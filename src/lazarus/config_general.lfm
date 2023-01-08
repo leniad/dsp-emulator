@@ -763,6 +763,7 @@ object MConfig: TMConfig
           Top = 46
           Width = 73
           Caption = 'Joystick'
+          Enabled = False
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
           Font.Height = -14
@@ -1025,44 +1026,13 @@ object MConfig: TMConfig
           ParentColor = False
           ParentFont = False
           TabOrder = 18
-          object RadioButton22: TRadioButton
-            Left = 82
-            Height = 23
-            Top = 35
-            Width = 65
-            Caption = 'Analog'
-            Font.CharSet = ANSI_CHARSET
-            Font.Color = clBlack
-            Font.Height = -14
-            Font.Name = 'Tahoma'
-            Font.Pitch = fpVariable
-            Font.Quality = fqDraft
-            OnChange = RadioButton22Change
-            ParentFont = False
-            TabOrder = 0
-          end
-          object RadioButton21: TRadioButton
-            Left = 5
-            Height = 23
-            Top = 35
-            Width = 60
-            Caption = 'Digital'
-            Font.CharSet = ANSI_CHARSET
-            Font.Color = clBlack
-            Font.Height = -14
-            Font.Name = 'Tahoma'
-            Font.Pitch = fpVariable
-            Font.Quality = fqDraft
-            OnChange = RadioButton21Change
-            ParentFont = False
-            TabOrder = 1
-          end
           object Button7: TButton
-            Left = 151
+            Left = 64
             Height = 30
             Top = 31
             Width = 65
             Caption = 'Calibrate'
+            Enabled = False
             Font.CharSet = ANSI_CHARSET
             Font.Color = clBlack
             Font.Height = -14
@@ -1071,13 +1041,14 @@ object MConfig: TMConfig
             Font.Quality = fqDraft
             OnClick = Button7Click
             ParentFont = False
-            TabOrder = 2
+            TabOrder = 0
           end
           object ComboBox1: TComboBox
             Left = 5
             Height = 25
             Top = -4
             Width = 199
+            Enabled = False
             Font.CharSet = ANSI_CHARSET
             Font.Color = clBlack
             Font.Height = -14
@@ -1087,7 +1058,7 @@ object MConfig: TMConfig
             ItemHeight = 17
             OnChange = ComboBox1Change
             ParentFont = False
-            TabOrder = 3
+            TabOrder = 1
             TabStop = False
             Text = 'ComboBox1'
           end
@@ -1234,23 +1205,6 @@ object MConfig: TMConfig
           ParentFont = False
           TabOrder = 1
         end
-        object ComboBox2: TComboBox
-          Left = 20
-          Height = 25
-          Top = 79
-          Width = 189
-          Enabled = False
-          Font.CharSet = ANSI_CHARSET
-          Font.Color = clBlack
-          Font.Height = -14
-          Font.Name = 'Tahoma'
-          Font.Pitch = fpVariable
-          Font.Quality = fqDraft
-          ItemHeight = 17
-          ParentFont = False
-          TabOrder = 2
-          Text = 'ComboBox2'
-        end
         object BitBtn5: TBitBtn
           Left = 112
           Height = 41
@@ -1264,7 +1218,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn5Click
           ParentFont = False
-          TabOrder = 3
+          TabOrder = 2
         end
         object BitBtn6: TBitBtn
           Left = 45
@@ -1279,7 +1233,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn6Click
           ParentFont = False
-          TabOrder = 4
+          TabOrder = 3
         end
         object BitBtn7: TBitBtn
           Left = 182
@@ -1294,7 +1248,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn7Click
           ParentFont = False
-          TabOrder = 5
+          TabOrder = 4
         end
         object BitBtn8: TBitBtn
           Left = 112
@@ -1309,7 +1263,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn8Click
           ParentFont = False
-          TabOrder = 6
+          TabOrder = 5
         end
         object BitBtn12: TBitBtn
           Left = 52
@@ -1324,7 +1278,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn12Click
           ParentFont = False
-          TabOrder = 7
+          TabOrder = 6
         end
         object BitBtn13: TBitBtn
           Left = 52
@@ -1339,7 +1293,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn13Click
           ParentFont = False
-          TabOrder = 8
+          TabOrder = 7
         end
         object BitBtn14: TBitBtn
           Left = 52
@@ -1354,7 +1308,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn14Click
           ParentFont = False
-          TabOrder = 9
+          TabOrder = 8
         end
         object ComboBox6: TComboBox
           Left = 54
@@ -1369,7 +1323,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           ItemHeight = 17
           ParentFont = False
-          TabOrder = 10
+          TabOrder = 9
           Text = 'ComboBox6'
         end
         object ComboBox7: TComboBox
@@ -1385,7 +1339,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           ItemHeight = 17
           ParentFont = False
-          TabOrder = 11
+          TabOrder = 10
           Text = 'ComboBox7'
         end
         object ComboBox8: TComboBox
@@ -1401,7 +1355,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           ItemHeight = 17
           ParentFont = False
-          TabOrder = 12
+          TabOrder = 11
           Text = 'ComboBox8'
         end
         object BitBtn18: TBitBtn
@@ -1417,7 +1371,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn18Click
           ParentFont = False
-          TabOrder = 13
+          TabOrder = 12
         end
         object BitBtn19: TBitBtn
           Left = 180
@@ -1432,7 +1386,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn19Click
           ParentFont = False
-          TabOrder = 14
+          TabOrder = 13
         end
         object BitBtn20: TBitBtn
           Left = 180
@@ -1447,7 +1401,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           OnClick = BitBtn20Click
           ParentFont = False
-          TabOrder = 15
+          TabOrder = 14
         end
         object ComboBox12: TComboBox
           Left = 181
@@ -1462,7 +1416,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           ItemHeight = 17
           ParentFont = False
-          TabOrder = 16
+          TabOrder = 15
           Text = 'ComboBox6'
         end
         object ComboBox13: TComboBox
@@ -1478,7 +1432,7 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           ItemHeight = 17
           ParentFont = False
-          TabOrder = 17
+          TabOrder = 16
           Text = 'ComboBox6'
         end
         object ComboBox14: TComboBox
@@ -1494,24 +1448,61 @@ object MConfig: TMConfig
           Font.Quality = fqDraft
           ItemHeight = 17
           ParentFont = False
-          TabOrder = 18
+          TabOrder = 17
           Text = 'ComboBox6'
         end
-        object Button8: TButton
-          Left = 129
-          Height = 41
-          Top = 32
-          Width = 71
-          Caption = 'Calibrate'
+        object GroupBox10: TGroupBox
+          Left = 24
+          Height = 84
+          Top = 70
+          Width = 221
+          ClientHeight = 62
+          ClientWidth = 217
+          Color = clWhite
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
           Font.Height = -14
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
-          OnClick = Button8Click
+          ParentBackground = False
+          ParentColor = False
           ParentFont = False
-          TabOrder = 19
+          TabOrder = 18
+          object ComboBox2: TComboBox
+            Left = 8
+            Height = 25
+            Top = -4
+            Width = 189
+            Enabled = False
+            Font.CharSet = ANSI_CHARSET
+            Font.Color = clBlack
+            Font.Height = -14
+            Font.Name = 'Tahoma'
+            Font.Pitch = fpVariable
+            Font.Quality = fqDraft
+            ItemHeight = 17
+            ParentFont = False
+            TabOrder = 0
+            Text = 'ComboBox2'
+          end
+          object Button8: TButton
+            Left = 69
+            Height = 29
+            Top = 31
+            Width = 71
+            Caption = 'Calibrate'
+            Enabled = False
+            Font.CharSet = ANSI_CHARSET
+            Font.Color = clBlack
+            Font.Height = -14
+            Font.Name = 'Tahoma'
+            Font.Pitch = fpVariable
+            Font.Quality = fqDraft
+            OnClick = Button8Click
+            ParentFont = False
+            TabOrder = 1
+          end
         end
       end
     end

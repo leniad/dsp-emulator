@@ -47,7 +47,7 @@ var
  ram2:array [0..$7fff] of word;
  spritebank,sound_bank:byte;
 
-procedure update_video_rainbow;inline;
+procedure update_video_rainbow;
 var
   f,x,y,nchar,atrib,color:word;
   flipx,flipy:boolean;
@@ -167,7 +167,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure rainbow_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -178,7 +180,6 @@ begin
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
 
-procedure rainbow_putword(direccion:dword;valor:word);
 begin
 case direccion of
       0..$7ffff:;

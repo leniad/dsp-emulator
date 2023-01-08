@@ -33,7 +33,7 @@ var
  ram:array[0..$1fff] of word;
  sound_latch:byte;
 
-procedure update_video_snowbros;inline;
+procedure update_video_snowbros;
 begin
   pandora_0.update_video(1,0);
   actualiza_trozo_final(0,16,256,224,1);
@@ -107,7 +107,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure snowbros_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -117,7 +119,6 @@ begin
   set_pal_color(color,numero);
 end;
 
-procedure snowbros_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:; //ROM

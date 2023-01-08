@@ -112,7 +112,7 @@ deco16ic_0.update_pf_1(5,true);
 actualiza_trozo_final(0,8,320,240,5);
 end;
 
-procedure eventos_cninja;inline;
+procedure eventos_cninja;
 begin
 if event.arcade then begin
   //P1
@@ -173,7 +173,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function cninja_protection_deco_104_r(real_address:word):word;inline;
+function cninja_protection_deco_104_r(real_address:word):word;
 var
   data,deco104_addr:word;
   cs:byte;
@@ -213,7 +213,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
+procedure cambiar_color(numero:word);
 var
   color:tcolor;
 begin
@@ -229,7 +229,7 @@ begin
   end;
 end;
 
-procedure cninja_protection_deco_104_w(real_address,data:word);inline;
+procedure cninja_protection_deco_104_w(real_address,data:word);
 var
   deco104_addr:word;
   cs:byte;
@@ -289,7 +289,7 @@ end;
 end;
 
 //Roboop 2
-function robocop2_protection_deco_146_r(real_address:word):word;inline;
+function robocop2_protection_deco_146_r(real_address:word):word;
 var
   deco146_addr,data:word;
   cs:byte;
@@ -330,7 +330,7 @@ case direccion of
 end;
 end;
 
-procedure robocop2_protection_deco_146_w(real_address,data:word);inline;
+procedure robocop2_protection_deco_146_w(real_address,data:word);
 var
   deco146_addr:word;
   cs:byte;

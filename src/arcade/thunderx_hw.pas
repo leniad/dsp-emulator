@@ -125,7 +125,7 @@ begin
      latch_1f98:=valor;
 end;
 
-procedure run_collisions(s0,e0,s1,e1:integer;cm,hm:byte);inline;
+procedure run_collisions(s0,e0,s1,e1:integer;cm,hm:byte);
 var
    p0,p1:integer;
    ii,jj:integer;
@@ -161,7 +161,7 @@ for ii:=s0 to (e0-1) do begin
 end;
 end;
 
-procedure calculate_collisions;inline;
+procedure calculate_collisions;
 var
     X0,Y0,X1,Y1:integer;
     CM,HM:byte;
@@ -348,7 +348,9 @@ case direccion of
     end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure thunderx_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -361,7 +363,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure thunderx_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     $0..$3fff:case direccion of

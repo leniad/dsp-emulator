@@ -4,8 +4,8 @@ object joy_calibration: Tjoy_calibration
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Joystick Calibration'
-  ClientHeight = 208
-  ClientWidth = 237
+  ClientHeight = 237
+  ClientWidth = 225
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -748,9 +748,25 @@ object joy_calibration: Tjoy_calibration
     Height = 13
     Caption = 'Y Axys'
   end
+  object Label5: TLabel
+    Left = 8
+    Top = 136
+    Width = 188
+    Height = 18
+    Alignment = taCenter
+    Caption = 'Move Joystick in all directions'
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
   object Button1: TButton
     Left = 64
-    Top = 151
+    Top = 175
     Width = 97
     Height = 34
     Caption = 'OK'

@@ -67,14 +67,15 @@ var
 
 implementation
 
-procedure draw_sprites(pri:byte);inline;
+procedure update_video_outrun;
+procedure draw_sprites(pri:byte);
 var
   f,sprpri,g:byte;
   xpos,vzoom,hzoom,top,addr,bank,pix,data_7,color,height:word;
   x,y,ydelta,ytarget,xacc,yacc,pitch,xdelta:integer;
   pixels,spritedata:dword;
   hide,flip:boolean;
-procedure system16b_draw_pixel(x,y,pix:word);inline;
+procedure system16b_draw_pixel(x,y,pix:word);
 var
   punt,punt2,temp1,temp2,temp3:word;
   xf:integer;
@@ -177,8 +178,7 @@ begin
 		end; //Del while
 	end;
 end;
-
-procedure draw_road(pri:byte);inline;
+procedure draw_road(pri:byte);
 var
   y,bgcolor:byte;
   x,data0,data1,pix0,pix1,color0,color1:word;
@@ -302,8 +302,7 @@ begin
     end;
   end;
 end;
-
-procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
 var
   pos,f,nchar,color,data,x,y:word;
 begin
@@ -327,8 +326,6 @@ begin
     end;
   end;
 end;
-
-procedure update_video_outrun;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
 begin
@@ -533,37 +530,6 @@ end;
 if not(zona) then outrun_getword:=s315_5195_0.read_reg((direccion shr 1) and $1f);
 end;
 
-procedure change_pal(direccion,valor:word);
-var
-	r,g,b:word;
-  color:tcolor;
-begin
-	//     byte 0    byte 1
-	//  sBGR BBBB GGGG RRRR
-	//  x000 4321 4321 4321
-	r:=((valor shr 12) and $01) or ((valor shl 1) and $1e);
-	g:=((valor shr 13) and $01) or ((valor shr 3) and $1e);
-	b:=((valor shr 14) and $01) or ((valor shr 7) and $1e);
-  //normal
-  color.r:=s16_info.normal[r];
-  color.g:=s16_info.normal[g];
-  color.b:=s16_info.normal[b];
-  set_pal_color(color,direccion);
-  //shadow
-  if (valor and $8000)<>0 then begin
-    color.r:=s16_info.shadow[r];
-    color.g:=s16_info.shadow[g];
-    color.b:=s16_info.shadow[b];
-  end else begin
-    //hilight
-    color.r:=s16_info.hilight[r];
-    color.g:=s16_info.hilight[g];
-    color.b:=s16_info.hilight[b];
-  end;
-  set_pal_color(color,direccion+$1000);
-  buffer_color[(direccion shr 3) and $7f]:=true;
-end;
-
 procedure test_screen_change(direccion:word);
 var
   tmp:byte;
@@ -628,6 +594,38 @@ end;
 end;
 
 procedure outrun_putword(direccion:dword;valor:word);
+
+procedure change_pal(direccion,valor:word);
+var
+	r,g,b:word;
+  color:tcolor;
+begin
+	//     byte 0    byte 1
+	//  sBGR BBBB GGGG RRRR
+	//  x000 4321 4321 4321
+	r:=((valor shr 12) and $01) or ((valor shl 1) and $1e);
+	g:=((valor shr 13) and $01) or ((valor shr 3) and $1e);
+	b:=((valor shr 14) and $01) or ((valor shr 7) and $1e);
+  //normal
+  color.r:=s16_info.normal[r];
+  color.g:=s16_info.normal[g];
+  color.b:=s16_info.normal[b];
+  set_pal_color(color,direccion);
+  //shadow
+  if (valor and $8000)<>0 then begin
+    color.r:=s16_info.shadow[r];
+    color.g:=s16_info.shadow[g];
+    color.b:=s16_info.shadow[b];
+  end else begin
+    //hilight
+    color.r:=s16_info.hilight[r];
+    color.g:=s16_info.hilight[g];
+    color.b:=s16_info.hilight[b];
+  end;
+  set_pal_color(color,direccion+$1000);
+  buffer_color[(direccion shr 3) and $7f]:=true;
+end;
+
 var
   zona:boolean;
   tempd:dword;

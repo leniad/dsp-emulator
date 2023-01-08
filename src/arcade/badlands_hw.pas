@@ -62,7 +62,8 @@ var
  write_eeprom,main_pending,sound_pending:boolean;
  pant_bl:array [0..((512*256)-1)] of word;
 
-procedure put_gfx_bl(pos_x,pos_y,nchar,color:word;ngfx:byte;pant_dest:pword);inline;
+procedure update_video_badlands;
+procedure put_gfx_bl(pos_x,pos_y,nchar,color:word;ngfx:byte;pant_dest:pword);
 var
   x,y:byte;
   temp,temp2:pword;
@@ -82,8 +83,6 @@ for y:=0 to 7 do begin
   copymemory(temp2,punbuf,8*2);
 end;
 end;
-
-procedure update_video_badlands;
 var
   f,color,x,y,nchar,atrib:word;
   pant1,pant2:array[0..((512*256)-1)] of word;
@@ -195,6 +194,8 @@ case direccion of
 end;
 end;
 
+procedure badlands_putword(direccion:dword;valor:word);
+
 procedure cambiar_color(numero:word);
 var
   color:tcolor;
@@ -211,7 +212,6 @@ begin
   if numero<$80 then  buffer_color[(numero shr 4) and 7]:=true;
 end;
 
-procedure badlands_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:; //ROM

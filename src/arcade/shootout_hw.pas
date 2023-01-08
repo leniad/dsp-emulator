@@ -38,7 +38,12 @@ var
   banco,sound_latch:byte;
   bflicker,old_val:boolean;
 
-procedure sprites(prioridad:byte);inline;
+procedure update_video_shootout;
+var
+  f,nchar,color:word;
+  x,y,atrib:byte;
+
+procedure sprites(prioridad:byte);
 var
   f,atrib,x,y:byte;
   nchar:word;
@@ -71,11 +76,8 @@ for f:=$7f downto 0 do begin
 end;
 end;
 
-procedure update_video_shootout;inline;
-var
-  f,nchar,color:word;
-  x,y,atrib:byte;
 begin
+
 for f:=0 to $3ff do begin
   //tiles
   if gfx[2].buffer[f] then begin

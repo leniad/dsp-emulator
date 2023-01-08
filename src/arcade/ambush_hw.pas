@@ -28,7 +28,7 @@ var
   color_bank:byte;
   scroll_y:array[0..$1f] of word;
 
-procedure update_video_ambush;inline;
+procedure update_video_ambush;
 var
   ngfx,atrib,x,y,color:byte;
   f,nchar:word;

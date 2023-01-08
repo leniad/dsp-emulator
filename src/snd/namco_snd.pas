@@ -111,7 +111,7 @@ if not(self.wave_on_ram) then
   for f:=0 to $ff do self.update_waveform(f,self.onda[f]);
 end;
 
-procedure getvoice_3(numero_voz:byte);inline;
+procedure getvoice_3(numero_voz:byte);
 var
   base:byte;
   f:integer;
@@ -135,7 +135,7 @@ begin
     end else namco_snd_0.voice[numero_voz].activa:=true;
 end;
 
-procedure getvoice_8(numero_voz:byte);inline;
+procedure getvoice_8(numero_voz:byte);
 var
   base:byte;
   f:integer;

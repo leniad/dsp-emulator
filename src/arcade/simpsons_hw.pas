@@ -130,7 +130,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure simpsons_objdma;inline;
+procedure simpsons_objdma;
 var
 	dst,src:pword;
   inac,count:word;
@@ -222,7 +222,11 @@ case direccion of
     end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure simpsons_putbyte(direccion:word;valor:byte);
+var
+   tempw:word;
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -235,9 +239,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure simpsons_putbyte(direccion:word;valor:byte);
-var
-   tempw:word;
 begin
 case direccion of
     0..$fff:if bank0_bank=1 then begin

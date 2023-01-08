@@ -194,7 +194,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_gradius3(pos,valor:word);inline;
+procedure gradius3_putword(direccion:dword;valor:word);
+
+procedure cambiar_color_gradius3(pos,valor:word);
 var
   color:tcolor;
 begin
@@ -205,7 +207,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure gradius3_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:; //ROM

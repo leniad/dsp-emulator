@@ -3107,6 +3107,16 @@ const
         (n:'a3.f7';l:$2000;p:$4000;crc:$8db57ab5),(n:'a4.e7';l:$2000;p:$6000;crc:$4a34d2a4),
         (n:'fa1.m4';l:$2000;p:$0;crc:$ad10969e),(n:'fa2.n4';l:$2000;p:$2000;crc:$e7f134ba),
         (n:'a.bpr';l:$100;p:$0;crc:$5f27f511),(n:'b.bpr';l:$100;p:$100;crc:$1b03fd3b),());
+        superduck:array[0..18] of tipo_roms=(
+        (n:'5.u16n';l:$20000;p:0;crc:$837a559a),(n:'6.u16l';l:$20000;p:$1;crc:$508e9905),
+        (n:'4.su6';l:$8000;p:0;crc:$d75863ea),(n:'3.cu15';l:$8000;p:0;crc:$b1cacca4),
+        (n:'11.ul29';l:$20000;p:0;crc:$1b6958a4),(n:'12.ul30';l:$20000;p:$20000;crc:$3e6bd24b),
+        (n:'13.ul31';l:$20000;p:$40000;crc:$bff7b7cd),(n:'14.ul32';l:$20000;p:$60000;crc:$97a7310b),
+        (n:'7.uu29';l:$20000;p:0;crc:$f3251b20),(n:'8.uu30';l:$20000;p:$20000;crc:$03c60cbd),
+        (n:'9.uu31';l:$20000;p:$40000;crc:$9b6d3430),(n:'10.uu32';l:$20000;p:$6000;crc:$beed2616),
+        (n:'15.u1d';l:$20000;p:0;crc:$81bf1f27),(n:'16.u2d';l:$20000;p:1;crc:$9573d6ec),
+        (n:'17.u1c';l:$20000;p:2;crc:$21ef14d4),(n:'18.u2c';l:$20000;p:3;crc:$33dd0674),
+        (n:'2.su12';l:$20000;p:0;crc:$745d42fb),(n:'1.su13';l:$80000;p:$20000;crc:$7fb1ed42),());
 
 implementation
 uses principal,init_games;

@@ -92,7 +92,7 @@ var
  sound_latch,gaelco_dec_val:byte;
  oki_rom:array[0..$c,0..$ffff] of byte;
 
-procedure draw_sprites_bk(pri:byte);inline;
+procedure draw_sprites_bk(pri:byte);
 var
 	x,i,color,attr,attr2,nchar:word;
   flipx,flipy:boolean;
@@ -127,7 +127,7 @@ begin
 	 end;
 end;
 
-procedure draw_all_bigk;inline;
+procedure draw_all_bigk;
 var
   f,color,sx,sy,pos,x,y,nchar,atrib1,atrib2:word;
   pant,h:byte;
@@ -180,7 +180,7 @@ for f:=0 to $164 do begin
 end;
 end;
 
-procedure update_video_bigk;inline;
+procedure update_video_bigk;
 begin
 fill_full_screen(17,0);
 draw_all_bigk;
@@ -233,7 +233,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -359,7 +359,7 @@ begin
 end;
 
 //Thunder Hoop
-procedure draw_sprites_thoop(pri:byte);inline;
+procedure draw_sprites_thoop(pri:byte);
 var
 	x,i,color,attr,attr2,nchar:word;
   flipx,flipy:boolean;
@@ -393,7 +393,7 @@ begin
 	 end;
 end;
 
-procedure draw_all_thoop;inline;
+procedure draw_all_thoop;
 var
   f,color,sx,sy,x,y,nchar,atrib1,atrib2,pos:word;
   pant,h:byte;
@@ -436,7 +436,7 @@ for f:=0 to $164 do begin
 end;
 end;
 
-procedure update_video_thoop;inline;
+procedure update_video_thoop;
 begin
 fill_full_screen(17,0);
 draw_all_thoop;

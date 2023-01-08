@@ -40,7 +40,8 @@ const
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  irq_enable,video_enable:boolean;
-procedure update_video_bagman;inline;
+
+procedure update_video_bagman;
 var
   f,color,nchar:word;
   atrib,gfx_num,x,y:byte;
@@ -73,6 +74,7 @@ if video_enable then begin
 end else fill_full_screen(2,$3ff);
 actualiza_trozo_final(16,0,224,256,2);
 end;
+
 procedure eventos_bagman;
 begin
 if event.arcade then begin
@@ -94,6 +96,7 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
 end;
+
 procedure bagman_principal;
 var
   frame:single;
@@ -114,6 +117,7 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 function bagman_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -122,6 +126,7 @@ case direccion of
   $b000:bagman_getbyte:=marcade.dswa;
 end;
 end;
+
 procedure bagman_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -140,10 +145,12 @@ case direccion of
   $a800..$a805:bagman_pal16r6_w(direccion and $7,valor);
 end;
 end;
+
 function bagman_inbyte(puerto:word):byte;
 begin
   if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.Read;
 end;
+
 procedure bagman_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -151,18 +158,22 @@ case (puerto and $ff) of
   $09:AY8910_0.Write(valor);
 end;
 end;
+
 function bagman_portar:byte;
 begin
   bagman_portar:=marcade.in0;
 end;
+
 function bagman_portbr:byte;
 begin
   bagman_portbr:=marcade.in1;
 end;
+
 procedure bagman_sound;
 begin
   ay8910_0.update;
 end;
+
 //Main
 procedure reset_bagman;
 begin
@@ -184,6 +195,7 @@ begin
  bagman_pal16r6_w(7,1);	// pin 9
  bagman_update_pal;
 end;
+
 function iniciar_bagman:boolean;
 var
   colores:tpaleta;
@@ -295,4 +307,5 @@ marcade.dswa_val:=@bagman_dip;
 reset_bagman;
 iniciar_bagman:=true;
 end;
+
 end.

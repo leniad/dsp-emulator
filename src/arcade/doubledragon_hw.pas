@@ -71,7 +71,12 @@ var
  ddragon_scanline:array[0..271] of word;
  adpcm_ch,adpcm_idle:array [0..1] of boolean;
 
-procedure draw_sprites;inline;
+procedure update_video_ddragon;
+var
+  x,y,color,f,nchar,pos:word;
+  atrib:byte;
+
+procedure draw_sprites;
 var
   size,x,y,nchar:word;
   f,color,atrib:byte;
@@ -120,10 +125,6 @@ begin
 	end;  //for
 end;
 
-procedure update_video_ddragon;inline;
-var
-  x,y,color,f,nchar,pos:word;
-  atrib:byte;
 begin
 for f:=$0 to $3ff do begin
   x:=f mod 32;
@@ -153,7 +154,7 @@ actualiza_trozo_final(0,8,256,240,4);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_ddragon;inline;
+procedure eventos_ddragon;
 begin
 if event.arcade then begin
   //p1
@@ -219,7 +220,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;

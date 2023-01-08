@@ -64,7 +64,7 @@ var
   type_row_scroll:boolean;
   roms,roms_dec:array[0..3,0..$3fff] of byte;
 
-procedure update_video;inline;
+procedure update_video;
 var
   f:byte;
   x_temp:word;
@@ -76,7 +76,7 @@ yscroll:=bg_ram[$7ba];
 update_video_system1;
 end;
 
-procedure update_video_row_scroll;inline;
+procedure update_video_row_scroll;
 var
   f:byte;
 begin

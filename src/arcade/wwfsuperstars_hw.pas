@@ -40,7 +40,7 @@ var
  ram:array[0..$1fff] of word;
  sound_latch:byte;
 
-procedure update_video_wwfsstar;inline;
+procedure update_video_wwfsstar;
 var
   f,x,y,nchar,pos,atrib,atrib2:word;
   a,color:byte;
@@ -171,7 +171,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure wwfsstar_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
 begin
@@ -185,7 +187,6 @@ begin
   end;
 end;
 
-procedure wwfsstar_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:;

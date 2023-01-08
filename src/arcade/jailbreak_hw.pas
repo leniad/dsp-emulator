@@ -39,7 +39,7 @@ var
  mem_opcodes:array[0..$7fff] of byte;
  scroll_lineas:array[0..$1f] of word;
 
-procedure update_video_jailbreak;inline;
+procedure update_video_jailbreak;
 var
   y,atrib:byte;
   f,x,nchar,color:word;

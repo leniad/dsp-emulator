@@ -223,7 +223,7 @@ r.cc.v:=(pila and $2)<>0;
 r.cc.c:=(pila and $1)<>0;
 end;
 
-function coger_band(r:preg_m68000):word;inline;
+function coger_band(r:preg_m68000):word;
 var
   pila:word;
 begin
@@ -819,7 +819,7 @@ end;
 leerdir_ea:=res;
 end;
 
-function condicion(r:preg_m68000;tipo:byte):boolean;inline;
+function condicion(r:preg_m68000;tipo:byte):boolean;
 begin
   case tipo of
     $00:condicion:=true;

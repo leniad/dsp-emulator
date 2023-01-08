@@ -55,7 +55,55 @@ var
 
 implementation
 
-procedure draw_sprites;inline;
+procedure put_gfx_system1(pos_x,pos_y,nchar,color:word;screen:byte);
+var
+  x,y:byte;
+  temp:pword;
+  pos:pbyte;
+begin
+pos:=gfx[0].datos;
+inc(pos,nchar*8*8);
+for y:=0 to 7 do begin
+  temp:=punbuf;
+  for x:=0 to 7 do begin
+    temp^:=pos^ or color;
+    inc(pos);
+    inc(temp);
+  end;
+  copymemory(@final_screen[screen,pos_x+((pos_y+y)*256)],punbuf,8*2);
+end;
+end;
+
+procedure update_backgroud(screen:byte);
+var
+  source,f,color,nchar,atrib:word;
+  x,y:word;
+begin
+source:=screen shl 11;
+for f:=0 to $3ff do begin
+   if (bg_ram_w[f+(source shr 1)]) then begin
+      x:=f mod 32;
+      y:=f div 32;
+      atrib:=bg_ram[f*2+source]+(bg_ram[$1+(f*2)+source] shl 8);
+      nchar:=(((atrib shr 4) and $800) or (atrib and $7ff)) and mask_char;
+      color:=((atrib shr 5) and $ff) shl 3;
+      put_gfx_system1(x*8,y*8,nchar,color,screen);
+      bg_ram_w[f+(source shr 1)]:=false;
+   end;
+end;
+end;
+
+procedure update_video_system1;
+var
+  x,y:integer;
+  temp:pword;
+  fgbase,sprbase,bgy,bgxscroll:word;
+  lookup_value,lookup_index:byte;
+  bgx,fgpix,bgpix,sprpix:word;
+  bgbase:array[0..1] of byte;
+  bit0,bit1,bit2,bit3,bit4:byte;
+
+procedure draw_sprites;
 var
   spritedata,srcaddr,stride:word;
   bank,xstart,bottom,top,palettebase:word;
@@ -129,53 +177,6 @@ for f:=0 to 31 do begin
   end; //del for f
 end;
 
-procedure put_gfx_system1(pos_x,pos_y,nchar,color:word;screen:byte);inline;
-var
-  x,y:byte;
-  temp:pword;
-  pos:pbyte;
-begin
-pos:=gfx[0].datos;
-inc(pos,nchar*8*8);
-for y:=0 to 7 do begin
-  temp:=punbuf;
-  for x:=0 to 7 do begin
-    temp^:=pos^ or color;
-    inc(pos);
-    inc(temp);
-  end;
-  copymemory(@final_screen[screen,pos_x+((pos_y+y)*256)],punbuf,8*2);
-end;
-end;
-
-procedure update_backgroud(screen:byte);
-var
-  source,f,color,nchar,atrib:word;
-  x,y:word;
-begin
-source:=screen shl 11;
-for f:=0 to $3ff do begin
-   if (bg_ram_w[f+(source shr 1)]) then begin
-      x:=f mod 32;
-      y:=f div 32;
-      atrib:=bg_ram[f*2+source]+(bg_ram[$1+(f*2)+source] shl 8);
-      nchar:=(((atrib shr 4) and $800) or (atrib and $7ff)) and mask_char;
-      color:=((atrib shr 5) and $ff) shl 3;
-      put_gfx_system1(x*8,y*8,nchar,color,screen);
-      bg_ram_w[f+(source shr 1)]:=false;
-   end;
-end;
-end;
-
-procedure update_video_system1;
-var
-  x,y:integer;
-  temp:pword;
-  fgbase,sprbase,bgy,bgxscroll:word;
-  lookup_value,lookup_index:byte;
-  bgx,fgpix,bgpix,sprpix:word;
-  bgbase:array[0..1] of byte;
-  bit0,bit1,bit2,bit3,bit4:byte;
 begin
 if (system1_videomode and $10)<>0 then begin
   fill_full_screen(0,$800);

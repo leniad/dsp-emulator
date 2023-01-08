@@ -80,6 +80,7 @@ type
     D3: TDirectoryEdit;
     D4: TEdit;
     GroupBox1: TGroupBox;
+    GroupBox10: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
     GroupBox4: TGroupBox;
@@ -121,8 +122,6 @@ type
     RadioButton19: TRadioButton;
     RadioButton2: TRadioButton;
     RadioButton20: TRadioButton;
-    RadioButton21: TRadioButton;
-    RadioButton22: TRadioButton;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
     GroupBox5: TRadioGroup;
@@ -607,14 +606,14 @@ end;
 procedure TMConfig.ComboBox1Change(Sender: TObject);
 begin
   arcade_input.num_joystick[0]:=combobox1.ItemIndex;
-  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+  {if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
       radiobutton21.Enabled:=true;
       radiobutton22.Enabled:=true;
   end else begin
       radiobutton21.Enabled:=false;
       radiobutton22.Enabled:=true;
       radiobutton22.Checked:=true;
-  end;
+  end;}
 end;
 
 procedure TMConfig.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -641,23 +640,6 @@ end;
 procedure TMConfig.FormShow(Sender: TObject);
 var
   f:byte;
-function extract_joy_name(nombre:pansichar):string;
-var
-    ptemp:pbyte;
-    cadena:string;
-begin
-    if nombre=nil then begin
-      extract_joy_name:='None';
-      exit;
-    end;
-    ptemp:=pbyte(nombre);
-    cadena:='';
-    while ptemp^<>0 do begin
-      cadena:=cadena+chr(ptemp^);
-      inc(ptemp);
-    end;
-    extract_joy_name:=cadena;
-end;
 begin
   cambiar_texto_idioma(main_vars.idioma);
   //idioma
@@ -695,7 +677,7 @@ begin
   D5.Text:=Directory.Arcade_hi;
   D6.Text:=Directory.qsnapshot;
   //Componer todas las entradas
-  if event.num_joysticks=0 then begin
+  if joystick.num=0 then begin
     radiobutton1.Checked:=true;
     radiobutton2.Checked:=false;
     radiobutton2.enabled:=false;
@@ -734,10 +716,6 @@ begin
     combobox12.Visible:=false;
     combobox13.Visible:=false;
     combobox14.Visible:=false;
-    radiobutton21.enabled:=false;
-    radiobutton22.enabled:=false;
-    //radiobutton23.enabled:=false;
-    //radiobutton24.enabled:=false;
   end else begin
     radiobutton2.enabled:=true;
     if arcade_input.use_key[0] then begin
@@ -760,8 +738,6 @@ begin
       combobox9.Visible:=false;
       combobox10.Visible:=false;
       combobox11.Visible:=false;
-      radiobutton21.enabled:=false;
-      radiobutton22.enabled:=false;
     end else begin
       radiobutton1.Checked:=false;
       radiobutton2.Checked:=true;
@@ -847,9 +823,9 @@ begin
     end;
     combobox1.Clear;
     combobox2.Clear;
-    for f:=0 to (event.num_joysticks-1) do begin
-      combobox1.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
-      combobox2.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
+    for f:=0 to (joystick.num-1) do begin
+      combobox1.Items.Add(joystick.nombre[f]);
+      combobox2.Items.Add(joystick.nombre[f]);
     end;
     combobox1.Enabled:=true;
     combobox1.ItemIndex:=arcade_input.num_joystick[0];
@@ -867,7 +843,7 @@ begin
     combobox12.Clear;
     combobox13.Clear;
     combobox14.Clear;
-    for f:=0 to (sdl_joysticknumbuttons(joystick_def[0])-1) do begin
+    for f:=0 to (joystick.buttons[0]-1) do begin
       combobox3.Items.Add('But '+inttostr(f));
       combobox4.Items.Add('But '+inttostr(f));
       combobox5.Items.Add('But '+inttostr(f));
@@ -875,7 +851,7 @@ begin
       combobox10.Items.Add('But '+inttostr(f));
       combobox11.Items.Add('But '+inttostr(f));
     end;
-    for f:=0 to (sdl_joysticknumbuttons(joystick_def[1])-1) do begin
+    for f:=0 to (joystick.buttons[1]-1) do begin
       combobox6.Items.Add('But ' + inttostr(f));
       combobox7.Items.Add('But ' + inttostr(f));
       combobox8.Items.Add('But ' + inttostr(f));

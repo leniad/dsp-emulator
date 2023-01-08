@@ -510,7 +510,8 @@ for f:=16 to 79 do begin
 end;
 set_pal(colores,80);
 var_spectrum.haz_flash:=false;
-if mouse.tipo<>MNONE then show_mouse_cursor;
+if mouse.tipo<>MNONE then show_mouse_cursor
+  else hide_mouse_cursor;
 //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;

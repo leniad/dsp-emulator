@@ -80,7 +80,7 @@ var
  read_events:procedure;
  croller_counter,croller_offset,unk_latch:byte;
 
-procedure update_video_pacman;inline;
+procedure update_video_pacman;
 var
   color,offs:word;
   nchar,f,sx,sy,atrib,x,y:byte;

@@ -3,9 +3,9 @@ unit config;
 interface
 
 uses
-  lib_sdl2,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls,ComCtrls,lenguaje,spectrum_misc,main_engine,
-  sound_engine,z80pio,z80daisy,z80_sp,misc_functions,timer_engine;
+  Controls, Classes, Forms, StdCtrls, lenguaje,spectrum_misc,main_engine,
+  sound_engine,z80pio,z80daisy,z80_sp,misc_functions,timer_engine,
+  controls_engine;
 
 type
   TConfigSP = class(TForm)
@@ -195,8 +195,8 @@ with ConfigSP do begin
     else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
       else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
         else if radiobutton20.Checked then mouse.tipo:=MAMX;
-  if (mouse.tipo<>0) then sdl_showcursor(1)
-    else sdl_showcursor(0);
+  if (mouse.tipo<>0) then show_mouse_cursor
+    else hide_mouse_cursor;
   if mouse.tipo=3 then begin
     z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
     z80daisy_init(Z80_PIO_TYPE,Z80_DAISY_NONE,Z80_DAISY_NONE,0,0,0);

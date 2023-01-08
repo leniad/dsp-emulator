@@ -36,7 +36,7 @@ const
 var
   scroll_x,scroll_y,prot:byte;
 
-procedure update_video_mrdo;inline;
+procedure update_video_mrdo;
 var
   f,color,nchar:word;
   x,y,atrib:byte;

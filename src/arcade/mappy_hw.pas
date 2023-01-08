@@ -72,7 +72,7 @@ var
  update_video_proc:procedure;
  scroll_x:word;
 
-procedure draw_sprites_mappy;inline;
+procedure draw_sprites_mappy;
 var
   color,y:word;
   flipx,flipy:boolean;
@@ -353,7 +353,7 @@ begin
   end;
 end;
 
-procedure mappy_latch(direccion:word);inline;
+procedure mappy_latch(direccion:word);
 begin
 case (direccion and $0e) of
   $00:begin

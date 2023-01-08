@@ -54,7 +54,7 @@ var
   screen_val:array[0..127,0..63] of byte;
   stack:array[0..$f] of word;
 
-procedure change_screen(mode:byte);inline;
+procedure change_screen(mode:byte);
 begin
 screen_mode:=mode;
 fillchar(screen_val[0],128*64,0);
@@ -265,7 +265,7 @@ begin
   end;
 end;
 
-procedure update_video_chip8;inline;
+procedure update_video_chip8;
 var
   x,y,pos_y:byte;
   ptemp:pword;

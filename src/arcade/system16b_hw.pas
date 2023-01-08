@@ -170,14 +170,15 @@ var
  region2_write:procedure(direccion:dword;valor:word);
  sound_bank_calc:function(valor:byte):byte;
 
-procedure draw_sprites(pri:byte);inline;
+procedure update_video_system16b;
+procedure draw_sprites(pri:byte);
 var
   g,f,sprpri,vzoom,hzoom:byte;
   bottom,top,xacc,xpos,addr,bank,x,y,pix,data_7,pixels,color:word;
   pitch:integer;
   spritedata:dword;
   hide,flip:boolean;
-procedure system16b_draw_pixel(x,y,pix:word);inline;
+procedure system16b_draw_pixel(x,y,pix:word);
 var
   punt,punt2,temp1,temp2,temp3:word;
   xf:integer;
@@ -279,8 +280,7 @@ begin
 		end;
 	end;
 end;
-
-procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
 var
   pos,f,nchar,color,data,x,y:word;
 begin
@@ -305,8 +305,6 @@ begin
     end;
   end;
 end;
-
-procedure update_video_system16b;inline;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
 begin
@@ -468,7 +466,7 @@ end;
 standar_s16_io_r:=res;
 end;
 
-procedure change_pal(direccion,valor:word);inline;
+procedure change_pal(direccion,valor:word);
 var
 	r,g,b:byte;
   color:tcolor;

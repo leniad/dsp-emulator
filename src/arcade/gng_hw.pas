@@ -40,7 +40,7 @@ var
  banco,soundlatch:byte;
  scroll_x,scroll_y:word;
 
-procedure update_video_gng;inline;
+procedure update_video_gng;
 var
   x,y,f,color,nchar:word;
   atrib:byte;
@@ -145,7 +145,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;

@@ -1,13 +1,10 @@
 unit cps1_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,timer_engine,ym_2151,
      oki6295,kabuki_decript,qsound,rom_engine,misc_functions,pal_engine,
      sound_engine,eeprom;
-
 function iniciar_cps1:boolean;
-
 implementation
 type
   cps1_games_def=record
@@ -69,7 +66,6 @@ const
 {CPS_B_21_DEF}  (layerctrl:$166;palctrl:$170;testaddr:$172;testval:$0000;mula:$140;mulb:$142;mull:$144;mulh:$146;mask_sc1:$02;mask_sc2:$04;mask_sc3:$08;mask_sc4:$30;pri_mask1:$168;pri_mask2:$16a;pri_mask3:$16c;pri_mask4:$16e),
 {CPS_B_21_QS2}  (layerctrl:$14a;palctrl:$144;testaddr:$1ff;testval:$0000;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$16;mask_sc2:$16;mask_sc3:$16;mask_sc4:$0;pri_mask1:$14c;pri_mask2:$14e;pri_mask3:$140;pri_mask4:$142),
 {CPS_B_21_QS3}  (layerctrl:$152;palctrl:$14c;testaddr:$14e;testval:$0c00;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$04;mask_sc2:$02;mask_sc3:$20;mask_sc4:$0;pri_mask1:$154;pri_mask2:$156;pri_mask3:$148;pri_mask4:$14a));
-
         //Ghouls and ghosts
         ghouls_rom1:array[0..3] of tipo_roms=(
         (n:'dme_29.10h';l:$20000;p:0;crc:$166a58a2),(n:'dme_30.10j';l:$20000;p:$1;crc:$7ac8407a),
@@ -223,11 +219,10 @@ const
         punisher_qsound1:array[0..3] of tipo_roms=(
         (n:'ps-q1.1k';l:$80000;p:$00000;crc:$31fd8726),(n:'ps-q2.2k';l:$80000;p:$80000;crc:$980a9eef),
         (n:'ps-q3.3k';l:$80000;p:$100000;crc:$0dd44491),(n:'ps-q4.4k';l:$80000;p:$180000;crc:$bed42f03));
-
 var
  nbank,cps_b:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2,scroll_x3,scroll_y3:word;
- rom:array[0..$bffff] of word;
+ rom:array[0..$1fffff] of word;
  ram:array[0..$7fff] of word;
  vram:array[0..$17fff] of word;
  snd_rom:array[0..5,0..$3fff] of byte;
@@ -240,8 +235,10 @@ var
  cps1_palcltr,pri_mask0,pri_mask1,pri_mask2,pri_mask3:word;
  cps1_rowscrollstart:word;
  pal_change,mask_change,sprites_pri_draw,rowscroll_ena:boolean;
-
-procedure pal_calc;inline;
+procedure update_video_cps1;
+var
+  l0,l1,l2,l3:byte;
+procedure pal_calc;
 var
   page,bright:byte;
   color:tcolor;
@@ -269,8 +266,7 @@ for page:=0 to 5 do begin
 end;
 pal_change:=false;
 end;
-
-function gfx_bank(tipo:byte;nchar:word):integer;inline;
+function gfx_bank(tipo:byte;nchar:word):integer;
 var
   shift,pos:byte;
   code,base:dword;
@@ -298,8 +294,7 @@ begin
   end;
   gfx_bank:=-1;
 end;
-
-procedure draw_sprites;inline;
+procedure draw_sprites;
 var
   f,color,col,rx,ry,yy,xx:word;
   flipx,flipy:boolean;
@@ -360,14 +355,14 @@ if sprites_pri_draw then begin
   sprites_pri_draw:=false;
 end;
 end;
-
-procedure draw_layer(nlayer:byte;sprite_next:boolean);inline;
+procedure draw_layer(nlayer:byte;sprite_next:boolean);
 var
-  f,atrib,color,sx,sy,pos,layer2_scroll_x:word;
+  f,atrib,color,sx,sy,pos:word;
   x,y,pant:byte;
   address:dword;
   nchar:integer;
   flipx,flipy:boolean;
+  scroll_data_x:array[0..$3ff] of word;
 begin
 case nlayer of
   0:draw_sprites;
@@ -419,12 +414,7 @@ case nlayer of
       for f:=0 to $1cf do begin
         x:=f mod 29;
         y:=f div 29;
-        if not(rowscroll_ena) then layer2_scroll_x:=scroll_x2
-          else begin  //mal!
-                  address:=cps1_rowscroll+((y+(scroll_y2 div 16))*4);
-                  layer2_scroll_x:=(vram[(address+cps1_rowscrollstart) shr 1]+scroll_x2) and $3ff;
-          end;
-        sx:=x+((layer2_scroll_x and $3f0) div 16);
+        sx:=x+((scroll_x2 and $3f0) div 16);
         sy:=y+((scroll_y2 and $3f0) div 16);
         pos:=(sy and $0f)+((sx and $3f) shl 4)+((sy and $30) shl 6);
         address:=cps1_scroll2+(pos*4);
@@ -454,7 +444,11 @@ case nlayer of
         scroll_pri_x:=scroll_x2 and $f;
         scroll_pri_y:=scroll_y2 and $f;
       end;
-      scroll_x_y(2,5,layer2_scroll_x and $f,scroll_y2 and $f);
+      if not(rowscroll_ena) then scroll_x_y(2,5,scroll_x2 and $f,scroll_y2 and $f)
+        else begin
+          for f:=0 to $3ff do scroll_data_x[(f-scroll_y2) and $3ff]:=vram[((cps1_rowscroll+cps1_rowscrollstart) shr 1)+f] and $3ff;
+          scroll__x_part2(2,5,1,@scroll_data_x,scroll_x2 and $f,scroll_y2 and $f);
+        end;
     end;
   3:if (cps1_layer and cps1_cps_b[cps_b].mask_sc3)<>0 then begin
       if (sprite_next and mask_change) then begin
@@ -502,10 +496,6 @@ case nlayer of
     end;
 end;
 end;
-
-procedure update_video_cps1;inline;
-var
-  l0,l1,l2,l3:byte;
 begin
   if pal_change then pal_calc;
   fill_full_screen(5,$bff);
@@ -521,7 +511,6 @@ begin
   actualiza_trozo_final(64,16,384,224,5);
   fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
-
 procedure eventos_cps1;
 begin
 if event.arcade then begin
@@ -541,6 +530,13 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $efff) else marcade.in1:=(marcade.in1 or $1000);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
+  //Extra buttons
+  if arcade_input.but3[0] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.but4[0] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.but5[0] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but3[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but4[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but5[1] then marcade.in2:=(marcade.in2 and $ffbf) else marcade.in2:=(marcade.in2 or $40);
   //SYS
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
@@ -548,8 +544,7 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
 end;
 end;
-
-procedure calc_mask(mask:word;index:byte);inline;
+procedure calc_mask(mask:word;index:byte);
 var
   f:byte;
   val:boolean;
@@ -562,7 +557,6 @@ copymemory(@gfx[1].trans_alt[index][0],@gfx[0].trans_alt[index][0],16);
 copymemory(@gfx[2].trans_alt[index][0],@gfx[0].trans_alt[index][0],16);
 copymemory(@gfx[3].trans_alt[index][0],@gfx[0].trans_alt[index][0],16);
 end;
-
 procedure cps1_principal;
 var
   frame_m,frame_s:single;
@@ -589,8 +583,7 @@ while EmuStatus=EsRuning do begin
  video_sync;
 end;
 end;
-
-function cps1_read_io_w(dir:word):word;inline;
+function cps1_read_io_w(dir:word):word;
 var
   res:word;
 begin
@@ -601,24 +594,23 @@ case dir of
   $01a:res:=(dswa shl 8)+$ff; //DSWA
   $01c:res:=(dswb shl 8)+$ff; //DSWB
   $01e:res:=(dswc shl 8)+$ff; //DSWC
+  $176:res:=marcade.in2; //Extra buttons
 end;
 if (dir=cps1_cps_b[cps_b].testaddr) then res:=cps1_cps_b[cps_b].testval;
 if (dir=cps1_cps_b[cps_b].mull) then res:=(cps1_mula*cps1_mulb) and $ffff;
 if (dir=cps1_cps_b[cps_b].mulh) then res:=(cps1_mula*cps1_mulb) shr 16;
 cps1_read_io_w:=res;
 end;
-
 function cps1_getword(direccion:dword):word;
 begin
 case direccion of
-    $000000..$17ffff:cps1_getword:=rom[direccion shr 1];
+    $000000..$3fffff:cps1_getword:=rom[direccion shr 1];
     $800000..$8001ff:cps1_getword:=cps1_read_io_w(direccion and $1fe);
     $900000..$92ffff:cps1_getword:=vram[(direccion and $3ffff) shr 1];
     $ff0000..$ffffff:cps1_getword:=ram[(direccion and $ffff) shr 1];
 end;
 end;
-
-procedure cps1_write_io_w(dir,val:word);inline;
+procedure cps1_write_io_w(dir,val:word);
 begin
   case dir of
     $100:cps1_sprites:=(val*256)-$900000;
@@ -711,8 +703,7 @@ begin
     end;
   end;
 end;
-
-procedure test_buffers(direccion:dword);inline;
+procedure test_buffers(direccion:dword);
 begin
   if ((direccion>=cps1_pal) and (direccion<(cps1_pal+$1800))) then begin
     pal_change:=true;
@@ -723,11 +714,10 @@ begin
   if ((direccion>=cps1_scroll2) and (direccion<(cps1_scroll2+$4000))) then gfx[2].buffer[(direccion-cps1_scroll2) shr 2]:=true;
   if ((direccion>=cps1_scroll3) and (direccion<(cps1_scroll3+$4000))) then gfx[3].buffer[(direccion-cps1_scroll3) shr 2]:=true;
 end;
-
 procedure cps1_putword(direccion:dword;valor:word);
 begin
 case direccion of
-    $000000..$17ffff:; //ROM
+    $000000..$3fffff:; //ROM
     $800000..$8001ff:cps1_write_io_w(direccion and $1fe,valor);
     $900000..$92ffff:if (vram[(direccion and $3ffff) shr 1]<>valor) then begin
                           vram[(direccion and $3ffff) shr 1]:=valor;
@@ -736,7 +726,6 @@ case direccion of
     $ff0000..$ffffff:ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
-
 //Sonido
 function cps1_snd_getbyte(direccion:word):byte;
 begin
@@ -749,7 +738,6 @@ case direccion of
   $f00a:cps1_snd_getbyte:=sound_latch2;
 end;
 end;
-
 procedure cps1_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -762,18 +750,15 @@ case direccion of
   $f006:oki_6295_0.change_pin7(valor and 1);
 end;
 end;
-
 procedure cps1_ym2151_snd_irq(irqstate:byte);
 begin
   z80_0.change_irq(irqstate);
 end;
-
 procedure cps1_sound_update;
 begin
   ym2151_0.update;
   oki_6295_0.update;
 end;
-
 //Qsound
 function cps1_qsnd_getword(direccion:dword):word;
 begin
@@ -789,7 +774,6 @@ case direccion of
     $ff0000..$ffffff:cps1_qsnd_getword:=ram[(direccion and $ffff) shr 1];
 end;
 end;
-
 procedure cps1_qsnd_putword(direccion:dword;valor:word);
 begin
 case direccion of
@@ -809,7 +793,6 @@ case direccion of
     $ff0000..$ffffff:ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
-
 function cps1_qz80_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -821,7 +804,6 @@ case direccion of
   $f000..$ffff:cps1_qz80_getbyte:=qram2[direccion and $fff];
 end;
 end;
-
 procedure cps1_qz80_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -832,12 +814,10 @@ case direccion of
   $f000..$ffff:qram2[direccion and $fff]:=valor;
 end;
 end;
-
 procedure cps1_qsnd_int;
 begin
   z80_0.change_irq(HOLD_LINE);
 end;
-
 //Main
 procedure reset_cps1;
 begin
@@ -856,6 +836,7 @@ begin
  end;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
+ marcade.in2:=$ffff;
  sound_latch:=0;
  sound_latch2:=0;
  sound_bank:=0;
@@ -890,8 +871,7 @@ begin
  calc_mask(0,2);
  calc_mask(0,3);
 end;
-
-procedure cps1_gfx_decode(memoria_temp:pbyte;gfxsize:dword);inline;
+procedure cps1_gfx_decode(memoria_temp:pbyte;gfxsize:dword);
 var
   i:dword;
   src,dwval,mask:dword;
@@ -928,14 +908,12 @@ begin
     ptemp^:=(dwval shr 24) and $ff;
 	end;
 end;
-
 procedure cerrar_cps1;
 begin
 case main_vars.tipo_maquina of
   112..113:qsound_close;
 end;
 end;
-
 function iniciar_cps1:boolean;
 var
   memoria_temp,ptemp:pbyte;
@@ -951,7 +929,6 @@ const
                                8*128, 9*128,10*128,11*128,12*128,13*128,14*128,15*128,
                               16*128,17*128,18*128,19*128,20*128,21*128,22*128,23*128,
                               24*128,25*128,26*128,27*128,28*128,29*128,30*128,31*128);
-
 procedure poner_roms_word;
 var
   rom_size:dword;
@@ -967,7 +944,6 @@ for rom_size:=0 to $bffff do begin
   rom[rom_size]:=tempw;
 end;
 end;
-
 procedure convert_chars(n:dword);
 begin
   init_gfx(0,8,8,n);
@@ -978,7 +954,6 @@ begin
   convert_gfx(0,0,memoria_temp,@pt2_x,@pt_y,false,false);
   convert_gfx(1,0,memoria_temp,@pt2_x[8],@pt_y,false,false);
 end;
-
 procedure convert_tiles16(n:dword);
 begin
   init_gfx(2,16,16,n);
@@ -986,7 +961,6 @@ begin
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
   convert_gfx(2,0,memoria_temp,@pt2_x,@pt_y,false,false);
 end;
-
 procedure convert_tiles32(n:dword);
 begin
   init_gfx(3,32,32,n);
@@ -994,7 +968,6 @@ begin
   gfx_set_desc_data(4,0,512*8,0,1,2,3);
   convert_gfx(3,0,memoria_temp,@pt2_x,@pt2_y,false,false);
 end;
-
 begin
 llamadas_maquina.bucle_general:=cps1_principal;
 llamadas_maquina.close:=cerrar_cps1;
@@ -1360,5 +1333,4 @@ freemem(memoria_temp);
 reset_cps1;
 iniciar_cps1:=true;
 end;
-
 end.

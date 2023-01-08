@@ -10,6 +10,7 @@ interface
 uses lib_sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
      Classes,SysUtils,FileUtil,LResources,Forms,Controls,
      Graphics,Dialogs,Menus,ExtCtrls,ComCtrls,StdCtrls,Grids,Buttons,
+     {$ifndef windows}LMessages,{$endif}
      //misc
      sound_engine,lenguaje,controls_engine,main_engine,loadrom,config_general,
      init_games,tape_window,timer_engine,misc_functions,
@@ -272,6 +273,7 @@ type
     magmax1: TMenuItem;
     ambush1: TMenuItem;
     airwolf1: TMenuItem;
+    superduck1: TMenuItem;
     srdmission1: TMenuItem;
     Repulse1: TMenuItem;
     speedrumbler1: TMenuItem;
@@ -529,6 +531,7 @@ type
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
+    procedure Panel1Click(Sender: TObject);
     procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -543,6 +546,11 @@ type
     procedure Timer4Timer(Sender: TObject);
   private
     { private declarations }
+    {$IFDEF WINDOWS}
+    procedure WindowMove(var Msg:TWMMove); message WM_MOVE;
+    {$else}
+    procedure WindowMove(var Msg:TLMMove); message LM_MOVE;
+    {$endif}
   public
     { public declarations }
   end;
@@ -563,7 +571,7 @@ var
 procedure sync_all;
 begin
 if window_render<>nil then begin
-   if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
+   //if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
    cont_sincroniza:=sdl_getticks();
    valor_sync:=1000/llamadas_maquina.fps_max;
    cont_micro:=valor_sync;
@@ -742,8 +750,7 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.close)<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
-if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
-if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
+close_joystick;
 sdl_videoquit;
 sdl_quit;
 status_bitmap.Destroy;
@@ -909,6 +916,11 @@ while FLoadRom.Showing do application.ProcessMessages;
 timer4.Enabled:=true;
 end;
 
+procedure Tprincipal1.Panel1Click(Sender: TObject);
+begin
+  SDL_RaiseWindow(window_render);
+end;
+
 procedure Tprincipal1.Salir1Click(Sender: TObject);
 begin
 close;
@@ -920,7 +932,10 @@ var
   sdl_res:integer;
 begin
 timer2.Enabled:=false;
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then sdl_res:=SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO);
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
+  sdl_res:=SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO);
+  controls_start;
+end;
 if sdl_res<0 then begin
    MessageDlg('SDL2 Mixer library not found.'+chr(10)+chr(13)+'Please read the documentation!', mtError,[mbOk], 0);
    halt(0);
@@ -948,13 +963,14 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
+//Si entro aqui NO debo ejecutar timer4 (puede venir del cambio de driver)
+timer4.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
 main_vars.driver_ok:=false;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
-timers.autofire_init;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
@@ -972,25 +988,42 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn19.Enabled:=false;
 end else begin
   timers.autofire_init;
-  EmuStatus:=EsRuning;
   sync_all;
   principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
-  if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
+  principal1.Enabled:=true;
+  EmuStatus:=EsRuning;
+  llamadas_maquina.bucle_general;
 end;
 end;
 
 procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
+principal1.Enabled:=true;
 if main_vars.driver_ok then begin
    EmuStatus:=EsRuning;
    timer1.Enabled:=true;
-   principal1.Enabled:=true;
    sync_all;
    llamadas_maquina.bucle_general;
 end;
+end;
+
+{$IFDEF WINDOWS}
+procedure Tprincipal1.WindowMove(var Msg:TWMMove);
+{$else}
+procedure Tprincipal1.WindowMove(var Msg:TLMMove);
+{$endif}
+begin
+if Msg.Result=0 then
+  begin
+    if window_render<>nil then begin
+       SDL_SetWindowPosition(window_render,Msg.xpos+5,msg.ypos+principal1.Height+panel1.Height+statusbar1.Height+FORM_POS_LAZARUS);
+       SDL_RaiseWindow(window_render);
+       sync_all;
+    end;
+  end;
 end;
 
 initialization

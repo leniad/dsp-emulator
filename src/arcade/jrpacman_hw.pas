@@ -36,7 +36,11 @@ var
  irq_vblank,bg_prio:boolean;
  gfx_bank,colortable_bank,pal_bank,scroll_x,sprite_bank:byte;
 
-procedure draw_sprites;inline;
+procedure update_video_jrpacman;
+var
+  color,nchar,offs,color_index:word;
+  sx,sy,x,y:byte;
+procedure draw_sprites;
 var
   f,atrib:byte;
   nchar,color,x,y:word;
@@ -66,11 +70,6 @@ for f:=7 downto 0 do begin
      else actualiza_gfx_sprite(x and $ff,y,2,1);
 end;
 end;
-
-procedure update_video_jrpacman;inline;
-var
-  color,nchar,offs,color_index:word;
-  sx,sy,x,y:byte;
 begin
 for x:=0 to 53 do begin
   for y:=0 to 35 do begin
@@ -156,17 +155,15 @@ case direccion of
 end;
 end;
 
-procedure clean_tiles(offset:word);inline;
+procedure jrpacman_putbyte(direccion:word;valor:byte);
+procedure clean_tiles(offset:word);
 var
   f:byte;
 begin
-// line color - mark whole line as dirty */
 if (offset<$20) then for f:=2 to 55 do gfx[0].buffer[offset+(f*$20)]:=true
   else if (offset<$700) then gfx[0].buffer[offset]:=true
           else gfx[0].buffer[offset and not($80)]:=true;
 end;
-
-procedure jrpacman_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
         $0..$3fff,$8000..$dfff:;

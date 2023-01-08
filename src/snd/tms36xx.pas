@@ -1,8 +1,6 @@
 unit tms36xx;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
-
 type
   TMS36XX_type=record
 	  samplerate:integer; 	// from Machine->sample_rate
@@ -27,17 +25,14 @@ type
     tsample:byte;
   end;
   ptms36xx=^tms36xx_type;
-
 var
   tms_chip:ptms36xx;
   tunes:array[1..4,0..(96*6)-1] of integer;
-
 procedure tms36xx_sound_update;
 procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 procedure mm6221aa_tune_w(tune:integer);
 procedure tms36xx_note_w(octave,note:integer);
 procedure tms36xx_close;
-
 implementation
 const
    VMIN=$0000;
@@ -254,99 +249,88 @@ const
 	Ax_1,	Ax_2,	D_3,	Ax_3,	D_4,	Ax_4,
 	B_1,	B_2,	Dx_3,	B_3,	Dx_4,	B_4);
 
-function C(n:byte):integer;inline;
+function C(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.18921;	// 2^(3/12) */
   c:=trunc(temp);
 end;
-
-function Cx(n:byte):integer;inline;
+function Cx(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.25992;	// 2^(4/12) */
   cx:=trunc(temp);
 end;
-
-function D(n:byte):integer;inline;
+function D(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.33484;	// 2^(5/12) */
   d:=trunc(temp);
 end;
-
-function Dx(n:byte):integer;inline;
+function Dx(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.41421;	// 2^(6/12) */
   Dx:=trunc(temp);
 end;
-
-function E(n:byte):integer;inline;
+function E(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.49831;	// 2^(7/12) */
   e:=trunc(temp);
 end;
-
-function F_n(n:byte):integer;inline;
+function F_n(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.58740;	// 2^(8/12) */
   f_n:=trunc(temp);
 end;
-
-function Fx(n:byte):integer;inline;
+function Fx(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.68179;	// 2^(9/12) */
   fx:=trunc(temp);
 end;
-
-function G(n:byte):integer;inline;
+function G(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.78180;	// 2^(10/12) */
   g:=trunc(temp);
 end;
-
-function Gx(n:byte):integer;inline;
+function Gx(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl (n-1))*1.88775;	// 2^(11/12) */
   gx:=trunc(temp);
 end;
-function A(n:byte):integer;inline;
+function A(n:byte):integer;
 begin
   a:=(FSCALE shl n);
 end;
-
-function Ax(n:byte):integer;inline;
+function Ax(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl n)*1.05946;		// 2^(1/12) */
   ax:=trunc(temp);
 end;
-
-function B(n:byte):integer;inline;
+function B(n:byte):integer;
 var
   temp:extended;
 begin
 	temp:=(FSCALE shl n)*1.12246;		// 2^(2/12) */
   b:=trunc(temp);
 end;
-
-procedure DECAY(voice:integer);inline;
+procedure DECAY(voice:integer);
 begin
 	if (tms_chip.vol[voice]>VMIN)	then begin
 		// decay of first voice
@@ -362,8 +346,7 @@ begin
 		end;
   end;
 end;
-
-procedure RESTART(voice:integer);inline;
+procedure RESTART(voice:integer);
 var
   temp:single;
 begin
@@ -373,7 +356,6 @@ begin
 		tms_chip.vol[tms_chip.shift+voice]:=VMAX;
 	end;
 end;
-
 function TONE(voice:integer):integer;
 begin
   tone:=0;
@@ -386,7 +368,6 @@ begin
 		if (tms_chip.output and tms_chip.enable and (1 shl voice))<>0 then tone:=tms_chip.vol[voice];
 	end;
 end;
-
 procedure tms36xx_internal_update;
 var
   n,sum:integer;
@@ -421,7 +402,6 @@ begin
   for f:=0 to 11 do sum:=sum+TONE(f);
   tms_chip.audio_out:=sum/tms_chip.voices;
 end;
-
 procedure tms36xx_sound_update;
 begin
   tsample[tms_chip.tsample,sound_status.posicion_sonido]:=trunc(tms_chip.audio_out);
@@ -436,7 +416,6 @@ begin
     tms_chip.tune_ofs:=0;
     tms_chip.tune_max:=96; // fixed for now
 end;
-
 procedure tms36xx_reset_counters;
 var
   f:byte;
@@ -448,7 +427,6 @@ begin
 	    tms_chip.counter[f]:=0;
     end;
 end;
-
 procedure tms36xx_note_w(octave,note:integer);
 begin
 	octave:=octave and 3;
@@ -461,7 +439,6 @@ begin
 	tms_chip.tune_ofs:=note;
 	tms_chip.tune_max:=note+1;
 end;
-
 procedure tms3617_enable(enable:integer);
 var
   i,bits:integer;
@@ -477,7 +454,6 @@ begin
 	tms_chip.enable:=enable;
   tms_chip.voices:=bits;
 end;
-
 procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 var
 	j,f:integer;
@@ -580,7 +556,6 @@ begin
 	tms3617_enable(enable);
   tms_chip.tsample:=init_channel;
 end;
-
 procedure tms36xx_close;
 begin
 if tms_chip<>nil then begin
@@ -588,5 +563,4 @@ if tms_chip<>nil then begin
     tms_chip:=nil;
 end;
 end;
-
 end.

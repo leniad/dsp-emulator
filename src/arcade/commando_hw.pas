@@ -42,7 +42,7 @@ var
  scroll_x,scroll_y:word;
  sound_command:byte;
 
-procedure update_video_commando;inline;
+procedure update_video_commando;
 var
   f,color,nchar,x,y:word;
   attr,bank:byte;
@@ -88,7 +88,7 @@ actualiza_trozo_final(16,0,224,256,1);
 copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
 end;
 
-procedure eventos_commando;inline;
+procedure eventos_commando;
 begin
 if event.arcade then begin
   //P1

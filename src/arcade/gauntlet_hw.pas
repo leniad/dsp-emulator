@@ -89,7 +89,7 @@ var
  rom_bank,vblank,sound_to_main_data,main_to_sound_data:byte;
  scroll_x,sound_reset_val:word;
 
-procedure update_video_gauntlet;inline;
+procedure update_video_gauntlet;
 var
   f,color,x,y,nchar,atrib,scroll_y:word;
   tile_bank:byte;
@@ -226,7 +226,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure gauntlet_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -240,7 +242,6 @@ begin
   end;
 end;
 
-procedure gauntlet_putword(direccion:dword;valor:word);
 var
   old:word;
 begin

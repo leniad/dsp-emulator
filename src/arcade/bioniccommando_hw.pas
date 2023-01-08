@@ -46,7 +46,7 @@ var
  //MCU
  audiocpu_to_mcu,mcu_to_audiocpu,mcu_p1,mcu_p3:byte;
 
-procedure update_video_bionicc;inline;
+procedure update_video_bionicc;
 var
   f,color,x,y,nchar,atrib,sx,sy,pos:word;
 begin
@@ -122,7 +122,7 @@ actualiza_trozo_final(0,16,256,224,3);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_bionicc;inline;
+procedure eventos_bionicc;
 begin
 if event.arcade then begin
   //P2
@@ -199,7 +199,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure bionicc_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(pos,data:word);
 var
   bright:byte;
   color:tcolor;
@@ -221,7 +223,6 @@ begin
   end;
 end;
 
-procedure bionicc_putword(direccion:dword;valor:word);
 begin
 direccion:=direccion and $fffff;
 case direccion of

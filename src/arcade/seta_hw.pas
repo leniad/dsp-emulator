@@ -99,7 +99,7 @@ begin
   actualiza_trozo_final(0,16,384,224,1);
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
 begin

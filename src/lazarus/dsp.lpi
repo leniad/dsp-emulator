@@ -16,8 +16,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="21"/>
-      <RevisionNr Value="4"/>
-      <BuildNr Value="1315"/>
+      <RevisionNr Value="5"/>
+      <BuildNr Value="1324"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.21"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="100">
+    <Units Count="103">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,12 +59,12 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="912"/>
-        <CursorPos X="26" Y="925"/>
+        <TopLine Value="926"/>
+        <CursorPos X="3" Y="938"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\ordenadores\spectrum_misc.pas"/>
@@ -164,18 +164,19 @@
       <Unit14>
         <Filename Value="..\misc\main_engine.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="165"/>
-        <CursorPos X="17" Y="177"/>
+        <TopLine Value="25"/>
+        <CursorPos X="28" Y="34"/>
         <UsageCount Value="114"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
       <Unit15>
         <Filename Value="..\misc\controls_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="161"/>
-        <CursorPos X="15" Y="178"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="484"/>
+        <CursorPos Y="495"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit15>
       <Unit16>
@@ -201,6 +202,7 @@
         <TopLine Value="279"/>
         <CursorPos Y="291"/>
         <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
         <Filename Value="config_general.pas"/>
@@ -208,10 +210,13 @@
         <ComponentName Value="MConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="942"/>
-        <CursorPos X="27" Y="949"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="730"/>
+        <CursorPos Y="741"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
       <Unit19>
         <Filename Value="redefine.pas"/>
@@ -305,6 +310,7 @@
         <TopLine Value="123"/>
         <CursorPos X="23" Y="144"/>
         <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit29>
       <Unit30>
         <Filename Value="tape_window.pas"/>
@@ -390,10 +396,11 @@
         <ComponentName Value="joy_calibration"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="64"/>
-        <CursorPos X="3" Y="82"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="41"/>
+        <CursorPos X="7" Y="57"/>
         <UsageCount Value="226"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit37>
       <Unit38>
@@ -405,10 +412,12 @@
       </Unit38>
       <Unit39>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="754"/>
-        <CursorPos X="51" Y="767"/>
-        <UsageCount Value="63"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="759"/>
+        <CursorPos X="44" Y="770"/>
+        <UsageCount Value="64"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit39>
       <Unit40>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
@@ -449,10 +458,11 @@
       <Unit44>
         <Filename Value="..\misc\lib_sdl2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="133"/>
-        <CursorPos X="109" Y="155"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="107"/>
+        <CursorPos X="26" Y="125"/>
         <UsageCount Value="208"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit44>
       <Unit45>
@@ -577,10 +587,11 @@
       <Unit59>
         <Filename Value="..\misc\misc_functions.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="24"/>
-        <CursorPos X="78" Y="53"/>
-        <UsageCount Value="150"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="42"/>
+        <CursorPos Y="61"/>
+        <UsageCount Value="159"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit59>
       <Unit60>
@@ -695,7 +706,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="208"/>
         <CursorPos X="22" Y="233"/>
-        <UsageCount Value="141"/>
+        <UsageCount Value="150"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit73>
       <Unit74>
@@ -820,7 +831,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="36"/>
         <CursorPos Y="49"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="50"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit89>
       <Unit90>
@@ -902,16 +913,150 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit99>
+      <Unit100>
+        <Filename Value="C:\lazarus\lcl\buttons.pp"/>
+        <UnitName Value="Buttons"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="..\misc\lib_sdl2.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="425"/>
+        <CursorPos Y="448"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="..\arcade\jrpacman_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="153"/>
+        <CursorPos X="26" Y="162"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit102>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="principal.pas"/>
-        <Caret Line="713" Column="8" TopLine="699"/>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="54" TopLine="35"/>
       </Position1>
       <Position2>
-        <Filename Value="principal.pas"/>
-        <Caret Line="925" Column="26" TopLine="912"/>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="55" TopLine="36"/>
       </Position2>
+      <Position3>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="56" TopLine="37"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="57" TopLine="38"/>
+      </Position4>
+      <Position5>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="58" TopLine="39"/>
+      </Position5>
+      <Position6>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="59" TopLine="40"/>
+      </Position6>
+      <Position7>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="60" TopLine="41"/>
+      </Position7>
+      <Position8>
+        <Filename Value="..\misc\misc_functions.pas"/>
+        <Caret Line="61" TopLine="42"/>
+      </Position8>
+      <Position9>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1016" Column="11" TopLine="1006"/>
+      </Position9>
+      <Position10>
+        <Filename Value="principal.pas"/>
+        <Caret Line="13" Column="41"/>
+      </Position10>
+      <Position11>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1020" TopLine="1007"/>
+      </Position11>
+      <Position12>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="852" Column="36" TopLine="852"/>
+      </Position12>
+      <Position13>
+        <Filename Value="principal.pas"/>
+        <Caret Line="752" Column="16" TopLine="740"/>
+      </Position13>
+      <Position14>
+        <Filename Value="joystick_calibration.pas"/>
+        <Caret Line="57" Column="7" TopLine="41"/>
+      </Position14>
+      <Position15>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="617" Column="8" TopLine="599"/>
+      </Position15>
+      <Position16>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="681" Column="18" TopLine="669"/>
+      </Position16>
+      <Position17>
+        <Filename Value="principal.pas"/>
+        <Caret Line="604" Column="16" TopLine="593"/>
+      </Position17>
+      <Position18>
+        <Filename Value="principal.pas"/>
+        <Caret Line="741" Column="18" TopLine="722"/>
+      </Position18>
+      <Position19>
+        <Filename Value="principal.pas"/>
+        <Caret Line="937" Column="3" TopLine="925"/>
+      </Position19>
+      <Position20>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="681" Column="18" TopLine="669"/>
+      </Position20>
+      <Position21>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="680" Column="18" TopLine="668"/>
+      </Position21>
+      <Position22>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="679" Column="18" TopLine="667"/>
+      </Position22>
+      <Position23>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="682" Column="18" TopLine="670"/>
+      </Position23>
+      <Position24>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="681" Column="18" TopLine="669"/>
+      </Position24>
+      <Position25>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="680" Column="18" TopLine="668"/>
+      </Position25>
+      <Position26>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="679" Column="18" TopLine="667"/>
+      </Position26>
+      <Position27>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="680" Column="18" TopLine="668"/>
+      </Position27>
+      <Position28>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="679" Column="18" TopLine="667"/>
+      </Position28>
+      <Position29>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="680" Column="18" TopLine="668"/>
+      </Position29>
+      <Position30>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="719" TopLine="708"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

@@ -253,7 +253,8 @@ begin
 		end;
 	end;
 end;
-procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
+
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
 var
   pos,f,nchar,color,data:word;
   x,y:word;
@@ -280,7 +281,8 @@ begin
     pos:=pos+1;
   end;
 end;
-procedure update_video_system16a;inline;
+
+procedure update_video_system16a;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib:word;
   scroll_y1,scroll_y2:byte;
@@ -393,9 +395,10 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 procedure system16a_principal;
 var
-  frame_m,frame_s,frame_s_sub:single;
+  frame_m,frame_s:single;
   f:word;
   h:byte;
 begin
@@ -421,7 +424,8 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-function standar_s16_io_r(direccion:word):word;inline;
+
+function standar_s16_io_r(direccion:word):word;
 var
   res:word;
 begin
@@ -441,6 +445,7 @@ case (direccion and $3000) of
 end;
 standar_s16_io_r:=res;
 end;
+
 function system16a_getword(direccion:dword):word;
 begin
 case direccion of
@@ -515,7 +520,8 @@ if direccion=$74f then begin
           end;
 end;
 end;
-procedure change_pal(direccion:word);inline;
+
+procedure change_pal(direccion:word);
 var
 	val:word;
   color:tcolor;
@@ -547,7 +553,8 @@ begin
   //Buffer
   buffer_color[(direccion shr 3) and $7f]:=true;
 end;
-procedure test_tile_buffer(direccion:word);inline;
+
+procedure test_tile_buffer(direccion:word);
 var
   num_scr,f:byte;
   pos:word;
@@ -557,7 +564,8 @@ begin
   for f:=0 to 7 do
     if s16_screen[f]=num_scr then tile_buffer[(f shl 11)+pos]:=true;
 end;
-procedure standard_io_w(direccion,valor:word);inline;
+
+procedure standard_io_w(direccion,valor:word);
 begin
 case (direccion and $3000) of
 		$0:pia8255_0.write((direccion shr 1) and $3,valor and $ff);

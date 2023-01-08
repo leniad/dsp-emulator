@@ -381,7 +381,7 @@ begin
 end;
 
 //FMCHAN
-function op_calc(phase:dword;env:word;pm:integer):integer;inline;
+function op_calc(phase:dword;env:word;pm:integer):integer;
 var
   tmp:integer;
   p:dword;
@@ -392,7 +392,7 @@ begin
     else op_calc:=tl_tab[p];
 end;
 
-function op_calc1(phase:dword;env:word;pm:integer):integer;inline;
+function op_calc1(phase:dword;env:word;pm:integer):integer;
 var
   p:dword;
   tmp:integer;

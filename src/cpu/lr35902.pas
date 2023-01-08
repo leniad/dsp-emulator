@@ -169,12 +169,12 @@ begin
   dec_8bit:=res;
 end;
 
-function res_8bit(bit,val:byte):byte;inline;
+function res_8bit(bit,val:byte):byte;
 begin
   res_8bit:=val and (not(1 shl bit));
 end;
 
-function set_8bit(bit,val:byte):byte;inline;
+function set_8bit(bit,val:byte):byte;
 begin
   set_8bit:=val or (1 shl bit);
 end;

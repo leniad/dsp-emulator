@@ -1,4 +1,23 @@
 ﻿# DSP Emulator status #
+<b>08/01/23 - DSP Emulator 0.21WIP5. Updated Windows binary and source update.<br>
+<pre>
+-General
+    +Find a bug on new releases of SDL 2 library, joystick stop working when main window loses focus. Changed to SDL 2.0.16, works fine with this version
+        -Added SDL 2.0.16 for download
+    +Enhanced joystick support
+        -New redefine buttons system, select and press the button to use it
+        -Rewrited joystick internal functions
+    +Windows: Removed mouse cursor, slows down everything when enabled
+    +Lazarus: Added 'follow me' window style. The main emulation window follows select window when it moves.
+-CPS1 HW
+    +Added 3 extra players buttons, 'Street Fighter II' now works with all buttons
+    +Better row scroll, still not working
+-Super Duck
+    +Added driver with sound
+-Tiger Road
+    +Added sprite buffer
+</pre><br>
+<img src="https://i.ibb.co/3WVdjYP/supduck.png"><br><br>
 <b>06/12/22 - DSP Emulator 0.21WIP4.2. Another fix! Updated Windows binary and source update.<br>
 <pre>
 -General

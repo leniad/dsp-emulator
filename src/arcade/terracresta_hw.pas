@@ -77,7 +77,7 @@ var
  sound_latch:byte;
  prot_mem:array[0..$1fff] of byte;
 
-procedure update_video_terracre;inline;
+procedure update_video_terracre;
 var
   f,color,x,y,nchar,atrib:word;
 begin

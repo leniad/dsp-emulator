@@ -41,7 +41,11 @@ var
   rom:array[0..5,0..$3fff] of byte;
   snd_dec:array[0..$7fff] of byte;
 
-procedure draw_sprites(pri:byte);inline;
+procedure update_video_dec8;
+var
+  f,nchar,color,atrib,x,y:word;
+
+procedure draw_sprites(pri:byte);
 var
   x,y,f,nchar:word;
   color,atrib:byte;
@@ -68,9 +72,6 @@ begin
 	end;
 end;
 
-procedure update_video_dec8;inline;
-var
-  f,nchar,color,atrib,x,y:word;
 begin
 for f:=0 to $1ff do begin
     atrib:=memoria[$1400+(f*2)];

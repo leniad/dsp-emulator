@@ -121,7 +121,7 @@ var
  sprites_split,mcu_hs:boolean;
  mcu_hs_ram:array[0..9] of word;
 
-procedure poner_sprites(pri:byte);inline;
+procedure poner_sprites(pri:byte);
 var
   f,sprite,nchar,atrib,color,x,pos_obj,pos_sprite,y:word;
   flipx,flipy:boolean;
@@ -336,7 +336,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
   r,g,b:byte;
@@ -525,7 +525,7 @@ begin
  mcu_hs:=false;
 end;
 
-procedure decript_phantasm(dest,source:pword);inline;
+procedure decript_phantasm(dest,source:pword);
 var
   f:dword;
   x,y:word;
@@ -548,7 +548,7 @@ begin
   end;  //del for
 end;
 
-procedure decript_rodland(dest,source:pword);inline;
+procedure decript_rodland(dest,source:pword);
 var
   f:dword;
   x,y:word;

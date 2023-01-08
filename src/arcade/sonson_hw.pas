@@ -39,7 +39,7 @@ const
 var
  soundlatch,last,scroll_x:byte;
 
-procedure update_video_sonson;inline;
+procedure update_video_sonson;
 var
   f,color,nchar:word;
   x,y,atrib:byte;

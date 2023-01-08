@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      dac,rom_engine,pal_engine,konami_decrypt,sound_engine,qsnapshot,file_engine;
 
-procedure cargar_hypersports;
+function iniciar_hypersports:boolean;
 
 implementation
 const
@@ -59,7 +59,6 @@ for f:=0 to $7ff do begin
       gfx[0].buffer[f]:=false;
    end;
 end;
-
 for f:=0 to $1f do scroll_x[f]:=memoria[$10c0+(f*2)]+((memoria[$10c1+(f*2)] and 1) shl 8);
 scroll__x_part2(1,2,8,@scroll_x);
 for f:=$1f downto 0 do begin
@@ -293,6 +292,11 @@ const
     resistances_rg:array[0..2] of integer=(1000,470,220);
     resistances_b:array[0..1] of integer=(470,220);
 begin
+llamadas_maquina.bucle_general:=hypersports_principal;
+llamadas_maquina.reset:=reset_hypersports;
+llamadas_maquina.close:=close_hypersports;
+llamadas_maquina.save_qsnap:=hypersports_qsave;
+llamadas_maquina.load_qsnap:=hypersports_qload;
 iniciar_hypersports:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -362,16 +366,6 @@ marcade.dswb_val:=@hypersports_dip_b;
 //final
 reset_hypersports;
 iniciar_hypersports:=true;
-end;
-
-procedure Cargar_hypersports;
-begin
-llamadas_maquina.iniciar:=iniciar_hypersports;
-llamadas_maquina.bucle_general:=hypersports_principal;
-llamadas_maquina.reset:=reset_hypersports;
-llamadas_maquina.close:=close_hypersports;
-llamadas_maquina.save_qsnap:=hypersports_qsave;
-llamadas_maquina.load_qsnap:=hypersports_qload;
 end;
 
 end.

@@ -971,7 +971,7 @@ begin
  RORC_WORD:=temp shr 1;
 end;
 
-function sshr(num:integer;fac:byte):integer;inline;
+function sshr(num:integer;fac:byte):integer;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;

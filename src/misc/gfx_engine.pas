@@ -68,14 +68,14 @@ procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
 procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
 procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
 //Basic draw functions
-procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);inline;
-function getpixel(x,y:word;sitio:byte):word;inline;
-procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);inline;
+procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);
+function getpixel(x,y:word;sitio:byte):word;
+procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);
 procedure single_line(x,y,color,longitud:word;pant:byte);
 procedure draw_line(x0,y0,x1,y1:integer;color:word;pant:byte);
 //Screen functions
-procedure fill_full_screen(screen:byte;color:word);inline;
-procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
+procedure fill_full_screen(screen:byte;color:word);
+procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
 //Misc
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
 
@@ -114,7 +114,7 @@ begin
   getmem(gfx[num].datos,num_elements*x_size*y_size);
 end;
 
-function GetBit(bit_nbr:dword;buffer:pbyte):byte;inline;
+function GetBit(bit_nbr:dword;buffer:pbyte):byte;
 var
   oct_nbr:dword;
   bit_n:byte;
@@ -380,7 +380,7 @@ while (pos_y<p_final[porigen].scroll.max_y) do begin
 end;
 end;
 //put pixel especial interno solo para los gfx...
-procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
+procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
 var
    punt:pword;
 begin
@@ -391,7 +391,7 @@ copymemory(punt,punbuf,cantidad shl 1);
 //SDL_UnlockSurface(pantalla[sitio]);
 end;
 
-procedure putpixel_gfx_int_32(x,y,cantidad:word;sitio:byte);inline;
+procedure putpixel_gfx_int_32(x,y,cantidad:word;sitio:byte);
 var
    punt:pdword;
 begin
@@ -1152,7 +1152,7 @@ end;
 end;
 
 //Put pixel basics
-procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);inline;
+procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);
 var
    punt:pword;
 begin
@@ -1161,7 +1161,7 @@ inc(punt,((y*pantalla[sitio].pitch) shr 1)+x);
 copymemory(punt,pixel,cantidad shl 1);
 end;
 
-function getpixel(x,y:word;sitio:byte):word;inline;
+function getpixel(x,y:word;sitio:byte):word;
 var
    punt:pword;
 begin
@@ -1170,7 +1170,7 @@ inc(punt,((y*pantalla[sitio].pitch) shr 1)+x);
 getpixel:=punt^;
 end;
 
-procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);inline;
+procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);
 var
    punt:pdword;
 begin
@@ -1180,7 +1180,7 @@ copymemory(punt,pixel,cantidad shl 2);
 end;
 
 //Draw lines
-procedure single_line(x,y,color,longitud:word;pant:byte);inline;
+procedure single_line(x,y,color,longitud:word;pant:byte);
 var
   punt:pword;
 begin
@@ -1189,7 +1189,7 @@ inc(punt,((y*pantalla[pant].pitch) shr 1)+x);
 fillword(punt,longitud,color);
 end;
 
-procedure draw_line(x0,y0,x1,y1:integer;color:word;pant:byte);inline;
+procedure draw_line(x0,y0,x1,y1:integer;color:word;pant:byte);
 var
   dy,dx,stepx,stepy:integer;
   fraction:single;
@@ -1235,7 +1235,7 @@ end;
 end;
 
 //Screen functions
-procedure fill_full_screen(screen:byte;color:word);inline;
+procedure fill_full_screen(screen:byte;color:word);
 begin
 fillword(pantalla[screen].pixels,pantalla[screen].w*pantalla[screen].h,paleta[color]);
 end;

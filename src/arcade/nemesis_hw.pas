@@ -276,7 +276,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   bit1,bit2,bit3:byte;
   color:tcolor;
@@ -687,7 +687,11 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_salamander(numero:word);inline;
+procedure salamander_putword(direccion:dword;valor:word);
+var
+  dir:word;
+
+procedure cambiar_color_salamander(numero:word);
 var
   color:tcolor;
   tmp_color:word;
@@ -701,9 +705,6 @@ begin
   buffer_color[numero shr 4]:=true;
 end;
 
-procedure salamander_putword(direccion:dword;valor:word);
-var
-  dir:word;
 begin
 case direccion of
   0..$7ffff:;

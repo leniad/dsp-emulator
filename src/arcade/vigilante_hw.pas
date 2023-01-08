@@ -151,7 +151,8 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure vigilante_putbyte(direccion:word;valor:byte);
+procedure cambiar_color(dir:word);
 var
   color:tcolor;
   pos2:byte;
@@ -169,8 +170,6 @@ begin
   end;
   rear_ch_color:=(bank=$400);
 end;
-
-procedure vigilante_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$bfff:;

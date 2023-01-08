@@ -40,7 +40,9 @@ var
  invert_controls,sound_latch:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
 
-procedure poner_sprites(prioridad:boolean);inline;
+procedure update_video_prehisle;
+
+procedure poner_sprites(prioridad:boolean);
 var
   atrib,nchar,color,x,y:word;
   f:byte;
@@ -58,7 +60,6 @@ for f:=0 to $ff do begin
 end;
 end;
 
-procedure update_video_prehisle;
 var
   f,color,pos,x,y,sx,sy,nchar,atrib:word;
 begin
@@ -182,7 +183,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure prehisle_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -197,7 +200,6 @@ begin
   end;
 end;
 
-procedure prehisle_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:; //ROM

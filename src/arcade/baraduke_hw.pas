@@ -66,7 +66,8 @@ var
  prio,copy_sprites:boolean;
  spritex_add,spritey_add:integer;
 
-procedure draw_sprites(prior:byte);inline;
+procedure update_video_baraduke;
+procedure draw_sprites(prior:byte);
 var
   x,y,sizex,sizey,sy,f,atrib1,atrib2:byte;
   nchar,sx,sprite_xoffs,sprite_yoffs,color:word;
@@ -97,8 +98,6 @@ begin
     actualiza_gfx_sprite_size(sx,sy,4,16*(sizex+1),16*(sizey+1));
 	end;
 end;
-
-procedure update_video_baraduke;
 var
   f,color,nchar,pos:word;
   sx,sy,x,y,atrib:byte;
@@ -172,7 +171,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure copy_sprites_hw;inline;
+procedure copy_sprites_hw;
 var
   i,j:byte;
 begin

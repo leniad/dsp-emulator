@@ -76,7 +76,7 @@ var
  update_video:procedure;
  calc_pos_txt:function(x,y:byte):word;
 
-procedure armedf_put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx,clut:byte);inline;
+procedure armedf_put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx,clut:byte);
 var
   x,y,pos_y:byte;
   temp,temp2:pword;
@@ -115,7 +115,7 @@ for y:=0 to 15 do begin
 end;
 end;
 
-procedure draw_sprites(prio:byte);inline;
+procedure draw_sprites(prio:byte);
 var
   atrib,f,nchar,sx,sy:word;
   flip_x,flip_y:boolean;
@@ -137,7 +137,7 @@ begin
   end;
 end;
 
-procedure draw_fg_bg(f:word;x,y:byte);inline;
+procedure draw_fg_bg(f:word;x,y:byte);
 var
   color:byte;
   atrib,nchar:word;

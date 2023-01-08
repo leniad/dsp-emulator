@@ -1,8 +1,6 @@
 unit k053246_k053247_k055673;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,gfx_engine;
-
 type
      t_k053247_cb=procedure(var code:dword;var color:word;var priority_mask:word);
      k053246_chip=class
@@ -35,12 +33,9 @@ type
               procedure k053247_draw_single_sprite_gxcore(code:dword;offs:word;color,shadow:word);
               procedure k053247_draw_yxloop_gx(height,width,ox,oy,code,color,shadow,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
      end;
-
 var
    k053246_0:k053246_chip;
-
 implementation
-
 constructor k053246_chip.create(pant:byte;call_back:t_k053247_cb;rom:pbyte;rom_size:dword);
 begin
   self.pant:=pant;
@@ -49,11 +44,9 @@ begin
   self.rom_mask:=rom_size-1;
   self.k053247_cb:=call_back;
 end;
-
 destructor k053246_chip.free;
 begin
 end;
-
 procedure k053246_chip.reset;
 var
   f:byte;
@@ -63,17 +56,14 @@ begin
 	for f:=0 to 7 do self.kx46_regs[f]:=0;
   for f:=0 to 31 do self.kx47_regs[f]:=0;
 end;
-
 function k053246_chip.k053247_get_ram:pword;
 begin
   k053247_get_ram:=@self.ram;
 end;
-
 function k053246_chip.is_irq_enabled:boolean;
 begin
      is_irq_enabled:=(kx46_regs[5] and $10)<>0
 end;
-
 function k053246_chip.read(direccion:byte):byte;
 var
    addr:dword;
@@ -83,29 +73,24 @@ begin
     read:=self.rom[addr and self.rom_mask];
   end else read:=0;
 end;
-
 procedure k053246_chip.write(direccion,valor:byte);
 begin
      self.kx46_regs[direccion]:=valor;
 end;
-
 procedure k053246_chip.set_objcha_line(status:byte);
 begin
   self.objcha_line:=status;
 end;
-
 function k053246_chip.k053247_r(direccion:word):byte;
 begin
   if (direccion and 1)<>0 then k053247_r:=self.ram[direccion shr 1] and $ff
     else k053247_r:=self.ram[direccion shr 1] shr 8;
 end;
-
 procedure k053246_chip.k053247_w(direccion:word;valor:byte);
 begin
 if (direccion and 1)<>0 then self.ram[direccion shr 1]:=(self.ram[direccion shr 1] and $ff00) or valor
     else self.ram[direccion shr 1]:=(self.ram[direccion shr 1] and $ff) or (valor shl 8);
 end;
-
 procedure k053246_chip.k053247_start(dx:byte=0;dy:byte=0);
 const
   ps_x:array[0..15] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4,
@@ -122,7 +107,6 @@ begin
   gfx[1].trans[0]:=true;
   gfx[1].alpha[$f]:=true;
 end;
-
 procedure k053246_chip.k053247_draw_yxloop_gx(height,width,ox,oy,code,color,shadow,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
 const
    xoffset:array [0..7] of byte=(0,1,4,5,16,17,20,21);
@@ -196,7 +180,6 @@ begin
 			end; // end of X loop
 		end; // end of Y loop
 end;
-
 procedure k053246_chip.k053247_draw_single_sprite_gxcore(code:dword;offs:word;color,shadow:word);
 var
 		xa,ya,ox,oy:integer;
@@ -283,7 +266,6 @@ begin
   	//color:=color and $ffff; // strip attribute flags
 		self.k053247_draw_yxloop_gx(height,width,ox+53-self.dx,oy-6-self.dy,code,color,shadow,xa,ya,zoomx,zoomy,nozoom,mirrorx,mirrory,flipx,flipy);
 end;
-
 procedure k053246_chip.k053247_update_sprites;
 var
   count,f:byte;
@@ -304,7 +286,6 @@ end else begin
 end;
 self.sprite_count:=count;
 end;
-
 procedure k053246_chip.k053247_draw_sprites(prio:byte);
 var
   zcode:integer;
@@ -356,6 +337,4 @@ begin
     self.k053247_draw_single_sprite_gxcore(code,w,color,shadow);
 	end; // end of sprite-list loop
 end;
-
 end.
-

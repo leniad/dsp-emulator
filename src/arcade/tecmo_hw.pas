@@ -217,25 +217,6 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
-var
-  color:tcolor;
-  valor:byte;
-begin
-  valor:=buffer_paleta[numero];
-  color.b:=pal4bit(valor);
-  valor:=buffer_paleta[1+numero];
-  color.g:=pal4bit(valor);
-  color.r:=pal4bit(valor shr 4);
-  numero:=numero shr 1;
-  set_pal_color(color,numero);
-  case numero of
-    256..511:buffer_color[(numero shr 4) and $f]:=true;
-    512..767:buffer_color[((numero shr 4) and $f)+$10]:=true;
-    768..1023:buffer_color[((numero shr 4) and $f)+$20]:=true;
-  end;
-end;
-
 function rygar_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -256,6 +237,25 @@ case direccion of
   $f808:rygar_getbyte:=marcade.dswb and $f;
   $f809:rygar_getbyte:=(marcade.dswb shr 4) and $f;
 end;
+end;
+
+procedure cambiar_color(numero:word);
+var
+  color:tcolor;
+  valor:byte;
+begin
+  valor:=buffer_paleta[numero];
+  color.b:=pal4bit(valor);
+  valor:=buffer_paleta[1+numero];
+  color.g:=pal4bit(valor);
+  color.r:=pal4bit(valor shr 4);
+  numero:=numero shr 1;
+  set_pal_color(color,numero);
+  case numero of
+    256..511:buffer_color[(numero shr 4) and $f]:=true;
+    512..767:buffer_color[((numero shr 4) and $f)+$10]:=true;
+    768..1023:buffer_color[((numero shr 4) and $f)+$20]:=true;
+  end;
 end;
 
 procedure rygar_putbyte(direccion:word;valor:byte);

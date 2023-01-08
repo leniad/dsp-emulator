@@ -3,7 +3,7 @@ unit tigerroad_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,mcs51,main_engine,controls_engine,gfx_engine,nz80,ym_2203,rom_engine,
-     pal_engine,sound_engine,misc_functions;
+     pal_engine,sound_engine;
 
 function iniciar_tigeroad:boolean;
 
@@ -61,13 +61,17 @@ var
  scroll_x,scroll_y,mask_sprite,mask_back:word;
  rom:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
- sprite_ram:array[0..$808] of word;
+ ram2:array[0..$803] of word;
  video_ram:array[0..$3ff] of word;
  fondo_rom:array[0..$7fff] of byte;
  pintar_fondo:boolean;
  old_p3,fondo_bank,sound_latch:byte;
 
-procedure draw_fondo;inline;
+procedure update_video_tigeroad;
+var
+  f,color,x,y,nchar,atrib:word;
+  atrib2:byte;
+procedure draw_fondo;
 var
   nchar,color,pos:word;
   x,y,f,data,atrib,sx,sy:byte;
@@ -89,33 +93,31 @@ end;
 pintar_fondo:=false;
 end;
 
-procedure update_video_tigeroad;inline;
-var
-  f,color,x,y,nchar,atrib:word;
 begin
 //background
 if pintar_fondo then draw_fondo;
 scroll_x_y(2,3,scroll_x and $1f,scroll_y and $1f);
 //sprites
 for f:=$9f downto 0 do begin
-    nchar:=sprite_ram[f*4] and mask_sprite;
-    atrib:=sprite_ram[(f*4)+1];
-  	y:=240-sprite_ram[(f*4)+2];
-		x:=sprite_ram[(f*4)+3];
-		color:=(((atrib shr 2) and $f) shl 4)+$100;
-    put_gfx_sprite(nchar,color,(atrib and 2)<>0,(atrib and 1)<>0,2);
+    nchar:=buffer_sprites_w[f*4] and mask_sprite;
+    atrib:=buffer_sprites_w[(f*4)+1];
+  	y:=240-buffer_sprites_w[(f*4)+2];
+		x:=buffer_sprites_w[(f*4)+3];
+		color:=(atrib and $3c) shl 2;
+    put_gfx_sprite(nchar,color+$100,(atrib and 2)<>0,(atrib and 1)<>0,2);
     actualiza_gfx_sprite(x,y,3,2);
 end;
 scroll_x_y(4,3,scroll_x and $1f,scroll_y and $1f);
 //foreground
 for f:=$0 to $3ff do begin
   atrib:=video_ram[f];
-  color:=(atrib shr 8) and $f;
+  atrib2:=atrib shr 8;
+  color:=atrib2 and $f;
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=BITSWAP16(atrib,9,8,10,12,11,13,15,14,7,6,5,4,3,2,1,0);
-    put_gfx_trans_flip(x*8,y*8,nchar and $7ff,(color shl 2)+512,1,0,false,(atrib and $1000)<>0);
+    nchar:=(atrib and $ff)+((atrib2 and $c0) shl 2)+((atrib2 and $20) shl 5);
+    put_gfx_trans_flip(x*8,y*8,nchar and $7ff,(color shl 2)+512,1,0,false,(atrib2 and $10)<>0);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -167,6 +169,7 @@ while EmuStatus=EsRuning do begin
     if f=239 then begin
       update_video_tigeroad;
       m68000_0.irq[2]:=HOLD_LINE;
+      copymemory(@buffer_sprites_w,@ram2,$280*2);
     end;
   end;
   eventos_tigeroad;
@@ -181,14 +184,14 @@ case direccion of
   $fe4000:tigeroad_getword:=marcade.in0;
   $fe4002:tigeroad_getword:=marcade.in1;
   $fe4004:tigeroad_getword:=marcade.dswa;
-  $fe0800..$fe1807:tigeroad_getword:=sprite_ram[(direccion-$fe0800) shr 1];
+  $fe0800..$fe1807:tigeroad_getword:=ram2[(direccion-$fe0800) shr 1];
   $fec000..$fec7ff:tigeroad_getword:=video_ram[(direccion and $7ff) shr 1];
   $ff8200..$ff867f:tigeroad_getword:=buffer_paleta[(direccion-$ff8200) shr 1];
   $ffc000..$ffffff:tigeroad_getword:=ram[(direccion and $3fff) shr 1];
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -209,7 +212,7 @@ var
 begin
 case direccion of
   $0..$3ffff:; //ROM
-  $fe0800..$fe1807:sprite_ram[(direccion-$fe0800) shr 1]:=valor;
+  $fe0800..$fe1807:ram2[(direccion-$fe0800) shr 1]:=valor;
   $fe4000:begin  //video control
              bank:=(valor shr 10) and $1;
              if (fondo_bank<>bank) then begin
@@ -289,7 +292,7 @@ var
 begin
 case direccion of
   $0..$3ffff:; //ROM
-  $fe0800..$fe1807:sprite_ram[(direccion-$fe0800) shr 1]:=valor;
+  $fe0800..$fe1807:ram2[(direccion-$fe0800) shr 1]:=valor;
   $fe4000:begin  //video control
              bank:=(valor shr 10) and $1;
           	 if (fondo_bank<>bank) then begin
@@ -379,6 +382,7 @@ while EmuStatus=EsRuning do begin
     if f=239 then begin
       update_video_tigeroad;
       m68000_0.irq[2]:=HOLD_LINE;
+      copymemory(@buffer_sprites_w,@ram2,$280*2);
     end;
   end;
   eventos_tigeroad;

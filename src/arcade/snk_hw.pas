@@ -137,6 +137,7 @@ var
   txt_ram,sprite_ram:array[0..$7ff] of byte;
   bg_ram:array[0..$1fff] of byte;
 
+procedure update_video_ikari;
 procedure draw_sprites16(pos:byte);
 var
   f,color,atrib:byte;
@@ -179,7 +180,6 @@ begin
 	end;
 end;
 
-procedure update_video_ikari;
 var
   g,atrib,color:byte;
   x,y,f,nchar,pos:word;
@@ -533,7 +533,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function hardflags_check(num:byte):byte;inline;
+function hardflags_check(num:byte):byte;
 var
   x,y,dx,dy:word;
   ret:byte;
@@ -549,7 +549,7 @@ begin
   hardflags_check:=ret;
 end;
 
-function hardflags_check8(num:byte):byte;inline;
+function hardflags_check8(num:byte):byte;
 begin
 	hardflags_check8:=
 		(hardflags_check(num+0) shl 0) or (hardflags_check(num+1) shl 1) or

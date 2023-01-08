@@ -534,21 +534,21 @@ object MConfig: TMConfig
           Caption = 'But 2'
         end
         object Label15: TLabel
-          Left = 113
+          Left = 111
           Top = 252
           Width = 25
           Height = 13
           Caption = 'But 3'
         end
         object Label16: TLabel
-          Left = 113
+          Left = 111
           Top = 276
           Width = 25
           Height = 13
           Caption = 'But 4'
         end
         object Label17: TLabel
-          Left = 113
+          Left = 111
           Top = 299
           Width = 25
           Height = 13
@@ -569,6 +569,7 @@ object MConfig: TMConfig
           Width = 70
           Height = 17
           Caption = 'Joystick'
+          Enabled = False
           TabOrder = 1
           OnClick = RadioButton2Click
         end
@@ -631,7 +632,7 @@ object MConfig: TMConfig
         object BitBtn9: TBitBtn
           Left = 33
           Top = 243
-          Width = 52
+          Width = 74
           Height = 27
           TabOrder = 6
           OnClick = BitBtn9Click
@@ -639,90 +640,42 @@ object MConfig: TMConfig
         object BitBtn10: TBitBtn
           Left = 33
           Top = 268
-          Width = 52
+          Width = 74
           Height = 27
           TabOrder = 7
           OnClick = BitBtn10Click
         end
         object BitBtn11: TBitBtn
           Left = 33
-          Top = 293
-          Width = 52
+          Top = 295
+          Width = 74
           Height = 28
           TabOrder = 8
           OnClick = BitBtn11Click
         end
-        object ComboBox3: TComboBox
-          Left = 33
-          Top = 245
-          Width = 58
-          Height = 21
-          TabOrder = 9
-          Text = 'ComboBox3'
-        end
-        object ComboBox4: TComboBox
-          Left = 33
-          Top = 270
-          Width = 58
-          Height = 21
-          TabOrder = 10
-          Text = 'ComboBox4'
-        end
-        object ComboBox5: TComboBox
-          Left = 33
-          Top = 296
-          Width = 58
-          Height = 21
-          TabOrder = 11
-          Text = 'ComboBox5'
-        end
         object BitBtn15: TBitBtn
           Left = 139
           Top = 268
-          Width = 52
+          Width = 74
           Height = 27
-          TabOrder = 12
+          TabOrder = 9
           OnClick = BitBtn15Click
         end
         object BitBtn16: TBitBtn
           Left = 139
           Top = 293
-          Width = 52
+          Width = 74
           Height = 28
-          TabOrder = 13
+          TabOrder = 10
           OnClick = BitBtn16Click
         end
         object BitBtn17: TBitBtn
           Left = 139
           Top = 243
-          Width = 53
+          Width = 74
           Height = 27
-          TabOrder = 14
+          TabOrder = 11
           OnClick = BitBtn17Click
-        end
-        object ComboBox9: TComboBox
-          Left = 140
-          Top = 245
-          Width = 58
-          Height = 21
-          TabOrder = 15
-          Text = 'ComboBox3'
-        end
-        object ComboBox10: TComboBox
-          Left = 140
-          Top = 270
-          Width = 58
-          Height = 21
-          TabOrder = 16
-          Text = 'ComboBox4'
-        end
-        object ComboBox11: TComboBox
-          Left = 139
-          Top = 296
-          Width = 58
-          Height = 21
-          TabOrder = 17
-          Text = 'ComboBox5'
         end
         object GroupBox7: TGroupBox
           Left = 3
@@ -732,42 +685,23 @@ object MConfig: TMConfig
           Color = clWhite
           ParentBackground = False
           ParentColor = False
-          TabOrder = 18
-          object RadioButton22: TRadioButton
-            Left = 65
-            Top = 30
-            Width = 52
-            Height = 17
-            Caption = 'Analog'
-            Enabled = False
-            TabOrder = 0
-            OnClick = RadioButton22Click
-          end
-          object RadioButton21: TRadioButton
-            Left = 3
-            Top = 30
-            Width = 56
-            Height = 17
-            Caption = 'Digital'
-            Enabled = False
-            TabOrder = 1
-            OnClick = RadioButton21Click
-          end
+          TabOrder = 12
           object Button7: TButton
-            Left = 122
-            Top = 25
+            Left = 55
+            Top = 27
             Width = 52
             Height = 24
             Caption = 'Calibrate'
-            TabOrder = 2
+            TabOrder = 0
             OnClick = Button7Click
           end
           object ComboBox1: TComboBox
-            Left = 4
-            Top = 3
+            Left = 8
+            Top = 6
             Width = 159
             Height = 21
-            TabOrder = 3
+            Enabled = False
+            TabOrder = 1
             TabStop = False
             Text = 'ComboBox1'
             OnChange = ComboBox1Change
@@ -877,7 +811,7 @@ object MConfig: TMConfig
         object BitBtn12: TBitBtn
           Left = 37
           Top = 243
-          Width = 52
+          Width = 74
           Height = 27
           TabOrder = 6
           OnClick = BitBtn12Click
@@ -885,7 +819,7 @@ object MConfig: TMConfig
         object BitBtn13: TBitBtn
           Left = 37
           Top = 268
-          Width = 52
+          Width = 74
           Height = 27
           TabOrder = 7
           OnClick = BitBtn13Click
@@ -893,82 +827,34 @@ object MConfig: TMConfig
         object BitBtn14: TBitBtn
           Left = 37
           Top = 293
-          Width = 52
+          Width = 74
           Height = 28
           TabOrder = 8
           OnClick = BitBtn14Click
         end
-        object ComboBox6: TComboBox
-          Left = 37
-          Top = 245
-          Width = 58
-          Height = 21
-          TabOrder = 9
-          Text = 'ComboBox6'
-        end
-        object ComboBox7: TComboBox
-          Left = 37
-          Top = 270
-          Width = 58
-          Height = 21
-          TabOrder = 10
-          Text = 'ComboBox7'
-        end
-        object ComboBox8: TComboBox
-          Left = 37
-          Top = 297
-          Width = 58
-          Height = 21
-          TabOrder = 11
-          Text = 'ComboBox8'
-        end
         object BitBtn18: TBitBtn
           Left = 148
           Top = 243
-          Width = 52
+          Width = 74
           Height = 27
-          TabOrder = 12
+          TabOrder = 9
           OnClick = BitBtn18Click
         end
         object BitBtn19: TBitBtn
           Left = 148
           Top = 268
-          Width = 52
+          Width = 74
           Height = 27
-          TabOrder = 13
+          TabOrder = 10
           OnClick = BitBtn19Click
         end
         object BitBtn20: TBitBtn
           Left = 148
           Top = 293
-          Width = 52
+          Width = 74
           Height = 27
-          TabOrder = 14
+          TabOrder = 11
           OnClick = BitBtn20Click
-        end
-        object ComboBox12: TComboBox
-          Left = 148
-          Top = 245
-          Width = 58
-          Height = 21
-          TabOrder = 15
-          Text = 'ComboBox6'
-        end
-        object ComboBox13: TComboBox
-          Left = 148
-          Top = 270
-          Width = 58
-          Height = 21
-          TabOrder = 16
-          Text = 'ComboBox6'
-        end
-        object ComboBox14: TComboBox
-          Left = 148
-          Top = 296
-          Width = 58
-          Height = 21
-          TabOrder = 17
-          Text = 'ComboBox6'
         end
         object GroupBox10: TGroupBox
           Left = 19
@@ -978,42 +864,24 @@ object MConfig: TMConfig
           Color = clWhite
           ParentBackground = False
           ParentColor = False
-          TabOrder = 18
+          TabOrder = 12
           object ComboBox2: TComboBox
-            Left = 6
-            Top = 3
+            Left = 9
+            Top = 6
             Width = 159
             Height = 21
             Enabled = False
             TabOrder = 0
             Text = 'ComboBox2'
           end
-          object RadioButton23: TRadioButton
-            Left = 3
-            Top = 30
-            Width = 54
-            Height = 17
-            Caption = 'Digital'
-            Enabled = False
-            TabOrder = 1
-          end
           object Button8: TButton
-            Left = 116
-            Top = 25
+            Left = 60
+            Top = 27
             Width = 52
             Height = 24
             Caption = 'Calibrate'
-            TabOrder = 2
+            TabOrder = 1
             OnClick = Button8Click
-          end
-          object RadioButton24: TRadioButton
-            Left = 58
-            Top = 30
-            Width = 52
-            Height = 17
-            Caption = 'Analog'
-            Enabled = False
-            TabOrder = 3
           end
         end
       end

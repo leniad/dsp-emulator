@@ -1,12 +1,9 @@
 unit kyugo_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      pal_engine,sound_engine,timer_engine;
-
 function iniciar_kyugo_hw:boolean;
-
 implementation
 const
         repulse_rom:array[0..2] of tipo_roms=(
@@ -53,14 +50,18 @@ const
         airwolf_prom:array[0..3] of tipo_roms=(
         (n:'01j.bin';l:$100;p:0;crc:$6a94b2a3),(n:'01h.bin';l:$100;p:$100;crc:$ec0923d3),
         (n:'01f.bin';l:$100;p:$200;crc:$ade97052),(n:'74s288-2.bin';l:$20;p:$300;crc:$190a55ad));
-
 var
   scroll_x:word;
   scroll_y,fg_color,bg_pal_bank:byte;
   nmi_enable:boolean;
   color_codes:array[0..$1f] of byte;
 
-procedure draw_sprites;inline;
+procedure update_video_kyugo_hw;
+var
+  f,nchar:word;
+  atrib,x,y,color:byte;
+
+procedure draw_sprites;
 var
   n,y:byte;
   offs,color,sx,sy,nchar,atrib:word;
@@ -80,10 +81,6 @@ for n:=0 to (12*2)-1 do begin
 end;
 end;
 
-procedure update_video_kyugo_hw;inline;
-var
-  f,nchar:word;
-  atrib,x,y,color:byte;
 begin
 for f:=0 to $7ff do begin
   //background
@@ -135,7 +132,6 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
 end;
 end;
-
 procedure kyugo_hw_principal;
 var
   frame_m,frame_s:single;
@@ -161,14 +157,12 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function kyugo_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$a7ff,$f000..$f7ff:kyugo_getbyte:=memoria[direccion];
 end;
 end;
-
 procedure kyugo_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -198,7 +192,6 @@ case direccion of
     $b800:scroll_y:=valor;
 end;
 end;
-
 procedure kyugo_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $7) of
@@ -208,7 +201,6 @@ begin
         else z80_1.change_halt(ASSERT_LINE);
   end;
 end;
-
 //Sound
 function snd_kyugo_hw_getbyte(direccion:word):byte;
 begin
@@ -220,7 +212,6 @@ case direccion of
    $c080:snd_kyugo_hw_getbyte:=marcade.in0;
 end;
 end;
-
 procedure snd_kyugo_hw_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -228,12 +219,10 @@ case direccion of
   $a000..$a7ff:memoria[direccion+$5000]:=valor;
 end;
 end;
-
 function snd_kyugo_inbyte(puerto:word):byte;
 begin
   if (puerto and $ff)=2 then snd_kyugo_inbyte:=ay8910_0.read;
 end;
-
 procedure snd_kyugo_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -243,28 +232,23 @@ case (puerto and $ff) of
   $41:ay8910_1.write(valor);
 end;
 end;
-
 function kyugo_porta_r:byte;
 begin
   kyugo_porta_r:=marcade.dswa;
 end;
-
 function kyugo_portb_r:byte;
 begin
   kyugo_portb_r:=marcade.dswb;
 end;
-
 procedure kyugo_snd_irq;
 begin
   z80_1.change_irq(HOLD_LINE);
 end;
-
 procedure kyugo_snd_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
 end;
-
 //SRD Mission
 function srdmission_getbyte(direccion:word):byte;
 begin
@@ -272,7 +256,6 @@ case direccion of
   0..$a7ff,$e000..$e7ff:srdmission_getbyte:=memoria[direccion];
 end;
 end;
-
 procedure srdmission_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -302,7 +285,6 @@ case direccion of
     $b800:scroll_y:=valor;
 end;
 end;
-
 function snd_srdmission_hw_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -313,7 +295,6 @@ case direccion of
    $f402:snd_srdmission_hw_getbyte:=marcade.in2;
 end;
 end;
-
 procedure snd_srdmission_hw_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -322,12 +303,10 @@ case direccion of
   $8800..$8fff:mem_snd[direccion]:=valor;
 end;
 end;
-
 function snd_srdmission_inbyte(puerto:word):byte;
 begin
   if (puerto and $ff)=$82 then snd_srdmission_inbyte:=ay8910_0.read;
 end;
-
 procedure snd_srdmission_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -337,7 +316,6 @@ case (puerto and $ff) of
   $85:ay8910_1.write(valor);
 end;
 end;
-
 //Main
 procedure reset_kyugo_hw;
 begin
@@ -356,7 +334,6 @@ begin
  nmi_enable:=false;
  z80_1.change_halt(ASSERT_LINE);
 end;
-
 function iniciar_kyugo_hw:boolean;
 var
   memoria_temp,memoria_temp2:array[0..$17fff] of byte;
@@ -516,5 +493,4 @@ set_pal(colores,$100);
 reset_kyugo_hw;
 iniciar_kyugo_hw:=true;
 end;
-
 end.

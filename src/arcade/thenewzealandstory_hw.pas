@@ -72,7 +72,7 @@ const
         (n:'b08-03.7a';l:$20000;p:$40000;crc:$274a795f),(n:'b08-04.4a';l:$20000;p:$60000;crc:$9754f703));
         arknoid2_pal:array[0..1] of tipo_roms=(
         (n:'b08-08.15f';l:$200;p:0;crc:$a4f7ebd9),(n:'b08-07.16f';l:$200;p:$200;crc:$ea34d9f7));}
-        CPU_SYNC=64;
+        CPU_SYNC=8;
 
 var
  main_bank,misc_bank,sound_latch:byte;
@@ -81,7 +81,7 @@ var
  //MCU
  input_select:byte;
 
-procedure update_video_tnzs;inline;
+procedure update_video_tnzs;
 begin
 if (seta_sprite0.bg_flag and $80)=0 then fill_full_screen(1,$1f0);
 seta_sprite0.draw_sprites;
@@ -195,7 +195,7 @@ begin
   end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:word;
   color:tcolor;

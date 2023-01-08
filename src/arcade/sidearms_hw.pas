@@ -71,7 +71,8 @@ draw_sprites_def($38,$800);
 draw_sprites_def($38,0);
 end;
 
-procedure draw_back;inline;
+procedure update_video_sidearms;
+procedure draw_back;
 var
   pos,offset,f,color,nchar:word;
   x,y,attr:byte;
@@ -88,8 +89,7 @@ for f:=0 to $3fff do begin
 end;
 back_redraw:=false;
 end;
-
-procedure draw_stars;inline;
+procedure draw_stars;
 var
   i,hadd_283,vadd_283,x,y:word;
   punt:array[0..511] of word;
@@ -117,8 +117,6 @@ for y:=0 to 255 do begin// 8-bit V-clock input
     putpixel(0+ADD_SPRITE,y+ADD_SPRITE,512,@punt,3);
   end;
 end;
-
-procedure update_video_sidearms;inline;
 var
   f,nchar:word;
   color,attr,x,y:byte;
@@ -221,7 +219,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
+procedure cambiar_color(numero:word);
 var
   color:tcolor;
   tmp_color:word;

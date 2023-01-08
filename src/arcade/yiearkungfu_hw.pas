@@ -36,7 +36,7 @@ var
  irq_ena,nmi_ena:boolean;
  sound_latch:byte;
 
-procedure update_video_yiear;inline;
+procedure update_video_yiear;
 var
   x,y:byte;
   f,nchar,atrib:word;

@@ -312,7 +312,7 @@ var
 begin
 tempw:=valor;
 if (numero<>0) then begin
-   cc.c:=(valor and (1 shl numero))<>0;
+   cc.c:=(valor and (1 shl (numero-1)))<>0;
    if numero<16 then tempw:=valor shr numero
       else tempw:=0;
    cc.n:=(tempw and $8000)<>0;
@@ -401,7 +401,7 @@ var
 begin
 tempw:=valor;
 if (numero<>0) then begin
-   cc.c:=(valor and (1 shl numero))<>0;
+   cc.c:=(valor and (1 shl (numero-1)))<>0;
    if numero<16 then tempw:=sshr(smallint(valor),numero)
       else if (smallint(valor)<0) then tempw:=$ffff
            else tempw:=0;

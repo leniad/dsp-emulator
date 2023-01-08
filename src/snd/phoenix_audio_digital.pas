@@ -94,7 +94,7 @@ begin
   phoenix_sound[1]:=nil;
 end;
 
-function update_c24(samplerate:integer):integer;inline;
+function update_c24(samplerate:integer):integer;
 var
 	n:integer;
   temp:extended;
@@ -136,7 +136,7 @@ begin
 	update_c24:=VMAX-c24_state.level;
 end;
 
-function update_c25(samplerate:integer):integer;inline;
+function update_c25(samplerate:integer):integer;
 var
 	n:integer;
   temp:extended;
@@ -177,7 +177,7 @@ begin
 	update_c25:=c25_state.level;
 end;
 
-function noise(samplerate:integer):integer;inline;
+function noise(samplerate:integer):integer;
 var
   vc24,vc25,sum,n:integer;
   level,frequency,temp:extended;

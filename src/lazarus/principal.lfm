@@ -1,16 +1,16 @@
 object principal1: Tprincipal1
   Left = 442
-  Height = 284
-  Top = 160
-  Width = 378
+  Height = 389
+  Top = 123
+  Width = 400
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   ActiveControl = Panel1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 259
-  ClientWidth = 378
+  ClientHeight = 364
+  ClientWidth = 400
   DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -21,16 +21,15 @@ object principal1: Tprincipal1
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
-  Position = poDesktopCenter
   LCLVersion = '2.2.4.0'
   object Panel1: TPanel
     Left = 0
     Height = 42
     Top = 0
-    Width = 378
+    Width = 400
     Align = alTop
     ClientHeight = 42
-    ClientWidth = 378
+    ClientWidth = 400
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -39,6 +38,7 @@ object principal1: Tprincipal1
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 0
+    OnClick = Panel1Click
     object BitBtn2: TBitBtn
       Left = 6
       Height = 40
@@ -1047,11 +1047,11 @@ object principal1: Tprincipal1
   object Panel5: TPanel
     Left = 0
     Height = 24
-    Top = 235
-    Width = 378
+    Top = 340
+    Width = 400
     Align = alBottom
     ClientHeight = 24
-    ClientWidth = 378
+    ClientWidth = 400
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -1061,7 +1061,7 @@ object principal1: Tprincipal1
     ParentFont = False
     TabOrder = 2
     object Image1: TImage
-      Left = 347
+      Left = 369
       Height = 24
       Top = 0
       Width = 31
@@ -1145,13 +1145,13 @@ object principal1: Tprincipal1
   end
   object Panel2: TPanel
     Left = 0
-    Height = 193
+    Height = 298
     Top = 42
-    Width = 352
+    Width = 374
     Align = alLeft
     Anchors = [akTop, akLeft, akRight]
-    ClientHeight = 193
-    ClientWidth = 352
+    ClientHeight = 298
+    ClientWidth = 374
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -1163,9 +1163,9 @@ object principal1: Tprincipal1
     Visible = False
     object Image2: TImage
       Left = 1
-      Height = 191
+      Height = 296
       Top = 1
-      Width = 350
+      Width = 372
       Align = alClient
       AutoSize = True
       Enabled = False
@@ -14339,6 +14339,10 @@ object principal1: Tprincipal1
             Caption = 'Mag Max'
             OnClick = CambiarMaquina
           end
+          object superduck1: TMenuItem
+            Caption = 'Super Duck'
+            OnClick = CambiarMaquina
+          end
         end
         object MenuItem11: TMenuItem
           Caption = '80x86'
@@ -14500,27 +14504,27 @@ object principal1: Tprincipal1
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    Left = 260
-    Top = 120
+    Left = 56
+    Top = 208
   end
   object Timer2: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer2Timer
-    Left = 300
-    Top = 120
+    Left = 104
+    Top = 208
   end
   object Timer4: TTimer
     Enabled = False
     OnTimer = Timer4Timer
-    Left = 380
-    Top = 120
+    Left = 200
+    Top = 208
   end
   object Timer3: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer3Timer
-    Left = 335
-    Top = 120
+    Left = 152
+    Top = 208
   end
 end

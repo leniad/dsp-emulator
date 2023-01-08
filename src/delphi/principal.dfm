@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 248
+  ClientHeight = 233
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 187
+    Height = 172
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 187
+    Height = 172
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 178
+    ExplicitHeight = 163
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 229
+    Top = 214
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 220
+    ExplicitTop = 205
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -3773,6 +3773,10 @@ object principal1: Tprincipal1
             Caption = 'Mag Max'
             OnClick = CambiarMaquina
           end
+          object SuperDuck1: TMenuItem
+            Caption = 'Super Duck'
+            OnClick = CambiarMaquina
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -3869,6 +3873,7 @@ object principal1: Tprincipal1
       end
       object Pausa1: TMenuItem
         Caption = 'Pausa'
+        OnClick = Pausa1Click
       end
     end
   end
@@ -4956,7 +4961,7 @@ object principal1: Tprincipal1
   end
   object Timer4: TTimer
     Enabled = False
-    Interval = 700
+    Interval = 300
     OnTimer = Timer4Timer
     Left = 232
     Top = 80

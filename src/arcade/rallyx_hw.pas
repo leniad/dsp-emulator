@@ -225,7 +225,7 @@ end;
 end;
 
 //Rally X
-procedure update_video_rallyx;inline;
+procedure update_video_rallyx;
 var
   pos,f,nchar,y,x,color:word;
   atrib:byte;

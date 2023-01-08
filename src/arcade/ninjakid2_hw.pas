@@ -172,7 +172,7 @@ end;
 scroll_x_y(2,3,scroll_x[0],scroll_y[0]);
 end;
 
-procedure put_gfx_sprite_upl(nchar:dword;color:word;flipx,flipy:boolean;pos_x,pos_y:word);inline;
+procedure put_gfx_sprite_upl(nchar:dword;color:word;flipx,flipy:boolean;pos_x,pos_y:word);
 var
   x,y:byte;
   pos_temp:dword;
@@ -288,7 +288,7 @@ repeat
 until num_sprites=96;
 end;
 
-procedure update_foreground;inline;
+procedure update_foreground;
 var
   f,nchar:word;
   x,y,atrib,color:byte;
@@ -412,7 +412,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -595,7 +595,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_robokid(pos:word);inline;
+procedure cambiar_color_robokid(pos:word);
 var
   tmp_color:byte;
   color:tcolor;

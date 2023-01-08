@@ -40,7 +40,7 @@ var
   weights_b:array[0..1] of single;
   ms_scanline:array[0..271] of word;
 
-procedure cambiar_color(pos:byte);inline;
+procedure cambiar_color(pos:byte);
 var
   valor,bit0,bit1,bit2:byte;
   color:tcolor;
@@ -63,7 +63,7 @@ begin
   set_pal_color(color,pos);
 end;
 
-procedure update_video_ms;inline;
+procedure update_video_ms;
 var
   f,nchar,color,x,y:word;
   atrib:byte;

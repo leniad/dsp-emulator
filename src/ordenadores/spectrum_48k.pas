@@ -2,8 +2,8 @@ unit spectrum_48k;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80_sp,misc_functions,graphics,controls_engine,dialogs,lenguaje,
-     sysutils,rom_engine,main_engine,gfx_engine,extctrls,pal_engine,
-     sound_engine,z80pio,file_engine;
+     sysutils,rom_engine,main_engine,gfx_engine,pal_engine,sound_engine,
+     z80pio,file_engine;
 
 var
     rom_cambiada_48:boolean=false;

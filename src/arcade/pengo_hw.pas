@@ -1,9 +1,12 @@
 unit pengo_hw;
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sega_decrypt;
+
 function iniciar_pengo:boolean;
+
 implementation
 const
         pengo_rom:array[0..7] of tipo_roms=(
@@ -30,7 +33,8 @@ var
  irq_enable:boolean;
  rom_opcode:array[0..$7fff] of byte;
  colortable_bank,gfx_bank,pal_bank:byte;
-procedure update_video_pengo;inline;
+
+procedure update_video_pengo;
 var
   x,y,f,color,nchar,offs:word;
   sx,sy,atrib:byte;
@@ -61,6 +65,7 @@ for f:=7 downto 0 do begin
 end;
 actualiza_trozo_final(0,0,224,288,2);
 end;
+
 procedure eventos_pengo;
 begin
 if event.arcade then begin
@@ -77,6 +82,7 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
 end;
 end;
+
 procedure pengo_principal;
 var
   frame:single;
@@ -97,6 +103,7 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 function pengo_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -109,6 +116,7 @@ case direccion of
    $90c0..$90ff:pengo_getbyte:=marcade.in0;
 end;
 end;
+
 procedure pengo_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -137,10 +145,12 @@ case direccion of
    $9070:; //watchdog
 end;
 end;
+
 procedure pengo_sound_update;
 begin
   namco_snd_0.update;
 end;
+
 //Main
 procedure reset_pengo;
 begin
@@ -154,6 +164,7 @@ begin
  pal_bank:=0;
  colortable_bank:=0;
 end;
+
 function iniciar_pengo:boolean;
 var
   colores:tpaleta;
@@ -239,4 +250,5 @@ marcade.dswb_val:=@pengo_dip_b;
 reset_pengo;
 iniciar_pengo:=true;
 end;
+
 end.

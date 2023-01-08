@@ -34,7 +34,7 @@ var
  video_control,mcu_port_p,mcu_port_o:byte;
  mcu_port_r:array[0..3] of byte;
 
-procedure update_video_arabian;inline;
+procedure update_video_arabian;
 var
   x,y:byte;
   punt:array[0..$ffff] of word;
@@ -101,7 +101,8 @@ case direccion of
 end;
 end;
 
-procedure video_ram_w(pos:word;valor:byte);inline;
+procedure arabian_putbyte(direccion:word;valor:byte);
+procedure video_ram_w(pos:word;valor:byte);
 var
   x,y:byte;
   base:word;
@@ -140,7 +141,7 @@ begin
 	end;
 end;
 
-procedure blit_area(plane:byte;src:word;x,y,sx,sy:byte);inline;
+procedure blit_area(plane:byte;src:word;x,y,sx,sy:byte);
 var
   srcdata,base:word;
   i,j,p1,p2,p3,p4:byte;
@@ -178,7 +179,6 @@ begin
 	end; //for i
 end;
 
-procedure arabian_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$7fff:; //ROM
@@ -303,7 +303,7 @@ begin
  marcade.in3:=0;
 end;
 
-procedure create_palette;inline;
+procedure create_palette;
 var
   colores:tpaleta;
   i:word;

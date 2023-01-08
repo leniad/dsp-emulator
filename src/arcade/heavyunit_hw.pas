@@ -12,7 +12,7 @@ const
         hvyunit_cpu1:tipo_roms=(n:'b73_10.5c';l:$20000;p:0;crc:$ca52210f);
         hvyunit_cpu2:tipo_roms=(n:'b73_11.5p';l:$10000;p:0;crc:$cb451695);
         hvyunit_sound:tipo_roms=(n:'b73_12.7e';l:$10000;p:0;crc:$d1d24fab);
-        hvyunit_memaid:tipo_roms=(n:'mermaid.bin';l:$e00;p:0;crc:$88c5dd27);
+        hvyunit_mermaid:tipo_roms=(n:'mermaid.bin';l:$e00;p:0;crc:$88c5dd27);
         hvyunit_gfx0:array[0..7] of tipo_roms=(
         (n:'b73_08.2f';l:$80000;p:0;crc:$f83dd808),(n:'b73_07.2c';l:$10000;p:$100000;crc:$5cffa42c),
         (n:'b73_06.2b';l:$10000;p:$120000;crc:$a98e4aea),(n:'b73_01.1b';l:$10000;p:$140000;crc:$3a8a4489),
@@ -43,7 +43,7 @@ var
  slavelatch_data,mermaidlatch_data:boolean;
  mermaid_p:array[0..3] of byte;
 
-procedure update_video_hvyunit;inline;
+procedure update_video_hvyunit;
 var
   f,nchar:word;
   color,x,y,atrib:byte;
@@ -162,20 +162,6 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
-var
-  tmp_color:byte;
-  color:tcolor;
-begin
-  tmp_color:=buffer_paleta[dir];
-  color.r:=pal4bit(tmp_color);
-  tmp_color:=buffer_paleta[dir+$200];
-  color.g:=pal4bit(tmp_color shr 4);
-  color.b:=pal4bit(tmp_color);
-  set_pal_color(color,dir);
-  if dir<$100 then buffer_color[dir shr 4]:=true;
-end;
-
 function hvyunit_misc_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -191,6 +177,21 @@ end;
 end;
 
 procedure hvyunit_misc_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:word);
+var
+  tmp_color:byte;
+  color:tcolor;
+begin
+  tmp_color:=buffer_paleta[dir];
+  color.r:=pal4bit(tmp_color);
+  tmp_color:=buffer_paleta[dir+$200];
+  color.g:=pal4bit(tmp_color shr 4);
+  color.b:=pal4bit(tmp_color);
+  set_pal_color(color,dir);
+  if dir<$100 then buffer_color[dir shr 4]:=true;
+end;
+
 begin
 case direccion of
   0..$bfff:;
@@ -429,7 +430,7 @@ for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
 if not(roms_load(@memoria_temp,hvyunit_sound)) then exit;
 for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
 //cargar mermaid
-if not(roms_load(mcs51_0.get_rom_addr,hvyunit_memaid)) then exit;
+if not(roms_load(mcs51_0.get_rom_addr,hvyunit_mermaid)) then exit;
 //convertir chars
 getmem(ptemp,$200000);
 if not(roms_load(ptemp,hvyunit_gfx0)) then exit;

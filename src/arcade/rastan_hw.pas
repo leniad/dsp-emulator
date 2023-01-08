@@ -140,7 +140,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure rastan_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -151,7 +153,6 @@ begin
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
 
-procedure rastan_putword(direccion:dword;valor:word);
 begin
 case direccion of
       0..$5ffff:; //ROM

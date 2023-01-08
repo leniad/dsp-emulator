@@ -607,8 +607,6 @@ if not(port2_written) then exit;
 end;
 
 procedure cpu_m6800.m6803_internal_reg_w(direccion:word;valor:byte);
-var
-  tempw:word;
 begin
 self.internal_ram[direccion]:=valor;
 case direccion of

@@ -51,7 +51,7 @@ var
   ddr_a,ddr_b,ddr_c,from_main,from_mcu:byte;
   main_sent,mcu_sent:boolean;
 
-procedure update_video_renegade;inline;
+procedure update_video_renegade;
 var
   f,nchar,x,y:word;
   color,atrib:byte;
@@ -193,7 +193,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:byte);inline;
+procedure putbyte_renegade(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:byte);
 var
   tmp_color:byte;
   color:tcolor;
@@ -210,7 +212,6 @@ begin
   end;
 end;
 
-procedure putbyte_renegade(direccion:word;valor:byte);
 begin
 case direccion of
   0..$17ff:memoria[direccion]:=valor;

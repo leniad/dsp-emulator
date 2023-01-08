@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295;
 
-procedure cargar_blockout;
+function iniciar_blockout:boolean;
 
 implementation
 const
@@ -74,7 +74,7 @@ actualiza_trozo(0,0,320,256,2,0,0,320,256,3);
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
-procedure eventos_blockout;inline;
+procedure eventos_blockout;
 begin
 if event.arcade then begin
   //p1
@@ -151,7 +151,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure blockout_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(pos,data:word);
 var
   bit0,bit1,bit2,bit3:byte;
   color:tcolor;
@@ -178,7 +180,6 @@ begin
   fillchar(video_ram_buff,$20000,1);
 end;
 
-procedure blockout_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:; //ROM
@@ -256,6 +257,8 @@ end;
 
 function iniciar_blockout:boolean;
 begin
+llamadas_maquina.bucle_general:=blockout_principal;
+llamadas_maquina.reset:=reset_blockout;
 iniciar_blockout:=false;
 iniciar_audio(false);
 //Pantallas
@@ -287,13 +290,6 @@ marcade.dswb_val:=@blockout_dipb;
 //final
 reset_blockout;
 iniciar_blockout:=true;
-end;
-
-procedure Cargar_blockout;
-begin
-llamadas_maquina.iniciar:=iniciar_blockout;
-llamadas_maquina.bucle_general:=blockout_principal;
-llamadas_maquina.reset:=reset_blockout;
 end;
 
 end.

@@ -160,7 +160,9 @@ case direccion of
     end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure aliens_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -173,7 +175,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure aliens_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$3ff:begin

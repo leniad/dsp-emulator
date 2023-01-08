@@ -35,6 +35,10 @@ var
  analog_data:array[0..7] of byte;
  analog_select:byte;
 
+procedure update_video_foodf;
+var
+  f,color,x,y,nchar,atrib:word;
+
 procedure draw_sprites(prio:byte);
 var
   color,atrib,atrib2:word;
@@ -55,9 +59,6 @@ for f:=$10 to $3f do begin
 end;
 end;
 
-procedure update_video_foodf;
-var
-  f,color,x,y,nchar,atrib:word;
 begin
 for f:=$0 to $3ff do begin
    atrib:=bg_ram[f];
@@ -140,7 +141,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure foodf_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
   bit0,bit1,bit2:byte;
@@ -163,7 +166,6 @@ begin
     if pos<64 then buffer_color[pos]:=true;
 end;
 
-procedure foodf_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3fffff:case (direccion and $1ffff) of

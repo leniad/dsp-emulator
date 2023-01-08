@@ -169,7 +169,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_tmnt(pos:word);inline;
+procedure tmnt_putword(direccion:dword;valor:word);
+
+procedure cambiar_color_tmnt(pos:word);
 var
   color:tcolor;
   data:word;
@@ -182,16 +184,15 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure tmnt_putword(direccion:dword;valor:word);
 begin
-if direccion<$60000 then exit;
 case direccion of
-    $060000..$063fff:ram[(direccion and $3fff) shr 1]:=valor;
-    $080000..$080fff:if buffer_paleta[(direccion and $fff) shr 1]<>(valor and $ff) then begin
+    0..$5ffff:;
+    $60000..$63fff:ram[(direccion and $3fff) shr 1]:=valor;
+    $80000..$80fff:if buffer_paleta[(direccion and $fff) shr 1]<>(valor and $ff) then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor and $ff;
                         cambiar_color_tmnt((direccion and $fff) shr 1);
                    end;
-    $0a0000:begin
+    $a0000:begin
               if ((last_snd=8) and ((valor and 8)=0)) then z80_0.change_irq(HOLD_LINE);
               last_snd:=valor and 8;
 		          // bit 5 = irq enable
@@ -200,8 +201,8 @@ case direccion of
 		          if (valor and $80)<>0 then k052109_0.rmrd_line:=ASSERT_LINE
                 else k052109_0.rmrd_line:=CLEAR_LINE;
             end;
-    $0a0008:sound_latch:=valor and $ff;
-    $0c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
+    $a0008:sound_latch:=valor and $ff;
+    $c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
                         if m68000_0.access_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
@@ -426,7 +427,9 @@ begin
 	end;
 end;
 
-procedure cambiar_color_ssriders(pos,valor:word);inline;
+procedure ssriders_putword(direccion:dword;valor:word);
+
+procedure cambiar_color_ssriders(pos,valor:word);
 var
   color:tcolor;
 begin
@@ -437,10 +440,9 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure ssriders_putword(direccion:dword;valor:word);
 begin
-if direccion<$c0000 then exit;
 case direccion of
+    0..$bffff:;
     $104000..$107fff:ram[(direccion and $3fff) shr 1]:=valor;
     $140000..$140fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor;

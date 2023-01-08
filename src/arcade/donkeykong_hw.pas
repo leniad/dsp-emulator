@@ -90,7 +90,7 @@ var
  tune01,tune08,tune09,tune11:byte;
  effect0,effect1,effect2:byte;
 
-procedure update_video_dkong;inline;
+procedure update_video_dkong;
 var
   f,color,nchar:word;
   x,y,atrib,atrib2:byte;

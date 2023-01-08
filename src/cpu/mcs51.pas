@@ -187,12 +187,12 @@ begin
   get_rom_addr:=@self.rom[0];
 end;
 
-function get_bit(r,n:byte):byte;inline;
+function get_bit(r,n:byte):byte;
 begin
   get_bit:=(r shr n) and 1;
 end;
 
-function set_bit(r,n,v:byte):byte;inline;
+function set_bit(r,n,v:byte):byte;
 begin
  set_bit:=(r and not(1 shl n)) or (v shl n);
 end;

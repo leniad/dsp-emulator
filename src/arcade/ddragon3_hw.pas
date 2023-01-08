@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295,qsnapshot;
 
-procedure cargar_ddragon3;
+function iniciar_ddragon3:boolean;
 
 implementation
 const
@@ -73,7 +73,7 @@ var
  fg_ram,ram2:array[0..$7ff] of word;
  sound_latch,vblank:byte;
 
-procedure draw_sprites;inline;
+procedure draw_sprites;
 var
   atrib,nchar,color,x,y,count:word;
   f,h:byte;
@@ -110,7 +110,7 @@ for f:=0 to $ff do begin
 	end; //del for
 end;
 
-procedure draw_video;inline;
+procedure draw_video;
 var
   f,x,y,nchar,atrib:word;
   color:byte;
@@ -139,7 +139,7 @@ fill_full_screen(3,$600);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure update_video_ddragon3;inline;
+procedure update_video_ddragon3;
 begin
 draw_video;
 case (vreg and $60) of
@@ -162,7 +162,7 @@ end;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
-procedure update_video_ctribe;inline;
+procedure update_video_ctribe;
 begin
 draw_video;
 if (vreg and $8)<>0 then begin
@@ -307,7 +307,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
 begin
@@ -393,7 +393,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_ctribe(pos,data:word);inline;
+procedure cambiar_color_ctribe(pos,data:word);
 var
   color:tcolor;
 begin
@@ -594,6 +594,11 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=ddragon3_principal;
+llamadas_maquina.reset:=reset_ddragon3;
+llamadas_maquina.fps_max:=57.444853;
+llamadas_maquina.load_qsnap:=ddragon3_qload;
+llamadas_maquina.save_qsnap:=ddragon3_qsave;
 iniciar_ddragon3:=false;
 iniciar_audio(false);
 //Pantallas
@@ -678,16 +683,6 @@ end;
 freemem(memoria_temp);
 reset_ddragon3;
 iniciar_ddragon3:=true;
-end;
-
-procedure Cargar_ddragon3;
-begin
-llamadas_maquina.iniciar:=iniciar_ddragon3;
-llamadas_maquina.bucle_general:=ddragon3_principal;
-llamadas_maquina.reset:=reset_ddragon3;
-llamadas_maquina.fps_max:=57.444853;
-llamadas_maquina.load_qsnap:=ddragon3_qload;
-llamadas_maquina.save_qsnap:=ddragon3_qsave;
 end;
 
 end.

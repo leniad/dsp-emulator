@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.21WIP4.2';
+        DSP_VERSION='0.21WIP5';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -27,6 +27,13 @@ const
         ALREADY_RESET=4;
         IRQ_DELAY=5;
         INPUT_LINE_NMI=$20;
+        {$ifdef fpc}
+        {$ifdef windows}
+        FORM_POS_LAZARUS=0;
+        {$else}
+        FORM_POS_LAZARUS=20;
+        {$endif}
+        {$endif}
 
 type
         TMain_vars=record
@@ -226,11 +233,11 @@ procedure uses_sdl_window;
 begin
 case main_vars.tipo_maquina of
      0..9,1000..1008,2000..2002,3000:begin
-             fix_screen_pos(400,120);
+             fix_screen_pos(400,100);
              principal1.Panel2.width:=400;
              principal1.Panel2.height:=55;
           end;
-     else fix_screen_pos(350,70);
+     else fix_screen_pos(400,70);
 end;
 end;
 
@@ -275,6 +282,7 @@ principal1.image2.visible:=false;
 //pongo el nombre de la maquina...
 change_caption('');
 SDL_SetWindowSize(window_render,x,y);
+SDL_SetWindowPosition(window_render,principal1.left,principal1.Height+principal1.panel1.Height+principal1.statusbar1.Height+125);
 if main_vars.center_screen then begin
   principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
   principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
@@ -352,7 +360,6 @@ for f:=1 to MAX_PANT_VISIBLE do
     //Y si son transparentes las creo
     if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,SET_TRANS_COLOR);
 end;
-sdl_showcursor(0);
 end;
 
 //funciones de creacion de pantallas de video
@@ -401,12 +408,12 @@ if not(main_screen.pantalla_completa) then begin
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
-  //window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,640,480,0);
   main_screen.pantalla_completa:=true;
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
+  window_render:=nil;
   {$ifndef fpc}
   if child<>nil then child.Free;
   Child:=TfrChild.Create(application);
@@ -414,10 +421,10 @@ end else begin
   child.Top:=0;
   handle_:=child.Handle;
   window_render:=SDL_CreateWindowFrom(pointer(handle_));
-  {$else}
-  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,0);
-  {$endif}
   cambiar_video;
+  {$else}
+  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x*mul_video,p_final[0].y*mul_video,0);
+  {$endif}
   main_screen.pantalla_completa:=false;
 end;
 pantalla[0]:=SDL_GetWindowSurface(window_render);
@@ -444,7 +451,7 @@ punbuf:=nil;
 punbuf_alpha:=nil;
 end;
 
-procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
+procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 var
   origen:libsdl_rect;
   y,x:word;
@@ -480,7 +487,7 @@ end else begin
 end;
 end;
 
-procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);inline;
+procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
 var
   origen,destino:libsdl_rect;
 begin
@@ -499,7 +506,7 @@ end;
 SDL_UpperBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
 end;
 
-procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
+procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 var
   origen,destino:libsdl_rect;
   y,x:word;
@@ -810,7 +817,7 @@ cont_sincroniza:=sdl_getticks();
 end;
 
 {$ifndef windows}
-procedure copymemory(dest,source:pointer;size:integer);inline;
+procedure copymemory(dest,source:pointer;size:integer);
 begin
 move(source^,dest^,size);
 end;

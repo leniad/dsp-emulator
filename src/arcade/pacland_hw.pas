@@ -32,7 +32,7 @@ var
  scroll_x1,scroll_x2:word;
  irq_enable,irq_enable_mcu:boolean;
 
-procedure cambiar_paleta;inline;
+procedure cambiar_paleta;
 var
   colores:tpaleta;
   f,bit0,bit1,bit2,bit3,tmp:byte;
@@ -59,7 +59,9 @@ end;
 set_pal(colores,$100);
 end;
 
-procedure put_sprite_pacland(nchar,color:word;flipx,flipy:boolean;pri:byte);inline;
+procedure update_video_pacland;
+
+procedure put_sprite_pacland(nchar,color:word;flipx,flipy:boolean;pri:byte);
 var
   x,y,punto:byte;
   temp:pword;
@@ -110,7 +112,7 @@ end else begin
 end;
 end;
 
-procedure draw_sprites(pri:byte);inline;
+procedure draw_sprites(pri:byte);
 const
   gfx_offs:array[0..1,0..1] of byte=((0,1),(2,3));
 var
@@ -181,7 +183,6 @@ for y:=0 to (cant_y-1) do begin
 end;
 end;
 
-procedure update_video_pacland;inline;
 var
   f,color,nchar:word;
   x,y,atrib:byte;

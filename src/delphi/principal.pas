@@ -501,6 +501,7 @@ type
     SRDMission1: TMenuItem;
     Airwolf1: TMenuItem;
     Ambush1: TMenuItem;
+    SuperDuck1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -526,6 +527,7 @@ type
     procedure LstRomsClick(Sender: TObject);
     procedure Timer4Timer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
+    procedure Pausa1Click(Sender: TObject);
   private
     { Private declarations }
     procedure WndProc(var Message:TMessage); override;
@@ -638,8 +640,14 @@ var
   tipo:word;
 begin
 timer2.Enabled:=false;
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
-  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE)<0) then begin
+    MessageDlg('SDL2 library can not be initialized.', mtError,[mbOk], 0);
+    halt(0);
+  end;
+  SDL_SetHint('SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS','1');
+  controls_start;
+end;
 Child:=TfrChild.Create(application);
 child.Width:=1;
 child.Height:=1;
@@ -684,7 +692,6 @@ end else begin
   timers.autofire_init;
   QueryPerformanceFrequency(cont_micro);
   valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
-  EmuStatus:=EsRuning;
   QueryPerformanceCounter(cont_sincroniza);
   principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
@@ -780,6 +787,13 @@ while FLoadRom.Showing do application.ProcessMessages;
 timer4.Enabled:=true;
 end;
 
+procedure Tprincipal1.Pausa1Click(Sender: TObject);
+begin
+timer1.Enabled:=false;
+EmuStatus:=EsPause;
+principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
+end;
+
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 timer1.Enabled:=false;
@@ -788,8 +802,7 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
-if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
-if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
+close_joystick;
 SDL_DestroyWindow(window_render);
 SDL_VideoQuit;
 SDL_Quit;

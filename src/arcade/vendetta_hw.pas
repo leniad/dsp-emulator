@@ -176,7 +176,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure vendetta_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -189,7 +191,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure vendetta_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$1fff,$8000..$ffff:; //ROM

@@ -53,6 +53,7 @@ var
  read_crt:function(direccion:word):word;
  write_crt:procedure(direccion,valor:word);
 
+procedure update_video_bloodbros;
 procedure draw_sprites(prio:byte);
 var
   f,color,nchar,x,y,atrib:word;
@@ -98,8 +99,6 @@ for f:=$1ff downto 0 do begin
     actualiza_gfx_sprite_size(x,y,4,16*(width+1),16*(height+1));
 end;
 end;
-
-procedure update_video_bloodbros;
 var
   f,nchar,atrib:word;
   color,x,y:byte;
@@ -237,7 +236,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin

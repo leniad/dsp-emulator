@@ -31,7 +31,7 @@ var
  adpcm_b,adpcm_c:array[0..5] of byte;
  adpcm_pos,adpcm_end,adpcm_data:array[0..1] of dword;
 
-procedure update_video_opwolf;inline;
+procedure update_video_opwolf;
 var
   f,x,y,nchar,atrib,color:word;
   flipx,flipy:boolean;
@@ -141,7 +141,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure opwolf_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -152,10 +154,9 @@ begin
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
 
-procedure opwolf_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
+      0..$3ffff:;
       $0ff000..$0ff7ff:opwolf_cchip_data_w(direccion and $7ff,valor);
 	    $0ff802:opwolf_cchip_status_w(valor);
 	    $0ffc00:opwolf_cchip_bank_w(valor);

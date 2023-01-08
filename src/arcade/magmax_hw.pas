@@ -53,7 +53,8 @@ var
  rom18B:array[0..$ffff] of byte;
  redraw_bg:boolean;
 
-procedure draw_background;inline;
+procedure update_video_magmax;
+procedure draw_background;
 var
   prom_data,pen_base,scroll_h,map_v_scr_100,rom18D_addr,rom15F_addr,map_v_scr_1fe_6,LS283:word;
   scroll_v,f,h,graph_color,graph_data:byte;
@@ -94,8 +95,6 @@ begin
 end;
 redraw_bg:=false;
 end;
-
-procedure update_video_magmax;inline;
 var
   f,x,nchar:word;
   color,y,atrib:byte;

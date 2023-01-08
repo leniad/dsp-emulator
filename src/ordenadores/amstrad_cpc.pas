@@ -552,7 +552,7 @@ begin
 end;
 
 //PPI 8255
-procedure update_ay;inline;
+procedure update_ay;
 begin
 case cpc_ppi.ay_control of
   0:cpc_ppi.port_a_read_latch:=$ff;

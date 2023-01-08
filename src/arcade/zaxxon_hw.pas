@@ -76,7 +76,7 @@ var
  coin_press:array[0..1] of boolean;
  coin_enable:array[0..2] of boolean;
 
-function find_minimum_y(value:byte):byte;inline;
+function find_minimum_y(value:byte):byte;
 var
   y:byte;
   sum:word;
@@ -347,7 +347,7 @@ begin
 end;
 
 //Zaxxon
-procedure update_video_zaxxon;inline;
+procedure update_video_zaxxon;
 var
   f,color,nchar:word;
   x,y,srcx,srcy:word;

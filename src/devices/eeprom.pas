@@ -103,7 +103,7 @@ locked:=false;
 reset_counter:=0;
 end;
 
-function command_match(buf:pchar;cmd:pchar;len:integer):boolean;inline;
+function command_match(buf:pchar;cmd:pchar;len:integer):boolean;
 var
   b,c:char;
 begin

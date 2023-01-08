@@ -39,7 +39,7 @@ var
  banco_pal,video_line,sound_latch,sound_trq:byte;
  irq_ena:boolean;
 
-procedure update_video_mikie;inline;
+procedure update_video_mikie;
 var
   x,y,atrib:byte;
   f,color,nchar:word;

@@ -35,7 +35,7 @@ var
  haz_nmi:boolean;
  gfx_bank,palette_bank,scroll_y,death_val,skid_val:byte;
 
-procedure update_video_mario;inline;
+procedure update_video_mario;
 var
   atrib:byte;
   f,x,y,color,nchar:word;
@@ -145,7 +145,7 @@ case direccion of
               12:start_sample(16); //tune bonus perfecto
               13:start_sample(17); //lanzar el ultimo bicho
               14:start_sample(18); //tune en bonus
-              15:start_sample(19); //tune coin cojido en bonus
+              15:start_sample(19); //tune coin cogido en bonus
             end;
             case (valor shr 4) of
               1:start_sample(20);

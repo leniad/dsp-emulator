@@ -36,6 +36,7 @@ var
  ssio_data:array[0..3] of byte;
  ssio_14024_count:byte;
 
+procedure update_video_tapper;
 procedure put_sprite_mcr(pri:byte);
 var
   prioridad,f,color,atrib,x,y,pos_y:byte;
@@ -86,8 +87,6 @@ for f:=0 to $7f do begin
   actualiza_gfx_sprite(sx,sy,2,1);
 end;
 end;
-
-procedure update_video_tapper;
 var
   x,y,h,atrib2:byte;
   atrib,f,nchar,color:word;
@@ -122,7 +121,7 @@ actualiza_trozo_final(0,0,512,480,2);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_tapper;inline;
+procedure eventos_tapper;
 begin
 if event.arcade then begin
   //ip0
@@ -189,7 +188,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos:byte;tmp_color:word);inline;
+procedure cambiar_color(pos:byte;tmp_color:word);
 var
   color:tcolor;
 begin

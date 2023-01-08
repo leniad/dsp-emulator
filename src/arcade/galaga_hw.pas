@@ -150,7 +150,7 @@ for f:=0 to $3f do begin
 end;
 end;
 
-procedure update_stars;inline;
+procedure update_stars;
 const
   speeds:array[0..7] of integer=(-1,-2,-3,0,3,2,1,0);
 var
@@ -162,7 +162,7 @@ begin
 	scrolly_bg:=scrolly_bg+speeds[s0+s1*2+s2*4];
 end;
 
-procedure draw_stars;inline;
+procedure draw_stars;
 var
   star_cntr,set_a,set_b:byte;
   x,y,color:word;
@@ -182,7 +182,7 @@ if (galaga_starcontrol[5] and 1)=1 then begin
 end;
 end;
 
-procedure update_video_galaga;inline;
+procedure update_video_galaga;
 var
   color,nchar,pos:word;
   sx,sy,x,y:byte;
@@ -267,7 +267,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure galaga_latch(dir,val:byte);inline;
+procedure galaga_latch(dir,val:byte);
 var
   bit:byte;
 begin
@@ -354,7 +354,7 @@ begin
   namco_53xx_k_r:=custom_mod shl 1;
 end;
 
-procedure draw_sprites_digdug;inline;
+procedure draw_sprites_digdug;
 var
   nchar,f,atrib,a,b,c,d,flipx_v,flipy_v:byte;
   color,x:word;
@@ -390,7 +390,7 @@ for f:=0 to $3f do begin
 end;
 end;
 
-procedure update_video_digdug;inline;
+procedure update_video_digdug;
 var
   color,nchar,pos:word;
   sx,sy,x,y:byte;
@@ -717,7 +717,7 @@ if (direccion and 1)<>0 then // return BB1
 else begin // return BB0
   dat2:=xevious_tiles[$3000+adr_2c];
   // swap bit 6 & 7
-  dat2:= BITSWAP8(dat2,6,7,5,4,3,2,1,0);
+  dat2:=BITSWAP8(dat2,6,7,5,4,3,2,1,0);
   // flip x & y
   if (dat1 and $400)<>0 then dat2:=dat2 xor $40;
   if (dat1 and $200)<>0 then dat2:=dat2 xor $80;

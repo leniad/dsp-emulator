@@ -44,7 +44,8 @@ var
  scroll_x:word;
  irq_enable,irq_enable_mcu,screen_flip:boolean;
 
-procedure draw_sprites;inline;
+procedure update_video_skykid;
+procedure draw_sprites;
 var
   nchar,color,x:word;
   f,flipx_v,flipy_v,atrib,y,size,a,b,c,d,mix:byte;
@@ -107,7 +108,6 @@ begin
 	end;
 end;
 
-procedure update_video_skykid;inline;
 var
   f,color,nchar,offs:word;
   x,y,sx,sy,atrib:byte;
@@ -147,7 +147,7 @@ end;
 actualiza_trozo_final(0,0,288,224,3);
 end;
 
-procedure eventos_skykid;inline;
+procedure eventos_skykid;
 begin
 if event.arcade then begin
   //P1

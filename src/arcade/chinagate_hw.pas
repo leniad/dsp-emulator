@@ -40,7 +40,8 @@ var
  scroll_x,scroll_y:word;
  chinagate_scanline:array[0..271] of word;
 
-procedure draw_sprites;inline;
+procedure update_video_chinagate;
+procedure draw_sprites;
 var
   size,x,y,nchar:word;
   color,f,atrib:byte;
@@ -83,8 +84,6 @@ begin
 		end;  //visible
 	end;  //for
 end;
-
-procedure update_video_chinagate;
 var
   x,y,color,f,nchar,pos:word;
   atrib:byte;
@@ -117,7 +116,7 @@ actualiza_trozo_final(0,8,256,240,3);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_chinagate;inline;
+procedure eventos_chinagate;
 begin
 if event.arcade then begin
   //p1

@@ -36,7 +36,8 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
-  mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,ambush_hw;
+  mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
+  ambush_hw,superduck_hw;
 
 type
   tgame_desc=record
@@ -64,7 +65,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=346;
+  GAMES_CONT=347;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -401,6 +402,7 @@ const
   (name:'S.R.D. Mission';year:'1986';snd:1;hi:false;zip:'srdmissn';grid:330;company:'Kyugo/Sega';rom:@srdmission;tipo:ARCADE or SHOT),
   (name:'Airwolf';year:'1987';snd:1;hi:false;zip:'airwolf';grid:331;company:'Kyugo';rom:@airwolf;tipo:ARCADE or SHOT),
   (name:'Ambush';year:'1983';snd:1;hi:false;zip:'ambush';grid:332;company:'Tecfri';rom:@ambush;tipo:ARCADE or SHOT),
+  (name:'Super Duck';year:'1992';snd:1;hi:false;zip:'supduck';grid:333;company:'Comad';rom:@superduck;tipo:ARCADE or MAZE),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -765,6 +767,7 @@ case numero of
   330:principal1.CambiarMaquina(principal1.SRDMission1);
   331:principal1.CambiarMaquina(principal1.airwolf1);
   332:principal1.CambiarMaquina(principal1.ambush1);
+  333:principal1.CambiarMaquina(principal1.superduck1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1117,6 +1120,7 @@ principal1.magmax1.checked:=false;
 principal1.SRDMission1.Checked:=false;
 principal1.airwolf1.Checked:=false;
 principal1.ambush1.Checked:=false;
+principal1.superduck1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1281,7 +1285,7 @@ case tmaquina of
   92,96,247:llamadas_maquina.iniciar:=iniciar_ddragon;
   93:llamadas_maquina.iniciar:=iniciar_mrdo;
   94,95:llamadas_maquina.iniciar:=iniciar_epos_hw;
-  98,99:Cargar_sf_hw;
+  98,99:llamadas_maquina.iniciar:=iniciar_sf_hw;
   100:llamadas_maquina.iniciar:=iniciar_lk_hw;
   102:llamadas_maquina.iniciar:=iniciar_cabal;
   103,104,105,106,107,108,109,110,111,112,113:llamadas_maquina.iniciar:=iniciar_cps1;
@@ -1310,7 +1314,7 @@ case tmaquina of
   160:Cargar_funkyjet;
   159,161:Cargar_supbtime;
   162,163:llamadas_maquina.iniciar:=iniciar_cninja;
-  164:Cargar_Dietgo;
+  164:llamadas_maquina.iniciar:=iniciar_dietgo;
   165:llamadas_maquina.iniciar:=iniciar_actfancer;
   166:llamadas_maquina.iniciar:=iniciar_arabian;
   170:llamadas_maquina.iniciar:=iniciar_higemaru;
@@ -1325,11 +1329,11 @@ case tmaquina of
   184:llamadas_maquina.iniciar:=iniciar_outrun;
   185,189:Cargar_Taitosj;
   195:llamadas_maquina.iniciar:=iniciar_vulgus;
-  196,232:Cargar_ddragon3;
-  197:Cargar_blockout;
+  196,232:llamadas_maquina.iniciar:=iniciar_ddragon3;
+  197:llamadas_maquina.iniciar:=iniciar_blockout;
   199:llamadas_maquina.iniciar:=iniciar_foodf;
   204,205,260,261:llamadas_maquina.iniciar:=iniciar_nemesis;
-  206,207:Cargar_pirates;
+  206,207:llamadas_maquina.iniciar:=iniciar_pirates;
   208:llamadas_maquina.iniciar:=iniciar_junofrst;
   209:Cargar_gyruss;
   210:Cargar_boogwing;
@@ -1345,7 +1349,7 @@ case tmaquina of
   222,223,224:Cargar_thunderx;
   225:llamadas_maquina.iniciar:=iniciar_simpsons;
   226:cargar_trackfield;
-  227:cargar_hypersports;
+  227:llamadas_maquina.iniciar:=iniciar_hypersports;
   228:Cargar_megazone;
   229:Cargar_spacefb;
   230:llamadas_maquina.iniciar:=iniciar_ajax;
@@ -1364,7 +1368,7 @@ case tmaquina of
   266,267:llamadas_maquina.iniciar:=iniciar_galivan;
   268,269,270:llamadas_maquina.iniciar:=iniciar_lastduel;
   275,276,277,278:llamadas_maquina.iniciar:=iniciar_armedf;
-  280:cargar_firetrap;
+  280:llamadas_maquina.iniciar:=iniciar_firetrap;
   281,282:cargar_puzz3x3;
   283,284:cargar_k31945;
   285,286:llamadas_maquina.iniciar:=iniciar_bloodbros;
@@ -1384,6 +1388,7 @@ case tmaquina of
   328:llamadas_maquina.iniciar:=iniciar_chinagate;
   329:llamadas_maquina.iniciar:=iniciar_magmax;
   332:llamadas_maquina.iniciar:=iniciar_ambush;
+  333:llamadas_maquina.iniciar:=iniciar_superduck;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2736,6 +2741,10 @@ end;
 if sender=principal1.ambush1 then begin
   tipo:=332;
   principal1.ambush1.Checked:=true;
+end;
+if sender=principal1.superduck1 then begin
+  tipo:=333;
+  principal1.superduck1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

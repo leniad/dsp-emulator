@@ -113,7 +113,7 @@ var
  //MCU
  cpu_to_mcu,mcu_p0,audiocpu_to_mcu,mcu_p2,mcu_p3,mcu_to_cpu,mcu_to_audiocpu:byte;
 
-procedure draw_sprites(pri:boolean);inline;
+procedure draw_sprites(pri:boolean);
 var
   f,color,nchar,x,y,pos:word;
   atrib:byte;
@@ -249,7 +249,7 @@ end;
 actualiza_trozo_final(16,0,224,256,1);
 end;
 
-procedure eventos_gunsmokehw;inline;
+procedure eventos_gunsmokehw;
 begin
 if event.arcade then begin
   //P1

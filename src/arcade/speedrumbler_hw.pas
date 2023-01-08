@@ -47,7 +47,7 @@ var
  soundlatch:byte;
  scroll_x,scroll_y:word;
 
-procedure update_video_speedr;inline;
+procedure update_video_speedr;
 var
   x,y,f,color,nchar:word;
   atrib:byte;
@@ -153,7 +153,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -171,7 +171,7 @@ begin
   end;
 end;
 
-procedure cambiar_banco(valor:byte);inline;
+procedure cambiar_banco(valor:byte);
 var
   f,bank:byte;
   pos1,pos2:word;

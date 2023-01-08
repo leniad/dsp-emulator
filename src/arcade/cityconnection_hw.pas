@@ -37,7 +37,9 @@ var
  memoria_fondo:array[0..$dfff] of byte;
  cambia_fondo:boolean;
 
-procedure cambiar_fondo;inline;
+procedure update_video_citycon;
+
+procedure cambiar_fondo;
 var
   f,x,y,nchar,color:word;
 begin
@@ -52,7 +54,6 @@ end;
 cambia_fondo:=false;
 end;
 
-procedure update_video_citycon;inline;
 var
   f,x,y,color,nchar:word;
   y2,x2,atrib:byte;
@@ -97,7 +98,7 @@ end;
 actualiza_trozo_final(8,16,240,224,3);
 end;
 
-procedure eventos_citycon;inline;
+procedure eventos_citycon;
 begin
 if event.arcade then begin
   //P1
@@ -161,7 +162,7 @@ begin
   end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;

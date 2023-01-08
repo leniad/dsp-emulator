@@ -41,7 +41,7 @@ var
  track0,track1:array[0..1] of byte;
  mem_adpcm:array[0..$7fff] of byte;
 
-procedure update_video_tehkanwc;inline;
+procedure update_video_tehkanwc;
 var
   f,color,nchar,atrib,x,y:word;
 begin
@@ -139,7 +139,26 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+function tehkanwc_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$ec02:tehkanwc_getbyte:=memoria[direccion];
+  $f800:tehkanwc_getbyte:=track0[0]-analog.c[0].x[0];
+  $f801:tehkanwc_getbyte:=track0[1]-analog.c[0].y[0];
+  $f802,$f806:tehkanwc_getbyte:=marcade.in2;
+  $f803:tehkanwc_getbyte:=marcade.in0;
+  $f810:tehkanwc_getbyte:=track1[0]-analog.c[0].x[1];
+  $f811:tehkanwc_getbyte:=track1[1]-analog.c[0].y[1];
+  $f813:tehkanwc_getbyte:=marcade.in1;
+  $f820:tehkanwc_getbyte:=sound_latch2;
+  $f840:tehkanwc_getbyte:=marcade.dswa;
+  $f850:tehkanwc_getbyte:=marcade.dswb;
+  $f860:;
+  $f870:tehkanwc_getbyte:=marcade.dswc;
+end;
+end;
+
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -157,7 +176,7 @@ begin
   end;
 end;
 
-procedure mem_shared_w(direccion:word;valor:byte);inline;
+procedure mem_shared_w(direccion:word;valor:byte);
 begin
 memoria[direccion]:=valor;
 case (direccion-$c800) of
@@ -170,25 +189,6 @@ case (direccion-$c800) of
     $2400:scroll_x:=(scroll_x and $100) or valor;
     $2401:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
     $2402:scroll_y:=valor;
-end;
-end;
-
-function tehkanwc_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $0..$ec02:tehkanwc_getbyte:=memoria[direccion];
-  $f800:tehkanwc_getbyte:=track0[0]-analog.c[0].x[0];
-  $f801:tehkanwc_getbyte:=track0[1]-analog.c[0].y[0];
-  $f802,$f806:tehkanwc_getbyte:=marcade.in2;
-  $f803:tehkanwc_getbyte:=marcade.in0;
-  $f810:tehkanwc_getbyte:=track1[0]-analog.c[0].x[1];
-  $f811:tehkanwc_getbyte:=track1[1]-analog.c[0].y[1];
-  $f813:tehkanwc_getbyte:=marcade.in1;
-  $f820:tehkanwc_getbyte:=sound_latch2;
-  $f840:tehkanwc_getbyte:=marcade.dswa;
-  $f850:tehkanwc_getbyte:=marcade.dswb;
-  $f860:;
-  $f870:tehkanwc_getbyte:=marcade.dswc;
 end;
 end;
 

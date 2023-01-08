@@ -44,7 +44,7 @@ var
  ram1,ram3:array[0..$1fff] of word;
  spritebank:byte;
 
-procedure update_video_volfied;inline;
+procedure update_video_volfied;
 var
   x,y,nchar,atrib,color:word;
   p:dword;
@@ -158,7 +158,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure volfied_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -168,7 +170,6 @@ begin
   set_pal_color(color,numero);
 end;
 
-procedure volfied_putword(direccion:dword;valor:word);
 begin
 case direccion of
       0..$fffff:; //ROM

@@ -81,7 +81,11 @@ var
  main_ram_seg,dsp_addr_w:dword;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
 
-procedure draw_sprites(priority:word);inline;
+procedure update_video_twincobr;
+var
+  f,color,nchar,x,y,atrib:word;
+
+procedure draw_sprites(priority:word);
 var
   f,atrib,x,y,nchar,color:word;
   flipx,flipy:boolean;
@@ -103,9 +107,6 @@ for f:=0 to $1ff do begin
 end;
 end;
 
-procedure update_video_twincobr;inline;
-var
-  f,color,nchar,x,y,atrib:word;
 begin
 if display_on then begin
   for f:=$7ff downto 0 do begin
@@ -235,7 +236,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero,valor:word);inline;
+procedure twincobr_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(numero,valor:word);
 var
   color:tcolor;
 begin
@@ -250,7 +253,6 @@ begin
   end;
 end;
 
-procedure twincobr_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$2ffff:;

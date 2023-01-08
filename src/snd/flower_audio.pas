@@ -43,7 +43,7 @@ var
 
 implementation
 
-function sshr(num:int64;fac:byte):int64;inline;
+function sshr(num:int64;fac:byte):int64;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;

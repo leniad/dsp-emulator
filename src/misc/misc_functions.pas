@@ -60,17 +60,17 @@ principal1.Left:=old_x;
 principal1.Top:=old_y;
 end;
 
-function bit(data:dword;bitpos:byte):boolean;inline;
+function bit(data:dword;bitpos:byte):boolean;
 begin
    bit:=((data shr bitpos) and 1)<>0;
 end;
 
-function bit_n(data:dword;bitpos:byte):byte;inline;
+function bit_n(data:dword;bitpos:byte):byte;
 begin
    bit_n:=(data shr bitpos) and 1;
 end;
 
-function BITSWAP8(val,B7,B6,B5,B4,B3,B2,B1,B0:byte):byte;inline;
+function BITSWAP8(val,B7,B6,B5,B4,B3,B2,B1,B0:byte):byte;
 var
   src:byte;
 begin
@@ -86,7 +86,7 @@ begin
   bitswap8:=src;
 end;
 
-function BITSWAP16(val:word;B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):word;inline;
+function BITSWAP16(val:word;B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):word;
 var
   src:word;
 begin
@@ -110,7 +110,7 @@ begin
   bitswap16:=src;
 end;
 
-function BITSWAP24(val:dword;B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;inline;
+function BITSWAP24(val:dword;B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
 var
   src:dword;
 begin
@@ -142,7 +142,7 @@ begin
      bitswap24:=src;
 end;
 
-function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;inline;
+function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
 var
   src:dword;
 begin

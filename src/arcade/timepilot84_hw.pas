@@ -38,7 +38,12 @@ var
  irq_enable:boolean;
  tp84_pal_bank,sound_latch,scroll_x,scroll_y,linea:byte;
 
-procedure draw_sprites;inline;
+procedure update_video_tp84;
+var
+  x,y,f,nchar,color:word;
+  atrib:byte;
+
+procedure draw_sprites;
 var
   f:byte;
   palette_base,color:word;
@@ -59,10 +64,6 @@ begin
   end;
 end;
 
-procedure update_video_tp84;inline;
-var
-  x,y,f,nchar,color:word;
-  atrib:byte;
 begin
 for f:=$0 to $3ff do begin
       x:=31-(f div 32);

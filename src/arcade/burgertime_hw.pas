@@ -77,7 +77,7 @@ var
   //Minky Monkey
   protection_status,protection_ret,protection_command,protection_value:byte;
 
-procedure update_video_btime;inline;
+procedure update_video_btime;
 const
   pant_pos:array[0..7] of byte=(1,2,3,0,5,6,7,4);
 var
@@ -120,7 +120,7 @@ end;
 actualiza_trozo_final(8,8,240,240,3);
 end;
 
-procedure update_video_lnc;inline;
+procedure update_video_lnc;
 var
   f,nchar,x,y:word;
   atrib:byte;
@@ -274,7 +274,18 @@ case direccion of
 end;
 end;
 
-procedure cambiar_paleta(ncolor:byte);inline;
+function calc_pos(dir:word):word;
+var
+  x,y:byte;
+begin
+  x:=(dir and $3ff) shr 5;
+  y:=(dir and $3ff) and $1f;
+  calc_pos:=(y shl 5)+x;
+end;
+
+procedure putbyte_btime(direccion:word;valor:byte);
+
+procedure cambiar_paleta(ncolor:byte);
 var
   color:tcolor;
   valor:byte;
@@ -290,16 +301,6 @@ if ncolor<8 then fillchar(gfx[0].buffer[0],$400,1)
   else bg_cambiado:=true;
 end;
 
-function calc_pos(dir:word):word;inline;
-var
-  x,y:byte;
-begin
-  x:=(dir and $3ff) shr 5;
-  y:=(dir and $3ff) and $1f;
-  calc_pos:=(y shl 5)+x;
-end;
-
-procedure putbyte_btime(direccion:word;valor:byte);
 var
   pos:word;
 begin

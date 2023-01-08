@@ -43,7 +43,7 @@ var
  sound_command,val_port1,val_port2,tile_bank,sprite_bank:byte;
  scroll_x:word;
 
-procedure update_video_knjoe;inline;
+procedure update_video_knjoe;
 const
   pribase:array[0..3] of word=($e980, $e880, $e900, $e800);
   spr_mask:array[1..2] of word=($3ff,$1ff);

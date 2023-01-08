@@ -3,9 +3,9 @@ unit joystick_calibrate;
 interface
 
 uses
-  lib_sdl2,Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  lib_sdl2,Windows,sysutils,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,controls_engine,
-  Vcl.Imaging.GIFImg, Vcl.ExtCtrls;
+  Vcl.Imaging.GIFImg, Vcl.ExtCtrls, System.Classes;
 
 type
   Tjoy_calibration = class(TForm)
@@ -15,6 +15,7 @@ type
     Image1: TImage;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
     procedure Button1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
@@ -32,6 +33,7 @@ var
 procedure bucle_joystick(numero:byte);
 
 implementation
+uses principal;
 
 {$R *.dfm}
 
@@ -48,7 +50,6 @@ while not(salir) do begin
     application.ProcessMessages;
     if salir then break;
   end;
-  SDL_JoystickUpdate;
   if sdl_event.type_=libSDL_JOYAXISMOTION then begin
     tempi:=SDL_JoystickGetAxis(joystick_def[numero],0);
     if abs(tempi)>abs(max_x[numero]) then max_x[numero]:=tempi;
@@ -67,6 +68,7 @@ arcade_input.joy_right[numero]:=cent_x[numero]+abs(temp_x);
 arcade_input.joy_up[numero]:=cent_y[numero]-abs(temp_y);
 arcade_input.joy_down[numero]:=cent_y[numero]+abs(temp_y);
 joy_calibration.close;
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tjoy_calibration.Button1Click(Sender: TObject);
