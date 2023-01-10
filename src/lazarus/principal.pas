@@ -390,7 +390,6 @@ type
     StreetSm1: TMenuItem;
     pow1: TMenuItem;
     Solomon1: TMenuItem;
-    Timer4: TTimer;
     tnzs1: TMenuItem;
     kyugohw1: TMenuItem;
     Pacland1: TMenuItem;
@@ -543,7 +542,6 @@ type
     procedure Reset1Click(Sender: TObject);
     procedure fConfigurar_general(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
-    procedure Timer4Timer(Sender: TObject);
   private
     { private declarations }
     {$IFDEF WINDOWS}
@@ -576,6 +574,18 @@ if window_render<>nil then begin
    valor_sync:=1000/llamadas_maquina.fps_max;
    cont_micro:=valor_sync;
    SDL_ClearQueuedAudio(sound_device);
+end;
+end;
+
+//Continuar con la emulacion...
+procedure restart_emu;
+begin
+principal1.Enabled:=true;
+if not(main_screen.pantalla_completa) then sync_all;
+if main_vars.driver_ok then begin
+  EmuStatus:=EsRuning;
+  principal1.timer1.Enabled:=true;
+  llamadas_maquina.bucle_general;
 end;
 end;
 
@@ -657,7 +667,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.IdiomaClick(Sender: TObject);
@@ -778,12 +788,7 @@ end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-aboutbox.show;
-while aboutbox.Showing do application.ProcessMessages;
-timer4.Enabled:=true;
+aboutbox.showmodal;
 end;
 
 procedure Tprincipal1.BitBtn12Click(Sender: TObject);
@@ -811,7 +816,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
@@ -820,7 +825,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.cintas)<>nil then llamadas_maquina.cintas;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
@@ -829,7 +834,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.grabar_snapshot)<>nil then llamadas_maquina.grabar_snapshot;
-timer4.enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
@@ -903,17 +908,12 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.cartuchos)<>nil then llamadas_maquina.cartuchos;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-FLoadRom.Show;
-while FLoadRom.Showing do application.ProcessMessages;
-timer4.Enabled:=true;
+FLoadRom.Showmodal;
 end;
 
 procedure Tprincipal1.Panel1Click(Sender: TObject);
@@ -933,6 +933,7 @@ var
 begin
 timer2.Enabled:=false;
 if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
+  SDL_SetHint(libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,'1');
   sdl_res:=SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO);
   controls_start;
 end;
@@ -952,19 +953,12 @@ end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-MConfig.Show;
-while MConfig.Showing do application.ProcessMessages;
-timer4.Enabled:=true;
+MConfig.Showmodal;
 end;
 
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
-//Si entro aqui NO debo ejecutar timer4 (puede venir del cambio de driver)
-timer4.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
@@ -995,18 +989,6 @@ end else begin
   principal1.Enabled:=true;
   EmuStatus:=EsRuning;
   llamadas_maquina.bucle_general;
-end;
-end;
-
-procedure Tprincipal1.Timer4Timer(Sender: TObject);
-begin
-timer4.Enabled:=false;
-principal1.Enabled:=true;
-if main_vars.driver_ok then begin
-   EmuStatus:=EsRuning;
-   timer1.Enabled:=true;
-   sync_all;
-   llamadas_maquina.bucle_general;
 end;
 end;
 

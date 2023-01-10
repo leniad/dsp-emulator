@@ -158,6 +158,10 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3) and $ff;
   arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4) and $ff;
   arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5) and $ff;
+  arcade_input.jcoin[0]:=fich_ini.ReadInteger('keyboard','jcoin_0',6) and $ff;
+  arcade_input.jcoin[1]:=fich_ini.ReadInteger('keyboard','jcoin_1',6) and $ff;
+  arcade_input.jstart[0]:=fich_ini.ReadInteger('keyboard','jstart_0',7) and $ff;
+  arcade_input.jstart[1]:=fich_ini.ReadInteger('keyboard','jstart_1',7) and $ff;
   arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',KEYBOARD_5) and $ff;
   arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',KEYBOARD_6) and $ff;
   arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',KEYBOARD_1) and $ff;
@@ -278,6 +282,10 @@ end else begin
   arcade_input.jbut3[0]:=3;
   arcade_input.jbut4[0]:=4;
   arcade_input.jbut5[0]:=5;
+  arcade_input.jcoin[0]:=6;
+  arcade_input.jcoin[1]:=6;
+  arcade_input.jstart[0]:=7;
+  arcade_input.jstart[1]:=7;
   arcade_input.ncoin[0]:=KEYBOARD_5;
   arcade_input.ncoin[1]:=KEYBOARD_6;
   arcade_input.nstart[0]:=KEYBOARD_1;
@@ -449,6 +457,10 @@ fich_ini.WriteInteger('keyboard','coin_0',arcade_input.ncoin[0]);
 fich_ini.WriteInteger('keyboard','coin_1',arcade_input.ncoin[1]);
 fich_ini.WriteInteger('keyboard','start_0',arcade_input.nstart[0]);
 fich_ini.WriteInteger('keyboard','start_1',arcade_input.nstart[1]);
+fich_ini.WriteInteger('keyboard','jcoin_0',arcade_input.jcoin[0]);
+fich_ini.WriteInteger('keyboard','jcoin_1',arcade_input.jcoin[1]);
+fich_ini.WriteInteger('keyboard','jstart_0',arcade_input.jstart[0]);
+fich_ini.WriteInteger('keyboard','jstart_1',arcade_input.jstart[1]);
 //Teclas P2
 fich_ini.WriteInteger('keyboard','up_1',arcade_input.nup[1]);
 fich_ini.WriteInteger('keyboard','down_1',arcade_input.ndown[1]);

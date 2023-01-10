@@ -121,7 +121,7 @@ type
     end;
     def_arcade = record
         coin,start,up,down,left,right,but0,but1,but2,but3,but4,but5,use_key:array[0..NUM_PLAYERS] of boolean;
-        ncoin,nstart,nup,ndown,nleft,nright,nbut0,nbut1,nbut2,nbut3,nbut4,nbut5,jbut0,jbut1,jbut2,jbut3,jbut4,jbut5,num_joystick:array[0..NUM_PLAYERS] of byte;
+        ncoin,nstart,nup,ndown,nleft,nright,nbut0,nbut1,nbut2,nbut3,nbut4,nbut5,jcoin,jstart,jbut0,jbut1,jbut2,jbut3,jbut4,jbut5,num_joystick:array[0..NUM_PLAYERS] of byte;
         joy_up,joy_down,joy_left,joy_right:array[0..NUM_PLAYERS] of integer;
     end;
     def_marcade=record
@@ -288,24 +288,18 @@ event.keyboard:=false;
 fillchar(keyboard[0],256,0);
 end;
 
-procedure evaluar_arcade_basic;
-var
-   f:byte;
-begin
-for f:=0 to NUM_PLAYERS do begin
-    if (arcade_input.coin[f]<>(keyboard[arcade_input.ncoin[f]])) then begin
-       arcade_input.coin[f]:=keyboard[arcade_input.ncoin[f]];
-       event.arcade:=true;
-    end;
-    if (arcade_input.start[f]<>(keyboard[arcade_input.nstart[f]])) then begin
-       arcade_input.start[f]:=keyboard[arcade_input.nstart[f]];
-       event.arcade:=true;
-    end;
-end;
-end;
-
 procedure evaluar_arcade_keyb(player:byte);
 begin
+//System
+if (arcade_input.coin[player]<>(keyboard[arcade_input.ncoin[player]])) then begin
+  arcade_input.coin[player]:=keyboard[arcade_input.ncoin[player]];
+  event.arcade:=true;
+end;
+if (arcade_input.start[player]<>(keyboard[arcade_input.nstart[player]])) then begin
+  arcade_input.start[player]:=keyboard[arcade_input.nstart[player]];
+  event.arcade:=true;
+end;
+//Joystick
 if (arcade_input.up[player]<>(keyboard[arcade_input.nup[player]])) then begin
     arcade_input.up[player]:=keyboard[arcade_input.nup[player]];
     event.arcade:=true;
@@ -385,6 +379,18 @@ if joystick.num=0 then exit;
 player_joy:=arcade_input.num_joystick[player];
 case tevent of
   libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
+      //System
+      tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jcoin[player])<>0;
+      if (arcade_input.coin[player]<>tempb) then begin
+        arcade_input.coin[player]:=tempb;
+        event.arcade:=true;
+      end;
+      tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jstart[player])<>0;
+      if (arcade_input.start[player]<>tempb) then begin
+        arcade_input.start[player]:=tempb;
+        event.arcade:=true;
+      end;
+      //Buttons
       if timers.autofire_enabled[0+(player*6)] then begin
         timers.autofire_status[0+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut0[player])<>0;
       end else begin
@@ -513,13 +519,11 @@ begin
      if keyboard[KEYBOARD_F10] then if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
      if keyboard[KEYBOARD_F11] then principal1.fSlow(nil);
   end;
-  //Arcade
-  if event.earcade then evaluar_arcade_basic;
   //Joy Stick
   if (event.ejoystick or event.earcade) then begin
     for f:=0 to NUM_PLAYERS do begin
       if not(arcade_input.use_key[f]) then evaluar_arcade_joy(sdl_event.type_,f)
-        else evaluar_arcade_keyb(f);
+        else if event.keyboard then evaluar_arcade_keyb(f);
     end;
   end;
   //Raton

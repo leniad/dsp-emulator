@@ -4954,21 +4954,14 @@ object principal1: Tprincipal1
   end
   object Timer2: TTimer
     Enabled = False
-    Interval = 500
+    Interval = 300
     OnTimer = Timer2Timer
     Left = 168
     Top = 80
   end
-  object Timer4: TTimer
-    Enabled = False
-    Interval = 300
-    OnTimer = Timer4Timer
-    Left = 232
-    Top = 80
-  end
   object Timer3: TTimer
     Enabled = False
-    Interval = 500
+    Interval = 300
     OnTimer = Timer3Timer
     Left = 200
     Top = 80

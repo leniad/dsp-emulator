@@ -13,11 +13,9 @@ uses principal;
 var
   bios_enabled:boolean;
   io_gg:array[0..6] of byte;
+
 procedure eventos_gg;
 begin
-if event.keyboard then begin
-  if (keyboard[KEYBOARD_F1]) then z80_0.change_nmi(PULSE_LINE);
-end;
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);

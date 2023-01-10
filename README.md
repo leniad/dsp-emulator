@@ -1,5 +1,17 @@
 ﻿# DSP Emulator status #
-<b>08/01/23 - DSP Emulator 0.21WIP5. Updated Windows binary and source update.<br>
+<b>10/01/23 - DSP Emulator 0.21WIP5.1. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Change between drivers is faster now
+    +Fixed joystick SDL 2 support! Changed hint function before SDL init, and works with all SDL 2 versions (removed SDL 2.0.16)
+    +Added start and coin/select in player redefinition page
+    +Start and coin/select keys can be mapped to joystick buttons
+-Sega Master System
+    +Remapped 'Pause' button to coin/select button
+-Sega Game Gear
+    +Removed 'Pause' button (doesn't have it)
+</pre><br><br>
+<b>08/01/23 - DSP Emulator 0.21WIP5. Updated Windows binary and source.<br>
 <pre>
 -General
     +Find a bug on new releases of SDL 2 library, joystick stop working when main window loses focus. Changed to SDL 2.0.16, works fine with this version

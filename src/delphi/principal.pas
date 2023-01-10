@@ -237,7 +237,6 @@ type
     RodLand1: TMenuItem;
     SaintDragon1: TMenuItem;
     TimePilot1: TMenuItem;
-    Timer4: TTimer;
     Pengo1: TMenuItem;
     Scramble1: TMenuItem;
     scobra1: TMenuItem;
@@ -525,7 +524,6 @@ type
     procedure fLoadCartucho(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
-    procedure Timer4Timer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
     procedure Pausa1Click(Sender: TObject);
   private
@@ -571,7 +569,6 @@ if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_n
 if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
 leer_idioma;
 cambiar_idioma(main_vars.idioma);
-principal1.timer2.Enabled:=true;
 fix_screen_pos(415,325);
 case main_screen.video_mode of
   1,3,5,6:begin
@@ -583,6 +580,8 @@ case main_screen.video_mode of
         principal1.Top:=(screen.Height div 2)-principal1.Height;
       end;
 end;
+//No puedo evitar este timer... Hasta que no está creada la ventana de la aplicacion no puedo crear la ventana interior
+principal1.timer2.Enabled:=true;
 end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
@@ -641,11 +640,11 @@ var
 begin
 timer2.Enabled:=false;
 if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
+  SDL_SetHint(libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,'1');
   if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE)<0) then begin
     MessageDlg('SDL2 library can not be initialized.', mtError,[mbOk], 0);
     halt(0);
   end;
-  SDL_SetHint('SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS','1');
   controls_start;
 end;
 Child:=TfrChild.Create(application);
@@ -665,8 +664,6 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
-//Si entro aqui NO debo ejecutar timer4 (puede venir del cambio de driver)
-timer4.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
@@ -704,14 +701,13 @@ end;
 end;
 
 //Continuar con la emulacion...
-procedure Tprincipal1.Timer4Timer(Sender: TObject);
+procedure restart_emu;
 begin
-timer4.Enabled:=false;
 principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 if main_vars.driver_ok then begin
   EmuStatus:=EsRuning;
-  timer1.Enabled:=true;
+  principal1.timer1.Enabled:=true;
   llamadas_maquina.bucle_general;
 end;
 end;
@@ -748,12 +744,7 @@ end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-aboutbox.show;
-while aboutbox.Showing do application.ProcessMessages;
-timer4.Enabled:=true;
+aboutbox.showmodal;
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);
@@ -779,12 +770,7 @@ end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-FLoadRom.Show;
-while FLoadRom.Showing do application.ProcessMessages;
-timer4.Enabled:=true;
+FLoadRom.Showmodal;
 end;
 
 procedure Tprincipal1.Pausa1Click(Sender: TObject);
@@ -822,12 +808,7 @@ end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-MConfig.Show;
-while MConfig.Showing do application.ProcessMessages;
-timer4.enabled:=true;
+MConfig.Showmodal;
 end;
 
 procedure Tprincipal1.fSaveGif(Sender: TObject);
@@ -855,7 +836,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
-      timer4.Enabled:=true;
+      restart_emu;
       exit;
     end;
     deletefile(nombre);
@@ -908,7 +889,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.ffastload(Sender: TObject);
@@ -958,7 +939,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if @llamadas_maquina.cartuchos<>nil then llamadas_maquina.cartuchos;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
@@ -967,7 +948,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if @llamadas_maquina.cintas<>nil then llamadas_maquina.cintas;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.fConfigurar(Sender: TObject);
@@ -980,7 +961,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
@@ -989,7 +970,7 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 end.

@@ -4,7 +4,7 @@ object MConfig: TMConfig
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Configurar DSP'
-  ClientHeight = 464
+  ClientHeight = 502
   ClientWidth = 498
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,25 +16,9 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   TextHeight = 13
-  object SpeedButton3: TSpeedButton
-    Left = 367
-    Top = 298
-    Width = 23
-    Height = 22
-    Caption = '...'
-    OnClick = SpeedButton2Click
-  end
-  object SpeedButton7: TSpeedButton
-    Left = 367
-    Top = 284
-    Width = 23
-    Height = 22
-    Caption = '...'
-    OnClick = SpeedButton6Click
-  end
   object Button1: TButton
     Left = 90
-    Top = 407
+    Top = 457
     Width = 113
     Height = 41
     Caption = 'OK'
@@ -44,7 +28,7 @@ object MConfig: TMConfig
   end
   object Button2: TButton
     Left = 304
-    Top = 407
+    Top = 457
     Width = 113
     Height = 41
     Caption = 'CANCELAR'
@@ -53,16 +37,16 @@ object MConfig: TMConfig
     OnKeyUp = FormKeyUp
   end
   object other: TPageControl
-    Left = 3
-    Top = 8
+    Left = 8
+    Top = 16
     Width = 488
-    Height = 393
+    Height = 439
     ActivePage = TabSheet1
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
       object GroupBox3: TGroupBox
-        Left = 6
+        Left = 41
         Top = 13
         Width = 169
         Height = 147
@@ -180,9 +164,9 @@ object MConfig: TMConfig
         end
       end
       object GroupBox4: TGroupBox
-        Left = 181
+        Left = 235
         Top = 13
-        Width = 202
+        Width = 187
         Height = 58
         Caption = 'Sound'
         Font.Charset = DEFAULT_CHARSET
@@ -222,8 +206,8 @@ object MConfig: TMConfig
         end
       end
       object GroupBox5: TGroupBox
-        Left = 6
-        Top = 165
+        Left = 44
+        Top = 178
         Width = 378
         Height = 82
         Caption = 'Video'
@@ -276,10 +260,10 @@ object MConfig: TMConfig
         end
       end
       object GroupBox6: TGroupBox
-        Left = 3
-        Top = 252
-        Width = 462
-        Height = 93
+        Left = 41
+        Top = 280
+        Width = 381
+        Height = 111
         Caption = 'Misc'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -290,7 +274,7 @@ object MConfig: TMConfig
         TabOrder = 3
         object CheckBox2: TCheckBox
           Left = 29
-          Top = 11
+          Top = 19
           Width = 286
           Height = 20
           TabStop = False
@@ -300,7 +284,7 @@ object MConfig: TMConfig
         end
         object CheckBox1: TCheckBox
           Left = 29
-          Top = 29
+          Top = 37
           Width = 300
           Height = 24
           TabStop = False
@@ -310,7 +294,7 @@ object MConfig: TMConfig
         end
         object CheckBox3: TCheckBox
           Left = 29
-          Top = 51
+          Top = 59
           Width = 300
           Height = 20
           TabStop = False
@@ -320,7 +304,7 @@ object MConfig: TMConfig
         end
         object CheckBox17: TCheckBox
           Left = 29
-          Top = 71
+          Top = 80
           Width = 430
           Height = 20
           TabStop = False
@@ -509,7 +493,7 @@ object MConfig: TMConfig
         Left = 5
         Top = 13
         Width = 225
-        Height = 340
+        Height = 395
         Caption = 'Player 1'
         TabOrder = 0
         object Label6: TLabel
@@ -553,6 +537,20 @@ object MConfig: TMConfig
           Width = 25
           Height = 13
           Caption = 'But 5'
+        end
+        object Label13: TLabel
+          Left = 52
+          Top = 337
+          Width = 29
+          Height = 13
+          Caption = ' COIN'
+        end
+        object Label14: TLabel
+          Left = 155
+          Top = 337
+          Width = 36
+          Height = 13
+          Caption = 'START'
         end
         object RadioButton1: TRadioButton
           Left = 11
@@ -682,7 +680,7 @@ object MConfig: TMConfig
           Top = 75
           Width = 177
           Height = 52
-          Color = clWhite
+          Color = clBtnFace
           ParentBackground = False
           ParentColor = False
           TabOrder = 12
@@ -707,12 +705,28 @@ object MConfig: TMConfig
             OnChange = ComboBox1Change
           end
         end
+        object Button9: TButton
+          Left = 33
+          Top = 356
+          Width = 75
+          Height = 27
+          TabOrder = 13
+          OnClick = Button9Click
+        end
+        object Button10: TButton
+          Left = 138
+          Top = 356
+          Width = 75
+          Height = 27
+          TabOrder = 14
+          OnClick = Button10Click
+        end
       end
       object GroupBox2: TGroupBox
         Left = 236
         Top = 13
         Width = 238
-        Height = 340
+        Height = 395
         Caption = 'Player 2'
         TabOrder = 1
         object Label9: TLabel
@@ -756,6 +770,20 @@ object MConfig: TMConfig
           Width = 25
           Height = 13
           Caption = 'But 5'
+        end
+        object Label25: TLabel
+          Left = 62
+          Top = 337
+          Width = 26
+          Height = 13
+          Caption = 'COIN'
+        end
+        object Label26: TLabel
+          Left = 168
+          Top = 337
+          Width = 36
+          Height = 13
+          Caption = 'START'
         end
         object RadioButton3: TRadioButton
           Left = 16
@@ -861,7 +889,7 @@ object MConfig: TMConfig
           Top = 75
           Width = 177
           Height = 52
-          Color = clWhite
+          Color = clBtnFace
           ParentBackground = False
           ParentColor = False
           TabOrder = 12
@@ -873,6 +901,7 @@ object MConfig: TMConfig
             Enabled = False
             TabOrder = 0
             Text = 'ComboBox2'
+            OnChange = ComboBox2Change
           end
           object Button8: TButton
             Left = 60
@@ -884,74 +913,22 @@ object MConfig: TMConfig
             OnClick = Button8Click
           end
         end
-      end
-    end
-    object TabSheet4: TTabSheet
-      Caption = 'Main Keys'
-      ImageIndex = 3
-      object Label21: TLabel
-        Left = 58
-        Top = 40
-        Width = 38
-        Height = 13
-        Caption = ' COIN 1'
-      end
-      object Label22: TLabel
-        Left = 150
-        Top = 39
-        Width = 35
-        Height = 13
-        Caption = 'COIN 2'
-      end
-      object Label23: TLabel
-        Left = 40
-        Top = 96
-        Width = 77
-        Height = 13
-        Caption = 'Player 1 START'
-      end
-      object Label24: TLabel
-        Left = 128
-        Top = 96
-        Width = 77
-        Height = 13
-        Caption = 'Player 2 START'
-      end
-      object Button3: TButton
-        Left = 40
-        Top = 56
-        Width = 73
-        Height = 25
-        Caption = '5'
-        TabOrder = 0
-        OnClick = Button3Click
-      end
-      object Button4: TButton
-        Left = 128
-        Top = 55
-        Width = 73
-        Height = 25
-        Caption = '6'
-        TabOrder = 1
-        OnClick = Button4Click
-      end
-      object Button5: TButton
-        Left = 40
-        Top = 112
-        Width = 73
-        Height = 25
-        Caption = '1'
-        TabOrder = 2
-        OnClick = Button5Click
-      end
-      object Button6: TButton
-        Left = 128
-        Top = 112
-        Width = 73
-        Height = 25
-        Caption = '2'
-        TabOrder = 3
-        OnClick = Button6Click
+        object Button11: TButton
+          Left = 37
+          Top = 356
+          Width = 75
+          Height = 27
+          TabOrder = 13
+          OnClick = Button11Click
+        end
+        object Button12: TButton
+          Left = 148
+          Top = 356
+          Width = 75
+          Height = 27
+          TabOrder = 14
+          OnClick = Button12Click
+        end
       end
     end
     object ROM: TTabSheet
@@ -1018,7 +995,7 @@ object MConfig: TMConfig
           TabOrder = 4
         end
         object CheckBox9: TCheckBox
-          Left = 31
+          Left = 28
           Top = 145
           Width = 64
           Height = 16

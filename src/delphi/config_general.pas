@@ -13,54 +13,6 @@ type
     Button2: TButton;
     other: TPageControl;
     TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
-    d1: TEdit;
-    Label1: TLabel;
-    SpeedButton1: TSpeedButton;
-    Label4: TLabel;
-    d4: TEdit;
-    d5: TEdit;
-    Label5: TLabel;
-    TabSheet3: TTabSheet;
-    GroupBox1: TGroupBox;
-    RadioButton1: TRadioButton;
-    RadioButton2: TRadioButton;
-    BitBtn2: TBitBtn;
-    BitBtn3: TBitBtn;
-    BitBtn1: TBitBtn;
-    BitBtn4: TBitBtn;
-    GroupBox2: TGroupBox;
-    RadioButton3: TRadioButton;
-    RadioButton4: TRadioButton;
-    BitBtn5: TBitBtn;
-    BitBtn6: TBitBtn;
-    BitBtn7: TBitBtn;
-    BitBtn8: TBitBtn;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    BitBtn9: TBitBtn;
-    BitBtn10: TBitBtn;
-    BitBtn11: TBitBtn;
-    Label9: TLabel;
-    BitBtn12: TBitBtn;
-    Label10: TLabel;
-    BitBtn13: TBitBtn;
-    Label11: TLabel;
-    BitBtn14: TBitBtn;
-    SpeedButton5: TSpeedButton;
-    Label15: TLabel;
-    Label16: TLabel;
-    Label17: TLabel;
-    BitBtn15: TBitBtn;
-    BitBtn16: TBitBtn;
-    BitBtn17: TBitBtn;
-    BitBtn18: TBitBtn;
-    BitBtn19: TBitBtn;
-    BitBtn20: TBitBtn;
-    Label18: TLabel;
-    Label19: TLabel;
-    Label20: TLabel;
     GroupBox3: TGroupBox;
     RadioButton6: TRadioButton;
     RadioButton5: TRadioButton;
@@ -72,15 +24,6 @@ type
     GroupBox4: TGroupBox;
     RadioButton14: TRadioButton;
     RadioButton15: TRadioButton;
-    TabSheet4: TTabSheet;
-    Label21: TLabel;
-    Label22: TLabel;
-    Label23: TLabel;
-    Label24: TLabel;
-    Button3: TButton;
-    Button4: TButton;
-    Button5: TButton;
-    Button6: TButton;
     GroupBox5: TGroupBox;
     RadioButton16: TRadioButton;
     RadioButton17: TRadioButton;
@@ -91,22 +34,81 @@ type
     CheckBox2: TCheckBox;
     CheckBox1: TCheckBox;
     CheckBox3: TCheckBox;
-    ROM: TTabSheet;
-    BitBtn21: TBitBtn;
+    CheckBox17: TCheckBox;
+    TabSheet2: TTabSheet;
+    Label1: TLabel;
+    SpeedButton1: TSpeedButton;
+    Label4: TLabel;
+    Label5: TLabel;
+    SpeedButton5: TSpeedButton;
+    Label2: TLabel;
+    SpeedButton2: TSpeedButton;
+    Label3: TLabel;
+    SpeedButton6: TSpeedButton;
+    Label12: TLabel;
+    SpeedButton8: TSpeedButton;
+    SpeedButton4: TSpeedButton;
+    d1: TEdit;
+    d4: TEdit;
+    d5: TEdit;
+    d2: TEdit;
+    d3: TEdit;
+    D6: TEdit;
+    TabSheet3: TTabSheet;
+    GroupBox1: TGroupBox;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label15: TLabel;
+    Label16: TLabel;
+    Label17: TLabel;
+    Label13: TLabel;
+    Label14: TLabel;
+    RadioButton1: TRadioButton;
+    RadioButton2: TRadioButton;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
+    BitBtn1: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn9: TBitBtn;
+    BitBtn10: TBitBtn;
+    BitBtn11: TBitBtn;
+    BitBtn15: TBitBtn;
+    BitBtn16: TBitBtn;
+    BitBtn17: TBitBtn;
     GroupBox7: TGroupBox;
     Button7: TButton;
     ComboBox1: TComboBox;
-    d2: TEdit;
-    Label2: TLabel;
-    SpeedButton2: TSpeedButton;
-    SpeedButton3: TSpeedButton;
-    d3: TEdit;
-    Label3: TLabel;
-    SpeedButton6: TSpeedButton;
-    SpeedButton7: TSpeedButton;
-    Label12: TLabel;
-    D6: TEdit;
-    SpeedButton8: TSpeedButton;
+    Button9: TButton;
+    Button10: TButton;
+    GroupBox2: TGroupBox;
+    Label9: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
+    Label18: TLabel;
+    Label19: TLabel;
+    Label20: TLabel;
+    Label25: TLabel;
+    Label26: TLabel;
+    RadioButton3: TRadioButton;
+    RadioButton4: TRadioButton;
+    BitBtn5: TBitBtn;
+    BitBtn6: TBitBtn;
+    BitBtn7: TBitBtn;
+    BitBtn8: TBitBtn;
+    BitBtn12: TBitBtn;
+    BitBtn13: TBitBtn;
+    BitBtn14: TBitBtn;
+    BitBtn18: TBitBtn;
+    BitBtn19: TBitBtn;
+    BitBtn20: TBitBtn;
+    GroupBox10: TGroupBox;
+    ComboBox2: TComboBox;
+    Button8: TButton;
+    Button11: TButton;
+    Button12: TButton;
+    ROM: TTabSheet;
+    BitBtn21: TBitBtn;
     Autofire: TTabSheet;
     GroupBox8: TGroupBox;
     CheckBox4: TCheckBox;
@@ -123,11 +125,6 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
-    SpeedButton4: TSpeedButton;
-    GroupBox10: TGroupBox;
-    ComboBox2: TComboBox;
-    Button8: TButton;
-    CheckBox17: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -159,10 +156,10 @@ type
     procedure BitBtn19Click(Sender: TObject);
     procedure BitBtn18Click(Sender: TObject);
     procedure BitBtn20Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
-    procedure Button5Click(Sender: TObject);
-    procedure Button6Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button11Click(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Button12Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure BitBtn21Click(Sender: TObject);
@@ -180,6 +177,7 @@ type
     procedure RadioButton8Click(Sender: TObject);
     procedure RadioButton9Click(Sender: TObject);
     procedure RadioButton10Click(Sender: TObject);
+    procedure ComboBox2Change(Sender: TObject);
   private
     { Private declarations }
   public
@@ -571,6 +569,14 @@ begin
       bitbtn17.Caption:=nombre_tecla(arcade_input.nbut3[0]);
       bitbtn15.Caption:=nombre_tecla(arcade_input.nbut4[0]);
       bitbtn16.Caption:=nombre_tecla(arcade_input.nbut5[0]);
+      //Player 1
+      bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
+      bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
+      bitbtn3.Caption:=nombre_tecla(arcade_input.ndown[0]);
+      bitbtn4.Caption:=nombre_tecla(arcade_input.nup[0]);
+      //Misc Keys
+      button9.Caption:=nombre_tecla(arcade_input.ncoin[0]);
+      button10.Caption:=nombre_tecla(arcade_input.nstart[0]);
     end else begin
       radiobutton1.Checked:=false;
       radiobutton2.Checked:=true;
@@ -586,6 +592,9 @@ begin
       bitbtn17.Caption:=inttostr(arcade_input.jbut3[0]);
       bitbtn15.Caption:=inttostr(arcade_input.jbut4[0]);
       bitbtn16.Caption:=inttostr(arcade_input.jbut5[0]);
+      //Misc Keys
+      button9.Caption:=inttostr(arcade_input.jcoin[0]);
+      button10.Caption:=inttostr(arcade_input.jstart[0]);
     end;
     radiobutton4.enabled:=true;
     if arcade_input.use_key[1] then begin
@@ -603,9 +612,18 @@ begin
       bitbtn18.Caption:=nombre_tecla(arcade_input.nbut3[1]);
       bitbtn19.Caption:=nombre_tecla(arcade_input.nbut4[1]);
       bitbtn20.Caption:=nombre_tecla(arcade_input.nbut5[1]);
+      //Player 2
+      bitbtn6.Caption:=nombre_tecla(arcade_input.nleft[1]);
+      bitbtn7.Caption:=nombre_tecla(arcade_input.nright[1]);
+      bitbtn8.Caption:=nombre_tecla(arcade_input.ndown[1]);
+      bitbtn5.Caption:=nombre_tecla(arcade_input.nup[1]);
+      //Misc keys
+      button11.Caption:=nombre_tecla(arcade_input.ncoin[1]);
+      button12.Caption:=nombre_tecla(arcade_input.nstart[1]);
     end else begin
       radiobutton3.Checked:=false;
       radiobutton4.Checked:=true;
+      combobox2.Enabled:=true;
       button8.Enabled:=true;
       bitbtn5.Enabled:=false;
       bitbtn6.Enabled:=false;
@@ -617,6 +635,9 @@ begin
       bitbtn18.Caption:=inttostr(arcade_input.jbut3[1]);
       bitbtn19.Caption:=inttostr(arcade_input.jbut4[1]);
       bitbtn20.Caption:=inttostr(arcade_input.jbut5[1]);
+      //Misc keys
+      button11.Caption:=inttostr(arcade_input.jcoin[1]);
+      button12.Caption:=inttostr(arcade_input.jstart[1]);
     end;
     combobox1.ItemIndex:=arcade_input.num_joystick[0];
     combobox2.ItemIndex:=arcade_input.num_joystick[1];
@@ -635,21 +656,6 @@ begin
   checkbox15.Checked:=timers.autofire_enabled[11];
   checkbox16.Checked:=timers.autofire_on;
   CheckBox16Click(self);
-  //Player 1
-  bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
-  bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
-  bitbtn3.Caption:=nombre_tecla(arcade_input.ndown[0]);
-  bitbtn4.Caption:=nombre_tecla(arcade_input.nup[0]);
-  //Player 2
-  bitbtn6.Caption:=nombre_tecla(arcade_input.nleft[1]);
-  bitbtn7.Caption:=nombre_tecla(arcade_input.nright[1]);
-  bitbtn8.Caption:=nombre_tecla(arcade_input.ndown[1]);
-  bitbtn5.Caption:=nombre_tecla(arcade_input.nup[1]);
-  //Misc Keys
-  button3.Caption:=nombre_tecla(arcade_input.ncoin[0]);
-  button4.Caption:=nombre_tecla(arcade_input.ncoin[1]);
-  button5.Caption:=nombre_tecla(arcade_input.nstart[0]);
-  button6.Caption:=nombre_tecla(arcade_input.nstart[1]);
 end;
 
 procedure TMConfig.RadioButton1Click(Sender: TObject);
@@ -666,6 +672,15 @@ begin
   bitbtn17.Caption:=nombre_tecla(arcade_input.nbut3[0]);
   bitbtn15.Caption:=nombre_tecla(arcade_input.nbut4[0]);
   bitbtn16.Caption:=nombre_tecla(arcade_input.nbut5[0]);
+  //Player 1
+  bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
+  bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
+  bitbtn3.Caption:=nombre_tecla(arcade_input.ndown[0]);
+  bitbtn4.Caption:=nombre_tecla(arcade_input.nup[0]);
+  //Misc Keys
+  button9.Caption:=nombre_tecla(arcade_input.ncoin[0]);
+  button10.Caption:=nombre_tecla(arcade_input.nstart[0]);
+  arcade_input.use_key[0]:=true;
 end;
 
 procedure TMConfig.RadioButton21Click(Sender: TObject);
@@ -680,6 +695,8 @@ end;
 
 procedure TMConfig.RadioButton2Click(Sender: TObject);
 begin
+  if joystick.num=0 then exit;
+  arcade_input.use_key[0]:=false;
   bitbtn1.Enabled:=false;
   bitbtn2.Enabled:=false;
   bitbtn3.Enabled:=false;
@@ -692,6 +709,9 @@ begin
   bitbtn17.Caption:=inttostr(arcade_input.jbut3[0]);
   bitbtn15.Caption:=inttostr(arcade_input.jbut4[0]);
   bitbtn16.Caption:=inttostr(arcade_input.jbut5[0]);
+  //Misc Keys
+  button9.Caption:=inttostr(arcade_input.jcoin[0]);
+  button10.Caption:=inttostr(arcade_input.jstart[0]);
 end;
 
 procedure TMConfig.RadioButton3Click(Sender: TObject);
@@ -708,10 +728,21 @@ begin
   bitbtn18.Caption:=nombre_tecla(arcade_input.nbut3[1]);
   bitbtn19.Caption:=nombre_tecla(arcade_input.nbut4[1]);
   bitbtn20.Caption:=nombre_tecla(arcade_input.nbut5[1]);
+  //Player 2
+  bitbtn6.Caption:=nombre_tecla(arcade_input.nleft[1]);
+  bitbtn7.Caption:=nombre_tecla(arcade_input.nright[1]);
+  bitbtn8.Caption:=nombre_tecla(arcade_input.ndown[1]);
+  bitbtn5.Caption:=nombre_tecla(arcade_input.nup[1]);
+  //Misc keys
+  button11.Caption:=nombre_tecla(arcade_input.ncoin[1]);
+  button12.Caption:=nombre_tecla(arcade_input.nstart[1]);
+  arcade_input.use_key[1]:=true;
 end;
 
 procedure TMConfig.RadioButton4Click(Sender: TObject);
 begin
+  if joystick.num=0 then exit;
+  arcade_input.use_key[1]:=false;
   bitbtn5.Enabled:=false;
   bitbtn6.Enabled:=false;
   bitbtn7.Enabled:=false;
@@ -724,6 +755,9 @@ begin
   bitbtn18.Caption:=inttostr(arcade_input.jbut3[1]);
   bitbtn19.Caption:=inttostr(arcade_input.jbut4[1]);
   bitbtn20.Caption:=inttostr(arcade_input.jbut5[1]);
+  //Misc keys
+  button11.Caption:=inttostr(arcade_input.jcoin[1]);
+  button12.Caption:=inttostr(arcade_input.jstart[1]);
 end;
 
 procedure TMConfig.SpeedButton1Click(Sender: TObject);
@@ -761,39 +795,63 @@ begin
   close;
 end;
 
-procedure TMConfig.Button3Click(Sender: TObject);
+procedure TMConfig.Button9Click(Sender: TObject);
 begin
-  redefine1.showmodal;
-  if tecla_leida<>$FFFF then begin
-    button3.Caption:=nombre_tecla(tecla_leida);
-    arcade_input.ncoin[0]:=tecla_leida;
+  if arcade_input.use_key[0] then begin
+    redefine1.showmodal;
+    if tecla_leida<>$FFFF then begin
+      button9.Caption:=nombre_tecla(tecla_leida);
+      arcade_input.ncoin[0]:=tecla_leida;
+    end;
+  end else begin
+    button9.Caption:='Press but';
+    arcade_input.jcoin[0]:=get_button(arcade_input.num_joystick[0]);
+    button9.Caption:=inttostr(arcade_input.jcoin[0]);
   end;
 end;
 
-procedure TMConfig.Button4Click(Sender: TObject);
+procedure TMConfig.Button11Click(Sender: TObject);
 begin
-  redefine1.showmodal;
-  if tecla_leida<>$FFFF then begin
-    button4.Caption:=nombre_tecla(tecla_leida);
-    arcade_input.ncoin[1]:=tecla_leida;
+  if arcade_input.use_key[1] then begin
+    redefine1.showmodal;
+    if tecla_leida<>$FFFF then begin
+      button11.Caption:=nombre_tecla(tecla_leida);
+      arcade_input.ncoin[1]:=tecla_leida;
+    end;
+  end else begin
+    button11.Caption:='Press but';
+    arcade_input.jcoin[1]:=get_button(arcade_input.num_joystick[1]);
+    button11.Caption:=inttostr(arcade_input.jcoin[1]);
   end;
 end;
 
-procedure TMConfig.Button5Click(Sender: TObject);
+procedure TMConfig.Button10Click(Sender: TObject);
 begin
-  redefine1.showmodal;
-  if tecla_leida<>$FFFF then begin
-    button5.Caption:=nombre_tecla(tecla_leida);
-    arcade_input.nstart[0]:=tecla_leida;
+  if arcade_input.use_key[0] then begin
+    redefine1.showmodal;
+    if tecla_leida<>$FFFF then begin
+      button10.Caption:=nombre_tecla(tecla_leida);
+      arcade_input.nstart[0]:=tecla_leida;
+    end;
+  end else begin
+    button10.Caption:='Press but';
+    arcade_input.jstart[0]:=get_button(arcade_input.num_joystick[0]);
+    button10.Caption:=inttostr(arcade_input.jstart[0]);
   end;
 end;
 
-procedure TMConfig.Button6Click(Sender: TObject);
+procedure TMConfig.Button12Click(Sender: TObject);
 begin
-  redefine1.showmodal;
-  if tecla_leida<>$FFFF then begin
-    button6.Caption:=nombre_tecla(tecla_leida);
-    arcade_input.nstart[1]:=tecla_leida;
+  if arcade_input.use_key[1] then begin
+    redefine1.showmodal;
+    if tecla_leida<>$FFFF then begin
+      button12.Caption:=nombre_tecla(tecla_leida);
+      arcade_input.nstart[1]:=tecla_leida;
+    end;
+  end else begin
+    button12.Caption:='Press but';
+    arcade_input.jstart[1]:=get_button(arcade_input.num_joystick[1]);
+    button12.Caption:=inttostr(arcade_input.jstart[1]);
   end;
 end;
 
@@ -818,6 +876,11 @@ end;
 procedure TMConfig.ComboBox1Change(Sender: TObject);
 begin
   arcade_input.num_joystick[0]:=combobox1.ItemIndex;
+end;
+
+procedure TMConfig.ComboBox2Change(Sender: TObject);
+begin
+  arcade_input.num_joystick[1]:=combobox2.ItemIndex;
 end;
 
 procedure TMConfig.BitBtn20Click(Sender: TObject);

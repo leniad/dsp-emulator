@@ -21,6 +21,7 @@ type
 var
   mapper_sms:^tmapper_sms;
   sms_model:byte;
+  push_pause:boolean;
 
 const
   CLOCK_NTSC=3579545;
@@ -39,9 +40,6 @@ var
 
 procedure eventos_sms;
 begin
-if event.keyboard then begin
-  if (keyboard[KEYBOARD_F1]) then z80_0.change_nmi(PULSE_LINE);
-end;
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
@@ -57,6 +55,12 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.coin[0] then push_pause:=true
+    else begin
+      if push_pause then
+        z80_0.change_nmi(PULSE_LINE);
+      push_pause:=false;
+    end;
 end;
 end;
 
@@ -349,6 +353,7 @@ begin
  mapper_sms.slot2:=2 mod mapper_sms.max;
  mapper_sms.slot3:=0;
  mapper_sms.slot2_bank:=0;
+ push_pause:=true;
  //Alibaba confia en este inicio de la RAM!!!
  fillchar(mapper_sms.ram[0],$2000,$f0);
 end;

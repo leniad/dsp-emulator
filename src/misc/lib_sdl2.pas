@@ -74,6 +74,7 @@ const
   libSDL_WINDOWEVENT_CLOSE=14; {**< The window manager requests that the window be closed *}
   libSDL_WINDOWEVENT_TAKE_FOCUS=15; {**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) *}
   libSDL_WINDOWEVENT_HIT_TEST=16; {**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. *}
+  libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS='SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS';
 
 {$I lib_sdl2.inc}
 
