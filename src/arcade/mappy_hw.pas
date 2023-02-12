@@ -72,6 +72,13 @@ var
  update_video_proc:procedure;
  scroll_x:word;
 
+procedure update_video_mappy;
+const
+  linea_y:array[0..$1f] of byte=($11,$10,$1f,$1e,$1d,$1c,$1b,$1a,$19,$18,$17,$16,$15,$14,$13,$12,1,0,$f,$e,$d,$c,$b,$a,9,8,7,6,5,4,3,2);
+var
+  f,color:word;
+  x,y,atrib,nchar:byte;
+
 procedure draw_sprites_mappy;
 var
   color,y:word;
@@ -133,12 +140,6 @@ for f:=0 to $3f do begin
   end;
 end;
 
-procedure update_video_mappy;
-const
-  linea_y:array[0..$1f] of byte=($11,$10,$1f,$1e,$1d,$1c,$1b,$1a,$19,$18,$17,$16,$15,$14,$13,$12,1,0,$f,$e,$d,$c,$b,$a,9,8,7,6,5,4,3,2);
-var
-  f,color:word;
-  x,y,atrib,nchar:byte;
 begin
 for f:=$7ff downto 0 do begin
     if gfx[0].buffer[f] then begin
@@ -188,6 +189,11 @@ scroll__x_part(2,3,scroll_x,0,16,256);
 //final, lo pego todooooo
 actualiza_trozo_final(0,0,224,288,3);
 end;
+
+procedure update_video_spacman;
+var
+  f,color:word;
+  x,y,atrib,nchar:byte;
 
 procedure draw_sprites_spacman;
 var
@@ -250,10 +256,6 @@ for f:=0 to $3f do begin
   end;
 end;
 
-procedure update_video_spacman;
-var
-  f,color:word;
-  x,y,atrib,nchar:byte;
 begin
 for f:=$3ff downto 0 do begin
     if gfx[0].buffer[f] then begin

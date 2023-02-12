@@ -297,6 +297,7 @@ begin
 				vol[2] * self.Volume[2] + vol[3] * self.Volume[3];
     if (out_sn>MAX_OUTPUT*SN_STEP) then out_sn:=MAX_OUTPUT*SN_STEP;
     tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc((out_sn/SN_STEP)*self.amp);
+    if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc((out_sn/SN_STEP)*self.amp);
 end;
 
 end.

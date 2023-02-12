@@ -1,11 +1,12 @@
 unit megasys1_hw;
 
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_2151,sound_engine,oki6295,misc_functions;
 
-procedure cargar_megasys1;
+function iniciar_megasys1:boolean;
 
 implementation
 const
@@ -51,17 +52,17 @@ const
         (mask:$8000;name:'Invulnerability';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Rod-Land
         rodland_rom:array[0..3] of tipo_roms=(
-        (n:'rl_02.rom';l:$20000;p:0;crc:$c7e00593),(n:'rl_01.rom';l:$20000;p:$1;crc:$2e748ca1),
-        (n:'rl_03.rom';l:$10000;p:$40000;crc:$62fdf6d7),(n:'rl_04.rom';l:$10000;p:$40001;crc:$44163c86));
+        (n:'jaleco_rod_land_2.rom2';l:$20000;p:0;crc:$c7e00593),(n:'jaleco_rod_land_1.rom1';l:$20000;p:$1;crc:$2e748ca1),
+        (n:'jaleco_rod_land_3.rom3';l:$10000;p:$40000;crc:$62fdf6d7),(n:'jaleco_rod_land_4.rom4';l:$10000;p:$40001;crc:$44163c86));
         rodland_sound:array[0..1] of tipo_roms=(
-        (n:'rl_05.rom';l:$10000;p:0;crc:$c1617c28),(n:'rl_06.rom';l:$10000;p:$1;crc:$663392b2));
-        rodland_scr0:tipo_roms=(n:'rl_23.rom';l:$80000;p:0;crc:$ac60e771);
-        rodland_scr1:tipo_roms=(n:'rl_18.rom';l:$80000;p:0;crc:$f3b30ca6);
-        rodland_scr2:tipo_roms=(n:'rl_19.bin';l:$20000;p:0;crc:$124d7e8f);
-        rodland_sprites:tipo_roms=(n:'rl_14.rom';l:$80000;p:0;crc:$08d01bf4);
-        rodland_oki1:tipo_roms=(n:'rl_10.rom';l:$40000;p:0;crc:$e1d1cd99);
-        rodland_oki2:tipo_roms=(n:'rl_08.rom';l:$40000;p:0;crc:$8a49d3a7);
-        rodland_pri:tipo_roms=(n:'rl.bin';l:$200;p:0;crc:$8914e72d);
+        (n:'jaleco_rod_land_5.rom5';l:$10000;p:0;crc:$c1617c28),(n:'jaleco_rod_land_6.rom6';l:$10000;p:$1;crc:$663392b2));
+        rodland_scr0:tipo_roms=(n:'lh534h31.rom14';l:$80000;p:0;crc:$8201e1bb);
+        rodland_scr1:tipo_roms=(n:'lh534h32.rom18';l:$80000;p:0;crc:$f3b30ca6);
+        rodland_scr2:tipo_roms=(n:'lh2311j0.rom19';l:$20000;p:0;crc:$124d7e8f);
+        rodland_sprites:tipo_roms=(n:'lh534h33.rom23';l:$80000;p:0;crc:$936db174);
+        rodland_oki1:tipo_roms=(n:'lh5321t5.rom10';l:$40000;p:0;crc:$e1d1cd99);
+        rodland_oki2:tipo_roms=(n:'s202000dr.rom8';l:$40000;p:0;crc:$8a49d3a7);
+        rodland_pri:tipo_roms=(n:'ps89013a.14m';l:$200;p:0;crc:$8914e72d);
         rodland_dip:array [0..7] of def_dip=(
         (mask:$000c;name:'Lives';number:4;dip:((dip_val:$4;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$0010;name:'Default Episode';number:2;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -98,28 +99,58 @@ const
         (mask:$0700;name:'Coin A';number:8;dip:((dip_val:$100;dip_name:'4C 1C'),(dip_val:$200;dip_name:'3C 1C'),(dip_val:$300;dip_name:'2C 1C'),(dip_val:$700;dip_name:'1C 1C'),(dip_val:$600;dip_name:'1C 2C'),(dip_val:$500;dip_name:'1C 3C'),(dip_val:$400;dip_name:'1C 4C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),())),
         (mask:$3800;name:'Coin B';number:8;dip:((dip_val:$800;dip_name:'4C 1C'),(dip_val:$1000;dip_name:'3C 1C'),(dip_val:$1800;dip_name:'2C 1C'),(dip_val:$3800;dip_name:'1C 1C'),(dip_val:$3000;dip_name:'1C 2C'),(dip_val:$2800;dip_name:'1C 3C'),(dip_val:$2000;dip_name:'1C 4C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),())),
         (mask:$4000;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //64th street
+        th64_rom:array[0..1] of tipo_roms=(
+        (n:'64th_03.rom';l:$40000;p:0;crc:$ed6c6942),(n:'64th_02.rom';l:$40000;p:$1;crc:$0621ed1d));
+        th64_sound:array[0..1] of tipo_roms=(
+        (n:'64th_08.rom';l:$10000;p:0;crc:$632be0c1),(n:'64th_07.rom';l:$10000;p:$1;crc:$13595d01));
+        th64_scr0:tipo_roms=(n:'64th_01.rom';l:$80000;p:0;crc:$06222f90);
+        th64_scr1:tipo_roms=(n:'64th_06.rom';l:$80000;p:0;crc:$2bfcdc75);
+        th64_scr2:tipo_roms=(n:'64th_09.rom';l:$20000;p:0;crc:$a4a97db4);
+        th64_sprites:array[0..1] of tipo_roms=(
+        (n:'64th_05.rom';l:$80000;p:$0;crc:$a89a7020),(n:'64th_04.rom';l:$80000;p:$80000;crc:$98f83ef6));
+        th64_oki1:tipo_roms=(n:'64th_11.rom';l:$20000;p:0;crc:$b0b8a65c);
+        th64_oki2:tipo_roms=(n:'64th_10.rom';l:$40000;p:0;crc:$a3390561);
+        th64_pri:tipo_roms=(n:'pr91009.12';l:$200;p:0;crc:$c69423d6);
+        th64_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:11;dip:((dip_val:$07;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$09;dip_name:'2C 1C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$06;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),())),
+        (mask:$f0;name:'Coin B';number:11;dip:((dip_val:$70;dip_name:'4C 1C'),(dip_val:$80;dip_name:'3C 1C'),(dip_val:$90;dip_name:'2C 1C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),())),());
+        th64_dip_b:array [0..5] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Difficulty';number:4;dip:((dip_val:$10;dip_name:'Easy'),(dip_val:$18;dip_name:'Normal'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Lives';number:4;dip:((dip_val:$40;dip_name:'1'),(dip_val:$60;dip_name:'2'),(dip_val:$20;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 type
   tlayer_info=record
     scr_ram:array[0..$1fff] of word;
     scroll_x,scroll_y:word;
     es_8x8:boolean;
-    filas,cols,info:word;
-    mask_x,mask_y:word;
+    filas,info,char_mask:word;
   end;
 
 var
- rom:array[0..$2ffff] of word;
- ram:array[0..$7fff] of word;
- rom_snd,ram_snd:array[0..$ffff] of word;
+ rom:array[0..$3ffff] of word;
+ ram,ram_snd:array[0..$7fff] of word;
+ rom_snd:array[0..$ffff] of word;
  vregs_ram:array[0..$1ff] of word;
  obj_ram:array[0..$fff] of word;
  layer_scr:array[0..2] of tlayer_info;
  sound_latch,sound_latch2,active_layer:word;
  prioridad:array[0..$f] of dword;
  sprite_bank:byte;
- sprites_split,mcu_hs:boolean;
+ sprites_split:boolean;
+ //Protecciones
+ mcu_hs:boolean;
  mcu_hs_ram:array[0..9] of word;
+ ip_select:word;
+ ip_select_values:array[0..7] of byte;
+
+procedure update_video_megasys1;
+var
+  f,layer:byte;
+  trans:boolean;
 
 procedure poner_sprites(pri:byte);
 var
@@ -128,14 +159,15 @@ var
 begin
 for f:=0 to $ff do begin
   for sprite:=0 to 3 do begin
-      pos_obj:=((f*8)+$800*sprite) shr 1;
+      pos_obj:=(f*4)+$400*sprite;
       pos_sprite:=$4000+((obj_ram[pos_obj] and $7f)*8);
       atrib:=ram[pos_sprite+4];
-      if ((atrib shr 3) and 1)<>pri then continue;
+      //Si la prioridad es 2, los tengo que poner todos!!
+      if ((((atrib shr 3) and 1)<>pri) and (pri<>2)) then continue;
       if (((atrib and $c0) shr 6)<>sprite) then	continue;	//flipping
-      // apply the position displacements */
-			x:=(ram[pos_sprite+5]+obj_ram[pos_obj+$1]) and $1ff;
-			y:=(ram[pos_sprite+6]+obj_ram[pos_obj+$2]) and $1ff;
+      // apply the position displacements
+			x:=(ram[pos_sprite+5]+obj_ram[pos_obj+1]) and $1ff;
+			y:=(ram[pos_sprite+6]+obj_ram[pos_obj+2]) and $1ff;
 			flipx:=(atrib and $40)<>0;
 			flipy:=(atrib and $80)<>0;
 			// sprite code is displaced as well
@@ -143,120 +175,107 @@ for f:=0 to $ff do begin
 			color:=(atrib and $f) shl 4;
       put_gfx_sprite(nchar and $fff,768+color,flipx,flipy,3);
       actualiza_gfx_sprite(x,y,4,3);
-  end;	//del sprite
-end; //del for
+  end;
+end;
 end;
 
-procedure poner_pant_16(layer,pant_x:byte;trans:boolean;pos_x,pos_y:word);
+procedure poner_pant_16(layer:byte;trans:boolean);
 var
-  f,x,y:byte;
-  nchar,color,pos,sx,sy:word;
+  x,y,f,nchar,color,pos:word;
 begin
-x:=0;
-y:=0;
-for f:=0 to $ff do begin
-  pos:=(y+x*$10)+(pant_x*$100);
-  nchar:=layer_scr[layer].scr_ram[pos and $1fff];
+for f:=0 to $1fff do begin
+  case layer_scr[layer].filas of
+    16:begin
+        x:=f and $ff;
+        y:=f shr 8;
+      end;
+    8:begin
+        x:=f and $7f;
+        y:=f shr 7;
+      end;
+    4:begin
+        x:=f and $3f;
+        y:=f shr 6;
+      end;
+    2:begin
+        x:=f and $1f;
+        y:=f shr 5;
+      end;
+  end;
+  pos:=(x shl 4)+(y shr 4)*$100*layer_scr[layer].filas+(y and $f);
+  nchar:=layer_scr[layer].scr_ram[pos];
   color:=nchar shr 12;
   if (gfx[layer].buffer[pos] or buffer_color[color+(layer*$10)]) then begin
     color:=(color shl 4)+($100*layer);
-    nchar:=(nchar and $fff)*4;
-    sx:=(x*16)+pos_x;
-    sy:=(y*16)+pos_y;
-    if trans then put_gfx_trans(sx,sy,nchar,color,layer+1,layer)
-      else put_gfx(sx,sy,nchar,color,layer+1,layer);
-    sy:=sy+8;
-    if trans then put_gfx_trans(sx,sy,nchar+1,color,layer+1,layer)
-      else put_gfx(sx,sy,nchar+1,color,layer+1,layer);
-    sx:=sx+8;
-    sy:=(y*16)+pos_y;
-    if trans then put_gfx_trans(sx,sy,nchar+2,color,layer+1,layer)
-      else put_gfx(sx,sy,nchar+2,color,layer+1,layer);
-    sy:=sy+8;
-    if trans then put_gfx_trans(sx,sy,nchar+3,color,layer+1,layer)
-      else put_gfx(sx,sy,nchar+3,color,layer+1,layer);
+    nchar:=((nchar and $fff)*4) and layer_scr[layer].char_mask;
+    if trans then begin
+      put_gfx_trans(x*16,y*16,nchar,color,layer+1,layer);
+      put_gfx_trans(x*16,y*16+8,nchar+1,color,layer+1,layer);
+      put_gfx_trans(x*16+8,y*16,nchar+2,color,layer+1,layer);
+      put_gfx_trans(x*16+8,y*16+8,nchar+3,color,layer+1,layer);
+    end else begin
+      put_gfx(x*16,y*16,nchar,color,layer+1,layer);
+      put_gfx(x*16,y*16+8,nchar+1,color,layer+1,layer);
+      put_gfx(x*16+8,y*16,nchar+2,color,layer+1,layer);
+      put_gfx(x*16+8,y*16+8,nchar+3,color,layer+1,layer);
+    end;
     gfx[layer].buffer[pos]:=false;
   end;
-  if (y and $f)=$f then begin
-    x:=x+1;
-    y:=0;
-  end else y:=y+1;
-end;
+  end;
 end;
 
-procedure poner_pant_8(layer,pant_x:byte;trans:boolean;pos_x,pos_y:word);
+procedure poner_pant_8(layer:byte;trans:boolean);
 var
-  x,y:byte;
-  f,nchar,color,pos:word;
+  x,y,f,nchar,color,pos:word;
 begin
-x:=0;
-y:=0;
-for f:=0 to $3ff do begin
-  pos:=(y+x*$20)+(pant_x*400);
-  nchar:=layer_scr[layer].scr_ram[pos and $1fff];
+for f:=0 to $1fff do begin
+  case layer_scr[layer].filas of
+    8:begin
+        x:=f and $ff;
+        y:=f shr 8;
+      end;
+    4:begin
+        x:=f and $7f;
+        y:=f shr 7;
+      end;
+    2:begin
+        x:=f and $3f;
+        y:=f shr 6;
+      end;
+  end;
+  pos:=(x shl 5)+(y shr 5)*$400*layer_scr[layer].filas+(y and $1f);
+  nchar:=layer_scr[layer].scr_ram[pos];
   color:=nchar shr 12;
   if (gfx[layer].buffer[pos] or buffer_color[color+(layer*$10)]) then begin
-    if trans then put_gfx_trans((x*8)+pos_x,(y*8)+pos_y,nchar and $fff,(color shl 4)+($100*layer),layer+1,layer)
-      else put_gfx((x*8)+pos_x,(y*8)+pos_y,nchar and $fff,(color shl 4)+($100*layer),layer+1,layer);
+    if trans then put_gfx_trans(x*8,y*8,nchar and $fff,(color shl 4)+($100*layer),layer+1,layer)
+      else put_gfx(x*8,y*8,nchar and $fff,(color shl 4)+($100*layer),layer+1,layer);
     gfx[layer].buffer[pos]:=false;
   end;
-  if (y and $1f)=$1f then begin
-    x:=x+1;
-    y:=0;
-  end else y:=y+1;
 end;
 end;
 
-procedure update_video_megasys1;
-var
-  g,f,pant_x,h,layer:byte;
-  trans:boolean;
 begin
 trans:=false;
-for g:=4 downto 0 do begin
-  layer:=(prioridad[(active_layer shr 8) and $f] shr (g*4)) and $f;
+for f:=4 downto 0 do begin
+  layer:=(prioridad[(active_layer shr 8) and $f] shr (f*4)) and $f;
   case layer of
-    0,1,2:if (active_layer and (1 shl layer))<>0 then begin
+    0,1,2:if (((active_layer and (1 shl layer))<>0) or (not(trans))) then begin
             if layer_scr[layer].es_8x8 then begin //layer 8x8
-              for h:=0 to 1 do begin
-                for f:=0 to 1 do begin
-                  case layer_scr[layer].filas of
-                    8:pant_x:=pant_1_16[0,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                    4:pant_x:=pant_2_16[((layer_scr[layer].scroll_y shr 8)+h) mod layer_scr[layer].cols,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                    2:pant_x:=pant_3_16[((layer_scr[layer].scroll_y shr 8)+h) mod layer_scr[layer].cols,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                  end;
-                  poner_pant_8(layer,pant_x,trans,f*256,h*256);
-                end;
-              end;
-              scroll_x_y(layer+1,4,layer_scr[layer].scroll_x and $ff,layer_scr[layer].scroll_y and $ff);
-              //actualiza_trozo(0,0,512,512,3,0,0,512,512,4);
+              poner_pant_8(layer,trans);
+              scroll_x_y(layer+1,4,layer_scr[layer].scroll_x,layer_scr[layer].scroll_y);
             end else begin //layer 16x16
-              for h:=0 to 1 do begin
-                for f:=0 to 1 do begin
-                  case layer_scr[layer].filas of
-                    16:pant_x:=pant_0_16[((layer_scr[layer].scroll_y shr 8)+h) mod layer_scr[layer].cols,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                    8:pant_x:=pant_1_16[((layer_scr[layer].scroll_y shr 8)+h) mod layer_scr[layer].cols,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                    4:pant_x:=pant_2_16[((layer_scr[layer].scroll_y shr 8)+h) mod layer_scr[layer].cols,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                    2:pant_x:=pant_3_16[((layer_scr[layer].scroll_y shr 8)+h) mod layer_scr[layer].cols,((layer_scr[layer].scroll_x shr 8)+f) mod layer_scr[layer].filas];
-                  end;
-                  poner_pant_16(layer,pant_x,trans,f*256,h*256);
-                end;
-              end;
-              scroll_x_y(layer+1,4,layer_scr[layer].scroll_x and $ff,layer_scr[layer].scroll_y and $ff);
+              poner_pant_16(layer,trans);
+              scroll_x_y(layer+1,4,layer_scr[layer].scroll_x,layer_scr[layer].scroll_y);
             end;
             trans:=true;
-        end; //del layer_active
+          end;
         3:if (active_layer and 8)<>0 then begin  //Sprites
-            poner_sprites(0);
-            if not(sprites_split) then poner_sprites(1);
+            if sprites_split then poner_sprites(0)
+              else poner_sprites(2);
           end;
         4:if (((active_layer and 8)<>0) and sprites_split) then poner_sprites(1);  //Sprites
-  end;  //del case
-  if not(trans) then begin
-    fill_full_screen(4,$400);
-    trans:=true;
   end;
-end;  //del for
+end;
 actualiza_trozo_final(0,16,256,224,4);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
@@ -286,16 +305,16 @@ if event.arcade then begin
 end;
 end;
 
-procedure megasys1_principal;
+procedure megasys1_a_principal;
 var
   frame_m,frame_s:single;
-  f:byte;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m68000_1.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to $ff do begin
+ for f:=0 to 261 do begin
    //Main CPU
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -318,8 +337,9 @@ end;
 
 function megasys1_a_getword(direccion:dword):word;
 begin
+direccion:=direccion and $fffff;
 case direccion of
-  $0..$5ffff:if (mcu_hs and (((mcu_hs_ram[4] shl 6) and $3ffc0)=(direccion and $3ffc0))) then megasys1_a_getword:=$835d
+  $0..$7ffff:if (mcu_hs and (((mcu_hs_ram[4] shl 6) and $3ffc0)=(direccion and $3ffc0))) then megasys1_a_getword:=$835d
                 else megasys1_a_getword:=rom[direccion shr 1];
   $80000:megasys1_a_getword:=marcade.in2;
   $80002:megasys1_a_getword:=marcade.in0;
@@ -359,71 +379,52 @@ procedure cambiar_layer(layer:byte;valor:word);
 const
   scan_val_16:array[0..3] of word=(16,8,4,2);
   scan_val_8:array[0..3] of word=(8,4,4,2);
+  scan_val_8_col:array[0..3] of word=(1,2,2,4);
 var
-  mask_x,mask_y:word;
+  mask_x,mask_y,cols:word;
 begin
 layer_scr[layer].info:=valor;
 layer_scr[layer].es_8x8:=(((valor shr 4) and 1)<>0);
 if not(layer_scr[layer].es_8x8) then begin //16x16
   layer_scr[layer].filas:=scan_val_16[valor and $3];
-  layer_scr[layer].cols:=scan_val_16[3-(valor and $3)];
+  cols:=scan_val_16[3-(valor and $3)];
 end else begin
   layer_scr[layer].filas:=scan_val_8[valor and $3];
-  layer_scr[layer].cols:=scan_val_8[3-(valor and $3)] shr 1;
+  cols:=scan_val_8_col[valor and $3];
 end;
 mask_x:=(layer_scr[layer].filas*256)-1;
-mask_y:=(layer_scr[layer].cols*256)-1;
-screen_mod_scroll(layer+1,layer_scr[layer].filas*256,256,mask_x,layer_scr[layer].cols*256,256,mask_y);
-layer_scr[layer].mask_x:=mask_x;
-layer_scr[layer].mask_y:=mask_y;
-fillchar(gfx[layer].buffer[0],$2000,1);
+mask_y:=(cols*256)-1;
+screen_mod_scroll(layer+1,layer_scr[layer].filas*256,256,mask_x,cols*256,256,mask_y);
+fillchar(gfx[layer].buffer,$2000,1);
 end;
 
 procedure megasys1_a_putword(direccion:dword;valor:word);
 begin
+direccion:=direccion and $fffff;
 case direccion of
-    0..$23fef,$23ffa..$5ffff:;
+    0..$23fef,$23ffa..$7ffff:;
     $23ff0..$23ff9:begin
                       mcu_hs_ram[(direccion and $f) shr 1]:=valor;
-                      if (((mcu_hs_ram[0]=0) and (mcu_hs_ram[1]=$0055) and (mcu_hs_ram[2]=$00aa) and (mcu_hs_ram[3]=$00ff)) and (((direccion and $f) shr 1)=4)) then mcu_hs:=true
-	                      else mcu_hs:=false;
+                      mcu_hs:=(((mcu_hs_ram[0]=0) and (mcu_hs_ram[1]=$0055) and (mcu_hs_ram[2]=$00aa) and (mcu_hs_ram[3]=$00ff)) and (((direccion and $f) shr 1)=4));
                    end;
     $84000..$843ff:begin
                       vregs_ram[(direccion and $3ff) shr 1]:=valor;
                       case (direccion and $3ff) of
                         $000:if active_layer<>valor then begin
                                active_layer:=valor;
-                               if (active_layer and 1)<>0 then fillchar(gfx[0].buffer[0],$2000,1);
-                               if (active_layer and 2)<>0 then fillchar(gfx[1].buffer[0],$2000,1);
-                               if (active_layer and 4)<>0 then fillchar(gfx[2].buffer[0],$2000,1);
+                               if (active_layer and 1)<>0 then fillchar(gfx[0].buffer,$2000,1);
+                               if (active_layer and 2)<>0 then fillchar(gfx[1].buffer,$2000,1);
+                               if (active_layer and 4)<>0 then fillchar(gfx[2].buffer,$2000,1);
                              end;
-                        $008:begin
-                                if (layer_scr[2].scroll_x shr 8)<>((valor and layer_scr[2].mask_x) shr 8) then fillchar(gfx[2].buffer[0],$2000,1);
-                                layer_scr[2].scroll_x:=valor and layer_scr[2].mask_x;
-                             end;
-                        $00a:begin
-                                if (layer_scr[2].scroll_y shr 8)<>((valor and layer_scr[2].mask_y) shr 8) then fillchar(gfx[2].buffer[0],$2000,1);
-                                layer_scr[2].scroll_y:=valor and layer_scr[2].mask_y;
-                             end;
+                        $008:layer_scr[2].scroll_x:=valor;
+                        $00a:layer_scr[2].scroll_y:=valor;
                         $00c:if layer_scr[2].info<>valor then cambiar_layer(2,valor);
                         $100:sprites_split:=(valor and $100)<>0;
-                        $200:begin
-                                if (layer_scr[0].scroll_x shr 8)<>((valor and layer_scr[0].mask_x) shr 8) then fillchar(gfx[0].buffer[0],$2000,1);
-                                layer_scr[0].scroll_x:=valor and layer_scr[0].mask_x;
-                             end;
-                        $202:begin
-                                if (layer_scr[0].scroll_y shr 8)<>((valor and layer_scr[0].mask_y) shr 8) then fillchar(gfx[0].buffer[0],$2000,1);
-                                layer_scr[0].scroll_y:=valor and layer_scr[0].mask_y;
-                             end;
+                        $200:layer_scr[0].scroll_x:=valor;
+                        $202:layer_scr[0].scroll_y:=valor;
                         $204:if layer_scr[0].info<>valor then cambiar_layer(0,valor);
-                        $208:begin
-                                if (layer_scr[1].scroll_x shr 8)<>((valor and layer_scr[1].mask_x) shr 8) then fillchar(gfx[1].buffer[0],$2000,1);
-                                layer_scr[1].scroll_x:=valor and layer_scr[1].mask_x;
-                             end;
-                        $20a:begin
-                                if (layer_scr[1].scroll_y shr 8)<>((valor and layer_scr[1].mask_y) shr 8) then fillchar(gfx[1].buffer[0],$2000,1);
-                                layer_scr[1].scroll_y:=valor and layer_scr[1].mask_y;
-                             end;
+                        $208:layer_scr[1].scroll_x:=valor;
+                        $20a:layer_scr[1].scroll_y:=valor;
                         $20c:if layer_scr[1].info<>valor then cambiar_layer(1,valor);
                         $300:if (valor and $10)<>0 then m68000_1.change_reset(ASSERT_LINE)
                                 else m68000_1.change_reset(CLEAR_LINE);
@@ -458,12 +459,11 @@ function megasys1_snd_a_getword(direccion:dword):word;
 begin
 case direccion of
   0..$1ffff:megasys1_snd_a_getword:=rom_snd[direccion shr 1];
-  $40000:megasys1_snd_a_getword:=sound_latch;
+  $40000,$60000:megasys1_snd_a_getword:=sound_latch;
   $80002:megasys1_snd_a_getword:=ym2151_0.status;
   $a0000:megasys1_snd_a_getword:=0;//oki_6295_0.read;
   $c0000:megasys1_snd_a_getword:=0;//oki_6295_1.read;
-  $e0000..$fffff:megasys1_snd_a_getword:=ram_snd[(direccion and $1ffff) shr 1];
-  $ff21de,$ff21b0,$ff22be:megasys1_snd_a_getword:=$ffff;
+  $e0000..$fffff:megasys1_snd_a_getword:=ram_snd[(direccion and $ffff) shr 1];
 end;
 end;
 
@@ -471,12 +471,12 @@ procedure megasys1_snd_a_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$1ffff:;
-  $60000:sound_latch2:=valor;
+  $40000,$60000:sound_latch2:=valor;
   $80000:ym2151_0.reg(valor);
   $80002:ym2151_0.write(valor);
   $a0000,$a0002:oki_6295_0.write(valor);
   $c0000,$c0002:oki_6295_1.write(valor);
-  $e0000..$fffff:ram_snd[(direccion and $1ffff) shr 1]:=valor;
+  $e0000..$fffff:ram_snd[(direccion and $ffff) shr 1]:=valor;
 end;
 end;
 
@@ -490,6 +490,133 @@ end;
 procedure snd_irq(irqstate:byte);
 begin
   if irqstate=1 then m68000_1.irq[4]:=HOLD_LINE;
+end;
+
+//Megasys C
+procedure megasys1_c_principal;
+var
+  frame_m,frame_s:single;
+  f:word;
+begin
+init_controls(false,false,false,true);
+frame_m:=m68000_0.tframes;
+frame_s:=m68000_1.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to 261 do begin
+   //Main CPU
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   //Sound CPU
+   m68000_1.run(frame_s);
+   frame_s:=frame_s+m68000_1.tframes-m68000_1.contador;
+   case f of
+    127:m68000_0.irq[1]:=HOLD_LINE;
+    239:begin
+          update_video_megasys1;
+          m68000_0.irq[4]:=HOLD_LINE;
+        end;
+    261:m68000_0.irq[2]:=HOLD_LINE;
+   end;
+ end;
+ eventos_megasys1;
+ video_sync;
+end;
+end;
+
+function megasys1_c_getword(direccion:dword):word;
+begin
+direccion:=direccion and $1fffff;
+case direccion of
+  $0..$7ffff:megasys1_c_getword:=rom[direccion shr 1];
+  $c2000..$c23ff:megasys1_c_getword:=vregs_ram[(direccion and $3ff) shr 1];
+  $c8000:megasys1_c_getword:=sound_latch2;
+  $d2000..$d3fff:megasys1_c_getword:=obj_ram[(direccion and $1fff) shr 1];
+  $d8000:megasys1_c_getword:=ip_select;
+  $e0000..$e7fff:megasys1_c_getword:=layer_scr[0].scr_ram[(direccion and $3fff) shr 1];
+  $e8000..$effff:megasys1_c_getword:=layer_scr[1].scr_ram[(direccion and $3fff) shr 1];
+  $f0000..$f7fff:megasys1_c_getword:=layer_scr[2].scr_ram[(direccion and $3fff) shr 1];
+  $f8000..$f87ff:megasys1_c_getword:=buffer_paleta[(direccion and $7ff) shr 1];
+  $1c0000..$1fffff:megasys1_c_getword:=ram[(direccion and $ffff) shr 1];
+end;
+end;
+
+procedure megasys1_c_putword(direccion:dword;valor:word);
+
+procedure ip_select_prot(valor:word);
+var
+  f:byte;
+begin
+  for f:=0 to 7 do if ((valor and $ff)=ip_select_values[f]) then break;
+	case f of
+			0:ip_select:=marcade.in2;
+			1:ip_select:=marcade.in0;
+			2:ip_select:=marcade.in1;
+			3:ip_select:=marcade.dswa;
+			4:ip_select:=marcade.dswb;
+			5:ip_select:=$0d; // startup check?
+			6:ip_select:=$06; // sent before each other command
+			else exit; // get out if it wasn't a valid request
+	end;
+	// if the command is valid, generate an IRQ from the MCU
+  m68000_0.irq[2]:=HOLD_LINE;
+end;
+
+begin
+direccion:=direccion and $1fffff;
+case direccion of
+    0..$7ffff:;
+    $c2000..$c23ff:begin
+                      vregs_ram[(direccion and $3ff) shr 1]:=valor;
+                      case (direccion and $3ff) of
+                        $000:layer_scr[0].scroll_x:=valor;
+                        $002:layer_scr[0].scroll_y:=valor;
+                        $004:if layer_scr[0].info<>valor then cambiar_layer(0,valor);
+                        $008:layer_scr[1].scroll_x:=valor;
+                        $00a:layer_scr[1].scroll_y:=valor;
+                        $00c:if layer_scr[1].info<>valor then cambiar_layer(1,valor);
+                        $100:layer_scr[2].scroll_x:=valor;
+                        $102:layer_scr[2].scroll_y:=valor;
+                        $104:if layer_scr[2].info<>valor then cambiar_layer(2,valor);
+                        $108:sprite_bank:=valor and 1;
+                        $200:sprites_split:=(valor and $100)<>0;
+                        $208:if active_layer<>valor then begin
+                               active_layer:=valor;
+                               if (active_layer and 1)<>0 then fillchar(gfx[0].buffer,$2000,1);
+                               if (active_layer and 2)<>0 then fillchar(gfx[1].buffer,$2000,1);
+                               if (active_layer and 4)<>0 then fillchar(gfx[2].buffer,$2000,1);
+                             end;
+                        $308:if (valor and $10)<>0 then begin
+                                m68000_1.change_reset(ASSERT_LINE);
+                                ym2151_0.reset;
+                                oki_6295_0.reset;
+                                oki_6295_1.reset;
+                             end else m68000_1.change_reset(CLEAR_LINE);
+                      end;
+                    end;
+    $c8000:begin
+              sound_latch:=valor;
+              m68000_1.irq[2]:=HOLD_LINE;
+            end;
+    $d2000..$d3fff:obj_ram[(direccion and $1fff) shr 1]:=valor;
+    $d8000:ip_select_prot(valor);
+    $e0000..$e7fff:if (layer_scr[0].scr_ram[(direccion and $3fff) shr 1]<>valor) then begin
+                      layer_scr[0].scr_ram[(direccion and $3fff) shr 1]:=valor;
+                      gfx[0].buffer[(direccion and $3fff) shr 1]:=true;
+                   end;
+    $e8000..$effff:if (layer_scr[1].scr_ram[(direccion and $3fff) shr 1]<>valor) then begin
+                      layer_scr[1].scr_ram[(direccion and $3fff) shr 1]:=valor;
+                      gfx[1].buffer[(direccion and $3fff) shr 1]:=true;
+                   end;
+    $f0000..$f7fff:if (layer_scr[2].scr_ram[(direccion and $3fff) shr 1]<>valor) then begin
+                      layer_scr[2].scr_ram[(direccion and $3fff) shr 1]:=valor;
+                      gfx[2].buffer[(direccion and $3fff) shr 1]:=true;
+                   end;
+    $f8000..$f87ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
+                      buffer_paleta[(direccion and $7ff) shr 1]:=valor;
+                      cambiar_color(valor,(direccion and $7ff) shr 1);
+                   end;
+    $1c0000..$1fffff:ram[(direccion and $ffff) shr 1]:=valor;
+  end;
 end;
 
 //Main
@@ -515,16 +642,14 @@ begin
   layer_scr[f].scroll_x:=0;
   layer_scr[f].scroll_y:=0;
   layer_scr[f].es_8x8:=true;
-  layer_scr[f].filas:=16;
-  layer_scr[f].cols:=2;
+  layer_scr[f].filas:=4;
   layer_scr[f].info:=$ffff;
-  layer_scr[f].mask_x:=0;
-  layer_scr[f].mask_y:=0;
-  fillchar(layer_scr[f].scr_ram[0],$4000,0);
  end;
+ ip_select:=6;
  mcu_hs:=false;
 end;
 
+function iniciar_megasys1:boolean;
 procedure decript_phantasm(dest,source:pword);
 var
   f:dword;
@@ -547,7 +672,6 @@ begin
     inc(dest);
   end;  //del for
 end;
-
 procedure decript_rodland(dest,source:pword);
 var
   f:dword;
@@ -556,40 +680,55 @@ begin
 	for f:=0 to $1ffff do begin
 		x:=source^;
     inc(source);
-		if (f<($8000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
+		if (f<$4000) then begin
+      if ((f or $124)<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
         else y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c);
-    end else if	(f<($10000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$f,$d,$b,$9,$c,$e,$0,$7,$5,$3,$1,$8,$a,$2,$4,$6)
+    end else if	(f<$8000) then begin
+      if ((f or $124)<>f) then y:=BITSWAP16(x,$f,$d,$b,$9,$c,$e,$0,$7,$5,$3,$1,$8,$a,$2,$4,$6)
         else y:=BITSWAP16(x,$4,$5,$1,$2,$e,$d,$3,$b,$a,$9,$6,$7,$0,$8,$f,$c);
-    end else if	(f<($18000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
+    end else if	(f<$c000) then begin
+      if ((f or $124)<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
         else y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c);
-    end	else if	(f<($20000 div 2)) then y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c)
+    end	else if	(f<$10000) then y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c)
       else y:=BITSWAP16(x,$4,$5,$1,$2,$e,$d,$3,$b,$a,$9,$6,$7,$0,$8,$f,$c);
     dest^:=y;
     inc(dest);
   end;  //del for
 end;
-
-function iniciar_megasys1:boolean;
+procedure decode_gfx_rodland(rom:pbyte);
+var
+  f,i:dword;
+  buffer:pbyte;
+begin
+  // data lines swap: 76543210 -> 64537210
+	for f:=0 to $7ffff do rom[f]:=BITSWAP8(rom[f],6,4,5,3,7,2,1,0);
+  getmem(buffer,$80000);
+	copymemory(buffer,rom,$80000);
+	// address lines swap: ..dcba9876543210 -> ..acb8937654d210
+	for f:=0 to $7ffff do begin
+    i:=BITSWAP24(f,$17,$16,$15,$14,$13,$12,$11,$10,$f,$e,$a,$c,$b,8,9,3,7,6,5,4,$d,2,1,0);
+		rom[f]:=buffer[i];
+	end;
+  freemem(buffer);
+end;
 const
-  pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-  ps_x:array[0..15] of dword=(8*8*4*0+0,8*8*4*0+4,8*8*4*0+8,8*8*4*0+12,8*8*4*0+16,8*8*4*0+20,8*8*4*0+24,8*8*4*0+28,
-		8*8*4*2+0,8*8*4*2+4,8*8*4*2+8,8*8*4*2+12,8*8*4*2+16,8*8*4*2+20,8*8*4*2+24,8*8*4*2+28);
+  ps_x:array[0..15] of dword=(0*4,1*4,2*4,3*4,4*4,5*4,6*4,7*4,
+		4*8*16+0*4,4*8*16+1*4,4*8*16+2*4,4*8*16+3*4,4*8*16+4*4,4*8*16+5*4,4*8*16+6*4,4*8*16+7*4);
   ps_y:array[0..15] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8,
 		8*4*8, 9*4*8, 10*4*8, 11*4*8, 12*4*8, 13*4*8, 14*4*8, 15*4*8);
 var
   memoria_temp:pbyte;
   mem_prom:array[0..$1ff] of byte;
   memoria_w,ptemp:pword;
+
 procedure convert_chars(ngfx:byte;num:dword);
 begin
   init_gfx(ngfx,8,8,num);
   gfx[ngfx].trans[15]:=true;
   gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
-  convert_gfx(ngfx,0,memoria_temp,@pc_x[0],@ps_y[0],false,false);
+  convert_gfx(ngfx,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 end;
+
 procedure convert_sprites(ngfx:byte;num:dword);
 begin
   init_gfx(ngfx,16,16,num);
@@ -597,6 +736,7 @@ begin
   gfx_set_desc_data(4,0,16*16*4,0,1,2,3);
   convert_gfx(ngfx,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 end;
+
 procedure convert_pri;
 var
   pri_code,offset,enable_mask:byte;
@@ -638,7 +778,7 @@ for pri_code:=0 to $f do begin	// 16 priority codes
 				if (result=2)	then enable_mask:=0; // totally opaque top layer
 			until (enable_mask=0);
     end; //for  offset
-		// merge the two layers orders */
+		// merge the two layers orders
 		order:=$fffff;
     i:=5;
 		while i>0 do begin // 5 layers to write
@@ -665,7 +805,7 @@ for pri_code:=0 to $f do begin	// 16 priority codes
 					layers_order[1]:=layers_order[1] shl 4;	// layer1 won't change next loop
 				end;
 			end;
-			// reverse the order now */
+			// reverse the order now
 			order:=(order shl 4) or layer;
 			i:=i-1;		// layer written
 			layers_order[0]:=layers_order[0] shr 4;
@@ -674,25 +814,25 @@ for pri_code:=0 to $f do begin	// 16 priority codes
 		prioridad[pri_code]:=order and $fffff;	// at last!
 end;	//del for pri_code
 end;
+
 begin
 iniciar_megasys1:=false;
+llamadas_maquina.bucle_general:=megasys1_a_principal;
+llamadas_maquina.reset:=reset_megasys1;
+llamadas_maquina.fps_max:=56.191350;
 iniciar_audio(true);
-screen_init(1,512,512);
+screen_init(1,4096,4096,true);
 screen_mod_scroll(1,512,256,511,512,256,511);
-screen_init(2,512,512,true);
+screen_init(2,4096,4096,true);
 screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,512,true);
+screen_init(3,4096,4096,true);
 screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(256,224);
-//iniciar_video(512,512);
-//Main CPU
 getmem(memoria_temp,$100000);
 getmem(memoria_w,$60000);
-m68000_0:=cpu_m68000.create(6000000,$100);
-m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
 //Sound CPU
-m68000_1:=cpu_m68000.create(7000000,$100);
+m68000_1:=cpu_m68000.create(7000000,262);
 m68000_1.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
 m68000_1.init_sound(megasys1_sound_update);
 //Sound Chips
@@ -700,8 +840,14 @@ oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
 oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
 ym2151_0:=ym2151_chip.create(3500000);
 ym2151_0.change_irq_func(snd_irq);
+layer_scr[0].char_mask:=$3fff;
+layer_scr[1].char_mask:=$3fff;
+layer_scr[2].char_mask:=$1fff;
 case main_vars.tipo_maquina of
   138:begin //P-47
+        //Main CPU
+        m68000_0:=cpu_m68000.create(6000000,262);
+        m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
         //cargar roms
         if not(roms_load16w(@rom,p47_rom)) then exit;
         //cargar sonido
@@ -729,6 +875,9 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@p47_dip;
       end;
   139:begin  //Rodland
+        //Main CPU
+        m68000_0:=cpu_m68000.create(6000000,262);
+        m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
         //cargar roms
         if not(roms_load16w(memoria_w,rodland_rom)) then exit;
         decript_rodland(@rom,memoria_w);
@@ -742,6 +891,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(oki_6295_1.get_rom_addr,rodland_oki2)) then exit;
         //scroll 0 y ordenar
         if not(roms_load(memoria_temp,rodland_scr0)) then exit;
+        decode_gfx_rodland(memoria_temp);
         convert_chars(0,$4000);
         //scroll 1
         if not(roms_load(memoria_temp,rodland_scr1)) then exit;
@@ -749,8 +899,9 @@ case main_vars.tipo_maquina of
         //scroll 2
         if not(roms_load(memoria_temp,rodland_scr2)) then exit;
         convert_chars(2,$1000);
-        //Sprites
+        //Sprites y ordenar
         if not(roms_load(memoria_temp,rodland_sprites)) then exit;
+        decode_gfx_rodland(memoria_temp);
         convert_sprites(3,$1000);
         //Prioridades
         if not(roms_load(@mem_prom,rodland_pri)) then exit;
@@ -760,10 +911,12 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@rodland_dip;
       end;
   140:begin //Saint Dragon
+        //Main CPU
+        m68000_0:=cpu_m68000.create(6000000,262);
+        m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
         //cargar roms
         if not(roms_load16w(memoria_w,stdragon_rom)) then exit;
         decript_phantasm(@rom,memoria_w);
-        //rom[$00045e div 2]:=$0098;	// protection
         //cargar sonido
         if not(roms_load16w(@rom_snd,stdragon_sound)) then exit;
         //OKI Sounds
@@ -787,20 +940,53 @@ case main_vars.tipo_maquina of
         marcade.dswa:=$ffbf;
         marcade.dswa_val:=@stdragon_dip;
       end;
+  337:begin //64th street
+        llamadas_maquina.bucle_general:=megasys1_c_principal;
+        //Main CPU
+        m68000_0:=cpu_m68000.create(12000000,262);
+        m68000_0.change_ram16_calls(megasys1_c_getword,megasys1_c_putword);
+        //cargar roms
+        if not(roms_load16w(@rom,th64_rom)) then exit;
+        //cargar sonido
+        if not(roms_load16w(@rom_snd,th64_sound)) then exit;
+        //OKI Sounds
+        if not(roms_load(oki_6295_0.get_rom_addr,th64_oki1)) then exit;
+        if not(roms_load(oki_6295_1.get_rom_addr,th64_oki2)) then exit;
+        //scroll 0
+        if not(roms_load(memoria_temp,th64_scr0)) then exit;
+        convert_chars(0,$4000);
+        //scroll 1
+        if not(roms_load(memoria_temp,th64_scr1)) then exit;
+        convert_chars(1,$4000);
+        //scroll 2
+        if not(roms_load(memoria_temp,th64_scr2)) then exit;
+        convert_chars(2,$1000);
+        //Sprites
+        if not(roms_load(memoria_temp,th64_sprites)) then exit;
+        convert_sprites(3,$2000);
+        //Prioridades
+        if not(roms_load(@mem_prom,th64_pri)) then exit;
+        convert_pri;
+        //Proteccion
+        ip_select_values[0]:=$57;
+        ip_select_values[1]:=$53;
+        ip_select_values[2]:=$54;
+        ip_select_values[3]:=$55;
+        ip_select_values[4]:=$56;
+        ip_select_values[5]:=$fa;
+        ip_select_values[6]:=$06;
+        //DIP
+        marcade.dswa:=$ff;
+        marcade.dswa_val:=@th64_dip_a;
+        marcade.dswb:=$bd;
+        marcade.dswb_val:=@th64_dip_b;
+      end;
 end;
 //final
 freemem(memoria_temp);
 freemem(memoria_w);
 reset_megasys1;
 iniciar_megasys1:=true;
-end;
-
-procedure cargar_megasys1;
-begin
-llamadas_maquina.iniciar:=iniciar_megasys1;
-llamadas_maquina.bucle_general:=megasys1_principal;
-llamadas_maquina.reset:=reset_megasys1;
-llamadas_maquina.fps_max:=56.191350;
 end;
 
 end.

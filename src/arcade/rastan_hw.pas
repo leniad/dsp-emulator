@@ -134,7 +134,7 @@ case direccion of
   $390006:rastan_getword:=marcade.in0;
   $390008:rastan_getword:=$fe;
   $39000c..$39000f:rastan_getword:=$00;
-  $3e0002:if m68000_0.access_8bits_hi_dir then rastan_getword:=tc0140syt_0.comm_r;
+  $3e0002:if m68000_0.read_8bits_hi_dir then rastan_getword:=tc0140syt_0.comm_r;
   $c00000..$c0ffff:rastan_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:rastan_getword:=ram3[(direccion and $3fff) shr 1];
 end;

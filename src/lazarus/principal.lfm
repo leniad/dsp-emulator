@@ -14343,6 +14343,13 @@ object principal1: Tprincipal1
             Caption = 'Super Duck'
             OnClick = CambiarMaquina
           end
+          object MenuItem46: TMenuItem
+            Caption = 'Hang-On HW'
+            object hangon1: TMenuItem
+              Caption = 'Hang-On'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object MenuItem11: TMenuItem
           Caption = '80x86'

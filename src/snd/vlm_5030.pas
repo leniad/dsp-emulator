@@ -577,6 +577,7 @@ end;
 procedure vlm5030_chip.update;
 begin
 tsample[self.tsample_num,sound_status.posicion_sonido]:=self.out_;
+if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.out_;
 end;
 
 procedure vlm5030_update_stream;

@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 233
+  ClientHeight = 228
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 172
+    Height = 167
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 172
+    Height = 167
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 163
+    ExplicitHeight = 158
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 214
+    Top = 209
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 205
+    ExplicitTop = 200
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -3478,6 +3478,10 @@ object principal1: Tprincipal1
               Caption = 'Saint Dragon'
               OnClick = CambiarMaquina
             end
+            object N64thStreet1: TMenuItem
+              Caption = '64th Street - A detective story'
+              OnClick = CambiarMaquina
+            end
           end
           object winCobraHardware1: TMenuItem
             Caption = 'Twin Cobra HW'
@@ -3776,6 +3780,21 @@ object principal1: Tprincipal1
           object SuperDuck1: TMenuItem
             Caption = 'Super Duck'
             OnClick = CambiarMaquina
+          end
+          object HangOnHW1: TMenuItem
+            Caption = 'Hang On HW'
+            object HangOn1: TMenuItem
+              Caption = 'Hang On'
+              OnClick = CambiarMaquina
+            end
+            object EnduroRacer1: TMenuItem
+              Caption = 'Enduro Racer'
+              OnClick = CambiarMaquina
+            end
+            object SpaceHarrier1: TMenuItem
+              Caption = 'Space Harrier'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem

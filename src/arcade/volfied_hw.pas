@@ -36,6 +36,7 @@ const
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Medium'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$70;name:'Lives';number:4;dip:((dip_val:$70;dip_name:'3'),(dip_val:$60;dip_name:'4'),(dip_val:$50;dip_name:'5'),(dip_val:$40;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$80;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        CPU_SYNC=4;
 
 var
  video_mask,video_ctrl:word;
@@ -107,7 +108,7 @@ end;
 procedure volfied_principal;
 var
   frame_m,frame_s{$IFDEF MCU},frame_mcu{$ENDIF}:single;
-  f:byte;
+  f,h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
@@ -115,17 +116,19 @@ frame_s:=tc0140syt_0.z80.tframes;
 {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
-        //Main CPU
-        m68000_0.run(frame_m);
-        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-        //Sound CPU
-        tc0140syt_0.z80.run(frame_s);
-        frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-        //MCU
-        {$IFDEF MCU}
-        cchip_0.upd7810.run(frame_mcu);
-        frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
-        {$ENDIF}
+        for h:=1 to CPU_SYNC do begin
+          //Main CPU
+          m68000_0.run(frame_m);
+          frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+          //Sound CPU
+          tc0140syt_0.z80.run(frame_s);
+          frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+          //MCU
+          {$IFDEF MCU}
+          cchip_0.upd7810.run(frame_mcu);
+          frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
+          {$ENDIF}
+        end;
       if f=247 then begin
         update_video_volfied;
         m68000_0.irq[4]:=HOLD_LINE;
@@ -147,7 +150,7 @@ case direccion of
   $400000..$47ffff:volfied_getword:=ram2[(direccion and $7ffff) shr 1];
   $500000..$503fff:volfied_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $d00000:volfied_getword:=$60;
-  $e00002:if m68000_0.access_8bits_hi_dir then volfied_getword:=tc0140syt_0.comm_r;
+  $e00002:if m68000_0.read_8bits_hi_dir then volfied_getword:=tc0140syt_0.comm_r;
   {$IFDEF MCU}
   $f00000..$f007ff:volfied_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
   $f00800..$f00fff:volfied_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
@@ -293,10 +296,10 @@ screen_init(1,248,512);
 screen_init(2,512,512,false,true);
 iniciar_video(240,320);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000,256*CPU_SYNC);
 m68000_0.change_ram16_calls(volfied_getword,volfied_putword);
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_SYNC);
 tc0140syt_0.z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
 tc0140syt_0.z80.init_sound(volfied_update_sound);
 //Sound Chips

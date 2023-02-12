@@ -154,7 +154,7 @@ case direccion of
   $200000..$203fff:rainbow_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $390000..$390002:rainbow_getword:=marcade.dswa;
   $3b0000..$3b0002:rainbow_getword:=marcade.dswb;
-  $3e0002:if m68000_0.access_8bits_hi_dir then rainbow_getword:=tc0140syt_0.comm_r;
+  $3e0002:if m68000_0.read_8bits_hi_dir then rainbow_getword:=tc0140syt_0.comm_r;
   {$IFDEF MCU}
   $800000..$8007ff:rainbow_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
   $800800..$800fff:rainbow_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);

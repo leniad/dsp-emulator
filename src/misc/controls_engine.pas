@@ -288,7 +288,7 @@ event.keyboard:=false;
 fillchar(keyboard[0],256,0);
 end;
 
-procedure evaluar_arcade_keyb(player:byte);
+procedure evaluar_arcade_keyb_extra(player:byte);
 begin
 //System
 if (arcade_input.coin[player]<>(keyboard[arcade_input.ncoin[player]])) then begin
@@ -299,6 +299,10 @@ if (arcade_input.start[player]<>(keyboard[arcade_input.nstart[player]])) then be
   arcade_input.start[player]:=keyboard[arcade_input.nstart[player]];
   event.arcade:=true;
 end;
+end;
+
+procedure evaluar_arcade_keyb(player:byte);
+begin
 //Joystick
 if (arcade_input.up[player]<>(keyboard[arcade_input.nup[player]])) then begin
     arcade_input.up[player]:=keyboard[arcade_input.nup[player]];
@@ -369,13 +373,11 @@ end else begin
 end;
 end;
 
-procedure evaluar_arcade_joy(tevent:integer;player:byte);
+procedure evaluar_arcade_joy_extra(tevent:integer;player:byte);
 var
-  valor:integer;
   tempb:boolean;
   player_joy:byte;
 begin
-if joystick.num=0 then exit;
 player_joy:=arcade_input.num_joystick[player];
 case tevent of
   libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
@@ -390,6 +392,19 @@ case tevent of
         arcade_input.start[player]:=tempb;
         event.arcade:=true;
       end;
+  end;
+end;
+end;
+
+procedure evaluar_arcade_joy(tevent:integer;player:byte);
+var
+  valor:integer;
+  tempb:boolean;
+  player_joy:byte;
+begin
+player_joy:=arcade_input.num_joystick[player];
+case tevent of
+  libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
       //Buttons
       if timers.autofire_enabled[0+(player*6)] then begin
         timers.autofire_status[0+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut0[player])<>0;
@@ -477,12 +492,12 @@ procedure evalue_controls;
 var
    f,sc_mul:byte;
    sdl_event:libSDL_Event;
-function video_mult:byte;
+procedure video_mult;
 begin
   case main_screen.video_mode of
-    2,4,6:video_mult:=2;
-    5:video_mult:=3;
-    else video_mult:=1;
+    2,4:sc_mul:=2;
+    5:sc_mul:=3;
+    else sc_mul:=1;
   end;
 end;
 
@@ -496,7 +511,7 @@ begin
     if ((sdl_event.window.event<>libSDL_WINDOWEVENT_ENTER) and (sdl_event.window.event<>libSDL_WINDOWEVENT_LEAVE)) then SDL_ClearQueuedAudio(sound_device);
   {$endif}
   //Rellenar el teclado interno
-  //principal1.statusbar1.panels[2].text:=inttostr(sdl_event.key.keysym.scancode);
+  //principal1.statusbar1.panels[2].text:=inttostr(analog.c[0].x[0]);
   for f:=0 to $ff do
       if keyboard[f]<>(keystate[f]<>0) then begin
         event.keyboard:=true;
@@ -522,15 +537,22 @@ begin
   //Joy Stick
   if (event.ejoystick or event.earcade) then begin
     for f:=0 to NUM_PLAYERS do begin
-      if not(arcade_input.use_key[f]) then evaluar_arcade_joy(sdl_event.type_,f)
-        else if event.keyboard then evaluar_arcade_keyb(f);
+      if not(arcade_input.use_key[f]) then begin
+        evaluar_arcade_joy(sdl_event.type_,f);
+        if event.earcade then evaluar_arcade_joy_extra(sdl_event.type_,f);
+      end else begin
+        if event.keyboard then begin
+          evaluar_arcade_keyb(f);
+          if event.earcade then evaluar_arcade_keyb_extra(f);
+        end;
+      end;
     end;
   end;
   //Raton
   if event.emouse then begin
     case sdl_event.type_ of
       libSDL_MOUSEMOTION:begin  //Movimiento
-                            sc_mul:=video_mult;
+                            video_mult;
                             raton.x:=sdl_event.motion.x div sc_mul;
                             raton.y:=sdl_event.motion.y div sc_mul;
                             event.mouse:=true;

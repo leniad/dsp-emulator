@@ -1,4 +1,65 @@
 ﻿# DSP Emulator status #
+<b>12/02/23 - DSP Emulator 0.21WIP6. Updated Windows binary and source.<br>
+<pre>
+-General 
+    +Updated SDL library to 2.26.3
+    +Updated preview images
+    +Remove arcade keys when not using arcade drivers
+    +CPU
+        -M68000
+            +Split read/write byte flags
+            +Enhanced timings
+            +Fixed opcodes addi.l, addq.l, sbcd.rr, abcd.rr, roxr.w, roxl.w, rol.w, asr.b, lsr.b, roxr.b, ror.b, asr.w, lsr.w, ror.w, asr.l, lsr.l, roxr.l, ror.l asl.b, lsl.b, roxl.b, rol.b, asl.w, lsl.w, asl.l, lsl.l, roxl.l, rol.l
+            +Added movem.w $38 efective address
+        -MCS51
+            +Added opcodes $38..$3f, $62, $63, $64 and $b1
+            +Fixed external get/put byte with no function
+        -fd1089: Updated decode functions
+    +Sound
+        -SEGA PCM: Added stereo
+        -SN76496: Added stereo
+        -VLM5030: Added stereo
+        -YM2203: Added stereo
+    +Updated key redefine names
+        -'COIN' --> 'COIN/SELECT'
+        -'START' --> 'P1/START' or 'P2/START'
+-Gauntlet
+    +Gauntlet: Renamed ROM zip to 'gauntlet'
+    +Gauntlet II: Updated ROMs to v2
+-Hang-On HW
+    +Hang-On: added driver with sound
+    +Enduro racer: added driver with sound
+    +Space Harrier: added driver with sound, some sprite problems (M68000 bug?)
+-Mega System 1 HW
+    +Fixed all video issues
+        -Fixed graphics layers
+        -Fixed scroll
+        -Fixed sprites
+    +Fixed graphics decode
+    +Rod Land
+        -Updated ROMs
+        -Added graphics decrypt
+    +64th Street - A detective story: added driver with sound
+-Outrun
+    +Fixed tile buffer size and activation
+    +Fixed missing sprites
+    +Fixed tiles transparency
+    +Fixed tiles priority
+-Sega System 16A HW
+    +Fixed graphics decode
+    +Fixed sprite ROMs and decode to 16bits
+    +Fixed tiles transparency
+    +Fixed tiles priority (very obious in WB3 end zone)
+    +Alien Syndrome: Updated fd1089 ROM decode key
+    +Wonder Boy III: Updated fd1089 ROM decode key
+-Sega System 16B HW
+    +Fixed disabled screen
+    +Fixed tiles transparency
+    +Fixed tiles priority
+    +Fixed tile buffer activation
+</pre><br>
+<img src="https://i.ibb.co/1TJHpV3/64street.png"> <img src="https://i.ibb.co/D76gTcV/enduror.png"><br>
+<img src="https://i.ibb.co/Y0DM3wd/hangon.png"> <img src="https://i.ibb.co/qYXqgYZ/sharrier.png"><br><br>
 <b>10/01/23 - DSP Emulator 0.21WIP5.1. Updated Windows binary and source.<br>
 <pre>
 -General

@@ -37,7 +37,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
-  ambush_hw,superduck_hw;
+  ambush_hw,superduck_hw,hangon_hw;
 
 type
   tgame_desc=record
@@ -65,7 +65,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=347;
+  GAMES_CONT=351;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -305,7 +305,7 @@ const
   (name:'Lunar Lander';year:'1979';snd:0;hi:false;zip:'llander';grid:233;company:'Atari';rom:@llander;tipo:ARCADE),
   (name:'Crush Roller';year:'1981';snd:1;hi:false;zip:'crush';grid:234;company:'Alpha Denshi Co./Kural Samno Electric, Ltd.';rom:@crush;tipo:ARCADE or MAZE),
   (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta;tipo:ARCADE or FIGHT),
-  (name:'Gauntlet';year:'1985';snd:1;hi:false;zip:'gauntlet2p';grid:236;company:'Atari';rom:@gauntlet2p;tipo:ARCADE or RUN_GUN),
+  (name:'Gauntlet';year:'1985';snd:1;hi:false;zip:'gauntlet';grid:236;company:'Atari';rom:@gauntlet2p;tipo:ARCADE or RUN_GUN),
   (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro;tipo:ARCADE or SHOT),
   (name:'Crazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber;tipo:ARCADE),
   (name:'Return of the Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv;tipo:ARCADE or SHOT),
@@ -403,6 +403,10 @@ const
   (name:'Airwolf';year:'1987';snd:1;hi:false;zip:'airwolf';grid:331;company:'Kyugo';rom:@airwolf;tipo:ARCADE or SHOT),
   (name:'Ambush';year:'1983';snd:1;hi:false;zip:'ambush';grid:332;company:'Tecfri';rom:@ambush;tipo:ARCADE or SHOT),
   (name:'Super Duck';year:'1992';snd:1;hi:false;zip:'supduck';grid:333;company:'Comad';rom:@superduck;tipo:ARCADE or MAZE),
+  (name:'Hang-On';year:'1985';snd:1;hi:false;zip:'hangon';grid:334;company:'Sega';rom:@hangon;tipo:ARCADE or SPORT),
+  (name:'Enduro Racer';year:'1986';snd:1;hi:false;zip:'enduror';grid:335;company:'Sega';rom:@enduror;tipo:ARCADE or SPORT),
+  (name:'Space Harrier';year:'1985';snd:1;hi:false;zip:'sharrier';grid:336;company:'Sega';rom:@sharrier_roms;tipo:ARCADE or RUN_GUN),
+  (name:'64th Street - A detective story';year:'1991';snd:1;hi:false;zip:'64street';grid:337;company:'Jaleco';rom:@th64_roms;tipo:ARCADE or FIGHT),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -415,8 +419,8 @@ const
   (name:'Super Cassette Vision';year:'1984';snd:1;hi:false;zip:'scv';grid:1007;company:'Epoch';rom:@scv;tipo:CONSOLE),
   (name:'Sega Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega';tipo:CONSOLE),
   //G&W
-  (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101;tipo:GNW),
-  (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55;tipo:GNW),
+  (name:'Donkey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101;tipo:GNW),
+  (name:'Donkey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55;tipo:GNW),
   (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56;tipo:GNW));
 
 var
@@ -768,6 +772,10 @@ case numero of
   331:principal1.CambiarMaquina(principal1.airwolf1);
   332:principal1.CambiarMaquina(principal1.ambush1);
   333:principal1.CambiarMaquina(principal1.superduck1);
+  334:principal1.CambiarMaquina(principal1.hangon1);
+  335:principal1.CambiarMaquina(principal1.enduroracer1);
+  336:principal1.CambiarMaquina(principal1.spaceharrier1);
+  337:principal1.CambiarMaquina(principal1.N64thstreet1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1121,6 +1129,10 @@ principal1.SRDMission1.Checked:=false;
 principal1.airwolf1.Checked:=false;
 principal1.ambush1.Checked:=false;
 principal1.superduck1.Checked:=false;
+principal1.hangon1.Checked:=false;
+principal1.enduroracer1.Checked:=false;
+principal1.spaceharrier1.Checked:=false;
+principal1.N64thstreet1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1305,7 +1317,7 @@ case tmaquina of
   134:llamadas_maquina.iniciar:=iniciar_combatsc;
   135:llamadas_maquina.iniciar:=iniciar_hvyunit;
   136,137,149,150:llamadas_maquina.iniciar:=iniciar_snk68;
-  138,139,140:Cargar_megasys1;
+  138,139,140,337:llamadas_maquina.iniciar:=iniciar_megasys1;
   141:llamadas_maquina.iniciar:=timepilot_iniciar;
   142:llamadas_maquina.iniciar:=iniciar_pengo;
   146,147:Cargar_twincobra;
@@ -1389,6 +1401,7 @@ case tmaquina of
   329:llamadas_maquina.iniciar:=iniciar_magmax;
   332:llamadas_maquina.iniciar:=iniciar_ambush;
   333:llamadas_maquina.iniciar:=iniciar_superduck;
+  334,335,336:llamadas_maquina.iniciar:=iniciar_hangon;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2745,6 +2758,22 @@ end;
 if sender=principal1.superduck1 then begin
   tipo:=333;
   principal1.superduck1.Checked:=true;
+end;
+if sender=principal1.hangon1 then begin
+  tipo:=334;
+  principal1.hangon1.Checked:=true;
+end;
+if sender=principal1.enduroracer1 then begin
+  tipo:=335;
+  principal1.enduroracer1.Checked:=true;
+end;
+if sender=principal1.spaceharrier1 then begin
+  tipo:=336;
+  principal1.spaceharrier1.Checked:=true;
+end;
+if sender=principal1.N64thstreet1 then begin
+  tipo:=337;
+  principal1.N64thstreet1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

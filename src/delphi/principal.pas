@@ -501,6 +501,11 @@ type
     Airwolf1: TMenuItem;
     Ambush1: TMenuItem;
     SuperDuck1: TMenuItem;
+    HangOnHW1: TMenuItem;
+    HangOn1: TMenuItem;
+    EnduroRacer1: TMenuItem;
+    SpaceHarrier1: TMenuItem;
+    N64thStreet1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

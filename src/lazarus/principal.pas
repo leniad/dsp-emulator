@@ -273,6 +273,8 @@ type
     magmax1: TMenuItem;
     ambush1: TMenuItem;
     airwolf1: TMenuItem;
+    MenuItem46: TMenuItem;
+    hangon1: TMenuItem;
     superduck1: TMenuItem;
     srdmission1: TMenuItem;
     Repulse1: TMenuItem;

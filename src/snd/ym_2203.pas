@@ -329,6 +329,7 @@ begin
     if lt>$7fff then lt:=$7fff
       else if lt<-$7fff then lt:=-$7fff;
     tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
+    if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
     INTERNAL_TIMER_A(self.OPN.ST,self.OPN.p_ch[2]);
     INTERNAL_TIMER_B(self.OPN.ST)
 end;

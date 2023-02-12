@@ -539,18 +539,18 @@ object MConfig: TMConfig
           Caption = 'But 5'
         end
         object Label13: TLabel
-          Left = 52
+          Left = 35
           Top = 337
-          Width = 29
+          Width = 75
           Height = 13
-          Caption = ' COIN'
+          Caption = ' COIN/SELECT'
         end
         object Label14: TLabel
-          Left = 155
+          Left = 149
           Top = 337
-          Width = 36
+          Width = 54
           Height = 13
-          Caption = 'START'
+          Caption = 'P1/START'
         end
         object RadioButton1: TRadioButton
           Left = 11
@@ -772,18 +772,18 @@ object MConfig: TMConfig
           Caption = 'But 5'
         end
         object Label25: TLabel
-          Left = 62
+          Left = 38
           Top = 337
-          Width = 26
+          Width = 72
           Height = 13
-          Caption = 'COIN'
+          Caption = 'COIN/SELECT'
         end
         object Label26: TLabel
-          Left = 168
+          Left = 159
           Top = 337
-          Width = 36
+          Width = 54
           Height = 13
-          Caption = 'START'
+          Caption = 'P2/START'
         end
         object RadioButton3: TRadioButton
           Left = 16

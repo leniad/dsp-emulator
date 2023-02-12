@@ -337,7 +337,8 @@ uses
   chinagate_hw in '..\arcade\chinagate_hw.pas',
   magmax_hw in '..\arcade\magmax_hw.pas',
   ambush_hw in '..\arcade\ambush_hw.pas',
-  superduck_hw in '..\arcade\superduck_hw.pas';
+  superduck_hw in '..\arcade\superduck_hw.pas',
+  hangon_hw in '..\arcade\hangon_hw.pas';
 
 {$R *.res}
 begin

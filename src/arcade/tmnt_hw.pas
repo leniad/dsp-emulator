@@ -160,11 +160,11 @@ case direccion of
     $0a0018:tmnt_getword:=marcade.dswc;
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if m68000_0.access_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
+                        if m68000_0.read_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
                             else tmnt_getword:=k052109_0.read_lsb(((direccion and $3000) shr 1) or (direccion and $07ff)) shl 8;
                      end;
     $140000..$140007:tmnt_getword:=k051960_0.k051937_read(direccion and 7);
-	  $140400..$1407ff:if m68000_0.access_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
+	  $140400..$1407ff:if m68000_0.read_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
                           else tmnt_getword:=k051960_0.read(direccion and $3ff) shl 8;
 end;
 end;
@@ -205,11 +205,11 @@ case direccion of
     $c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if m68000_0.access_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
+                        if m68000_0.write_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
                           else k052109_0.write_lsb(((direccion and $3000) shr 1) or (direccion and $07ff),valor shr 8)
                      end;
     $140000..$140007:k051960_0.k051937_write((direccion and $7),valor);
-	  $140400..$1407ff:if m68000_0.access_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
+	  $140400..$1407ff:if m68000_0.write_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
                         else k051960_0.write(direccion and $3ff,valor shr 8)
   end;
 end;
@@ -401,7 +401,7 @@ case direccion of
                         ssriders_getword:=k053244_read(direccion+1)+(k053244_read(direccion) shl 8);
                       end;
     $5c0600..$5c0603:ssriders_getword:=k053260_0.main_read((direccion and 3) shr 1); //k053260
-    $600000..$603fff:if m68000_0.access_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
+    $600000..$603fff:if m68000_0.read_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
                         else ssriders_getword:=k052109_0.read_lsb((direccion and $3fff) shr 1) shl 8;
 end;
 end;
@@ -473,13 +473,13 @@ case direccion of
     $1c0800..$1c0803:ssriders_protection_w((direccion and $3) shr 1); //proteccion
     $5a0000..$5a001f:begin  //k053244
                         direccion:=((direccion and $1f) shr 1) and $fe;   // handle mirror address
-                        if m68000_0.access_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
+                        if m68000_0.write_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
                           else k053244_write(direccion,valor shr 8);
                      end;
     $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
     $5c0604:z80_0.change_irq(HOLD_LINE); //sound
     $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
-    $600000..$603fff:if m68000_0.access_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
+    $600000..$603fff:if m68000_0.write_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
                         else k052109_0.write_lsb((direccion and $3fff) shr 1,valor shr 8);
   end;
 end;

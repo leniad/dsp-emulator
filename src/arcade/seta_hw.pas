@@ -363,7 +363,7 @@ case direccion of
                         tilebank[(direccion and 7) shr 1]:=valor;
                         fillchar(gfx[1].buffer,$2000,1);
                      end;
-    $500000..$500001:if m68000_0.access_8bits_hi_dir then begin
+    $500000..$500001:if m68000_0.write_8bits_hi_dir then begin
                         if (valor and $30)=0 then m68000_0.irq[3]:=CLEAR_LINE;
                      end;
     $700000..$7003ff:if buffer_paleta[(direccion and $3ff) shr 1]<>valor then begin

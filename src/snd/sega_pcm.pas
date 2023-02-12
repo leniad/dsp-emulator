@@ -74,8 +74,8 @@ end;
 
 procedure tsega_pcm.update;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=self.outl;
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.outr;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.outl*self.amp);
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.outr*self.amp);
 end;
 
 procedure internal_update_segapcm;

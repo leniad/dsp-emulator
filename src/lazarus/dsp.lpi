@@ -17,7 +17,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="21"/>
       <RevisionNr Value="5"/>
-      <BuildNr Value="1330"/>
+      <BuildNr Value="1332"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.21"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="103">
+    <Units Count="106">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,9 +59,8 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="550"/>
-        <CursorPos X="19" Y="573"/>
+        <TopLine Value="552"/>
+        <CursorPos X="19" Y="575"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -172,11 +171,10 @@
       <Unit15>
         <Filename Value="..\misc\controls_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="484"/>
         <CursorPos Y="495"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="acercade.pas"/>
@@ -184,11 +182,10 @@
         <ComponentName Value="Aboutbox"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="11"/>
         <CursorPos X="28" Y="15"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="loadrom.pas"/>
@@ -209,11 +206,10 @@
         <ComponentName Value="MConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="691"/>
         <CursorPos X="42" Y="693"/>
         <UsageCount Value="202"/>
-        <Loaded Value="True"/>
       </Unit18>
       <Unit19>
         <Filename Value="redefine.pas"/>
@@ -393,11 +389,10 @@
         <ComponentName Value="joy_calibration"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
         <CursorPos X="7" Y="57"/>
         <UsageCount Value="226"/>
-        <Loaded Value="True"/>
       </Unit37>
       <Unit38>
         <Filename Value="..\misc\SDL2\sdl2.pas"/>
@@ -408,11 +403,10 @@
       </Unit38>
       <Unit39>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="759"/>
-        <CursorPos X="44" Y="770"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="761"/>
+        <CursorPos X="44" Y="772"/>
         <UsageCount Value="66"/>
-        <Loaded Value="True"/>
       </Unit39>
       <Unit40>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
@@ -453,11 +447,10 @@
       <Unit44>
         <Filename Value="..\misc\lib_sdl2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos X="26" Y="125"/>
         <UsageCount Value="208"/>
-        <Loaded Value="True"/>
       </Unit44>
       <Unit45>
         <Filename Value="..\cpu\m6809.pas"/>
@@ -581,11 +574,10 @@
       <Unit59>
         <Filename Value="..\misc\misc_functions.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos Y="61"/>
         <UsageCount Value="163"/>
-        <Loaded Value="True"/>
       </Unit59>
       <Unit60>
         <Filename Value="..\arcade\sauro_hw.pas"/>
@@ -928,126 +920,109 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit102>
+      <Unit103>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="498"/>
+        <CursorPos Y="510"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="699"/>
+        <CursorPos X="3" Y="704"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="..\snd\ym_2203.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="283"/>
+        <CursorPos Y="294"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit105>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="19" HistoryIndex="18">
       <Position1>
-        <Filename Value="principal.pas"/>
-        <Caret Line="817" Column="12" TopLine="797"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="678" TopLine="670"/>
       </Position1>
       <Position2>
-        <Filename Value="principal.pas"/>
-        <Caret Line="826" Column="12" TopLine="806"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="616" TopLine="604"/>
       </Position2>
       <Position3>
-        <Filename Value="principal.pas"/>
-        <Caret Line="900" Column="12" TopLine="880"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="605" TopLine="602"/>
       </Position3>
       <Position4>
-        <Filename Value="principal.pas"/>
-        <Caret Line="951" TopLine="931"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="616" TopLine="601"/>
       </Position4>
       <Position5>
-        <Filename Value="principal.pas"/>
-        <Caret Line="544" Column="44" TopLine="534"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="617" TopLine="601"/>
       </Position5>
       <Position6>
-        <Filename Value="principal.pas"/>
-        <Caret Line="696" Column="8" TopLine="682"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="653" TopLine="637"/>
       </Position6>
       <Position7>
-        <Filename Value="principal.pas"/>
-        <Caret Line="807" Column="8" TopLine="787"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="25" TopLine="25"/>
       </Position7>
       <Position8>
-        <Filename Value="principal.pas"/>
-        <Caret Line="816" Column="8" TopLine="796"/>
+        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Caret Line="770" Column="3" TopLine="766"/>
       </Position8>
       <Position9>
-        <Filename Value="principal.pas"/>
-        <Caret Line="825" Column="8" TopLine="805"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="510" TopLine="498"/>
       </Position9>
       <Position10>
-        <Filename Value="principal.pas"/>
-        <Caret Line="899" Column="8" TopLine="879"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="511" TopLine="498"/>
       </Position10>
       <Position11>
-        <Filename Value="principal.pas"/>
-        <Caret Line="760" TopLine="750"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="512" TopLine="498"/>
       </Position11>
       <Position12>
-        <Filename Value="principal.pas"/>
-        <Caret Line="808" TopLine="787"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="513" TopLine="498"/>
       </Position12>
       <Position13>
-        <Filename Value="principal.pas"/>
-        <Caret Line="819" Column="7" TopLine="799"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="514" TopLine="498"/>
       </Position13>
       <Position14>
-        <Filename Value="principal.pas"/>
-        <Caret Line="828" Column="7" TopLine="808"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="515" TopLine="498"/>
       </Position14>
       <Position15>
-        <Filename Value="principal.pas"/>
-        <Caret Line="837" Column="7" TopLine="817"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="516" TopLine="498"/>
       </Position15>
       <Position16>
-        <Filename Value="principal.pas"/>
-        <Caret Line="911" Column="7" TopLine="891"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="518" TopLine="498"/>
       </Position16>
       <Position17>
-        <Filename Value="principal.pas"/>
-        <Caret Line="658" Column="7" TopLine="647"/>
+        <Filename Value="..\snd\ym_2203.pas"/>
+        <Caret Line="294" Column="9" TopLine="283"/>
       </Position17>
       <Position18>
-        <Filename Value="principal.pas"/>
-        <Caret Line="796" TopLine="785"/>
+        <Filename Value="..\snd\fmopn.pas"/>
+        <Caret Line="510" TopLine="498"/>
       </Position18>
       <Position19>
-        <Filename Value="principal.pas"/>
+        <Filename Value="..\snd\ym_2203.pas"/>
+        <Caret Line="294" TopLine="283"/>
       </Position19>
-      <Position20>
-        <Filename Value="principal.pas"/>
-        <Caret Line="591" TopLine="572"/>
-      </Position20>
-      <Position21>
-        <Filename Value="principal.pas"/>
-        <Caret Line="584" Column="52" TopLine="572"/>
-      </Position21>
-      <Position22>
-        <Filename Value="principal.pas"/>
-        <Caret Line="618" Column="16" TopLine="599"/>
-      </Position22>
-      <Position23>
-        <Filename Value="principal.pas"/>
-        <Caret Line="686" Column="9" TopLine="666"/>
-      </Position23>
-      <Position24>
-        <Filename Value="principal.pas"/>
-        <Caret Line="784" Column="17" TopLine="764"/>
-      </Position24>
-      <Position25>
-        <Filename Value="principal.pas"/>
-        <Caret Line="806" Column="9" TopLine="786"/>
-      </Position25>
-      <Position26>
-        <Filename Value="principal.pas"/>
-        <Caret Line="812" Column="12" TopLine="792"/>
-      </Position26>
-      <Position27>
-        <Filename Value="principal.pas"/>
-        <Caret Line="854" Column="12" TopLine="834"/>
-      </Position27>
-      <Position28>
-        <Filename Value="principal.pas"/>
-        <Caret Line="872" Column="9" TopLine="852"/>
-      </Position28>
-      <Position29>
-        <Filename Value="principal.pas"/>
-      </Position29>
-      <Position30>
-        <Filename Value="principal.pas"/>
-        <Caret Line="555" Column="21" TopLine="535"/>
-      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

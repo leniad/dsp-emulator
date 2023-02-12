@@ -229,8 +229,8 @@ case direccion of
     $100000..$103fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $14c000..$153fff:begin
                         direccion:=(direccion-$14c000) shr 1;
-                        if not(m68000_0.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
-                        if m68000_0.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
+                        if not(m68000_0.write_8bits_lo_dir) then k052109_0.write(direccion,valor);
+                        if m68000_0.write_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
                      end;
     $180000..$19ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
@@ -263,8 +263,8 @@ case direccion of
     $200000..$203fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $24c000..$253fff:begin
                         direccion:=(direccion-$24c000) shr 1;
-                        if not(m68000_1.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
-                        if m68000_1.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
+                        if not(m68000_1.write_8bits_lo_dir) then k052109_0.write(direccion,valor);
+                        if m68000_1.write_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
                      end;
     $280000..$29ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
