@@ -58,8 +58,8 @@
     +Fixed tiles priority
     +Fixed tile buffer activation
 </pre><br>
-<img src="https://i.ibb.co/1TJHpV3/64street.png"> <img src="https://i.ibb.co/D76gTcV/enduror.png"><br>
-<img src="https://i.ibb.co/Y0DM3wd/hangon.png"> <img src="https://i.ibb.co/qYXqgYZ/sharrier.png"><br><br>
+<img src="https://i.ibb.co/1TJHpV3/64street.png"> <img src="https://i.ibb.co/ky5TD1S/enduror.png"><br>
+<img src="https://i.ibb.co/NZ45xpK/hangon.png"> <img src="https://i.ibb.co/8jFd81t/sharrier.png"><br><br>
 <b>10/01/23 - DSP Emulator 0.21WIP5.1. Updated Windows binary and source.<br>
 <pre>
 -General
