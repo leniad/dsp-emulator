@@ -166,90 +166,90 @@ var
   ptemp:pword;
 begin
   for y:=0 to 255 do begin
-		control:=road_ram[y];
+    control:=road_ram[y];
     // the PLYCONT signal controls the road layering
-		plycont:=((control shr 10) and 3)<>0;
-		// skip layers we aren't supposed to be drawing
-		if (not(plycont) and (pri<>0)) then continue;
+    plycont:=((control shr 10) and 3)<>0;
+    // skip layers we aren't supposed to be drawing
+    if (not(plycont) and (pri<>0)) then continue;
     if (plycont and (pri=0)) then continue;
-		hpos:=road_ram[$100+(control and $ff)];
-		color0:=road_ram[$200+(control and $ff)];
-		color1:=road_ram[$300+(control and $ff)];
-		// compute the offset of the road graphics for this line
-		src:=(control and $ff)*512;
-		// initialize the 4-bit counter at 9M, which counts bits within each road byte
-		ctr9m:=hpos and 7;
-		// initialize the two 4-bit counters at 9P (low) and 9N (high), which count road data bytes
-		ctr9n9p:=hpos shr 3;
-		// initialize the flip-flop at 9J (lower half), which controls the counting direction
-		ff9j1:=((hpos shr 11) and 1)<>0;
-		// initialize the flip-flop at 9J (upper half), which controls the background color
-		ff9j2:=true;
-		// initialize the serial shifter at 8S, which delays several signals after we flip
-		ss8j:=0;
-		// draw this scanline from the beginning
+    hpos:=road_ram[$100+(control and $ff)];
+    color0:=road_ram[$200+(control and $ff)];
+    color1:=road_ram[$300+(control and $ff)];
+    // compute the offset of the road graphics for this line
+    src:=(control and $ff)*512;
+    // initialize the 4-bit counter at 9M, which counts bits within each road byte
+    ctr9m:=hpos and 7;
+    // initialize the two 4-bit counters at 9P (low) and 9N (high), which count road data bytes
+    ctr9n9p:=hpos shr 3;
+    // initialize the flip-flop at 9J (lower half), which controls the counting direction
+    ff9j1:=((hpos shr 11) and 1)<>0;
+    // initialize the flip-flop at 9J (upper half), which controls the background color
+    ff9j2:=true;
+    // initialize the serial shifter at 8S, which delays several signals after we flip
+    ss8j:=0;
+    // draw this scanline from the beginning
     ptemp:=punbuf;
-		for x:=-24 to 511 do begin
-			// ---- the following logic all happens constantly ----
-			// the enable is controlled by the value in the counter at 9M
-			ctr9n9p_ena:=(ctr9m=7);
-			// if we carried out of the 9P/9N counters, we will forcibly clear the flip-flop at 9J (lower half)
-			if (ctr9n9p=$ff) then ff9j1:=false;
-			// if the control word bit 8 is clear, we will forcibly set the flip-flop at 9J (lower half)
-			if (control and $100)=0 then ff9j1:=true;
-			// for the Hang On/Super Hang On case only: if the control word bit 9 is clear, we will forcibly
-			// set the flip-flip at 9J (upper half)
-			if ((road_info.type_=HANG_ON) and ((control and $200)=0)) then ff9j2:=true;
-      // ---- now process the pixel ----
-			md:=3;
-			// the Space Harrier/Enduro Racer hardware has a tweak that maps the control word bit 9 to the
-			// /CE line on the road ROM; use this to effectively disable the road data
-			if ((road_info.type_<>SHARRIER) or ((control and $200)=0)) then
-				// the /OE line on the road ROM is linked to the AND of bits 2 & 3 of the counter at 9N
-				if ((ctr9n9p and $c0)=$c0) then begin
-					// note that the pixel logic is hidden in a custom at 9S; this is just a guess
-					if (ss8j and 1)<>0 then md:=road_gfx[src+(((ctr9n9p and $3f) shl 3) or ctr9m)]
-            else md:=road_gfx[src+(((ctr9n9p and $3f) shl 3) or (ctr9m xor 7))];
-				end;
-			// "select" is a made-up signal that comes from bit 3 of the serial shifter and is
-			// used in several places for color selection
-			select:=(ss8j shr 3) and 1;
-			// check the flip-flop at 9J (upper half) to determine if we should use the background color;
-			// the output of this is ANDed with M0 and M1 so it only affects pixels with a value of 3;
-			// this is done by the AND gates at 9L and 7K
-			if (ff9j2 and (md=3)) then begin
-				// in this case, the "select" signal is used to select which background color to use
-				// since the color0 control word contains two selections
-        if (select<>0) then color:=(color0 and $3f) or road_info.colorbase2
-          else color:=((color0 shr 8) and $3f) or road_info.colorbase2;
-			end else begin
-			// if we're not using the background color, we select pixel data from an alternate path
-      // the AND gates at 7L, 9K, and 7K clamp the pixel value to 0 if bit 7 of the color 1
-      // signal is 1 and if the pixel value is 3 (both M0 and M1 == 1)
-				if (((color1 and $80)<>0) and (md=3)) then md:=0;
-				// the pixel value plus the "select" line combine to form a mux into the low 8 bits of color1
-				color:=(color1 shr ((md shl 1) or select)) and 1;
-			  // this value becomes the low bit of the final color; the "select" line itself and the pixel
-				// value form the other bits
-				color:=color or (select shl 3) or (md shl 1) or road_info.colorbase1;
-			end;
-			// write the pixel if we're past the minimum clip
-			if (x>=0) then begin
-        ptemp^:=paleta[color];
-        inc(ptemp);
-      end;
-			// ---- the following logic all happens on the 6M clock ----
-			// clock the counter at 9M
-			ctr9m:=(ctr9m+1) and 7;
-			// if enabled, clock on the two cascaded 4-bit counters at 9P and 9N
-			if (ctr9n9p_ena) then begin
-				if ff9j1 then ctr9n9p:=ctr9n9p+1
-				  else ctr9n9p:=ctr9n9p-1;
-			end;
-			// clock the flip-flop at 9J (upper half)
-			ff9j2:=not(not(ff9j1) and ((ss8j and $80)<>0));
-			// clock the serial shift register at 8J
-			ss8j:=(ss8j shl 1) or byte(ff9j1);
+    for x:=-24 to 511 do begin
+        // ---- the following logic all happens constantly ----
+        // the enable is controlled by the value in the counter at 9M
+	      ctr9n9p_ena:=(ctr9m=7);
+	      // if we carried out of the 9P/9N counters, we will forcibly clear the flip-flop at 9J (lower half)
+        if (ctr9n9p=$ff) then ff9j1:=false;
+        // if the control word bit 8 is clear, we will forcibly set the flip-flop at 9J (lower half)
+        if (control and $100)=0 then ff9j1:=true;
+        // for the Hang On/Super Hang On case only: if the control word bit 9 is clear, we will forcibly
+        // set the flip-flip at 9J (upper half)
+	      if ((road_info.type_=HANG_ON) and ((control and $200)=0)) then ff9j2:=true;
+        // ---- now process the pixel ----
+	      md:=3;
+	      // the Space Harrier/Enduro Racer hardware has a tweak that maps the control word bit 9 to the
+        // /CE line on the road ROM; use this to effectively disable the road data
+	      if ((road_info.type_<>SHARRIER) or ((control and $200)=0)) then
+	        // the /OE line on the road ROM is linked to the AND of bits 2 & 3 of the counter at 9N
+	        if ((ctr9n9p and $c0)=$c0) then begin
+	          // note that the pixel logic is hidden in a custom at 9S; this is just a guess
+	          if (ss8j and 1)<>0 then md:=road_gfx[src+(((ctr9n9p and $3f) shl 3) or ctr9m)]
+                 else md:=road_gfx[src+(((ctr9n9p and $3f) shl 3) or (ctr9m xor 7))];
+	        end;
+	      // "select" is a made-up signal that comes from bit 3 of the serial shifter and is
+	      // used in several places for color selection
+	      select:=(ss8j shr 3) and 1;
+	      // check the flip-flop at 9J (upper half) to determine if we should use the background color;
+	      // the output of this is ANDed with M0 and M1 so it only affects pixels with a value of 3;
+	      // this is done by the AND gates at 9L and 7K
+	      if (ff9j2 and (md=3)) then begin
+	        // in this case, the "select" signal is used to select which background color to use
+	        // since the color0 control word contains two selections
+          if (select<>0) then color:=(color0 and $3f) or road_info.colorbase2
+              else color:=((color0 shr 8) and $3f) or road_info.colorbase2;
+	      end else begin
+	        // if we're not using the background color, we select pixel data from an alternate path
+          // the AND gates at 7L, 9K, and 7K clamp the pixel value to 0 if bit 7 of the color 1
+          // signal is 1 and if the pixel value is 3 (both M0 and M1 == 1)
+	        if (((color1 and $80)<>0) and (md=3)) then md:=0;
+	        // the pixel value plus the "select" line combine to form a mux into the low 8 bits of color1
+	        color:=(color1 shr ((md shl 1) or select)) and 1;
+	        // this value becomes the low bit of the final color; the "select" line itself and the pixel
+	        // value form the other bits
+	        color:=color or (select shl 3) or (md shl 1) or road_info.colorbase1;
+	      end;
+	      // write the pixel if we're past the minimum clip
+	      if (x>=0) then begin
+           ptemp^:=paleta[color];
+           inc(ptemp);
+        end;
+	      // ---- the following logic all happens on the 6M clock ----
+	      // clock the counter at 9M
+	      ctr9m:=(ctr9m+1) and 7;
+	      // if enabled, clock on the two cascaded 4-bit counters at 9P and 9N
+	      if (ctr9n9p_ena) then begin
+	        if ff9j1 then ctr9n9p:=ctr9n9p+1
+	          else ctr9n9p:=ctr9n9p-1;
+	      end;
+	      // clock the flip-flop at 9J (upper half)
+	      ff9j2:=not(not(ff9j1) and ((ss8j and $80)<>0));
+	      // clock the serial shift register at 8J
+        ss8j:=(ss8j shl 1) or byte(ff9j1);
     end;
     putpixel(ADD_SPRITE,y+ADD_SPRITE,512,punbuf,5);
   end;
@@ -314,22 +314,21 @@ var
   spritedata:dword;
 begin
   for f:=0 to $7f do begin
-    bottom:=(sprite_ram[f*8] shr 8)+1;
-    if bottom>$f0 then break;
     sprpri:=sprite_ram[(f*8)+4] and $3;
     if sprpri<>pri then continue;
+    addr:=sprite_ram[(f*8)+3];
+    sprite_ram[(f*8)+7]:=addr;
+    bottom:=(sprite_ram[f*8] shr 8)+1;
+    if bottom>$f0 then break;
     top:=(sprite_ram[f*8] and $ff)+1;
     bank:=sprite_bank[(sprite_ram[(f*8)+1] shr 12) and $f];
     // if hidden, or top greater than/equal to bottom, or invalid bank
 		if ((top>=bottom) or (bank=255)) then continue;
 		xpos:=(sprite_ram[(f*8)+1] and $1ff)-$bd;
 		pitch:=smallint(sprite_ram[(f*8)+2]);
-		addr:=sprite_ram[(f*8)+3];
 		color:=((sprite_ram[(f*8)+4] shr 8) and $3f) shl 4;
     vzoom:=(sprite_ram[(f*8)+4] shr 2) and $3f;
 		hzoom:=vzoom shl 1;
-		// initialize the end address to the start address
-    sprite_ram[(f*8)+7]:=addr;
 		// clamp to within the memory region size
 		spritedata:=$8000*(bank mod s16_info.banks);
     // determine the starting zoom address and mask
@@ -350,12 +349,9 @@ begin
 				// to emulate this as the games compensate for it
 				// non-flipped case
 				if (addr and $8000)=0 then begin
-					// start at the word before because we preincrement below
-          sprite_ram[(f*8)+7]:=addr-1;
+          data_7:=addr;
 					x:=xpos;
           while (x<512) do begin
-            data_7:=sprite_ram[(f*8)+7]+1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom[spritedata+(data_7 and $7fff)];
 						// draw four pixels
             for g:=3 downto 0 do begin
@@ -367,16 +363,16 @@ begin
               end;
             end;
 						// stop if the last pixel in the group was 0xf
-						if (((pixels shr 0) and $f)=$f) then break;
+						if (((pixels shr 0) and $f)=$f) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7+1;
 					end;
 				end else begin
 				  // flipped case
-					// start at the word after because we predecrement below
-          sprite_ram[(f*8)+7]:=addr+1;
+          data_7:=addr;
 					x:=xpos;
           while (x<512) do begin
-            data_7:=sprite_ram[(f*8)+7]-1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom[spritedata+(data_7 and $7fff)];
 						// draw four pixels
             for g:=0 to 3 do begin
@@ -388,7 +384,10 @@ begin
               end;
             end;
 						// stop if the last pixel in the group was 0xf
-						if (((pixels shr 12) and $f)=$f) then break;
+						if (((pixels shr 12) and $f)=$f) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7-1;
 					end;
 				end;
 			end;
@@ -465,20 +464,19 @@ var
   spritedata,pixels:dword;
 begin
   for f:=0 to $ff do begin
-    bottom:=sprite_ram[f*8] shr 8;
-    if bottom>$f0 then break;
     sprpri:=(sprite_ram[(f*$8)+2] shr 14) and $1;
     if sprpri<>pri then continue;
     addr:=sprite_ram[(f*8)+3];
-		// initialize the end address to the start address
-    sprite_ram[(f*8)+$7]:=addr;
+    sprite_ram[(f*8)+7]:=addr;
+    bottom:=sprite_ram[f*8] shr 8;
+    if bottom>$f0 then break;
     top:=sprite_ram[f*8] and $ff;
     bank:=sprite_bank[(sprite_ram[(f*8)+1] shr 12) and $f];
     // if hidden, or top greater than/equal to bottom, or invalid bank
 		if ((top>=bottom) or (bank=255)) then continue;
 		xpos:=(sprite_ram[(f*8)+1] and $1ff)-$bd;
 		pitch:=sprite_ram[(f*8)+2] and $7f;
-    if pitch>$3f then pitch:=-((pitch and $3f)+1);
+    if pitch>$3f then pitch:=-(pitch and $3f);
 		color:=(sprite_ram[(f*8)+2] shr 8) shl 4;
     vzoom:=(sprite_ram[(f*8)+4] shr 0) and $3f;
 		hzoom:=((sprite_ram[(f*8)+4] shr 8) and $3f) shl 1;
@@ -502,12 +500,9 @@ begin
 				// to emulate this as the games compensate for it
 				// non-flipped case
 				if (addr and $8000)=0 then begin
-					// start at the word before because we preincrement below
-          sprite_ram[(f*8)+7]:=addr-1;
+          data_7:=addr;
 					x:=xpos;
           while (x<512) do begin
-            data_7:=sprite_ram[(f*8)+7]+1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom_32[spritedata+(data_7 and $7fff)];
 						// draw pixels
             for g:=7 downto 0 do begin
@@ -519,16 +514,16 @@ begin
               end;
             end;
 						// stop if the last pixel in the group was 0xf
-						if (pixels and $f)=$f then break;
+						if (pixels and $f)=$f then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7+1;
 					end;
         end else begin
 				  // flipped case
-					// start at the word after because we predecrement below
-          sprite_ram[(f*$8)+$7]:=addr+1;
+          data_7:=addr;
 					x:=xpos;
           while (x<512) do begin
-            data_7:=sprite_ram[(f*8)+7]-1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom_32[spritedata+(data_7 and $7fff)];
 						// draw pixels
             for g:=0 to 7 do begin
@@ -540,7 +535,10 @@ begin
               end;
             end;
 						// stop if the last pixel in the group was 0xf
-						if ((pixels shr 28) and $f)=$f then break;
+						if ((pixels shr 28) and $f)=$f then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7-1;
           end;
 					end;
 				end;
@@ -1132,7 +1130,7 @@ end;
 function iniciar_hangon:boolean;
 var
   f:byte;
-  memoria_temp:array[0..$7ffff] of byte;
+  memoria_temp:array[0..$3ffff] of byte;
   fd1089_key:array[0..$1fff] of byte;
   weights:array[0..1,0..5] of single;
   i0,i1,i2,i3,i4:integer;
@@ -1277,7 +1275,7 @@ case main_vars.tipo_maquina of
         update_video:=update_video_sharrier;
   end;
   336:begin //Space Harrier
-        CPU_SYNC:=6;
+        CPU_SYNC:=2;
         sharrier_controls_update:=sharrier_controls;
         llamadas_maquina.bucle_general:=sharrier_principal;
         //Main CPU

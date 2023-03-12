@@ -1,4 +1,21 @@
 ﻿# DSP Emulator status #
+<b>12/03/23 - DSP Emulator 0.21Final. Updated Windows binary, linux 64 binary and source.<br>
+<pre>
+-General
+    +Added some SDL2 functions to autoselect the best video format when switch to full screen
+    +Fixed some export ROM data (thanks to Neville)
+    +Fixed a stupid bug creating pixel buffer
+    +CPU
+        -M68000
+            +Fixed opcodes divu and sbcd (thanks to Neville)
+-SG-1000
+    +Added HOLD button
+-Sega Master System
+    +Fixed 'Pause' button, now works
+-Mega System 1 HW
+    +Fixed RAM byte write (fixes '64th Street - A detective story' protection)
+</pre><br>
+Please read 'Whats New 0.21' file for full details<br><br>
 <b>12/02/23 - DSP Emulator 0.21WIP6. Updated Windows binary and source.<br>
 <pre>
 -General 

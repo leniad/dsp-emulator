@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 442
+  Left = 1061
   Height = 389
-  Top = 123
+  Top = 240
   Width = 400
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 42
@@ -12723,7 +12723,6 @@ object principal1: Tprincipal1
       end
       object Salir1: TMenuItem
         Caption = 'Salir'
-        OnClick = Salir1Click
       end
       object N1: TMenuItem
         Caption = '-'
@@ -14044,6 +14043,10 @@ object principal1: Tprincipal1
               Caption = 'Saint Dragon'
               OnClick = CambiarMaquina
             end
+            object n64thstreet1: TMenuItem
+              Caption = '64Th Street - A detective story'
+              OnClick = CambiarMaquina
+            end
           end
           object MenuItem18: TMenuItem
             Caption = 'Twin Cobra HW'
@@ -14349,6 +14352,14 @@ object principal1: Tprincipal1
               Caption = 'Hang-On'
               OnClick = CambiarMaquina
             end
+            object enduroracer1: TMenuItem
+              Caption = 'Enduro Racer'
+              OnClick = CambiarMaquina
+            end
+            object spaceharrier1: TMenuItem
+              Caption = 'Space Harrier'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object MenuItem11: TMenuItem
@@ -14444,6 +14455,7 @@ object principal1: Tprincipal1
       end
       object Pausa1: TMenuItem
         Caption = 'Pausa'
+        OnClick = Ejecutar1Click
       end
     end
   end

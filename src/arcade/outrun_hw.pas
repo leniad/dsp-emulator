@@ -58,7 +58,7 @@ var
  ram,ram2:array[0..$3fff] of word;
  road_ram,char_ram,sprite_ram:array[0..$7ff] of word;
  tile_ram:array[0..$7fff] of word;
- sprite_rom:array[0..$7ffff] of dword;
+ sprite_rom:array[0..$3ffff] of dword;
  s16_info:tsystem16_info;
  road_info:toutrun_road;
  adc_select,sound_latch:byte;
@@ -95,15 +95,14 @@ begin
 end;
 begin
   for f:=0 to $ff do begin
-    if (sprite_ram[f*8] and $8000)<>0 then exit;
     sprpri:=(sprite_ram[(f*8)+3] shr 12) and 3;
     if sprpri<>pri then continue;
+    addr:=sprite_ram[(f*8)+1];
+    sprite_ram[(f*8)+7]:=addr;
+    if (sprite_ram[f*8] and $8000)<>0 then exit;
     hide:=(sprite_ram[f*8] and $5000)<>0;
     if hide then continue;
     top:=(sprite_ram[f*8] and $1ff)-$100;
-    // initialize the end address to the start address
-    addr:=sprite_ram[(f*8)+1];
-    sprite_ram[(f*8)+7]:=addr;
     bank:=((sprite_ram[f*8] shr 9) and $7) mod s16_info.banks;
 		xpos:=sprite_ram[(f*8)+2] and $1ff;
     if (sprite_ram[(f*8)+4] and $2000)<>0 then xdelta:=1
@@ -131,12 +130,9 @@ begin
 			if ((y<256) and (y>=0)) then begin
         xacc:=0;
 				if not(flip) then begin
-					// start at the word before because we preincrement below
-          sprite_ram[(f*8)+7]:=addr-1;
+          data_7:=addr;
 					x:=xpos;
           while (((xdelta>0) and (x<512)) or ((xdelta<0) and (x>=0))) do begin
-            data_7:=sprite_ram[(f*8)+7]+1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
             for g:=7 downto 0 do begin
 						  pix:=(pixels shr (g*4)) and $f;
@@ -147,16 +143,16 @@ begin
               end;
               xacc:=xacc-$200;
             end;
-						if (pixels and $f0)=$f0 then break;
+						if (pixels and $f0)=$f0 then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7+1;
 					end;
 				end else begin
-				// flipped case
-					// start at the word after because we predecrement below
-          sprite_ram[(f*8)+7]:=addr+1;
+				  // flipped case
+          data_7:=addr;
 					x:=xpos;
           while (((xdelta>0) and (x<512)) or ((xdelta<0) and (x>=0))) do begin
-            data_7:=sprite_ram[(f*8)+7]-1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
             for g:=0 to 7 do begin
 						  pix:=(pixels shr (g*4)) and $f;
@@ -167,7 +163,10 @@ begin
               end;
               xacc:=xacc-$200;
             end;
-						if (pixels and $0f000000)=$0f000000 then break;
+						if (pixels and $0f000000)=$0f000000 then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7-1;
 					end;
 			 	end; //del flip
         yacc:=yacc+vzoom;

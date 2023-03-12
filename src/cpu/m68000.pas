@@ -2566,7 +2566,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                   r.cc.c:=false;
                   templ:=r.d[dest].l div tempw;
                   if(templ<$10000) then begin
-              	    r.cc.z:=(templ<>0);
+              	    r.cc.z:=(templ=0);
                     r.cc.n:=(templ and $8000)<>0;
               	    r.cc.v:=false;
                     templ2:=r.d[dest].l mod tempw;
@@ -2599,11 +2599,13 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                 end else begin
                                           r.cc.x:=false;
                                           r.cc.c:=false;
+                                          r.cc.n:=false;
                                          end;
-                       r.cc.z:=(templ and $ff)=0;
+                       templ:=(templ-tempb3) and $ff;
+                       r.cc.z:=(templ=0);
                        r.cc.v:=r.cc.v and ((templ and $80)<>0);
                        r.cc.n:=(templ and $80)<>0;
-                       r.d[dest].l0:=templ and $ff;
+                       r.d[dest].l0:=templ;
                     end;
                  $1:begin  // # sbcd mm
                       self.contador:=self.contador+18;
@@ -2631,10 +2633,11 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                           r.cc.x:=false;
                                           r.cc.c:=false;
                                          end;
-                            r.cc.z:=(templ and $ff)=0;
+                            templ:=(templ-tempb3) and $ff;
+                            r.cc.z:=(templ=0);
                             r.cc.v:=r.cc.v and ((templ and $80)<>0);
                             r.cc.n:=(templ and $80)<>0;
-                            self.putbyte(r.a[dest].l,templ and $ff);
+                            self.putbyte(r.a[dest].l,templ);
                             self.opcode:=true;
                           end;
                       end;

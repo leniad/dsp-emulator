@@ -530,7 +530,6 @@ type
     procedure Timer2Timer(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
-    procedure Pausa1Click(Sender: TObject);
   private
     { Private declarations }
     procedure WndProc(var Message:TMessage); override;
@@ -596,10 +595,12 @@ if EmuStatus=EsRuning then begin //Cambiar a pausa
   timer1.Enabled:=false;
   EmuStatus:=EsPause;
   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
+  principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[1];
 end else begin //Cambiar a play
   EmuStatus:=EsRuning;
   timer1.Enabled:=true;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
+  principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[2];
   if @llamadas_maquina.bucle_general<>nil then begin
     if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
     llamadas_maquina.bucle_general;
@@ -776,13 +777,6 @@ end;
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
 FLoadRom.Showmodal;
-end;
-
-procedure Tprincipal1.Pausa1Click(Sender: TObject);
-begin
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);

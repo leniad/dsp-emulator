@@ -74,6 +74,7 @@ const
   libSDL_WINDOWEVENT_CLOSE=14; {**< The window manager requests that the window be closed *}
   libSDL_WINDOWEVENT_TAKE_FOCUS=15; {**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) *}
   libSDL_WINDOWEVENT_HIT_TEST=16; {**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. *}
+  libSDL_PIXELTYPE_UNKNOWN=0;
   libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS='SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS';
 
 {$I lib_sdl2.inc}
@@ -119,6 +120,8 @@ var
   SDL_SetHint:function(const title:PAnsiChar;const value:PAnsiChar):LongBool;cdecl;
   SDL_JoystickUpdate:procedure;cdecl;
   SDL_JoystickEventState:function(state:LongInt):LongInt;cdecl;
+  SDL_GetClosestDisplayMode:function(displayIndex:LongInt;const mode:libsdlp_DisplayMode;closest:libsdlp_DisplayMode):libsdlp_DisplayMode;cdecl;
+  SDL_SetWindowDisplayMode:function(window:libsdlP_Window;const mode:libsdlp_DisplayMode):LongInt; cdecl;
   {$ifdef fpc}
   SDL_SetError:function(const fmt:PAnsiChar):LongInt;cdecl;
   SDL_GetError:function:PAnsiChar;cdecl;
@@ -195,6 +198,8 @@ end;
 @SDL_CreateWindowFrom:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindowFrom');
 @SDL_CreateWindow:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindow');
 @SDL_UpdateWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UpdateWindowSurface');
+@SDL_GetClosestDisplayMode:=GetProcAddress(sdl_dll_Handle,'SDL_GetClosestDisplayMode');
+@SDL_SetWindowDisplayMode:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowDisplayMode');
 //rwops
 @SDL_RWFromFile:=GetProcAddress(sdl_dll_Handle,'SDL_RWFromFile');
 //pixels

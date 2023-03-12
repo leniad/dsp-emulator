@@ -275,6 +275,9 @@ type
     airwolf1: TMenuItem;
     MenuItem46: TMenuItem;
     hangon1: TMenuItem;
+    enduroracer1: TMenuItem;
+    n64thstreet1: TMenuItem;
+    spaceharrier1: TMenuItem;
     superduck1: TMenuItem;
     srdmission1: TMenuItem;
     Repulse1: TMenuItem;
@@ -533,7 +536,6 @@ type
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
     procedure Panel1Click(Sender: TObject);
-    procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure CambiarMaquina(Sender: TObject);
@@ -921,11 +923,6 @@ end;
 procedure Tprincipal1.Panel1Click(Sender: TObject);
 begin
   SDL_RaiseWindow(window_render);
-end;
-
-procedure Tprincipal1.Salir1Click(Sender: TObject);
-begin
-close;
 end;
 
 procedure Tprincipal1.Timer2Timer(Sender: TObject);

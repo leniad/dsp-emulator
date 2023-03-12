@@ -141,7 +141,7 @@ principal1.reset1.caption:=leng[idioma].accion[2];
 principal1.pausa1.caption:=leng[idioma].accion[3];
 //Hints
 principal1.BitBtn2.Hint:=leng[idioma].hints[0];
-principal1.BitBtn3.Hint:=leng[idioma].hints[1];
+principal1.BitBtn3.Hint:=leng[idioma].hints[2];
 principal1.BitBtn5.Hint:=leng[idioma].hints[3];
 principal1.BitBtn6.Hint:=leng[idioma].hints[4];
 principal1.btncfg.Hint:=leng[idioma].hints[5];

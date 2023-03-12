@@ -19,7 +19,7 @@ type
     shadow:array[0..$1f] of boolean;
     alpha:array[0..$1f] of boolean;
     trans_alt:array[0..4,0..$1f] of boolean;
-    buffer:array[0..$ffff] of boolean;
+    buffer:array[0..$7fff] of boolean;
     elements:dword;
   end;
   pgfx=^gfx_tipo;

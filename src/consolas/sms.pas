@@ -69,7 +69,7 @@ var
   frame:single;
   f:word;
 begin
-init_controls(false,false,true,false);
+init_controls(false,false,false,true);
 frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin

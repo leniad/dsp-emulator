@@ -11,7 +11,7 @@ implementation
 uses principal;
 
 var
-  ram_8k,mid_8k_ram:boolean;
+  ram_8k,mid_8k_ram,push_pause:boolean;
 
 procedure eventos_sg;
 begin
@@ -30,6 +30,12 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.coin[0] then push_pause:=true
+    else begin
+      if push_pause then
+        z80_0.change_nmi(PULSE_LINE);
+      push_pause:=false;
+    end;
 end;
 end;
 
@@ -38,7 +44,7 @@ var
   frame:single;
   f:word;
 begin
-init_controls(false,true,true,false);
+init_controls(false,false,false,true);
 frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
@@ -75,8 +81,8 @@ begin
   case (puerto and $ff) of
     $80..$bf:if (puerto and $01)<>0 then sg_inbyte:=tms_0.register_r
           else sg_inbyte:=tms_0.vram_r;
-    $dc:sg_inbyte:=marcade.in0;
-    $df:sg_inbyte:=marcade.in1;
+    $c0..$ff:if (puerto and 1)<>0 then sg_inbyte:=marcade.in1
+                  else sg_inbyte:=marcade.in0;
   end;
 end;
 procedure sg_outbyte(puerto:word;valor:byte);
@@ -85,7 +91,7 @@ begin
     $40..$7f:sn_76496_0.Write(valor);
     $80..$bf:if (puerto and $1)<>0 then tms_0.register_w(valor)
                 else tms_0.vram_w(valor);
-    $dc,$df:; //mandos
+    $c0..$ff:; //mandos
   end;
 end;
 
@@ -109,6 +115,7 @@ begin
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
+ push_pause:=false;
 end;
 
 procedure abrir_sg;

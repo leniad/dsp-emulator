@@ -180,20 +180,19 @@ begin
 end;
 begin
   for f:=0 to $7f do begin
-    bottom:=(sprite_ram[f*8] shr 8)+1;
-    if bottom>$f0 then break;
     sprpri:=(sprite_ram[(f*8)+4] and $ff) and $3;
     if sprpri<>pri then continue;
+    addr:=sprite_ram[(f*8)+3];
+    sprite_ram[(f*8)+7]:=addr;
+    bottom:=(sprite_ram[f*8] shr 8)+1;
+    if bottom>$f0 then break;
     bank:=sprite_bank[(sprite_ram[(f*8)+4] shr 4) and $7];
     top:=(sprite_ram[f*8] and $ff)+1;
     // if hidden, or top greater than/equal to bottom, or invalid bank
 		if ((top>=bottom) or (bank=255)) then continue;
 		xpos:=(sprite_ram[(f*8)+1] and $1ff)-$bd;
 		pitch:=smallint(sprite_ram[(f*$8)+2]);
-		addr:=sprite_ram[(f*8)+3];
 		color:=((sprite_ram[(f*8)+4] shr 8) and $3f) shl 4;
-		// initialize the end address to the start address
-    sprite_ram[(f*8)+7]:=addr;
 		// clamp to within the memory region size
 		spritedata:=$8000*(bank mod s16_info.banks);
 		// loop from top to bottom
@@ -207,12 +206,9 @@ begin
 				// to emulate this as the games compensate for it
 				// non-flipped case
 				if (addr and $8000)=0 then begin
-					// start at the word before because we preincrement below
-          sprite_ram[(f*8)+7]:=addr-1;
+          data_7:=addr;
 					x:=xpos;
           while (x<512) do begin
-            data_7:=sprite_ram[(f*8)+7]+1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom[spritedata+(data_7 and $7fff)];
 						// draw four pixels
 						pix:=(pixels shr 12) and $f;
@@ -225,16 +221,16 @@ begin
             system16a_draw_pixel(x+3,y,pix or color);
             x:=x+4;
 						// stop if the last pixel in the group was 0xf
-						if (pix=15) then break;
+						if (pix=15) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7+1;
 					end;
 				end else begin
 				// flipped case
-					// start at the word after because we predecrement below
-          sprite_ram[(f*8)+7]:=addr+1;
+          data_7:=addr;
 					x:=xpos;
           while (x<512) do begin
-            data_7:=sprite_ram[(f*8)+7]-1;
-            sprite_ram[(f*8)+7]:=data_7;
 						pixels:=sprite_rom[spritedata+(data_7 and $7fff)];
 						// draw four pixels
 						pix:=(pixels shr 0) and $f;
@@ -247,7 +243,10 @@ begin
             system16a_draw_pixel(x+3,y,pix or color);
             x:=x+4;
 						// stop if the last pixel in the group was 0xf
-						if (pix=15) then break;
+						if (pix=15) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7-1;
 					end;
 				end;
 			end;

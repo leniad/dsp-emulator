@@ -10,18 +10,6 @@ function iniciar_megasys1:boolean;
 
 implementation
 const
-        pant_0_16:array[0..1,0..15] of byte=(
-        (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
-        (16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31));
-        pant_1_16:array[0..3,0..7] of byte=(
-        (0,1,2,3,4,5,6,7),(8,9,10,11,12,13,14,15),
-        (16,17,18,19,20,21,22,23),(24,25,26,27,28,29,30,31));
-        pant_2_16:array[0..7,0..3] of byte=(
-        (0,1,2,3),(4,5,6,7),(8,9,10,11),(12,13,14,15),
-        (16,17,18,19),(20,21,22,23),(24,25,26,27),(28,29,30,31));
-        pant_3_16:array[0..15,0..1] of byte=(
-        (0,1),(2,3),(4,5),(6,7),(8,9),(10,11),(12,13),(14,15),
-        (16,17),(18,19),(20,21),(22,23),(24,25),(26,27),(28,29),(30,31));
         //P47
         p47_rom:array[0..1] of tipo_roms=(
         (n:'p47us3.bin';l:$20000;p:0;crc:$022e58b8),(n:'p47us1.bin';l:$20000;p:$1;crc:$ed926bd8));
@@ -377,11 +365,12 @@ end;
 
 procedure cambiar_layer(layer:byte;valor:word);
 const
-  scan_val_16:array[0..3] of word=(16,8,4,2);
-  scan_val_8:array[0..3] of word=(8,4,4,2);
-  scan_val_8_col:array[0..3] of word=(1,2,2,4);
+  scan_val_16:array[0..3] of byte=(16,8,4,2);
+  scan_val_8:array[0..3] of byte=(8,4,4,2);
+  scan_val_8_col:array[0..3] of byte=(1,2,2,4);
 var
-  mask_x,mask_y,cols:word;
+  mask_x,mask_y:word;
+  cols:byte;
 begin
 layer_scr[layer].info:=valor;
 layer_scr[layer].es_8x8:=(((valor shr 4) and 1)<>0);
@@ -615,7 +604,10 @@ case direccion of
                       buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                       cambiar_color(valor,(direccion and $7ff) shr 1);
                    end;
-    $1c0000..$1fffff:ram[(direccion and $ffff) shr 1]:=valor;
+                     //Esto es importante!! La escritura de bytes (no words) hay que hacerla asi, si no, fallan cosas como la proteccion
+    $1c0000..$1fffff:if m68000_0.write_8bits_lo_dir then ram[(direccion and $ffff) shr 1]:=(valor and $ff00) or ((valor and $ff00) shr 8)
+                      else if m68000_0.write_8bits_hi_dir then ram[(direccion and $ffff) shr 1]:=(valor and $ff) or ((valor and $ff) shl 8)
+                          else ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
 
@@ -836,8 +828,8 @@ m68000_1:=cpu_m68000.create(7000000,262);
 m68000_1.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
 m68000_1.init_sound(megasys1_sound_update);
 //Sound Chips
-oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
-oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
+oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH,0.5);
+oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH,0.5);
 ym2151_0:=ym2151_chip.create(3500000);
 ym2151_0.change_irq_func(snd_irq);
 layer_scr[0].char_mask:=$3fff;

@@ -72,7 +72,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     ptemp:=sitio;
     inc(ptemp,ctipo_roms[f].p);
@@ -97,7 +97,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load16b:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     //Creo un puntero byte
     getmem(mem_temp,ctipo_roms[f].l);
@@ -135,7 +135,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load16w:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     //Cargo los datos en tipo byte
     getmem(mem_temp,ctipo_roms[f].l);
@@ -173,7 +173,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load32b:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     getmem(mem_temp,ctipo_roms[f].l);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
@@ -209,7 +209,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load32b_b:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     getmem(mem_temp,ctipo_roms[f].l);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
@@ -243,7 +243,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load32dw:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     //Cargo los datos en tipo byte
     getmem(mem_temp,ctipo_roms[f].l);
@@ -284,7 +284,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load64b:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     getmem(mem_temp,ctipo_roms[f].l);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
@@ -320,7 +320,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load_swap_word:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     ptemp:=sitio;
     inc(ptemp,ctipo_roms[f].p);
@@ -352,7 +352,7 @@ for f:=1 to GAMES_CONT do begin
   end;
 end;
 roms_load64b_b:=false;
-roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
     getmem(mem_temp,ctipo_roms[f].l);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];

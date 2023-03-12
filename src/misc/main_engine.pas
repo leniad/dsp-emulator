@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.21WIP6';
+        DSP_VERSION='0.21F';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -317,7 +317,7 @@ var
   {$endif}
 begin
 //Puntero general del pixels
-getmem(punbuf,MAX_PUNBUF);
+getmem(punbuf,MAX_PUNBUF*2);
 //creo la pantalla general
 if main_screen.rot90_screen or main_screen.rol90_screen then begin
     p_final[0].x:=y;
@@ -391,10 +391,12 @@ begin
 end;
 
 procedure pasar_pantalla_completa;
-{$ifndef fpc}
 var
+  i:integer;
+  mode,closest:libsdl_DisplayMode;
+  {$ifndef fpc}
   handle_:integer;
-{$endif}
+  {$endif}
 begin
 if not(main_screen.pantalla_completa) then begin
   main_screen.old_video_mode:=main_screen.video_mode;
@@ -407,7 +409,16 @@ if not(main_screen.pantalla_completa) then begin
   principal1.FullScreen1.Checked:=true;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
-  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
+  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
+  mode.w:=p_final[0].x;
+  mode.h:=p_final[0].y;
+  mode.format:=libSDL_PIXELTYPE_UNKNOWN;
+  mode.refresh_rate:=0;
+  mode.driverdata:=nil;
+  i:=0;
+  if SDL_GetClosestDisplayMode(i,@mode,@closest)<>nil then begin
+    SDL_SetWindowDisplayMode(window_render,@closest);
+  end;
   main_screen.pantalla_completa:=true;
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
