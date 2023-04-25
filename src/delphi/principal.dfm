@@ -1233,7 +1233,7 @@ object principal1: Tprincipal1
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 158
+    ExplicitHeight = 153
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1875,7 +1875,7 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 200
+    ExplicitTop = 195
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -3796,6 +3796,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object ShadowWarriorsHW1: TMenuItem
+            Caption = 'Shadow Warriors HW'
+            object ShadowWarriors1: TMenuItem
+              Caption = 'Shadow Warriors'
+              OnClick = CambiarMaquina
+            end
+            object wildfang1: TMenuItem
+              Caption = 'Wild Fang/Tecmo Knight'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -3814,6 +3825,25 @@ object principal1: Tprincipal1
               Caption = 'R-Type2'
               OnClick = CambiarMaquina
             end
+          end
+          object Raiden1: TMenuItem
+            Caption = 'Raiden'
+            OnClick = CambiarMaquina
+          end
+          object winsHW1: TMenuItem
+            Caption = 'Twins HW'
+            object twins1: TMenuItem
+              Caption = 'Twins'
+              OnClick = CambiarMaquina
+            end
+            object twinsed1: TMenuItem
+              Caption = 'Twins (Electronic Devices)'
+              OnClick = CambiarMaquina
+            end
+          end
+          object HotBlock1: TMenuItem
+            Caption = 'Hot Block'
+            OnClick = CambiarMaquina
           end
         end
         object Hu62801: TMenuItem

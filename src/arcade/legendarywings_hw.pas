@@ -457,10 +457,10 @@ procedure trojan_outbyte(puerto:word;valor:byte);
 begin
 //ADPCM
 if (puerto and $ff)=$1 then begin
-    msm_5205_0.reset_w((valor shr 7) and 1);
-    msm_5205_0.data_w(valor);
-    msm_5205_0.vclk_w(1);
-    msm_5205_0.vclk_w(0);
+    msm5205_0.reset_w((valor shr 7) and 1);
+    msm5205_0.data_w(valor);
+    msm5205_0.vclk_w(1);
+    msm5205_0.vclk_w(0);
 end;
 end;
 
@@ -489,7 +489,7 @@ begin
  YM2203_1.reset;
  if main_vars.tipo_maquina=61 then begin
     z80_2.reset;
-    msm_5205_0.reset;
+    msm5205_0.reset;
  end;
  reset_audio;
  marcade.in0:=$ff;
@@ -631,7 +631,7 @@ case main_vars.tipo_maquina of
         z80_2:=cpu_z80.create(3000000,256);
         z80_2.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
         z80_2.change_io_calls(trojan_inbyte,trojan_outbyte);
-        msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,0.50,nil);
+        msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,0.50,nil);
         timers.init(z80_2.numero_cpu,3000000/4000,trojan_adpcm_instruccion,nil,true);
         //Graficos
         if not(roms_load(@memoria_temp,trojan_rom)) then exit;

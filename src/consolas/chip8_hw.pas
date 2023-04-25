@@ -366,9 +366,10 @@ end;
 procedure abrir_chip8;
 var
   extension,nombre_file,RomFile:string;
-  longitud,crc:integer;
+  longitud:integer;
   datos:pbyte;
   resultado:boolean;
+  crc:dword;
 begin
   if not(OpenRom(StChip8,RomFile)) then exit;
   extension:=extension_fichero(RomFile);

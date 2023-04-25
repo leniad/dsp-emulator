@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 1061
+  Left = 432
   Height = 389
-  Top = 240
+  Top = 190
   Width = 400
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -14361,6 +14361,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object MenuItem47: TMenuItem
+            Caption = 'Shadow Warriors HW'
+            object ShadowWarriors1: TMenuItem
+              Caption = 'Shadow Warriors'
+              OnClick = CambiarMaquina
+            end
+            object wildfang1: TMenuItem
+              Caption = 'Wild Fang/Tecmo Knight'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object MenuItem11: TMenuItem
           Caption = '80x86'
@@ -14378,6 +14389,25 @@ object principal1: Tprincipal1
               Caption = 'R-Type 2'
               OnClick = CambiarMaquina
             end
+          end
+          object raiden1: TMenuItem
+            Caption = 'Raiden'
+            OnClick = CambiarMaquina
+          end
+          object MenuItem48: TMenuItem
+            Caption = 'Twins HW'
+            object Twins1: TMenuItem
+              Caption = 'Twins'
+              OnClick = CambiarMaquina
+            end
+            object twinsed1: TMenuItem
+              Caption = 'Twins (Electronic Devices)'
+              OnClick = CambiarMaquina
+            end
+          end
+          object hotblock1: TMenuItem
+            Caption = 'Hot Block'
+            OnClick = CambiarMaquina
           end
         end
         object MenuItem21: TMenuItem

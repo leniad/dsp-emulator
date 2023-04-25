@@ -37,6 +37,108 @@ const
         0.1569, 0.2196, 0.4392, 0.5020,
         0.2824, 0.8471, 0.8157, 0.8784,
         0.2510, 0.3137, 0.5333, 0.5961);
+  z80t_a:array[0..$ff] of byte= (
+ 	 4, 12,  8,  8,  4,  4,  8,  4,  4, 12,  8,  8,  4,  4,  8,  4,
+	12, 12,  8,  8,  4,  4,  8,  4, 12, 12,  8,  8,  4,  4,  8,  4,
+	 8, 12, 20,  8,  4,  4,  8,  4,  8, 12, 20,  8,  4,  4,  8,  4,
+	 8, 12, 16,  8, 12, 12, 12,  4,  8, 12, 16,  8,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,
+	 8, 12, 12, 12, 12, 16,  8, 16,  8, 12, 12,  0, 12, 20,  8, 16,
+	 8, 12, 12, 12, 12, 16,  8, 16,  8,  4, 12, 12, 12,  0,  8, 16,
+	 8, 12, 12, 24, 12, 16,  8, 16,  8,  4, 12,  4, 12,  0,  8, 16,
+	 8, 12, 12,  4, 12, 16,  8, 16,  8,  8, 12,  4, 12,  0,  8, 16);
+  z80t_cb_a:array[0..$ff] of byte= (
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8,
+	8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8,
+	8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8,
+	8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
+	8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8);
+  z80t_ed_a:array[0..$ff] of byte= (
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	16, 16, 16, 24,  8, 16,  8, 12, 16, 16, 16, 24,  8, 16,  8, 12,
+	16, 16, 16, 24,  8, 16,  8, 12, 16, 16, 16, 24,  8, 16,  8, 12,
+	16, 16, 16, 24,  8, 16,  8, 20, 16, 16, 16, 24,  8, 16,  8, 20,
+	16, 16, 16, 24,  8, 16,  8,  8, 16, 16, 16, 24,  8, 16,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	20, 16, 20, 20,  8,  8,  8,  8, 20, 16, 20, 20,  8,  8,  8,  8,
+	20, 16, 20, 20,  8,  8,  8,  8, 20, 16, 20, 20,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
+	 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8);
+  z80t_dd_a:array[0..$ff] of byte= (
+	 8, 16, 12, 12,  8,  8, 12,  8,  8, 16, 12, 12,  8,  8, 12,  8,
+	16, 16, 12, 12,  8,  8, 12,  8, 16, 16, 12, 12,  8,  8, 12,  8,
+  12, 16, 24, 12,  8,  8, 12,  8, 12, 16, 24, 12,  8,  8, 12,  8,
+  12, 16, 20, 12, 24, 24, 24,  8, 12, 16, 20, 12,  8,  8, 12,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+	20, 20, 20, 20, 20, 20,  8, 20,  8,  8,  8,  8,  8,  8, 20,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+	 8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,
+  12, 16, 16, 16, 16, 20, 12, 20, 12, 16, 16,  0, 16, 24, 12, 20,
+  12, 16, 16, 16, 16, 20, 12, 20, 12,  8, 16, 16, 16,  0, 12, 20,
+  12, 16, 16, 28, 16, 20, 12, 20, 12,  8, 16,  8, 16,  0, 12, 20,
+  12, 16, 16,  8, 16, 20, 12, 20, 12, 12, 16,  8, 16,  0, 12, 20);
+  z80t_ddcb_a:array[0..$ff] of byte= (
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,
+	24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24);
+  z80t_ex_a:array[0..$ff] of byte= (
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	4,  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0,  0,
+	4,  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	4,  8,  4,  4,  0,  0,  0,  0,  4,  8,  4,  4,  0,  0,  0,  0,
+	8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,
+	8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,
+	8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,
+	8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0);
 
 type
   tcpc_crt=packed record
@@ -64,7 +166,7 @@ type
               port_c_write_latch:byte;
               tape_motor:boolean;
               ay_control,keyb_line:byte;
-              keyb_val:array[0..9] of byte;
+              keyb_val:array[0..$f] of byte;
            end;
   tcpc_rom=packed record
               data:array[0..$3fff] of byte;
@@ -233,7 +335,11 @@ end;
 
 procedure amstrad_ga_exec;
 begin
-//Esto hay que revisarlo... No está bien!! JameBond007 y Saboteur II
+//Tengo que cambiar el video?
+if cpc_ga.change_video then begin
+  cpc_ga.video_mode:=cpc_ga.nvideo;
+  cpc_ga.change_video:=false;
+end;
 //Compruebo si llevo 52 lineas
 if (cpc_ga.lines_count=52) then begin
   cpc_ga.lines_count:=0;
@@ -247,12 +353,10 @@ if (cpc_ga.lines_sync>0) then begin
     //Si el contador es mayor de 32 lineas, genero IRQ
     if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE);
     cpc_ga.lines_count:=0;
-    //exit; //Si pongo esto Saboteur II funciona, pero el resto va peor (aparece un linea en DL2)
+    //Si pongo esto Saboteur II funciona, pero hay juegos que no ponen bien la pantalla... DL2, shortcircuit...
+    //Y titus de fox no va...
+    //exit;
   end;
-end;
-if cpc_ga.change_video then begin
-  cpc_ga.video_mode:=cpc_ga.nvideo;
-  cpc_ga.change_video:=false;
 end;
 cpc_ga.lines_count:=cpc_ga.lines_count+1;
 end;
@@ -440,10 +544,8 @@ case (val shr 6) of
                 else cpc_ga.pen:=$10; //Border
      $1:cpc_ga.pal[cpc_ga.pen]:=val and $1f;    //Change pen colour
      $2:begin   //ROM banking and mode switch
-            //if (cpc_ga.video_mode<>(val and 3)) then begin
-              cpc_ga.nvideo:=val and 3;
-              cpc_ga.change_video:=true;
-            //end;
+            cpc_ga.nvideo:=val and 3;
+            cpc_ga.change_video:=true;
             cpc_ga.rom_low:=(val and 4)=0;
             cpc_ga.rom_high:=(val and 8)=0;
             if (val and $10)<>0 then begin
@@ -485,8 +587,6 @@ begin
 //Se pueden seleccionar multiples dispositivos EXCEPTO GA y CRTC
 if (puerto and $c000)=$4000 then write_ga(valor)
   else if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
-//if (puerto and $c000)=$4000 then write_ga(valor);
-//if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
 if (puerto and $2000)=0 then begin
   if cpc_rom[valor and $f].enabled then cpc_ga.rom_selected:=valor and $f
     else cpc_ga.rom_selected:=0;
@@ -684,10 +784,14 @@ begin
 end;
 
 procedure clock_alt;
+var
+  tempb:byte;
 begin
   if cpc_crt.state_hsync then begin
     cpc_crt.hsync_counter:=cpc_crt.hsync_counter+1;
-    if cpc_crt.hsync_counter=(cpc_crt.regs[3] and $f) then cpc_crt.state_hsync:=false;
+    tempb:=cpc_crt.regs[3] and $f;
+    if tempb=0 then tempb:=16;
+    if cpc_crt.hsync_counter=tempb then cpc_crt.state_hsync:=false;
   end;
   if (cpc_crt.regs[0]>=cpc_crt.regs[2]) then begin
     if (cpc_crt.character_counter=cpc_crt.regs[2]) then begin
@@ -792,10 +896,10 @@ begin
   cpc_ga.marco_latch:=0;
   cpc_ga.change_video:=false;
   cpc_ga.nvideo:=0;
-  //cpc_ga.cpc_model; no lo toco
+  //cpc_ga.cpc_model;no lo toco
   //PPI
   fillchar(cpc_ppi,sizeof(tcpc_ppi),0);
-  fillchar(cpc_ppi.keyb_val[0],10,$ff);
+  fillchar(cpc_ppi.keyb_val[0],$10,$ff);
   //Dandanator
   cpc_dandanator.halted:=false;
   cpc_dandanator.wait_ret:=false;
@@ -843,9 +947,10 @@ end;
 procedure amstrad_tapes;
 var
   datos:pbyte;
-  file_size,crc:integer;
+  file_size:integer;
   nombre_zip,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
+  crc:dword;
 begin
   if not(OpenRom(StAmstrad,nombre_zip)) then exit;
   cpc_dandanator.enabled:=false;
@@ -1127,13 +1232,13 @@ z80_0.change_ram_calls(cpc_getbyte,cpc_putbyte);
 z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
 z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80,amstrad_m1_detect);
 z80_0.init_sound(amstrad_sound_update);
+//z80_0.change_timmings(@z80t_a,@z80t_cb_a,@z80t_dd_a,@z80t_ddcb_a,@z80t_ed_a,@z80t_ex_a);
 tape_sound_channel:=init_channel;
 tape_timer:=timers.init(z80_0.numero_cpu,100,tape_timer_exec,nil,false);
 ay8910_0:=ay8910_chip.create(1000000,AY8912,1);
 ay8910_0.change_io_calls(cpc_porta_read,nil,nil,nil);
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
-//m6845_0:=chip_m6845.create(HD6845S,cpc_bus_cycle1,cpc_bus_cycle2);
 cpc_load_roms;
 cpc_reset;
 TZX_CLOCK:=4000;

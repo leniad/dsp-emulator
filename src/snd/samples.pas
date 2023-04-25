@@ -215,8 +215,9 @@ function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:sing
 var
   f,sample_size:word;
   ptemp:pbyte;
-  longitud,crc:integer;
+  longitud:integer;
   nombre_zip:string;
+  crc:dword;
 begin
 if parent then begin
     nombre_zip:=name;

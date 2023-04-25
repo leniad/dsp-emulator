@@ -2,8 +2,8 @@ unit bloodbros_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,m68000,main_engine,controls_engine,gfx_engine,ym_3812,oki6295,
-     seibu_sound,rom_engine,pal_engine,sound_engine;
+     m68000,main_engine,controls_engine,gfx_engine,seibu_sound,rom_engine,
+     pal_engine,sound_engine;
 
 function iniciar_bloodbros:boolean;
 
@@ -47,8 +47,7 @@ const
 var
  rom:array[0..$3ffff] of word;
  ram:array[0..$7fff] of word;
- sound_rom:array[0..1,0..$7fff] of byte;
- snd_bank,irq_level:byte;
+ irq_level:byte;
  crt_ram:array[0..$27] of word;
  read_crt:function(direccion:word):word;
  write_crt:procedure(direccion,valor:word);
@@ -162,8 +161,8 @@ if event.arcade then begin
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   //COINS por la CPU de sonido!!
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or $1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or $2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
 end;
 end;
 
@@ -174,16 +173,15 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-///PRECAUCION EL Z80 ES EL 1, PORQUE EL SISTEMA DE SONIDO LO COGE ASI, HAY QUE CAMBIARLO...
-frame_s:=z80_1.tframes;
+frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRuning do begin
    for f:=0 to $ff do begin
      //Main CPU
      m68000_0.run(frame_m);
      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      //Sound CPU
-     z80_1.run(frame_s);
-     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+     seibu_snd_0.z80.run(frame_s);
+     frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
      if f=239 then begin
         m68000_0.irq[irq_level]:=HOLD_LINE;
         update_video_bloodbros;
@@ -228,7 +226,7 @@ case direccion of
     $0..$7ffff:bloodbros_getword:=rom[direccion shr 1];
     $80000..$8e7ff,$8f800..$8ffff:bloodbros_getword:=ram[(direccion and $ffff) shr 1];
     $8e800..$8f7ff:bloodbros_getword:=buffer_paleta[(direccion-$8e800) shr 1];
-    $a0000..$a000d:bloodbros_getword:=seibu_get(direccion and $e);
+    $a0000..$a000d:bloodbros_getword:=seibu_snd_0.get((direccion and $f) shr 1);
     $c0000..$c004f:bloodbros_getword:=read_crt(direccion);
     $e0000:bloodbros_getword:=marcade.dswa;
     $e0002:bloodbros_getword:=marcade.in0;
@@ -272,72 +270,20 @@ case direccion of
                     buffer_paleta[(direccion-$8e800) shr 1]:=valor;
                     cambiar_color(valor,((direccion-$8e800) shr 1));
                  end;
-  $a0000..$a000d:seibu_put(direccion and $e,valor);
+  $a0000..$a000d:seibu_snd_0.put((direccion and $f) shr 1,valor);
   $c0000..$c004f:write_crt(direccion,valor);
 end;
-end;
-
-function bloodbros_snd_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$1fff:bloodbros_snd_getbyte:=mem_snd[direccion];
-  $2000..$27ff:bloodbros_snd_getbyte:=mem_snd[direccion];
-  $4008:bloodbros_snd_getbyte:=ym3812_0.status;
-  $4010:bloodbros_snd_getbyte:=sound_latch[0];
-  $4011:bloodbros_snd_getbyte:=sound_latch[1];
-  $4012:bloodbros_snd_getbyte:=byte(sub2main_pending);
-  $4013:bloodbros_snd_getbyte:=marcade.in2;
-  $6000:bloodbros_snd_getbyte:=oki_6295_0.read;
-  $8000..$ffff:bloodbros_snd_getbyte:=sound_rom[snd_bank,direccion and $7fff];
-end;
-end;
-
-procedure bloodbros_snd_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-  0..$1fff,$8000..$ffff:; //ROM
-  $2000..$27ff:mem_snd[direccion]:=valor;
-  $4000:begin
-          main2sub_pending:=false;
-        	sub2main_pending:=true;
-        end;
-  $4001:;//seibu_update_irq_lines(RESET_ASSERT);
-  $4002:;
-  $4003:seibu_update_irq_lines(RST18_CLEAR);
-  $4007:snd_bank:=valor and 1;
-  $4008:ym3812_0.control(valor);
-  $4009:ym3812_0.write(valor);
-  $4018:sub2main[0]:=valor;
-  $4019:sub2main[1]:=valor;
-  $6000:oki_6295_0.write(valor);
-end;
-end;
-
-procedure bloodbros_sound_update;
-begin
-  ym3812_0.update;
-  oki_6295_0.update;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  if irqstate=0 then seibu_update_irq_lines(RST10_CLEAR)
-    else seibu_update_irq_lines(RST10_ASSERT);
 end;
 
 //Main
 procedure reset_bloodbros;
 begin
  m68000_0.reset;
- z80_1.reset;
- ym3812_0.reset;
- oki_6295_0.reset;
- seibu_reset;
+ seibu_snd_0.reset;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
- marcade.in2:=0;
- snd_bank:=0;
+ seibu_snd_0.input:=0;
 end;
 
 function iniciar_bloodbros:boolean;
@@ -382,14 +328,6 @@ getmem(memoria_temp,$100000);
 //Main CPU
 m68000_0:=cpu_m68000.create(20000000 div 2,256);
 m68000_0.change_ram16_calls(bloodbros_getword,bloodbros_putword);
-//Sound CPU
-z80_1:=cpu_z80.create(7159090 div 2,256);
-z80_1.init_sound(bloodbros_sound_update);
-z80_1.change_ram_calls(bloodbros_snd_getbyte,bloodbros_snd_putbyte);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,7159090 div 2);
-ym3812_0.change_irq_calls(snd_irq);
-oki_6295_0:=snd_okim6295.Create(12000000 div 12,OKIM6295_PIN7_HIGH);
 case main_vars.tipo_maquina of
   285:begin //Blood Bros
         read_crt:=bloodbros_read_crt;
@@ -399,11 +337,11 @@ case main_vars.tipo_maquina of
         if not(roms_load16w(@rom,bloodbros_rom)) then exit;
         //Sound CPU
         if not(roms_load(memoria_temp,bloodbros_sound)) then exit;
-        copymemory(@mem_snd,memoria_temp,$2000);
-        copymemory(@sound_rom[0,0],@memoria_temp[$8000],$8000);
-        copymemory(@sound_rom[1,0],memoria_temp,$8000);
+        seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,7159090 div 2,256,memoria_temp,false);
+        copymemory(@seibu_snd_0.sound_rom[0,0],@memoria_temp[$8000],$8000);
+        copymemory(@seibu_snd_0.sound_rom[1,0],memoria_temp,$8000);
         //OKI Roms
-        if not(roms_load(oki_6295_0.get_rom_addr,bloodbros_oki)) then exit;
+        if not(roms_load(seibu_snd_0.oki_6295_get_rom_addr,bloodbros_oki)) then exit;
         //chars
         if not(roms_load(memoria_temp,bloodbros_char)) then exit;
         char_convert;
@@ -425,11 +363,11 @@ case main_vars.tipo_maquina of
         if not(roms_load16w(@rom,skysmash_rom)) then exit;
         //Sound CPU
         if not(roms_load(memoria_temp,skysmash_sound)) then exit;
-        copymemory(@mem_snd,memoria_temp,$2000);
-        copymemory(@sound_rom[0,0],@memoria_temp[$8000],$8000);
-        copymemory(@sound_rom[1,0],memoria_temp,$8000);
+        seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,7159090 div 2,256,memoria_temp,false);
+        copymemory(@seibu_snd_0.sound_rom[0,0],@memoria_temp[$8000],$8000);
+        copymemory(@seibu_snd_0.sound_rom[1,0],memoria_temp,$8000);
         //OKI Roms
-        if not(roms_load(oki_6295_0.get_rom_addr,skysmash_oki)) then exit;
+        if not(roms_load(seibu_snd_0.oki_6295_get_rom_addr,skysmash_oki)) then exit;
         //chars
         if not(roms_load(memoria_temp,skysmash_char)) then exit;
         char_convert;

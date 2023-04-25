@@ -1054,7 +1054,7 @@ var
   tmp:single;
 begin
 	i:=4; // four operators per channel
-  while i<>0 do begin
+  repeat
     swap_flag:=0;
     SLOT:=CH.SLOT[4-i];
 		case SLOT.state of
@@ -1137,7 +1137,7 @@ begin
 		SLOT.vol_out:=out_+slot.tl;
 		SLOT.ssgn:=SLOT.ssgn xor swap_flag;
 		i:=i-1;
-	end;
+	until (i=0);
 end;
 
 procedure FMInitTable;

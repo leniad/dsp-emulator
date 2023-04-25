@@ -60,7 +60,7 @@ type
           im2_lo,im0:byte;
           procedure reset;
           procedure run(maximo:single);
-          //procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
+          procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
           procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
           procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil);
           function get_safe_pc:word;
@@ -101,6 +101,7 @@ type
           function adc_hl(valor:word):word;
           function sbc_hl(valor:word):word;
         private
+          z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..255] of byte;
           raised_z80:type_raised;
           m1_raised:type_m1_raise;
           function call_nmi:byte;
@@ -118,9 +119,9 @@ var
 implementation
 
 const
-        z80t:array[0..255] of byte=(
+        z80t_m:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-        4,10, 7, 6, 4, 4, 7, 4, 4,11, 7, 6, 4, 4, 7, 4,  //0                          *
+        4,10, 7, 6, 4, 4, 7, 4, 4,11, 7, 6, 4, 4, 7, 4,  //0
         8,10, 7, 6, 4, 4, 7, 4,12,11, 7, 6, 4, 4, 7, 4,  //10
         7,10,16, 6, 4, 4, 7, 4, 7,11,16, 6, 4, 4, 7, 4,  //20
         7,10,13, 6,11,11,10, 4, 7,11,13, 6, 4, 4, 7, 4,  //30
@@ -136,7 +137,7 @@ const
         5,10,10,11,10,11, 7,11, 5, 4,10,11,10, 0, 7,11,  //D0
         5,10,10,19,10,11, 7,11, 5, 4,10, 4,10, 0, 7,11,  //E0
         5,10,10, 4,10,11, 7,11, 5, 6,10, 4,10, 0, 7,11); //F0
-         z80t_cb:array[0..255] of byte=(
+         z80t_cb_m:array[0..255] of byte=(
       //0 1 2 3 4 5  6 7 8 9 a b c d  e f
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
@@ -154,7 +155,7 @@ const
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8);
-        z80t_dd:array[0..255] of byte=( //cb_xy
+        z80t_dd_m:array[0..255] of byte=( //cb_xy
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         8,14,11,10, 8, 8,11, 8, 8,15,11,10, 8, 8,11, 8,
        12,14,11,10, 8, 8,11, 8,16,15,11,10, 8, 8,11, 8,
@@ -169,10 +170,10 @@ const
       	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
       	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
       	9,14,14,14,14,15,11,15, 9,14,14, 0,14,21,11,15,
-      	9,14,14,15,14,15,11,15, 9, 8,14,15,14, 4,11,15,
-      	9,14,14,23,14,15,11,15, 9, 8,14, 8,14, 4,11,15,
-      	9,14,14, 8,14,15,11,15, 9,10,14, 8,14, 4,11,15);
-        z80t_ddcb:array[0..255] of byte=(
+      	9,14,14,15,14,15,11,15, 9, 8,14,15,14, 0,11,15,
+      	9,14,14,23,14,15,11,15, 9, 8,14, 8,14, 0,11,15,
+      	9,14,14, 8,14,15,11,15, 9,10,14, 8,14, 0,11,15);
+        z80t_ddcb_m:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
@@ -190,7 +191,7 @@ const
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23);
-        z80t_ed:array[0..255] of byte=(
+        z80t_ed_m:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //00
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //10
@@ -208,7 +209,7 @@ const
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8); //F0
-        z80t_ex:array[0..255] of byte=(
+        z80t_ex_m:array[0..255] of byte=(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	      5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // DJNZ
 	      5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, // JR NZ/JR Z
@@ -578,11 +579,27 @@ self.in_port:=res_ff;
 self.out_port:=out_ff;
 self.despues_instruccion:=nil;
 self.raised_z80:=nil;
+copymemory(@z80t,@z80t_m,$100);
+copymemory(@z80t_cb,@z80t_cb_m,$100);
+copymemory(@z80t_dd,@z80t_dd_m,$100);
+copymemory(@z80t_ddcb,@z80t_ddcb_m,$100);
+copymemory(@z80t_ed,@z80t_ed_m,$100);
+copymemory(@z80t_ex,@z80t_ex_m,$100);
 end;
 
 destructor cpu_z80.free;
 begin
 freemem(self.r);
+end;
+
+procedure cpu_z80.change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
+begin
+copymemory(@z80t,z80t_set,$100);
+copymemory(@z80t_cb,z80t_cb_set,$100);
+copymemory(@z80t_dd,z80t_dd_set,$100);
+copymemory(@z80t_ddcb,z80t_ddcb_set,$100);
+copymemory(@z80t_ed,z80t_ed_set,$100);
+copymemory(@z80t_ex,z80t_ex_set,$100);
 end;
 
 procedure cpu_z80.reset;
@@ -758,7 +775,6 @@ var
  :band_z80;
  irq_temp:boolean;
  cantidad_t:word;
- pestados:integer;
 begin
 irq_temp:=false;
 self.contador:=0;
@@ -767,7 +783,6 @@ if self.pedir_halt<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
-pestados:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   temp:=self.pedir_reset;
   self.reset;
@@ -1575,13 +1590,13 @@ end; {del case}
 cantidad_t:=z80t[instruccion]+self.estados_demas;
 if @self.despues_instruccion<>nil then self.despues_instruccion(cantidad_t);
 self.contador:=self.contador+cantidad_t;
-timers.update(self.contador-pestados,self.numero_cpu);
+timers.update(cantidad_t,self.numero_cpu);
 end; {del while}
 end;
 
 function cpu_z80.exec_cb:byte;
 var
-        instruccion,temp:byte;
+  instruccion,temp:byte;
 begin
 self.opcode:=true;
 instruccion:=self.getbyte(r.pc);
@@ -1968,11 +1983,9 @@ var
  temp2:word;
  registro:pparejas;
  posicion:parejas;
- estados_dd_cb:byte;
 begin
 if tipo then registro:=@r.ix else registro:=@r.iy;
 temp2:=registro.w;
-estados_dd_cb:=0;
 self.opcode:=true;
 instruccion:=self.getbyte(r.pc);
 if @self.m1_raised<>nil then self.m1_raised(instruccion);
@@ -2245,8 +2258,7 @@ case instruccion of
                 temp:=self.getbyte(temp2);
                 cp_a(temp);
         end;
-        $dd,$fd:estados_demas:=estados_demas+self.exec_dd_cb(tipo);
-        $cb:estados_dd_cb:=self.exec_dd_cb(tipo);
+        $cb,$dd,$fd:self.estados_demas:=self.estados_demas+self.exec_dd_cb(tipo);
         $e1:registro.w:=self.pop_sp;  {pop IX}
         $e3:begin   {ex (SP),IX}
                 posicion.w:=self.pop_sp;
@@ -2259,7 +2271,7 @@ case instruccion of
         $f9:r.sp:=registro^.w; {ld SP,IX}
         else r.pc:=r.pc-1;
 end;
-exec_dd_fd:=z80t_dd[instruccion]+estados_dd_cb;
+exec_dd_fd:=z80t_dd[instruccion];
 end;
 
 function cpu_z80.exec_dd_cb(tipo:boolean):byte;
@@ -3164,10 +3176,8 @@ function cpu_z80.exec_ed:byte;
 var
         instruccion,temp,temp2,temp3:byte;
         posicion:parejas;
-        estados_demas:byte;
         tempw:word;
 begin
-estados_demas:=0;
 self.opcode:=true;
 instruccion:=self.getbyte(r.pc);
 self.opcode:=false;
@@ -3563,7 +3573,7 @@ case instruccion of
                  if (r.bc.w<>0) then begin
                         r.pc:=r.pc-2;
                         r.wz:=r.pc+1;
-                        estados_demas:=z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                  end;
                  r.f.p_v:=(r.bc.w<>0);
                  r.f.n:=false;
@@ -3587,7 +3597,7 @@ case instruccion of
                 r.f.bit5:=((temp-((temp3 and 16) shr 4)) and 2)<>0;
                 r.f.bit3:=((temp-((temp3 shr 4) and 1)) and 8)<>0;
                 If (r.f.p_v and not(r.f.z)) then begin
-                  estados_demas:=z80t_ex[instruccion];
+                  self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                   r.pc:=r.pc-2;
                   r.wz:=r.pc+1;
                 end;
@@ -3609,7 +3619,7 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=z80t_ex[instruccion];
+                  self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
            end;
         $b3:begin //otir añadido el dia 18-09-04
@@ -3628,7 +3638,7 @@ case instruccion of
                 r.f.bit3:=(r.bc.h and 8)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=z80t_ex[instruccion];
+                  self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
             end;
         { $b4..$b7:nop*2}
@@ -3645,7 +3655,7 @@ case instruccion of
                 r.f.bit3:=((r.a+temp) and $8)<>0;
                 if (r.bc.w<>0) then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=z80t_ex[instruccion];
+                  self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                   r.wz:=r.pc+1;
                 end;
              end;
@@ -3665,7 +3675,7 @@ case instruccion of
                  r.f.bit3:=((temp-((temp3 shr 4) and 1)) and 8)<>0;
                  if r.f.p_v and not(r.f.z) then begin
                      r.pc:=r.pc-2;
-                     estados_demas:=z80t_ex[instruccion];
+                     self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                      r.wz:=r.pc+1;
                  end;
              end;
@@ -3684,7 +3694,7 @@ case instruccion of
                  r.f.bit3:=(r.bc.h and 8)<>0;
                  r.f.s:=(r.bc.h and $80)<>0;
                  if (r.bc.h<>0) then begin
-                        estados_demas:=z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                         dec(r.pc,2);
                  end;
                  r.hl.w:=r.hl.w-1;
@@ -3705,12 +3715,12 @@ case instruccion of
                 r.f.bit3:=(r.bc.h and 8)<>0;
                 r.f.s:=(r.bc.h and $80)<>0;
                 if (r.bc.h<>0) then begin
-                    estados_demas:=z80t_ex[instruccion];
+                    self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                     dec(r.pc,2);
                 end;
             end;
 end;
-exec_ed:=z80t_ed[instruccion]+estados_demas;
+exec_ed:=z80t_ed[instruccion];
 end;
 
 end.

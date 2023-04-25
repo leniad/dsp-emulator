@@ -506,6 +506,14 @@ type
     EnduroRacer1: TMenuItem;
     SpaceHarrier1: TMenuItem;
     N64thStreet1: TMenuItem;
+    ShadowWarriorsHW1: TMenuItem;
+    ShadowWarriors1: TMenuItem;
+    wildfang1: TMenuItem;
+    Raiden1: TMenuItem;
+    winsHW1: TMenuItem;
+    twins1: TMenuItem;
+    twinsed1: TMenuItem;
+    HotBlock1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

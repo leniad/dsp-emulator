@@ -353,11 +353,10 @@ end;
 procedure cpu_m6502.run(maximo:single);
 var
     instruccion,numero,tempb,carry:byte;
-    tempw,posicion,old_contador:word;
+    tempw,posicion:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
-old_contador:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   tempb:=self.pedir_reset;
   self.reset;
@@ -1029,7 +1028,7 @@ case instruccion of
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-timers.update(self.contador-old_contador,self.numero_cpu);
+timers.update(tempw,self.numero_cpu);
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
 end; //del while!!
 end;

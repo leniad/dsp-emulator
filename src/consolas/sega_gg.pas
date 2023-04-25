@@ -220,9 +220,9 @@ procedure abrir_gg;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
-  longitud,crc:integer;
+  longitud:integer;
   resultado:boolean;
-  crc_val:dword;
+  crc_val,crc:dword;
 begin
   if not(OpenRom(StGG,RomFile)) then exit;
   extension:=extension_fichero(RomFile);

@@ -233,7 +233,6 @@ uses
   config_sms in 'config_sms.pas' {SMSConfig},
   lib_sdl2 in '..\misc\lib_sdl2.pas',
   renegade_hw in '..\arcade\renegade_hw.pas',
-  generic_adpcm in '..\snd\generic_adpcm.pas',
   tmnt_hw in '..\arcade\tmnt_hw.pas',
   eepromser in '..\devices\eepromser.pas',
   gradius3_hw in '..\arcade\gradius3_hw.pas',
@@ -338,7 +337,11 @@ uses
   magmax_hw in '..\arcade\magmax_hw.pas',
   ambush_hw in '..\arcade\ambush_hw.pas',
   superduck_hw in '..\arcade\superduck_hw.pas',
-  hangon_hw in '..\arcade\hangon_hw.pas';
+  hangon_hw in '..\arcade\hangon_hw.pas',
+  shadow_warriors_hw in '..\arcade\shadow_warriors_hw.pas',
+  raiden_hw in '..\arcade\raiden_hw.pas',
+  twins_hw in '..\arcade\twins_hw.pas',
+  i2cmem in '..\devices\i2cmem.pas';
 
 {$R *.res}
 begin

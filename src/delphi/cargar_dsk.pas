@@ -82,9 +82,10 @@ end;
 procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
-  longitud,crc:integer;
+  longitud:integer;
   nothing1,nothing2,nothing3:boolean;
   file_inside_zip:string;
+  crc:dword;
 begin
 file_name:=filelistbox1.FileName;
 file_extension:=extension_fichero(filelistbox1.FileName);

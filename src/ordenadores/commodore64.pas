@@ -335,9 +335,10 @@ end;
 procedure c64_tapes;
 var
   datos:pbyte;
-  file_size,crc:integer;
+  file_size:integer;
   nombre_zip,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
+  crc:dword;
 begin
   if not(OpenRom(StC64,nombre_zip)) then exit;
   extension:=extension_fichero(nombre_zip);

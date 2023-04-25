@@ -1268,11 +1268,11 @@ var
   mal,resultado:boolean;
   extension,nombre_file,RomFile,dir,cadena:string;
   datos,ptemp:pbyte;
-  longitud,crc:integer;
+  longitud:integer;
   f,h:word;
   colores:tpaleta;
   gb_logo:^tgb_logo;
-  crc32:dword;
+  crc32,crc:dword;
 begin
   if not(OpenRom(StGb,RomFile)) then exit;
   getmem(gb_logo,sizeof(tgb_logo));

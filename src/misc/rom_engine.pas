@@ -30,7 +30,8 @@ uses init_games;
 
 function carga_rom_zip(nombre_zip,nombre_rom:string;donde:pbyte;longitud,crc:integer;warning:boolean):boolean;
 var
-  long_rom,crc_rom:integer;
+  long_rom:integer;
+  crc_rom:dword;
 begin
 carga_rom_zip:=false;
 //Cargar el archivo

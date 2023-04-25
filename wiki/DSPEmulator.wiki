@@ -1,4 +1,4 @@
-<h1>DSP Emulator v0.20 by Leniad 2001-2022</h1><br>
+<h1>DSP Emulator v0.22WIP1 by Leniad 2001-2023</h1><br>
 Well, this is just another emulator... but, where is the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 There are versions available for Windows 32/64-bit, Linux 64-bit, and MacOS 64-bit.<br><br>
@@ -12,7 +12,7 @@ The emulator includes inside the ZIP (not in WIP versions) the ROMS for Spectrum
 <b>1.1-. Keys</b>
 <hr>
 -General Keys:<br><pre>
-    F1 --> Service key
+    F1 --> Service/Pause key
     F2 --> Full speed/Normal Speed
     F3 --> Reset machine
     F6 --> Full screen
@@ -36,7 +36,7 @@ By default keys are<br><pre>
     Insert Coin 2     --> Key '6'</pre>
 Any other control is not defined. You can redefine it in the main configuration menu.<br>
 You can select autofire for all players buttons<br><br>
-- Spectrum/Amstrad basic keys:<br><pre>
+- Spectrum/Amstrad/C64 basic keys:<br><pre>
     F1 --> Play/Stop tape
     F4 --> Save snapshot
     F5 --> Remove Disk</pre><br>
@@ -51,19 +51,21 @@ In the main screen of the emulator you can press some buttons<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Fastest/Slow emulation<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- General configuration, you can configure some options<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Select the main language<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Audio quality: 11025Khz, 22050Khz, 44100Khz or 'No Sound'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Sound: enabled or disabled<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video settings: 1x, 2x, scanlines 1x, scanlines 2x or 3x factor<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Default directories for arcade ROMs (Supports multiple directories separated by semicolons), hiscore files, preview images, samples, quick snapshots and NV-Ram files<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Redefine all keys or use external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Load last driver/use driver list<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show the ROMs CRC errors<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Center the main screen when the driver is changed<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Consoles: show game loading menu at startup<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Configuration of drivers can be changed as follows:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- When the running driver is an arcade, there is a button for change the dip switches<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- When the driver wich is running is a computer/console, there is a button to change its specific configuration<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Show game list:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- The emulator can start whith a list of drivers, which shows the arcade games, computers and consoles available and further information: availability of the ROMS for each system, distribution year, company, etc. In general configuration you can choose this way of booting (show a game list), or the old way (run the last driver loaded)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Save Pictures: You can save GIF, JPG or PNG from all drivers (arcade, computer or console)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Also when you open the game list, you can see a sort options on the window.
+&nbsp;&nbsp;&nbsp;&nbsp;- Save Pictures: You can save GIF, JPG or PNG from all drivers (arcade, computer or console). The snapshot uses the same resolution that you choose in the video options, if 2x is selected, the snapshot doubles the picture resolution.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Export ROMs/samples information: You can export ROMs/samples information in .DAT (Clearmame) format to check if any is missing, defective, etc.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Autofire: You can configure autofire in any of the buttons of both players<br><br>
 <b>2-. Drivers</b><br>
@@ -202,6 +204,7 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick, support 2 players<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- 'PAUSE' uses F1 key<br>
 - Sound: Sound chip SN-76496 implemented<br>
 - Cartridges: Supports 'SG' file format, ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports up to tree types, with almost 100% compatibility<br>
@@ -211,7 +214,6 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- 'PAUSE' uses F1 key<br>
 - Sound: Sound chip SN-76496 implemented<br>
 - Cartridges: Supports 'GG' file format, ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports two types, with almost 100% compatibility<br>
@@ -275,7 +277,7 @@ Shaolin's Road             | SHAOLIN.ZIP  |     100    |
 Yie Ar Kung-Fu             | YIEAR.ZIP    |     100    |
 Son Son                    | SONSON.ZIP   |     100    |
 Asteroids                  | ASTEROID.ZIP |     100    | Analog sound and samples
-Lunar Lander               | LLANDER.ZIP  |      50    | No sound and graphic issues
+Lunar Lander               | LLANDER.ZIP  |      50    | No sound and graphic issues, WIP
 Star Force                 | STARFORC.ZIP |     100    | Senjyo HW
 Senjyo                     | SENJYO.ZIP   |     100    | Senjyo HW
 Baluba-louk no Densetsu    | BALUBA.ZIP   |     100    | Senjyo HW
@@ -307,14 +309,15 @@ Snap Jack                  | SNAPJACK.ZIP |     100    | Lady Bug HW
 Cosmic Avenger             | CAVENGER.ZIP |     100    | Lady Bug HW
 Tehkan World Cup           | TEHKANWC.ZIP |     100    |
 Popeye                     | POPEYE.ZIP   |     100    |
-Psychic 5                  | PSYCHIC5.ZIP |      96    | Missing alpha render (background and sprites) and color intesity
+Psychic 5                  | PSYCHIC5.ZIP |      95    | Missing alpha render (background and sprites) and color intesity
 Kung-Fu Master             | KUNGFUM.ZIP  |     100    | Irem M62 HW
 Spelunker                  | SPELUNKR.ZIP |     100    | Irem M62 HW
 Spelunker II               | SPELUNK2.ZIP |     100    | Irem M62 HW
 Lode Runner                | LODERUN.ZIP  |     100    | Irem M62 HW
 Lode Runner II             | LODERUN2.ZIP |     100    | Irem M62 HW
-Terra Cresta               | TERRACRE.ZIP |     100    |
-Shoot Out!                 | SHOOTOUT.ZIP |     100    |
+Terra Cresta               | TERRACRE.ZIP |     100    | TerraCresta HW
+Soldier Girl Amazon        | AMAZON.ZIP   |     100    | TerraCresta HW
+Shoot Out!                 | SHOOTOUT.ZIP |      95    | Some sprites issues
 Vigilante                  | VIGILANT.ZIP |     100    |
 Jackal                     | JACKAL.ZIP   |     100    |
 Bubble Bobble              | BUBLBOBL.ZIP |     100    |
@@ -340,6 +343,7 @@ DigDug                     | DIGDUG.ZIP   |     100    | Galaga HW
 Xevious                    | XEVIOUS.ZIP  |     100    | Galaga HW
                                                        | Partial sound using samples
 Bosconian                  | BOSCO.ZIP    |     100    | Galaga HW
+                                                       | Partial sound using samples
 Xain'd Sleena              | XSLEENA.ZIP  |     100    |
 Hard Head                  | HARDHEAD.ZIP |     100    | Suna HW
 Hard Head 2                | HARDHED2.ZIP |     100    | Suna HW
@@ -359,9 +363,9 @@ Gun.Smoke                  | GUNSMOKE.ZIP |     100    | Gun.Smoke HW
 Jail Break                 | JAILBREK.ZIP |     100    |
 Circus Charlie             | CIRCUSC.ZIP  |     100    |
 Iron Horse                 | IRONHORS.ZIP |     100    |
-R-Type                     | RTYPE.ZIP    |      95    | Irem M72 HW
-Hammerin' Harry            | HHARRY.ZIP   |      95    | Irem M72 HW
-R-Type 2                   | RTYPE2.ZIP   |      95    | Irem M72 HW
+R-Type                     | RTYPE.ZIP    |     100    | Irem M72 HW
+Hammerin' Harry            | HHARRY.ZIP   |     100    | Irem M72 HW
+R-Type 2                   | RTYPE2.ZIP   |     100    | Irem M72 HW
 Break Thru                 | BRKTHRU.ZIP  |     100    | Break Thru HW
 Darwin 4078                | DARWIN.ZIP   |     100    | Break Thru HW
 Super Real Darwin          | SRDARWIN.ZIP |     100    |
@@ -381,14 +385,14 @@ The King of Dragons        | KOD.ZIP      |     100    | Capcom Play System 1 - 
                                                        | Missing third player controls
 Street Fighter II          |
    The World Warrior       | SF2.ZIP      |      95    | Capcom Play System 1 - CPS1
-                                                       | Missing some control, missing scroll row
+                                                       | Missing scroll row
 Strider                    | STRIDER.ZIP  |     100    | Capcom Play System 1 - CPS1
 Three Wonders              | 3WONDERS.ZIP |     100    | Capcom Play System 1 - CPS1
 Captain Commando           | CCOMANDO.ZIP |     100    | Capcom Play System 1 - CPS1
 Knights of the Round       | KNIGHTS.ZIP  |     100    | Capcom Play System 1 - CPS1
 Street Fighter II'         |
    Champion Edition        | SF2CE.ZIP    |      95    | Capcom Play System 1 - CPS1
-                                                       | Missing some control, missing scroll row
+                                                       | Missing scroll row
 Cadillacs and Dinosaurs    | DINO.ZIP     |     100    | Capcom Play System 1 - CPS1
 The Punisher               | PUNISHER.ZIP |     100    | Capcom Play System 1 - CPS1
 Shinobi                    | SHINOBI.ZIP  |     100    | Sega System 16A
@@ -413,7 +417,9 @@ The Return of Ishtar       | ROISHTAR.ZIP |     100    | Namco System 86 HW
 Genpei ToumaDen            | GENPEITD.ZIP |     100    | Namco System 86 HW
 Wonder Momo                | WNDRMOMO.ZIP |     100    | Namco System 86 HW
 Roc'n Rope                 | ROCNROPE.ZIP |     100    |
-Repulse                    | REPULSE.ZIP  |     100    |
+Repulse                    | REPULSE.ZIP  |     100    | Kyugo HW
+S.R.D. Mission             | SRDMISSN.ZIP |     100    | Kyugo HW
+Airwolf                    | AIRWOLF.ZIP  |     100    | Kyugo HW
 The NewZealand Story       | TNZS.ZIP     |     100    | The NewZealand Story HW
 Insector X                 | INSECTX.ZIP  |     100    | The NewZealand Story HW
 Extermination              | EXTRMATN.ZIP |     100    | The NewZealand Story HW
@@ -429,6 +435,8 @@ Search and Rescue          | SEARCHAR.ZIP |     100    | SNK 68K HW
 P47 - Phantom Fighter      | P47.ZIP      |     100    | Jaleco Megasystem HW
 Rodland                    | RODLAND.ZIP  |     100    | Jaleco Megasystem HW
 Saint Dragon               | STDRAGON.ZIP |     100    | Jaleco Megasystem HW
+64th Street -              |
+     A detective story     | 64STREET.ZIP |     100    | Jaleco Megasystem HW
 Time Pilot                 | TIMEPLT.ZIP  |     100    |
 Pengo                      | PENGO.ZIP    |     100    |
 Twin Cobra                 | TWINCOBR.ZIP |     100    | Twin Cobra HW
@@ -473,8 +481,7 @@ The Combatribes            | CTRIBE.ZIP   |     100    | DD3 HW
 Block Out                  | BLOCKUOT.ZIP |     100    |
 Food Fight                 | FOODF.ZIP    |     100    |
 Nemesis                    | NEMESIS.ZIP  |     100    | Nemesis HW
-TwinBee                    | TWINBEE.ZIP  |      80    | Nemesis HW
-                                                       | Video and sprites issues
+TwinBee                    | TWINBEE.ZIP  |     100    | Nemesis HW
 Galactic Warriors          | GWARRIOR.ZIP |     100    | Nemesis HW
 Salamander                 | SALAMAND.ZIP |     100    | Nemesis HW
 Pirates                    | PIRATES.ZIP  |     100    | Pirates HW
@@ -486,7 +493,7 @@ Gigas                      | GIGAS.ZIP    |     100    | Freekick HW
 Gigas Mark II              | GIGASM2.ZIP  |     100    | Freekick HW
 Omega                      | OMEGA.ZIP    |     100    | Freekick HW
 Perfect Billard            | PBILLRD.ZIP  |     100    | Freekick HW
-Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver
+Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver, WIP
 Pinball Action             | PBACTION.ZIP |     100    |
 Renegade                   | RENEGADE.ZIP |     100    |
 Teenage Mutant Ninja       |
@@ -501,12 +508,12 @@ Aliens                     | ALIENS.ZIP   |      95    | Small issues with sprit
 Super Contra               | SCONTRA.ZIP  |     100    | Thunder Cross HW
 Gang Busters               | GBUSTERS.ZIP |     100    | Thunder Cross HW
 Thunder Cross HW           | THUNDERZ.ZIP |     100    | Thunder Cross HW
-The Simpsons               | SIMPSONS.ZIP |      90    | Some graphics issues (CPU bug?)
+The Simpsons               | SIMPSONS.ZIP |     100    |
 Track & Field              | TRACKFLD.ZIP |     100    |
 Hyper Sports               | HYPERSPT.ZIP |     100    |
 Megazone                   | MEGAZONE.ZIP |     100    |
 Space Fire Bird            | SPACEFB.ZIP  |     100    | Partial sound using samples
-Ajax                       | AJAX.ZIP     |      80    | Graphic issues, missing screen rotation
+Ajax                       | AJAX.ZIP     |      90    | Missing screen rotation
 Vendetta                   | VENDETTA.ZIP |     100    |
 Gauntlet                   | GAUNTLET.ZIP |      95    | Gauntlet HW
                                                        | Missing ADPCM
@@ -520,10 +527,10 @@ Ikari Warriors             | IKARI.ZIP    |     100    | SNK HW
 Athena                     | ATHENA.ZIP   |     100    | SNK HW
 T.N.K III                  | TNK3.ZIP     |     100    | SNK HW
 ASO - Armored Scrum Object | ASO.ZIP      |     100    | SNK HW
-Peter Pakrat               | PETERPAK.ZIP |      70    | Atari System I HW
+Peter Pakrat               | PETERPAK.ZIP |      70    | Atari System I HW, WIP
 Indiana Jones and          |              |
-   the Temple of Doom      | INDYTEMP.ZIP |      70    | Atari System I HW
-Marble Madness             | MARBLE.ZIP   |      70    | Atari System I HW
+   the Temple of Doom      | INDYTEMP.ZIP |      70    | Atari System I HW, WIP
+Marble Madness             | MARBLE.ZIP   |      70    | Atari System I HW, WIP
 Badlands                   | BADLANDS.ZIP |     100    |
 Cosmo Police Galivan       | GALIVAN.ZIP  |     100    | Galivan HW
 Ufo Robo Dangar            | DANGAR.ZIP   |     100    | Galivan HW
@@ -539,10 +546,12 @@ Opa-Opa                    | OPAOPA.ZIP   |     100    | Sega System E
 Tetris                     | TETRISSE.ZIP |     100    | Sega System E
 Transformer                | TRANSFRM.ZIP |     100    | Sega System E
 Riddle of Pythagoras       | RIDLEOFP.ZIP |     100    | Sega System E
-Soldier Girl Amazon        | AMAZON.ZIP   |     100    | TerraCresta HW
-Defender                   | DEFENDER.ZIP |      90    | Williams HW, some sound issues
-May Day                    | MAYDAY.ZIP   |      90    | Williams HW, some sound issues
-Colony 7                   | COLONY7.ZIP  |      90    | Williams HW, some sound issues
+Defender                   | DEFENDER.ZIP |     100    | Williams HW
+May Day                    | MAYDAY.ZIP   |     100    | Williams HW
+Colony 7                   | COLONY7.ZIP  |     100    | Williams HW
+Joust                      | JOUST.ZIP    |     100    | Williams HW
+Robotron                   | ROBOTRON.ZIP |     100    | Williams HW
+Stargate                   | STARGATE.ZIP |     100    | Williams HW
 Armed F                    | ARMEDF.ZIP   |     100    | ArmedF HW
 Terra Force                | TERRAF.ZIP   |     100    | ArmedF HW
 Crazy Climber 2            | CCLIMB2.ZIP  |     100    | ArmedF HW
@@ -562,7 +571,7 @@ Dynamite Dux               | DDUX1.ZIP    |     100    | Sega System 16B
 E-Swat - Cyber Police      | ESWAT.ZIP    |     100    | Sega System 16B
 Passing Shot               | PASSSHT.ZIP  |     100    | Sega System 16B
 Aurail                     | AURAIL.ZIP   |     100    | Sega System 16B
-Hellfire                   | HELLFIRE.ZIP |      50    | Toaplan 1 System
+Hellfire                   | HELLFIRE.ZIP |      50    | Toaplan 1 System, WIP
 Karate Champ               | KCHAMP.ZIP   |     100    |
 Thundercade                | TNDRCADE.ZIP |     100    | Seta HW
 Twin Eagle                 |              |            |
@@ -577,8 +586,26 @@ Indoor Soccer              | IDSOCCER.ZIP |     100    | Mr DoCastle HW
 Crystal Castles            | CCASTLES.ZIP |     100    |
 Flower                     | FLOWER.ZIP   |     100    |
 Super Dodge Ball           | SPDODGEB.ZIP |     100    |
+Tapper                     | TAPPER.ZIP   |     100    |
+Arkanoid                   | ARKANOID.ZIP |      95    | Incorrect sound chip
+Side Arms - Hyper Dyne     | SIDEARMS.ZIP |     100    |
+The Speed Rumbler          | SRUMBLER.ZIP |     100    |
+China Gate                 | CHINAGAT.ZIP |     100    |
+Mag Max                    | MAGMAX.ZIP   |     100    |
+Ambush                     | AMBUSH.ZIP   |     100    |
+Super Duck                 | SUPDUCK.ZIP  |     100    |
+Hang-On                    | HANGON.ZIP   |     100    | HangOn HW
+Enduro Racer               | ENDUROR.ZIP  |     100    | HangOn Hw
+Space Harrier              | SHARRIER.ZIP |      90    | HangOn HW
+                                                       | Some sprite issues
+Shadow Warriors            | SHADOWW.ZIP  |     100    | Shadow Warriors HW
+Wild Fang/Tecmo Knight     | WILDFANG.ZIP |     100    | Shadow Warriors HW
+Raiden                     | RAIDEN.ZIP   |      80    | Many issues, controls, sound, sprites...
+Twins                      | TWINS.ZIP    |     100    | Twins HW
+Twins (Electronic Devices) | TWINSED1.ZIP |     100    | Twins HW
+Hot Blocks - Tetirx II     | HOTBLOCK.ZIP |     100    | Twins HW
 ------------------------------------------------------------------------------------------------------------------------
-Total: 310</pre>
+Total: 334</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you want to add another language, download old languaje files and edit any file with the extension '.lng', rename it with the language name and send it to me, to add it to the next version.<br>
@@ -622,4 +649,4 @@ www.emulation9.com<br><br>
 if you want spectrum tapes, snapshot, info...<br>
 www.worldofspectrum.org<br>
 trastero.speccy.org<br>
-spa2.speccy.org
+spa2.speccy.org<br>

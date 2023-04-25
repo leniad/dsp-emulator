@@ -311,7 +311,7 @@ begin
      $8001:ym3812_0.write(valor);
      $c000:begin
               adpcm_pos:=(valor shl 8);
-              msm_5205_0.reset_w(0);
+              msm5205_0.reset_w(0);
            end;
      $d000:adpcm_end:=((valor+1) shl 8);
      //$e000:volumen
@@ -395,7 +395,7 @@ begin
      $a001:ym3812_0.write(valor);
      $c000:begin
               adpcm_pos:=(valor shl 8);
-              msm_5205_0.reset_w(0);
+              msm5205_0.reset_w(0);
            end;
      $c400:adpcm_end:=((valor+1) shl 8);
      //$c800:volumen
@@ -416,16 +416,16 @@ end;
 procedure snd_adpcm;
 begin
 if ((adpcm_pos>=adpcm_end) or	(adpcm_pos>$7fff)) then begin
-  msm_5205_0.reset_w(1);
+  msm5205_0.reset_w(1);
   exit;
 end;
 if (adpcm_data<>$100) then begin
-		msm_5205_0.data_w(adpcm_data and $0f);
+		msm5205_0.data_w(adpcm_data and $0f);
 		adpcm_data:=$100;
 end	else begin
 		adpcm_data:=mem_adpcm[adpcm_pos];
     adpcm_pos:=adpcm_pos+1;
-    msm_5205_0.data_w((adpcm_data and $f0) shr 4);
+    msm5205_0.data_w((adpcm_data and $f0) shr 4);
 end;
 end;
 
@@ -435,7 +435,7 @@ begin
  z80_0.reset;
  z80_1.reset;
  ym3812_0.reset;
- msm_5205_0.reset;
+ msm5205_0.reset;
  reset_audio;
  adpcm_end:=0;
  adpcm_pos:=0;
@@ -505,7 +505,7 @@ iniciar_video(256,224);
 z80_1:=cpu_z80.create(4000000,$100);
 z80_1.init_sound(snd_sound_play);
 //Sound Chip
-msm_5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,snd_adpcm);
+msm5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,snd_adpcm);
 //cargar roms
 case main_vars.tipo_maquina of
   26:begin

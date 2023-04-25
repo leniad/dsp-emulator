@@ -113,7 +113,6 @@ procedure TFLoadRom.init_game_desc(sort:word);
 var
   f:word;
   sitio,cantidad:integer;
-  myRect:TGridRect;
 procedure poner;
 var
   test:string;

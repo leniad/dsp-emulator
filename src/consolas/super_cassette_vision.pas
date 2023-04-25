@@ -406,9 +406,9 @@ procedure abrir_scv;
 var
   extension,extension2,nombre_file,RomFile:string;
   datos,datos2:pbyte;
-  longitud,longitud2,crc:integer;
+  longitud,longitud2:integer;
   resultado:boolean;
-  crc32:dword;
+  crc32,crc:dword;
 procedure load_rom;
 begin
 rom_bank_type:=0;

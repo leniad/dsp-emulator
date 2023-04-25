@@ -336,16 +336,16 @@ procedure sf_misc_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:begin
-        msm_5205_0.reset_w((valor shr 7) and 1);
-        msm_5205_0.data_w(valor);
-	      msm_5205_0.vclk_w(1);
-	      msm_5205_0.vclk_w(0);
+        msm5205_0.reset_w((valor shr 7) and 1);
+        msm5205_0.data_w(valor);
+	      msm5205_0.vclk_w(1);
+	      msm5205_0.vclk_w(0);
      end;
   1:begin
-        msm_5205_1.reset_w((valor shr 7) and 1);
-        msm_5205_1.data_w(valor);
-	      msm_5205_1.vclk_w(1);
-	      msm_5205_1.vclk_w(0);
+        msm5205_1.reset_w((valor shr 7) and 1);
+        msm5205_1.data_w(valor);
+	      msm5205_1.vclk_w(1);
+	      msm5205_1.vclk_w(0);
     end;
   2:misc_bank:=valor+1;
 end;
@@ -373,8 +373,8 @@ begin
  z80_1.reset;
  z80_0.reset;
  ym2151_0.reset;
- msm_5205_0.reset;
- msm_5205_1.reset;
+ msm5205_0.reset;
+ msm5205_1.reset;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
@@ -424,8 +424,8 @@ timers.init(z80_0.numero_cpu,3579545/8000,sf_adpcm_timer,nil,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 //cargar roms
 if not(roms_load16w(@rom,sfighter_rom)) then exit;
 //Sound CPUs

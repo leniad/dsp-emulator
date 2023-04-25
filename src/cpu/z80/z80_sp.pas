@@ -101,7 +101,7 @@ var
  instruccion,temp:byte;
  posicion:parejas;
  ban_temp:band_z80;
- pcontador:byte;
+ pcontador:integer;
  irq_temp:boolean;
  cantidad_t:word;
 begin

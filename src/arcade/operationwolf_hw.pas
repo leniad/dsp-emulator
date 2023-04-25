@@ -211,7 +211,7 @@ case direccion of
                 	if ((direccion and $7)=$04) then begin //trigger ?
                 		adpcm_pos[0]:=(adpcm_b[0]+(adpcm_b[1] shl 8))*16;
                 		adpcm_end[0]:=(adpcm_b[2]+(adpcm_b[3] shl 8))*16;
-                		msm_5205_0.reset_w(0);
+                		msm5205_0.reset_w(0);
                   end;
 	             end;
   $c000..$c006:begin
@@ -219,7 +219,7 @@ case direccion of
                 	if ((direccion and $7)=$04) then begin //trigger ?
                 		adpcm_pos[1]:=(adpcm_c[0]+(adpcm_c[1] shl 8))*16;
                 		adpcm_end[1]:=(adpcm_c[2]+(adpcm_c[3] shl 8))*16;
-                		msm_5205_1.reset_w(0);
+                		msm5205_1.reset_w(0);
 	                end;
                end;
   end;
@@ -243,26 +243,26 @@ end;
 procedure snd_adpcm_0;
 begin
 if (adpcm_data[0] and $100)=0 then begin
-		msm_5205_0.data_w(adpcm_data[0] and $0f);
+		msm5205_0.data_w(adpcm_data[0] and $0f);
 		adpcm_data[0]:=$100;
     adpcm_pos[0]:=(adpcm_pos[0]+1) and $7ffff;
-		if (adpcm_pos[0]=adpcm_end[0]) then msm_5205_0.reset_w(1);
+		if (adpcm_pos[0]=adpcm_end[0]) then msm5205_0.reset_w(1);
 	end else begin
 		adpcm_data[0]:=adpcm[adpcm_pos[0]];
-		msm_5205_0.data_w(adpcm_data[0] shr 4);
+		msm5205_0.data_w(adpcm_data[0] shr 4);
 	end;
 end;
 
 procedure snd_adpcm_1;
 begin
 if (adpcm_data[1] and $100)=0 then begin
-		msm_5205_1.data_w(adpcm_data[1] and $0f);
+		msm5205_1.data_w(adpcm_data[1] and $0f);
 		adpcm_data[1]:=$100;
     adpcm_pos[1]:=(adpcm_pos[1]+1) and $7ffff;
-		if (adpcm_pos[1]=adpcm_end[1]) then msm_5205_1.reset_w(1);
+		if (adpcm_pos[1]=adpcm_end[1]) then msm5205_1.reset_w(1);
 	end else begin
 		adpcm_data[1]:=adpcm[adpcm_pos[1]];
-		msm_5205_1.data_w(adpcm_data[1] shr 4);
+		msm5205_1.data_w(adpcm_data[1] shr 4);
 	end;
 end;
 
@@ -272,10 +272,10 @@ begin
  m68000_0.reset;
  tc0140syt_0.reset;
  ym2151_0.reset;
- msm_5205_0.reset;
- msm_5205_1.reset;
- msm_5205_0.reset_w(1);
- msm_5205_1.reset_w(1);
+ msm5205_0.reset;
+ msm5205_1.reset;
+ msm5205_0.reset_w(1);
+ msm5205_1.reset_w(1);
  opwolf_cchip_reset;
  reset_audio;
  marcade.in0:=$fc;
@@ -326,8 +326,8 @@ opwolf_init_cchip(m68000_0.numero_cpu);
 ym2151_0:=ym2151_chip.create(4000000);
 ym2151_0.change_port_func(sound_bank_rom);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
 //cargar roms
 if not(roms_load16w(@rom,opwolf_rom)) then exit;
 //cargar sonido+ponerlas en su banco+adpcm

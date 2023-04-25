@@ -2,8 +2,8 @@ unit cabal_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,seibu_sound,
-     rom_engine,pal_engine,sound_engine;
+     m68000,main_engine,controls_engine,gfx_engine,seibu_sound,rom_engine,
+     pal_engine,sound_engine;
 
 function iniciar_cabal:boolean;
 
@@ -43,7 +43,6 @@ const
 
 var
  rom:array[0..$1ffff] of word;
- decrypt:array[0..$1fff] of byte;
  main_ram:array[0..$7fff] of word;
  bg_ram:array[0..$1ff] of word;
  fg_ram:array[0..$3ff] of word;
@@ -116,8 +115,8 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7fff) else marcade.in1:=(marcade.in1 or $8000);
   //Coins
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or $1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or $2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
 end;
 end;
 
@@ -128,16 +127,15 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-///PRECAUCION EL Z80 ES EL 1, PORQUE EL SISTEMA DE SONIDO LO COGE ASI, HAY QUE CAMBIARLO...
-frame_s:=z80_1.tframes;
+frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRuning do begin
    for f:=0 to $ff do begin
       //Main CPU
       m68000_0.run(frame_m);
       frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
       //Sound CPU
-      z80_1.run(frame_s);
-      frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+      seibu_snd_0.z80.run(frame_s);
+      frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
       if f=239 then begin
           update_video_cabal;
           m68000_0.irq[1]:=HOLD_LINE;
@@ -161,12 +159,11 @@ case direccion of
     $a000a,$a000e:cabal_getword:=$0;  //track 1
     $a0010:cabal_getword:=marcade.in1;  //input
     $e0000..$e07ff:cabal_getword:=buffer_paleta[(direccion and $7ff) shr 1];
-    $e8000..$e800d:cabal_getword:=seibu_get(direccion and $e);
+    $e8000..$e800d:cabal_getword:=seibu_snd_0.get((direccion and $e) shr 1);
 end;
 end;
 
 procedure cabal_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
@@ -180,7 +177,6 @@ begin
     512..767:buffer_color[((numero shl 4) and $f)+$40]:=true;
   end;
 end;
-
 begin
 case direccion of
   0..$3ffff:; //ROM
@@ -199,72 +195,19 @@ case direccion of
                     buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                     cambiar_color(valor,(direccion and $7ff) shr 1);
                  end;
-  $e8000..$e800d:seibu_put(direccion and $e,valor);
+  $e8000..$e800d:seibu_snd_0.put((direccion and $e) shr 1,valor);
 end;
-end;
-
-function cabal_snd_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$1fff:if z80_1.opcode then cabal_snd_getbyte:=decrypt[direccion]
-              else cabal_snd_getbyte:=mem_snd[direccion];
-  $2000..$27ff,$8000..$ffff:cabal_snd_getbyte:=mem_snd[direccion];
-  $4008:cabal_snd_getbyte:=ym2151_0.status;
-  $4010:cabal_snd_getbyte:=sound_latch[0];
-  $4011:cabal_snd_getbyte:=sound_latch[1];
-  $4012:cabal_snd_getbyte:=byte(sub2main_pending);
-  $4013:cabal_snd_getbyte:=marcade.in2;
-end;
-end;
-
-procedure cabal_snd_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-  0..$1fff,$8000..$ffff:; //ROM
-  $2000..$27ff:mem_snd[direccion]:=valor;
-  $4001,$4002:;
-  $4003:seibu_update_irq_lines(RST18_CLEAR);
-  $4005:seibu_adpcm_adr_w(0,0,valor);
-  $4006:seibu_adpcm_adr_w(0,1,valor);
-  $4008:ym2151_0.reg(valor);
-  $4009:ym2151_0.write(valor);
-  $4018:sub2main[0]:=valor;
-  $4019:sub2main[1]:=valor;
-  $401a:seibu_adpcm_ctl_w(0,valor);
-  $6005,$6006:seibu_adpcm_adr_w(1,(direccion and 1) xor 1,valor);
-  $601a:seibu_adpcm_ctl_w(1,valor);
-end;
-end;
-
-procedure cabal_sound_act;
-begin
-  ym2151_0.update;
-  seibu_adpcm_update;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  if irqstate=1 then seibu_update_irq_lines(RST10_ASSERT)
-    else seibu_update_irq_lines(RST10_CLEAR);
 end;
 
 //Main
 procedure reset_cabal;
 begin
  m68000_0.reset;
- z80_1.reset;
- ym2151_0.reset;
- seibu_adpcm_reset;
- seibu_reset;
+ seibu_snd_0.reset;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
- marcade.in2:=$fc;
-end;
-
-procedure cerrar_cabal;
-begin
-  seibu_adpcm_close;
+ seibu_snd_0.input:=$fc;
 end;
 
 function iniciar_cabal:boolean;
@@ -283,7 +226,6 @@ var
   memoria_temp:array[0..$7ffff] of byte;
 begin
 llamadas_maquina.bucle_general:=cabal_principal;
-llamadas_maquina.close:=cerrar_cabal;
 llamadas_maquina.reset:=reset_cabal;
 llamadas_maquina.fps_max:=59.60;
 iniciar_cabal:=false;
@@ -295,22 +237,14 @@ iniciar_video(256,224);
 //Main CPU
 m68000_0:=cpu_m68000.create(10000000,256);
 m68000_0.change_ram16_calls(cabal_getword,cabal_putword);
-//Sound CPU
-z80_1:=cpu_z80.create(3579545,256);
-z80_1.change_ram_calls(cabal_snd_getbyte,cabal_snd_putbyte);
-z80_1.init_sound(cabal_sound_act);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
-ym2151_0.change_irq_func(snd_irq);
-//cargar roms
 if not(roms_load16w(@rom,cabal_rom)) then exit;
-//cargar sonido
+//Sound Chips
 if not(roms_load(@memoria_temp,cabal_sound)) then exit;
-decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
+seibu_snd_0:=seibu_snd_type.create(SEIBU_ADPCM,3579545,256,@memoria_temp,true);
 copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
 //adpcm
 if not(roms_load(@memoria_temp,cabal_adpcm)) then exit;
-seibu_adpcm_init(@memoria_temp);
+seibu_snd_0.adpcm_load_roms(@memoria_temp,$10000);
 //convertir chars
 if not(roms_load(@memoria_temp,cabal_char)) then exit;
 init_gfx(0,8,8,$400);

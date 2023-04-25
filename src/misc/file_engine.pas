@@ -28,9 +28,9 @@ function read_file(nombre_file:string;donde:pbyte;var longitud:integer):boolean;
 function write_file(nombre_file:string;donde:pbyte;longitud:integer):boolean;
 function file_name_only(cadena:string):string;
 //Parte ZIP
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
-function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
+function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
+function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean):boolean;
 function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
 //Parte ZLIB
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
@@ -587,7 +587,7 @@ write_file:=true;
 end;
 
 //Parte ZIP
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
+function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
 var
   f:integer;
   extension,extension2:string;
@@ -669,7 +669,7 @@ if (warning and not(res)) then begin
 end;
 end;
 
-function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
+function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
 var
   f:integer;
   extension,extension2:string;
@@ -739,7 +739,7 @@ find_next_file_zip:=false;
 {$endif}
 end;
 
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean):boolean;
 var
   f:word;
   find:boolean;

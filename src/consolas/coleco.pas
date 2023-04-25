@@ -272,8 +272,9 @@ procedure abrir_coleco;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
-  longitud,crc:integer;
+  longitud:integer;
   resultado:boolean;
+  crc:dword;
 begin
   if not(OpenRom(StColecovision,Romfile)) then exit;
   extension:=extension_fichero(RomFile);

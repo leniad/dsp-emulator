@@ -122,8 +122,9 @@ procedure abrir_sg;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
-  crc_val,longitud:integer;
+  longitud:integer;
   resultado:boolean;
+  crc_val:dword;
 begin
   if not(OpenRom(StSG1000,RomFile)) then exit;
   extension:=extension_fichero(RomFile);

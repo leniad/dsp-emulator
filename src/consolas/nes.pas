@@ -594,8 +594,9 @@ procedure abrir_nes;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
-  longitud,crc:integer;
+  longitud:integer;
   resultado:boolean;
+  crc:dword;
 begin
   if not(OpenRom(StNes,RomFile)) then exit;
   cartucho_cargado:=false;

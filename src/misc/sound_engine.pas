@@ -216,12 +216,8 @@ end;
 procedure sound_update_internal;
 begin
 if @update_sound_proc<>nil then update_sound_proc;
-if sound_status.posicion_sonido=sound_status.long_sample then begin
-  play_sonido;
-end else begin
-  if sound_status.stereo then sound_status.posicion_sonido:=sound_status.posicion_sonido+2
-    else sound_status.posicion_sonido:=sound_status.posicion_sonido+1;
-end;
+if sound_status.posicion_sonido=sound_status.long_sample then play_sonido
+  else sound_status.posicion_sonido:=sound_status.posicion_sonido+1+1*byte(sound_status.stereo);
 end;
 
 procedure reset_audio;

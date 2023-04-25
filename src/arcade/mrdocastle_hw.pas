@@ -458,10 +458,10 @@ case direccion of
                                 gfx[0].buffer[direccion and $3ff]:=true;
                              end;
    $c000:if (valor and $80)<>0 then begin
-           msm_5205_0.reset_w(1);
+           msm5205_0.reset_w(1);
          end else begin
            adpcm_pos:=(valor and $7f)*$200;
-           msm_5205_0.reset_w(0);
+           msm5205_0.reset_w(0);
          end;
    $e000:z80_1.change_nmi(PULSE_LINE);
 end;
@@ -470,15 +470,16 @@ end;
 procedure snd_adpcm;
 begin
 if (adpcm_data and $100)=0 then begin
-		msm_5205_0.data_w(adpcm_data and $0f);
+		msm5205_0.data_w(adpcm_data and $0f);
 		adpcm_data:=$100;
-    if (adpcm_pos+1)=$10000 then msm_5205_0.reset_w(1)
+    if (adpcm_pos+1)=$10000 then msm5205_0.reset_w(1)
       else adpcm_pos:=adpcm_pos+1;
 end else begin
 		adpcm_data:=adpcm[adpcm_pos];
-		msm_5205_0.data_w(adpcm_data shr 4);
+		msm5205_0.data_w(adpcm_data shr 4);
 end;
 end;
+
 //Main
 procedure reset_mrdocastle;
 begin
@@ -489,7 +490,7 @@ begin
  sn_76496_1.reset;
  sn_76496_2.reset;
  sn_76496_3.reset;
- if (main_vars.tipo_maquina=313) then msm_5205_0.reset;
+ if (main_vars.tipo_maquina=313) then msm5205_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -667,7 +668,7 @@ case main_vars.tipo_maquina of
           z80_1.change_ram_calls(mrdocastle_getbyte_slave,mrdocastle_putbyte_slave);
           if not(roms_load(@mem_snd,idsoccer_slave)) then exit;
           if not(roms_load(@mem_misc,idsoccer_misc)) then exit;
-          msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S64_4B,0.4,snd_adpcm);
+          msm5205_0:=MSM5205_chip.create(384000,MSM5205_S64_4B,0.4,snd_adpcm);
           if not(roms_load(@adpcm,idsoccer_adpcm)) then exit;
           //convertir chars
           if not(roms_load(@memoria_temp,idsoccer_char)) then exit;

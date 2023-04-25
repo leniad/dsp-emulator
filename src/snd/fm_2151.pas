@@ -1115,7 +1115,7 @@ begin
 		// envelope generator */
     n_op:=0;
     i:=32;
-		while (i<>0) do begin
+		repeat
       op:=chip.oper[n_op];	// CH 0 M1 */
 			case (op.state) of
 			  EG_ATT:begin	// attack phase */
@@ -1156,7 +1156,7 @@ begin
 			end;
 			n_op:=n_op+1;
       i:=i-1;
-		end;
+    until (i=0);
 	end;
 end;
 
@@ -1250,7 +1250,7 @@ begin
 	// phase generator */
   n_op:=0;
   i:=8;
-	while (i<>0) do begin
+	repeat
     op:=chip.oper[n_op];	// CH 0 M1 */
     op2:=chip.oper[n_op+1];
     op3:=chip.oper[n_op+2];
@@ -1279,7 +1279,7 @@ begin
 		end;
 		n_op:=n_op+4;
     i:=i-1;
-	end;
+  until (i=0);
 	{ CSM is calculated *after* the phase generator calculations (verified on real chip)
     * CSM keyon line seems to be ORed with the KO line inside of the chip.
     * The result is that it only works when KO (register 0x08) is off, ie. 0
@@ -1291,21 +1291,21 @@ begin
 		if (chip.csm_req=2)	then begin // KEY ON */
       n_op:=0;
       i:=32;
-			while (i<>0) do begin
+			repeat
 				KEY_ON(num,n_op,2);
         n_op:=n_op+1;
         i:=i-1;
-      end;
+      until (i=0);
 			chip.csm_req:=1;
 		end	else begin					// KEY OFF */
       n_op:=0;
       i:=32;
-			while (i<>0) do begin
+			repeat
         op:=chip.oper[n_op];	// CH 0 M1 */
 				KEY_OFF(op,2);
 				n_op:=n_op+1;
         i:=i-1;
-			end;
+			until (i=0);
 			chip.csm_req:=0;
 		end;
 	end;

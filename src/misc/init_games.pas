@@ -37,7 +37,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
-  ambush_hw,superduck_hw,hangon_hw;
+  ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw;
 
 type
   tgame_desc=record
@@ -65,7 +65,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=351;
+  GAMES_CONT=357;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -407,6 +407,12 @@ const
   (name:'Enduro Racer';year:'1986';snd:1;hi:false;zip:'enduror';grid:335;company:'Sega';rom:@enduror;tipo:ARCADE or SPORT),
   (name:'Space Harrier';year:'1985';snd:1;hi:false;zip:'sharrier';grid:336;company:'Sega';rom:@sharrier_roms;tipo:ARCADE or RUN_GUN),
   (name:'64th Street - A detective story';year:'1991';snd:1;hi:false;zip:'64street';grid:337;company:'Jaleco';rom:@th64_roms;tipo:ARCADE or FIGHT),
+  (name:'Shadow Warriors';year:'1988';snd:1;hi:false;zip:'shadoww';grid:338;company:'Tecmo';rom:@shadoww_roms;tipo:ARCADE or FIGHT),
+  (name:'Wild Fang/Tecmo Knight';year:'1989';snd:1;hi:false;zip:'wildfang';grid:339;company:'Tecmo';rom:@wildfang_roms;tipo:ARCADE or FIGHT),
+  (name:'Raiden';year:'1990';snd:1;hi:false;zip:'raiden';grid:340;company:'Seibu Kaihatsu';rom:@raiden_roms;tipo:ARCADE or SHOT),
+  (name:'Twins';year:'1993';snd:1;hi:false;zip:'twins';grid:341;company:'Ecogames';rom:@twins_roms;tipo:ARCADE or MAZE),
+  (name:'Twins (Electronic Devices)';year:'1994';snd:1;hi:false;zip:'twinsed1';grid:342;company:'Ecogames';rom:@twinsed1_roms;tipo:ARCADE or MAZE),
+  (name:'Hot Blocks - Tetirx II';year:'1993';snd:1;hi:false;zip:'hotblock';grid:343;company:'NIX?';rom:@hotblock_roms;tipo:ARCADE or MAZE),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -776,6 +782,12 @@ case numero of
   335:principal1.CambiarMaquina(principal1.enduroracer1);
   336:principal1.CambiarMaquina(principal1.spaceharrier1);
   337:principal1.CambiarMaquina(principal1.N64thstreet1);
+  338:principal1.CambiarMaquina(principal1.ShadowWarriors1);
+  339:principal1.CambiarMaquina(principal1.wildfang1);
+  340:principal1.CambiarMaquina(principal1.raiden1);
+  341:principal1.CambiarMaquina(principal1.twins1);
+  342:principal1.CambiarMaquina(principal1.twinsed1);
+  343:principal1.CambiarMaquina(principal1.hotblock1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1133,6 +1145,12 @@ principal1.hangon1.Checked:=false;
 principal1.enduroracer1.Checked:=false;
 principal1.spaceharrier1.Checked:=false;
 principal1.N64thstreet1.Checked:=false;
+principal1.shadowwarriors1.Checked:=false;
+principal1.wildfang1.Checked:=false;
+principal1.raiden1.Checked:=false;
+principal1.twins1.Checked:=false;
+principal1.twinsed1.Checked:=false;
+principal1.hotblock1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1402,6 +1420,9 @@ case tmaquina of
   332:llamadas_maquina.iniciar:=iniciar_ambush;
   333:llamadas_maquina.iniciar:=iniciar_superduck;
   334,335,336:llamadas_maquina.iniciar:=iniciar_hangon;
+  338,339:llamadas_maquina.iniciar:=iniciar_shadoww;
+  340:llamadas_maquina.iniciar:=iniciar_raiden;
+  341,342,343:llamadas_maquina.iniciar:=iniciar_twins;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2774,6 +2795,30 @@ end;
 if sender=principal1.N64thstreet1 then begin
   tipo:=337;
   principal1.N64thstreet1.Checked:=true;
+end;
+if sender=principal1.shadowwarriors1 then begin
+  tipo:=338;
+  principal1.shadowwarriors1.Checked:=true;
+end;
+if sender=principal1.wildfang1 then begin
+  tipo:=339;
+  principal1.wildfang1.Checked:=true;
+end;
+if sender=principal1.raiden1 then begin
+  tipo:=340;
+  principal1.raiden1.Checked:=true;
+end;
+if sender=principal1.twins1 then begin
+  tipo:=341;
+  principal1.twins1.Checked:=true;
+end;
+if sender=principal1.twinsed1 then begin
+  tipo:=342;
+  principal1.twinsed1.Checked:=true;
+end;
+if sender=principal1.hotblock1 then begin
+  tipo:=343;
+  principal1.hotblock1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

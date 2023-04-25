@@ -820,7 +820,7 @@ case (direccion and $f003) of
           2:ppu_nes.mirror:=MIRROR_LOW;
           3:ppu_nes.mirror:=MIRROR_HIGH;
         end;
-  //$f003:UPD7756;
+  // $f003:UPD7756;
 end;
 end;
 

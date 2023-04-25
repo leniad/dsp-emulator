@@ -361,15 +361,15 @@ case direccion of
                   case ((direccion and $7) shr 1) of
                     3:begin
 			                  adpcm_idle[adpcm_chip]:=true;
-			                  if adpcm_chip=0 then msm_5205_0.reset_w(1)
-                          else msm_5205_1.reset_w(1);
+			                  if adpcm_chip=0 then msm5205_0.reset_w(1)
+                          else msm5205_1.reset_w(1);
                     end;
 		                2:adpcm_pos[adpcm_chip]:=(valor and $7f)*$200;
 		                1:adpcm_end[adpcm_chip]:=(valor and $7f)*$200;
 		                0:begin
 			                  adpcm_idle[adpcm_chip]:=false;
-			                  if adpcm_chip=0 then msm_5205_0.reset_w(0)
-                          else msm_5205_1.reset_w(0);
+			                  if adpcm_chip=0 then msm5205_0.reset_w(0)
+                          else msm5205_1.reset_w(0);
                     end;
                   end;
                end;
@@ -386,15 +386,15 @@ procedure snd_adpcm0;
 begin
 if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
 		adpcm_idle[0]:=true;
-		msm_5205_0.reset_w(1);
+		msm5205_0.reset_w(1);
 end else if not(adpcm_ch[0]) then begin
-		          msm_5205_0.data_w(adpcm_data[0] and $0f);
+		          msm5205_0.data_w(adpcm_data[0] and $0f);
 		          adpcm_ch[0]:=true;
 	       end else begin
               adpcm_ch[0]:=false;
               adpcm_data[0]:=adpcm_mem[adpcm_pos[0]];
               adpcm_pos[0]:=(adpcm_pos[0]+1) and $ffff;
-          		msm_5205_0.data_w(adpcm_data[0] shr 4);
+          		msm5205_0.data_w(adpcm_data[0] shr 4);
          end;
 end;
 
@@ -402,15 +402,15 @@ procedure snd_adpcm1;
 begin
 if ((adpcm_pos[1]>=adpcm_end[1]) or (adpcm_pos[1]>=$10000)) then begin
 		adpcm_idle[1]:=true;
-		msm_5205_1.reset_w(1);
+		msm5205_1.reset_w(1);
 	end else if not(adpcm_ch[1]) then begin
-		          msm_5205_1.data_w(adpcm_data[1] and $0f);
+		          msm5205_1.data_w(adpcm_data[1] and $0f);
 		          adpcm_ch[1]:=true;
 	          end else begin
               adpcm_ch[1]:=false;
               adpcm_data[1]:=adpcm_mem[adpcm_pos[1]+$10000];
               adpcm_pos[1]:=(adpcm_pos[1]+1) and $ffff;
-          		msm_5205_1.data_w(adpcm_data[1] shr 4);
+          		msm5205_1.data_w(adpcm_data[1] shr 4);
             end;
 end;
 
@@ -596,8 +596,8 @@ begin
     92,247:begin
          m6800_0.reset;
          m6809_0.reset;
-         msm_5205_0.reset;
-         msm_5205_1.reset;
+         msm5205_0.reset;
+         msm5205_1.reset;
     end;
     96:begin
         z80_0.reset;
@@ -681,8 +681,8 @@ case main_vars.tipo_maquina of
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         ym2151_0.change_irq_func(ym2151_snd_irq);
-        msm_5205_0:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm0);
-        msm_5205_1:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm1);
+        msm5205_0:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm0);
+        msm5205_1:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm1);
         //Main roms
         if not(roms_load(@memoria_temp,ddragon_rom)) then exit;
         //Pongo las ROMs en su banco

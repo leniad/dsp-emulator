@@ -153,16 +153,15 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_MinorVer>21</VerInfo_MinorVer>
+        <VerInfo_MinorVer>22</VerInfo_MinorVer>
         <Manifest_File>(None)</Manifest_File>
         <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>917</VerInfo_Build>
+        <VerInfo_Build>931</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.21.7.917;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.21;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.22.1.931;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.21;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
-        <VerInfo_Release>7</VerInfo_Release>
         <UWP_DelphiLogo44>..\..\icons\main.png</UWP_DelphiLogo44>
         <UWP_DelphiLogo150>..\..\icons\main.png</UWP_DelphiLogo150>
     </PropertyGroup>
@@ -1242,7 +1241,6 @@
         </DCCReference>
         <DCCReference Include="..\misc\lib_sdl2.pas"/>
         <DCCReference Include="..\arcade\renegade_hw.pas"/>
-        <DCCReference Include="..\snd\generic_adpcm.pas"/>
         <DCCReference Include="..\arcade\tmnt_hw.pas"/>
         <DCCReference Include="..\devices\eepromser.pas"/>
         <DCCReference Include="..\arcade\gradius3_hw.pas"/>
@@ -1353,6 +1351,10 @@
         <DCCReference Include="..\arcade\ambush_hw.pas"/>
         <DCCReference Include="..\arcade\superduck_hw.pas"/>
         <DCCReference Include="..\arcade\hangon_hw.pas"/>
+        <DCCReference Include="..\arcade\shadow_warriors_hw.pas"/>
+        <DCCReference Include="..\arcade\raiden_hw.pas"/>
+        <DCCReference Include="..\arcade\twins_hw.pas"/>
+        <DCCReference Include="..\devices\i2cmem.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

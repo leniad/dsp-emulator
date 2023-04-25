@@ -276,6 +276,14 @@ type
     MenuItem46: TMenuItem;
     hangon1: TMenuItem;
     enduroracer1: TMenuItem;
+    MenuItem47: TMenuItem;
+    MenuItem48: TMenuItem;
+    hotblock1: TMenuItem;
+    twinsed1: TMenuItem;
+    Twins1: TMenuItem;
+    raiden1: TMenuItem;
+    ShadowWarriors1: TMenuItem;
+    wildfang1: TMenuItem;
     n64thstreet1: TMenuItem;
     spaceharrier1: TMenuItem;
     superduck1: TMenuItem;

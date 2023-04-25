@@ -1,9 +1,6 @@
 unit device_functions;
-
 interface
-
 procedure close_all_devices;
-
 implementation
 uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496,
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
@@ -11,8 +8,7 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
      deco_common,deco_16ic,sm510,slapstic,upd7810,upd1771,blitter_williams,
-     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc;
-
+     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc,seibu_sound;
 procedure close_all_devices;
 begin
 //Z80
@@ -229,13 +225,13 @@ if dac_3<>nil then begin
   dac_3.free;
   dac_3:=nil;
 end;
-if msm_5205_0<>nil then begin
-  msm_5205_0.free;
-  msm_5205_0:=nil;
+if msm5205_0<>nil then begin
+  msm5205_0.free;
+  msm5205_0:=nil;
 end;
-if msm_5205_1<>nil then begin
-  msm_5205_1.free;
-  msm_5205_1:=nil;
+if msm5205_1<>nil then begin
+  msm5205_1.free;
+  msm5205_1:=nil;
 end;
 if ym2151_0<>nil then begin
   ym2151_0.free;
@@ -252,6 +248,11 @@ end;
 if upd1771_0<>nil then begin
   upd1771_0.free;
   upd1771_0:=nil;
+end;
+if seibu_snd_0<>nil then begin
+  //Es importante poner aqui esto! Como tiene chips internos hay que borrarlos antes que el resto o falla
+  seibu_snd_0.free;
+  seibu_snd_0:=nil;
 end;
 close_samples;
 //Konami chips
@@ -381,5 +382,4 @@ if ctc_0<>nil then begin
   ctc_0:=nil;
 end;
 end;
-
 end.
