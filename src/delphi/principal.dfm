@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 223
+  ClientHeight = 218
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 162
+    Height = 157
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 162
+    Height = 157
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 153
+    ExplicitHeight = 148
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 204
+    Top = 199
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 195
+    ExplicitTop = 190
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -2125,6 +2125,17 @@ object principal1: Tprincipal1
         object c641: TMenuItem
           Caption = 'Commodore 64'
           OnClick = CambiarMaquina
+        end
+        object angerine1: TMenuItem
+          Caption = 'Tangerine'
+          object Oric1_1: TMenuItem
+            Caption = 'Oric 1'
+            OnClick = CambiarMaquina
+          end
+          object OricAtmos1: TMenuItem
+            Caption = 'Oric Atmos'
+            OnClick = CambiarMaquina
+          end
         end
       end
       object Arcade1: TMenuItem

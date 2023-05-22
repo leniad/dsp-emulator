@@ -1,7 +1,7 @@
 unit mos6526;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}dialogs,sysutils,cpu_misc,main_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}cpu_misc,main_engine;
 
 type
   registros=packed record

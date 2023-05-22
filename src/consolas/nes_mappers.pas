@@ -55,6 +55,7 @@ procedure mapper_mmc6_wram_write(direccion:word;valor:byte);
 procedure mapper_7_write_rom(direccion:word;valor:byte);
 procedure mapper_9_write_rom(direccion:word;valor:byte);
 procedure mapper_9_ppu_read(direccion:word);
+procedure mapper_10_write_rom(direccion:word;valor:byte);
 procedure mapper_11_write_rom(direccion:word;valor:byte);
 procedure mapper_13_write_rom(direccion:word;valor:byte);
 procedure mapper_15_write_rom(direccion:word;valor:byte);
@@ -623,10 +624,22 @@ procedure mapper_9_write_rom(direccion:word;valor:byte);
 begin
 case (direccion shr 12) of
   $a:set_prg_8($8000,valor and $f);
-  $b:mapper_nes.reg[0]:=valor and $1f;
-  $c:mapper_nes.reg[1]:=valor and $1f;
-  $d:mapper_nes.reg[2]:=valor and $1f;
-  $e:mapper_nes.reg[3]:=valor and $1f;
+  $b:begin
+        mapper_nes.reg[0]:=valor and $1f;
+        if (mapper_nes.latch0=$fd) then set_chr_4($0,valor and $1f);
+     end;
+  $c:begin
+        mapper_nes.reg[1]:=valor and $1f;
+        if (mapper_nes.latch0=$fe) then set_chr_4($0,valor and $1f);
+     end;
+  $d:begin
+        mapper_nes.reg[2]:=valor and $1f;
+        if (mapper_nes.latch1=$fd) then set_chr_4($1000,valor and $1f);
+     end;
+  $e:begin
+        mapper_nes.reg[3]:=valor and $1f;
+        if (mapper_nes.latch1=$fe) then set_chr_4($1000,valor and $1f);
+     end;
   $f:if (valor and 1)<>0 then ppu_nes.mirror:=MIRROR_HORIZONTAL
         else ppu_nes.mirror:=MIRROR_VERTICAL;
 end;
@@ -634,28 +647,48 @@ end;
 
 procedure mapper_9_ppu_read(direccion:word);
 begin
-if mapper_nes.reload then begin
-  set_chr_4($0,mapper_nes.reg[mapper_nes.latch0]);
-  set_chr_4($1000,mapper_nes.reg[mapper_nes.latch1]);
-  mapper_nes.reload:=false;
-end;
 case (direccion and $3ff0) of
-  $0fd0:begin //latch0 $fd
-          mapper_nes.reload:=mapper_nes.latch0<>0;
-          mapper_nes.latch0:=0;
+  $0fd0:begin
+          mapper_nes.latch0:=$fd;
+          set_chr_4($0,mapper_nes.reg[0]);
        end;
-  $0fe0:begin //latch0 $fe
-          mapper_nes.reload:=mapper_nes.latch0<>1;
-          mapper_nes.latch0:=1;
+  $0fe0:begin
+          mapper_nes.latch0:=$fe;
+          set_chr_4($0,mapper_nes.reg[1]);
        end;
-  $1fd0:begin //latch1 $fd
-          mapper_nes.reload:=mapper_nes.latch1<>2;
-          mapper_nes.latch1:=2;
+  $1fd0:begin
+          mapper_nes.latch1:=$fd;
+          set_chr_4($1000,mapper_nes.reg[2]);
         end;
-  $1fe0:begin //latch1 $fe
-          mapper_nes.reload:=mapper_nes.latch1<>3;
-          mapper_nes.latch1:=3;
+  $1fe0:begin
+          mapper_nes.latch1:=$fe;
+          set_chr_4($1000,mapper_nes.reg[3]);
         end;
+end;
+end;
+
+procedure mapper_10_write_rom(direccion:word;valor:byte);
+begin
+case ((direccion shr 12) and 7) of
+  $2:set_prg_16($8000,valor and $f);
+  $3:begin
+        mapper_nes.reg[0]:=valor and $1f;
+        if (mapper_nes.latch0=$fd) then set_chr_4($0,valor and $1f);
+     end;
+  $4:begin
+        mapper_nes.reg[1]:=valor and $1f;
+        if (mapper_nes.latch0=$fe) then set_chr_4($0,valor and $1f);
+     end;
+  $5:begin
+        mapper_nes.reg[2]:=valor and $1f;
+        if (mapper_nes.latch1=$fd) then set_chr_4($1000,valor and $1f);
+     end;
+  $6:begin
+        mapper_nes.reg[3]:=valor and $1f;
+        if (mapper_nes.latch1=$fe) then set_chr_4($1000,valor and $1f);
+     end;
+  $7:if (valor and 1)<>0 then ppu_nes.mirror:=MIRROR_HORIZONTAL
+        else ppu_nes.mirror:=MIRROR_VERTICAL;
 end;
 end;
 
@@ -2299,13 +2332,18 @@ begin
         mapper_nes.mm5.mul2:=$ff;
       end;
     7,15,145,148,149,150,184,243:set_prg_32(0);
-    9:begin
+    9,10:begin
         set_prg_8($8000,0);
         set_prg_8($a000,(mapper_nes.last_prg shl 1)-3);
         set_prg_8($c000,(mapper_nes.last_prg shl 1)-2);
         set_prg_8($e000,(mapper_nes.last_prg shl 1)-1);
-        set_chr_4(0,4);
-        set_chr_4($1000,0);
+        set_chr_8(0);
+        mapper_nes.reg[0]:=0;
+        mapper_nes.reg[1]:=0;
+        mapper_nes.reg[2]:=0;
+        mapper_nes.reg[3]:=0;
+        mapper_nes.latch0:=$fe;
+        mapper_nes.latch1:=$fe;
       end;
     11,58,212,213:begin
         set_prg_32(0);

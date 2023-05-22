@@ -7,7 +7,8 @@ uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
 
 type
   TSistema=(StNES,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,
-            StSMS,StExport,StSpectrum,StBitmap,StSG1000,StC64,StGG,StSuperCassette);
+            StSMS,StExport,StSpectrum,StBitmap,StSG1000,StC64,StGG,StSuperCassette,
+            StOric);
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
@@ -274,6 +275,10 @@ case Sistema of
   StSuperCassette:begin
          opendialog.InitialDir:=Directory.scv;
          OpenDialog.Filter:='SCV Files (*.bin;*.zip)|*.bin;*.zip';
+       end;
+  StOric:begin
+         opendialog.InitialDir:=directory.oric_tap;
+         OpenDialog.Filter:='Oric Tape (*.tap;*.wav;*.zip)|*.tap;*.wav;*.zip';
        end;
 end;
 OpenRom:=OpenDialog.execute;

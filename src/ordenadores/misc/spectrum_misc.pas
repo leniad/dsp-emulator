@@ -468,7 +468,6 @@ var
   f:byte;
 begin
 spec_comun:=false;
-TZX_CLOCK:=clock div 1000;
 spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
@@ -515,6 +514,7 @@ if mouse.tipo<>MNONE then show_mouse_cursor
 //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;
+
 if cinta_tzx.cargada then tape_window1.Show;
 end;
 

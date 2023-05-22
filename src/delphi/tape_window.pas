@@ -82,7 +82,8 @@ cinta_tzx.play_tape:=true;
 cinta_tzx.estados:=0;
 BitBtn1.Enabled:=false;
 BitBtn2.Enabled:=true;
-if addr(cinta_tzx.tape_start)<>nil then cinta_tzx.tape_start;
+if addr(cinta_tzx.tape_start)<>nil then cinta_tzx.tape_start
+  else main_screen.rapido:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
@@ -93,7 +94,8 @@ cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
 main_screen.rapido:=false;
-if addr(cinta_tzx.tape_stop)<>nil then cinta_tzx.tape_stop;
+if addr(cinta_tzx.tape_stop)<>nil then cinta_tzx.tape_stop
+  else main_screen.rapido:=false;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 

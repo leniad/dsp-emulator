@@ -317,6 +317,10 @@ begin
           llamadas_nes.write_rom:=mapper_9_write_rom;
           mapper_nes.ppu_read:=mapper_9_ppu_read;
         end;
+      10:begin
+          llamadas_nes.write_rom:=mapper_10_write_rom;
+          mapper_nes.ppu_read:=mapper_9_ppu_read;
+        end;
       11:llamadas_nes.write_rom:=mapper_11_write_rom;
       12:begin
           llamadas_nes.line_ack:=mapper_4_line;
@@ -519,7 +523,7 @@ begin
   //Pos 7 bit7-4 mapper high
   //Si la pos 7 tiene la marca 'XXXX10XX'--> iNes 2.0
   if (nes_header.flags7 and $c)=8 then begin
-    MessageDlg('NES: Cabecera iNes 2.0',mtInformation,[mbOk], 0);
+    //MessageDlg('NES: Cabecera iNes 2.0',mtInformation,[mbOk], 0);
     //Falta por implementar el resto... http://wiki.nesdev.com/w/index.php/NES_2.0
     mapper_nes.submapper:=(nes_header.flags8 and $f0) shr 4;
     mapper:=(nes_header.flags6 shr 4) or (nes_header.flags7 and $f0) or ((nes_header.flags8 and $f) shl 8);

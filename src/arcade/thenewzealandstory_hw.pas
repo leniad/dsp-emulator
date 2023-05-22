@@ -72,7 +72,8 @@ const
         (n:'b08-03.7a';l:$20000;p:$40000;crc:$274a795f),(n:'b08-04.4a';l:$20000;p:$60000;crc:$9754f703));
         arknoid2_pal:array[0..1] of tipo_roms=(
         (n:'b08-08.15f';l:$200;p:0;crc:$a4f7ebd9),(n:'b08-07.16f';l:$200;p:$200;crc:$ea34d9f7));}
-        CPU_SYNC=8;
+        //Madre mia!!
+        CPU_SYNC=32;
 
 var
  main_bank,misc_bank,sound_latch:byte;

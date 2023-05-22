@@ -521,7 +521,7 @@ if extension='CSW' then begin
   cinta:=true;
 end;
 if extension='WAV' then begin
-  resultado:=abrir_wav(datos,file_size);
+  resultado:=abrir_wav(datos,file_size,3500000);
   cinta:=true;
 end;
 if ((extension='Z80') or (extension='DSP')) then resultado:=abrir_z80(datos,file_size,extension='DSP');

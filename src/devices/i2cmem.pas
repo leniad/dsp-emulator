@@ -16,8 +16,8 @@ type
       procedure load_data(ptemp:pbyte);
       procedure write_data(file_name:string);
     private
-      page:array[0..7] of byte;
-      data:array[0..$1fff] of byte;
+      page:array[0..15] of byte;
+      data:array[0..$7fff] of byte;
       wc,devsel_address_low:boolean;
       byteaddr,data_size,address_mask:word;
       page_written_size,page_offset,addresshigh,write_page_size,slave_address,
@@ -41,6 +41,8 @@ const
   DEVSEL_RW=1;
   DEVSEL_ADDRESS=$fe;
   I2C_24C02=6;
+  I2C_24C08=10;
+  I2C_24C256=14;
 
 var
   i2cmem_0:i2cmem_chip;
@@ -55,9 +57,19 @@ case tipo of
 	    self.write_page_size:=8;
       self.data_size:=$100;
   end;
+  I2C_24C08:begin
+      self.read_page_size:=0;
+	    self.write_page_size:=16;
+      self.data_size:=$400;
+  end;
+  I2C_24C256:begin
+      self.read_page_size:=0;
+	    self.write_page_size:=64;
+      self.data_size:=$8000;
+  end;
 end;
 self.address_mask:=self.data_size-1;
-fillchar(self.data[0],$2000,$ff);
+fillchar(self.data[0],$8000,$ff);
 end;
 
 destructor i2cmem_chip.free;
@@ -177,7 +189,7 @@ if (self.scl<>valor) then begin
 							  self.state:=STATE_DATAIN;
 							end;
 						  STATE_DATAIN:begin
-							  if not(self.wc) then begin
+							  if self.wc then begin
 								  self.state:=STATE_IDLE;
 							  end else if (self.write_page_size>0) then begin
 								            self.page[self.page_offset]:=self.shift;

@@ -341,7 +341,9 @@ uses
   shadow_warriors_hw in '..\arcade\shadow_warriors_hw.pas',
   raiden_hw in '..\arcade\raiden_hw.pas',
   twins_hw in '..\arcade\twins_hw.pas',
-  i2cmem in '..\devices\i2cmem.pas';
+  i2cmem in '..\devices\i2cmem.pas',
+  oric_hw in '..\ordenadores\oric_hw.pas',
+  via6522 in '..\devices\via6522.pas';
 
 {$R *.res}
 begin

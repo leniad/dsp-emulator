@@ -106,6 +106,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.amstrad_rom:=fich_ini.readString('dir','Amstrad_ROM_dir',directory.Base+'snap'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_tap:=fich_ini.readString('dir','c64_tap',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_disk:=fich_ini.readString('dir','c64_disk',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.oric_tap:=fich_ini.readString('dir','oric_tap',directory.Base+'oric'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
@@ -237,6 +238,7 @@ end else begin
   Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
   Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
   Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
+  Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
   sound_status.hay_sonido:=true;
@@ -357,6 +359,7 @@ if ((Directory.amstrad_snap='') or (directory.amstrad_snap=main_vars.cadena_dir)
 if ((Directory.amstrad_rom='') or( directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
 if ((Directory.c64_tap='') or( directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
 if ((Directory.c64_disk='') or( directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
+if ((Directory.oric_tap='') or( directory.oric_tap=main_vars.cadena_dir)) then Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
 end;
 
 function test_dir(cadena:string):string;
@@ -406,6 +409,7 @@ fich_ini.Writestring('dir','ams_snap',test_dir(Directory.amstrad_snap));
 fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
 fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
+fich_ini.Writestring('dir','oric_tap',test_dir(Directory.oric_tap));
 //Config general
 fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.hay_sonido));
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);

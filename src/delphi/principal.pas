@@ -514,6 +514,9 @@ type
     twins1: TMenuItem;
     twinsed1: TMenuItem;
     HotBlock1: TMenuItem;
+    angerine1: TMenuItem;
+    Oric1_1: TMenuItem;
+    OricAtmos1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

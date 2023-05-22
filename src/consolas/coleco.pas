@@ -12,7 +12,7 @@ unit coleco;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
-     rom_engine,misc_functions,sound_engine,file_engine,ay_8910;
+     rom_engine,misc_functions,sound_engine,file_engine,ay_8910,i2cmem;
 
 type
   tcoleco_machine=record
@@ -22,6 +22,7 @@ type
     mega_cart_rom:array[0..$1f,0..$3fff] of byte;
     mega_cart_size:byte;
     boxxle:boolean;
+    eprom_type:byte;
   end;
 
 procedure cargar_coleco;
@@ -117,7 +118,9 @@ case direccion of
   $2000..$5fff:if tcoleco.sgm_ram then coleco_getbyte:=memoria[direccion];
   $6000..$7fff:if tcoleco.sgm_ram then coleco_getbyte:=memoria[direccion]
                   else coleco_getbyte:=memoria[$6000+(direccion and $3ff)];
-  $8000..$ffbf:coleco_getbyte:=memoria[direccion];
+  $8000..$ff7f,$ff81..$ffbf:coleco_getbyte:=memoria[direccion];
+  $ff80:if tcoleco.boxxle then coleco_getbyte:=i2cmem_0.read_sda
+          else coleco_getbyte:=memoria[direccion];
   $ffc0..$ffff:if tcoleco.mega_cart then begin
                      tbyte:=tcoleco.mega_cart_size-(($ffff-direccion) and tcoleco.mega_cart_size);
                      copymemory(@memoria[$c000],@tcoleco.mega_cart_rom[tbyte,0],$4000);
@@ -140,6 +143,10 @@ case direccion of
                          tbyte:=((direccion shr 4) and 3) and tcoleco.mega_cart_size;
                          copymemory(@memoria[$c000],@tcoleco.mega_cart_rom[tbyte,0],$4000);
                     end;
+  $ffc0:if tcoleco.boxxle then i2cmem_0.write_scl(0);
+  $ffd0:if tcoleco.boxxle then i2cmem_0.write_scl(1);
+  $ffe0:if tcoleco.boxxle then i2cmem_0.write_sda(0);
+  $fff0:if tcoleco.boxxle then i2cmem_0.write_sda(1);
 end;
 end;
 
@@ -217,6 +224,7 @@ begin
  sn_76496_0.reset;
  ay8910_0.reset;
  tms_0.reset;
+ if tcoleco.boxxle then i2cmem_0.reset;
  reset_audio;
  //Importante o el juego 'The Yolk's on You' se para
  for f:=0 to $3ff do memoria[$6000+f]:=random(256);
@@ -235,6 +243,8 @@ var
    f:byte;
    ptemp:pbyte;
    rom_crc32:dword;
+   memoria_temp:array[0..$7fff] of byte;
+   long:integer;
 begin
 abrir_cartucho:=false;
 tcoleco.boxxle:=false;
@@ -245,6 +255,21 @@ if longitud>32768 then begin
    tcoleco.mega_cart_size:=(longitud shr 14)-1;
    if ((rom_crc32=$62dacf07) or (rom_crc32=$dddd1396)) then begin //Boxxle o Black Onix
       tcoleco.boxxle:=true;
+      if rom_crc32<>$62dacf07 then begin
+        tcoleco.eprom_type:=1;
+        i2cmem_0:=i2cmem_chip.create(I2C_24C08);
+        if read_file_size(Directory.Arcade_nvram+'black_onix.nv',long) then begin
+          read_file(Directory.Arcade_nvram+'black_onix.nv',@memoria_temp,long);
+          i2cmem_0.load_data(@memoria_temp);
+        end;
+      end else begin
+        tcoleco.eprom_type:=2;
+        i2cmem_0:=i2cmem_chip.create(I2C_24C256);
+        if read_file_size(Directory.Arcade_nvram+'boxxle.nv',long) then begin
+          read_file(Directory.Arcade_nvram+'boxxle.nv',@memoria_temp,long);
+          i2cmem_0.load_data(@memoria_temp);
+        end;
+      end;
       for f:=0 to tcoleco.mega_cart_size do begin
           copymemory(@tcoleco.mega_cart_rom[f,0],ptemp,$4000);
           inc(ptemp,$4000);
@@ -342,6 +367,14 @@ end else exit;
 Directory.coleco_snap:=ExtractFilePath(nombre);
 end;
 
+procedure cerrar_coleco;
+begin
+case tcoleco.eprom_type of
+  1:i2cmem_0.write_data(Directory.Arcade_nvram+'black_onix.nv');
+  2:i2cmem_0.write_data(Directory.Arcade_nvram+'boxxle.nv');
+end;
+end;
+
 function iniciar_coleco:boolean;
 begin
 iniciar_coleco:=false;
@@ -374,6 +407,7 @@ principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_coleco;
 llamadas_maquina.bucle_general:=coleco_principal;
 llamadas_maquina.reset:=reset_coleco;
+llamadas_maquina.close:=cerrar_coleco;
 llamadas_maquina.cartuchos:=abrir_coleco;
 llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
 llamadas_maquina.fps_max:=10738635/2/342/262;

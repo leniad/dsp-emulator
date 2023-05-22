@@ -4,8 +4,8 @@ object tape_window1: Ttape_window1
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Tape View'
-  ClientHeight = 316
-  ClientWidth = 313
+  ClientHeight = 307
+  ClientWidth = 307
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

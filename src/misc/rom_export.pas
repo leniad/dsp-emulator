@@ -75,6 +75,8 @@ const
         cpc664:array[0..2] of tipo_roms=((n:'cpc664.rom';l:$8000;p:0;crc:$9ab5a036),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
         cpc6128:array[0..5] of tipo_roms=((n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1),(n:'cpc6128f.rom';l:$8000;p:0;crc:$1574923b),(n:'cpc6128sp.rom';l:$8000;p:0;crc:$2fa2e7d6),(n:'cpc6128d.rom';l:$8000;p:0;crc:$4704685a),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
         c64:array [0..3] of tipo_roms=((n:'901227-03.u4';l:$2000;p:$0;crc:$dbe3e7c7),(n:'901226-01.u3';l:$2000;p:$0;crc:$f833d117),(n:'901225-01.u5';l:$1000;p:0;crc:$ec4272ee),());
+        orica:array [0..1] of tipo_roms=((n:'basic11b.rom';l:$4000;p:$c000;crc:$c3a92bef),());
+        oric1:array [0..1] of tipo_roms=((n:'basic10.rom';l:$4000;p:$0;crc:$f18710b4),());
         //Consolas
         coleco_:array[0..1] of tipo_roms=((n:'coleco.rom';l:$2000;p:0;crc:$3aa93ef3),());
         gameboy:array[0..1] of tipo_roms=((n:'dmg_boot.bin';l:$100;p:0;crc:$59c8598e),());

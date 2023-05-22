@@ -1,4 +1,46 @@
 ﻿# DSP Emulator status #
+<b>22/05/23 - DSP Emulator 0.22WIP2. Updated Windows binary and source.<br>
+<pre>
+-General
+    +CPU
+        -M6502
+            +Fixed timings before internal timer call
+            +Added some opcodes for 2xNOP and 3xNOP
+        -Z80
+            +Fixed timings before internal timer call
+            +Some updates to internal procedures
+    +Tape System
+        -Added procedures to call before tape play and after play
+        -Fixed WAV format tapes loading
+        -Added Oric TAP file format support
+        -Fixed main speed changes when a tape is playing
+    +Devices
+        -VIA6522: Added device
+-Amstrad CPC
+    +Enabled Z80 timings (fixes Saboteur II and many others)
+    +Rewrited video to update screen pixel by pixel
+    +Fixed tape loading with new Z80 timings
+-Coleco
+    +Black Onix: Added 24C08 eeprom
+    +Boxxled: Added 24C256 eeprom
+-Commodore 64
+    +Swapped joystick 0 and joystick 1
+    +Added F1 to start/stop tape loading
+-NES
+    +Fixed mapper 9
+    +Added partial mapper 10 (thanks to Neville)
+-Oric HW
+    +Added support for tape loading, AY-8910 sound and keyboard
+        -Oric 1: added driver with sound
+        -Oric Atmos: added driver with sound
+-Sega System 1/2 HW
+    +Changed Z80 timings, fixes Pitfall II intro
+</pre><br>
+<img src="https://i.ibb.co/gvD1SHf/zaptballs-before.png" alt="before"> --> <img src="https://i.ibb.co/CQnKbXf/zaptballs.png" alt="after"><br>
+<img src="https://i.ibb.co/dMGZx6d/zaptballs2-before.png" alt="before"> --> <img src="https://i.ibb.co/xh2pjtk/zaptballs2.png" alt="after"><br>
+<img src="https://i.ibb.co/C1qr3dN/oric1.png" alt="Oric 1"> <img src="https://i.ibb.co/Gt8DT3r/orica.png" alt="Oric Atmos"><br>
+<img src="https://i.ibb.co/R6j4ztG/Pitfall2.png" alt="Pitfall II fixed"><br>
+<img src="https://i.ibb.co/QHKwX27/oric-atmos.png" alt="Oirc Atmos in action"><br><br>
 <b>25/04/23 - DSP Emulator 0.22WIP1. Updated Windows binary and source.<br>
 <pre>
 -General

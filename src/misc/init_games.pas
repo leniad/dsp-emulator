@@ -37,7 +37,8 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
-  ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw;
+  ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
+  oric_hw;
 
 type
   tgame_desc=record
@@ -65,7 +66,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=357;
+  GAMES_CONT=359;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -78,6 +79,8 @@ const
   (name:'Amstrad CPC 664';year:'1984';snd:1;hi:false;zip:'cpc664';grid:8;company:'Amstrad';rom:@cpc664;tipo:COMPUTER),
   (name:'Amstrad CPC 6128';year:'1985';snd:1;hi:false;zip:'cpc6128';grid:9;company:'Amstrad';rom:@cpc6128;tipo:COMPUTER),
   (name:'Commodore 64';year:'1982';snd:1;hi:false;zip:'c64';grid:3000;company:'Commodore';rom:@c64;tipo:COMPUTER),
+  (name:'Oric Atmos';year:'1984';snd:1;hi:false;zip:'orica';grid:3001;company:'Tangerine';rom:@orica;tipo:COMPUTER),
+  (name:'Oric 1';year:'1983';snd:1;hi:false;zip:'oric1';grid:3002;company:'Tangerine';rom:@oric1;tipo:COMPUTER),
   //Arcade
   (name:'Pacman';year:'1980';snd:1;hi:false;zip:'pacman';grid:10;company:'Namco';rom:@pacman;tipo:ARCADE or MAZE),
   (name:'Phoenix';year:'1980';snd:1;hi:false;zip:'phoenix';grid:11;company:'Amstar Electronics';rom:@phoenix;tipo:ARCADE or SHOT),
@@ -454,6 +457,8 @@ case numero of
   8:principal1.CambiarMaquina(principal1.cpc6641);
   9:principal1.CambiarMaquina(principal1.cpc61281);
   3000:principal1.CambiarMaquina(principal1.c641);
+  3001:principal1.CambiarMaquina(principal1.oricatmos1);
+  3002:principal1.CambiarMaquina(principal1.oric1_1);
   10:principal1.CambiarMaquina(principal1.Pacman1);
   11:principal1.CambiarMaquina(principal1.Phoenix1);
   12:principal1.CambiarMaquina(principal1.MisteriousStone1);
@@ -816,6 +821,8 @@ principal1.CPC1.Checked:=false;
 principal1.CPC6641.Checked:=false;
 principal1.CPC61281.Checked:=false;
 principal1.c641.Checked:=false;
+principal1.oricatmos1.Checked:=false;
+principal1.oric1_1.Checked:=false;
 //Arcade
 principal1.phoenix1.Checked:=false;
 principal1.bombjack1.Checked:=false;
@@ -1216,6 +1223,15 @@ case driver of
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
+  3001,3002:begin //Oric
+          principal1.Panel2.visible:=true;
+          //principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+          //principal1.BitBtn1.enabled:=true;
+          principal1.BitBtn10.visible:=true; //Disco de momento, no
+          principal1.BitBtn10.enabled:=false;
+          principal1.BitBtn11.visible:=false; //Save Snapshot
+          principal1.BitBtn9.visible:=true; //Load Snapshot
+       end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
   1000,1003,1005,1006,1007,1008:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
@@ -1252,6 +1268,7 @@ case tmaquina of
   2,3:llamadas_maquina.iniciar:=iniciar_3;
   7,8,9:llamadas_maquina.iniciar:=iniciar_cpc;
   3000:llamadas_maquina.iniciar:=iniciar_c64;
+  3001,3002:llamadas_maquina.iniciar:=iniciar_oric;
   //arcade
   10,88,234,305:llamadas_maquina.iniciar:=iniciar_pacman;
   11,202:llamadas_maquina.iniciar:=phoenix_iniciar;
@@ -1482,6 +1499,14 @@ end;
 if sender=principal1.c641 then begin
   tipo:=3000;
   principal1.c641.Checked:=true;
+end;
+if sender=principal1.oricatmos1 then begin
+  tipo:=3001;
+  principal1.oricatmos1.Checked:=true;
+end;
+if sender=principal1.oric1_1 then begin
+  tipo:=3002;
+  principal1.oric1_1.Checked:=true;
 end;
 //Arcade
 if sender=principal1.Pacman1 then begin

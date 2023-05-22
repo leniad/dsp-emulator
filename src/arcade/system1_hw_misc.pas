@@ -336,15 +336,6 @@ begin
   system1_videomode:=valor;
 end;
 
-//Z80 delay
-procedure system1_delay(estados_t:word);
-var
-  est_final:byte;
-begin
-est_final:=((estados_t div 5)+byte((estados_t mod 5)<>0))*5;
-z80_0.contador:=z80_0.contador+(est_final-estados_t);
-end;
-
 //Main
 function iniciar_system1:boolean;
 var
@@ -369,8 +360,10 @@ case main_vars.tipo_maquina of
   else iniciar_video(256,224);
 end;
 //Main CPU
-z80_0:=cpu_z80.create(4000000,260);
+//Deberia ser 20Mhz, pero si lo pongo falla PFII
+z80_0:=cpu_z80.create(19300000,260);
 z80_0.change_ram_calls(system1_getbyte,system1_putbyte);
+z80_0.change_timmings(@z80t_a,@z80t_cb_a,@z80t_dd_a,@z80t_ddcb_a,@z80t_ed_a,@z80t_ex_a);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.init_sound(system1_sound_update);
@@ -381,7 +374,6 @@ sn_76496_1:=sn76496_chip.Create(4000000);
 sprite_num_banks:=1;
 case main_vars.tipo_maquina of
   27:begin //Pitfall II
-      z80_0.change_misc_calls(system1_delay);
       //cargar roms
       if not(roms_load(@memoria,pitfall2_rom)) then exit;
       decrypt_sega(@memoria,@mem_dec,0); //Sega Decypt
