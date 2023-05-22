@@ -36,8 +36,8 @@
 -Sega System 1/2 HW
     +Changed Z80 timings, fixes Pitfall II intro
 </pre><br>
-<img src="https://i.ibb.co/gvD1SHf/zaptballs-before.png" alt="before"> --> <img src="https://i.ibb.co/CQnKbXf/zaptballs.png" alt="after"><br>
-<img src="https://i.ibb.co/dMGZx6d/zaptballs2-before.png" alt="before"> --> <img src="https://i.ibb.co/xh2pjtk/zaptballs2.png" alt="after"><br>
+<img src="https://i.ibb.co/fY4p5Vy/zaptballs-before.png" alt="before"> <img src="https://i.ibb.co/PgY8J2h/zaptballs.png"><br>
+<img src="https://i.ibb.co/nbwR7g8/zaptballs2-before.png" alt="before"> <img src="https://i.ibb.co/7n3xkzP/zaptballs2.png" alt="after"><br>
 <img src="https://i.ibb.co/C1qr3dN/oric1.png" alt="Oric 1"> <img src="https://i.ibb.co/Gt8DT3r/orica.png" alt="Oric Atmos"><br>
 <img src="https://i.ibb.co/R6j4ztG/Pitfall2.png" alt="Pitfall II fixed"><br>
 <img src="https://i.ibb.co/QHKwX27/oric-atmos.png" alt="Oirc Atmos in action"><br><br>
