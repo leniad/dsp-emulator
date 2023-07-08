@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,timer_engine;
 
-procedure cargar_thunderx;
+function iniciar_thunderx:boolean;
 
 implementation
 
@@ -468,12 +468,26 @@ begin
  priority:=0;
 end;
 
+procedure cerrar_thunderx;
+begin
+if main_vars.tipo_maquina<>224 then if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+end;
+
 function iniciar_thunderx:boolean;
 var
    temp_mem:array[0..$1ffff] of byte;
    f:byte;
 begin
 iniciar_thunderx:=false;
+llamadas_maquina.close:=cerrar_thunderx;
+llamadas_maquina.reset:=reset_thunderx;
+llamadas_maquina.bucle_general:=thunderx_principal;
+llamadas_maquina.fps_max:=59.185606;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
@@ -604,25 +618,6 @@ sprite_colorbase:=32;
 //final
 reset_thunderx;
 iniciar_thunderx:=true;
-end;
-
-procedure cerrar_thunderx;
-begin
-if main_vars.tipo_maquina<>224 then if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
-procedure Cargar_thunderx;
-begin
-llamadas_maquina.iniciar:=iniciar_thunderx;
-llamadas_maquina.close:=cerrar_thunderx;
-llamadas_maquina.reset:=reset_thunderx;
-llamadas_maquina.bucle_general:=thunderx_principal;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.22WIP2';
+        DSP_VERSION='0.22WIP3';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -90,7 +90,7 @@ type
            end;
         tmain_screen=record
           video_mode,old_video_mode:byte;
-          flip_main_screen,flip_main_x,flip_main_y,rot90_screen,rol90_screen,pantalla_completa,rapido:boolean;
+          flip_main_screen,flip_main_x,flip_main_y,rot90_screen,rot180_screen,rot270_screen,pantalla_completa,rapido:boolean;
         end;
         def_dip_value=record
           dip_val:word;
@@ -301,7 +301,7 @@ end;
 
 procedure change_video_size(x,y:word);
 begin
-if main_screen.rot90_screen or main_screen.rol90_screen then begin
+if main_screen.rot90_screen or main_screen.rot270_screen then begin
     p_final[0].x:=y;
     p_final[0].y:=x;
 end else begin
@@ -321,7 +321,7 @@ begin
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF*2);
 //creo la pantalla general
-if main_screen.rot90_screen or main_screen.rol90_screen then begin
+if main_screen.rot90_screen or main_screen.rot270_screen then begin
     p_final[0].x:=y;
     p_final[0].y:=x;
 end else begin
@@ -546,37 +546,57 @@ if main_screen.rot90_screen then begin
       inc(pdest,dest_p);
     end;
   end;
-end else if main_screen.rol90_screen then begin
-             //Muevo desde la normal a la final rotada
-             orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
-             dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
-             for y:=0 to (o_y2-1) do begin
-                 //Origen
-                 porig:=pantalla[sitio].pixels; //Apunto a los pixels
-                 inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
-                 //Destino
-                 pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
-                 inc(pdest,(dest_p*(pantalla[PANT_TEMP].h-1))+y);  //Muevo el cursor al ultimo punto de la columna
-                 for x:=0 to (o_x2-1) do begin
-                     //Pongo el pixel
-                     pdest^:=porig^;
-                     //Avanzo en la fila de origen
-                     inc(porig);
-                     //Avanzo la columna de origen
-                     dec(pdest,dest_p);
-                 end;
-             end;
-         end else begin
-           origen.x:=o_x1+ADD_SPRITE;
-           origen.y:=o_y1+ADD_SPRITE;
-           origen.w:=o_x2;
-           origen.h:=o_y2;
-           destino.x:=0;
-           destino.y:=0;
-           destino.w:=pantalla[PANT_TEMP].w;
-           destino.h:=pantalla[PANT_TEMP].h;
-           SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
-         end;
+end else if main_screen.rot180_screen then begin
+            //Muevo desde la normal a la final rotada
+            orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+            dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
+            for y:=0 to (o_y2-1) do begin
+            //Origen
+              porig:=pantalla[sitio].pixels; //Apunto a los pixels
+              inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
+              //Destino
+              pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
+              inc(pdest,dest_p*(o_y2-y-1)+o_x2-1);  //Muevo el cursor al ultimo punto de la columna
+              for x:=0 to (o_x2-1) do begin
+                //Pongo el pixel
+                pdest^:=porig^;
+                //Avanzo en la fila de origen
+                inc(porig);
+                //Avanzo la columna de origen
+                dec(pdest);
+              end;
+            end;
+         end else if main_screen.rot270_screen then begin
+                    //Muevo desde la normal a la final rotada
+                    orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+                    dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
+                    for y:=0 to (o_y2-1) do begin
+                      //Origen
+                      porig:=pantalla[sitio].pixels; //Apunto a los pixels
+                      inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
+                      //Destino
+                      pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
+                      inc(pdest,(dest_p*(pantalla[PANT_TEMP].h-1))+y);  //Muevo el cursor al ultimo punto de la columna
+                      for x:=0 to (o_x2-1) do begin
+                        //Pongo el pixel
+                        pdest^:=porig^;
+                        //Avanzo en la fila de origen
+                        inc(porig);
+                        //Avanzo la columna de origen
+                        dec(pdest,dest_p);
+                      end;
+                    end;
+                  end else begin
+                              origen.x:=o_x1+ADD_SPRITE;
+                              origen.y:=o_y1+ADD_SPRITE;
+                              origen.w:=o_x2;
+                              origen.h:=o_y2;
+                              destino.x:=0;
+                              destino.y:=0;
+                              destino.w:=pantalla[PANT_TEMP].w;
+                              destino.h:=pantalla[PANT_TEMP].h;
+                              SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
+                           end;
 end;
 
 procedure flip_surface(pant:byte;flipx,flipy:boolean);
@@ -660,39 +680,41 @@ if main_screen.flip_main_screen then begin
   origen.w:=p_final[0].x;
   origen.h:=p_final[0].y;
   SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
-end else if main_screen.flip_main_x then begin
-            for i:=0 to p_final[0].y-1 do begin
-              punt:=pantalla[PANT_TEMP].pixels;
-              inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-              punt2:=pantalla[PANT_DOBLE].pixels;
-              inc(punt2,((i*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[0].x-1));
-              for f:=p_final[0].x-1 downto 0 do begin
-                punt2^:=punt^;
-                inc(punt);
-                dec(punt2);
-              end;
-            end;
-            origen.w:=p_final[0].x;
-            origen.h:=p_final[0].y;
-            SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
-         end else if main_screen.flip_main_y then begin
-                      h:=0;
-                      for i:=p_final[0].y-1 downto 0 do begin
-                        punt:=pantalla[PANT_TEMP].pixels;
-                        inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-                        punt2:=pantalla[PANT_DOBLE].pixels;
-                        inc(punt2,(h*pantalla[PANT_DOBLE].pitch) shr 1);
-                        h:=h+1;
-                        for f:=0 to p_final[0].x-1 do begin
-                          punt2^:=punt^;
-                          inc(punt);
-                          inc(punt2);
-                        end;
-                      end;
-                      origen.w:=p_final[0].x;
-                      origen.h:=p_final[0].y;
-                      SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
-                  end;
+end;
+if main_screen.flip_main_x then begin
+  for i:=0 to p_final[0].y-1 do begin
+    punt:=pantalla[PANT_TEMP].pixels;
+    inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
+    punt2:=pantalla[PANT_DOBLE].pixels;
+    inc(punt2,((i*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[0].x-1));
+    for f:=p_final[0].x-1 downto 0 do begin
+      punt2^:=punt^;
+      inc(punt);
+      dec(punt2);
+    end;
+  end;
+  origen.w:=p_final[0].x;
+  origen.h:=p_final[0].y;
+  SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
+end;
+if main_screen.flip_main_y then begin
+  h:=0;
+  for i:=p_final[0].y-1 downto 0 do begin
+    punt:=pantalla[PANT_TEMP].pixels;
+    inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
+    punt2:=pantalla[PANT_DOBLE].pixels;
+    inc(punt2,(h*pantalla[PANT_DOBLE].pitch) shr 1);
+    h:=h+1;
+    for f:=0 to p_final[0].x-1 do begin
+      punt2^:=punt^;
+      inc(punt);
+      inc(punt2);
+    end;
+  end;
+  origen.w:=p_final[0].x;
+  origen.h:=p_final[0].y;
+  SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
+end;
 case main_screen.video_mode of
   0:exit;
   1,6:begin
@@ -867,7 +889,8 @@ main_vars.frames_sec:=0;
 sound_status.canales_usados:=-1;
 principal1.timer1.Enabled:=false;
 main_screen.rot90_screen:=false;
-main_screen.rol90_screen:=false;
+main_screen.rot180_screen:=false;
+main_screen.rot270_screen:=false;
 main_screen.flip_main_screen:=false;
 main_screen.flip_main_x:=false;
 main_screen.flip_main_y:=false;

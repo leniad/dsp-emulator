@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_twincobra;
+function iniciar_twincobra:boolean;
 
 implementation
 const
@@ -474,6 +474,9 @@ end;
 
 begin
 iniciar_twincobra:=false;
+llamadas_maquina.bucle_general:=twincobra_principal;
+llamadas_maquina.reset:=reset_twincobra;
+llamadas_maquina.fps_max:=(28000000/4)/(446*286);
 iniciar_audio(false);
 screen_init(1,256,512,true);
 screen_mod_scroll(1,256,256,255,512,512,511);
@@ -559,14 +562,6 @@ end;
 //final
 reset_twincobra;
 iniciar_twincobra:=true;
-end;
-
-procedure Cargar_twincobra;
-begin
-llamadas_maquina.iniciar:=iniciar_twincobra;
-llamadas_maquina.bucle_general:=twincobra_principal;
-llamadas_maquina.reset:=reset_twincobra;
-llamadas_maquina.fps_max:=(28000000/4)/(446*286);
 end;
 
 end.

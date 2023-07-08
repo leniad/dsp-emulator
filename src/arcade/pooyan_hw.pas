@@ -106,7 +106,7 @@ while EmuStatus=EsRuning do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND CPU
-    konamisnd_0.run(f);
+    konamisnd_0.run;
     if f=239 then begin
       if nmi_vblank then z80_0.change_nmi(ASSERT_LINE);
       update_video_pooyan;

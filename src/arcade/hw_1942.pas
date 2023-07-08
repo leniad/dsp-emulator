@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,pal_engine,
      sound_engine,qsnapshot;
 
-procedure cargar_hw1942;
+function iniciar_hw1942:boolean;
 
 implementation
 const
@@ -42,6 +42,7 @@ var
  scroll:word;
  sound_command,rom_bank,palette_bank:byte;
 
+procedure update_video_hw1942;
 procedure draw_sprites;
 var
   f,color,nchar,x,y:word;
@@ -63,7 +64,6 @@ begin
   end;
 end;
 
-procedure update_video_hw1942;
 var
   f,color,nchar,pos,x,y:word;
   attr:byte;
@@ -321,6 +321,10 @@ const
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
 iniciar_hw1942:=false;
+llamadas_maquina.bucle_general:=hw1942_principal;
+llamadas_maquina.reset:=reset_hw1942;
+llamadas_maquina.save_qsnap:=hw1942_qsave;
+llamadas_maquina.load_qsnap:=hw1942_qload;
 iniciar_audio(false);
 screen_init(1,256,512,false,true);
 screen_init(2,256,512);
@@ -382,15 +386,6 @@ marcade.dswb_val:=@hw1942_dip_b;
 //final
 reset_hw1942;
 iniciar_hw1942:=true;
-end;
-
-procedure cargar_hw1942;
-begin
-llamadas_maquina.iniciar:=iniciar_hw1942;
-llamadas_maquina.bucle_general:=hw1942_principal;
-llamadas_maquina.reset:=reset_hw1942;
-llamadas_maquina.save_qsnap:=hw1942_qsave;
-llamadas_maquina.load_qsnap:=hw1942_qload;
 end;
 
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      dac,rom_engine,pal_engine,konami_decrypt,sound_engine,qsnapshot,file_engine;
 
-procedure cargar_trackfield;
+function iniciar_trackfield:boolean;
 
 implementation
 const
@@ -37,7 +37,7 @@ const
 
 var
  irq_ena:boolean;
- frame,sound_latch,chip_latch:byte;
+ sound_latch,chip_latch:byte;
  mem_opcodes:array[0..$9fff] of byte;
  last_addr:word;
 
@@ -92,19 +92,20 @@ end;
 procedure trackfield_principal;
 var
   frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for frame:=0 to $ff do begin
+  for f:=0 to $ff do begin
       //main
       m6809_0.run(frame_m);
       frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
       //sound
       z80_0.run(frame_s);
       frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-      if frame=239 then begin
+      if f=239 then begin
           if irq_ena then m6809_0.change_irq(HOLD_LINE);
           update_video_trackfield;
       end;
@@ -155,7 +156,7 @@ case direccion of
   0..$1fff:trackfield_snd_getbyte:=mem_snd[direccion];
   $4000..$5fff:trackfield_snd_getbyte:=mem_snd[(direccion and $3ff)+$4000];
   $6000..$7fff:trackfield_snd_getbyte:=sound_latch;
-  $8000..$9fff:trackfield_snd_getbyte:=((z80_0.contador+trunc(z80_0.tframes*frame)) shr 10) and $f;
+  $8000..$9fff:trackfield_snd_getbyte:=(z80_0.totalt shr 10) and $f;
   $e000..$ffff:if ((direccion and 7)=2) then trackfield_snd_getbyte:=vlm5030_0.get_bsy shl 4;
 end;
 end;
@@ -274,9 +275,9 @@ begin
  vlm5030_0.reset;
  dac_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  irq_ena:=false;
  sound_latch:=0;
  chip_latch:=0;
@@ -303,6 +304,11 @@ const
     resistances_b:array[0..1] of integer=(470,220);
 begin
 iniciar_trackfield:=false;
+llamadas_maquina.bucle_general:=trackfield_principal;
+llamadas_maquina.reset:=reset_trackfield;
+llamadas_maquina.close:=close_trackfield;
+llamadas_maquina.save_qsnap:=trackfield_qsave;
+llamadas_maquina.load_qsnap:=trackfield_qload;
 iniciar_audio(false);
 screen_init(1,512,256);
 screen_mod_scroll(1,512,256,511,256,256,255);
@@ -372,16 +378,6 @@ marcade.dswb_val:=@trackfield_dip_b;
 //final
 reset_trackfield;
 iniciar_trackfield:=true;
-end;
-
-procedure Cargar_trackfield;
-begin
-llamadas_maquina.iniciar:=iniciar_trackfield;
-llamadas_maquina.bucle_general:=trackfield_principal;
-llamadas_maquina.reset:=reset_trackfield;
-llamadas_maquina.close:=close_trackfield;
-llamadas_maquina.save_qsnap:=trackfield_qsave;
-llamadas_maquina.load_qsnap:=trackfield_qload;
 end;
 
 end.

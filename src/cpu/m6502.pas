@@ -234,17 +234,18 @@ end;
 r.a:=0;
 r.x:=0;
 r.y:=0;
-r.sp:=$FD;
+r.sp:=$fd;
 r.z:=0;
 self.contador:=0;
 r.p.n:=false;
 r.p.o_v:=false;
-r.p.t:=true;
+r.p.t:=false;
 r.p.brk:=false;
 r.p.dec:=false;
 r.p.int:=true;
 r.p.z:=false;
 r.p.c:=false;
+self.totalt:=0;
 self.after_ei:=false;
 self.change_nmi(CLEAR_LINE);
 self.change_irq(CLEAR_LINE);
@@ -1029,7 +1030,9 @@ tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
 //Ojo!! el contador se puede incrementar en la funcion siguiente!!
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
-timers.update(self.contador-old_contador,self.numero_cpu);
+tempw:=self.contador-old_contador;
+timers.update(tempw,self.numero_cpu);
+self.totalt:=self.totalt+tempw;
 end; //del while!!
 end;
 end.

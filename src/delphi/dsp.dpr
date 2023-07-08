@@ -343,7 +343,9 @@ uses
   twins_hw in '..\arcade\twins_hw.pas',
   i2cmem in '..\devices\i2cmem.pas',
   oric_hw in '..\ordenadores\oric_hw.pas',
-  via6522 in '..\devices\via6522.pas';
+  oric_disc in '..\ordenadores\misc\oric_disc.pas',
+  via6522 in '..\devices\via6522.pas',
+  missilecommand_hw in '..\arcade\missilecommand_hw.pas';
 
 {$R *.res}
 begin

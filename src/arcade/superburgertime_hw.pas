@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common;
 
-procedure cargar_supbtime;
+function iniciar_supbtime:boolean;
 
 implementation
 const
@@ -275,6 +275,9 @@ begin
 end;
 begin
 iniciar_supbtime:=false;
+llamadas_maquina.bucle_general:=supbtime_principal;
+llamadas_maquina.reset:=reset_supbtime;
+llamadas_maquina.fps_max:=58;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
 deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
@@ -336,14 +339,6 @@ case main_vars.tipo_maquina of
 end;
 reset_supbtime;
 iniciar_supbtime:=true;
-end;
-
-procedure cargar_supbtime;
-begin
-llamadas_maquina.bucle_general:=supbtime_principal;
-llamadas_maquina.iniciar:=iniciar_supbtime;
-llamadas_maquina.reset:=reset_supbtime;
-llamadas_maquina.fps_max:=58;
 end;
 
 end.

@@ -680,7 +680,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(6000000,262);
+       mcs51_0:=cpu_mcs51.create(3000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars
@@ -727,7 +727,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943kai_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(6000000,262);
+       mcs51_0:=cpu_mcs51.create(3000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars

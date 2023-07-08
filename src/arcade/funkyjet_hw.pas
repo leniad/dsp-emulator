@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,misc_functions,
      deco_146;
 
-procedure cargar_funkyjet;
+function iniciar_funkyjet:boolean;
 
 implementation
 const
@@ -197,6 +197,9 @@ var
   memoria_temp:pbyte;
 begin
 iniciar_funkyjet:=false;
+llamadas_maquina.bucle_general:=funkyjet_principal;
+llamadas_maquina.reset:=reset_funkyjet;
+llamadas_maquina.fps_max:=58;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
 deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
@@ -242,14 +245,6 @@ marcade.dswa_val:=@funkyjet_dip_a;
 freemem(memoria_temp);
 reset_funkyjet;
 iniciar_funkyjet:=true;
-end;
-
-procedure Cargar_funkyjet;
-begin
-llamadas_maquina.bucle_general:=funkyjet_principal;
-llamadas_maquina.iniciar:=iniciar_funkyjet;
-llamadas_maquina.reset:=reset_funkyjet;
-llamadas_maquina.fps_max:=58;
 end;
 
 end.

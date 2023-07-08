@@ -19,54 +19,67 @@ const
     (n:'timeplt.b4';l:$20;p:0;crc:$34c91839),(n:'timeplt.b5';l:$20;p:$20;crc:$463b2b07),
     (n:'timeplt.e9';l:$100;p:$40;crc:$4bbb2150),(n:'timeplt.e12';l:$100;p:$140;crc:$f7b7663e));
     timepilot_sound:tipo_roms=(n:'tm7';l:$1000;p:0;crc:$d66da813);
+    //Dip
+    timepilot_dip_a:array [0..2] of def_dip=(
+    (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+    (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),())),());
+    timepilot_dip_b:array [0..5] of def_dip=(
+    (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'10K 50K'),(dip_val:$0;dip_name:'20K 60K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'1'),(dip_val:$60;dip_name:'2'),(dip_val:$50;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$30;dip_name:'5'),(dip_val:$20;dip_name:'6'),(dip_val:$10;dip_name:'7'),(dip_val:$0;dip_name:'8'),(),(),(),(),(),(),(),())),
+    (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
   scan_line,last:byte;
-  nmi_enable:boolean;
+  video_enable,nmi_enable:boolean;
 
 procedure update_video_timepilot;
 var
     x,y,atrib:byte;
     f,nchar,color:word;
 begin
-for f:=0 to $3ff do begin
- if gfx[0].buffer[f] then begin
-    x:=31-(f div 32);
-    y:=f mod 32;
-    atrib:=memoria[$a000+f];
-    color:=(atrib and $1f) shl 2;
-    nchar:=memoria[$a400+f]+((atrib and $20) shl 3);
-    put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
-    if (atrib and $10)<>0 then put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $80)<>0,(atrib and $40)<>0)
-      else put_gfx_block_trans(x*8,y*8,2,8,8);
-    gfx[0].buffer[f]:=false;
+if not(video_enable) then fill_full_screen(3,$100)
+  else begin
+    for f:=0 to $3ff do begin
+      if gfx[0].buffer[f] then begin
+        x:=31-(f div 32);
+        y:=f mod 32;
+        atrib:=memoria[$a000+f];
+        color:=(atrib and $1f) shl 2;
+        nchar:=memoria[$a400+f]+((atrib and $20) shl 3);
+        put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
+        if (atrib and $10)<>0 then put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $80)<>0,(atrib and $40)<>0)
+          else put_gfx_block_trans(x*8,y*8,2,8,8);
+        gfx[0].buffer[f]:=false;
+      end;
+    end;
+    actualiza_trozo(0,32,256,224,1,0,32,256,224,3);
+    for f:=$1f downto $8 do begin
+      atrib:=memoria[$b400+(f*2)];
+      nchar:=memoria[$b001+(f*2)];
+      color:=(atrib and $3f) shl 2;
+      x:=memoria[$b401+(f*2)]-1;
+      y:=memoria[$b000+(f*2)];
+      put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
+      actualiza_gfx_sprite(x,y,3,1);
+    end;
+    actualiza_trozo(0,32,256,224,2,0,32,256,224,3);
+    actualiza_trozo(0,0,256,32,1,0,0,256,32,3);
+    actualiza_trozo(0,248,256,8,1,0,248,256,8,3);
   end;
-end;
-actualiza_trozo(0,32,256,224,1,0,32,256,224,3);
-for f:=$1f downto $8 do begin
-  atrib:=memoria[$b400+(f*2)];
-  nchar:=memoria[$b001+(f*2)];
-  color:=(atrib and $3f) shl 2;
-  x:=memoria[$b401+(f*2)]-1;
-  y:=memoria[$b000+(f*2)];
-  put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
-  actualiza_gfx_sprite(x,y,3,1);
-end;
-actualiza_trozo(0,32,256,224,2,0,32,256,224,3);
-actualiza_trozo(0,0,256,32,1,0,0,256,32,3);
-actualiza_trozo(0,248,256,8,1,0,248,256,8,3);
 actualiza_trozo_final(16,0,256,256,3);
 end;
 
 procedure eventos_timepilot;
 begin
 if event.arcade then begin
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $Fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $eF) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $Fe else marcade.in1:=marcade.in1 or $1;
-  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $Fd else marcade.in1:=marcade.in1 or $2;
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or $1;
+  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or $2;
   if arcade_input.up[0] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or $4;
   if arcade_input.down[0] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or $8;
   if arcade_input.but0[0] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
@@ -85,7 +98,7 @@ while EmuStatus=EsRuning do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
-    konamisnd_0.run(scan_line);
+    konamisnd_0.run;
     if ((scan_line=244) and nmi_enable) then z80_0.change_nmi(ASSERT_LINE);
   end;
   update_video_timepilot;
@@ -104,11 +117,11 @@ case direccion of
                end;
   $c000..$cfff:case (direccion and $3ff) of
                 $000..$0ff:timepilot_getbyte:=scan_line;
-                $200..$2ff:timepilot_getbyte:=$4b; //dsw1
+                $200..$2ff:timepilot_getbyte:=marcade.dswb;
                 $300..$31f,$380..$39f:timepilot_getbyte:=marcade.in0;
                 $320..$33f,$3a0..$3bf:timepilot_getbyte:=marcade.in1;
                 $340..$35f,$3c0..$3df:timepilot_getbyte:=marcade.in2;
-                $360..$37f,$3e0..$3ff:timepilot_getbyte:=$ff; //dsw2
+                $360..$37f,$3e0..$3ff:timepilot_getbyte:=marcade.dswa;
                end;
   else timepilot_getbyte:=$ff;
 end;
@@ -129,16 +142,17 @@ case direccion of
                end;
     $c000..$cfff:case (direccion and $3ff) of
                 $000..$0ff:konamisnd_0.sound_latch:=valor;
-                $300..$3ff:case (direccion and $f) of
-                    $0..$1:begin
-                              nmi_enable:=(valor and 1)<>0;
-	                            if not(nmi_enable) then z80_0.change_nmi(CLEAR_LINE);
-                           end;
-                    $02:main_screen.flip_main_screen:=(valor and $1)=0;
-                    $04:begin
+                $300..$3ff:case ((direccion and $f) shr 1) of
+                    $0:begin
+                          nmi_enable:=(valor and 1)<>0;
+	                        if not(nmi_enable) then z80_0.change_nmi(CLEAR_LINE);
+                        end;
+                    $1:main_screen.flip_main_screen:=(valor and $1)=0;
+                    $2:begin
                         if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
                         last:=valor;
                      end;
+                    $4:video_enable:=(valor and 1)<>0;
                 end;
                end;
 end;
@@ -224,6 +238,10 @@ for f:=0 to $ff do gfx[1].colores[f]:=memoria_temp[$40+f] and $f;
 //CLUT chars
 for f:=0 to $7f do gfx[0].colores[f]:=(memoria_temp[$140+f] and $f)+$10;
 //Final
+marcade.dswa:=$ff;
+marcade.dswb:=$4b;
+marcade.dswa_val:=@timepilot_dip_a;
+marcade.dswb_val:=@timepilot_dip_b;
 timepilot_reset;
 timepilot_iniciar:=true;
 end;

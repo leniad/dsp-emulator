@@ -43,7 +43,7 @@ begin
   chip:=(offset and 4) shr 2;
   banknum:=offset and 3;
   bankaddr:=((valor and $ff)*$10000) mod $100000;
-  // copy the samples */
+  // copy the samples
   ptemp:=adpcm_rom[chip];
   inc(ptemp,bankaddr+$400);
   if chip=0 then ptemp2:=oki_6295_0.get_rom_addr
@@ -240,9 +240,9 @@ begin
  oki_6295_0.reset;
  oki_6295_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  bg_bank:=0;
  for f:=0 to 7 do begin
   nmk112_bank[f]:=0;
@@ -367,7 +367,7 @@ llamadas_maquina.reset:=reset_nmk16;
 llamadas_maquina.fps_max:=56;
 iniciar_nmk16:=false;
 iniciar_audio(false);
-if main_vars.tipo_maquina=71 then main_screen.rol90_screen:=true;
+if main_vars.tipo_maquina=71 then main_screen.rot270_screen:=true;
 screen_init(1,512,512);
 screen_init(2,512,512,false,true);
 iniciar_video(384,224);

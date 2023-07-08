@@ -58,7 +58,6 @@ const
         (mask:$8;name:'Hurricane Kick';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$8;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Timer';number:4;dip:((dip_val:$0;dip_name:'60'),(dip_val:$10;dip_name:'65'),(dip_val:$30;dip_name:'70'),(dip_val:$20;dip_name:'80'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$c0;dip_name:'1'),(dip_val:$80;dip_name:'2'),(dip_val:$40;dip_name:'3'),(dip_val:$0;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
-
         CPU_SYNC=4;
 
 var

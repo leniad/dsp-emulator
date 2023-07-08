@@ -6,6 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      controls_engine,pal_engine,ppi8255,z80pio,qsnapshot,sound_engine;
 
 procedure cargar_system1;
+
 //Video
 procedure update_video_system1;
 procedure update_backgroud(screen:byte);
@@ -22,7 +23,6 @@ procedure system1_port_c_write(valor:byte);
 //Sound
 procedure system1_sound_update;
 procedure system1_sound_irq;
-
 const
   system1_dip_credit:array [0..2] of def_dip=(
   (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$07;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$09;dip_name:'2C 1C'),(dip_val:$05;dip_name:'2C 1C/5C 3C/6C 4C'),(dip_val:$04;dip_name:'2C 1C/4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$01;dip_name:'1C 1C/2C 3C'),(dip_val:$02;dip_name:'1C 1C/4C 5C'),(dip_val:$03;dip_name:'1C 1C/5C 6C'),(dip_val:$06;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$00;dip_name:'1C 1C'))),
@@ -204,7 +204,6 @@ var
   bgx,fgpix,bgpix,sprpix:word;
   bgbase:array[0..1] of byte;
   bit0,bit1,bit2,bit3,bit4:byte;
-
 procedure draw_sprites;
 var
   spritedata,srcaddr,stride:word;
@@ -329,7 +328,7 @@ for y:=0 to 255 do begin
     putpixel(ADD_SPRITE,y+ADD_SPRITE,256,punbuf,1);
 end;
 //Pantalla final
-if main_screen.rol90_screen then actualiza_trozo_final(8,0,240,224,1)
+if main_screen.rot270_screen then actualiza_trozo_final(8,0,240,224,1)
   else actualiza_trozo_final(0,0,256,224,1);
 end;
 
@@ -444,7 +443,6 @@ case main_vars.tipo_maquina of
   27,35,36,153,155:z80pio_close(0);
 end;
 end;
-
 procedure reset_system1;
 begin
 case main_vars.tipo_maquina of
@@ -630,3 +628,4 @@ llamadas_maquina.fps_max:=60.096154;
 end;
 
 end.
+

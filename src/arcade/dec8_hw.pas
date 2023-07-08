@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
      rom_engine,pal_engine,sound_engine,misc_functions,mcs51,timer_engine;
 
-procedure cargar_dec8;
+function iniciar_dec8:boolean;
 
 implementation
 
@@ -358,6 +358,9 @@ var
   memoria_temp,memoria_temp2:array[0..$3ffff] of byte;
 begin
 iniciar_dec8:=false;
+llamadas_maquina.bucle_general:=principal_dec8;
+llamadas_maquina.reset:=reset_dec8;
+llamadas_maquina.fps_max:=57.444583;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,256,512);
@@ -427,14 +430,6 @@ marcade.dswb_val:=@srd_dip_b;
 //final
 reset_dec8;
 iniciar_dec8:=true;
-end;
-
-procedure Cargar_dec8;
-begin
-llamadas_maquina.iniciar:=iniciar_dec8;
-llamadas_maquina.bucle_general:=principal_dec8;
-llamadas_maquina.reset:=reset_dec8;
-llamadas_maquina.fps_max:=57.444583;
 end;
 
 end.

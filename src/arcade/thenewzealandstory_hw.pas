@@ -533,7 +533,7 @@ llamadas_maquina.reset:=reset_tnzs;
 iniciar_tnzs:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
-if main_vars.tipo_maquina=306 then main_screen.rol90_screen:=true;
+if main_vars.tipo_maquina=306 then main_screen.rot270_screen:=true;
 iniciar_video(256,224);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);

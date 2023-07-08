@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,mcs48,pal_engine,
      sound_engine,dac,samples;
 
-procedure cargar_spacefb;
+function iniciar_spacefb:boolean;
 
 implementation
 const
@@ -358,6 +358,9 @@ var
   color:tcolor;
 begin
 iniciar_spacefb:=false;
+llamadas_maquina.bucle_general:=spacefb_principal;
+llamadas_maquina.reset:=reset_spacefb;
+llamadas_maquina.fps_max:=61.523438;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
@@ -397,14 +400,6 @@ set_pal_color(color,$40);
 //final
 reset_spacefb;
 iniciar_spacefb:=true;
-end;
-
-procedure Cargar_spacefb;
-begin
-llamadas_maquina.iniciar:=iniciar_spacefb;
-llamadas_maquina.bucle_general:=spacefb_principal;
-llamadas_maquina.reset:=reset_spacefb;
-llamadas_maquina.fps_max:=61.523438;
 end;
 
 end.

@@ -79,7 +79,7 @@ var
  yscroll_1,yscroll_2:array[0..$3f] of word;
  video1_ram,video2_ram,color1_ram,color2_ram,sprite_ram:array[0..$7ff] of word;
  screen_par,irq_on,irq2_on,irq4_on,flipx_scr,flipy_scr,changed_chr:boolean;
- sound_latch,linea:byte;
+ sound_latch:byte;
  k007232_1_rom:pbyte;
  //char buffer
  char_8_8:array[0..$7ff] of boolean;
@@ -295,7 +295,7 @@ function ay0_porta_read:byte;
 var
   res:byte;
 begin
-  res:=round((z80_0.contador+(linea*z80_0.tframes))/1024) and $2f;
+  res:=round(z80_0.totalt/1024) and $2f;
   ay0_porta_read:=res or $d0 or $20;
 end;
 
@@ -320,19 +320,20 @@ end;
 procedure nemesis_principal;
 var
   frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
- for linea:=0 to $ff do begin
+ for f:=0 to $ff do begin
     //Main CPU
     m68000_0.run(frame_m);
     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //Sound CPU
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if linea=239 then begin
+    if f=239 then begin
       update_video_nemesis;
       if irq_on then m68000_0.irq[1]:=HOLD_LINE;
     end;
@@ -484,19 +485,20 @@ end;
 procedure gx400_principal;
 var
   frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
- for linea:=0 to $ff do begin
+ for f:=0 to $ff do begin
     //Main CPU
     m68000_0.run(frame_m);
     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //Sound CPU
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    case linea of
+    case f of
       119:if irq4_on then m68000_0.irq[4]:=HOLD_LINE;
       239:begin
             update_video_nemesis;
@@ -653,7 +655,7 @@ function ay0_porta_read_gx400:byte;
 var
   res:byte;
 begin
-  res:=round((z80_0.contador+(linea*z80_0.tframes))/1024) and $2f;
+  res:=round(z80_0.totalt/1024) and $2f;
   ay0_porta_read_gx400:=res or $d0 or ($20*vlm5030_0.get_bsy);
 end;
 

@@ -1075,6 +1075,7 @@ case instruccion of
   cantidad_t:=self.contador-pcontador;
   spectrum_despues_instruccion(cantidad_t);
   timers.update(cantidad_t,self.numero_cpu);
+  self.totalt:=self.totalt+cantidad_t;
 end; {del while}
 end;
 

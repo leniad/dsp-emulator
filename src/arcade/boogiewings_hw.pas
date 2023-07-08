@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,
      misc_functions,dialogs;
 
-procedure cargar_boogwing;
+function iniciar_boogwing:boolean;
 
 implementation
 const
@@ -210,6 +210,14 @@ begin
  marcade.in1:=$7;
 end;
 
+procedure cerrar_boogwing;
+begin
+if oki1_mem<>nil then freemem(oki1_mem);
+if oki2_mem<>nil then freemem(oki2_mem);
+oki1_mem:=nil;
+oki2_mem:=nil;
+end;
+
 function iniciar_boogwing:boolean;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
@@ -227,6 +235,10 @@ var
   memoria_temp_rom:pword;
 begin
 iniciar_boogwing:=false;
+llamadas_maquina.bucle_general:=boogwing_principal;
+llamadas_maquina.close:=cerrar_boogwing;
+llamadas_maquina.reset:=reset_boogwing;
+llamadas_maquina.fps_max:=58;
 if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 //Pantallas
@@ -279,23 +291,6 @@ marcade.dswa_val:=@boogwing_dip_a;
 freemem(memoria_temp);
 reset_boogwing;
 iniciar_boogwing:=true;
-end;
-
-procedure cerrar_boogwing;
-begin
-if oki1_mem<>nil then freemem(oki1_mem);
-if oki2_mem<>nil then freemem(oki2_mem);
-oki1_mem:=nil;
-oki2_mem:=nil;
-end;
-
-procedure Cargar_boogwing;
-begin
-llamadas_maquina.bucle_general:=boogwing_principal;
-llamadas_maquina.iniciar:=iniciar_boogwing;
-llamadas_maquina.close:=cerrar_boogwing;
-llamadas_maquina.reset:=reset_boogwing;
-llamadas_maquina.fps_max:=58;
 end;
 
 end.

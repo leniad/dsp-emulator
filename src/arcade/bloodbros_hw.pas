@@ -322,7 +322,7 @@ screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
 screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,512,512,false,true);
-if main_vars.tipo_maquina=286 then main_screen.rol90_screen:=true;
+if main_vars.tipo_maquina=286 then main_screen.rot270_screen:=true;
 iniciar_video(256,224);
 getmem(memoria_temp,$100000);
 //Main CPU

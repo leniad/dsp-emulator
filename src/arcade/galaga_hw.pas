@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,namcoio_06xx_5xxx,
      rom_engine,pal_engine,sound_engine,galaga_stars_const,samples,misc_functions;
 
-procedure cargar_galagahw;
+function iniciar_galagahw:boolean;
 
 implementation
 const
@@ -1020,6 +1020,23 @@ begin
  for f:=0 to 7 do galaga_latch(f,0);
 end;
 
+procedure cerrar_galagahw;
+begin
+case main_vars.tipo_maquina of
+  65:namco_54xx_close;
+  167:namco_53xx_close;
+  231:begin
+        namco_50xx_close(0);
+        namco_54xx_close;
+      end;
+  250:begin
+        namco_50xx_close(0);
+        namco_50xx_close(1);
+        namco_54xx_close;
+      end;
+end;
+end;
+
 function iniciar_galagahw:boolean;
 var
   colores:tpaleta;
@@ -1057,11 +1074,16 @@ end;
 begin
 iniciar_galagahw:=false;
 iniciar_audio(false);
+llamadas_maquina.close:=cerrar_galagahw;
+llamadas_maquina.reset:=reset_galagahw;
+llamadas_maquina.fps_max:=60.6060606060;
 case main_vars.tipo_maquina of
   65,167:begin
           screen_init(1,224,288,true);
           screen_init(2,256,512,false,true);
           screen_init(3,224,288);
+          if main_vars.tipo_maquina=65 then llamadas_maquina.bucle_general:=galaga_principal
+            else llamadas_maquina.bucle_general:=digdug_principal;
         end;
   231:begin
             screen_init(1,256,512,true);
@@ -1069,6 +1091,7 @@ case main_vars.tipo_maquina of
             screen_init(2,256,512,true);
             screen_mod_scroll(2,256,256,255,512,512,511);
             screen_init(3,256,512,false,true);
+            llamadas_maquina.bucle_general:=xevious_principal;
           end;
   250:begin
             screen_init(1,256,256,true);
@@ -1077,6 +1100,7 @@ case main_vars.tipo_maquina of
             screen_init(3,512,512,false,true);
             screen_init(4,256,256);
             screen_mod_scroll(4,256,256,255,256,256,255);
+            llamadas_maquina.bucle_general:=bosco_principal;
           end;
 end;
 if main_vars.tipo_maquina<>250 then iniciar_video(224,288)
@@ -1342,37 +1366,6 @@ end;
 //final
 reset_galagahw;
 iniciar_galagahw:=true;
-end;
-
-procedure cerrar_galagahw;
-begin
-case main_vars.tipo_maquina of
-  65:namco_54xx_close;
-  167:namco_53xx_close;
-  231:begin
-        namco_50xx_close(0);
-        namco_54xx_close;
-      end;
-  250:begin
-        namco_50xx_close(0);
-        namco_50xx_close(1);
-        namco_54xx_close;
-      end;
-end;
-end;
-
-procedure cargar_galagahw;
-begin
-llamadas_maquina.iniciar:=iniciar_galagahw;
-case main_vars.tipo_maquina of
-  65:llamadas_maquina.bucle_general:=galaga_principal;
-  167:llamadas_maquina.bucle_general:=digdug_principal;
-  231:llamadas_maquina.bucle_general:=xevious_principal;
-  250:llamadas_maquina.bucle_general:=bosco_principal;
-end;
-llamadas_maquina.close:=cerrar_galagahw;
-llamadas_maquina.reset:=reset_galagahw;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

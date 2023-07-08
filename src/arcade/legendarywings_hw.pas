@@ -551,6 +551,7 @@ screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
   59:main_screen.rot90_screen:=true;
+  60:llamadas_maquina.fps_max:=55.37;
   61:begin
       //La pantallas 2 (la cambio) y 4 son transparentes
       screen_init(2,512,512,true);
@@ -598,7 +599,6 @@ case main_vars.tipo_maquina of
      end;
   60:begin
         llamadas_maquina.bucle_general:=lwings_principal;
-        llamadas_maquina.fps_max:=55.37;
         //Main CPU
         z80_0:=cpu_z80.create(3000000,256);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);

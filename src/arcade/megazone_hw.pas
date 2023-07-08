@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,konami_decrypt,ay_8910,mcs48,dac;
 
-procedure cargar_megazone;
+function iniciar_megazone:boolean;
 
 implementation
 const
@@ -35,7 +35,7 @@ const
 var
  mem_opcodes:array[0..$bfff] of byte;
  irq_enable:boolean;
- frame,i8039_status,sound_latch,scroll_x,scroll_y:byte;
+ i8039_status,sound_latch,scroll_x,scroll_y:byte;
  mem_snd_sub:array[0..$fff] of byte;
 
 procedure update_video_megazone;
@@ -113,13 +113,14 @@ end;
 procedure megazone_principal;
 var
   frame_m,frame_s,frame_s_sub:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 frame_s_sub:=mcs48_0.tframes;
 while EmuStatus=EsRuning do begin
-  for frame:=0 to $ff do begin
+  for f:=0 to $ff do begin
     //Main CPU
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
@@ -129,7 +130,7 @@ while EmuStatus=EsRuning do begin
     //snd sub
     mcs48_0.run(frame_s_sub);
     frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
-    if frame=239 then begin
+    if f=239 then begin
       if irq_enable then m6809_0.change_irq(HOLD_LINE);
       z80_0.change_irq(HOLD_LINE);
       update_video_megazone;
@@ -234,7 +235,7 @@ function megazone_portar:byte;
 var
   timer:byte;
 begin
-timer:=trunc(((z80_0.contador+(z80_0.tframes*frame))*(7159/12288))/(1024/2)) and $f;
+timer:=trunc((z80_0.totalt*(7159/12288))/(1024/2)) and $f;
 megazone_portar:=(timer shl 4) or i8039_status;
 end;
 
@@ -286,6 +287,9 @@ const
     resistances_b:array[0..1] of integer=(470,220);
 begin
 iniciar_megazone:=false;
+llamadas_maquina.bucle_general:=megazone_principal;
+llamadas_maquina.reset:=reset_megazone;
+llamadas_maquina.fps_max:=60.60606060606;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256);
@@ -363,14 +367,6 @@ marcade.dswb_val:=@megazone_dip_b;
 //final
 reset_megazone;
 iniciar_megazone:=true;
-end;
-
-procedure cargar_megazone;
-begin
-llamadas_maquina.iniciar:=iniciar_megazone;
-llamadas_maquina.bucle_general:=megazone_principal;
-llamadas_maquina.reset:=reset_megazone;
-llamadas_maquina.fps_max:=60.60606060606;
 end;
 
 end.

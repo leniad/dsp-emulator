@@ -215,7 +215,7 @@ begin
 case direccion of
   0..$43ff:sound_getbyte:=mem_snd[direccion];
   $6000:sound_getbyte:=sound_latch;
-  $8000:sound_getbyte:=((z80_0.contador+round(z80_0.tframes*linea)) shr 10) and $f;
+  $8000:sound_getbyte:=(z80_0.totalt shr 10) and $f;
 end;
 end;
 

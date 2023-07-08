@@ -171,7 +171,7 @@ while EmuStatus=EsRuning do begin
       z80_0.run(frame_m);
       frame_m:=frame_m+z80_0.tframes-z80_0.contador;
       //Sound
-      konamisnd_0.run(f);
+      konamisnd_0.run;
       if f=239 then begin
         if hacer_int then z80_0.change_nmi(PULSE_LINE);
         update_video_jungler;
@@ -464,7 +464,7 @@ begin
  llamadas_maquina.reset:=reset_rallyxh;
  iniciar_rallyxh:=false;
  iniciar_audio(false);
- if main_vars.tipo_maquina=29 then main_screen.rol90_screen:=true;
+ if main_vars.tipo_maquina=29 then main_screen.rot270_screen:=true;
  screen_init(1,256,256);
  screen_mod_scroll(1,256,256,255,256,256,255);
  screen_init(2,64,256);

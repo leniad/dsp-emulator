@@ -1,6 +1,6 @@
 object principal1: Tprincipal1
-  Left = 550
-  Top = 242
+  Left = 710
+  Top = 327
   HelpType = htKeyword
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -666,7 +666,6 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 391
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -1232,8 +1231,6 @@ object principal1: Tprincipal1
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitLeft = 342
-    ExplicitHeight = 148
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1875,8 +1872,6 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 190
-    ExplicitWidth = 391
     DesignSize = (
       397
       19)
@@ -2706,6 +2701,14 @@ object principal1: Tprincipal1
               Caption = 'Congo'
               OnClick = CambiarMaquina
             end
+            object SuperZaxxon1: TMenuItem
+              Caption = 'Super Zaxxon'
+              OnClick = CambiarMaquina
+            end
+            object FutureSpy1: TMenuItem
+              Caption = 'Future Spy'
+              OnClick = CambiarMaquina
+            end
           end
           object Kangaroo1: TMenuItem
             Caption = 'Kangaroo'
@@ -2954,10 +2957,17 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
-          object Centipede1: TMenuItem
-            Caption = 'Centipede'
+          object CentipedeHW1: TMenuItem
+            Caption = 'Centipede HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object Centipede1: TMenuItem
+              Caption = 'Centipede'
+              OnClick = CambiarMaquina
+            end
+            object Millipede1: TMenuItem
+              Caption = 'Millipede'
+              OnClick = CambiarMaquina
+            end
           end
           object TetrisAtari1: TMenuItem
             Caption = 'Tetris (Atari)'
@@ -2973,6 +2983,18 @@ object principal1: Tprincipal1
             Caption = 'Super Dodge Ball'
             GroupIndex = 1
             OnClick = CambiarMaquina
+          end
+          object MissileCommandHW1: TMenuItem
+            Caption = 'Missile Command HW'
+            GroupIndex = 1
+            object MissileCommand1: TMenuItem
+              Caption = 'Missile Command'
+              OnClick = CambiarMaquina
+            end
+            object SuperMissileAttack1: TMenuItem
+              Caption = 'Super Missile Attack'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object M68091: TMenuItem

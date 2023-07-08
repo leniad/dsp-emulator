@@ -537,7 +537,7 @@ iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
-if ((main_vars.tipo_maquina=308) or (main_vars.tipo_maquina=311)) then main_screen.rol90_screen:=true;
+if ((main_vars.tipo_maquina=308) or (main_vars.tipo_maquina=311)) then main_screen.rot270_screen:=true;
 iniciar_video(240,192);
 //Main CPU
 z80_0:=cpu_z80.create(4000000,264*CPU_SYNC);

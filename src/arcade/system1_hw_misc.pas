@@ -354,7 +354,7 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 case main_vars.tipo_maquina of
   152,154:begin
-             main_screen.rol90_screen:=true;
+             main_screen.rot270_screen:=true;
              iniciar_video(240,224);
           end;
   else iniciar_video(256,224);

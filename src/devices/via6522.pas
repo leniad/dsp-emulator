@@ -1,7 +1,7 @@
 unit via6522;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,sysutils,dialogs,dateutils;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,sysutils,dialogs,lib_sdl2;
 
 type
   tin_handler=function:byte;
@@ -244,8 +244,8 @@ begin
 	self.shift_counter:=0;
   self.in_cb2:=0;
   shift_irq_contador:=0;
-  time1:=0;
-  time2:=0;
+  time1:=sdl_getticks;
+  time2:=sdl_getticks;
   self.t1ll:=$f3; // via at 0x9110 in vic20 show these values
 	self.t1lh:=$b5; // ports are not written by kernel!
 	self.t2ll:=$ff; // taken from vice
@@ -275,12 +275,12 @@ begin
     self.t1_contador:=self.t1_contador-estados;
     if self.t1_contador<=0 then begin //t1_tick
       if T1_CONTINUOUS(self.acr) then begin
-		      self.t1_pb7:=not(self.t1_pb7);
+		      self.t1_pb7:=not(self.t1_pb7) and 1;
 		      t1_contador:=t1_contador+self.t1ll+(self.t1lh shl 8)+IFR_DELAY;
 	    end else begin
 		      self.t1_pb7:=1;
 		      self.t1_active:=0;
-		      time1:=SecondOfTheDay(now);
+		      time1:=SDL_GetTicks;
       end;
 	    if T1_SET_PB7(self.acr) then self.output_pb;
 	    self.set_int(INT_T1);
@@ -290,7 +290,7 @@ begin
     self.t2_contador:=self.t2_contador-estados;
     if self.t2_contador<=0 then begin //t2_tick
       self.t2_active:=0;
-	    time2:=SecondOfTheDay(now);
+	    time2:=SDL_GetTicks;
       self.set_int(INT_T2);
     end;
   end;
@@ -305,9 +305,10 @@ end;
 
 procedure via6522_chip.set_pb_line(line:byte;state:boolean);
 begin
-	if state then self.in_b:=self.in_b or (1 shl line)
+	if state then
+    self.in_b:=self.in_b or (1 shl line)
 	else begin
-		if ((line=6) and ((self.in_b and $40)<>0)) then counter2_decrement();
+		if ((line=6) and ((self.in_b and $40)<>0)) then counter2_decrement;
 		self.in_b:=self.in_b and not(1 shl line);
 	end;
 end;
@@ -316,7 +317,7 @@ procedure via6522_chip.output_pa;
 var
   res:byte;
 begin
-	res:= (self.out_a and self.ddr_a) or not(self.ddr_a);
+	res:=(self.out_a and self.ddr_a) or not(self.ddr_a);
 	if @self.out_a_handler<>nil then self.out_a_handler(res);
 end;
 
@@ -374,7 +375,7 @@ begin
 	pb:=self.in_b and not(self.ddr_b);
 	if ((self.ddr_b<>$ff) and (@self.in_b_handler<>nil)) then pb:=pb and self.in_b_handler;
 	pb:=pb or (self.out_b and self.ddr_b);
-	if T1_SET_PB7(self.acr) then pb:=(pb and $7f) or (self.t1_pb7 shl 7);
+	if T1_SET_PB7(self.acr) then pb:=(pb and $7f) or ((self.t1_pb7 and 1) shl 7);
 	input_pb:=pb;
 end;
 
@@ -383,7 +384,7 @@ var
   res:byte;
 begin
 	res:=(self.out_b and self.ddr_b) or not(self.ddr_b);
-	if T1_SET_PB7(self.acr) then res:=(res and $7f) or (self.t1_pb7 shl 7);
+	if T1_SET_PB7(self.acr) then res:=(res and $7f) or ((self.t1_pb7 and 1) shl 7);
 	if @self.out_b_handler<>nil then self.out_b_handler(res);
 end;
 
@@ -434,15 +435,11 @@ procedure via6522_chip.counter2_decrement;
 begin
 	if not(T2_COUNT_PB6(self.acr)) then exit;
 	// count down on T2CL
-	if (self.t2cl<>0) then begin
-    self.t2cl:=self.t2cl-1;
-		exit;
-  end;
+  self.t2cl:=self.t2cl-1;
+	if (self.t2cl<>0) then exit;
 	// borrow from T2CH
-	if (self.t2ch<>0) then begin
-    self.t2ch:=self.t2ch-1;
-		exit;
-  end;
+  self.t2ch:=self.t2ch-1;
+	if (self.t2ch<>0) then exit;
 	// underflow causes only one interrupt between T2CH writes
 	if (self.t2_active)<>0 then begin
 		self.t2_active:=0;
@@ -453,6 +450,7 @@ end;
 function via6522_chip.read(direccion:byte):byte;
 var
   res:byte;
+  tdword:dword;
 begin
   res:=0;
   direccion:=direccion and $f;
@@ -466,7 +464,7 @@ begin
 		          if not(PA_LATCH_ENABLE(self.acr)) then res:=self.input_pa
                 else res:=self.latch_a;
 			        self.CLR_PA_INT;
-			        if ((self.out_ca2<>0) and  (CA2_PULSE_OUTPUT(self.pcr) or CA2_AUTO_HS(self.pcr))) then begin
+			        if ((self.out_ca2<>0) and (CA2_PULSE_OUTPUT(self.pcr) or CA2_AUTO_HS(self.pcr))) then begin
 				        self.out_ca2:=0;
 				        if @self.ca2_handler<>nil then self.ca2_handler(self.out_ca2);
               end;
@@ -483,17 +481,21 @@ begin
 	  VIA_T1LH:res:=self.t1lh;
     VIA_T2CL:begin
 			          clear_int(INT_T2);
-		            if ((self.t2_active<>0) and (self.t2_contador>0)) then res:=self.t2_contador and $ff
-                  else begin
+		            if ((self.t2_active<>0) and (self.t2_contador>0)) then begin
+                  res:=self.t2_contador and $ff
+                end else begin
                     if T2_COUNT_PB6(self.acr) then res:=self.t2cl
-                      else res:=((($10000-(SecondOfTheDay(now)-time2)) and $ffff)-1) and $ff;
+                      else begin
+                        tdword:=SDL_GetTicks;
+                        res:=((($10000-(tdword-time2)) and $ffff)-1) and $ff;
+                      end;
                   end;
               end;
     VIA_T2CH:if ((self.t2_active<>0) and (self.t2_contador>0)) then begin
 			          res:=t2_contador shr 8;
              end else begin
                 if (T2_COUNT_PB6(self.acr)) then res:=self.t2ch
-                  else res:=((($10000-(SecondOfTheDay(now)-time2)) and $ffff)-1) shr 8;
+                  else res:=((($10000-(SDL_GetTicks-time2)) and $ffff)-1) shr 8;
 			       end;
     VIA_SR:begin
 		          res:=self.sr;
@@ -504,9 +506,9 @@ begin
               end else if self.in_cb1 then self.shift_counter:=$0f
                           else self.shift_counter:=$10;
               self.clear_int(INT_SR);
-		          if (SO_O2_CONTROL(self.acr) or SI_O2_CONTROL(self.acr)) then MessageDlg('Mierda timer VIA_SR R', mtInformation,[mbOk], 0)//m_shift_timer->adjust(clocks_to_attotime(6) / 2); // 6 edges to cb2 change from start of write
-		            else if (SO_T2_RATE(self.acr) or SO_T2_CONTROL(self.acr) or SI_T2_CONTROL(self.acr)) then MessageDlg('Mierda timer VIA_SR R2', mtInformation,[mbOk], 0) //m_shift_timer->adjust(clocks_to_attotime(m_t2ll + 2) / 2);
-		                    else ;//MessageDlg('Mierda timer VIA_SR W3', mtInformation,[mbOk], 0);//m_shift_timer->adjust(attotime::never); // In case we change mode before counter expire
+		          if (SI_O2_CONTROL(self.acr) or SO_O2_CONTROL(self.acr)) then MessageDlg('Mierda timer VIA_SR R', mtInformation,[mbOk], 0)//m_shift_timer->adjust(clocks_to_attotime(6) / 2); // 6 edges to cb2 change from start of write
+		            else if (SI_T2_CONTROL(self.acr) or SO_T2_CONTROL(self.acr)) then MessageDlg('Mierda timer VIA_SR R2', mtInformation,[mbOk], 0) //m_shift_timer->adjust(clocks_to_attotime(m_t2ll + 2) / 2);
+		                 else if not(SO_T2_RATE(self.acr)) then ;//MessageDlg('Mierda timer VIA_SR W3', mtInformation,[mbOk], 0);//m_shift_timer->adjust(attotime::never); // In case we change mode before counter expire}
             end;
     VIA_ACR:res:=self.acr;
     VIA_PCR:res:=self.pcr;
@@ -524,11 +526,13 @@ var
   val:word;
 begin
 	if (self.t1_active<>0) then val:=t1_contador-IFR_DELAY
-	  else val:=$ffff-SecondOfTheDay(now)-time1;
+	  else val:=$ffff-((SDL_GetTicks-time1)*1000);
 	get_counter1_value:=val;
 end;
 
 procedure via6522_chip.write(direccion,valor:byte);
+var
+  tword:word;
 begin
   direccion:=direccion and $f;
   case direccion of
@@ -586,7 +590,7 @@ begin
 			            self.t2_active:=1;
 		            end else begin
 			            self.t2_active:=1;
-			            time2:=SecondOfTheDay(now);
+			            time2:=SDL_GetTicks;
 		            end;
             end;
     VIA_SR:begin
@@ -603,11 +607,12 @@ begin
 		                    else ;//MessageDlg('Mierda timer VIA_SR W3', mtInformation,[mbOk], 0);//m_shift_timer->adjust(attotime::never); // In case we change mode before counter expire
             end;
     VIA_ACR:begin
+              tword:=get_counter1_value;
 			        self.acr:=valor;
 			        self.output_pb;
 			        if (SR_DISABLED(self.acr) or SI_EXT_CONTROL(self.acr) or SO_EXT_CONTROL(self.acr)) then shift_timer:=false;
 			        if (T1_CONTINUOUS(self.acr)) then begin
-                t1_contador:=get_counter1_value+IFR_DELAY;
+                t1_contador:=tword+IFR_DELAY;
 				        self.t1_active:=1;
               end;
 			        if (SI_T2_CONTROL(self.acr) or SI_O2_CONTROL(self.acr) or SI_EXT_CONTROL(self.acr)) then begin
@@ -617,11 +622,11 @@ begin
             end;
     VIA_PCR:begin
                 self.pcr:=valor;
-		            if (CA2_FIX_OUTPUT(valor) and ((self.out_ca2<>0)<>(CA2_OUTPUT_LEVEL(valor)<>0))) then begin
+		            if (CA2_FIX_OUTPUT(valor) and (self.out_ca2<>CA2_OUTPUT_LEVEL(valor))) then begin
 			              self.out_ca2:=CA2_OUTPUT_LEVEL(valor);
 			              if @self.ca2_handler<>nil then self.ca2_handler(self.out_ca2);
 		            end;
-		            if (CB2_FIX_OUTPUT(valor) and ((self.out_cb2<>0)<>(CB2_OUTPUT_LEVEL(valor)<>0))) then begin
+		            if (CB2_FIX_OUTPUT(valor) and (self.out_cb2<>CB2_OUTPUT_LEVEL(valor))) then begin
 			              self.out_cb2:=CB2_OUTPUT_LEVEL(valor);
 			              if @self.cb2_handler<>nil then self.cb2_handler(self.out_cb2);
                 end;

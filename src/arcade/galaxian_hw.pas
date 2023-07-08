@@ -106,7 +106,7 @@ var
   //Variables globales
   haz_nmi,stars_enable:boolean;
   stars_scrollpos:dword;
-  stars_blinking,port_b_latch,local_frame:byte;
+  stars_blinking,port_b_latch:byte;
   stars:array[0..star_count-1] of tstars;
   videoram_mem:array[0..$3ff] of byte;
   sprite_mem,disparo_mem:array[0..$1f] of byte;
@@ -895,16 +895,17 @@ end;
 procedure frogger_principal;
 var
   frame_m:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for local_frame:=0 to $ff do begin
+  for f:=0 to $ff do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND
-    konamisnd_0.run(local_frame);
-    if local_frame=248 then begin
+    konamisnd_0.run;
+    if f=248 then begin
       if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       if stars_enable then stars_scrollpos:=stars_scrollpos+1;
       galaxian_update_video;

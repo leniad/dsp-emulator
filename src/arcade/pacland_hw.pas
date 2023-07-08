@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_pacland;
+function iniciar_pacland:boolean;
 
 implementation
 const
@@ -380,6 +380,9 @@ const
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
 begin
 iniciar_pacland:=false;
+llamadas_maquina.bucle_general:=pacland_principal;
+llamadas_maquina.reset:=reset_pacland;
+llamadas_maquina.fps_max:=60.60606060606060;
 iniciar_audio(false);
 screen_init(1,512,256,true);
 screen_mod_scroll(1,512,512,511,256,256,255);
@@ -434,14 +437,5 @@ end;
 reset_pacland;
 iniciar_pacland:=true;
 end;
-
-procedure cargar_pacland;
-begin
-llamadas_maquina.iniciar:=iniciar_pacland;
-llamadas_maquina.bucle_general:=pacland_principal;
-llamadas_maquina.reset:=reset_pacland;
-llamadas_maquina.fps_max:=60.60606060606060;
-end;
-
 
 end.

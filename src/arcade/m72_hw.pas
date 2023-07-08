@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,nec_v20_v30,main_engine,controls_engine,gfx_engine,ym_2151,
      rom_engine,pal_engine,sound_engine,timer_engine,dac;
 
-procedure cargar_irem_m72;
+function iniciar_irem_m72:boolean;
 
 implementation
 const
@@ -755,6 +755,9 @@ var
   memoria_temp:pbyte;
 begin
 iniciar_irem_m72:=false;
+llamadas_maquina.reset:=reset_irem_m72;
+llamadas_maquina.fps_max:=55.017606;
+llamadas_maquina.bucle_general:=irem_m72_principal;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,256,511);
@@ -870,14 +873,6 @@ ym2151_0.change_irq_func(ym2151_snd_irq);
 freemem(memoria_temp);
 reset_irem_m72;
 iniciar_irem_m72:=true;
-end;
-
-procedure Cargar_irem_m72;
-begin
-llamadas_maquina.iniciar:=iniciar_irem_m72;
-llamadas_maquina.reset:=reset_irem_m72;
-llamadas_maquina.fps_max:=55.017606;
-llamadas_maquina.bucle_general:=irem_m72_principal;
 end;
 
 end.

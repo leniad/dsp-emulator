@@ -601,7 +601,7 @@ case main_vars.tipo_maquina of
         screen_mod_scroll(2,1024,512,1023,512,256,511);
       end;
 end;
-main_screen.rol90_screen:=true;
+main_screen.rot270_screen:=true;
 iniciar_video(384,224);
 //Main CPU
 m68000_0:=cpu_m68000.create(16000000 div 2,256);

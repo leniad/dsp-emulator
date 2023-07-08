@@ -627,6 +627,7 @@ begin
   self.im0:=$ff;
   self.opcode:=false;
   self.after_ei:=false;
+  self.totalt:=0;
 end;
 
 function cpu_z80.get_safe_pc:word;
@@ -773,6 +774,7 @@ var
  ban_temp:band_z80;
  irq_temp:boolean;
  old_contador:integer;
+ tempw:word;
 begin
 irq_temp:=false;
 self.contador:=0;
@@ -1589,7 +1591,9 @@ end; //del case
 self.contador:=self.contador+self.estados_demas+z80t[instruccion];
 //Ojo!! el contador se puede incrementar en la funcion siguiente!! Debo volver a calcular los estados
 if @self.despues_instruccion<>nil then self.despues_instruccion(self.contador-old_contador);
-timers.update(self.contador-old_contador,self.numero_cpu);
+tempw:=self.contador-old_contador;
+timers.update(tempw,self.numero_cpu);
+self.totalt:=self.totalt+tempw;
 end; //del while
 end;
 

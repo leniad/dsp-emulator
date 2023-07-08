@@ -171,8 +171,16 @@ var
   SpriteNbr,ind:dword;
   temp_cx,temp_cy:pdword;
   ngfx:pgfx;
+  change_again:boolean;
 begin
 ngfx:=@gfx[num_gfx];
+change_again:=false;
+if ((rot90 or rol90) and (increment<>0)) then begin
+  b0:=ngfx.x;
+  ngfx.x:=ngfx.y;
+  ngfx.y:=b0;
+  change_again:=true;
+end;
 ind:=0;
 temp_cx:=cx;
 temp_cy:=cy;
@@ -198,7 +206,13 @@ for n:=0 to elements do begin
 	if rot90 then Rotater(n,ngfx,increment);
   if rol90 then Rotatel(n,ngfx,increment);
 end;
+  if (((rot90 or rol90) and (increment=0)) or change_again) then begin
+      b0:=ngfx.x;
+      ngfx.x:=ngfx.y;
+      ngfx.y:=b0;
+  end;
 end;
+
 procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 var
   oct,b0,o,i,bit_pixel:byte;

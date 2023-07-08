@@ -346,7 +346,7 @@ type
     Gradius31: TMenuItem;
     BitBtn1: TBitBtn;
     SpaceInvaders1: TMenuItem;
-    Centipede1: TMenuItem;
+    CentipedeHW1: TMenuItem;
     KarnovHW1: TMenuItem;
     Karnov1: TMenuItem;
     Chelnov1: TMenuItem;
@@ -517,6 +517,13 @@ type
     angerine1: TMenuItem;
     Oric1_1: TMenuItem;
     OricAtmos1: TMenuItem;
+    MissileCommandHW1: TMenuItem;
+    MissileCommand1: TMenuItem;
+    SuperMissileAttack1: TMenuItem;
+    SuperZaxxon1: TMenuItem;
+    FutureSpy1: TMenuItem;
+    Centipede1: TMenuItem;
+    Millipede1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

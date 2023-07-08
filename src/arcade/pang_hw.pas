@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,kabuki_decript,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,oki6295,sound_engine,eeprom;
 
-procedure cargar_pang;
+function iniciar_pang:boolean;
 
 implementation
 const
@@ -252,6 +252,9 @@ end;
 
 begin
 iniciar_pang:=false;
+llamadas_maquina.bucle_general:=pang_principal;
+llamadas_maquina.reset:=reset_pang;
+llamadas_maquina.fps_max:=57.42;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,256,true);
@@ -316,14 +319,6 @@ freemem(ptemp);
 //final
 reset_pang;
 iniciar_pang:=true;
-end;
-
-procedure Cargar_pang;
-begin
-llamadas_maquina.iniciar:=iniciar_pang;
-llamadas_maquina.bucle_general:=pang_principal;
-llamadas_maquina.reset:=reset_pang;
-llamadas_maquina.fps_max:=57.42;
 end;
 
 end.

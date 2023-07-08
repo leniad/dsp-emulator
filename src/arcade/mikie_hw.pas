@@ -36,7 +36,7 @@ const
         (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- banco_pal,video_line,sound_latch,sound_trq:byte;
+ banco_pal,sound_latch,sound_trq:byte;
  irq_ena:boolean;
 
 procedure update_video_mikie;
@@ -110,19 +110,20 @@ end;
 procedure mikie_principal;
 var
   frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for video_line:=0 to $ff do begin
+  for f:=0 to $ff do begin
     //Main CPU
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if video_line=239 then begin
+    if f=239 then begin
       m6809_0.change_irq(HOLD_LINE);
       update_video_mikie;
     end;
@@ -171,7 +172,7 @@ begin
 case direccion of
   0..$43ff:sound_getbyte:=mem_snd[direccion];
   $8003:sound_getbyte:=sound_latch;
-  $8005:sound_getbyte:=(trunc(video_line*z80_0.tframes)+z80_0.contador) shr 9;
+  $8005:sound_getbyte:=z80_0.totalt shr 9;
 end;
 end;
 
@@ -214,7 +215,6 @@ savedata_com_qsnapshot(@memoria[$0],$4000);
 savedata_com_qsnapshot(@mem_snd[$2000],$e000);
 //MISC
 buffer[0]:=banco_pal;
-buffer[1]:=video_line;
 buffer[2]:=byte(irq_ena);
 buffer[3]:=sound_latch;
 buffer[4]:=sound_trq;
@@ -246,7 +246,6 @@ loaddata_qsnapshot(@mem_snd[$2000]);
 //MISC
 loaddata_qsnapshot(@buffer);
 banco_pal:=buffer[0];
-video_line:=buffer[1];
 irq_ena:=buffer[2]<>0;
 sound_latch:=buffer[3];
 sound_trq:=buffer[4];

@@ -72,8 +72,8 @@ if event.arcade then begin
   //marcade.in0
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
@@ -138,7 +138,7 @@ case direccion of
              colortable_bank:=valor;
              fillchar(gfx[0].buffer,$400,1);
          end;
-   $9047:if (gfx_bank<>(valor and $1)) then begin
+   $9047:if gfx_bank<>(valor and $1) then begin
              gfx_bank:=valor and $1;
              fillchar(gfx[0].buffer,$400,1);
          end;
@@ -219,17 +219,17 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances,@gweights,0,0,
 			2,@resistances[1],@bweights,0,0);
 for f:=0 to $1f do begin
-		// red component */
+		// red component
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
 		colores[f].r:=combine_3_weights(@rweights, bit0, bit1, bit2);
-		// green component */
+		// green component
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
 		colores[f].g:=combine_3_weights(@gweights, bit0, bit1, bit2);
-		// blue component */
+		// blue component
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
 		colores[f].b:=combine_2_weights(@bweights, bit0, bit1);

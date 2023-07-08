@@ -1140,7 +1140,7 @@ case main_vars.tipo_maquina of
   241:iniciar_video(216,288);
   242:iniciar_video(288,216);
   243,279:begin
-        main_screen.rol90_screen:=true;
+        main_screen.rot270_screen:=true;
         iniciar_video(288,216);
       end;
 end;

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      samples,pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_spaceinv;
+function iniciar_spaceinv:boolean;
 
 implementation
 
@@ -223,6 +223,11 @@ var
   colores:tpaleta;
 begin
 iniciar_spaceinv:=false;
+llamadas_maquina.bucle_general:=spaceinv_principal;
+llamadas_maquina.reset:=reset_spaceinv;
+llamadas_maquina.fps_max:=59.541985;
+llamadas_maquina.save_qsnap:=spaceinv_qsave;
+llamadas_maquina.load_qsnap:=spaceinv_qload;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
@@ -253,16 +258,6 @@ set_pal(colores,4);
 //final
 reset_spaceinv;
 iniciar_spaceinv:=true;
-end;
-
-procedure Cargar_spaceinv;
-begin
-llamadas_maquina.iniciar:=iniciar_spaceinv;
-llamadas_maquina.bucle_general:=spaceinv_principal;
-llamadas_maquina.reset:=reset_spaceinv;
-llamadas_maquina.fps_max:=59.541985;
-llamadas_maquina.save_qsnap:=spaceinv_qsave;
-llamadas_maquina.load_qsnap:=spaceinv_qload;
 end;
 
 end.

@@ -62,9 +62,14 @@ begin
 end;
 
 procedure dac_chip.update;
+var
+  res:smallint;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.output*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.output+self.amp);
+  if (self.output*self.amp)>32767 then res:=32767
+    else if (self.output*self.amp)<=-32767 then res:=-32767
+         else res:=trunc(self.output*self.amp);
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=res;
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=res;
 end;
 
 procedure dac_chip.data8_w(data:byte);

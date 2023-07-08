@@ -1,4 +1,64 @@
 ﻿# DSP Emulator status #
+<b>08/07/23 - DSP Emulator 0.22WIP3. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Updated Preview Images
+    +CPU
+        -Added a new counter to count all timings of the CPU, used in Asteroids, Circus Charlie, Gyruss, Hypersports, and many others...
+        -LR35902: fixed HALT opcode, fixes many Gameboy Color Konami games
+    +Sound
+        -Konami Sound: video line not needed any more
+        -Samples: added volume
+    +Video
+        -Changed rol90 name to rot270
+        -Added rot180 to rotate screen 180 degrees
+        -Fixed main screen flip x and flip y, now can be used both
+    +Disk: added DSK format for Oric disks
+    +GFX: fixed gfx rotate when graphics are not square
+-Oric HW
+    +Added preliminary disc support, not working
+-Centipede HW
+    +Centipede
+        -Fixed dip
+        -Fixed video
+        -Fixed controls
+        -Fixed colors, now using indirect palette
+    +Millipede: added driver with sound
+-Circus Charlie
+    +Fixed sprites
+-Flower
+    +Enhanced IRQs
+-Legendary Wings HW
+    +Section Z: fixed audio
+-Mega Sys 1 HW
+    +64th Street: fixed sprites
+-Missile Command
+    +Missile Command: added driver with sound
+    +Super Missile Attack: added driver with sound
+-Taito SJ HW
+    +Added DIPs
+    +Updated to use gfx buffers
+    +Fixed controls, added buttons
+    +Optimized maps
+    +Fixed sound NMI
+    +Fixed DAC
+    +Elevator Action: updated ROMs
+-Time Pilot
+    +Added DIPs
+    +Added video enable
+-Wardner
+    +Fixed DIPs
+-Zaxxon HW
+    +Fixed sound
+    +Fixed DIPs
+    +Fixed video
+    +Added samples volume
+    +Super Zaxxon: added driver with sound
+    +Future Spy: added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/QXPBHVk/Millipede.png"> <img src="https://i.ibb.co/2cPdYjJ/fspy.png"><br>
+<img src="https://i.ibb.co/sj1W1T4/missile.png"> <img src="https://i.ibb.co/T8cnjdk/smissile.png"><br>
+<img src="https://i.ibb.co/gjQKZgt/szaxxon.png"><br><br>
 <b>22/05/23 - DSP Emulator 0.22WIP2. Updated Windows binary and source.<br>
 <pre>
 -General

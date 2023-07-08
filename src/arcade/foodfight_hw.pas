@@ -254,7 +254,7 @@ init_analog(m68000_0.numero_cpu,m68000_0.clock);
 analog_0(100,10,$7f,$ff,0,true);
 //Sound Chips
 pokey_0:=pokey_chip.create(trunc(12096000/2/10));
-pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);
+pokey_0.change_all_pot(foodf_pot_r);
 pokey_1:=pokey_chip.create(trunc(12096000/2/10));
 pokey_2:=pokey_chip.create(trunc(12096000/2/10));
 //cargar roms

@@ -89,7 +89,7 @@ for f:=$0 to $3ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-for f:=0 to $1f do scroll_y[f]:=not(memoria[$d000+(32*(f mod 4)+(f div 4))]);
+for f:=0 to $1f do scroll_y[f]:=not(memoria[$d000+(32*(f and 3)+(f shr 2))]);
 scroll__y_part2(2,1,8,@scroll_y);
 for f:=$e downto $2 do begin
   i:=0;

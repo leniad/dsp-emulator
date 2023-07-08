@@ -161,7 +161,7 @@ for f:=0 to $ff do begin
 			// sprite code is displaced as well
 			nchar:=((ram[pos_sprite+7]+obj_ram[pos_obj+$3]) and $fff)+((sprite_bank and 1) shl 12);
 			color:=(atrib and $f) shl 4;
-      put_gfx_sprite(nchar and $fff,768+color,flipx,flipy,3);
+      put_gfx_sprite(nchar,768+color,flipx,flipy,3);
       actualiza_gfx_sprite(x,y,4,3);
   end;
 end;

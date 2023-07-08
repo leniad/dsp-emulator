@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,ay_8910,gfx_engine,timer_engine,
      rom_engine,pal_engine,sound_engine,via6522,misc_functions,file_engine,
-     dialogs,sysutils,tape_window;
+     dialogs,sysutils,tape_window,oric_disc,cargar_dsk,forms;
 
 function iniciar_oric:boolean;
 
@@ -14,10 +14,12 @@ uses tap_tzx;
 const
     atmos_rom:tipo_roms=(n:'basic11b.rom';l:$4000;p:$0;crc:$c3a92bef);
     oric1_rom:tipo_roms=(n:'basic10.rom';l:$4000;p:$0;crc:$f18710b4);
+    microdisc_rom:tipo_roms=(n:'microdis.rom';l:$2000;p:$0;crc:$a9664a9c);
 		PATTR_HIRES =$04;
 		LATTR_ALT   =$01;
 		LATTR_DSIZE =$02;
 		LATTR_BLINK =$04;
+
 var
   tape_sound_channel,blink_counter,pattr,via_a,via_b,psg_a,tape_timer:byte;
   bios_rom:array[0..$3fff] of byte;
@@ -215,8 +217,40 @@ end;
 procedure oric_putbyte(direccion:word;valor:byte);
 begin
   case direccion of
-    0..$2ff,$400..$ffff:memoria[direccion]:=valor;
+    0..$2ff,$400..$bfff:memoria[direccion]:=valor;
     $300..$3ff:via6522_0.write(direccion and $f,valor);
+    $c000..$ffff:;
+  end;
+end;
+
+//Microdisc
+function oric_getbyte_microdisc(direccion:word):byte;
+begin
+case direccion of
+  $0..$2ff,$400..$bfff:oric_getbyte_microdisc:=memoria[direccion];
+  $300..$3ff:case direccion of
+                $310..$31f:oric_getbyte_microdisc:=microdisc_0.read(direccion and $f);
+                else oric_getbyte_microdisc:=via6522_0.read(direccion and $f);
+             end;
+  $c000..$dfff:if (microdisc_0.port_314 and P_ROMDIS)<>0 then oric_getbyte_microdisc:=bios_rom[direccion and $3fff]
+                  else oric_getbyte_microdisc:=memoria[direccion];
+  $e000..$ffff:if (microdisc_0.port_314 and P_ROMDIS)<>0 then oric_getbyte_microdisc:=bios_rom[direccion and $3fff]
+                  else if (microdisc_0.port_314 and P_EPROM)<>0 then oric_getbyte_microdisc:=memoria[direccion]
+                    else oric_getbyte_microdisc:=microdisc_0.rom[direccion and $1fff];
+end;
+end;
+
+procedure oric_putbyte_microdisc(direccion:word;valor:byte);
+begin
+  case direccion of
+    0..$2ff,$400..$bfff:memoria[direccion]:=valor;
+    $300..$3ff:case direccion of
+                $310..$31f:microdisc_0.write(direccion and $f,valor);
+                else via6522_0.write(direccion and $f,valor);
+             end;
+    $c000..$dfff:if (microdisc_0.port_314 and P_ROMDIS)=0 then memoria[direccion]:=valor;
+    $e000..$ffff:if (microdisc_0.port_314 and P_ROMDIS)=0 then
+                    if (microdisc_0.port_314 and P_EPROM)<>0 then memoria[direccion]:=valor;
   end;
 end;
 
@@ -284,13 +318,20 @@ end;
 
 procedure oric_irq(valor:byte);
 begin
-	via_irq:=valor<>0;
+	via_irq:=valor<>CLEAR_LINE;
 	update_irq;
+end;
+
+procedure oric_ext_irq(valor:byte);
+begin
+  ext_irq:=valor<>CLEAR_LINE;
+  update_irq;
 end;
 
 procedure oric_update_timers(estados_t:word);
 begin
   via6522_0.update_timers(estados_t);
+  //microdisc_0.wd.run(estados_t);
   if cinta_tzx.cargada then begin
     if cinta_tzx.play_tape then begin
       play_cinta_tzx(estados_t);
@@ -310,8 +351,16 @@ begin
 end;
 
 //Main
+procedure oric_loaddisk;
+begin
+load_dsk.show;
+while load_dsk.Showing do application.ProcessMessages;
+end;
+
 procedure reset_oric;
 begin
+ //IMPORTANTE!! Hay que resetear primero esto para que ponga los valores pordefecto!
+ //microdisc_0.reset;
  m6502_0.reset;
  ay8910_0.reset;
  via6522_0.reset;
@@ -391,6 +440,7 @@ begin
 llamadas_maquina.bucle_general:=oric_principal;
 llamadas_maquina.reset:=reset_oric;
 llamadas_maquina.cintas:=oric_tapes;
+llamadas_maquina.cartuchos:=oric_loaddisk;
 llamadas_maquina.fps_max:=50.080128;
 iniciar_oric:=false;
 iniciar_audio(false);
@@ -412,9 +462,15 @@ ay8910_0.change_io_calls(nil,nil,psg_a_w,nil);
 tape_sound_channel:=init_channel;
 //cargar roms
 case main_vars.tipo_maquina of
-  3001:if not(roms_load(@bios_rom,atmos_rom)) then exit;
+  3001:begin
+          if not(roms_load(@bios_rom,atmos_rom)) then exit;
+          //microdisc_0:=tmicrodisc.create(1000000,oric_ext_irq);
+          //if not(roms_load(@microdisc_0.rom,microdisc_rom)) then exit;
+          //m6502_0.change_ram_calls(oric_getbyte_microdisc,oric_putbyte_microdisc);
+       end;
   3002:if not(roms_load(@bios_rom,oric1_rom)) then exit;
 end;
+//bios_rom[$2000]:=$42;
 //paleta
 for f:=0 to 7 do begin
   colores[f].r:=pal1bit(f);

@@ -7,7 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2203,taitosnd,rom_engine,
      pal_engine,sound_engine{$IFDEF MCU},taito_cchip{$ELSE IF},volfied_cchip{$ENDIF};
 
-procedure cargar_volfied;
+function iniciar_volfied:boolean;
 
 implementation
 const
@@ -291,6 +291,8 @@ var
   memoria_temp:pbyte;
 begin
 iniciar_volfied:=false;
+llamadas_maquina.bucle_general:=volfied_principal;
+llamadas_maquina.reset:=reset_volfied;
 iniciar_audio(false);
 screen_init(1,248,512);
 screen_init(2,512,512,false,true);
@@ -337,13 +339,6 @@ marcade.dswb_val:=@volfied_dip2;
 //final
 reset_volfied;
 iniciar_volfied:=true;
-end;
-
-procedure Cargar_volfied;
-begin
-llamadas_maquina.iniciar:=iniciar_volfied;
-llamadas_maquina.bucle_general:=volfied_principal;
-llamadas_maquina.reset:=reset_volfied;
 end;
 
 end.

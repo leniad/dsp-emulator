@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2151,msm5205,
      taitosnd,rom_engine,pal_engine,sound_engine,opwolf_cchip;
 
-procedure cargar_opwolf;
+function iniciar_opwolf:boolean;
 
 var
  rom:array[0..$2ffff] of word;
@@ -306,6 +306,8 @@ var
   memoria_temp:array[0..$7ffff] of byte;
 begin
 iniciar_opwolf:=false;
+llamadas_maquina.bucle_general:=opwolf_principal;
+llamadas_maquina.reset:=reset_opwolf;
 iniciar_audio(true);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,256,511);
@@ -354,13 +356,6 @@ convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 show_mouse_cursor;
 reset_opwolf;
 iniciar_opwolf:=true;
-end;
-
-procedure Cargar_opwolf;
-begin
-llamadas_maquina.iniciar:=iniciar_opwolf;
-llamadas_maquina.bucle_general:=opwolf_principal;
-llamadas_maquina.reset:=reset_opwolf;
 end;
 
 end.

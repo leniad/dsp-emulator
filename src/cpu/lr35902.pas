@@ -525,10 +525,14 @@ case instruccion of
         r.f.h:=false;
         r.f.n:=false;
       end;
-  $10:if self.change_speed then begin  //stop
-        self.speed:=self.speed xor 1;
-        self.change_speed:=false;
-        self.changed_speed:=true;
+  $10:begin
+        self.getbyte(self.r.pc);
+        r.pc:=r.pc+1;
+        if self.change_speed then begin  //stop
+          self.speed:=self.speed xor 1;
+          self.change_speed:=false;
+          self.changed_speed:=true;
+        end;
       end;
   $11:begin //ld de,nnnn
         r.de.w:=read_word(r.pc);

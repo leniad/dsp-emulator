@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,misc_functions,sound_engine;
 
-procedure cargar_skykid;
+function iniciar_skykid:boolean;
 
 implementation
 const
@@ -326,6 +326,9 @@ const
     pt_y:array[0..7] of dword=(0*8, 2*8, 4*8, 6*8, 8*8, 10*8, 12*8, 14*8);
 begin
 iniciar_skykid:=false;
+llamadas_maquina.bucle_general:=skykid_principal;
+llamadas_maquina.reset:=reset_skykid;
+llamadas_maquina.fps_max:=60.60606060606060;
 iniciar_audio(false);
 screen_init(1,288,224,true);
 screen_init(2,512,256);
@@ -427,14 +430,6 @@ end;
 //final
 reset_skykid;
 iniciar_skykid:=true;
-end;
-
-procedure Cargar_skykid;
-begin
-llamadas_maquina.iniciar:=iniciar_skykid;
-llamadas_maquina.bucle_general:=skykid_principal;
-llamadas_maquina.reset:=reset_skykid;
-llamadas_maquina.fps_max:=60.60606060606060;
 end;
 
 end.
