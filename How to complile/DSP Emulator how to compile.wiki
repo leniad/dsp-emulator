@@ -1,6 +1,6 @@
 <h1>DSP Emulator - How to compile</h1><br>
 This is a small 'how to' for compiling DSP emulator.<br><br>
-<b>1-. First step - Choose compiler IDE</b><hr>
+<b>1-. First step - Choose IDE compiler</b><hr>
 You can choose two ways to compile DSP emulator<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- RAD Studio IDE: For Windows only<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Lazarus IDE: For Windows, Linux, MacOS and others<br>
@@ -22,4 +22,5 @@ After download and install (no registration needed), download DSP emulator sourc
 &nbsp;&nbsp;&nbsp;Menu File --> Open --> change to 'Lazarus project (*.lpi)' --> go to folder 'src\lazarus' --> select 'dsp'<br>
 <img src="lazarus_project.jpg" width="25%" height="25%"><br>
 Now you can open units, forms or compile the emulator.<br>
-If you want compile for another OS, you need to download the cross-platform complements.<br>
+If you want compile for another OS, you need to download the cross-platform complements.<br><br>
+If you have any question or suggestion, please contact me!
