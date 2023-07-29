@@ -524,6 +524,10 @@ type
     FutureSpy1: TMenuItem;
     Centipede1: TMenuItem;
     Millipede1: TMenuItem;
+    Gaplus1: TMenuItem;
+    SuperXevious1: TMenuItem;
+    Grobda1: TMenuItem;
+    PacnPal1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

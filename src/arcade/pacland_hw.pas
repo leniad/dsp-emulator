@@ -9,21 +9,34 @@ function iniciar_pacland:boolean;
 
 implementation
 const
-        pacland_rom:array[0..6] of tipo_roms=(
+        pacland_rom:array[0..5] of tipo_roms=(
         (n:'pl5_01b.8b';l:$4000;p:$0;crc:$b0ea7631),(n:'pl5_02.8d';l:$4000;p:$4000;crc:$d903e84e),
         (n:'pl1_3.8e';l:$4000;p:$8000;crc:$aa9fa739),(n:'pl1_4.8f';l:$4000;p:$c000;crc:$2b895a90),
-        (n:'pl1_5.8h';l:$4000;p:$10000;crc:$7af66200),(n:'pl3_6.8j';l:$4000;p:$14000;crc:$2ffe3319),());
+        (n:'pl1_5.8h';l:$4000;p:$10000;crc:$7af66200),(n:'pl3_6.8j';l:$4000;p:$14000;crc:$2ffe3319));
         pacland_char:tipo_roms=(n:'pl2_12.6n';l:$2000;p:0;crc:$a63c8726);
         pacland_tiles:tipo_roms=(n:'pl4_13.6t';l:$2000;p:0;crc:$3ae582fd);
-        pacland_sprites:array[0..4] of tipo_roms=(
+        pacland_sprites:array[0..3] of tipo_roms=(
         (n:'pl1-9.6f';l:$4000;p:0;crc:$f5d5962b),(n:'pl1-8.6e';l:$4000;p:$4000;crc:$a2ebfa4a),
-        (n:'pl1-10.7e';l:$4000;p:$8000;crc:$c7cf1904),(n:'pl1-11.7f';l:$4000;p:$c000;crc:$6621361a),());
-        pacland_mcu:array[0..2] of tipo_roms=(
-        (n:'pl1_7.3e';l:$2000;p:$8000;crc:$8c5becae),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),());
-        pacland_prom:array[0..5] of tipo_roms=(
+        (n:'pl1-10.7e';l:$4000;p:$8000;crc:$c7cf1904),(n:'pl1-11.7f';l:$4000;p:$c000;crc:$6621361a));
+        pacland_mcu:array[0..1] of tipo_roms=(
+        (n:'pl1_7.3e';l:$2000;p:$8000;crc:$8c5becae),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        pacland_prom:array[0..4] of tipo_roms=(
         (n:'pl1-2.1t';l:$400;p:$0;crc:$472885de),(n:'pl1-1.1r';l:$400;p:$400;crc:$a78ebdaf),
         (n:'pl1-5.5t';l:$400;p:$800;crc:$4b7ee712),(n:'pl1-4.4n';l:$400;p:$c00;crc:$3a7be418),
-        (n:'pl1-3.6l';l:$400;p:$1000;crc:$80558da8),());
+        (n:'pl1-3.6l';l:$400;p:$1000;crc:$80558da8));
+        pacland_dip_a:array [0..4] of def_dip=(
+        (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$18;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Lives';number:4;dip:((dip_val:$40;dip_name:'2'),(dip_val:$60;dip_name:'3'),(dip_val:$20;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        pacland_dip_b:array [0..5] of def_dip=(
+        (mask:$1;name:'Trip Select';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$1;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Freeze';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Round Select';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Difficulty';number:4;dip:((dip_val:$10;dip_name:'B (Easy)'),(dip_val:$18;dip_name:'A (Average)'),(dip_val:$8;dip_name:'C (Hard)'),(dip_val:$0;dip_name:'D (Very Hard)'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Bonus Life';number:8;dip:((dip_val:$e0;dip_name:'30K 80K 150K 300K 500K 1M'),(dip_val:$80;dip_name:'30K 80K 100K+'),(dip_val:$40;dip_name:'30K 80K 150K'),(dip_val:$c0;dip_name:'30K 100K 200K 400K 600K 1M'),(dip_val:$a0;dip_name:'40K 100K 180K 300K 500K 1M'),(dip_val:$20;dip_name:'40K 100K 200K'),(dip_val:$0;dip_name:'40K'),(dip_val:$60;dip_name:'50K 150K 200K+'),(),(),(),(),(),(),(),())),());
+        pacland_dip_c:array [0..1] of def_dip=(
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom_bank:array[0..7,0..$1fff] of byte;
@@ -31,33 +44,6 @@ var
  rom_nbank,palette_bank:byte;
  scroll_x1,scroll_x2:word;
  irq_enable,irq_enable_mcu:boolean;
-
-procedure cambiar_paleta;
-var
-  colores:tpaleta;
-  f,bit0,bit1,bit2,bit3,tmp:byte;
-begin
-for f:=0 to $ff do begin
-  tmp:=pal_proms[palette_bank*$100+f];
-  bit0:=(tmp shr 0) and $1;
-  bit1:=(tmp shr 1) and $1;
-  bit2:=(tmp shr 2) and $1;
-  bit3:=(tmp shr 3) and $1;
-  colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  bit0:=(tmp shr 4) and $1;
-  bit1:=(tmp shr 5) and $1;
-  bit2:=(tmp shr 6) and $1;
-  bit3:=(tmp shr 7) and $1;
-  colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  tmp:=pal_proms[palette_bank*$100+$400+f];
-  bit0:=(tmp shr 0) and $1;
-  bit1:=(tmp shr 1) and $1;
-  bit2:=(tmp shr 2) and $1;
-  bit3:=(tmp shr 3) and $1;
-  colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-end;
-set_pal(colores,$100);
-end;
 
 procedure update_video_pacland;
 
@@ -226,11 +212,14 @@ end;
 procedure eventos_pacland;
 begin
 if event.arcade then begin
-  //IN2
+  //P1 & P2
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  //marcade.in1
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //System
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
@@ -247,7 +236,7 @@ init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 263 do begin
     //Main CPU
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
@@ -275,6 +264,33 @@ end;
 end;
 
 procedure pacland_putbyte(direccion:word;valor:byte);
+procedure cambiar_paleta;
+var
+  colores:tpaleta;
+  f,bit0,bit1,bit2,bit3,tmp:byte;
+begin
+for f:=0 to $ff do begin
+  tmp:=pal_proms[palette_bank*$100+f];
+  bit0:=(tmp shr 0) and $1;
+  bit1:=(tmp shr 1) and $1;
+  bit2:=(tmp shr 2) and $1;
+  bit3:=(tmp shr 3) and $1;
+  colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  bit0:=(tmp shr 4) and $1;
+  bit1:=(tmp shr 5) and $1;
+  bit2:=(tmp shr 6) and $1;
+  bit3:=(tmp shr 7) and $1;
+  colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  tmp:=pal_proms[palette_bank*$100+$400+f];
+  bit0:=(tmp shr 0) and $1;
+  bit1:=(tmp shr 1) and $1;
+  bit2:=(tmp shr 2) and $1;
+  bit3:=(tmp shr 3) and $1;
+  colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+end;
+set_pal(colores,$100);
+end;
+
 begin
 case direccion of
   $0..$fff:if memoria[direccion]<>valor then begin
@@ -293,10 +309,10 @@ case direccion of
   $3c00:begin
           rom_nbank:=valor and $7;
           if palette_bank<>((valor and $18) shr 3) then
-            cambiar_paleta;
             palette_bank:=(valor and $18) shr 3;
             fillchar(gfx[0].buffer[0],$800,1);
             fillchar(gfx[1].buffer[0],$800,1);
+            cambiar_paleta;
         end;
   $4000..$5fff,$a000..$ffff:;
   $6800..$6bff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
@@ -315,9 +331,10 @@ case direccion of
   $0..$ff:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
   $8000..$c7ff,$f000..$ffff:mcu_getbyte:=mem_snd[direccion];
-  $d000,$d001:mcu_getbyte:=$ff;  //dswa dswb
-  $d002:mcu_getbyte:=(marcade.in1 and $f0)+$80;
-  $d003:mcu_getbyte:=(marcade.in1 and $f) shl 4;
+  $d000:mcu_getbyte:=(marcade.dswa and $f0) or (marcade.dswb shr 4);
+  $d001:mcu_getbyte:=((marcade.dswa and $f) shl 4) or (marcade.dswb and $f);
+  $d002:mcu_getbyte:=(marcade.in1 and $f0) or marcade.dswc or $f;
+  $d003:mcu_getbyte:=((marcade.in1 and $f) shl 4) or $f;
   end;
 end;
 
@@ -342,7 +359,7 @@ end;
 
 function in_port2:byte;
 begin
-  in_port2:=$ff;
+  in_port2:=$ff; //Sin uso
 end;
 
 procedure pacland_sound_update;
@@ -364,8 +381,7 @@ begin
  irq_enable_mcu:=false;
  scroll_x1:=0;
  scroll_x2:=0;
- palette_bank:=0;
- cambiar_paleta;
+ palette_bank:=$ff;
 end;
 
 function iniciar_pacland:boolean;
@@ -393,10 +409,10 @@ screen_init(4,512,256,true);
 screen_mod_scroll(4,512,512,511,256,256,255);
 iniciar_video(288,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,256,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1536000,264,TCPU_M6809);
 m6809_0.change_ram_calls(pacland_getbyte,pacland_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(6144000,$100,TCPU_HD63701);
+m6800_0:=cpu_m6800.create(6144000,264,TCPU_HD63701);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
 m6800_0.init_sound(pacland_sound_update);
@@ -433,6 +449,13 @@ for f:=$0 to $3ff do begin
   gfx[1].colores[f]:=memoria_temp[$c00+f];
   gfx[2].colores[f]:=memoria_temp[$1000+f];
 end;
+//Dip
+marcade.dswa:=$ff;
+marcade.dswa_val:=@pacland_dip_a;
+marcade.dswb:=$ff;
+marcade.dswb_val:=@pacland_dip_b;
+marcade.dswc:=$80;
+marcade.dswc_val:=@pacland_dip_c;
 //final
 reset_pacland;
 iniciar_pacland:=true;

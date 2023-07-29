@@ -17,7 +17,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="21"/>
       <RevisionNr Value="5"/>
-      <BuildNr Value="1342"/>
+      <BuildNr Value="1343"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.21"/>
     </VersionInfo>
@@ -60,8 +60,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="980"/>
-        <CursorPos Y="998"/>
+        <TopLine Value="994"/>
+        <CursorPos X="91" Y="1011"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -179,11 +179,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadRom"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="109"/>
         <CursorPos X="26" Y="115"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="config_general.pas"/>
@@ -264,11 +263,10 @@
       <Unit25>
         <Filename Value="..\devices\upd765.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="4"/>
         <CursorPos X="3" Y="16"/>
         <UsageCount Value="208"/>
-        <Loaded Value="True"/>
       </Unit25>
       <Unit26>
         <Filename Value="cargar_dsk.pas"/>
@@ -288,11 +286,10 @@
         <ComponentName Value="tape_window1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="17"/>
         <CursorPos X="46" Y="28"/>
         <UsageCount Value="221"/>
-        <Loaded Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="cargar_spec.pas"/>
@@ -452,7 +449,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos Y="61"/>
-        <UsageCount Value="167"/>
+        <UsageCount Value="168"/>
       </Unit43>
       <Unit44>
         <Filename Value="..\arcade\sauro_hw.pas"/>
@@ -475,11 +472,10 @@
       <Unit46>
         <Filename Value="..\consolas\sega_gg.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="182"/>
         <CursorPos X="14" Y="202"/>
-        <UsageCount Value="158"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="159"/>
       </Unit46>
       <Unit47>
         <Filename Value="config_gb.pas"/>
@@ -490,202 +486,170 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="36"/>
         <CursorPos Y="49"/>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit47>
       <Unit48>
         <Filename Value="..\cpu\mcs51.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="645"/>
         <CursorPos Y="656"/>
         <UsageCount Value="11"/>
-        <Loaded Value="True"/>
       </Unit48>
       <Unit49>
         <Filename Value="..\arcade\hangon_hw.pas"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="181"/>
         <CursorPos X="6" Y="191"/>
         <UsageCount Value="11"/>
-        <Loaded Value="True"/>
       </Unit49>
       <Unit50>
         <Filename Value="..\misc\main_engine.pas"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="321"/>
         <CursorPos X="16" Y="340"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit50>
       <Unit51>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
-        <EditorIndex Value="12"/>
-        <CursorPos X="27" Y="12"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="93" Y="6"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit51>
       <Unit52>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="13"/>
-        <TopLine Value="776"/>
-        <CursorPos X="44" Y="787"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="801"/>
+        <CursorPos X="44" Y="812"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit52>
       <Unit53>
         <Filename Value="..\misc\pal_engine.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="148"/>
         <CursorPos X="34" Y="159"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit53>
       <Unit54>
         <Filename Value="..\consolas\nes_mappers.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="811"/>
         <CursorPos X="6" Y="823"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit54>
       <Unit55>
         <Filename Value="..\consolas\gb.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos Y="53"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit55>
       <Unit56>
         <Filename Value="..\consolas\super_cassette_vision.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="397"/>
         <CursorPos X="12" Y="411"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit56>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="24" HistoryIndex="23">
       <Position1>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="138" Column="15" TopLine="118"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="990" TopLine="972"/>
       </Position1>
       <Position2>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="139" Column="15" TopLine="119"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="991" TopLine="973"/>
       </Position2>
       <Position3>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="320" Column="27" TopLine="304"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="992" TopLine="974"/>
       </Position3>
       <Position4>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="340" Column="16" TopLine="321"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="993" TopLine="975"/>
       </Position4>
       <Position5>
-        <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
-        <Caret Line="12" Column="27"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="993" TopLine="975"/>
       </Position5>
       <Position6>
         <Filename Value="principal.pas"/>
-        <Caret Line="990" TopLine="972"/>
+        <Caret Line="994" TopLine="976"/>
       </Position6>
       <Position7>
         <Filename Value="principal.pas"/>
-        <Caret Line="991" TopLine="973"/>
+        <Caret Line="995" TopLine="977"/>
       </Position7>
       <Position8>
         <Filename Value="principal.pas"/>
-        <Caret Line="992" TopLine="974"/>
+        <Caret Line="996" TopLine="978"/>
       </Position8>
       <Position9>
         <Filename Value="principal.pas"/>
-        <Caret Line="993" TopLine="975"/>
+        <Caret Line="997" TopLine="979"/>
       </Position9>
       <Position10>
-        <Filename Value="..\misc\pal_engine.pas"/>
-        <Caret Line="159" Column="13" TopLine="148"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="998" TopLine="980"/>
       </Position10>
       <Position11>
-        <Filename Value="loadrom.pas"/>
-        <Caret Line="115" Column="26" TopLine="109"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="997" TopLine="979"/>
       </Position11>
       <Position12>
-        <Filename Value="..\devices\upd765.pas"/>
-        <Caret Line="34" Column="13" TopLine="15"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="998" TopLine="980"/>
       </Position12>
       <Position13>
-        <Filename Value="..\devices\upd765.pas"/>
-        <Caret Line="16" Column="3" TopLine="4"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="999" TopLine="981"/>
       </Position13>
       <Position14>
-        <Filename Value="tape_window.pas"/>
-        <Caret Line="28" Column="46" TopLine="17"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1000" TopLine="982"/>
       </Position14>
       <Position15>
-        <Filename Value="..\consolas\nes_mappers.pas"/>
-        <Caret Line="829" Column="17" TopLine="810"/>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="470" Column="45" TopLine="459"/>
       </Position15>
       <Position16>
-        <Filename Value="..\consolas\nes_mappers.pas"/>
-        <Caret Line="823" Column="6" TopLine="811"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="991" Column="7" TopLine="983"/>
       </Position16>
       <Position17>
-        <Filename Value="..\consolas\gb.pas"/>
-        <Caret Line="53" TopLine="33"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="992" Column="7" TopLine="984"/>
       </Position17>
       <Position18>
-        <Filename Value="..\consolas\sega_gg.pas"/>
-        <Caret Line="14" Column="15" TopLine="2"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="993" Column="7" TopLine="985"/>
       </Position18>
       <Position19>
-        <Filename Value="..\consolas\sega_gg.pas"/>
-        <Caret Line="128" Column="17" TopLine="108"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1006" Column="86" TopLine="986"/>
       </Position19>
       <Position20>
-        <Filename Value="..\consolas\sega_gg.pas"/>
-        <Caret Line="202" Column="14" TopLine="182"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1007" Column="87" TopLine="988"/>
       </Position20>
       <Position21>
-        <Filename Value="..\consolas\super_cassette_vision.pas"/>
-        <Caret Line="411" Column="10" TopLine="404"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1008" Column="51" TopLine="990"/>
       </Position21>
       <Position22>
-        <Filename Value="..\consolas\super_cassette_vision.pas"/>
-        <Caret Line="516" Column="9" TopLine="505"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1009" Column="51" TopLine="991"/>
       </Position22>
       <Position23>
-        <Filename Value="..\consolas\super_cassette_vision.pas"/>
-        <Caret Line="411" Column="12" TopLine="397"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1010" Column="51" TopLine="992"/>
       </Position23>
       <Position24>
         <Filename Value="principal.pas"/>
-        <Caret Line="993" TopLine="975"/>
+        <Caret Line="1011" Column="51" TopLine="993"/>
       </Position24>
-      <Position25>
-        <Filename Value="principal.pas"/>
-        <Caret Line="994" TopLine="976"/>
-      </Position25>
-      <Position26>
-        <Filename Value="principal.pas"/>
-        <Caret Line="995" TopLine="977"/>
-      </Position26>
-      <Position27>
-        <Filename Value="principal.pas"/>
-        <Caret Line="996" TopLine="978"/>
-      </Position27>
-      <Position28>
-        <Filename Value="principal.pas"/>
-        <Caret Line="997" TopLine="979"/>
-      </Position28>
-      <Position29>
-        <Filename Value="principal.pas"/>
-        <Caret Line="998" TopLine="980"/>
-      </Position29>
-      <Position30>
-        <Filename Value="principal.pas"/>
-        <Caret Line="997" TopLine="979"/>
-      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

@@ -89,6 +89,7 @@ var
  char_32_32:array[0..$7f] of boolean;
  char_64_64:array[0..$1f] of boolean;
 
+procedure update_video_nemesis;
 procedure char_calc;
 var
   f:word;
@@ -172,7 +173,6 @@ for pri:=0 to $ff do begin  //prioridad
 end;
 end;
 
-procedure update_video_nemesis;
 var
   f,x,y,nchar,color:word;
   flipx,flipy:boolean;

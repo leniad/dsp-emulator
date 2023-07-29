@@ -345,7 +345,8 @@ uses
   oric_hw in '..\ordenadores\oric_hw.pas',
   oric_disc in '..\ordenadores\misc\oric_disc.pas',
   via6522 in '..\devices\via6522.pas',
-  missilecommand_hw in '..\arcade\missilecommand_hw.pas';
+  missilecommand_hw in '..\arcade\missilecommand_hw.pas',
+  gaplus_hw in '..\arcade\gaplus_hw.pas';
 
 {$R *.res}
 begin

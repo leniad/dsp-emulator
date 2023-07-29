@@ -38,6 +38,7 @@ const
         (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Bonus Life';number:2;dip:((dip_val:$80;dip_name:'30K 50K+'),(dip_val:$0;dip_name:'50K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         CPU_SYNC=4;
+        CPU_DIV=5;
 
 var
  sound_latch,scrollfg,scrollbg:byte;
@@ -312,16 +313,16 @@ screen_init(4,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
 //Si pongo 3Mhz, a veces en la demo la nave muere, pero no se da cuenta y entra en un bucle sin fin y ya no responde a nada
-z80_0:=cpu_z80.create(18432000 div 4,264*CPU_SYNC);
+z80_0:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_0.change_ram_calls(flower_getbyte,flower_putbyte);
 //Sub CPU
-z80_1:=cpu_z80.create(18432000 div 4,264*CPU_SYNC);
+z80_1:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_1.change_ram_calls(flower_getbyte_sub,flower_putbyte);
 //Sound CPU
-z80_2:=cpu_z80.create(18432000 div 4,264*CPU_SYNC);
+z80_2:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.init_sound(flower_update_sound);
-timers.init(z80_2.numero_cpu,18432000/4/90,flower_snd_irq,nil,true);
+timers.init(z80_2.numero_cpu,18432000/CPU_DIV/90,flower_snd_irq,nil,true);
 //Sound
 //cargar roms
 if not(roms_load(@memoria,flower_rom)) then exit;

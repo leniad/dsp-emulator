@@ -326,8 +326,9 @@ case direccion of
   $c800:sound_command:=valor;
   $c804:begin
           rom_bank:=(valor and $0c) shr 2;
-          chon:=(valor and $80)<>0;
+          z80_1.change_reset((valor and $20) shr 5);
           main_screen.flip_main_screen:=(valor and $40)<>0;
+          chon:=(valor and $80)<>0;
         end;
   $c806:if (valor and $40)<>0 then begin
           copymemory(@buffer_sprites,@memoria[$f000],$1000);
@@ -429,9 +430,10 @@ case direccion of
         0..$bfff:;
         $c800:sound_command:=valor;
         $c804:begin
-                chon:=(valor and $80)<>0;
                 rom_bank:=(valor shr 2) and $7;
+                z80_1.change_reset((valor and $20) shr 5);
                 main_screen.flip_main_screen:=(valor and $40)<>0;
+                chon:=(valor and $80)<>0;
               end;
         $c807:cpu_to_mcu:=valor;
         $d000..$d7ff:if memoria[direccion]<>valor then begin

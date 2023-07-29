@@ -15,7 +15,7 @@ type
 
 function carga_rom_zip(nombre_zip,nombre_rom:string;donde:pbyte;longitud,crc:integer;warning:boolean):boolean;
 function carga_rom_zip_crc(nombre_zip,nombre_rom:string;donde:pointer;longitud:integer;crc:dword):boolean;
-function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms;parent:boolean=false;nombre:string=''):boolean;
 function roms_load16b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load16w(sitio:pword;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load32b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
@@ -60,18 +60,19 @@ end;
 carga_rom_zip_crc:=true;
 end;
 
-function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms;parent:boolean=false;nombre:string=''):boolean;
 var
   ptemp:pbyte;
   f,roms_size:word;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+if parent then nombre_zip:=nombre
+  else for f:=1 to GAMES_CONT do begin
+          if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+            nombre_zip:=GAMES_DESC[f].zip+'.zip';
+            break;
+          end;
+        end;
 roms_load:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin

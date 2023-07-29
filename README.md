@@ -1,4 +1,41 @@
 ﻿# DSP Emulator status #
+<b>29/07/23 - DSP Emulator 0.22WIP4. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Added a new section 'How to compile DSP Emulator'
+    +Started to implement parent drivers (ROMs loading and ROMs export), for example Xevious and Super Xevious, they share ROMs, but they are not the same arcade.
+    +Namco IO 56XX-58XX-59XX
+        -Changed to classes
+        -Added IO 59XX
+        -Implemented timers to internal
+-Galaga HW
+    +Added DIPs to all drivers
+    +Added all remain controls to all drivers
+    +DigDug: Simplified background render 
+    +Super Xevious: Added driver with sound
+-Galaxian HW
+    +Added DIPs to all drivers
+    +Added all remain controls to all drivers
+    +Amidar
+        -Updated ROMs
+        -Added background color
+-Gaplus
+    +Added driver with sound
+-Gun.Smoke HW
+    +Added sound CPU reset line
+-Mappy HW
+    +Added DIPs to all drivers
+    +Added all remain controls to all drivers
+    +Changed to new Namco 5X IO driver
+    +Grobda: added driver with sound
+    +Pac & Pal: Added driver with sound
+-Pacland
+    +Added DIPs switches
+    +Fixed a stupid bug with palette change
+    +Change screen parameters
+</pre><br>
+<img src="https://i.ibb.co/MMrK2QL/gaplus.png"> <img src="https://i.ibb.co/yyhYKkF/Grobda.png"><br>
+<img src="https://i.ibb.co/dWBHZGV/pacnpal.png"> <img src="https://i.ibb.co/4pCWsMm/sxevious.png"><br><br>
 <b>08/07/23 - DSP Emulator 0.22WIP3. Updated Windows binary and source.<br>
 <pre>
 -General

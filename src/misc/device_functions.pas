@@ -1,6 +1,9 @@
 unit device_functions;
+
 interface
+
 procedure close_all_devices;
+
 implementation
 uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496,
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
@@ -8,7 +11,9 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
      deco_common,deco_16ic,sm510,slapstic,upd7810,upd1771,blitter_williams,
-     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc,seibu_sound;
+     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc,seibu_sound,
+     namcoio_56xx_58xx;
+
 procedure close_all_devices;
 begin
 //Z80
@@ -381,5 +386,14 @@ if ctc_0<>nil then begin
   ctc_0.free;
   ctc_0:=nil;
 end;
+if namco_5x_0<>nil then begin
+  namco_5x_0.free;
+  namco_5x_0:=nil;
 end;
+if namco_5x_1<>nil then begin
+  namco_5x_1.free;
+  namco_5x_1:=nil;
+end;
+end;
+
 end.

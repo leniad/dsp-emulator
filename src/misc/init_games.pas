@@ -38,7 +38,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
-  oric_hw,missilecommand_hw;
+  oric_hw,missilecommand_hw,gaplus_hw;
 
 type
   tgame_desc=record
@@ -66,7 +66,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=364;
+  GAMES_CONT=368;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -217,7 +217,7 @@ const
   (name:'Pengo';year:'1982';snd:1;hi:false;zip:'pengo';grid:142;company:'Sega';rom:@pengo;tipo:ARCADE or MAZE),
   (name:'Scramble';year:'1981';snd:1;hi:false;zip:'scramble';grid:143;company:'Konami';rom:@scramble;tipo:ARCADE or SHOT),
   (name:'Super Cobra';year:'1981';snd:1;hi:false;zip:'scobra';grid:144;company:'Konami';rom:@scobra;tipo:ARCADE or SHOT),
-  (name:'Amidar';year:'1981';snd:1;hi:false;zip:'amidar';grid:145;company:'Konami';rom:@amidar;tipo:ARCADE or MAZE),
+  (name:'Amidar';year:'1982';snd:1;hi:false;zip:'amidar';grid:145;company:'Konami';rom:@amidar_roms;tipo:ARCADE or MAZE),
   (name:'Twin Cobra';year:'1987';snd:1;hi:false;zip:'twincobr';grid:146;company:'Taito';rom:@twincobr;tipo:ARCADE or SHOT),
   (name:'Flying Shark';year:'1987';snd:1;hi:false;zip:'fshark';grid:147;company:'Taito';rom:@fshark;tipo:ARCADE or SHOT),
   (name:'Jr. Pac-Man';year:'1983';snd:1;hi:false;zip:'jrpacman';grid:148;company:'Bally Midway';rom:@jrpacman;tipo:ARCADE or MAZE),
@@ -421,6 +421,10 @@ const
   (name:'Super Zaxxon';year:'1982';snd:2;hi:false;zip:'szaxxon';grid:346;company:'Sega';rom:@szaxxon_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
   (name:'Future Spy';year:'1984';snd:2;hi:false;zip:'futspy';grid:347;company:'Sega';rom:@futspy_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
   (name:'Millipede';year:'1982';snd:1;hi:false;zip:'milliped';grid:348;company:'Atari';rom:@milliped_roms;tipo:ARCADE or SHOT),
+  (name:'Gaplus';year:'1984';snd:1;hi:false;zip:'gaplus';grid:349;company:'Namco';rom:@gaplus_roms;tipo:ARCADE or SHOT),
+  (name:'Super Xevious';year:'1984';snd:1;hi:false;zip:'sxevious';grid:350;company:'Namco';rom:@sxevious_roms;samples:@xevious_samples;tipo:ARCADE or SHOT),
+  (name:'Grobda';year:'1984';snd:1;hi:false;zip:'grobda';grid:351;company:'Namco';rom:@grobda_roms;tipo:ARCADE or SHOT),
+  (name:'Pac & Pal';year:'1983';snd:1;hi:false;zip:'pacnpal';grid:352;company:'Namco';rom:@pacnpal_roms;tipo:ARCADE or MAZE),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -803,6 +807,10 @@ case numero of
   346:principal1.CambiarMaquina(principal1.superzaxxon1);
   347:principal1.CambiarMaquina(principal1.futurespy1);
   348:principal1.CambiarMaquina(principal1.millipede1);
+  349:principal1.CambiarMaquina(principal1.gaplus1);
+  350:principal1.CambiarMaquina(principal1.superxevious1);
+  351:principal1.CambiarMaquina(principal1.grobda1);
+  352:principal1.CambiarMaquina(principal1.pacnpal1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1173,6 +1181,10 @@ principal1.supermissileattack1.Checked:=false;
 principal1.superzaxxon1.Checked:=false;
 principal1.futurespy1.Checked:=false;
 principal1.millipede1.Checked:=false;
+principal1.gaplus1.Checked:=false;
+principal1.superxevious1.Checked:=false;
+principal1.grobda1.Checked:=false;
+principal1.pacnpal1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1324,11 +1336,11 @@ case tmaquina of
   54:llamadas_maquina.iniciar:=iniciar_snowbros;
   55:llamadas_maquina.iniciar:=iniciar_toki;
   56:llamadas_maquina.iniciar:=iniciar_contra;
-  57,63,64,192,193:llamadas_maquina.iniciar:=iniciar_mappyhw;
+  57,63,64,192,193,351,352:llamadas_maquina.iniciar:=iniciar_mappyhw;
   58:llamadas_maquina.iniciar:=iniciar_rastan;
   59,60,61:llamadas_maquina.iniciar:=iniciar_lwings;
   62:llamadas_maquina.iniciar:=iniciar_sfighter;
-  65,167,231,250:llamadas_maquina.iniciar:=iniciar_galagahw;
+  65,167,231,250,350:llamadas_maquina.iniciar:=iniciar_galagahw;
   66:llamadas_maquina.iniciar:=iniciar_xain;
   67,68:llamadas_maquina.iniciar:=iniciar_suna_hw;
   69,71:llamadas_maquina.iniciar:=iniciar_nmk16;
@@ -1456,6 +1468,7 @@ case tmaquina of
   340:llamadas_maquina.iniciar:=iniciar_raiden;
   341,342,343:llamadas_maquina.iniciar:=iniciar_twins;
   344,345:llamadas_maquina.iniciar:=iniciar_missilec;
+  349:llamadas_maquina.iniciar:=iniciar_gaplus;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2880,6 +2893,22 @@ end;
 if sender=principal1.millipede1 then begin
   tipo:=348;
   principal1.millipede1.Checked:=true;
+end;
+if sender=principal1.gaplus1 then begin
+  tipo:=349;
+  principal1.gaplus1.Checked:=true;
+end;
+if sender=principal1.superxevious1 then begin
+  tipo:=350;
+  principal1.superxevious1.Checked:=true;
+end;
+if sender=principal1.grobda1 then begin
+  tipo:=351;
+  principal1.grobda1.Checked:=true;
+end;
+if sender=principal1.pacnpal1 then begin
+  tipo:=352;
+  principal1.pacnpal1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

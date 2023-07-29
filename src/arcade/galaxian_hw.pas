@@ -27,6 +27,13 @@ const
         galaxian_samples:array[0..8] of tipo_nombre_samples=(
         (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'),
         (nombre:'kill.wav';restart:true),(nombre:'coin.wav'),(nombre:'music.wav'),(nombre:'extra.wav'));
+        galaxian_dip_a:array [0..1] of def_dip=(
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        galaxian_dip_b:array [0..1] of def_dip=(
+        (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$80;dip_name:'1C 2C'),(dip_val:$c0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        galaxian_dip_c:array [0..2] of def_dip=(
+        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'7K'),(dip_val:$1;dip_name:'10K'),(dip_val:$2;dip_name:'12K'),(dip_val:$3;dip_name:'20K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'2'),(dip_val:$4;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Jump Bug
         jumpbug_rom:array[0..6] of tipo_roms=(
         (n:'jb1';l:$1000;p:0;crc:$415aa1b7),(n:'jb2';l:$1000;p:$1000;crc:$b1c27510),
@@ -38,6 +45,11 @@ const
         (n:'jbn';l:$800;p:$1000;crc:$155186e0),(n:'jbi';l:$800;p:$1800;crc:$7749b111),
         (n:'jbj';l:$800;p:$2000;crc:$06e8d7df),(n:'jbk';l:$800;p:$2800;crc:$b8dbddf3));
         jumpbug_pal:tipo_roms=(n:'l06_prom.bin';l:$20;p:0;crc:$6a0c7d87);
+        jumpbug_dip_b:array [0..1] of def_dip=(
+        (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$40;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        jumpbug_dip_c:array [0..2] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$1;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$3;dip_name:'5'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coinage';number:4;dip:((dip_val:$4;dip_name:'A 2C/1C - B 2C/1C'),(dip_val:$8;dip_name:'A 2C/1C - B 1C/3C'),(dip_val:$0;dip_name:'A 1C/1C - B 1C/1C'),(dip_val:$c;dip_name:'A 1C/1C - B 1C/6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Moon Cresta
         mooncrst_rom:array[0..7] of tipo_roms=(
         (n:'mc1';l:$800;p:0;crc:$7d954a7a),(n:'mc2';l:$800;p:$800;crc:$44bb7cfa),
@@ -50,6 +62,12 @@ const
         mooncrst_pal:tipo_roms=(n:'l06_prom.bin';l:$20;p:0;crc:$6a0c7d87);
         mooncrst_samples:array[0..4] of tipo_nombre_samples=(
         (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'ship1.wav'),(nombre:'enemy1.wav'),(nombre:'back3.wav'));
+        mooncrst_dip_b:array [0..2] of def_dip=(
+        (mask:$40;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'30K'),(dip_val:$40;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Language';number:2;dip:((dip_val:$80;dip_name:'English'),(dip_val:$0;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mooncrst_dip_c:array [0..2] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$3;dip_name:'4C 1C'),(dip_val:$2;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$4;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$c;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Scramble
         scramble_rom:array[0..7] of tipo_roms=(
         (n:'s1.2d';l:$800;p:0;crc:$ea35ccaa),(n:'s2.2e';l:$800;p:$800;crc:$e7bba1b3),
@@ -62,6 +80,11 @@ const
         (n:'ot1.5c';l:$800;p:0;crc:$bcd297f0),(n:'ot2.5d';l:$800;p:$800;crc:$de7912da),
         (n:'ot3.5e';l:$800;p:$1000;crc:$ba2fa933));
         scramble_pal:tipo_roms=(n:'c01s.6e';l:$20;p:0;crc:$4e3caeab);
+        scramble_dip_a:array [0..1] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        scramble_dip_b:array [0..2] of def_dip=(
+        (mask:$6;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'A 1/1  B 2/1  C 1/1'),(dip_val:$2;dip_name:'A 1/2  B 1/1  C 1/2'),(dip_val:$4;dip_name:'A 1/3  B 3/1  C 1/3'),(dip_val:$6;dip_name:'A 1/4  B 4/1  C 1/4'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$8;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Super Cobra
         scobra_rom:array[0..5] of tipo_roms=(
         (n:'epr1265.2c';l:$1000;p:0;crc:$a0744b3f),(n:'2e';l:$1000;p:$1000;crc:$8e7245cd),
@@ -73,6 +96,12 @@ const
         scobra_char:array[0..1] of tipo_roms=(
         (n:'epr1274.5h';l:$800;p:0;crc:$64d113b4),(n:'epr1273.5f';l:$800;p:$800;crc:$a96316d3));
         scobra_pal:tipo_roms=(n:'82s123.6e';l:$20;p:0;crc:$9b87f90d);
+        scobra_dip_a:array [0..2] of def_dip=(
+        (mask:$1;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$1;dip_name:'4 Times'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$2;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        scobra_dip_b:array [0..2] of def_dip=(
+        (mask:$6;name:'Coinage';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$6;dip_name:'4C 3C'),(dip_val:$2;dip_name:'1C 1C'),(dip_val:$0;dip_name:'99 Credits'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$8;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Frogger
         frogger_rom:array[0..2] of tipo_roms=(
         (n:'frogger.26';l:$1000;p:0;crc:$597696d6),(n:'frogger.27';l:$1000;p:$1000;crc:$b6e6fcc3),
@@ -83,17 +112,32 @@ const
         frogger_sound:array[0..2] of tipo_roms=(
         (n:'frogger.608';l:$800;p:0;crc:$e8ab0256),(n:'frogger.609';l:$800;p:$800;crc:$7380a48f),
         (n:'frogger.610';l:$800;p:$1000;crc:$31d7eb27));
+        frogger_dip_a:array [0..1] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$2;dip_name:'7'),(dip_val:$3;dip_name:'256'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        frogger_dip_b:array [0..2] of def_dip=(
+        (mask:$6;name:'Coinage';number:4;dip:((dip_val:$2;dip_name:'A 2/1 B 2/1 C 2/1'),(dip_val:$4;dip_name:'A 2/1 B 1/3 C 2/1'),(dip_val:$0;dip_name:'A 1/1 B 1/1 C 1/1'),(dip_val:$6;dip_name:'A 1/1 B 1/6 C 1/1'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$8;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Amidar
-        amidar_rom:array[0..3] of tipo_roms=(
-        (n:'amidar.2c';l:$1000;p:0;crc:$c294bf27),(n:'amidar.2e';l:$1000;p:$1000;crc:$e6e96826),
-        (n:'amidar.2f';l:$1000;p:$2000;crc:$3656be6f),(n:'amidar.2h';l:$1000;p:$3000;crc:$1be170bd));
+        amidar_rom:array[0..4] of tipo_roms=(
+        (n:'1.2c';l:$1000;p:0;crc:$621b74de),(n:'2.2e';l:$1000;p:$1000;crc:$38538b98),
+        (n:'3.2f';l:$1000;p:$2000;crc:$099ecb24),(n:'4.2h';l:$1000;p:$3000;crc:$ba149a93),
+        (n:'5.2j';l:$1000;p:$4000;crc:$eecc1abf));
         amidar_char:array[0..1] of tipo_roms=(
-        (n:'amidar.5f';l:$800;p:0;crc:$5e51e84d),(n:'amidar.5h';l:$800;p:$800;crc:$2f7f1c30));
+        (n:'c2.5f';l:$800;p:0;crc:$2cfe5ede),(n:'c2.5d';l:$800;p:$800;crc:$57c4fd0d));
         amidar_pal:tipo_roms=(n:'amidar.clr';l:32;p:0;crc:$f940dcc3);
         amidar_sound:array[0..1] of tipo_roms=(
-        (n:'amidar.5c';l:$1000;p:0;crc:$c4b66ae4),(n:'amidar.5d';l:$1000;p:$1000;crc:$806785af));
+        (n:'s1.5c';l:$1000;p:0;crc:$8ca7b750),(n:'s2.5d';l:$1000;p:$1000;crc:$9b5bdc0a));
+        amidar_dip_a:array [0..1] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        amidar_dip_b:array [0..3] of def_dip=(
+        (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'30K 70K+'),(dip_val:$4;dip_name:'50K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$8;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        amidar_dip_c:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:$f;dip:((dip_val:$04;dip_name:'4C 1C'),(dip_val:$0a;dip_name:'3C 1C'),(dip_val:$01;dip_name:'2C 1C'),(dip_val:$02;dip_name:'3C 2C'),(dip_val:$08;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'3C 4C'),(dip_val:$0e;dip_name:'2C 3C'),(dip_val:$07;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0b;dip_name:'1C 3C'),(dip_val:$03;dip_name:'1C 4C'),(dip_val:$0d;dip_name:'1C 5C'),(dip_val:$05;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:$f;dip:((dip_val:$40;dip_name:'4C 1C'),(dip_val:$a0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$20;dip_name:'3C 2C'),(dip_val:$80;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$c0;dip_name:'3C 4C'),(dip_val:$e0;dip_name:'2C 3C'),(dip_val:$70;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$b0;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'),(dip_val:$d0;dip_name:'1C 5C'),(dip_val:$50;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Invalid'))),());
         //Stars
-        star_count=252;
+        STAR_COUNT=252;
 var
   //variables de funciones especificas
   eventos_hardware_galaxian:procedure;
@@ -107,7 +151,7 @@ var
   haz_nmi,stars_enable:boolean;
   stars_scrollpos:dword;
   stars_blinking,port_b_latch:byte;
-  stars:array[0..star_count-1] of tstars;
+  stars:array[0..STAR_COUNT-1] of tstars;
   videoram_mem:array[0..$3ff] of byte;
   sprite_mem,disparo_mem:array[0..$1f] of byte;
   atributos_mem:array[0..$3f] of byte;
@@ -116,6 +160,9 @@ var
   scramble_background:boolean;
   scramble_prot_state:integer;
   scramble_prot:byte;
+  //amidar
+  amidar_back_r,amidar_back_g,amidar_back_b:byte;
+  amidar_back:boolean;
   //frogger
   timer_hs_frogger:byte;
 
@@ -123,11 +170,18 @@ var
 procedure eventos_galaxian;
 begin
 if event.arcade then begin
+  //P1 & System
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
+  //P2 & System
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
 end;
 end;
 
@@ -143,9 +197,9 @@ case direccion of
                   $60..$7f:galaxian_getbyte:=disparo_mem[direccion and $1f];
                   else galaxian_getbyte:=memoria[$5800+(direccion and $ff)];
                end;
-  $6000..$67ff:galaxian_getbyte:=marcade.in0;
-  $6800..$6fff:galaxian_getbyte:=marcade.in1;
-  $7000..$77ff:galaxian_getbyte:=marcade.in2;
+  $6000..$67ff:galaxian_getbyte:=marcade.in0 or marcade.dswa;
+  $6800..$6fff:galaxian_getbyte:=marcade.in1 or marcade.dswb;
+  $7000..$77ff:galaxian_getbyte:=marcade.dswc;
   else galaxian_getbyte:=$ff;
 end;
 end;
@@ -165,7 +219,7 @@ case direccion of
                   0..$3f:if atributos_mem[direccion and $3f]<>valor then begin
                             atributos_mem[direccion and $3f]:=valor;
                             dir:=((direccion and $3F) shr 1);
-                            for f:=0 to $1F do gfx[0].buffer[dir+(f shl 5)]:=true;
+                            for f:=0 to $1f do gfx[0].buffer[dir+(f shl 5)]:=true;
                          end;
                   $40..$5f:sprite_mem[direccion and $1f]:=valor;
                   $60..$7f:disparo_mem[direccion and $1f]:=valor;
@@ -219,7 +273,7 @@ var
   f:byte;
   x,y,color:word;
 begin
-for f:=0 to star_count-1 do begin
+for f:=0 to STAR_COUNT-1 do begin
 		x:=(stars[f].x+stars_scrollpos) and $1ff;
 		y:=(stars[f].y+((stars_scrollpos+stars[f].x) shr 9)) and $ff;
 		if ((y and $01) xor ((x shr 3) and $01))<>0 then begin
@@ -238,13 +292,22 @@ end;
 procedure eventos_jumpbug;
 begin
 if event.arcade then begin
+  //P1
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
+  //P2
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $80) else marcade.in1:=(marcade.in1 and $7f);
 end;
 end;
 
@@ -259,9 +322,9 @@ case direccion of
                   $60..$7f:jumpbug_getbyte:=disparo_mem[direccion and $1f];
                     else jumpbug_getbyte:=memoria[$5000+(direccion and $ff)];
                end;
-  $6000..$67ff:jumpbug_getbyte:=marcade.in0;
-  $6800..$6fff:jumpbug_getbyte:=marcade.in1;
-  $7000..$77ff:jumpbug_getbyte:=marcade.in2;
+  $6000..$67ff:jumpbug_getbyte:=marcade.in0 or marcade.dswa;
+  $6800..$6fff:jumpbug_getbyte:=marcade.in1 or marcade.dswb;
+  $7000..$77ff:jumpbug_getbyte:=marcade.dswc;
   $b000..$bfff:case (direccion and $fff) of  //proteccion
                   $114:jumpbug_getbyte:=$4f;
 	                $118:jumpbug_getbyte:=$d3;
@@ -357,14 +420,14 @@ begin
 for f:=0 to STAR_COUNT-1 do begin
 		x:=stars[f].x;
 		y:=stars[f].y;
-		// determine when to skip plotting */
+		// determine when to skip plotting
 		if ((y and $01) xor ((x shr 3) and $01))<>0 then begin
 			case (stars_blinking and $03) of
   			0:if (stars[f].color and $01)=0 then continue;
   			1:if (stars[f].color and $04)=0 then continue;
   			2:if (stars[f].y and $02)=0 then continue;
 			end;
-			// no stars in the status area */
+			// no stars in the status area
 			if ((x>=240) and (main_vars.tipo_maquina=48)) then continue;
       color:=paleta[stars[f].color];
       putpixel(y+ADD_SPRITE,x,1,@color,1);
@@ -385,9 +448,9 @@ case direccion of
                   $60..$7f:mooncrst_getbyte:=disparo_mem[direccion and $1f];
                    else mooncrst_getbyte:=memoria[$9800+(direccion and $ff)];
                end;
-  $a000..$a7ff:mooncrst_getbyte:=marcade.in0;
-  $a800..$afff:mooncrst_getbyte:=marcade.in1;
-  $b000..$b7ff:mooncrst_getbyte:=marcade.in2;
+  $a000..$a7ff:mooncrst_getbyte:=marcade.in0 or marcade.dswa;
+  $a800..$afff:mooncrst_getbyte:=marcade.in1 or marcade.dswb;
+  $b000..$b7ff:mooncrst_getbyte:=marcade.dswc;
     else mooncrst_getbyte:=$ff;
 end;
 end;
@@ -463,19 +526,25 @@ end;
 procedure eventos_scramble;
 begin
 if event.arcade then begin
-  //marcade.in0
+  //P1
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7F) else marcade.in0:=(marcade.in0 or $80);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bF) else marcade.in0:=(marcade.in0 or $40);
-  //marcade.in1
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  //marcade.in2
-  if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $EF) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $BF) else marcade.in2:=(marcade.in2 or $40);
+  //P1 & P2
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
 end;
 end;
 
@@ -632,13 +701,21 @@ end;
 procedure eventos_frogger;
 begin
 if event.arcade then begin
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P1
+  if arcade_input.up[1] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or $1;
+  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
+  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.right[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
+  if arcade_input.left[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
+  if arcade_input.start[1] then marcade.in1:=marcade.in1 and $bf else marcade.in1:=marcade.in1 or $40;
   if arcade_input.start[0] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
+  //P1 & P2
+  if arcade_input.down[1] then marcade.in2:=marcade.in2 and $fe else marcade.in2:=marcade.in2 or $1;
   if arcade_input.up[0] then marcade.in2:=marcade.in2 and $ef else marcade.in2:=marcade.in2 or $10;
   if arcade_input.down[0] then marcade.in2:=marcade.in2 and $bf else marcade.in2:=marcade.in2 or $40;
-  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
-  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
 end;
 end;
 
@@ -679,9 +756,9 @@ procedure frogger_putbyte(direccion:word;valor:byte);
 var
   dir,f:byte;
 begin
-if direccion<$4000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+        0..$3fff:;
+        $8000..$87ff:memoria[direccion]:=valor;
         $a800..$afff:if videoram_mem[direccion and $3ff]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   videoram_mem[direccion and $3ff]:=valor;
@@ -727,17 +804,22 @@ end;
 procedure eventos_amidar;
 begin
 if event.arcade then begin
-  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $F7 else marcade.in0:=marcade.in0 or $8;
-  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $DF else marcade.in0:=marcade.in0 or $20;
-  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $EF else marcade.in0:=marcade.in0 or $10;
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7F) else marcade.in0:=(marcade.in0 or $80);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bF) else marcade.in0:=(marcade.in0 or $40);
-  //marcade.in1
-  if arcade_input.start[1] then marcade.in1:=marcade.in1 and $bF else marcade.in1:=marcade.in1 or $40;
-  if arcade_input.start[0] then marcade.in1:=marcade.in1 and $7F else marcade.in1:=marcade.in1 or $80;
-  //marcade.in2
+  //P1
+  if arcade_input.up[1] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or $1;
+  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or $8;
+  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
+  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.right[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
+  if arcade_input.left[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
+  if arcade_input.start[1] then marcade.in1:=marcade.in1 and $bf else marcade.in1:=marcade.in1 or $40;
+  if arcade_input.start[0] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
+  //Misc
+  if arcade_input.down[1] then marcade.in2:=marcade.in2 and $fe else marcade.in2:=marcade.in2 or $1;
   if arcade_input.up[0] then marcade.in2:=marcade.in2 and $ef else marcade.in2:=marcade.in2 or $10;
-  if arcade_input.down[0] then marcade.in2:=marcade.in2 and $BF else marcade.in2:=marcade.in2 or $40;
+  if arcade_input.down[0] then marcade.in2:=marcade.in2 and $bf else marcade.in2:=marcade.in2 or $40;
 end;
 end;
 
@@ -762,15 +844,15 @@ end;
 procedure amidar_putbyte(direccion:word;valor:byte);
 var
   dir,f:byte;
+  color:tcolor;
 begin
-if direccion<$8000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+        0..$7fff:;
         $8000..$87ff,$c000..$c7ff:memoria[$8000-(direccion and $7ff)]:=valor;
         $9000..$97ff,$d000..$d7ff:if videoram_mem[direccion and $3ff]<>valor then begin
-                  gfx[0].buffer[direccion and $3ff]:=true;
-                  videoram_mem[direccion and $3ff]:=valor;
-               end;
+                                    gfx[0].buffer[direccion and $3ff]:=true;
+                                    videoram_mem[direccion and $3ff]:=valor;
+                                  end;
         $9800..$9fff,$d800..$dfff:case (direccion and $ff) of
                                     $0..$3f:if atributos_mem[direccion and $3f]<>valor then begin
                                               atributos_mem[direccion and $3f]:=valor;
@@ -782,7 +864,18 @@ case direccion of
                                         else memoria[$9800+(direccion and $ff)]:=valor;
                                  end;
         $a000..$a7ff,$e000..$e7ff:case (direccion and $3f) of
-                                    8:haz_nmi:=(valor and 1)<>0;
+                                    0,$20,$28:begin
+                                                case (direccion and $3f) of
+                                                   $0:amidar_back_r:=(valor and 1)*$55;
+                                                  $20:amidar_back_g:=(valor and 1)*$47;
+                                                  $28:amidar_back_b:=(valor and 1)*$55;
+                                                end;
+                                                color.r:=amidar_back_r;
+                                                color.g:=amidar_back_g;
+                                                color.b:=amidar_back_b;
+                                                set_pal_color(color,99);
+                                               end;
+                                    $8:haz_nmi:=(valor and 1)<>0;
                                   end;
         $b000..$b7ff,$f000..$f7ff:pia8255_0.write((direccion shr 4) and 3,valor);
         $b800..$bfff,$f800..$ffff:pia8255_1.write((direccion shr 4) and 3,valor);
@@ -798,17 +891,17 @@ end;
 
 function port_0_b_read:byte;
 begin
-  port_0_b_read:=marcade.in1;
+  port_0_b_read:=marcade.in1 or marcade.dswa;
 end;
 
 function port_0_c_read:byte;
 begin
-  port_0_c_read:=marcade.in2;
+  port_0_c_read:=marcade.in2 or marcade.dswb;
 end;
 
 function port_1_c_read:byte;
 begin
-  port_1_c_read:=$ff;  //Amidar IN3
+  port_1_c_read:=marcade.dswc;
 end;
 
 procedure update_video_frogger;
@@ -852,8 +945,8 @@ var
   f,color,nchar:word;
   scroll,x,y,atrib:byte;
 begin
-if scramble_background then fill_full_screen(1,99)
-  else fill_full_screen(1,150);
+if (scramble_background or amidar_back) then fill_full_screen(1,99)
+    else fill_full_screen(1,150);
 //estellas
 if stars_enable then draw_stars;
 //Chars
@@ -955,6 +1048,10 @@ begin
  sound_pos:=0;
  scramble_prot:=0;
  scramble_prot_state:=0;
+ amidar_back:=false;
+ amidar_back_r:=0;
+ amidar_back_g:=0;
+ amidar_back_b:=0;
  case main_vars.tipo_maquina of
   14:begin
        konamisnd_0.reset;
@@ -967,19 +1064,16 @@ begin
   47:begin
        marcade.in0:=0;
        marcade.in1:=0;
-       marcade.in2:=4;
        reset_samples;
   end;
   48:begin
        marcade.in0:=0;
        marcade.in1:=0;
-       marcade.in2:=1;
        ay8910_0.reset;
   end;
   49:begin
        marcade.in0:=0;
-       marcade.in1:=$80;
-       marcade.in2:=0;
+       marcade.in1:=0;
        reset_samples;
   end;
   143:begin
@@ -993,18 +1087,19 @@ begin
   144:begin
         konamisnd_0.reset;
         marcade.in0:=$ff;
-        marcade.in1:=$fd;
-        marcade.in2:=$f2;
+        marcade.in1:=$fc;
+        marcade.in2:=$f1;
         pia8255_0.reset;
         pia8255_1.reset;
       end;
   145:begin
         konamisnd_0.reset;
         marcade.in0:=$ff;
-        marcade.in1:=$ff;
+        marcade.in1:=$fc;
         marcade.in2:=$f1;
         pia8255_0.reset;
         pia8255_1.reset;
+        amidar_back:=true;
       end;
  end;
 end;
@@ -1095,6 +1190,12 @@ case main_vars.tipo_maquina of
       convert_chars(256);
       convert_sprt(64);
       if not(roms_load(@memoria_temp,frogger_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@scramble_dip_a;
+      marcade.dswb:=0;
+      marcade.dswb_val:=@scramble_dip_b;
+      marcade.dswc:=$ff;
   end;
   47:begin  //galaxian
       llamadas_maquina.bucle_general:=hgalaxian_principal;
@@ -1114,6 +1215,13 @@ case main_vars.tipo_maquina of
       convert_chars(256);
       convert_sprt(64);
       if not(roms_load(@memoria_temp,galaxian_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@galaxian_dip_a;
+      marcade.dswb:=0;
+      marcade.dswb_val:=@galaxian_dip_b;
+      marcade.dswc:=4;
+      marcade.dswc_val:=@galaxian_dip_c;
   end;
   48:begin //Jump Bug
       llamadas_maquina.bucle_general:=hgalaxian_principal;
@@ -1136,6 +1244,13 @@ case main_vars.tipo_maquina of
       convert_chars(768);
       convert_sprt(192);
       if not(roms_load(@memoria_temp,jumpbug_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@galaxian_dip_a;
+      marcade.dswb:=0;
+      marcade.dswb_val:=@jumpbug_dip_b;
+      marcade.dswc:=1;
+      marcade.dswc_val:=@jumpbug_dip_c;
   end;
   49:begin  //mooncrst
       llamadas_maquina.bucle_general:=hgalaxian_principal;
@@ -1164,6 +1279,13 @@ case main_vars.tipo_maquina of
       convert_chars(512);
       convert_sprt(128);
       if not(roms_load(@memoria_temp,mooncrst_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@galaxian_dip_a;
+      marcade.dswb:=$80;
+      marcade.dswb_val:=@mooncrst_dip_b;
+      marcade.dswc:=0;
+      marcade.dswc_val:=@mooncrst_dip_c;
   end;
   143:begin  //scramble
       //Main CPU
@@ -1184,6 +1306,12 @@ case main_vars.tipo_maquina of
       convert_chars(256);
       convert_sprt(64);
       if not(roms_load(@memoria_temp,scramble_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@scramble_dip_a;
+      marcade.dswb:=0;
+      marcade.dswb_val:=@scramble_dip_b;
+      marcade.dswc:=$ff;
   end;
   144:begin  //super cobra
       //Main CPU
@@ -1204,6 +1332,12 @@ case main_vars.tipo_maquina of
       convert_chars(256);
       convert_sprt(64);
       if not(roms_load(@memoria_temp,scobra_pal)) then exit;
+      //DIP
+      marcade.dswa:=1;
+      marcade.dswa_val:=@scobra_dip_a;
+      marcade.dswb:=2;
+      marcade.dswb_val:=@scobra_dip_b;
+      marcade.dswc:=$ff;
   end;
   145:begin  //amidar
       //Main CPU
@@ -1223,6 +1357,13 @@ case main_vars.tipo_maquina of
       convert_chars(256);
       convert_sprt(64);
       if not(roms_load(@memoria_temp,amidar_pal)) then exit;
+      //DIP
+      marcade.dswa:=3;
+      marcade.dswa_val:=@amidar_dip_a;
+      marcade.dswb:=0;
+      marcade.dswb_val:=@amidar_dip_b;
+      marcade.dswc:=$ff;
+      marcade.dswc_val:=@amidar_dip_c;
   end;
 end;
 //poner la paleta

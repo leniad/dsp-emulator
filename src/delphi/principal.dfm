@@ -666,6 +666,7 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 391
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -1231,6 +1232,8 @@ object principal1: Tprincipal1
     Align = alRight
     TabOrder = 1
     Visible = False
+    ExplicitLeft = 342
+    ExplicitHeight = 148
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1872,6 +1875,8 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 190
+    ExplicitWidth = 391
     DesignSize = (
       397
       19)
@@ -2453,6 +2458,10 @@ object principal1: Tprincipal1
             end
             object Xevious1: TMenuItem
               Caption = 'Xevious'
+              OnClick = CambiarMaquina
+            end
+            object SuperXevious1: TMenuItem
+              Caption = 'Super Xevious'
               OnClick = CambiarMaquina
             end
             object Bosconian1: TMenuItem
@@ -3063,6 +3072,14 @@ object principal1: Tprincipal1
               Caption = 'Motos'
               OnClick = CambiarMaquina
             end
+            object Grobda1: TMenuItem
+              Caption = 'Grobda'
+              OnClick = CambiarMaquina
+            end
+            object PacnPal1: TMenuItem
+              Caption = 'Pac && Pal'
+              OnClick = CambiarMaquina
+            end
           end
           object Xain1: TMenuItem
             Caption = 'Xain'#39'd Sleena'
@@ -3226,6 +3243,11 @@ object principal1: Tprincipal1
           end
           object SpeedRumbler1: TMenuItem
             Caption = 'The Speed Rumbler'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object Gaplus1: TMenuItem
+            Caption = 'Gaplus'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end

@@ -203,7 +203,7 @@ case num of
   end;
 end;
 //rom
-namcoio_50xx_init:=roms_load(namco_50xx[num].mb88.get_rom_addr,namco_50xx_rom);
+namcoio_50xx_init:=roms_load(namco_50xx[num].mb88.get_rom_addr,namco_50xx_rom,true,zip_name);
 end;
 
 procedure namco_50xx_close(num:byte);
@@ -435,7 +435,7 @@ namco_53xx.frame:=namco_53xx.mb88.tframes;
 //namco 53XX clock 1536000*0.000021=32.256
 namco_53xx.timer:=timers.init(namco_53xx.mb88.numero_cpu,32.256,namcoio_53xx_irq_clear,nil,false);
 //rom
-namcoio_53xx_init:=roms_load(namco_53xx.mb88.get_rom_addr,namco_53xx_rom);
+namcoio_53xx_init:=roms_load(namco_53xx.mb88.get_rom_addr,namco_53xx_rom,true,zip_name);
 end;
 
 procedure namcoio_53xx_reset;
@@ -510,7 +510,7 @@ namco_54xx.frame:=namco_54xx.mb88.tframes;
 //namco 53XX clock 1536000*0.000021=32.256
 namco_54xx.timer:=timers.init(namco_54xx.mb88.numero_cpu,32.256,namcoio_54xx_irq_clear,nil,false);
 //rom
-namcoio_54xx_init:=roms_load(namco_54xx.mb88.get_rom_addr,namco_54xx_rom);
+namcoio_54xx_init:=roms_load(namco_54xx.mb88.get_rom_addr,namco_54xx_rom,true,zip_name);
 end;
 
 procedure namco_54xx_close;
