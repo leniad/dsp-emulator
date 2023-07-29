@@ -1,7 +1,6 @@
 <h1>DSP Emulator - How to compile</h1><br>
 This is a small 'how to' for compiling DSP emulator.<br><br>
-<b>1-. First step - Choose compiler IDE</b>
-<hr>
+<b>1-. First step - Choose compiler IDE</b><hr>
 You can choose two ways to compile DSP emulator<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- RAD Studio IDE: For Windows only<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Lazarus IDE: For Windows, Linux, MacOS and others<br>
@@ -16,7 +15,7 @@ After register/download and install, download the emulator source code, and then
 &nbsp;&nbsp;&nbsp;Menu File --> Open Project --> go to folder 'src\delphi' --> select 'dsp'<br>
 <img src="main_project.jpg" width="25%" height="25%"><br>
 Now you can open units, forms or compile the emulator. You can also change between 32/64 bits for final exe compilation.<br><br>
-<b>2-. Lazarus IDE</b><hr>
+<b>3-. Lazarus IDE</b><hr>
 With Lazarus IDE you can compile DSP Emulator for many platforms, I've tested Windows, Linux, MacOS and Raspberry.<br>
 You can download it from [here](https://www.lazarus-ide.org/).<br>
 After download and install (no registration needed), download DSP emulator source code, and open the project.<br>
