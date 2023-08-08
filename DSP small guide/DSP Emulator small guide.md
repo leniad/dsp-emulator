@@ -139,6 +139,10 @@ Commodore and Oric, can only open tapes at this moment, you can go to the 'tape 
 
 <img src="dsp_spectrum.jpg" width="50%" height="50%">
 
+<img src="dsp_spectrum_tape.jpg" width="50%" height="50%">
+
+<img src="dsp_spectrum_opt.jpg" width="50%" height="50%">
+
 
 **2.2-. Amstrad CPC options**
 
@@ -155,7 +159,7 @@ You can select:
 - Expansion RAM
 	+ Disabled
 	+ 512Kb expansion
-	+ 4Gb expansion (not working)
+	+ 4Mb expansion (not working)
 - LensLok --> Enable/disable virtual window for LensLok copy-protection
 - Monitor Options
 	+ Select Color/Green monitor
