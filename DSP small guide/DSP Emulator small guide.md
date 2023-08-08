@@ -1,9 +1,9 @@
 <h1>DSP Emulator - Small guide</h1>
 
 This is a small guide for use DSP Emulator.<br>
-The emulator is designed to be easy to use, there are no complicated options, everything is designed to be "plug and play".<br>
+The emulator is designed to be easy to use, there are no complicated options, everything is designed to be "plug and play" or the default options work for almost all games.<br>
 Just a couple of definitions:
-- ROMs --> It means Read-Only-Memory, it's just a program data, video data, graphics data, etc. recorded in a single chip. Thanks to clever people, this data is extracted (some times it's very hard!) and saved into a file. If you put all files from the game into a zip, you have a 'set', and that's what you need to play a game.
+- ROMs --> It means Read-Only-Memory, it's just a program data, video data, graphics data, etc. recorded in a single chip. Thanks to clever people, this data is extracted (some times it's very hard!) and saved into a file. If you put all files from the game into a zip, you have a 'set', and that's what you need to play a game, console game or computer.
 - Samples --> Many older arcade games use analog devices to play sounds and music, this is very hard to emulate, so we use 'samples' (Mario Bros, Donkey Kong, Galaxian...). A sample it's a small piece of recorded sound directly from the arcade, and played at the right moment, it looks like the original sound. Like ROMs, you only need to put them all together in a single zip.
 
 <b>1-. Main menu</b>
@@ -23,8 +23,8 @@ The main menu, where you can select the main options:
 - Options
   - Sound --> Enable/Disable sound
   - Video --> Choose video settings
-  - Configuration --> Open main config menu
-- Machine --> Choose the system to emulate directly, divided in '8bits computers', 'Arcade', 'Consoles' and 'Game & Watch' (not the list menu)
+  - Configuration --> Open main config menu, see section 1.1 for more info
+- Machine --> Change the emulated system directly (not the list menu)
 - Action
   - Run --> Resume selected system
   - Reset --> Reset selected system
@@ -36,8 +36,8 @@ The buttons are short-cuts to some options:
 - Slow speed --> Select slow (50%), very slow (25%) or ultra slow speed (12%) of the selected system
 - Fastest speed --> Go as fast as your computer can, press F2 also
 - Take picture --> Take a picture of the actual system
-- Config menu --> Open main configure options menu
-- Open list menu --> Open available emulated systems (arcade, consoles, etc) in a list format
+- Config menu --> Open main configuration options menu, see section 1.1 for more info
+- Open list menu --> Open available emulated systems (arcade, consoles, etc) in a list format, see section 1.2 for more info.
 
 On the status bar, you can see:
 - FPS --> Frames per second, the quantity of pictures drawn every second
@@ -52,11 +52,11 @@ In this window you have five pages to configure some options of the emulator. Th
 
 <img src="dsp_config1.jpg" width="50%" height="50%">
 
-All the options here are the same that you can select in the main menu, except the last one
-- Run the last game at start-up --> If this option is selected, when DSP starts, it will run the last system it was running before it was closed
+All the options here are the same that you can select in the main menu, except the last one:
+- Run the last game at start-up --> If this option is selected, when DSP starts, it will run the last system it was running before it was closed, if not, the emulator will start with the list menu.
 - Show ROMs errors --> If set, when DSP detects a bad ROM file will show a window with the bad file
 - Center main screen --> When a new system is starting, the main window will go to the center of the screen
-- CONSOLES: Show game loading menu at start-up --> When a console is selected if the check it's selected, the open game window it's opened, otherwise, you need to press the button 'open game' on the right menu
+- CONSOLES: Show game loading menu at start-up --> When a console is started and this check it's selected, the open game window it's opened, otherwise, you need to press the button 'open game' on the right menu (no game select window will be opened)
 
 **1.1.2 Directory**
 
@@ -92,7 +92,7 @@ It's useful to check missing ROM files, missing samples, broken files, etc.
 <img src="dsp_config5.jpg" width="50%" height="50%">
 
 Here you can enable/disable autofire.<br>
-Instead of pressing insanely the fire button, you can select autofire and the emulator will make the magic, emulating the repetitive pressing of the button.<br>
+Instead of pressing insanely the fire button, you can select autofire and the emulator will do the magic, emulating the repetitive pressing of the button.<br>
 You can enable/disable any button of both players, and applies for any type of control, keyboard or joystick.
 
 
@@ -116,7 +116,7 @@ You can use the sort options to filter the list:
 	+ Fight
 	+ Drive
 
-You can see the availability of the systems ROMs, there are three options
+In the column 'ROM found', you can see the availability of the ROMs sets, there are three options:
 - Yes --> The ROMs are available, you can play the system
 - No --> The ROMs are not available, you can't play
 - N/A --> The system don't use ROMs, you can play it, but you need extra files for playing, for example a console cartridge.
@@ -133,15 +133,15 @@ There are four computer systems that DSP can emulate:
 - Commodore 64
 - Oric series
 
-Commodore and Oric, can only open tapes at this moment, you can go to the 'tape menu' for more info about tape window.
+Commodore 64 and Oric, can only open tapes at this moment, you can go to the 'tape menu' for more info about virtual tape, see section 2.3.
 
 **2.1-. Spectrum options**
 
-There are six models supported, all support tape and one have disk support.
+There are six models emulated, all support tape and one have disk drive (section 2.4).
 
 <img src="dsp_spectrum.jpg" width="50%" height="50%">
 
-The spectrum have a special tape menu, which have a preview of the tape or the snapshot.
+The spectrum have a special tape menu, which have a preview of the tape/snapshot.
 
 <img src="dsp_spectrum_tape.jpg" width="50%" height="50%">
 
@@ -155,7 +155,7 @@ Those are the options in config menu:
 	+ Disabled: no border emulation (fastest)
 	+ Normal: Emulated line by line (normal speed)
 	+ Full: Emulated pixel by pixel (slow speed)
-- Joystick --> Select the joystick model/type
+- Joystick --> Select the joystick model
 - Mouse --> Select mouse type
 - ULA+ --> Enable/disable ULA+ extended colors
 - Spectrum 128K audio --> Spectrum models 128K, +2, +2A and +3 have a special audio chip, this option defines the output
@@ -166,7 +166,7 @@ Those are the options in config menu:
 
 **2.2-. Amstrad CPC options**
 
-There are three models supported, all support tape and two of them have disk.
+There are three models emulated, all of them support tape (section 2.3) and two of them have disk support (section 2.4).
 
 <img src="dsp_cpc.jpg" width="50%" height="50%">
 
@@ -175,26 +175,27 @@ Those are the config options
 <img src="dsp_cpc_opt.jpg" width="50%" height="50%">
 
 You can select:
-- CPC ROM --> Select the ROM, based on the country location or a specific one
+- CPC ROM --> Select the ROM, based on the country location or select a specific one
 - Expansion RAM
-	+ Disabled
+	+ Disabled (no expansion)
 	+ 512Kb expansion
 	+ 4Mb expansion (not working)
 - LensLok --> Enable/disable virtual window for LensLok copy-protection
 - Monitor Options
 	+ Select Color/Green monitor
-	+ Brightness
-- ROMs slots --> add more ROMs in slots 1 to 6
+	+ Select brightness
+- ROMs slots --> add more ROMs into slots 1 to 6
 
 **2.3-. Tape window**
 
 All the computers emulated support tape loading, and all use the same window for control virtual tape.<br>
-When you open a tape file, the window will appear.
+When you open a tape file, a window for virtual tape will appear.
 
 <img src="dsp_tape.jpg" width="50%" height="50%">
 
-You can play/pause tape, open a new one and close virtual tape window.<br>
-In this window, use the mouse for select the tape block you want, and the emulator will start playing.<br>
+You can play/pause a tape, open a new tape file or close virtual tape window.<br>
+In this window, use the mouse for select the tape block you want, and the emulator will start playing from there.<br>
+When tape come to the end, will stop and rewind to the first block.<br>
 Some computers have auto-start, Spectrum, Amstrad CPC and Commodore 64 will start/stop the tape automatically.
 
 **2.4-. Disk window**
@@ -213,7 +214,9 @@ After select the arcade game you want to play (from 'Machine' menu or list windo
 
 <img src="dsp_arcade.jpg" width="50%" height="50%">
 
-The options you can change are 'DIPs switches', they are like configure options for arcade games. Every arcade have their own DIPs, expand the DIP you want to change and select the new one.
+The options you can change are 'DIPs switches', they are like configure options for arcade games.<br>
+Every arcade have their own DIPs.<br>
+To change, expand the DIP you want and select the new value.
 
 <img src="dsp_dip.jpg" width="50%" height="50%">
 
@@ -226,8 +229,8 @@ There are eight systems available, some of them have some special options.
 **4.1-. NES**
 
 This system don't have options. Just press button to open a cartridge game, and play.<br>
-The only trouble you can find are 'mappers', maybe the game you try to load have a mapper not supported (an error is show) or the mapper is incomplete.<br>
-Please read the DSP documentation for supported mappers.
+The only trouble you can find are cartridge 'mappers', maybe the game you try to load have a mapper not supported (an error is show) or the mapper is incomplete.<br>
+Please read the DSP documentation for supported mappers (there are many of them).
 
 <img src="dsp_nes.jpg" width="50%" height="50%">
 
@@ -281,4 +284,6 @@ There are no options, just press 'start P1' for Game-A or 'start-P2' for Game-B.
 <img src="dsp_wg_1.jpg" width="25%" height="25%">
 <img src="dsp_wg_2.jpg" width="25%" height="25%">
 
-If you have any question or suggestion, please contact me!
+If you have any question or suggestion, please contact me at leniad2[@]hotmail.com!
+
+v1.0

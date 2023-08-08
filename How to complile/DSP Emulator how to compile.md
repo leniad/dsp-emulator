@@ -27,4 +27,6 @@ After download and install (no registration needed), download DSP emulator sourc
 
 Now you can open units, forms or compile the emulator.<br>
 If you want compile for another OS, you need to download the cross-platform complements.<br><br>
-If you have any question or suggestion, please contact me!
+If you have any question or suggestion, please contact me leniad2[@]hotmail.com!
+
+v1.0
