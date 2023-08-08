@@ -135,7 +135,7 @@ There are four computer systems that DSP can emulate:
 
 Commodore 64 and Oric, can only play tapes at this moment, for more info about virtual tape see section 2.3.
 
-**2.1-. Spectrum options**
+**2.1-. Spectrum series**
 
 There are six models emulated, all support tape and one have disk drive (section 2.4).
 
@@ -162,9 +162,9 @@ Those are the options in config menu:
 - Speaker oversample --> Enable/disable enhancing the quality of the Spectrum speaker
 - Turbo Sound --> Enable/disable turbo sound hardware
 - Tape audio --> Enable/disable listening sounds from the virtual tape
-- ROM --> Select a different ROM for the Spectrum model emulating
+- ROM --> Select a different ROM for the Spectrum model emulated
 
-**2.2-. Amstrad CPC options**
+**2.2-. Amstrad CPC series**
 
 There are three models emulated, all of them support tape (section 2.3) and two of them have disk support (section 2.4).
 
