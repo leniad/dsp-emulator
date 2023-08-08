@@ -148,7 +148,7 @@ Commodore and Oric, can only open tapes at this moment, you can go to the 'tape 
 **2.3-. Tape window**
 
 All the computers emulated support tape loading, and all use the same window for control virtual tape.<br>
-When you open a tape, the tape window will be show.
+When you open a tape file, the window will appear.
 
 <img src="dsp_tape.jpg" width="50%" height="50%">
 
@@ -179,8 +179,14 @@ The options you can change are 'DIPs switches', the are like configure options f
 <b>4-. Console</b>
 
 ------
+The emulated consoles are easy to play, just select the system, open a cartridge and play.<br>
+There are eight systems available, some of them have some special options.
 
 **4.1-. NES**
+
+This system don't have options. Just press button to open a cartridge game, and play.<br>
+The only trouble you can find are 'mappers', maybe the game you try to load have a mapper not supported (an error is show) or the mapper is incomplete.<br>
+Please read the DSP documentation for supported mappers.
 
 <img src="dsp_nes.jpg" width="50%" height="50%">
 
@@ -188,11 +194,23 @@ The options you can change are 'DIPs switches', the are like configure options f
 
 <img src="dsp_sms.jpg" width="50%" height="50%">
 
+The options for this system are very simple.<br>
+You only need to choose the country (BIOS) of the console, Japan, Europe or US.<br>
+Some games need a specific BIOS to play.
+
+<img src="dsp_sms_bios.jpg" width="25%" height="25%">
+
 **4.3-. Gameboy/Gameboy Color**
 
 <img src="dsp_gb.jpg" width="50%" height="50%">
 
+This system have some small options. You only need to choose between two palette colors.
+
+<img src="dsp_gb_opt.jpg" width="25%" height="25%">
+
 **4.4-. ColecoVision**
+
+This system have support for save snapshots.
 
 <img src="dsp_coleco.jpg" width="50%" height="50%">
 
