@@ -1,7 +1,5 @@
 <h1>DSP Emulator - How to compile</h1>
-This is a small 'how to' for compiling DSP emulator
-
-
+This is a small 'how to' for compiling DSP emulator<br><br>
 <b>1-. First step - Choose IDE compiler</b>
 
 ---
