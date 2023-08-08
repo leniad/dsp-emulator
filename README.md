@@ -1,4 +1,9 @@
 ﻿# DSP Emulator status #
+<b>08/08/23 - Updated docs.<br>
+<pre>
+-Updated 'How to compile'
+-Added a new section 'DSP small guide', a guide for using the emulator
+</pre><br>
 <b>29/07/23 - DSP Emulator 0.22WIP4. Updated Windows binary and source.<br>
 <pre>
 -General
