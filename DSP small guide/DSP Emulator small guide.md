@@ -223,7 +223,7 @@ To change, expand the DIP you want and select the new value.
 <b>4-. Console</b>
 
 ------
-The emulated consoles are easy to play, just select the system, open a cartridge and play.<br>
+The emulated consoles are easy to use, just select the system, open a cartridge (game) and play.<br>
 There are eight systems available, some of them have some special options.
 
 **4.1-. NES**
@@ -238,7 +238,7 @@ Please read the DSP documentation for supported mappers (there are many of them)
 
 <img src="dsp_sms.jpg" width="50%" height="50%">
 
-The options for this system are very simple.<br>
+The options for this system are very simple, just one.<br>
 You only need to choose the country (BIOS) of the console, Japan, Europe or US.<br>
 Some games need a specific BIOS to play, many others play with all BIOS.
 
@@ -248,7 +248,7 @@ Some games need a specific BIOS to play, many others play with all BIOS.
 
 <img src="dsp_gb.jpg" width="50%" height="50%">
 
-This system have some small options. You only need to choose between two palette colors.
+This system have only one option, you can choose between two palette colors, for GameBoy only.
 
 <img src="dsp_gb_opt.jpg" width="25%" height="25%">
 
