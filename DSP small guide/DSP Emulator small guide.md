@@ -1,7 +1,7 @@
 <h1>DSP Emulator - Small guide</h1>
 
 This is a small guide for use DSP Emulator.<br>
-The emulator is designed to be easy to use, there are no complicated options, everything is designed to be "plug and play" or the default options work for almost all games.<br>
+The emulator is designed to be easy to use, there are no complicated options, everything is designed to be "plug and play" and the default options work for almost all games.<br>
 Just a couple of definitions:
 - ROMs --> It means Read-Only-Memory, it's just a program data, video data, graphics data, etc. recorded in a single chip. Thanks to clever people, this data is extracted (some times it's very hard!) and saved into a file. If you put all files from the game into a zip, you have a 'set', and that's what you need to play a game, console game or computer.
 - Samples --> Many older arcade games use analog devices to play sounds and music, this is very hard to emulate, so we use 'samples' (Mario Bros, Donkey Kong, Galaxian...). A sample it's a small piece of recorded sound directly from the arcade, and played at the right moment, it looks like the original sound. Like ROMs, you only need to put them all together in a single zip.
