@@ -137,7 +137,11 @@ Commodore and Oric, can only open tapes at this moment, you can go to the 'tape 
 
 **2.1-. Spectrum options**
 
+There are six models supported, all support tape and one have disk.
+
 <img src="dsp_spectrum.jpg" width="50%" height="50%">
+
+The spectrum have a special tape menu, which have a preview of the tape or the snapshot.
 
 <img src="dsp_spectrum_tape.jpg" width="50%" height="50%">
 
