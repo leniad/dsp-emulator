@@ -142,8 +142,25 @@ Commodore and Oric, can only open tapes at this moment, you can go to the 'tape 
 
 **2.2-. Amstrad CPC options**
 
+There are three models supported, all support tape and two of them have disk.
+
 <img src="dsp_cpc.jpg" width="50%" height="50%">
 
+Those are the config options
+
+<img src="dsp_cpc_opt.jpg" width="50%" height="50%">
+
+You can select:
+- CPC ROM --> Select the ROM, based on the country location or a specific one
+- Expansion RAM
+	+ Disabled
+	+ 512Kb expansion
+	+ 4Gb expansion (not working)
+- LensLok --> Enable/disable virtual window for LensLok copy-protection
+- Monitor Options
+	+ Select Color/Green monitor
+	+ Brightness
+- ROMs slots --> add more ROMs in slots 1 to 6
 
 **2.3-. Tape window**
 
@@ -163,16 +180,16 @@ When you choose a system that supports disk, a new window will open.
 <img src="dsp_disk.jpg" width="50%" height="50%">
 
 Here you can browse your drive, then select a disk image.<br>
-If the disk image is a zip file, you can see the content of the file, and if there is more than a virtual disk, you can select the one you need.
+If the disk image is a zip file, you can see the content of the file, and if there is more than a virtual disk file, you can select the one you need.
 
 <b>3-. Arcade</b>
 
 ------
-After select the arcade game you want to play (from 'Machine' menu or list window), you can play with the keyboard/joystick selected and configured in the main options.
+After select the arcade game you want to play (from 'Machine' menu or list window), you can play with the keyboard/joystick selected and configured in the main options (insert coin, start P1/P2, autofire...).
 
 <img src="dsp_arcade.jpg" width="50%" height="50%">
 
-The options you can change are 'DIPs switches', the are like configure options for arcade games. Every arcade have their own DIPs, expand the DIP you want to change and select the new one.
+The options you can change are 'DIPs switches', they are like configure options for arcade games. Every arcade have their own DIPs, expand the DIP you want to change and select the new one.
 
 <img src="dsp_dip.jpg" width="50%" height="50%">
 
@@ -196,7 +213,7 @@ Please read the DSP documentation for supported mappers.
 
 The options for this system are very simple.<br>
 You only need to choose the country (BIOS) of the console, Japan, Europe or US.<br>
-Some games need a specific BIOS to play.
+Some games need a specific BIOS to play, many others play with all BIOS.
 
 <img src="dsp_sms_bios.jpg" width="25%" height="25%">
 
@@ -214,9 +231,30 @@ This system have support for save snapshots.
 
 <img src="dsp_coleco.jpg" width="50%" height="50%">
 
+**4.5-. Super Cassette Vision**
+
+<img src="dsp_scv.jpg" width="50%" height="50%">
+
+**4.6-. SG-1000**
+
+<img src="dsp_sg.jpg" width="50%" height="50%">
+
+**4.7-. CHIP-8**
+
+<img src="dsp_chip8.jpg" width="50%" height="50%">
+
+**4.8-. Sega Game Gear**
+
+<img src="dsp_gg.jpg" width="50%" height="50%">
+
+
 <b>5-. Game & Watch</b>
 
 ------
+There are three supported games, one of them is WIP (not working).<br>
+There are no options, just press 'start P1' for Game-A or 'start-P2' for Game-B.
 
+<img src="dsp_wg_1.jpg" width="25%" height="25%">
+<img src="dsp_wg_2.jpg" width="25%" height="25%">
 
 If you have any question or suggestion, please contact me!
