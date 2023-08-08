@@ -11,7 +11,9 @@ You can choose two ways to compile DSP emulator
 Keep in mind that the final version works without problems for the different compilers, but the WIP version the compilation may fail in Lazarus IDE, but works fine in RAD Studio.<br>
 There is no external dependencies for compiling, you don't need to install any external library, just the IDE you like.<br>
 The compilation it's very fast... No more than 10 seconds, with more than 210.000 code lines...<br>
-Remember, if you want to run the emulator after compilation, you need the SDL2 library if you use RAD Studio, and for Lazarus IDE you need SDL2 and SDL Mixer v2 and of course the ROMs for the emulated driver.
+Remember, if you want to run the emulator after compilation, you need the SDL2 library if you use RAD Studio, and for Lazarus IDE you need SDL2 and SDL Mixer v2 and of course the ROMs for the emulated driver.<br>
+The source stable version, is located on 'Release XXX' folder.<br>
+The WIP source version, is located on 'src' folder.<br>
 
 <b>2-. RAD Studio IDE</b>
 
