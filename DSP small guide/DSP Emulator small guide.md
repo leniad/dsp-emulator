@@ -56,7 +56,7 @@ All the options here are the same that you can select in the main menu, except t
 - Run the last game at start-up --> If this option is selected, when DSP starts, it will run the last system it was running before it was closed, if not, the emulator will start with the list menu.
 - Show ROMs errors --> If set, when DSP detects a bad ROM file will show a window with the bad file
 - Center main screen --> When a new system is starting, the main window will go to the center of the screen
-- CONSOLES: Show game loading menu at start-up --> When a console is started and this check it's selected, the open game window it's opened, otherwise, you need to press the button 'open game' on the right menu (no game select window will be opened)
+- CONSOLES: Show game loading menu at start-up --> When a console is started and this check it's selected, the 'open game' window it's show, otherwise, you need to press the button 'open game' on the right menu (no game select window will be opened).
 
 **1.1.2 Directory**
 
@@ -133,7 +133,7 @@ There are four computer systems that DSP can emulate:
 - Commodore 64
 - Oric series
 
-Commodore 64 and Oric, can only open tapes at this moment, you can go to the 'tape menu' for more info about virtual tape, see section 2.3.
+Commodore 64 and Oric, can only play tapes at this moment, for more info about virtual tape see section 2.3.
 
 **2.1-. Spectrum options**
 
