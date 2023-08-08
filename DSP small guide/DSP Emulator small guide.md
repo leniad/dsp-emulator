@@ -17,7 +17,7 @@ Here you can set the main options, select the arcade game, console, computer to 
 The main menu, where you can select the main options:
 - File
   - Language --> You can select DSP language from 7 available
-  - ROMs List --> Open available emulated systems menu (arcade, consoles, etc) in a list format
+  - ROMs List --> Open available emulated systems menu (arcade, consoles, etc) in a list format, see section 1.2 for more info
   - Exit --> Close emulator
   - About --> Open 'about' emulator menu
 - Options
