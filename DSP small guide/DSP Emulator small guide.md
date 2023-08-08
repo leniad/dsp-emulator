@@ -137,7 +137,7 @@ Commodore and Oric, can only open tapes at this moment, you can go to the 'tape 
 
 **2.1-. Spectrum options**
 
-There are six models supported, all support tape and one have disk.
+There are six models supported, all support tape and one have disk support.
 
 <img src="dsp_spectrum.jpg" width="50%" height="50%">
 
@@ -145,8 +145,24 @@ The spectrum have a special tape menu, which have a preview of the tape or the s
 
 <img src="dsp_spectrum_tape.jpg" width="50%" height="50%">
 
+Those are the options in config menu:
+
 <img src="dsp_spectrum_opt.jpg" width="50%" height="50%">
 
+- Spectrum 48K issue --> There are variations in the original Spectrum 48K, some games need older issue 2, and many are compatible with the issue 3
+- LensLok --> Enable/disable LensLok copy-protection
+- Border emulation --> Border emulation is time consuming, to avoid this there are three options:
+	+ Disabled: no border emulation (fastest)
+	+ Normal: Emulated line by line (normal speed)
+	+ Full: Emulated pixel by pixel (slow speed)
+- Joystick --> Select the joystick model/type
+- Mouse --> Select mouse type
+- ULA+ --> Enable/disable ULA+ extended colors
+- Spectrum 128K audio --> Spectrum models 128K, +2, +2A and +3 have a special audio chip, this option defines the output
+- Speaker oversample --> Enable/disable enhancing the quality of the Spectrum speaker
+- Turbo Sound --> Enable/disable turbo sound hardware
+- Tape audio --> Enable/disable listening sounds from the virtual tape
+- ROM --> Select a different ROM for the Spectrum model emulating
 
 **2.2-. Amstrad CPC options**
 
