@@ -172,7 +172,7 @@ After select the arcade game you want to play (from 'Machine' menu or list windo
 
 <img src="dsp_arcade.jpg" width="50%" height="50%">
 
-The only options you need to change are 'DIPs switches', the are like configure options for arcade games. Every arcade have their own DIPs, expand the DIP you want to change and select the new one.
+The options you can change are 'DIPs switches', the are like configure options for arcade games. Every arcade have their own DIPs, expand the DIP you want to change and select the new one.
 
 <img src="dsp_dip.jpg" width="50%" height="50%">
 
