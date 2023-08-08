@@ -2,13 +2,14 @@
 
 This is a small guide for use DSP Emulator.<br>
 The emulator is designed to be easy to use, there are no complicated options, everything is designed to be "plug and play".<br>
-Just a couple of definitions:<br>
--ROMs --> It means Read-Only-Memory, it's just a program data, video data, graphics data, etc. recorded in a single chip. Thanks to clever people, this data is extracted (some times it's very hard!) and saved into a file. If you put all files from the game into a zip, you have a 'set', and that's what you need to play a game.<br>
--Samples --> Many older arcade games use analog devices to play sounds and music, this is very hard to emulate, so we use 'samples' (Mario Bros, Donkey Kong, Galaxian...). A sample it's a small piece of recorded sound directly from the arcade, and played at the right moment, it looks like the original sound. Like ROMs, you only need to put them all together in a single zip.
+Just a couple of definitions:
+- ROMs --> It means Read-Only-Memory, it's just a program data, video data, graphics data, etc. recorded in a single chip. Thanks to clever people, this data is extracted (some times it's very hard!) and saved into a file. If you put all files from the game into a zip, you have a 'set', and that's what you need to play a game.
+- Samples --> Many older arcade games use analog devices to play sounds and music, this is very hard to emulate, so we use 'samples' (Mario Bros, Donkey Kong, Galaxian...). A sample it's a small piece of recorded sound directly from the arcade, and played at the right moment, it looks like the original sound. Like ROMs, you only need to put them all together in a single zip.
 
 <b>1-. Main menu</b>
 
 ------
+
 Here you can set the main options, select the arcade game, console, computer to play, redefine controls, video settings...
 
 <img src="dsp_main.jpg" width="50%" height="50%">
@@ -61,7 +62,7 @@ All the options here are the same that you can select in the main menu, except t
 
 <img src="dsp_config2.jpg" width="50%" height="50%">
 
-Here you can select the folder where the need files or the output files will reside.
+Here you can select the folder where the need files or the output files will reside.<br>
 Press the button with three dots '...' for select the new folder.<br>
 On the Arcade option, you can add extra folders, splitted with semicolons, for example 'c:\folder1;d:\roms\folder2'
 
@@ -69,7 +70,7 @@ On the Arcade option, you can add extra folders, splitted with semicolons, for e
 
 <img src="dsp_config3.jpg" width="50%" height="50%">
 
-Here you can select the controls for all systems. If you have joystick(s) connected, you can select the device from the joystick list.
+Here you can select the controls for all systems. If you have joystick(s) connected, you can select the device from the joystick list.<br>
 If keyboard is selected and you want to change a control, just press the button and a new window will be show. Select the key from the virtual keyboard.
 
 <img src="dsp_config_key.jpg" width="50%" height="50%">
@@ -92,7 +93,7 @@ It's useful to check missing ROM files, missing samples, broken files, etc.
 
 Here you can enable/disable autofire.<br>
 Instead of pressing insanely the fire button, you can select autofire and the emulator will make the magic, emulating the repetitive pressing of the button.<br>
-You can enable/disable each button of both players, and applies for any type of control, keyboard or joystick.
+You can enable/disable any button of both players, and applies for any type of control, keyboard or joystick.
 
 
 <b>1.2-. List menu</b>
@@ -107,7 +108,7 @@ You can use the sort options to filter the list:
 - Computers --> Show only computers
 - Consoles --> Show only consoles
 - Game & Watch --> Show W&G games
-- Arcade --> Show arcade games, you can also filter for arcade type
+- Arcade --> Show arcade games, you can also filter for arcade type:
 	+ Sport
 	+ Run & Gun
 	+ Shot
@@ -118,9 +119,9 @@ You can use the sort options to filter the list:
 You can see the availability of the systems ROMs, there are three options
 - Yes --> The ROMs are available, you can play the system
 - No --> The ROMs are not available, you can't play
-- N/A --> The system don't use ROMs, you can play it
+- N/A --> The system don't use ROMs, you can play it, but you need extra files for playing, for example a console cartridge.
 
-On the right side you can see a small info of the selected system and a preview picture
+On the right side you can see a small info of the selected system and a preview picture.
 
 <b>2-. Computers</b>
 
@@ -132,23 +133,37 @@ There are four computer systems that DSP can emulate:
 - Commodore 64
 - Oric series
 
-Commodore and Oric, can only open tapes at this moment, you can go to the 'tape menu' for more info.
+Commodore and Oric, can only open tapes at this moment, you can go to the 'tape menu' for more info about tape window.
 
-<b>2.1-. Spectrum options</b>
+**2.1-. Spectrum options**
 
-------
 <img src="dsp_spectrum.jpg" width="50%" height="50%">
 
 
-<b>2.2-. Amstrad CPC options</b>
+**2.2-. Amstrad CPC options**
 
-------
 <img src="dsp_cpc.jpg" width="50%" height="50%">
 
 
-<b>2.3-. Tape menu</b>
+**2.3-. Tape window**
 
-------
+All the computers emulated support tape loading, and all use the same window for control virtual tape.<br>
+When you open a tape, the tape window will be show.
+
+<img src="dsp_tape.jpg" width="50%" height="50%">
+
+You can play/pause tape, open a new one and close virtual tape window.<br>
+In this window, use the mouse for select the tape block you want, and the emulator will start playing.<br>
+Some computers have auto-start, Spectrum, Amstrad CPC and Commodore 64 will start/stop the tape automatically.
+
+**2.4-. Disk window**
+
+When you choose a system that supports disk, a new window will open.
+
+<img src="dsp_disk.jpg" width="50%" height="50%">
+
+Here you can browse your drive, then select a disk image.<br>
+If the disk image is a zip file, you can see the content of the file, and if there is more than a virtual disk, you can select the one you need.
 
 <b>3-. Arcade</b>
 
@@ -165,38 +180,21 @@ The only options you need to change are 'DIPs switches', the are like configure 
 
 ------
 
-
-<b>4.1-. NES</b>
-
-------
+**4.1-. NES**
 
 <img src="dsp_nes.jpg" width="50%" height="50%">
 
-
-
-<b>4.2-. Sega Master System</b>
-
-------
+**4.2-. Sega Master System**
 
 <img src="dsp_sms.jpg" width="50%" height="50%">
 
-
-
-<b>4.3-. Gameboy/Gameboy Color</b>
-
-------
+**4.3-. Gameboy/Gameboy Color**
 
 <img src="dsp_gb.jpg" width="50%" height="50%">
 
-
-
-<b>4.4-. ColecoVision</b>
-
-------
+**4.4-. ColecoVision**
 
 <img src="dsp_coleco.jpg" width="50%" height="50%">
-
-
 
 <b>5-. Game & Watch</b>
 
