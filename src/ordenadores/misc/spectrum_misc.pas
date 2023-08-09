@@ -133,6 +133,7 @@ procedure reset_misc;
 procedure spectrum_despues_instruccion(estados_t:byte);
 procedure evalua_gunstick;
 procedure spec_a_pantalla(posicion_memoria:pbyte;imagen1:Tbitmap);
+procedure spectrum_reset_video;
 //AMX Mouse
 procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
@@ -166,8 +167,8 @@ end;
 
 procedure spectrum_reset_video;
 begin
-fillchar(var_spectrum.buffer_video[0],6144,1);
-fillchar(borde.buffer[0],78000,$80);
+fillchar(var_spectrum.buffer_video,6144,1);
+fillchar(borde.buffer,78000,$80);
 end;
 
 procedure borde_normal(linea:word);

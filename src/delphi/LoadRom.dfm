@@ -12,6 +12,7 @@ object FLoadRom: TFLoadRom
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   Position = poDesigned
   OnKeyUp = FormKeyUp
   OnShow = FormShow

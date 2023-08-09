@@ -12,6 +12,7 @@ object joy_calibration: Tjoy_calibration
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OnKeyUp = FormKeyUp
   OnShow = FormShow
   TextHeight = 13
   object Label1: TLabel

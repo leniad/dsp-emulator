@@ -96,6 +96,7 @@ case key of
       Close;
      end;
   38,40:show_picture;
+  27:floadrom.BitBtn1Click(nil);
 end;
 end;
 

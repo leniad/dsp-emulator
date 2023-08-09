@@ -1,12 +1,9 @@
 unit cargar_dsk;
-
 interface
-
 uses
   Windows, SysUtils, Variants, Classes,Forms,Vcl.Controls,Dialogs, Grids,
   StdCtrls, FileCtrl,upd765,main_engine,lenguaje,misc_functions,
   file_engine,disk_file_format,ipf_disk,d64_file_format;
-
 type
   Tload_dsk = class(TForm)
     Button1: TButton;
@@ -22,25 +19,21 @@ type
     procedure Button1Click(Sender: TObject);
     procedure FileListBox1DblClick(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
-    procedure FileListBox1KeyUp(Sender:TObject;var Key:word;Shift: TShiftState);
     procedure DirectoryListBox1Change(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
     { Public declarations }
   end;
-
 var
   load_dsk:Tload_dsk;
   file_name,file_extension,end_file_name:string;
   datos_dsk:pbyte;
   file_size,ultima_posicion:integer;
-
 implementation
 uses principal;
-
 {$R *.dfm}
-
 procedure Tload_dsk.Button1Click(Sender: TObject);
 begin
 if datos_dsk<>nil then freemem(datos_dsk);
@@ -54,12 +47,10 @@ end;
 ultima_posicion:=filelistbox1.ItemIndex;
 load_dsk.close;
 end;
-
 procedure Tload_dsk.Button2Click(Sender: TObject);
 begin
 FileListBox1DblClick(self);
 end;
-
 procedure clear_all;
 var
   f:word;
@@ -74,12 +65,10 @@ for f:=1 to (load_dsk.stringgrid1.RowCount-1) do begin
 end;
 load_dsk.stringgrid1.RowCount:=2;
 end;
-
 procedure Tload_dsk.DirectoryListBox1Change(Sender: TObject);
 begin
 clear_all;
 end;
-
 procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
@@ -143,7 +132,6 @@ if ((file_extension='DSK') or (file_extension='IPF') or (file_extension='D64')) 
   end_file_name:=extractfilename(file_name);
 end;
 end;
-
 procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
   correcto:boolean;
@@ -175,7 +163,8 @@ freemem(datos_dsk);
 datos_dsk:=nil;
 end;
 
-procedure Tload_dsk.FileListBox1KeyUp(Sender:TObject;var Key:word;Shift: TShiftState);
+procedure Tload_dsk.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
 case key of
   13:FileListBox1DblClick(self);
@@ -228,5 +217,4 @@ file_extension:=extension_fichero(file_inside_zip);
 end_file_name:=file_inside_zip;
 FileListBox1DblClick(self);
 end;
-
 end.

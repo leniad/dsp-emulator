@@ -75,6 +75,7 @@ type
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure Button9Click(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure RadioButton10Change(Sender: TObject);
     procedure RadioButton9Change(Sender: TObject);
@@ -296,6 +297,15 @@ end;
 procedure Tconfigcpc.Button9Click(Sender: TObject);
 begin
   put_text_file(5);
+end;
+
+procedure Tconfigcpc.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+case key of
+    13:button13Click(nil);
+    27:button14click(nil);
+end;
 end;
 
 initialization

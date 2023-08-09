@@ -321,7 +321,7 @@ case direccion of
             stop_all_samples;
             start_sample(0);
         end;
-  $7e82:main_screen.flip_main_screen:=(valor and 1)=0;
+  $7d82:main_screen.flip_main_screen:=(valor and 1)=0;
   $7d83:sprite_bank:=$200*(valor and 1);
   $7d84:haz_nmi:=(valor=1);
   $7d85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
@@ -508,7 +508,6 @@ begin
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
- marcade.in2:=0;
  haz_nmi:=false;
  npaleta:=0;
  sprite_bank:=0;

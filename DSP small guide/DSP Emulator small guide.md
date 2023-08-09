@@ -63,8 +63,8 @@ All the options here are the same that you can select in the main menu, except t
 <img src="dsp_config2.jpg" width="50%" height="50%">
 
 Here you can select the folder where the need files or the output files will reside.<br>
-Press the button with three dots '...' for select the new folder.<br>
-On the Arcade option, you can add extra folders, splitted with semicolons, for example 'c:\folder1;d:\roms\folder2'
+Press the button with three dots '...' and select a new folder.<br>
+On the Arcade option, you can add extra folders, splitted by semicolons, for example 'c:\folder1;d:\roms\folder2'
 
 **1.1.3 Input**
 
@@ -99,7 +99,7 @@ You can enable/disable any button of both players, and applies for any type of c
 <b>1.2-. List menu</b>
 
 ------
-Here you can select from the list the arcade, computer, console or W&G you want to play.<br>
+Here you can select from the list the arcade, computer, console or G&W you want to play.<br>
 
 <img src="dsp_list.jpg" width="50%" height="50%">
 
@@ -107,7 +107,7 @@ You can use the sort options to filter the list:
 - All --> Show everything available
 - Computers --> Show only computers
 - Consoles --> Show only consoles
-- Game & Watch --> Show W&G games
+- Game & Watch --> Show G&W games
 - Arcade --> Show arcade games, you can also filter for arcade type:
 	+ Sport
 	+ Run & Gun
@@ -286,4 +286,4 @@ There are no options, just press 'start P1' for Game-A or 'start-P2' for Game-B.
 
 If you have any question or suggestion, please contact me at leniad2[@]hotmail.com!
 
-v1.0
+v1.0.1

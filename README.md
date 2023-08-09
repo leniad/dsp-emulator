@@ -1,4 +1,23 @@
-﻿# DSP Emulator status #
+# DSP Emulator status #
+<b>09/08/23 - DSP Emulator 0.22WIP4.1. Fast fix... Updated Windows binary, OSX and source.<br>
+<pre>
+-General
+    +Updated SDL2 library for windows
+    +Updated the documentation, 'DSP small guide' and 'DSP how to compile'
+    +Lazarus
+        -Fixed compile i2cmem module
+    +Fixed press 'ESC' for close pop-up windows
+    +Fixed some spellings
+    +Some cosmetical changes
+    +ROMs export
+    	-Fixed 'future spy' ROM info (thanks to Neville)
+    	-Added 'gaplus' sample info, was missing
+    +Fixed controls, when pressing left+right or up+down at the same time
+-Spectrum
+    +Fixed screen refresh when changed screen resolution
+-Donkey Kong HW
+    +Fixed screen flip
+</pre><br>
 <b>08/08/23 - Updated docs.<br>
 <pre>
 -Updated 'How to compile'
@@ -10,9 +29,9 @@
     +Added a new section 'How to compile DSP Emulator'
     +Started to implement parent drivers (ROMs loading and ROMs export), for example Xevious and Super Xevious, they share ROMs, but they are not the same arcade.
     +Namco IO 56XX-58XX-59XX
-        -Changed to classes
-        -Added IO 59XX
-        -Implemented timers to internal
+        -Changed to classes
+        -Added IO 59XX
+        -Implemented timers to internal
 -Galaga HW
     +Added DIPs to all drivers
     +Added all remain controls to all drivers
@@ -22,8 +41,8 @@
     +Added DIPs to all drivers
     +Added all remain controls to all drivers
     +Amidar
-        -Updated ROMs
-        -Added background color
+        -Updated ROMs
+        -Added background color
 -Gaplus
     +Added driver with sound
 -Gun.Smoke HW
@@ -46,25 +65,25 @@
 -General
     +Updated Preview Images
     +CPU
-        -Added a new counter to count all timings of the CPU, used in Asteroids, Circus Charlie, Gyruss, Hypersports, and many others...
-        -LR35902: fixed HALT opcode, fixes many Gameboy Color Konami games
+        -Added a new counter to count all timings of the CPU, used in Asteroids, Circus Charlie, Gyruss, Hypersports, and many others...
+        -LR35902: fixed HALT opcode, fixes many Gameboy Color Konami games
     +Sound
-        -Konami Sound: video line not needed any more
-        -Samples: added volume
+        -Konami Sound: video line not needed any more
+        -Samples: added volume
     +Video
-        -Changed rol90 name to rot270
-        -Added rot180 to rotate screen 180 degrees
-        -Fixed main screen flip x and flip y, now can be used both
+        -Changed rol90 name to rot270
+        -Added rot180 to rotate screen 180 degrees
+        -Fixed main screen flip x and flip y, now can be used both
     +Disk: added DSK format for Oric disks
     +GFX: fixed gfx rotate when graphics are not square
 -Oric HW
     +Added preliminary disc support, not working
 -Centipede HW
     +Centipede
-        -Fixed dip
-        -Fixed video
-        -Fixed controls
-        -Fixed colors, now using indirect palette
+        -Fixed dip
+        -Fixed video
+        -Fixed controls
+        -Fixed colors, now using indirect palette
     +Millipede: added driver with sound
 -Circus Charlie
     +Fixed sprites
@@ -105,19 +124,19 @@
 <pre>
 -General
     +CPU
-        -M6502
-            +Fixed timings before internal timer call
-            +Added some opcodes for 2xNOP and 3xNOP
-        -Z80
-            +Fixed timings before internal timer call
-            +Some updates to internal procedures
+        -M6502
+            +Fixed timings before internal timer call
+            +Added some opcodes for 2xNOP and 3xNOP
+        -Z80
+            +Fixed timings before internal timer call
+            +Some updates to internal procedures
     +Tape System
-        -Added procedures to call before tape play and after play
-        -Fixed WAV format tapes loading
-        -Added Oric TAP file format support
-        -Fixed main speed changes when a tape is playing
+        -Added procedures to call before tape play and after play
+        -Fixed WAV format tapes loading
+        -Added Oric TAP file format support
+        -Fixed main speed changes when a tape is playing
     +Devices
-        -VIA6522: Added device
+        -VIA6522: Added device
 -Amstrad CPC
     +Enabled Z80 timings (fixes Saboteur II and many others)
     +Rewrited video to update screen pixel by pixel
@@ -133,8 +152,8 @@
     +Added partial mapper 10 (thanks to Neville)
 -Oric HW
     +Added support for tape loading, AY-8910 sound and keyboard
-        -Oric 1: added driver with sound
-        -Oric Atmos: added driver with sound
+        -Oric 1: added driver with sound
+        -Oric Atmos: added driver with sound
 -Sega System 1/2 HW
     +Changed Z80 timings, fixes Pitfall II intro
 </pre><br>
@@ -150,27 +169,27 @@
     +Updated preview images (thanks to Nevile)
     +Update SDL2 library to 2.26.5
     +CPU
-        -NEC V20/V30/V33
-            +Implemented sound timers
-            +Added NMI
-            +Added many EA types
-            +Fixed PUSH/POP CPU flags
-            +Added opcodes $0f18, $0f19, $0f1a, $0f1b, $0f1c, $0f1d, $31, $34, $68, $6a, $6b, $82, $8308, $8320, $8330, $8d, $91, $92, $93, $94, $95, $97, $c008, $c020, $c028, $c120, $c128, $c8, $c9, $d110, $d200, $d220, $d228, $d3, $e3, $e4, $ec, $ee, $ef, $f2a4, $f2a5, $f2af, $f618, $f620, $f630, $f720, $f728, $f730 and $f738
-        -Z80
-            +Added (again) functions to change CPU timmings
-            +Fixed some timmings and timming calculation
+        -NEC V20/V30/V33
+            +Implemented sound timers
+            +Added NMI
+            +Added many EA types
+            +Fixed PUSH/POP CPU flags
+            +Added opcodes $0f18, $0f19, $0f1a, $0f1b, $0f1c, $0f1d, $31, $34, $68, $6a, $6b, $82, $8308, $8320, $8330, $8d, $91, $92, $93, $94, $95, $97, $c008, $c020, $c028, $c120, $c128, $c8, $c9, $d110, $d200, $d220, $d228, $d3, $e3, $e4, $ec, $ee, $ef, $f2a4, $f2a5, $f2af, $f618, $f620, $f630, $f720, $f728, $f730 and $f738
+        -Z80
+            +Added (again) functions to change CPU timmings
+            +Fixed some timmings and timming calculation
     +Sound
-        -Seibu sound
-            +Rewrited and converted to class
-            +Added internal Z80, ADPCM, sound chip and controls
-            +Changed CPU mappers to internal
-            +Removed fake adpcm, using standar MSM5205
-        -MSM5205
-            +Converted to class
+        -Seibu sound
+            +Rewrited and converted to class
+            +Added internal Z80, ADPCM, sound chip and controls
+            +Changed CPU mappers to internal
+            +Removed fake adpcm, using standar MSM5205
+        -MSM5205
+            +Converted to class
     +Devices
-        -Added i2c eeproms
+        -Added i2c eeproms
     +File engine
-        -Changed CRC variable to unsigned 32bits
+        -Changed CRC variable to unsigned 32bits
 -Amstrad CPC
     +Fixed keyboard matrix reads (Fixes 'Night Shade')
     +Added specific Z80 timmings, but breaks tape loading, so they are disabled
@@ -200,8 +219,8 @@
     +Fixed some export ROM data (thanks to Neville)
     +Fixed a stupid bug creating pixel buffer
     +CPU
-        -M68000
-            +Fixed opcodes divu and sbcd (thanks to Neville)
+        -M68000
+            +Fixed opcodes divu and sbcd (thanks to Neville)
 -SG-1000
     +Added HOLD button
 -Sega Master System
@@ -217,23 +236,23 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Updated preview images
     +Remove arcade keys when not using arcade drivers
     +CPU
-        -M68000
-            +Split read/write byte flags
-            +Enhanced timings
-            +Fixed opcodes addi.l, addq.l, sbcd.rr, abcd.rr, roxr.w, roxl.w, rol.w, asr.b, lsr.b, roxr.b, ror.b, asr.w, lsr.w, ror.w, asr.l, lsr.l, roxr.l, ror.l asl.b, lsl.b, roxl.b, rol.b, asl.w, lsl.w, asl.l, lsl.l, roxl.l, rol.l
-            +Added movem.w $38 efective address
-        -MCS51
-            +Added opcodes $38..$3f, $62, $63, $64 and $b1
-            +Fixed external get/put byte with no function
-        -fd1089: Updated decode functions
+        -M68000
+            +Split read/write byte flags
+            +Enhanced timings
+            +Fixed opcodes addi.l, addq.l, sbcd.rr, abcd.rr, roxr.w, roxl.w, rol.w, asr.b, lsr.b, roxr.b, ror.b, asr.w, lsr.w, ror.w, asr.l, lsr.l, roxr.l, ror.l asl.b, lsl.b, roxl.b, rol.b, asl.w, lsl.w, asl.l, lsl.l, roxl.l, rol.l
+            +Added movem.w $38 efective address
+        -MCS51
+            +Added opcodes $38..$3f, $62, $63, $64 and $b1
+            +Fixed external get/put byte with no function
+        -fd1089: Updated decode functions
     +Sound
-        -SEGA PCM: Added stereo
-        -SN76496: Added stereo
-        -VLM5030: Added stereo
-        -YM2203: Added stereo
+        -SEGA PCM: Added stereo
+        -SN76496: Added stereo
+        -VLM5030: Added stereo
+        -YM2203: Added stereo
     +Updated key redefine names
-        -'COIN' --> 'COIN/SELECT'
-        -'START' --> 'P1/START' or 'P2/START'
+        -'COIN' --> 'COIN/SELECT'
+        -'START' --> 'P1/START' or 'P2/START'
 -Gauntlet
     +Gauntlet: Renamed ROM zip to 'gauntlet'
     +Gauntlet II: Updated ROMs to v2
@@ -243,13 +262,13 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Space Harrier: added driver with sound, some sprite problems (M68000 bug?)
 -Mega System 1 HW
     +Fixed all video issues
-        -Fixed graphics layers
-        -Fixed scroll
-        -Fixed sprites
+        -Fixed graphics layers
+        -Fixed scroll
+        -Fixed sprites
     +Fixed graphics decode
     +Rod Land
-        -Updated ROMs
-        -Added graphics decrypt
+        -Updated ROMs
+        -Added graphics decrypt
     +64th Street - A detective story: added driver with sound
 -Outrun
     +Fixed tile buffer size and activation
@@ -287,10 +306,10 @@ Please read 'Whats New 0.21' file for full details<br><br>
 <pre>
 -General
     +Find a bug on new releases of SDL 2 library, joystick stop working when main window loses focus. Changed to SDL 2.0.16, works fine with this version
-        -Added SDL 2.0.16 for download
+        -Added SDL 2.0.16 for download
     +Enhanced joystick support
-        -New redefine buttons system, select and press the button to use it
-        -Rewrited joystick internal functions
+        -New redefine buttons system, select and press the button to use it
+        -Rewrited joystick internal functions
     +Windows: Removed mouse cursor, slows down everything when enabled
     +Lazarus: Added 'follow me' window style. The main emulation window follows select window when it moves.
 -CPS1 HW
@@ -329,19 +348,19 @@ Please read 'Whats New 0.21' file for full details<br><br>
 -General
     +Update preview images, added images for new drivers
     +Konami K051316
-        -Begin implementation, still WIP
-    +CPU
-        -HD6309: Fixed opcodes $2c, $2d and $2f
-        -Konami CPU
-              +Fixed opcodes $66, $67, $6e, $6f, $76, $77, $7e, $7f, $b4 and $b5
-              +Added opcodes $74, $bc, $be, $c6, $cc, $cd and $ce (Fixes 'The Simpsons', it's playable to the end)
-        -M6809: Fixed opcodes $2c, $2d, $2e and $2f
-    +Konami 053246
-        -Fixed shadows
-    +Sound
-        -AY8910
-              +Added gain per channel
-              +Fixed AY8912 PORTB channel
+        -Begin implementation, still WIP
+    +CPU
+        -HD6309: Fixed opcodes $2c, $2d and $2f
+        -Konami CPU
+              +Fixed opcodes $66, $67, $6e, $6f, $76, $77, $7e, $7f, $b4 and $b5
+              +Added opcodes $74, $bc, $be, $c6, $cc, $cd and $ce (Fixes 'The Simpsons', it's playable to the end)
+        -M6809: Fixed opcodes $2c, $2d, $2e and $2f
+    +Konami 053246
+        -Fixed shadows
+    +Sound
+        -AY8910
+              +Added gain per channel
+              +Fixed AY8912 PORTB channel
 -Ajax
     +Added K051316 video chip
 -Ambush
@@ -368,10 +387,10 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Update preview images, added images for new drivers
     +Update SDL library to 2.24.1
     +Added sort options in game list menu. You can sort computers, Game & Watch, consoles and arcade (and arcade subtypes sport, run & gun, shot, maze, fight and drive)
-    +CPU
-        -Konami CPU: Fixed opcodes $6f, $76 and $7e. Fixes 'The Simpsons', which it's fully playable now.
-    +Konami 052109
-        -Fixed scroll, now 'Ajax' works fine.
+    +CPU
+        -Konami CPU: Fixed opcodes $6f, $76 and $7e. Fixes 'The Simpsons', which it's fully playable now.
+    +Konami 052109
+        -Fixed scroll, now 'Ajax' works fine.
 -China Gate
     +Added driver with sound
 -Side Arms
@@ -397,8 +416,8 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Changed 'Show game list', 'Configure DSP' and 'Save screen' icons
     +Changed 'Show game list' and 'Configure DSP' position in main window
     +Sound: removed 11025Hz and 22050Hz sample quality, they are useless!
-    +CPU
-        -M6805: Added opcodes $21, $56, $6a, $7a, $7f and $c1
+    +CPU
+        -M6805: Added opcodes $21, $56, $6a, $7a, $7f and $c1
 -Amstrad CPC
     +If a CDT tape is loaded and there is no pause block at the beginning, a 2000ms pause is added to the virtual tape
 -Arkanoid
@@ -414,9 +433,9 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Z80 CTC: converted to classes
     +Added close function to many devices
     +Sound: Make internal sound buffer bigger
-    +CPU
-        -M6809: Added opcodes $01, $29 and $1X2e
-        -M680X: 
+    +CPU
+        -M6809: Added opcodes $01, $29 and $1X2e
+        -M680X: 
              + Added opcodes $47,$c2,$c9,$d9,$f0 and $fb
              + Opcode $f3 is not for M6808
 -Senjyo HW
@@ -436,11 +455,11 @@ Please read 'Whats New 0.21' file for full details<br><br>
 <pre>
 -General
     +Changed transparent color (fixes 'Thunder & Lightning' sprites)
-    +CPU
-        -UPD78XX
-            +UPD7801
-                -Fixed IRQs
-                -Fixed timers
+    +CPU
+        -UPD78XX
+            +UPD7801
+                -Fixed IRQs
+                -Fixed timers
 -Amstrad CPC
     +Fixed green monitor palette
     +Added green monitor brightness
@@ -457,15 +476,15 @@ Please read 'Whats New 0.21' file for full details<br><br>
 <b>29/06/22 - DSP Emulator 0.20WIP9. Win32 and source update.<br>
 <pre>
 -General
-    +Updated SDL library to 2.0.22
-    +CPU
-        -UPD78XX
-            +Added many, many opcodes and fixed many others
-            +Added UPD7801 opcode timing tables
-            +Fixed IRQs
-            +Fixed outports
+    +Updated SDL library to 2.0.22
+    +CPU
+        -UPD78XX
+            +Added many, many opcodes and fixed many others
+            +Added UPD7801 opcode timing tables
+            +Fixed IRQs
+            +Fixed outports
 -Amstrad CPC
-    +Rewrited CRT video emulation
+    +Rewrited CRT video emulation
     +Added green monitor option
     +Fixed hardware scroll
 -Super Cassete Vision
@@ -490,24 +509,24 @@ Please read 'Whats New 0.21' file for full details<br><br>
 <b>01/05/22 - DSP Emulator 0.20WIP8. Win32 and source update.<br>
 <pre>
 -General
-    +ROMs export
-        -Fixed Sly Spy ROMs info (Thanks to Neville)
-    +CPU
-        -Z80
-            +Added M1 raise signal (read opcode)
-        -M6800
-            +Added HD63701Y0 CPU
-            +Fixed internal read/write registers
-            +Fixed opcodes BHI and BLS (ouch!)
-            +Added opcode RORA
+    +ROMs export
+        -Fixed Sly Spy ROMs info (Thanks to Neville)
+    +CPU
+        -Z80
+            +Added M1 raise signal (read opcode)
+        -M6800
+            +Added HD63701Y0 CPU
+            +Fixed internal read/write registers
+            +Fixed opcodes BHI and BLS (ouch!)
+            +Added opcode RORA
 -Amstrad CPC
-    +Speed up video
+    +Speed up video
     +Dandanator added initial support
 -Black Tiger
-    +Fixed MCU CPU clock
+    +Fixed MCU CPU clock
     +Added video HW specs
 -Commando
-    +Fixed main CPU clock
+    +Fixed main CPU clock
     +Added video HW specs
 -Ghost'n Goblins
     +Added video HW specs
@@ -515,13 +534,13 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Added video HW specs
 -The Legend of Kage
     +Rewrited video driver
-        -Fixed proirity BG/FG/Sprites
-        -Fixed disable screen
+        -Fixed proirity BG/FG/Sprites
+        -Fixed disable screen
 -Outrun (Thanks to Neville)
-    +Fixed palette
-    +Fixed shadows
+    +Fixed palette
+    +Fixed shadows
 -Senjyo HW (called StarForce before)
-    +Fixed video buffer
+    +Fixed video buffer
     +Added BG stripe and radar
     +Added char flip
     +Added Senjyo driver with sound
@@ -529,11 +548,11 @@ Please read 'Whats New 0.21' file for full details<br><br>
 -Super Dodgeball
     +Added driver with sound
 -Sega System 16A HW (Thanks to Neville)
-    +Fixed palette
-    +Fixed shadows
+    +Fixed palette
+    +Fixed shadows
 -Sega System 16B HW (Thanks to Neville)
-    +Fixed palette
-    +Fixed shadows
+    +Fixed palette
+    +Fixed shadows
 </pre><br>
 <img src="https://i.ibb.co/pbCwPBB/alien-new.png"> <img src="https://i.ibb.co/yykkKdT/alien-old.png"><br>
 <img src="https://i.ibb.co/0F2cVnD/ddux-new.png"> <img src="https://i.ibb.co/RSjvvYx/ddux-old.png"><br>

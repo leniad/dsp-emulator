@@ -15,9 +15,10 @@ object FLoadRom: TFLoadRom
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
+  KeyPreview = True
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '2.2.6.0'
   object BitBtn1: TBitBtn
     Left = 792
     Height = 45

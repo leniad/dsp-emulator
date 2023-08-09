@@ -5,7 +5,7 @@ object MConfig: TMConfig
   Width = 628
   BorderIcons = []
   BorderStyle = bsSingle
-  Caption = 'Configurar DSP'
+  Caption = 'Config DSP'
   ClientHeight = 595
   ClientWidth = 628
   DesignTimePPI = 120
@@ -15,10 +15,11 @@ object MConfig: TMConfig
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
+  KeyPreview = True
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '2.2.6.0'
   object Button1: TButton
     Left = 120
     Height = 51

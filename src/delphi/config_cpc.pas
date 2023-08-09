@@ -70,10 +70,10 @@ type
     procedure Button10Click(Sender: TObject);
     procedure Button12Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Button1Click(Sender: TObject);
     procedure RadioButton9Click(Sender: TObject);
     procedure RadioButton10Click(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
@@ -209,12 +209,12 @@ begin
 put_text_file(5);
 end;
 
-procedure TConfigCPC.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TConfigCPC.FormKeyUp(Sender:TObject;var Key:Word;Shift:TShiftState);
 begin
 case key of
     13:button13Click(nil);
     27:button14click(nil);
-  end;
+end;
 end;
 
 procedure TConfigCPC.FormShow(Sender: TObject);

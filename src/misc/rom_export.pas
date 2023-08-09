@@ -61,6 +61,7 @@ const
         (nombre:'6.wav'),(nombre:'7.wav'),(nombre:'8.wav'),(nombre:'9.wav'),());
         bosco_samples:array[0..3] of tsample_file=(
         (nombre:'bigbang.wav'),(nombre:'midbang.wav'),(nombre:'shot.wav'),());
+        gaplus_samples:array[0..1] of tsample_file=((nombre:'bang.wav'),());
         //Ordenadores
         spectrum:array[0..1] of tipo_roms=(
         (n:'spectrum.rom';l:$4000;p:0;crc:$ddee531f),());
@@ -3254,8 +3255,8 @@ const
         (n:'futrprom.u72';l:$100;p:$100;crc:$f9e26790),(n:'fs_snd.u68';l:$800;p:0;crc:$305fae2d),
         (n:'fs_snd.u69';l:$800;p:$800;crc:$3c5658c0),(n:'fs_vid.u113';l:$2000;p:0;crc:$36d2bdf6),
         (n:'fs_vid.u112';l:$2000;p:$2000;crc:$3740946a),(n:'fs_vid.u111';l:$2000;p:$4000;crc:$4cd4df98),
-        (n:'fs_vid.u77';l:$2000;p:0;crc:$1b93c9ec),(n:'fs_vid.u78';l:$2000;p:$2000;crc:$50e55262),
-        (n:'fs_vid.u79';l:$2000;p:$4000;crc:$bfb02e3e),(n:'fs_vid.u91';l:$2000;p:0;crc:$86da01f4),
+        (n:'fs_vid.u77';l:$4000;p:0;crc:$1b93c9ec),(n:'fs_vid.u78';l:$4000;p:$4000;crc:$50e55262),
+        (n:'fs_vid.u79';l:$4000;p:$8000;crc:$bfb02e3e),(n:'fs_vid.u91';l:$2000;p:0;crc:$86da01f4),
         (n:'fs_vid.u90';l:$2000;p:$2000;crc:$2bd41d2d),(n:'fs_vid.u93';l:$2000;p:$4000;crc:$b82b4997),
         (n:'fs_vid.u92';l:$2000;p:$6000;crc:$af4015af),());
         milliped_roms:array[0..6] of tipo_roms=(

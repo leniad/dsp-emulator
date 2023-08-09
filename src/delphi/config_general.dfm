@@ -3,7 +3,7 @@ object MConfig: TMConfig
   Top = 188
   BorderIcons = []
   BorderStyle = bsSingle
-  Caption = 'Configurar DSP'
+  Caption = 'Config DSP'
   ClientHeight = 502
   ClientWidth = 498
   Color = clBtnFace
@@ -12,6 +12,7 @@ object MConfig: TMConfig
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
+  KeyPreview = True
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
@@ -46,7 +47,7 @@ object MConfig: TMConfig
     object TabSheet1: TTabSheet
       Caption = 'Misc'
       object GroupBox3: TGroupBox
-        Left = 41
+        Left = 23
         Top = 13
         Width = 169
         Height = 147
@@ -206,9 +207,9 @@ object MConfig: TMConfig
         end
       end
       object GroupBox5: TGroupBox
-        Left = 44
+        Left = 23
         Top = 178
-        Width = 378
+        Width = 399
         Height = 82
         Caption = 'Video'
         Font.Charset = DEFAULT_CHARSET
@@ -260,9 +261,9 @@ object MConfig: TMConfig
         end
       end
       object GroupBox6: TGroupBox
-        Left = 41
+        Left = 23
         Top = 280
-        Width = 381
+        Width = 399
         Height = 111
         Caption = 'Misc'
         Font.Charset = DEFAULT_CHARSET
@@ -273,7 +274,7 @@ object MConfig: TMConfig
         ParentFont = False
         TabOrder = 3
         object CheckBox2: TCheckBox
-          Left = 29
+          Left = 19
           Top = 19
           Width = 286
           Height = 20
@@ -283,7 +284,7 @@ object MConfig: TMConfig
           OnKeyUp = FormKeyUp
         end
         object CheckBox1: TCheckBox
-          Left = 29
+          Left = 19
           Top = 37
           Width = 300
           Height = 24
@@ -293,7 +294,7 @@ object MConfig: TMConfig
           OnKeyUp = FormKeyUp
         end
         object CheckBox3: TCheckBox
-          Left = 29
+          Left = 19
           Top = 59
           Width = 300
           Height = 20
@@ -303,9 +304,9 @@ object MConfig: TMConfig
           OnKeyUp = FormKeyUp
         end
         object CheckBox17: TCheckBox
-          Left = 29
+          Left = 19
           Top = 80
-          Width = 430
+          Width = 360
           Height = 20
           TabStop = False
           Caption = 'CONSOLA: Cargar juego al principio'
@@ -315,7 +316,7 @@ object MConfig: TMConfig
       end
     end
     object TabSheet2: TTabSheet
-      Caption = 'Directory'
+      Caption = 'Folders'
       ImageIndex = 1
       object Label1: TLabel
         Left = 3
@@ -498,42 +499,42 @@ object MConfig: TMConfig
         TabOrder = 0
         object Label6: TLabel
           Left = 3
-          Top = 252
+          Top = 251
           Width = 25
           Height = 13
           Caption = 'But 0'
         end
         object Label7: TLabel
           Left = 3
-          Top = 276
+          Top = 278
           Width = 25
           Height = 13
           Caption = 'But 1'
         end
         object Label8: TLabel
           Left = 3
-          Top = 299
+          Top = 305
           Width = 25
           Height = 13
           Caption = 'But 2'
         end
         object Label15: TLabel
           Left = 111
-          Top = 252
+          Top = 251
           Width = 25
           Height = 13
           Caption = 'But 3'
         end
         object Label16: TLabel
           Left = 111
-          Top = 276
+          Top = 278
           Width = 25
           Height = 13
           Caption = 'But 4'
         end
         object Label17: TLabel
           Left = 111
-          Top = 299
+          Top = 305
           Width = 25
           Height = 13
           Caption = 'But 5'
@@ -551,6 +552,14 @@ object MConfig: TMConfig
           Width = 54
           Height = 13
           Caption = 'P1/START'
+        end
+        object BitBtn10: TBitBtn
+          Left = 33
+          Top = 270
+          Width = 74
+          Height = 30
+          TabOrder = 7
+          OnClick = BitBtn10Click
         end
         object RadioButton1: TRadioButton
           Left = 11
@@ -573,7 +582,7 @@ object MConfig: TMConfig
         end
         object BitBtn2: TBitBtn
           Left = 138
-          Top = 172
+          Top = 170
           Width = 41
           Height = 33
           Font.Charset = DEFAULT_CHARSET
@@ -587,7 +596,7 @@ object MConfig: TMConfig
         end
         object BitBtn3: TBitBtn
           Left = 91
-          Top = 206
+          Top = 204
           Width = 41
           Height = 33
           Font.Charset = DEFAULT_CHARSET
@@ -601,7 +610,7 @@ object MConfig: TMConfig
         end
         object BitBtn1: TBitBtn
           Left = 46
-          Top = 172
+          Top = 170
           Width = 41
           Height = 33
           Font.Charset = DEFAULT_CHARSET
@@ -615,7 +624,7 @@ object MConfig: TMConfig
         end
         object BitBtn4: TBitBtn
           Left = 91
-          Top = 136
+          Top = 134
           Width = 41
           Height = 33
           Font.Charset = DEFAULT_CHARSET
@@ -626,54 +635,6 @@ object MConfig: TMConfig
           ParentFont = False
           TabOrder = 5
           OnClick = BitBtn4Click
-        end
-        object BitBtn9: TBitBtn
-          Left = 33
-          Top = 243
-          Width = 74
-          Height = 27
-          TabOrder = 6
-          OnClick = BitBtn9Click
-        end
-        object BitBtn10: TBitBtn
-          Left = 33
-          Top = 268
-          Width = 74
-          Height = 27
-          TabOrder = 7
-          OnClick = BitBtn10Click
-        end
-        object BitBtn11: TBitBtn
-          Left = 33
-          Top = 295
-          Width = 74
-          Height = 28
-          TabOrder = 8
-          OnClick = BitBtn11Click
-        end
-        object BitBtn15: TBitBtn
-          Left = 139
-          Top = 268
-          Width = 74
-          Height = 27
-          TabOrder = 9
-          OnClick = BitBtn15Click
-        end
-        object BitBtn16: TBitBtn
-          Left = 139
-          Top = 293
-          Width = 74
-          Height = 28
-          TabOrder = 10
-          OnClick = BitBtn16Click
-        end
-        object BitBtn17: TBitBtn
-          Left = 139
-          Top = 243
-          Width = 74
-          Height = 27
-          TabOrder = 11
-          OnClick = BitBtn17Click
         end
         object GroupBox7: TGroupBox
           Left = 3
@@ -709,7 +670,7 @@ object MConfig: TMConfig
           Left = 33
           Top = 356
           Width = 75
-          Height = 27
+          Height = 30
           TabOrder = 13
           OnClick = Button9Click
         end
@@ -717,9 +678,49 @@ object MConfig: TMConfig
           Left = 138
           Top = 356
           Width = 75
-          Height = 27
+          Height = 30
           TabOrder = 14
           OnClick = Button10Click
+        end
+        object BitBtn16: TBitBtn
+          Left = 139
+          Top = 300
+          Width = 74
+          Height = 30
+          TabOrder = 10
+          OnClick = BitBtn16Click
+        end
+        object BitBtn15: TBitBtn
+          Left = 139
+          Top = 270
+          Width = 74
+          Height = 30
+          TabOrder = 9
+          OnClick = BitBtn15Click
+        end
+        object BitBtn17: TBitBtn
+          Left = 139
+          Top = 240
+          Width = 74
+          Height = 30
+          TabOrder = 11
+          OnClick = BitBtn17Click
+        end
+        object BitBtn11: TBitBtn
+          Left = 33
+          Top = 300
+          Width = 74
+          Height = 30
+          TabOrder = 8
+          OnClick = BitBtn11Click
+        end
+        object BitBtn9: TBitBtn
+          Left = 33
+          Top = 240
+          Width = 74
+          Height = 30
+          TabOrder = 6
+          OnClick = BitBtn9Click
         end
       end
       object GroupBox2: TGroupBox
@@ -731,21 +732,21 @@ object MConfig: TMConfig
         TabOrder = 1
         object Label9: TLabel
           Left = 7
-          Top = 252
+          Top = 251
           Width = 25
           Height = 13
           Caption = 'But 0'
         end
         object Label10: TLabel
           Left = 7
-          Top = 276
+          Top = 278
           Width = 25
           Height = 13
           Caption = 'But 1'
         end
         object Label11: TLabel
           Left = 7
-          Top = 299
+          Top = 305
           Width = 25
           Height = 13
           Caption = 'But 2'
@@ -759,14 +760,14 @@ object MConfig: TMConfig
         end
         object Label19: TLabel
           Left = 120
-          Top = 276
+          Top = 278
           Width = 25
           Height = 13
           Caption = 'But 4'
         end
         object Label20: TLabel
           Left = 120
-          Top = 299
+          Top = 305
           Width = 25
           Height = 13
           Caption = 'But 5'
@@ -806,7 +807,7 @@ object MConfig: TMConfig
         end
         object BitBtn5: TBitBtn
           Left = 108
-          Top = 136
+          Top = 134
           Width = 41
           Height = 33
           TabOrder = 2
@@ -814,7 +815,7 @@ object MConfig: TMConfig
         end
         object BitBtn6: TBitBtn
           Left = 61
-          Top = 172
+          Top = 170
           Width = 41
           Height = 33
           TabOrder = 3
@@ -822,7 +823,7 @@ object MConfig: TMConfig
         end
         object BitBtn7: TBitBtn
           Left = 155
-          Top = 167
+          Top = 170
           Width = 40
           Height = 33
           TabOrder = 4
@@ -830,7 +831,7 @@ object MConfig: TMConfig
         end
         object BitBtn8: TBitBtn
           Left = 108
-          Top = 206
+          Top = 204
           Width = 41
           Height = 33
           TabOrder = 5
@@ -838,49 +839,49 @@ object MConfig: TMConfig
         end
         object BitBtn12: TBitBtn
           Left = 37
-          Top = 243
+          Top = 240
           Width = 74
-          Height = 27
+          Height = 30
           TabOrder = 6
           OnClick = BitBtn12Click
         end
         object BitBtn13: TBitBtn
           Left = 37
-          Top = 268
+          Top = 270
           Width = 74
-          Height = 27
+          Height = 30
           TabOrder = 7
           OnClick = BitBtn13Click
         end
         object BitBtn14: TBitBtn
           Left = 37
-          Top = 293
+          Top = 300
           Width = 74
-          Height = 28
+          Height = 30
           TabOrder = 8
           OnClick = BitBtn14Click
         end
         object BitBtn18: TBitBtn
           Left = 148
-          Top = 243
+          Top = 240
           Width = 74
-          Height = 27
+          Height = 30
           TabOrder = 9
           OnClick = BitBtn18Click
         end
         object BitBtn19: TBitBtn
           Left = 148
-          Top = 268
+          Top = 270
           Width = 74
-          Height = 27
+          Height = 30
           TabOrder = 10
           OnClick = BitBtn19Click
         end
         object BitBtn20: TBitBtn
           Left = 148
-          Top = 293
+          Top = 300
           Width = 74
-          Height = 27
+          Height = 30
           TabOrder = 11
           OnClick = BitBtn20Click
         end
@@ -917,7 +918,7 @@ object MConfig: TMConfig
           Left = 37
           Top = 356
           Width = 75
-          Height = 27
+          Height = 30
           TabOrder = 13
           OnClick = Button11Click
         end
@@ -925,14 +926,14 @@ object MConfig: TMConfig
           Left = 148
           Top = 356
           Width = 75
-          Height = 27
+          Height = 30
           TabOrder = 14
           OnClick = Button12Click
         end
       end
     end
     object ROM: TTabSheet
-      Caption = 'ROM'
+      Caption = 'ROMs export'
       ImageIndex = 4
       object BitBtn21: TBitBtn
         Left = 40

@@ -421,7 +421,7 @@ const
   (name:'Super Zaxxon';year:'1982';snd:2;hi:false;zip:'szaxxon';grid:346;company:'Sega';rom:@szaxxon_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
   (name:'Future Spy';year:'1984';snd:2;hi:false;zip:'futspy';grid:347;company:'Sega';rom:@futspy_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
   (name:'Millipede';year:'1982';snd:1;hi:false;zip:'milliped';grid:348;company:'Atari';rom:@milliped_roms;tipo:ARCADE or SHOT),
-  (name:'Gaplus';year:'1984';snd:1;hi:false;zip:'gaplus';grid:349;company:'Namco';rom:@gaplus_roms;tipo:ARCADE or SHOT),
+  (name:'Gaplus';year:'1984';snd:1;hi:false;zip:'gaplus';grid:349;company:'Namco';rom:@gaplus_roms;samples:@gaplus_samples;tipo:ARCADE or SHOT),
   (name:'Super Xevious';year:'1984';snd:1;hi:false;zip:'sxevious';grid:350;company:'Namco';rom:@sxevious_roms;samples:@xevious_samples;tipo:ARCADE or SHOT),
   (name:'Grobda';year:'1984';snd:1;hi:false;zip:'grobda';grid:351;company:'Namco';rom:@grobda_roms;tipo:ARCADE or SHOT),
   (name:'Pac & Pal';year:'1983';snd:1;hi:false;zip:'pacnpal';grid:352;company:'Namco';rom:@pacnpal_roms;tipo:ARCADE or MAZE),
@@ -1223,6 +1223,7 @@ principal1.BitBtn12.Enabled:=true;
 principal1.BitBtn14.Enabled:=true;
 principal1.BitBtn8.enabled:=false; //Arcade config
 principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[8];
+main_vars.is_arcade:=false;
 case driver of
   0..6:begin
           principal1.Panel2.visible:=true;
@@ -1259,7 +1260,10 @@ case driver of
           principal1.BitBtn11.visible:=false; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
-  10..999:principal1.BitBtn8.enabled:=true;  //Arcade
+  10..999:begin
+            principal1.BitBtn8.enabled:=true;  //Arcade
+            main_vars.is_arcade:=true;
+          end;
   1000,1003,1005,1006,1007,1008:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho

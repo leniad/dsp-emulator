@@ -23,7 +23,7 @@ const
        'File already exists. Overwrite?','YES','NO','WARNING','LOAD','CANCEL','Can not find ROM file','inside file','Reset','Run emulation','Pause emulation',
        'Emulation speed: 25%, 50%, 75% or 100%','Fastest speed','Configure DSP','Configure computer/console','Load Tape/Snapshot','Load Disk','Save Snapshot',
        'Poke Memory','Take Snapshot','FlashLoad ON/OFF','Play virtual tape','Stop virtual tape','Close virtual tape','Virtual tape name','Virtual tape content',
-       'Configure dipswitch','Show game list','Configuration','File not found','Load Game','Run last game at startup','Show ROMs errors','Center main screen',
+       'Configure dipswitch','Show game list','Configuration','File not found','Load Game','Run last game at start-up','Show ROMs errors','Center main screen',
        'CONSOLES: Show game loading menu at startup','Enabled'),
        //Català
       ('Arxiu','Idioma','Llista de ROMS','Sortida','Acerca de...','Opcions','So','Video','Desconectat','Màquina','Ordinadors 8bits','Arcade','Consolas',

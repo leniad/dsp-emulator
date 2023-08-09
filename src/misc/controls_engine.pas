@@ -312,7 +312,7 @@ if (arcade_input.down[player]<>(keyboard[arcade_input.ndown[player]])) then begi
     arcade_input.down[player]:=keyboard[arcade_input.ndown[player]];
     event.arcade:=true;
 end;
-if (arcade_input.up[player] and arcade_input.down[player]) then arcade_input.down[player]:=false;
+if (arcade_input.up[player] and arcade_input.down[player] and main_vars.is_arcade) then arcade_input.up[player]:=false;
 if (arcade_input.left[player]<>(keyboard[arcade_input.nleft[player]])) then begin
     arcade_input.left[player]:=keyboard[arcade_input.nleft[player]];
     event.arcade:=true;
@@ -321,7 +321,7 @@ if (arcade_input.right[player]<>(keyboard[arcade_input.nright[player]])) then be
     arcade_input.right[player]:=keyboard[arcade_input.nright[player]];
     event.arcade:=true;
 end;
-if (arcade_input.left[player] and arcade_input.right[player]) then arcade_input.right[player]:=false;
+if (arcade_input.left[player] and arcade_input.right[player] and main_vars.is_arcade) then arcade_input.left[player]:=false;
 //Botones
 if timers.autofire_enabled[0+(player*6)] then begin
   timers.autofire_status[0+(player*6)]:=keyboard[arcade_input.nbut0[player]];

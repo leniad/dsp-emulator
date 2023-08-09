@@ -1,7 +1,7 @@
 unit i2cmem;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ELSE}main_engine,{$ENDIF}
      file_engine;
 
 type

@@ -162,7 +162,8 @@ if (puerto and 1)=0 then begin
   if (puerto and $100)=0 then temp:=temp and var_spectrum.keyCAPS_V;
   spec3_inbyte:=(temp and $bf) or cinta_tzx.value or var_spectrum.altavoz;
 end else begin
-  if (((puerto and $20)=0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then temp:=var_spectrum.joy_val;
+  if (((puerto and $20)=0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then
+  temp:=var_spectrum.joy_val;
   if (((puerto and $7f)=$7f) and (var_spectrum.tipo_joy=JFULLER)) then temp:=var_spectrum.joy_val;
   if puerto=$ff3b then begin
       case ulaplus.mode of
@@ -228,8 +229,7 @@ begin
           exit;
         end;
         if ((puerto=$ff3b) and ulaplus.enabled) then begin
-          fillchar(var_spectrum.buffer_video[0],6144,1);
-          fillchar(borde.buffer[0],78000,$80);
+          spectrum_reset_video;
           case ulaplus.mode of
             0:begin
                 ulaplus.paleta[ulaplus.last_reg]:=valor;
@@ -259,7 +259,7 @@ begin
                   old_pant:=((valor and 8) shr 2)+5;
                   if old_pant<>var_spectrum.pantalla_128k then begin
                     var_spectrum.pantalla_128k:=old_pant;
-                    fillchar(var_spectrum.buffer_video[0],6144,1);
+                    spectrum_reset_video;
                   end;
                   var_spectrum.old_7ffd:=valor;
                   memoria_spectrum3;

@@ -12,13 +12,14 @@ object SMSConfig: TSMSConfig
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   TextHeight = 13
   object SpeedButton1: TSpeedButton
     Left = 24
-    Top = 152
+    Top = 157
     Width = 97
     Height = 49
     Caption = 'OK'
@@ -26,18 +27,18 @@ object SMSConfig: TSMSConfig
   end
   object SpeedButton2: TSpeedButton
     Left = 168
-    Top = 152
+    Top = 157
     Width = 89
     Height = 49
     Caption = 'CANCEL'
     OnClick = SpeedButton2Click
   end
   object GroupBox1: TGroupBox
-    Left = 24
+    Left = 63
     Top = 24
     Width = 161
     Height = 113
-    Caption = 'Video'
+    Caption = 'SMS BIOS'
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 16

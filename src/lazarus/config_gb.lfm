@@ -1,54 +1,56 @@
 object configgb: Tconfiggb
   Left = 335
-  Height = 240
+  Height = 300
   Top = 194
-  Width = 320
+  Width = 400
   Caption = 'Config GB/GBC'
-  ClientHeight = 240
-  ClientWidth = 320
+  ClientHeight = 300
+  ClientWidth = 400
+  DesignTimePPI = 120
+  KeyPreview = True
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.0.12.0'
+  LCLVersion = '2.2.6.0'
   object GroupBox7: TGroupBox
-    Left = 27
-    Height = 81
-    Top = 24
-    Width = 194
+    Left = 34
+    Height = 101
+    Top = 30
+    Width = 242
     Caption = 'LensLok'
-    ClientHeight = 61
-    ClientWidth = 190
+    ClientHeight = 76
+    ClientWidth = 238
     TabOrder = 0
     object RadioButton1: TRadioButton
-      Left = 14
-      Height = 19
-      Top = 15
-      Width = 158
+      Left = 18
+      Height = 24
+      Top = 19
+      Width = 198
       Caption = 'Gameboy Original - Green'
       TabOrder = 0
     end
     object RadioButton2: TRadioButton
-      Left = 13
-      Height = 19
-      Top = 38
-      Width = 139
+      Left = 16
+      Height = 24
+      Top = 48
+      Width = 173
       Caption = 'Gameboy Pocket - BW'
       TabOrder = 1
     end
   end
   object Button1: TButton
-    Left = 16
-    Height = 62
-    Top = 154
-    Width = 120
+    Left = 20
+    Height = 78
+    Top = 192
+    Width = 150
     Caption = 'OK'
     OnClick = Button1Click
     TabOrder = 1
   end
   object Button2: TButton
-    Left = 192
-    Height = 62
-    Top = 154
-    Width = 120
+    Left = 240
+    Height = 78
+    Top = 192
+    Width = 150
     Caption = 'CANCEL'
     OnClick = Button2Click
     TabOrder = 2

@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.22WIP4';
+        DSP_VERSION='0.22WIP4.1';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -43,6 +43,7 @@ type
             vactual:byte;
             service1,driver_ok,auto_exec,show_crc_error,center_screen,console_init:boolean;
             sort:word;
+            is_arcade:boolean;
         end;
         TDirectory=record
             Base:string;
@@ -156,7 +157,7 @@ var
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
 
 implementation
-uses principal,controls_engine,cpu_misc,tap_tzx;
+uses principal,controls_engine,cpu_misc,tap_tzx,spectrum_misc;
 
 function find_rom_multiple_dirs(rom_name:string):byte;
 var
@@ -297,6 +298,8 @@ pantalla[PANT_TEMP]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0
 //Si el video el *2 necesito una temporal
 if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
 pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
+//EL spectrum hay que forzarlo tambien
+spectrum_reset_video;
 end;
 
 procedure change_video_size(x,y:word);
