@@ -24,7 +24,7 @@ The main menu, where you can select the main options:
   - Sound --> Enable/Disable sound
   - Video --> Choose video settings
   - Configuration --> Open main config menu, see section 1.1 for more info
-- Machine --> Change the emulated system directly (not the list menu)
+- Machine --> Change the emulated system directly (not from the list menu)
 - Action
   - Run --> Resume selected system
   - Reset --> Reset selected system
@@ -41,7 +41,7 @@ The buttons are short-cuts to some options:
 
 On the status bar, you can see:
 - FPS --> Frames per second, the quantity of pictures drawn every second
-- Speed --> In percentage, the speed of the emulation. 100% is the perfect speed, below the emulation is slow.
+- Speed --> In percentage, the speed of the emulation. 100% is the perfect speed, below the emulation is slow, above it's too fast.
 
 <b>1.1-. Main Options</b>
 
@@ -52,17 +52,17 @@ In this window you have five pages to configure some options of the emulator. Th
 
 <img src="dsp_config1.jpg" width="50%" height="50%">
 
-All the options here are the same that you can select in the main menu, except the last one:
-- Run the last game at start-up --> If this option is selected, when DSP starts, it will run the last system it was running before it was closed, if not, the emulator will start with the list menu.
+All the options here are the same that you can select in the main menu (see section 1), except the last one:
+- Run the last game at start-up --> If this option is selected, when DSP starts, it will run the last system it was running before it was closed, if not, the emulator will start with the list menu (see section 1.2).
 - Show ROMs errors --> If set, when DSP detects a bad ROM file will show a window with the bad file
 - Center main screen --> When a new system is starting, the main window will go to the center of the screen
-- CONSOLES: Show game loading menu at start-up --> When a console is started and this check it's selected, the 'open game' window it's show, otherwise, you need to press the button 'open game' on the right menu (no game select window will be opened).
+- CONSOLES: Show game loading menu at start-up --> When a console is started and this check it's selected, the 'open game' window it's show, otherwise, you need to press the button 'open game' on the right menu (no game select window will be opened at start-up).
 
-**1.1.2 Directory**
+**1.1.2 Folders**
 
 <img src="dsp_config2.jpg" width="50%" height="50%">
 
-Here you can select the folder where the need files or the output files will reside.<br>
+Here you can select the folders where the need files or the output files will reside.<br>
 Press the button with three dots '...' and select a new folder.<br>
 On the Arcade option, you can add extra folders, splitted by semicolons, for example 'c:\folder1;d:\roms\folder2'
 
@@ -80,7 +80,7 @@ There is another option with the joystick, 'calibrate'. If your directional cont
 
 <img src="dsp_config_joy.jpg" width="25%" height="25%">
 
-**1.1.4 ROM**
+**1.1.4 ROMs export**
 
 <img src="dsp_config4.jpg" width="50%" height="50%">
 
@@ -141,7 +141,7 @@ There are six models emulated, all support tape and one have disk drive (section
 
 <img src="dsp_spectrum.jpg" width="50%" height="50%">
 
-The spectrum have a special tape menu, which have a preview of the tape/snapshot.
+The spectrum have a special tape/snapshot menu, which have a preview of the game and some info.
 
 <img src="dsp_spectrum_tape.jpg" width="50%" height="50%">
 
@@ -183,7 +183,7 @@ You can select:
 - LensLok --> Enable/disable virtual window for LensLok copy-protection
 - Monitor Options
 	+ Select Color/Green monitor
-	+ Select brightness
+	+ Select brightness (green monitor only)
 - ROMs slots --> add more ROMs into slots 1 to 6
 
 **2.3-. Tape window**
@@ -286,4 +286,4 @@ There are no options, just press 'start P1' for Game-A or 'start-P2' for Game-B.
 
 If you have any question or suggestion, please contact me at leniad2[@]hotmail.com!
 
-v1.0.1
+v1.0.2
