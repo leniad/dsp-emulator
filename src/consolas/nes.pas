@@ -17,7 +17,7 @@ type
            line_ack:procedure;
            end;
 
-procedure cargar_nes;
+function iniciar_nes:boolean;
 
 var
   llamadas_nes:tllamadas_nes;
@@ -28,16 +28,15 @@ uses principal,snapshot;
 const
   NTSC_CLOCK=1789773;
   PAL_CLOCK=1662607;
-  NTSC_refresh=60.0988;
-  PAL_refresh=50.0070;
-  NTSC_lines=262;
-  PAL_lines=312;
+  NTSC_REFRESH=60.0988;
+  PAL_REFRESH=50.0070;
+  NTSC_LINES=262;
+  PAL_LINES=312;
 
 var
   joy1,joy2,joy1_read,joy2_read,val_4016:byte;
   sram_present:boolean=false;
-  cart_name:string;
-  cartucho_cargado:boolean;
+  nv_ram_name:string;
 
 procedure eventos_nes;
 var
@@ -80,7 +79,6 @@ var
   frame:single;
   even:boolean;
 begin
-  if not(cartucho_cargado) then exit;
   init_controls(false,true,false,true);
   frame:=n2a03_0.m6502.tframes;
   even:=true;
@@ -286,6 +284,14 @@ begin
   joy1_read:=0;
   joy2_read:=0;
   val_4016:=0;
+end;
+
+procedure grabar_nes;
+var
+  nombre:string;
+begin
+nombre:=snapshot_main_write;
+Directory.nes:=ExtractFilePath(nombre);
 end;
 
 function llamadas_mapper(mapper:word):boolean;
@@ -537,7 +543,7 @@ begin
     end;
   end;
   if (nes_header.flags6 and 2)<>0 then begin
-    if read_file_size(cart_name,longitud) then read_file(cart_name,@memoria[$6000],longitud);
+    if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@memoria[$6000],longitud);
     sram_present:=true;
   end else sram_present:=false;
   if (nes_header.flags6 and 8)<>0 then ppu_nes.mirror:=MIRROR_FOUR_SCREEN
@@ -596,58 +602,52 @@ end;
 
 procedure abrir_nes;
 var
-  extension,nombre_file,RomFile:string;
+  extension,nombre_file,romfile:string;
   datos:pbyte;
   longitud:integer;
-  resultado:boolean;
-  crc:dword;
 begin
-  if not(OpenRom(StNes,RomFile)) then exit;
-  cartucho_cargado:=false;
-  //Primero, si tengo que guardar la SRAM por que ya he abierto un cartucho
-  if sram_present then write_file(cart_name,@memoria[$6000],$2000);
-  if @n2a03_0.additional_sound<>nil then n2a03_0.add_more_sound(nil);
-  extension:=extension_fichero(RomFile);
-  resultado:=false;
-  if extension='ZIP' then begin
-    if search_file_from_zip(RomFile,'*.nes',nombre_file,longitud,crc,true) then begin
-      getmem(datos,longitud);
-      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
-        else resultado:=true;
-    end;
-  end else if extension='NES' then begin
-              if read_file_size(RomFile,longitud) then begin
-                getmem(datos,longitud);
-                if not(read_file(RomFile,datos,longitud)) then freemem(datos)
-                  else resultado:=true;
-                nombre_file:=extractfilename(RomFile);
-              end;
-           end;
-  if not(resultado) then begin
-    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+  if not(openrom(romfile)) then exit;
+  getmem(datos,$400000);
+  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+    freemem(datos);
     exit;
   end;
-  //Abrirlo
-  //extension:=extension_fichero(nombre_file);
-  //if extension='DSP' then resultado:=abrir_coleco_snapshot(datos,longitud)
-  //  else
-  resultado:=abrir_cartucho(datos,longitud);
-  freemem(datos);
-  if resultado then begin
-    cart_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
-    nes_reset;
-    cartucho_cargado:=true;
-  end else begin
-    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-    nombre_file:='';
+  extension:=extension_fichero(nombre_file);
+  //Guardar la SRAM
+  if sram_present then write_file(nv_ram_name,@memoria[$6000],$2000);
+  if @n2a03_0.additional_sound<>nil then n2a03_0.add_more_sound(nil);
+  //if extension='DSP' then snapshot_r(datos,longitud);
+  if extension='NES' then begin
+    if abrir_cartucho(datos,longitud) then begin
+      nv_ram_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
+      nes_reset;
+    end else nombre_file:='';
   end;
+  freemem(datos);
   change_caption(nombre_file);
   Directory.Nes:=ExtractFilePath(romfile);
+end;
+
+procedure nes_cerrar;
+begin
+  if sram_present then write_file(nv_ram_name,@memoria[$6000],$2000);
+  if mapper_nes<>nil then freemem(mapper_nes);
+  if ppu_nes<>nil then freemem(ppu_nes);
+  mapper_nes:=nil;
+  ppu_nes:=nil;
 end;
 
 function iniciar_nes:boolean;
 begin
   iniciar_audio(false);
+  principal1.BitBtn10.Glyph:=nil;
+  principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
+  principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+  llamadas_maquina.bucle_general:=nes_principal;
+  llamadas_maquina.close:=nes_cerrar;
+  llamadas_maquina.reset:=nes_reset;
+  llamadas_maquina.cartuchos:=abrir_nes;
+  llamadas_maquina.fps_max:=NTSC_REFRESH;
   screen_init(1,512,1,true);
   screen_init(2,256,240);
   iniciar_video(256,240);
@@ -659,45 +659,6 @@ begin
   nes_init_palette;
   if main_vars.console_init then abrir_nes;
   iniciar_nes:=true;
-end;
-
-procedure grabar_nes;
-var
-  nombre:string;
-  correcto:boolean;
-  indice:byte;
-begin
-if SaveRom(StNES,nombre,indice) then begin
-  if FileExists(nombre) then begin
-    if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
-  end;
-  correcto:=grabar_nes_snapshot(nombre);
-  if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0)
-    else Directory.Nes:=ExtractFilePath(nombre);
-end;
-end;
-
-procedure nes_cerrar;
-begin
-  if sram_present then write_file(cart_name,@memoria[$6000],$2000);
-  if mapper_nes<>nil then freemem(mapper_nes);
-  if ppu_nes<>nil then freemem(ppu_nes);
-  mapper_nes:=nil;
-  ppu_nes:=nil;
-end;
-
-procedure cargar_nes;
-begin
-  principal1.BitBtn10.Glyph:=nil;
-  principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
-  principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-  llamadas_maquina.iniciar:=iniciar_nes;
-  llamadas_maquina.bucle_general:=nes_principal;
-  llamadas_maquina.close:=nes_cerrar;
-  llamadas_maquina.reset:=nes_reset;
-  llamadas_maquina.cartuchos:=abrir_nes;
-  llamadas_maquina.fps_max:=NTSC_refresh;
-  cartucho_cargado:=false;
 end;
 
 end.

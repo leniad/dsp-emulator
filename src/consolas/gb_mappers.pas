@@ -35,7 +35,6 @@ procedure gb_putbyte_huc1(direccion:word;valor:byte);
 function gb_get_ext_ram_huc1(direccion:word):byte;
 procedure gb_put_ext_ram_huc1(direccion:word;valor:byte);
 
-
 var
   gb_mapper:tgb_mapper;
   rom_bank:array[0..$1ff,$0..$3fff] of byte;
@@ -48,7 +47,6 @@ var
   mux_mmc01,mode_mmc01,mode_we:boolean;
   ramb_masked,ramb_we,romb_we,ramb_mmc01:byte;
   romb_mmc01,romb_base:word;
-
 
 implementation
 uses gb;

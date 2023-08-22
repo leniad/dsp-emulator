@@ -15,6 +15,8 @@ type
       procedure reset;
       procedure load_data(ptemp:pbyte);
       procedure write_data(file_name:string);
+      function save_snapshot(data_dest:pbyte):word;
+      procedure load_snapshot(data_dest:pbyte);
     private
       page:array[0..15] of byte;
       data:array[0..$7fff] of byte;
@@ -94,7 +96,7 @@ begin
 	self.page_offset:=0;
 	self.page_written_size:=0;
 	self.devsel_address_low:=false;
-  slave_address:=I2CMEM_SLAVE_ADDRESS;
+  self.slave_address:=I2CMEM_SLAVE_ADDRESS;
 end;
 
 procedure i2cmem_chip.load_data(ptemp:pbyte);
@@ -273,6 +275,75 @@ begin
 			self.sdar:=1;
 		end;
 	end;
+end;
+
+function i2cmem_chip.save_snapshot(data_dest:pbyte):word;
+var
+  temp:pbyte;
+  buffer:array[0..23] of byte;
+begin
+  temp:=data_dest;
+  copymemory(temp,@page,16);
+  inc(temp,16);
+  copymemory(temp,@data,$8000);
+  inc(temp,$8000);
+  buffer[0]:=byte(wc);
+  buffer[1]:=byte(devsel_address_low);
+  copymemory(@buffer[2],@byteaddr,2);
+  copymemory(@buffer[4],@data_size,2);
+  copymemory(@buffer[6],@address_mask,2);
+  buffer[8]:=page_written_size;
+  buffer[9]:=page_offset;
+  buffer[10]:=addresshigh;
+  buffer[11]:=write_page_size;
+  buffer[12]:=slave_address;
+  buffer[13]:=devsel;
+  buffer[14]:=scl;
+  buffer[15]:=sdaw;
+  buffer[16]:=shift;
+  buffer[17]:=bits;
+  buffer[18]:=state;
+  buffer[19]:=sdar;
+  buffer[20]:=e0;
+  buffer[21]:=e1;
+  buffer[22]:=e2;
+  buffer[23]:=read_page_size;
+  copymemory(temp,@buffer[0],24);
+  save_snapshot:=16+$8000+24;
+end;
+
+procedure i2cmem_chip.load_snapshot(data_dest:pbyte);
+var
+  temp:pbyte;
+  buffer:array[0..23] of byte;
+begin
+  temp:=data_dest;
+  copymemory(@page,temp,16);
+  inc(temp,16);
+  copymemory(@data,temp,$8000);
+  inc(temp,$8000);
+  copymemory(@buffer,temp,24);
+  wc:=buffer[0]<>0;
+  devsel_address_low:=buffer[1]<>0;
+  copymemory(@byteaddr,@buffer[2],2);
+  copymemory(@data_size,@buffer[4],2);
+  copymemory(@address_mask,@buffer[6],2);
+  page_written_size:=buffer[8];
+  page_offset:=buffer[9];
+  addresshigh:=buffer[10];
+  write_page_size:=buffer[11];
+  slave_address:=buffer[12];
+  devsel:=buffer[13];
+  scl:=buffer[14];
+  sdaw:=buffer[15];
+  shift:=buffer[16];
+  bits:=buffer[17];
+  state:=buffer[18];
+  sdar:=buffer[19];
+  e0:=buffer[20];
+  e1:=buffer[21];
+  e2:=buffer[22];
+  read_page_size:=buffer[23];
 end;
 
 end.

@@ -1297,7 +1297,7 @@ case main_vars.tipo_maquina of
           //Sound
           namco_snd_0:=namco_snd_chip.create(3);
           //cargar roms
-          if not(roms_load(@mem_misc,xevious_sub2,true,'xevious.zip')) then exit;
+          if not(roms_load(@mem_misc,xevious_sub2,true,true,'xevious.zip')) then exit;
           if main_vars.tipo_maquina=231 then begin
             if not(roms_load(@memoria,xevious_rom)) then exit;
             if not(roms_load(@mem_snd,xevious_sub)) then exit;
@@ -1306,28 +1306,28 @@ case main_vars.tipo_maquina of
             if not(roms_load(@mem_snd,sxevious_sub)) then exit;
           end;
           //cargar sonido & iniciar_sonido
-          if not(roms_load(namco_snd_0.get_wave_dir,xevious_sound,true,'xevious.zip')) then exit;
+          if not(roms_load(namco_snd_0.get_wave_dir,xevious_sound,true,true,'xevious.zip')) then exit;
           //chars
-          if not(roms_load(@memoria_temp,xevious_char,true,'xevious.zip')) then exit;
+          if not(roms_load(@memoria_temp,xevious_char,true,true,'xevious.zip')) then exit;
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(1,0,8*8,0);
           convert_gfx(0,0,@memoria_temp,@pc_x_xevious,@ps_y,true,false);
           //convertir sprites
           fillchar(memoria_temp,$a000,0);
-          if not(roms_load(@memoria_temp,xevious_sprites,true,'xevious.zip')) then exit;
+          if not(roms_load(@memoria_temp,xevious_sprites,true,true,'xevious.zip')) then exit;
           for f:=$5000 to $6fff do memoria_temp[f+$2000]:=memoria_temp[f] shr 4;
           init_gfx(2,16,16,$140);
           gfx_set_desc_data(3,0,64*8,($140*64*8)+4,0,4);
           convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
           //tiles
-          if not(roms_load(@xevious_tiles,xevious_bg_tiles,true,'xevious.zip')) then exit;
-          if not(roms_load(@memoria_temp,xevious_bg,true,'xevious.zip')) then exit;
+          if not(roms_load(@xevious_tiles,xevious_bg_tiles,true,true,'xevious.zip')) then exit;
+          if not(roms_load(@memoria_temp,xevious_bg,true,true,'xevious.zip')) then exit;
           init_gfx(1,8,8,$200);
           gfx_set_desc_data(2,0,8*8,0,$200*8*8);
           convert_gfx(1,0,@memoria_temp,@pc_x_xevious,@ps_y,true,false);
           //poner la paleta
-          if not(roms_load(@memoria_temp,xevious_prom,true,'xevious.zip')) then exit;
+          if not(roms_load(@memoria_temp,xevious_prom,true,true,'xevious.zip')) then exit;
           for f:=0 to $ff do begin
               ctemp0:=(memoria_temp[f] shr 0) and 1;
               ctemp1:=(memoria_temp[f] shr 1) and 1;

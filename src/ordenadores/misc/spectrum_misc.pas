@@ -604,7 +604,7 @@ var
   correcto:boolean;
   indice:byte;
 begin
-if SaveRom(StSpectrum,nombre,indice) then begin
+if saverom(nombre,indice) then begin
         case indice of
           1:nombre:=changefileext(nombre,'.szx');
           2:nombre:=changefileext(nombre,'.z80');

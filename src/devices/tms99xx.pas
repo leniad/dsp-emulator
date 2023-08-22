@@ -45,6 +45,9 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
         procedure draw_mode23(linea:byte);
     end;
 
+const
+  TMS99X8_SNAPSHOT_SIZE=$10+$4000+29;
+
 var
   tms_0:tms99xx_chip;
 
@@ -95,7 +98,7 @@ begin
   buffer[26]:=byte(self.espera_read);
   //copymemory(@buffer[27],@TMS9918A_VRAM_SIZE,2);
   copymemory(temp,@buffer[0],29);
-  save_snapshot:=$10+$4000+29;
+  save_snapshot:=TMS99X8_SNAPSHOT_SIZE;
 end;
 
 procedure tms99xx_chip.load_snapshot(data:pbyte);

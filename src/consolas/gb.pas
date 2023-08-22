@@ -14,6 +14,8 @@ type
             is_gbc:boolean;
   end;
   tgb_head=packed record
+    none1:array[0..$103] of byte;
+    logo:array[0..$2f] of byte;
     title:array[0..10] of ansichar;
     manu:array[0..3] of ansichar;
     cgb_flag:byte;
@@ -30,15 +32,15 @@ type
     cart_size:word;
   end;
 
-procedure cargar_gb;
+function iniciar_gb:boolean;
 
 var
   ram_enable:boolean;
-  gb_head:^tgb_head;
+  gb_head:tgb_head;
   gb_palette:byte;
 
 implementation
-uses principal;
+uses principal,snapshot;
 
 const
   color_pal:array[0..1,0..3] of tcolor=(
@@ -62,8 +64,8 @@ var
  enable_bios,rom_exist,bgcolor_inc,spcolor_inc,lcd_ena,hdma_ena:boolean;
  scroll_y_last,irq_ena,joystick,vram_nbank,wram_nbank,bgcolor_index,spcolor_index:byte;
  scroll_y_pos,dma_src,dma_dst:word;
- nombre_rom:string;
- oam_dma,haz_dma,hay_nvram,cartucho_cargado:boolean;
+ nv_ram_name:string;
+ oam_dma,haz_dma,hay_nvram:boolean;
  oam_dma_pos,hdma_size,gb_timer,sprites_time:byte;
  gameboy:tgameboy;
 
@@ -578,9 +580,8 @@ end;
 
 procedure cerrar_gb;
 begin
-if hay_nvram then write_file(nombre_rom,@ram_bank[0,0],$2000);
+if hay_nvram then write_file(nv_ram_name,@ram_bank[0,0],$2000);
 gameboy_sound_close;
-freemem(gb_head);
 end;
 
 function leer_io(direccion:byte):byte;
@@ -950,7 +951,6 @@ procedure gb_principal;
 var
   frame_m:single;
 begin
-if not(cartucho_cargado) then exit;
 init_controls(false,false,false,true);
 frame_m:=lr35902_0.tframes;
 while EmuStatus=EsRuning do begin
@@ -1176,23 +1176,13 @@ begin
  sprt1_pal:=0;
  window_x:=0;
  window_y:=0;
-
- {
- tcontrol:byte;
- bgc_pal,spc_pal:array[0..$3f] of word;
- enable_bios,rom_exist,bgcolor_inc,spcolor_inc,hdma_ena:boolean;
- bgcolor_index,spcolor_index:byte;
- dma_src,dma_dst:word;
- gb_timer,sprites_time:byte;}
-
-
  if not(rom_exist) then begin
    enable_bios:=false;
    lr_reg.pc:=$100;
    lr_reg.sp:=$fffe;
    lr_reg.f.z:=true;
    lr_reg.f.n:=false;
-   if (gb_head.cgb_flag and $80)<>0 then begin
+   if not(gameboy.is_gbc) then begin
      lr_reg.a:=$11;
      lr_reg.f.h:=false;
      lr_reg.f.c:=false;
@@ -1204,8 +1194,8 @@ begin
      lr_reg.f.h:=true;
      lr_reg.f.c:=true;
      lr_reg.BC.w:=$0013;
-     lr_reg.DE.w:=$00D8;
-     lr_reg.HL.w:=$014D;
+     lr_reg.DE.w:=$00d8;
+     lr_reg.HL.w:=$014d;
      escribe_io(05,00);
      escribe_io(06,00);
      escribe_io(07,00);
@@ -1252,12 +1242,6 @@ begin
   end;
 end;
 
-type
-  tgb_logo=packed record
-    none1:array[0..$103] of byte;
-    logo:array[0..$2f] of byte;
-  end;
-
 procedure abrir_gb;
 const
   main_logo:array[0..$2f] of byte=(
@@ -1265,100 +1249,86 @@ const
   $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99,
   $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E);
 var
-  mal,resultado:boolean;
-  extension,nombre_file,RomFile,dir,cadena:string;
+  unlicensed:boolean;
+  extension,nombre_file,romfile,cadena:string;
   datos,ptemp:pbyte;
   longitud:integer;
   f,h:word;
   colores:tpaleta;
-  gb_logo:^tgb_logo;
-  crc32,crc:dword;
+  crc32:dword;
 begin
-  if not(OpenRom(StGb,RomFile)) then exit;
-  getmem(gb_logo,sizeof(tgb_logo));
-  gameboy.read_io:=leer_io;
-  gameboy.write_io:=escribe_io;
-  gameboy.video_render:=update_video_gb;
-  gameboy.is_gbc:=false;
-  lr35902_0.change_despues_instruccion(gb_despues_instruccion);
-  extension:=extension_fichero(RomFile);
-  resultado:=false;
-  if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.gb',nombre_file,longitud,crc,false)) then
-      if not(search_file_from_zip(RomFile,'*.gbc',nombre_file,longitud,crc,false)) then begin
-        MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-        exit;
-      end;
-    getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      freemem(gb_logo);
-    end else resultado:=true;
-  end else begin
-    if ((extension<>'GB') and (extension<>'GBC')) then begin
-      MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-      exit;
-    end;
-    if read_file_size(RomFile,longitud) then begin
-      getmem(datos,longitud);
-      if not(read_file(RomFile,datos,longitud)) then begin
-        freemem(datos);
-        freemem(gb_logo);
-      end else resultado:=true;
-      nombre_file:=extractfilename(RomFile);
-    end;
-  end;
-  if not(resultado) then begin
-    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+  if not(openrom(romfile)) then exit;
+  getmem(datos,$800000); //8Gb??
+  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+    freemem(datos);
     exit;
   end;
-  ptemp:=datos;
-  //Comprobar si hay una cabecera extra delante, detras me da igual...
-  copymemory(gb_logo,ptemp,sizeof(tgb_logo));
-  if (longitud mod $2000)<>0 then begin
-    //Esta delante? --> No estara el logo de Nintendo
-    for f:=0 to $2f do begin
-       mal:=(main_logo[f]=gb_logo.logo[f]);
-       if not(mal) then break;
-    end;
-    if not(mal) then inc(ptemp,longitud mod $2000);
-  end;
-  inc(ptemp,sizeof(tgb_logo));
-  copymemory(gb_head,ptemp,sizeof(tgb_head));
-  dec(ptemp,sizeof(tgb_logo));
-  //Is GBC?
-  if (gb_head.cgb_flag and $80)<>0 then begin
-    gameboy.read_io:=leer_io_gbc;
-    gameboy.write_io:=escribe_io_gbc;
-    gameboy.video_render:=update_video_gbc;
-    gameboy.is_gbc:=true;
-    lr35902_0.change_despues_instruccion(gbc_despues_instruccion);
-  end;
-  if hay_nvram then write_file(nombre_rom,@ram_bank[0,0],$2000);
-  nombre_rom:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
+  extension:=extension_fichero(nombre_file);
+  //Guardar NVRAM si la hay...
+  if hay_nvram then write_file(nv_ram_name,@ram_bank[0,0],$2000);
   hay_nvram:=false;
-  crc32:=calc_crc(ptemp,longitud);
-  if longitud<32768 then begin
-    if longitud>16384 then begin
-      gb_head.rom_size:=2;
-      gb_head.cart_size:=2;
-    end else begin
-      gb_head.rom_size:=1;
-      gb_head.cart_size:=1;
+  unlicensed:=false;
+  if extension='DSP' then snapshot_r(datos,longitud)
+  else begin //Cartucho
+    ptemp:=datos;
+    //Copiar datos del cartucho
+    copymemory(@gb_head,ptemp,sizeof(tgb_head));
+    //Comprobar si está el logo de nintendo... Si no está, unlicensed
+    for f:=0 to $2f do begin
+       unlicensed:=(main_logo[f]<>gb_head.logo[f]);
+       if unlicensed then break;
     end;
+    rom_exist:=false;
+    if gb_head.rom_size=0 then gb_head.rom_size:=longitud div $20000;
+    if longitud<32768 then begin
+      if longitud>16384 then begin
+        gb_head.rom_size:=2;
+        gb_head.cart_size:=2;
+      end else begin
+        gb_head.rom_size:=1;
+        gb_head.cart_size:=1;
+      end;
+    end else begin
+      gb_head.cart_size:=(32 shl gb_head.rom_size) div 16;
+    end;
+    for f:=0 to (gb_head.cart_size-1) do begin
+      copymemory(@rom_bank[f,0],ptemp,$4000);
+      inc(ptemp,$4000);
+    end;
+  end;
+  if (gb_head.cgb_flag and $80)<>0 then begin //GameBoy Color
+      gameboy.read_io:=leer_io_gbc;
+      gameboy.write_io:=escribe_io_gbc;
+      gameboy.video_render:=update_video_gbc;
+      gameboy.is_gbc:=true;
+      lr35902_0.change_despues_instruccion(gbc_despues_instruccion);
+      cadena:=gb_head.title;
+      if not(unlicensed) then rom_exist:=roms_load(@bios_rom[0],gbc_rom,false,true,'gbcolor.zip');
+      //Iniciar Paletas
+      for h:=0 to $7fff do begin
+        colores[h].r:=(h and $1F) shl 3;
+    	  colores[h].g:=((h shr 5) and $1f) shl 3;
+    	  colores[h].b:=((h shr 10) and $1f) shl 3;
+      end;
+      set_pal(colores,$8000);
+      for f:=0 to $1f do bgc_pal[f]:=$7fff;
+      for f:=0 to $1f do spc_pal[f]:=0;
   end else begin
-    gb_head.cart_size:=(32 shl gb_head.rom_size) div 16;
+      gameboy.read_io:=leer_io;
+      gameboy.write_io:=escribe_io;
+      gameboy.video_render:=update_video_gb;
+      gameboy.is_gbc:=false;
+      lr35902_0.change_despues_instruccion(gb_despues_instruccion);
+      if not(unlicensed) then rom_exist:=roms_load(@bios_rom[0],gb_rom,false);
+      cadena:=gb_head.title+gb_head.manu+ansichar(gb_head.cgb_flag);
   end;
-  for f:=0 to (gb_head.cart_size-1) do begin
-    copymemory(@rom_bank[f,0],ptemp,$4000);
-    inc(ptemp,$4000);
-  end;
+  crc32:=calc_crc(datos,longitud);
+  freemem(datos);
   gb_mapper.ext_ram_getbyte:=nil;
   gb_mapper.ext_ram_putbyte:=nil;
   gb_mapper.rom_putbyte:=nil;
-  mal:=true;
   case gb_head.cart_type of
-    0:mal:=false; //No mapper
+    0:; //No mapper
     $01..$03:begin  //mbc1
           gb_mapper.rom_putbyte:=gb_putbyte_mbc1;
           case crc32 of
@@ -1380,11 +1350,10 @@ begin
             3:begin //RAM + Battery
                 gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
                 gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
-                if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@ram_bank[0,0],longitud);
                 hay_nvram:=true;
               end;
           end;
-        mal:=false;
       end;
       $5,$6:begin //mbc2
         gb_mapper.rom_putbyte:=gb_putbyte_mbc2;
@@ -1392,28 +1361,26 @@ begin
         gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc2;
         gb_head.ram_size:=0;
         if gb_head.cart_type=6 then begin //Battery (No extra RAM!)
-           if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+           if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@ram_bank[0,0],longitud);
            hay_nvram:=true;
         end;
-        mal:=false;
       end;
       $b..$d:begin //mmm01
             gb_mapper.rom_putbyte:=gb_putbyte_mmm01;
             gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mmm01;
             gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mmm01;
-            mal:=false;
           end;
       $f..$13:begin //mbc3
             gb_mapper.rom_putbyte:=gb_putbyte_mbc3;
             case gb_head.cart_type of
                 $f:begin //Timer + Battery
-                      if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                      if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@ram_bank[0,0],longitud);
                       hay_nvram:=true;
                    end;
                 $10,$13:begin //[Timer] + RAM + Battery
                       gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc3;
                       gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc3;
-                      if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                      if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@ram_bank[0,0],longitud);
                       hay_nvram:=true;
                     end;
                 $11:;
@@ -1422,7 +1389,6 @@ begin
                       gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc3;
                 end;
             end;
-            mal:=false;
           end;
       $19..$1e:begin //mbc5
           gb_mapper.rom_putbyte:=gb_putbyte_mbc5;
@@ -1435,84 +1401,29 @@ begin
             $1b,$1e:begin //RAM + Battery + [Rumble]
                       gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc5;
                       gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc5;
-                      if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                      if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@ram_bank[0,0],longitud);
                       hay_nvram:=true;
                     end;
           end;
-          mal:=false;
          end;
       $22:begin //RAM + Acelerometro
              gb_mapper.rom_putbyte:=gb_putbyte_mbc7;
              gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc7;
              gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc7;
-             mal:=false;
           end;
       $ff:begin //HuC-1 (RAM+Battery)
             gb_mapper.rom_putbyte:=gb_putbyte_huc1;
             gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_huc1;
             gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_huc1;
-            if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+            if read_file_size(nv_ram_name,longitud) then read_file(nv_ram_name,@ram_bank[0,0],longitud);
             hay_nvram:=true;
-            mal:=false;
           end;
       else MessageDlg('Mapper '+inttohex(gb_head.cart_type,2)+' no implementado', mtInformation,[mbOk], 0);
   end;
-  cadena:='';
-  if not(mal) then begin
-    if (gb_head.cgb_flag and $80)<>0 then begin //GameBoy Color
-      dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gbcolor.zip')];
-      cadena:=gb_head.title;
-      rom_exist:=false;
-      if carga_rom_zip(dir+'gbcolor.zip',gbc_rom[0].n,@bios_rom[0],gbc_rom[0].l,gbc_rom[0].crc,false) then
-        if rom_exist or carga_rom_zip(dir+'gbcolor.zip',gbc_rom[1].n,@bios_rom[gbc_rom[1].p],gbc_rom[1].l,gbc_rom[1].crc,false) then rom_exist:=true;
-      //Iniciar Paletas
-      for h:=0 to $7fff do begin
-        colores[h].r:=(h and $1F) shl 3;
-    	  colores[h].g:=((h shr 5) and $1F) shl 3;
-    	  colores[h].b:=((h shr 10) and $1F) shl 3;
-      end;
-      set_pal(colores,$8000);
-      for f:=0 to $1f do bgc_pal[f]:=$7fff;
-      for f:=0 to $1f do spc_pal[f]:=0;
-    end else begin
-      dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gameboy.zip')];
-      rom_exist:=carga_rom_zip(dir+'gameboy.zip',gb_rom.n,@bios_rom[0],gb_rom.l,gb_rom.crc,false);
-      cadena:=gb_head.title+gb_head.manu+ansichar(gb_head.cgb_flag);
-    end;
-  end;
+  if extension<>'DSP' then reset_gb;
+  if hay_nvram then nv_ram_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
   change_caption(cadena);
-  cartucho_cargado:=true;
-  freemem(datos);
-  freemem(gb_logo);
-  reset_gb;
   directory.GameBoy:=ExtractFilePath(romfile);
-end;
-
-function iniciar_gb:boolean;
-begin
-iniciar_audio(true);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,1,true);
-screen_init(2,256+166+7,154);  //256 pantalla normal + 166 window + 7 de desplazamiento
-iniciar_video(160,144);
-//Main CPU
-lr35902_0:=cpu_lr.Create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
-lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
-lr35902_0.init_sound(gameboy_sound_update);
-//Timers internos de la GB
-timers.init(0,GB_CLOCK/16384,gb_main_timer,nil,true);
-gb_timer:=timers.init(0,GB_CLOCK/4096,gb_prog_timer,nil,false);
-//Sound Chips
-gameboy_sound_ini(FREQ_BASE_AUDIO);
-//cargar roms
-hay_nvram:=false;
-//final
-getmem(gb_head,sizeof(tgb_head));
-fill_full_screen(PANT_TEMP,$100);
-actualiza_video;
-reset_gb;
-if main_vars.console_init then abrir_gb;
-iniciar_gb:=true;
 end;
 
 procedure gb_config_call;
@@ -1535,19 +1446,39 @@ begin
   end;
 end;
 
-procedure Cargar_gb;
+function iniciar_gb:boolean;
 begin
+iniciar_audio(true);
 principal1.BitBtn10.Glyph:=nil;
 principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-llamadas_maquina.iniciar:=iniciar_gb;
 llamadas_maquina.bucle_general:=gb_principal;
 llamadas_maquina.close:=cerrar_gb;
 llamadas_maquina.reset:=reset_gb;
 llamadas_maquina.fps_max:=59.727500569605832763727500569606;
 llamadas_maquina.cartuchos:=abrir_gb;
-cartucho_cargado:=false;
 llamadas_maquina.configurar:=gb_config_call;
+//Pantallas:  principal+char y sprites
+screen_init(1,256,1,true);
+screen_init(2,256+166+7,154);  //256 pantalla normal + 166 window + 7 de desplazamiento
+iniciar_video(160,144);
+//Main CPU
+lr35902_0:=cpu_lr.Create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
+lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
+lr35902_0.init_sound(gameboy_sound_update);
+lr35902_0.change_despues_instruccion(gb_despues_instruccion);
+gameboy.read_io:=leer_io;
+gameboy.write_io:=escribe_io;
+gameboy.video_render:=update_video_gb;
+gameboy.is_gbc:=false;
+//Timers internos de la GB
+timers.init(0,GB_CLOCK/16384,gb_main_timer,nil,true);
+gb_timer:=timers.init(0,GB_CLOCK/4096,gb_prog_timer,nil,false);
+//Sound Chips
+gameboy_sound_ini;
+reset_gb;
+if main_vars.console_init then abrir_gb;
+iniciar_gb:=true;
 end;
 
 end.

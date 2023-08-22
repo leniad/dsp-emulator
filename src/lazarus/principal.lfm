@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 432
+  Left = 4179
   Height = 389
-  Top = 190
+  Top = 615
   Width = 400
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -14507,6 +14507,14 @@ object principal1: Tprincipal1
         end
         object genesis1: TMenuItem
           Caption = 'Genesis/Megadrive'
+          OnClick = CambiarMaquina
+        end
+        object pv1000: TMenuItem
+          Caption = 'Casio PV-1000'
+          OnClick = CambiarMaquina
+        end
+        object pv2000: TMenuItem
+          Caption = 'Casio PV-2000'
           OnClick = CambiarMaquina
         end
       end

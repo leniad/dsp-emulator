@@ -1,7 +1,6 @@
 unit init_games;
 
 interface
-
 uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
@@ -38,7 +37,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
-  oric_hw,missilecommand_hw,gaplus_hw;
+  oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000;
 
 type
   tgame_desc=record
@@ -66,7 +65,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=368;
+  GAMES_CONT=370;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -431,11 +430,13 @@ const
   (name:'GameBoy';year:'198X';snd:1;hi:false;zip:'gameboy';grid:1002;company:'Nintendo';rom:@gameboy;tipo:CONSOLE),
   (name:'GameBoy Color';year:'198X';snd:1;hi:false;zip:'gbcolor';grid:1002;company:'Nintendo';rom:@gbcolor;tipo:CONSOLE),
   (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-';tipo:CONSOLE),
-  (name:'Sega Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_;tipo:CONSOLE),
+  (name:'Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_;tipo:CONSOLE),
   (name:'SG-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega';tipo:CONSOLE),
-  (name:'Sega GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega';tipo:CONSOLE),
+  (name:'GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega';tipo:CONSOLE),
   (name:'Super Cassette Vision';year:'1984';snd:1;hi:false;zip:'scv';grid:1007;company:'Epoch';rom:@scv;tipo:CONSOLE),
-  (name:'Sega Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega';tipo:CONSOLE),
+  (name:'Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega';tipo:CONSOLE),
+  (name:'PV-1000';year:'1983';snd:1;hi:false;zip:'';grid:1009;company:'Casio';tipo:CONSOLE),
+  (name:'PV-2000';year:'1983';snd:1;hi:false;zip:'pv2000';grid:1010;company:'Casio';rom:@pv2000_rom;tipo:CONSOLE),
   //G&W
   (name:'Donkey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101;tipo:GNW),
   (name:'Donkey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55;tipo:GNW),
@@ -451,7 +452,7 @@ procedure cargar_maquina(tmaquina:word);
 function tipo_cambio_maquina(sender:TObject):word;
 
 implementation
-uses principal;
+uses principal,misc_functions;
 
 procedure load_game(numero:word);
 begin
@@ -820,6 +821,8 @@ case numero of
   1006:principal1.CambiarMaquina(principal1.SegaGG1);
   1007:principal1.CambiarMaquina(principal1.SCV1);
   1008:principal1.CambiarMaquina(principal1.genesis1);
+  1009:principal1.CambiarMaquina(principal1.pv1000);
+  1010:principal1.CambiarMaquina(principal1.pv2000);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
@@ -1195,6 +1198,8 @@ principal1.sg10001.checked:=false;
 principal1.segagg1.checked:=false;
 principal1.scv1.checked:=false;
 principal1.genesis1.checked:=false;
+principal1.pv1000.checked:=false;
+principal1.pv2000.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
@@ -1223,7 +1228,7 @@ principal1.BitBtn12.Enabled:=true;
 principal1.BitBtn14.Enabled:=true;
 principal1.BitBtn8.enabled:=false; //Arcade config
 principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[8];
-main_vars.is_arcade:=false;
+main_vars.system_type:=SARCADE;
 case driver of
   0..6:begin
           principal1.Panel2.visible:=true;
@@ -1234,6 +1239,7 @@ case driver of
           principal1.BitBtn9.visible:=true; //Load Snapshot
           principal1.BitBtn12.visible:=true; //Poke
           principal1.BitBtn14.visible:=true; //Fast
+          main_vars.system_type:=SSPECTRUM;
        end;
   7..9:begin  //Amstrad CPC
           principal1.Panel2.visible:=true;
@@ -1242,6 +1248,7 @@ case driver of
           principal1.BitBtn10.visible:=true;  //Disco
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
+          main_vars.system_type:=SAMSTRADCPC;
        end;
   3000:begin //C64
           principal1.Panel2.visible:=true;
@@ -1250,6 +1257,7 @@ case driver of
           principal1.BitBtn10.enabled:=true;
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
+          main_vars.system_type:=SC64;
        end;
   3001,3002:begin //Oric
           principal1.Panel2.visible:=true;
@@ -1259,35 +1267,51 @@ case driver of
           principal1.BitBtn10.enabled:=true;
           principal1.BitBtn11.visible:=false; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
+          main_vars.system_type:=SORIC;
        end;
   10..999:begin
             principal1.BitBtn8.enabled:=true;  //Arcade
-            main_vars.is_arcade:=true;
           end;
-  1000,1003,1005,1006,1007,1008:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
+  1000,1008:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          case driver of
+            1000:main_vars.system_type:=SNES;
+            1008:main_vars.system_type:=SGENESIS;
+          end;
        end;
-  1001:begin //Coleco
+  1001,1003,1005,1006,1007,1009,1010:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartcuho
-          principal1.BitBtn11.visible:=true; //Load Snapshot
+          principal1.BitBtn11.visible:=true; //Snapshot
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          case driver of
+            1001:main_vars.system_type:=SCOLECO;
+            1003:main_vars.system_type:=SCHIP8;
+            1005:main_vars.system_type:=SSG1000;
+            1006:main_vars.system_type:=SGG;
+            1007:main_vars.system_type:=SSUPERCASSETTE;
+            1009:main_vars.system_type:=SPV1000;
+            1010:main_vars.system_type:=SPV2000;
+          end;
        end;
   1002:begin
-          principal1.BitBtn1.visible:=true;
           principal1.Panel2.visible:=true;
+          principal1.BitBtn1.visible:=true;   //Config
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          main_vars.system_type:=SGB;
        end;
-  1004:begin //SMS
+  1004:begin
           principal1.Panel2.visible:=true;
+          principal1.BitBtn1.visible:=true; //Config
           principal1.BitBtn10.visible:=true; //Cartucho
-          principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+          principal1.BitBtn11.visible:=true; //Snapshot
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          main_vars.system_type:=SSMS;
        end;
-  2000..2002:; //G&W
+  2000..2002:main_vars.system_type:=SGANDW; //G&W
 end;
 end;
 
@@ -1474,15 +1498,17 @@ case tmaquina of
   344,345:llamadas_maquina.iniciar:=iniciar_missilec;
   349:llamadas_maquina.iniciar:=iniciar_gaplus;
   //consolas
-  1000:Cargar_NES;
-  1001:Cargar_coleco;
-  1002:Cargar_gb;
-  1003:Cargar_chip8;
-  1004:Cargar_SMS;
-  1005:Cargar_sg;
-  1006:Cargar_gg;
-  1007:Cargar_scv;
+  1000:llamadas_maquina.iniciar:=iniciar_nes;
+  1001:llamadas_maquina.iniciar:=iniciar_coleco;
+  1002:llamadas_maquina.iniciar:=iniciar_gb;
+  1003:llamadas_maquina.iniciar:=iniciar_chip8;
+  1004:llamadas_maquina.iniciar:=iniciar_sms;
+  1005:llamadas_maquina.iniciar:=iniciar_sg;
+  1006:llamadas_maquina.iniciar:=iniciar_gg;
+  1007:llamadas_maquina.iniciar:=iniciar_scv;
   1008:Cargar_genesis;
+  1009:llamadas_maquina.iniciar:=iniciar_pv1000;
+  1010:llamadas_maquina.iniciar:=iniciar_pv2000;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
@@ -2950,6 +2976,14 @@ end;
 if sender=principal1.genesis1 then begin
   tipo:=1008;
   principal1.genesis1.Checked:=true;
+end;
+if sender=principal1.pv1000 then begin
+  tipo:=1009;
+  principal1.pv1000.Checked:=true;
+end;
+if sender=principal1.pv2000 then begin
+  tipo:=1010;
+  principal1.pv2000.Checked:=true;
 end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin

@@ -50,7 +50,6 @@ type
         f,f2:band_z80;
         im:byte;
   end;
-
   npreg_z80=^nreg_z80;
   cpu_z80=class(cpu_class)
           constructor create(clock:dword;frames_div:single);

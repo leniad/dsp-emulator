@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 218
+  ClientHeight = 228
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 157
+    Height = 167
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 157
+    Height = 167
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 148
+    ExplicitHeight = 153
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 199
+    Top = 209
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 190
+    ExplicitTop = 195
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -3946,6 +3946,14 @@ object principal1: Tprincipal1
         end
         object genesis1: TMenuItem
           Caption = 'Sega Genesis/Megadrive'
+          OnClick = CambiarMaquina
+        end
+        object pv1000: TMenuItem
+          Caption = 'Casio PV-1000'
+          OnClick = CambiarMaquina
+        end
+        object pv2000: TMenuItem
+          Caption = 'Casio PV-2000'
           OnClick = CambiarMaquina
         end
       end

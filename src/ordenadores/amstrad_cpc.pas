@@ -709,7 +709,7 @@ for g:=0 to 1 do begin //Ocho pixels por cada 4T
           ptemp^:=paleta[cpc_ga.pal[p2]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p2]];
-          inc(ptemp);
+          //inc(ptemp);
       end;
       1:begin
           // 3 7      2 6      1 5      0 4
@@ -724,7 +724,7 @@ for g:=0 to 1 do begin //Ocho pixels por cada 4T
           ptemp^:=paleta[cpc_ga.pal[p3]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p4]];
-          inc(ptemp);
+          //inc(ptemp);
         end;
       2:begin
           // 7 6 5 4 3 2 1 0
@@ -763,7 +763,7 @@ for g:=0 to 1 do begin //Ocho pixels por cada 4T
           temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
           temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
           ptemp^:=temp1 or temp2 or temp3;
-          inc(ptemp);
+          //inc(ptemp);
       end;
     end;
     putpixel(cpc_crt.borde+cpc_crt.pant_x,cpc_line,4,punbuf,1);
@@ -956,65 +956,39 @@ end;
 procedure amstrad_tapes;
 var
   datos:pbyte;
-  file_size:integer;
-  nombre_zip,nombre_file,extension,cadena:string;
+  longitud:integer;
+  romfile,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
-  crc:dword;
 begin
-  if not(OpenRom(StAmstrad,nombre_zip)) then exit;
-  cpc_dandanator.enabled:=false;
-  extension:=extension_fichero(nombre_zip);
-  resultado:=false;
-  if extension='ZIP' then begin
-      if not(search_file_from_zip(nombre_zip,'*.cdt',nombre_file,file_size,crc,false)) then
-        if not(search_file_from_zip(nombre_zip,'*.tzx',nombre_file,file_size,crc,false)) then
-          if not(search_file_from_zip(nombre_zip,'*.csw',nombre_file,file_size,crc,false)) then
-            if not(search_file_from_zip(nombre_zip,'*.rom',nombre_file,file_size,crc,false)) then
-              if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then begin
-                MessageDlg('Error cargando cinta/CSW/WAV.'+chr(10)+chr(13)+'Error loading tape/CSW/WAV.', mtInformation,[mbOk], 0);
-                exit;
-              end;
-      getmem(datos,file_size);
-      if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then freemem(datos)
-        else resultado:=true;
-  end else begin
-      if read_file_size(nombre_zip,file_size) then begin
-        getmem(datos,file_size);
-        if not(read_file(nombre_zip,datos,file_size)) then freemem(datos)
-          else resultado:=true;
-        nombre_file:=extractfilename(nombre_zip);
-      end;
-  end;
-  if not(resultado) then begin
-    MessageDlg('Error cargando cinta/CSW/WAV.'+chr(10)+chr(13)+'Error loading tape/CSW/WAV.', mtInformation,[mbOk], 0);
+  if not(OpenRom(romfile)) then exit;
+  getmem(datos,$400000);
+  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+    freemem(datos);
     exit;
   end;
   cadena:='';
   extension:=extension_fichero(nombre_file);
   resultado:=false;
   es_cinta:=true;
-  if extension='CDT' then resultado:=abrir_cdt(datos,file_size);
-  if extension='TZX' then resultado:=abrir_tzx(datos,file_size);
-  if extension='CSW' then resultado:=abrir_csw(datos,file_size);
-  if extension='WAV' then resultado:=abrir_wav(datos,file_size,4000000);
+  cpc_dandanator.enabled:=false;
+  if extension='CDT' then resultado:=abrir_cdt(datos,longitud);
+  if extension='TZX' then resultado:=abrir_tzx(datos,longitud);
+  if extension='CSW' then resultado:=abrir_csw(datos,longitud);
+  if extension='WAV' then resultado:=abrir_wav(datos,longitud,4000000);
   if extension='ROM' then begin
-    resultado:=abrir_dandanator(datos,file_size);
+    resultado:=abrir_dandanator(datos,longitud);
     es_cinta:=false;
     if resultado then begin
         cadena:='ROM: '+nombre_file;
         cpc_reset;
-      end else begin
-        MessageDlg('Error cargando ROM.'+chr(10)+chr(13)+'Error loading the ROM.', mtInformation,[mbOk], 0);
-      end;
+    end else MessageDlg('Error cargando ROM.'+chr(10)+chr(13)+'Error loading the ROM.', mtInformation,[mbOk], 0);
   end;
   if extension='SNA' then begin
-      resultado:=abrir_sna_cpc(datos,file_size);
+      resultado:=abrir_sna_cpc(datos,longitud);
       es_cinta:=false;
       if resultado then begin
         cadena:='Snap: '+nombre_file;
-      end else begin
-        MessageDlg('Error cargando snapshot.'+chr(10)+chr(13)+'Error loading the snapshot.', mtInformation,[mbOk], 0);
-      end;
+      end else MessageDlg('Error cargando snapshot.'+chr(10)+chr(13)+'Error loading the snapshot.', mtInformation,[mbOk], 0);
   end;
   if es_cinta then begin
      if resultado then begin
@@ -1025,12 +999,10 @@ begin
         cinta_tzx.play_tape:=false;
         cadena:=extension+': '+nombre_file;
         cpc_ppi.tape_motor:=false;
-     end else begin
-        MessageDlg('Error cargando cinta/CSW/WAV.'+chr(10)+chr(13)+'Error loading tape/CSW/WAV.', mtInformation,[mbOk], 0);
-     end;
+     end else MessageDlg('Error cargando cinta/CSW/WAV.'+chr(10)+chr(13)+'Error loading tape/CSW/WAV.', mtInformation,[mbOk], 0);
   end;
   freemem(datos);
-  directory.amstrad_tap:=ExtractFilePath(nombre_zip);
+  directory.amstrad_tap:=ExtractFilePath(romfile);
   change_caption(cadena);
 end;
 
@@ -1046,7 +1018,7 @@ var
   correcto:boolean;
   indice:byte;
 begin
-if SaveRom(StAmstrad,nombre,indice) then begin
+if SaveRom(nombre,indice) then begin
         case indice of
           1:nombre:=changefileext(nombre,'.sna');
         end;

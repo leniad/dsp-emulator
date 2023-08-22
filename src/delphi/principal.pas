@@ -528,6 +528,8 @@ type
     SuperXevious1: TMenuItem;
     Grobda1: TMenuItem;
     PacnPal1: TMenuItem;
+    pv1000: TMenuItem;
+    pv2000: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -836,7 +838,7 @@ procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice:byte;
+  indice,tempb:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;
@@ -848,7 +850,9 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-if SaveRom(StBitmap,nombre,indice) then begin
+tempb:=main_vars.system_type;
+main_vars.system_type:=SBITMAP;
+if saverom(nombre,indice) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -857,6 +861,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
+      main_vars.system_type:=tempb;
       restart_emu;
       exit;
     end;
@@ -910,6 +915,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
+main_vars.system_type:=tempb;
 restart_emu;
 end;
 

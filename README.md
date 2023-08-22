@@ -1,4 +1,69 @@
 # DSP Emulator status #
+<b>22/08/23 - DSP Emulator 0.22WIP5. Updated Windows binary and source.<br>
+<pre>
+-General
+    +New main Snapshot system
+        -New unified ROM/game/snapshot/tape load/save system
+        -New unified snapshot data extractor system
+    +Video
+        -Sega VDP (SMS/GG): Added snapshots
+    +CPU
+        -UPD7810: Added snapshots
+    -Sound
+        -UPD1771: Added snapshots 
+    +Misc
+        +I2Cmem: Added snapshots
+-Amstrad CPC
+    +Added the new ROM/tape/snapshot load system
+-Commodore 64
+    +Added the new ROM/tape/snapshot load system
+-Oric HW
+    +Added the new ROM/tape/snapshot load system
+-Chip 8
+    +Added the new ROM load game system
+    +Added snapshot
+-Coleco
+    +Moved to new snapshot system
+    +Added eeprom to snapshot (if present)
+-GameBoy/GameBoy Color
+    +Added the new ROM load game system
+    +Added snapshots (still not working)
+    +Fixed ROM loading
+-NES
+    +Added the new ROM load game system
+    +Added snapshots (still not working)
+-Sega SG-1000
+    +Added the new ROM load game system
+    +Added snapshots
+    +Added a new game file format '.MV'
+-Sega GameGear
+    +Added the new ROM load game system
+    +Fixed CPU and sound creation order (emulator can crash)
+    +Added snapshots
+-Sega Master System
+    +Added the new ROM load game system
+    +Added snapshots
+    +Fixed BIOS+Game loading, now supports all extra BIOS+Game for all systems
+    +Fixed international detection, now detects the system via $3F port
+    +Fixed ROM loading
+    +Fixed model change NTSC/PAL
+    +Fixed CPU and sound creation order (emulator can crash)
+-SuperCassete Vision
+    +Added the new ROM load game system
+    +Added snapshots
+    +Fixed ROM loading, all available games now works
+-Casio PV-1000
+    +Added new console, supports sound, controls
+    +Added snapshots
+    +All available games working
+-Casio PV-2000
+    +Added new console, supports sound, controls, keyboard...
+    +Added snapshots
+    +All available games working
+</pre><br>
+<img src="https://i.ibb.co/K5630F6/sonic-bios.png"><br><img src="https://i.ibb.co/jgSjLx7/pv1k-pooyan.png">
+<img src="https://i.ibb.co/khPw33g/pv1k-digdug.png"><br><img src="https://i.ibb.co/tZjHjhz/pv2k-galaga.png">
+<img src="https://i.ibb.co/WzLYzmF/pv2k-super.png"><br><br>
 <b>09/08/23 - DSP Emulator 0.22WIP4.1. Fast fix... Updated Windows binary, OSX and source.<br>
 <pre>
 -General

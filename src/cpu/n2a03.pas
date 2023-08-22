@@ -5,16 +5,16 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      cpu_misc,sound_engine,timer_engine,main_engine,m6502,misc_functions;
 
 const
-  // GLOBAL CONSTANTS */
+  // GLOBAL CONSTANTS
   SYNCS_MAX1=$20;
   SYNCS_MAX2=$80;
   TOTAL_BUFFER_SIZE=150;
 
-// CHANNEL TYPE DEFINITIONS */
+// CHANNEL TYPE DEFINITIONS
 type
   tcall_frame_irq=procedure (status:byte);
   tadditional_sound=procedure;
-  square_t=packed record // Square Wave */
+  square_t=packed record // Square Wave
 	  regs:array[0..3] of byte;
 	  vbl_length:integer;
 	  freq:integer;
@@ -26,8 +26,8 @@ type
     enabled:boolean;
   end;
   psquare_t=^square_t;
-  triangle_t=packed record // Triangle Wave */
-	  regs:array[0..3] of byte; // regs[1] unused */
+  triangle_t=packed record // Triangle Wave
+	  regs:array[0..3] of byte; // regs[1] unused
 	  linear_length:integer;
     vbl_length:integer;
     write_latency:integer;
@@ -38,8 +38,8 @@ type
     enabled:boolean;
   end;
   ptriangle_t=^triangle_t;
-  noise_t=packed record // Noise Wave */
-	  regs:array[0..3] of byte; // regs[1] unused */
+  noise_t=packed record // Noise Wave
+	  regs:array[0..3] of byte; // regs[1] unused
     seed:dword;
     vbl_length:integer;
     phaseacc:single;
@@ -48,7 +48,7 @@ type
     enabled:boolean;
   end;
   pnoise_t=^noise_t;
-  dpcm_t=packed record // DPCM Wave */
+  dpcm_t=packed record // DPCM Wave
     regs:array[0..3] of byte;
     address:word;
     length:dword;
@@ -61,13 +61,13 @@ type
     getbyte:tgetbyte;
   end;
   pdpcm_t=^dpcm_t;
-  apu_t=packed record // APU type */
-	  // Sound channels */
+  apu_t=packed record // APU type
+	  // Sound channels
 	  squ:array[0..1] of psquare_t;
     tri:ptriangle_t;
     noi:pnoise_t;
     dpcm:pdpcm_t;
-	  // APU registers */
+	  // APU registers
 	  regs:array[0..$17] of byte;
     step_mode:integer;
   end;
@@ -86,11 +86,11 @@ type
       function save_snapshot(data:pbyte):word;
       procedure load_snapshot(data:pbyte);
     private
-      apu:papu_t;			       // Actual APUs */
-      samps_per_sync:dword;        // Number of samples per vsync */
-      vbl_times:array[0..$1f] of dword;       // VBL durations in samples */
-      sync_times1:array[0..(SYNCS_MAX1-1)] of dword; // Samples per sync table */
-      sync_times2:array[0..(SYNCS_MAX2-1)] of dword; // Samples per sync table */
+      apu:papu_t;			       // Actual APUs
+      samps_per_sync:dword;        // Number of samples per vsync
+      vbl_times:array[0..$1f] of dword;       // VBL durations in samples
+      sync_times1:array[0..(SYNCS_MAX1-1)] of dword; // Samples per sync table
+      sync_times2:array[0..(SYNCS_MAX2-1)] of dword; // Samples per sync table
       buffer:array[1..TOTAL_BUFFER_SIZE] of integer;
       buffer_pos:byte;
       num_sample:byte;
@@ -143,22 +143,22 @@ const
   APU_SMASK=$15;
   APU_IRQCTRL=$17;
 
-// CONSTANTS */
+// CONSTANTS
 
-// vblank length table used for squares, triangle, noise */
+// vblank length table used for squares, triangle, noise
 vbl_length:array[0..31] of byte=(
    5, 127, 10, 1, 19,  2, 40,  3, 80,  4, 30,  5, 7,  6, 13,  7,
    6,   8, 12, 9, 24, 10, 48, 11, 96, 12, 36, 13, 8, 14, 16, 15);
-// frequency limit of square channels */
+// frequency limit of square channels
 freq_limit:array[0..7] of word=($3FF,$555,$666,$71C,$787,$7C1,$7E0,$7F0);
-// table of noise frequencies */
+// table of noise frequencies
 noise_freq:array[0..15] of word=(
    4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 2046);
-// dpcm transfer freqs */
+// dpcm transfer freqs
 dpcm_clocks:array[0..15] of word=(
    428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 85, 72, 54);
-// ratios of pos/neg pulse for square waves */
-// 2/16 = 12.5%, 4/16 = 25%, 8/16 = 50%, 12/16 = 75% */
+// ratios of pos/neg pulse for square waves
+// 2/16 = 12.5%, 4/16 = 25%, 8/16 = 50%, 12/16 = 75%
 duty_lut:array[0..3] of byte=(2,4,8,12);
 
 function sshr(num:integer;fac:byte):integer;
@@ -177,7 +177,7 @@ begin
 
 end;
 
-// INITIALIZE WAVE TIMES RELATIVE TO SAMPLE RATE */
+// INITIALIZE WAVE TIMES RELATIVE TO SAMPLE RATE
 procedure cpu_n2a03.create_vbltimes(rate:dword);
 var
 	i:integer;
@@ -185,7 +185,7 @@ begin
 	for i:=0 to $1f do self.vbl_times[i]:=vbl_length[i]*rate;
 end;
 
-// INITIALIZE SAMPLE TIMES IN TERMS OF VSYNCS */
+// INITIALIZE SAMPLE TIMES IN TERMS OF VSYNCS
 procedure cpu_n2a03.create_syncs(sps:dword);
 var
 	i:integer;
@@ -215,10 +215,10 @@ begin
   getmem(self.apu.tri,sizeof(triangle_t));
   getmem(self.apu.noi,sizeof(noise_t));
   getmem(self.apu.dpcm,sizeof(dpcm_t));
-  // Initialize global variables */
+  // Initialize global variables
   rate:=clock div 4;
   self.samps_per_sync:=round(rate/llamadas_maquina.fps_max);
-  // Use initializer calls */
+  // Use initializer calls
   self.create_vbltimes(self.samps_per_sync);
   self.create_syncs(self.samps_per_sync);
   chips_total:=chips_total+1;
@@ -298,7 +298,7 @@ begin
   //dpcm.output:=0;
 end;
 
-// WRITE REGISTER VALUE */
+// WRITE REGISTER VALUE
 procedure cpu_n2a03.apu_regwrite(address,value:byte);
 var
   chan:byte;
@@ -321,14 +321,14 @@ begin
 			    self.apu.squ[chan].freq:=((((value and 7) shl 8)+self.apu.squ[chan].regs[2])+1) shl 16;
 		    end;
 		  end;
-	  // triangle */
+	  // triangle
 	  APU_WRC0:begin
 		    self.apu.tri.regs[0]:=value;
 		    if self.apu.tri.enabled then begin
 			    if not(self.apu.tri.counter_started) then self.apu.tri.linear_length:=self.sync_times2[value and $7F];
 		    end;
       end;
-	  $09:self.apu.tri.regs[1]:=value;	// unused */
+	  $09:self.apu.tri.regs[1]:=value;	// unused
 	  APU_WRC2:self.apu.tri.regs[2]:=value;
 	  APU_WRC3:begin
         self.apu.tri.regs[3]:=value;
@@ -354,23 +354,23 @@ begin
     			self.apu.tri.linear_length:=self.sync_times2[apu.tri.regs[0] and $7f];
         end;
     end;
-	  // noise */
+	  // noise
 	  APU_WRD0:self.apu.noi.regs[0]:=value;
-	  $0D:self.apu.noi.regs[1]:=value; // unused */
+	  $0D:self.apu.noi.regs[1]:=value; // unused
 	  APU_WRD2:self.apu.noi.regs[2]:=value;
 	  APU_WRD3:begin
         self.apu.noi.regs[3]:=value;
 		    if self.apu.noi.enabled then begin
     			self.apu.noi.vbl_length:=self.vbl_times[value shr 3];
-		    	self.apu.noi.env_vol:=0; // reset envelope */
+		    	self.apu.noi.env_vol:=0; // reset envelope
 		    end;
 		  end;
-	  // DMC */
+	  // DMC
 	  APU_WRE0:begin
 		      self.apu.dpcm.regs[0]:=value;
 		      self.apu.dpcm.irq:=(value and $80)<>0;
 		  end;
-	  APU_WRE1:begin // 7-bit DAC */
+	  APU_WRE1:begin // 7-bit DAC
 		    self.apu.dpcm.output:=(value and $7f)-64;
 		  end;
 	  APU_WRE2:begin
@@ -416,7 +416,7 @@ begin
     			  self.apu.noi.vbl_length:=0;
     		  end;
     		if (value and $10)<>0 then begin
-    			// only reset dpcm values if DMA is finished */
+    			// only reset dpcm values if DMA is finished
 		    	if not(self.apu.dpcm.enabled) then begin
     				self.apu.dpcm.enabled:=true;
             apu_dpcmreset(self.apu.dpcm);
@@ -426,7 +426,7 @@ begin
   end;
 end;
 
-// READ VALUES FROM REGISTERS */
+// READ VALUES FROM REGISTERS
 function cpu_n2a03.read(direccion:word):byte;
 var
   address,readval:byte;
@@ -446,7 +446,7 @@ begin
   read:=readval;
 end;
 
-// WRITE VALUE TO TEMP REGISTRY AND QUEUE EVENT */
+// WRITE VALUE TO TEMP REGISTRY AND QUEUE EVENT
 procedure cpu_n2a03.write(posicion:word;value:byte);
 var
   address:byte;
@@ -456,7 +456,7 @@ begin
 	self.apu_regwrite(address,value);
 end;
 
-// OUTPUT SQUARE WAVE SAMPLE (VALUES FROM -16 to +15) */
+// OUTPUT SQUARE WAVE SAMPLE (VALUES FROM -16 to +15)
 function cpu_n2a03.apu_square(chan:byte):integer;
 var
 	env_delay,sweep_delay:integer;
@@ -470,22 +470,22 @@ begin
     apu_square:=0;
     exit;
   end;
-	// enveloping */
+	// enveloping
 	env_delay:=self.sync_times1[self.apu.squ[chan].regs[0] and $f];
-	// decay is at a rate of (env_regs + 1) / 240 secs */
+	// decay is at a rate of (env_regs + 1) / 240 secs
 	self.apu.squ[chan].env_phase:=self.apu.squ[chan].env_phase-4;
 	while (self.apu.squ[chan].env_phase<0) do begin
 		self.apu.squ[chan].env_phase:=self.apu.squ[chan].env_phase+env_delay;
 		if (self.apu.squ[chan].regs[0] and $20)<>0 then self.apu.squ[chan].env_vol:=(self.apu.squ[chan].env_vol+1) and 15
 		  else if (self.apu.squ[chan].env_vol<15) then self.apu.squ[chan].env_vol:=self.apu.squ[chan].env_vol+1;
 	end;
-	// vbl length counter */
+	// vbl length counter
 	if ((self.apu.squ[chan].vbl_length>0) and ((self.apu.squ[chan].regs[0] and $20)=0)) then self.apu.squ[chan].vbl_length:=self.apu.squ[chan].vbl_length-1;
 	if (self.apu.squ[chan].vbl_length=0) then begin
     apu_square:=0;
     exit;
   end;
-	// freqsweeps */
+	// freqsweeps
 	if (((self.apu.squ[chan].regs[1] and $80)<>0) and ((self.apu.squ[chan].regs[1] and 7)<>0)) then begin
 		sweep_delay:=self.sync_times1[(self.apu.squ[chan].regs[1] shr 4) and 7];
 		self.apu.squ[chan].sweep_phase:=self.apu.squ[chan].sweep_phase-2;
@@ -499,7 +499,7 @@ begin
 		apu_square:=0;
     exit;
   end;
-	self.apu.squ[chan].phaseacc:=self.apu.squ[chan].phaseacc-4; // # of cycles per sample */
+	self.apu.squ[chan].phaseacc:=self.apu.squ[chan].phaseacc-4; // # of cycles per sample
 	while (self.apu.squ[chan].phaseacc<0) do begin
 		self.apu.squ[chan].phaseacc:=self.apu.squ[chan].phaseacc+sshr(self.apu.squ[chan].freq,16);
 		self.apu.squ[chan].adder:=(self.apu.squ[chan].adder+1) and $0F;
@@ -510,7 +510,7 @@ begin
   apu_square:=shortint(output_);
 end;
 
-// OUTPUT TRIANGLE WAVE SAMPLE (VALUES FROM -16 to +15) */
+// OUTPUT TRIANGLE WAVE SAMPLE (VALUES FROM -16 to +15)
 function cpu_n2a03.apu_triangle:integer;
 var
 	freq:word;
@@ -532,7 +532,7 @@ begin
 	end;
 	if (self.apu.tri.linear_length=0) then exit;
 	freq:=(((self.apu.tri.regs[3] and 7) shl 8)+self.apu.tri.regs[2])+1;
-	if (freq<4) then exit; // inaudible */
+	if (freq<4) then exit; // inaudible
 	self.apu.tri.phaseacc:=self.apu.tri.phaseacc-4; // # of cycles per sample
 	while (self.apu.tri.phaseacc<0) do begin
 		self.apu.tri.phaseacc:=self.apu.tri.phaseacc+freq;
@@ -545,7 +545,7 @@ begin
 	apu_triangle:=self.apu.tri.output_vol;
 end;
 
-// OUTPUT NOISE WAVE SAMPLE (VALUES FROM -16 to +15) */
+// OUTPUT NOISE WAVE SAMPLE (VALUES FROM -16 to +15)
 function cpu_n2a03.apu_noise:integer;
 var
 	freq,env_delay:integer;
@@ -560,14 +560,14 @@ begin
   end;
 	// enveloping */
 	env_delay:=self.sync_times1[self.apu.noi.regs[0] and $0f];
-	// decay is at a rate of (env_regs + 1) / 240 secs */
+	// decay is at a rate of (env_regs + 1) / 240 secs
 	self.apu.noi.env_phase:=self.apu.noi.env_phase-4;
 	while (self.apu.noi.env_phase<0) do begin
 		self.apu.noi.env_phase:=self.apu.noi.env_phase+env_delay;
 		if (self.apu.noi.regs[0] and $20)<>0 then self.apu.noi.env_vol:=(self.apu.noi.env_vol+1) and 15
 		  else if (self.apu.noi.env_vol<15) then self.apu.noi.env_vol:=self.apu.noi.env_vol+1;
 	end;
-	// length counter */
+	// length counter
 	if (self.apu.noi.regs[0] and $20)=0 then begin
 		if (self.apu.noi.vbl_length>0) then self.apu.noi.vbl_length:=self.apu.noi.vbl_length-1;
 	end;
@@ -576,7 +576,7 @@ begin
     exit;
   end;
 	freq:=noise_freq[self.apu.noi.regs[2] and $0f];
-	self.apu.noi.phaseacc:=self.apu.noi.phaseacc-4; // # of cycles per sample */
+	self.apu.noi.phaseacc:=self.apu.noi.phaseacc-4; // # of cycles per sample
 	while (self.apu.noi.phaseacc<0) do begin
     self.apu.noi.phaseacc:=self.apu.noi.phaseacc+freq;
     if (self.apu.noi.regs[2] and $80)<>0 then
@@ -618,7 +618,7 @@ begin
           if (self.apu.dpcm.output>1) then self.apu.dpcm.output:=self.apu.dpcm.output-2;
       end;
       if (self.apu.dpcm.length=0) then begin
-          self.apu.dpcm.enabled:=false; // Fixed * Proper DPCM channel ENABLE/DISABLE flag behaviour*/
+          self.apu.dpcm.enabled:=false; // Fixed * Proper DPCM channel ENABLE/DISABLE flag behaviour
           //self.apu.dpcm.output:=0; // Fixed * DPCM DAC resets itself when restarted
           if (self.apu.dpcm.regs[0] and $40)<>0 then begin  //Loop
 					    apu_dpcmreset(self.apu.dpcm);

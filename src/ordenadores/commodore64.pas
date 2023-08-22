@@ -363,54 +363,32 @@ end;
 procedure c64_tapes;
 var
   datos:pbyte;
-  file_size:integer;
-  nombre_zip,nombre_file,extension,cadena:string;
+  longitud:integer;
+  romfile,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
-  crc:dword;
 begin
-  if not(OpenRom(StC64,nombre_zip)) then exit;
-  extension:=extension_fichero(nombre_zip);
-  resultado:=false;
-  if extension='ZIP' then begin
-      if not(search_file_from_zip(nombre_zip,'*.tap',nombre_file,file_size,crc,false)) then
-        if not(search_file_from_zip(nombre_zip,'*.prg',nombre_file,file_size,crc,false)) then
-          if not(search_file_from_zip(nombre_zip,'*.t64',nombre_file,file_size,crc,false)) then
-            if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then
-              if not(search_file_from_zip(nombre_zip,'*.vsf',nombre_file,file_size,crc,false)) then begin
-                MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading tape/WAV.', mtInformation,[mbOk], 0);
-                exit;
-              end;
-      getmem(datos,file_size);
-      if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then freemem(datos)
-        else resultado:=true;
-  end else begin
-      if read_file_size(nombre_zip,file_size) then begin
-        getmem(datos,file_size);
-        if not(read_file(nombre_zip,datos,file_size)) then freemem(datos)
-          else resultado:=true;
-        nombre_file:=extractfilename(nombre_zip);
-      end;
-  end;
-  if not(resultado) then begin
-    MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading the tape/WAV.', mtInformation,[mbOk], 0);
+  if not(openrom(romfile)) then exit;
+  getmem(datos,$400000);
+  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+    freemem(datos);
     exit;
   end;
   extension:=extension_fichero(nombre_file);
   resultado:=false;
   es_cinta:=true;
-  if extension='TAP' then resultado:=abrir_c64_tap(datos,file_size);
-  if extension='WAV' then resultado:=abrir_wav(datos,file_size,985248);
+  if extension='TAP' then resultado:=abrir_c64_tap(datos,longitud);
+  if extension='WAV' then resultado:=abrir_wav(datos,longitud,985248);
   if extension='PRG' then begin
       es_cinta:=false;
-      resultado:=abrir_prg(datos,file_size);
+      resultado:=abrir_prg(datos,longitud);
    end;
   if extension='T64' then begin
      es_cinta:=false;
-     resultado:=abrir_t64(datos,file_size);
+     resultado:=abrir_t64(datos,longitud);
    end;
   if extension='VSF' then begin
      es_cinta:=false;
-     resultado:=abrir_vsf(datos,file_size);
+     resultado:=abrir_vsf(datos,longitud);
    end;
   if es_cinta then begin
      if resultado then begin
@@ -426,7 +404,7 @@ begin
      end;
   end;
   freemem(datos);
-  directory.c64_tap:=ExtractFilePath(nombre_zip);
+  directory.c64_tap:=ExtractFilePath(romfile);
   change_caption(cadena);
 end;
 

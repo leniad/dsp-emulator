@@ -135,8 +135,11 @@ end;
 procedure put_text_file(number:byte);
 var
   file_name:string;
+  tempb:byte;
 begin
-if OpenRom(StAmstradROM,file_name) then begin
+tempb:=main_vars.system_type;
+main_vars.system_type:=SAMSTRADROM;
+if OpenRom(file_name) then begin
   case number of
     0:configcpc.Edit7.Text:=file_name;
     1:configcpc.Edit1.Text:=file_name;
@@ -148,6 +151,7 @@ if OpenRom(StAmstradROM,file_name) then begin
   end;
   cpc_rom[number].name:=file_name;
 end;
+main_vars.system_type:=tempb;
 end;
 
 procedure clear_text_file(number:byte);

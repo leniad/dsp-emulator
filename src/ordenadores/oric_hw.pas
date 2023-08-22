@@ -380,55 +380,30 @@ end;
 procedure oric_tapes;
 var
   datos:pbyte;
-  file_size:integer;
-  nombre_zip,nombre_file,extension,cadena:string;
-  resultado,es_cinta:boolean;
-  crc:dword;
+  longitud:integer;
+  romfile,nombre_file,extension,cadena:string;
+  es_cinta:boolean;
 begin
-  if not(OpenRom(StOric,nombre_zip)) then exit;
-  extension:=extension_fichero(nombre_zip);
-  resultado:=false;
-  if extension='ZIP' then begin
-      if not(search_file_from_zip(nombre_zip,'*.tap',nombre_file,file_size,crc,false)) then
-         if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then begin
-            MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading tape/WAV.', mtInformation,[mbOk], 0);
-            exit;
-      end;
-      getmem(datos,file_size);
-      if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then freemem(datos)
-        else resultado:=true;
-  end else begin
-      if read_file_size(nombre_zip,file_size) then begin
-        getmem(datos,file_size);
-        if not(read_file(nombre_zip,datos,file_size)) then freemem(datos)
-          else resultado:=true;
-        nombre_file:=extractfilename(nombre_zip);
-      end;
-  end;
-  if not(resultado) then begin
-    MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading the tape/WAV.', mtInformation,[mbOk], 0);
+  if not(openrom(romfile)) then exit;
+  getmem(datos,$100000);
+  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+    freemem(datos);
     exit;
   end;
   extension:=extension_fichero(nombre_file);
-  resultado:=false;
   es_cinta:=true;
-  if extension='TAP' then resultado:=abrir_oric_tap(datos,file_size);
-  if extension='WAV' then resultado:=abrir_wav(datos,file_size,1000000);
+  if extension='TAP' then abrir_oric_tap(datos,longitud);
+  if extension='WAV' then abrir_wav(datos,longitud,1000000);
   if es_cinta then begin
-     if resultado then begin
-        tape_window1.edit1.Text:=nombre_file;
-        tape_window1.show;
-        tape_window1.BitBtn1.Enabled:=true;
-        tape_window1.BitBtn2.Enabled:=false;
-        cinta_tzx.play_tape:=false;
-        cadena:=extension+': '+nombre_file;
-     end else begin
-        MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading tape/WAV.', mtInformation,[mbOk], 0);
-        cadena:='';
-     end;
+     tape_window1.edit1.Text:=nombre_file;
+     tape_window1.show;
+     tape_window1.BitBtn1.Enabled:=true;
+     tape_window1.BitBtn2.Enabled:=false;
+     cinta_tzx.play_tape:=false;
+     cadena:=extension+': '+nombre_file;
   end;
   freemem(datos);
-  directory.oric_tap:=ExtractFilePath(nombre_zip);
+  directory.oric_tap:=ExtractFilePath(romfile);
   change_caption(cadena);
 end;
 

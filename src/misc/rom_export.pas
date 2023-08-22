@@ -85,6 +85,7 @@ const
         (n:'gbc_boot.1';l:$100;p:0;crc:$779ea374),(n:'gbc_boot.2';l:$700;p:$200;crc:$f741807d),());
         sms_:array[0..2] of tipo_roms=((n:'mpr-12808.ic2';l:$2000;p:0;crc:$0072ed54),(n:'mpr-11124.ic2';l:$2000;p:0;crc:$48d44a13),());
         scv:array[0..2] of tipo_roms=((n:'upd7801g.s01';l:$1000;p:0;crc:$7ac06182),(n:'epochtv.chr';l:$400;p:$1000;crc:$db521533),());
+        pv2000_rom:array[0..1] of tipo_roms=((n:'hn613128pc64.bin';l:$4000;p:0;crc:$8f31f297),());
         //gnw
         gnw_jr55:array[0..1] of tipo_roms=((n:'jr55_cms54c_kms560';l:$1000;p:$0;crc:$46aed0ae),());
         gnw_dj101:array[0..1] of tipo_roms=((n:'dj101';l:$1000;p:$0;crc:$8dcfb5d1),());
@@ -3313,9 +3314,15 @@ var
   rom_file:ptipo_roms;
   sample_file:ptsample_file;
   nombre_fichero,change_name:string;
-  indice:byte;
+  indice,tempb:byte;
 begin
-if not(SaveRom(StExport,nombre_fichero,indice)) then exit;
+tempb:=main_vars.system_type;
+main_vars.system_type:=SEXPORT;
+if not(SaveRom(nombre_fichero,indice)) then begin
+  main_vars.system_type:=tempb;
+  exit;
+end;
+main_vars.system_type:=tempb;
 if FileExists(nombre_fichero) then begin                                         //Respuesta 'NO' es 7
   if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 end;

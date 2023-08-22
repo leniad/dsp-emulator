@@ -4,8 +4,8 @@ object SMSConfig: TSMSConfig
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'SMS Config'
-  ClientHeight = 232
-  ClientWidth = 291
+  ClientHeight = 214
+  ClientWidth = 279
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

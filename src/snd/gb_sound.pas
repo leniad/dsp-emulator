@@ -47,7 +47,7 @@ const
   MAX_FREQUENCIES=2048;
   FIXED_POINT=16;
 
-  // Represents wave duties of 12.5%, 25%, 50% and 75% */
+  // Represents wave duties of 12.5%, 25%, 50% and 75%
   wave_duty_table:array[0..3] of single=(8.0,4.0,2.0,1.33);
 
 type
@@ -97,7 +97,6 @@ type
   	mode4_right:byte;
   end;
   gb_sound_tipo=record
-	  rate:integer;
   	env_length_table:array[0..7] of integer;
   	swp_time_table:array[0..7] of integer;
   	period_table:array[0..MAX_FREQUENCIES-1] of dword;
@@ -122,7 +121,7 @@ function gb_sound_r(offset:byte):byte;
 procedure gb_sound_w(offset,valor:byte);
 function gb_wave_r(offset:byte):byte;
 procedure gb_wave_w(offset,valor:byte);
-procedure gameboy_sound_ini(sample_rate:integer);
+procedure gameboy_sound_ini;
 procedure gameboy_sound_close;
 procedure gameboy_sound_reset;
 procedure gameboy_sound_update;
@@ -353,38 +352,37 @@ if gb_snd<>nil then begin
 end;
 end;
 
-procedure gameboy_sound_ini(sample_rate:integer);
+procedure gameboy_sound_ini;
 var
-  I, J:integer;
+  i,j:integer;
 begin
   getmem(gb_snd,sizeof(gb_sound_tipo));
-	gb_snd.rate:=sample_rate;
-	// Calculate the envelope and sweep tables */
+	// Calculate the envelope and sweep tables
 	for i:=0 to 7 do begin
-		gb_snd.env_length_table[i]:=trunc((i* ((1 shl FIXED_POINT)/64) * gb_snd.rate)) shr FIXED_POINT;
-		gb_snd.swp_time_table[i]:=trunc((((i shl FIXED_POINT) / 128) * gb_snd.rate)) shr (FIXED_POINT-1);
+		gb_snd.env_length_table[i]:=trunc((i*((1 shl FIXED_POINT)/64)*FREQ_BASE_AUDIO)) shr FIXED_POINT;
+		gb_snd.swp_time_table[i]:=trunc((((i shl FIXED_POINT)/128)*FREQ_BASE_AUDIO)) shr (FIXED_POINT-1);
 	end;
-	// Calculate the period tables */
+	// Calculate the period tables
 	for i:=0 to (MAX_FREQUENCIES-1) do begin
-		gb_snd.period_table[i]:=trunc(((1 shl FIXED_POINT) / (131072 / (2048 - i))) * gb_snd.rate);
-		gb_snd.period_mode3_table[i]:=trunc(((1 shl FIXED_POINT) / (65536 / (2048 - i))) * gb_snd.rate);
+		gb_snd.period_table[i]:=trunc(((1 shl FIXED_POINT)/(131072/(2048-i)))*FREQ_BASE_AUDIO);
+		gb_snd.period_mode3_table[i]:=trunc(((1 shl FIXED_POINT)/(65536/(2048-i)))*FREQ_BASE_AUDIO);
 	end;
-	// Calculate the period table for mode 4 */
+	// Calculate the period table for mode 4
 	for i:=0 to 7 do begin
 		for j:=0 to 15 do begin
 			// I is the dividing ratio of frequencies
       // J is the shift clock frequency
-      if i=0 then gb_snd.period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT) / (524288 / 0.5 / (1 shl (j + 1)))) * gb_snd.rate)
-          else gb_snd.period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT) / (524288 / i / (1 shl (j + 1)))) * gb_snd.rate);
+      if i=0 then gb_snd.period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT)/(524288/0.5/(1 shl (j+1))))*FREQ_BASE_AUDIO)
+          else gb_snd.period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT)/(524288/i/(1 shl (j+1))))*FREQ_BASE_AUDIO);
 		end;
 	end;
-	// Calculate the length table */
+	// Calculate the length table
 	for i:=0 to 63 do begin
-		gb_snd.length_table[i]:=trunc((64 - i)*((1 shl FIXED_POINT)/256) * gb_snd.rate) shr FIXED_POINT;
+		gb_snd.length_table[i]:=trunc((64-i)*((1 shl FIXED_POINT)/256)*FREQ_BASE_AUDIO) shr FIXED_POINT;
 	end;
-	// Calculate the length table for mode 3 */
+	// Calculate the length table for mode 3
 	for i:=0 to 255 do begin
-		gb_snd.length_mode3_table[i]:=trunc((256 - i) * ((1 shl FIXED_POINT)/256) * gb_snd.rate) shr FIXED_POINT;
+		gb_snd.length_mode3_table[i]:=trunc((256-i)*((1 shl FIXED_POINT)/256)*FREQ_BASE_AUDIO) shr FIXED_POINT;
 	end;
 	gameboy_sound_reset;
   gb_snd.tsample:=init_channel;
