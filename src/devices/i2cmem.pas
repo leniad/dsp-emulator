@@ -46,6 +46,7 @@ const
   I2C_24C08=10;
   I2C_24C256=14;
 
+
 var
   i2cmem_0:i2cmem_chip;
 

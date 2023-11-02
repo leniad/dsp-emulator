@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 228
+  ClientHeight = 223
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 167
+    Height = 162
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,7 +1228,7 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 167
+    Height = 162
     Align = alRight
     TabOrder = 1
     Visible = False
@@ -1870,7 +1870,7 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 209
+    Top = 204
     Width = 397
     Height = 19
     Align = alBottom
@@ -2178,6 +2178,10 @@ object principal1: Tprincipal1
               Caption = 'Ms Pac Man Twin'
               OnClick = CambiarMaquina
             end
+            object Birdiy1: TMenuItem
+              Caption = 'Birdiy'
+              OnClick = CambiarMaquina
+            end
           end
           object GalaxianHardware1: TMenuItem
             Caption = 'Galaxian HW'
@@ -2397,6 +2401,18 @@ object principal1: Tprincipal1
             object ldrun21: TMenuItem
               Caption = 'Lode Runner II'
               GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+          end
+          object M63HW1: TMenuItem
+            Caption = 'M63 HW'
+            GroupIndex = 1
+            object WilyTower1: TMenuItem
+              Caption = 'Wily Tower'
+              OnClick = CambiarMaquina
+            end
+            object FightingBasketball1: TMenuItem
+              Caption = 'Fighting Basketball'
               OnClick = CambiarMaquina
             end
           end

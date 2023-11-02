@@ -337,7 +337,7 @@ z80_1.init_sound(gyruss_sound_update);
 //Sound CPU 2
 mcs48_0:=cpu_mcs48.create(8000000,256,I8039);
 mcs48_0.change_ram_calls(gyruss_sound2_getbyte,nil);
-mcs48_0.change_io_calls(gyruss_sound2_inport,gyruss_sound2_outport);
+mcs48_0.change_io_calls(nil,gyruss_sound2_outport,gyruss_sound2_inport,nil);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(14318180 div 8,AY8910,1);
 ay8910_1:=ay8910_chip.create(14318180 div 8,AY8910,1,true);

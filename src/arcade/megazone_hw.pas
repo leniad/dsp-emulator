@@ -309,7 +309,7 @@ z80_0.init_sound(megazone_sound_update);
 //Sound CPU 2
 mcs48_0:=cpu_mcs48.create(14318000 div 2,$100,I8039);
 mcs48_0.change_ram_calls(megazone_sound2_getbyte,nil);
-mcs48_0.change_io_calls(megazone_sound2_inport,megazone_sound2_outport);
+mcs48_0.change_io_calls(nil,megazone_sound2_outport,megazone_sound2_inport,nil);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(14318000 div 8,AY8910,0.3);
 ay8910_0.change_io_calls(megazone_portar,nil,nil,megazone_portbw);

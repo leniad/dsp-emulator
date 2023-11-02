@@ -309,12 +309,6 @@ end;
 end;
 
 function xain_getbyte(direccion:word):byte;
-
-function mcu_status_r:byte;
-begin
-   mcu_status_r:=(byte(mcu_ready) shl 3) or (byte(mcu_accept) shl 4);
-end;
-
 begin
     case direccion of
         0..$397f,$8000..$ffff:xain_getbyte:=memoria[direccion];
@@ -326,7 +320,7 @@ begin
                 mcu_ready:=true;
                 xain_getbyte:=from_mcu;
               end;
-        $3a05:xain_getbyte:=$c7 or mcu_status_r or vblank; //VBlank
+        $3a05:xain_getbyte:=$c7 or (byte(mcu_ready) shl 3) or (byte(mcu_accept) shl 4) or vblank; //VBlank
         $3a06:begin
                 mcu_ready:=true;
 	              mcu_accept:=true;

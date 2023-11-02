@@ -1,7 +1,7 @@
 object configgb: Tconfiggb
-  Left = 335
+  Left = 355
   Height = 300
-  Top = 194
+  Top = 283
   Width = 400
   Caption = 'Config GB/GBC'
   ClientHeight = 300
@@ -10,13 +10,13 @@ object configgb: Tconfiggb
   KeyPreview = True
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.0.0.2'
   object GroupBox7: TGroupBox
     Left = 34
     Height = 101
     Top = 30
     Width = 242
-    Caption = 'LensLok'
+    Caption = 'Screen'
     ClientHeight = 76
     ClientWidth = 238
     TabOrder = 0
@@ -24,7 +24,7 @@ object configgb: Tconfiggb
       Left = 18
       Height = 24
       Top = 19
-      Width = 198
+      Width = 195
       Caption = 'Gameboy Original - Green'
       TabOrder = 0
     end
@@ -32,7 +32,7 @@ object configgb: Tconfiggb
       Left = 16
       Height = 24
       Top = 48
-      Width = 173
+      Width = 170
       Caption = 'Gameboy Pocket - BW'
       TabOrder = 1
     end
@@ -43,8 +43,8 @@ object configgb: Tconfiggb
     Top = 192
     Width = 150
     Caption = 'OK'
-    OnClick = Button1Click
     TabOrder = 1
+    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 240
@@ -52,7 +52,7 @@ object configgb: Tconfiggb
     Top = 192
     Width = 150
     Caption = 'CANCEL'
-    OnClick = Button2Click
     TabOrder = 2
+    OnClick = Button2Click
   end
 end

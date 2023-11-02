@@ -2,8 +2,8 @@ object configgb: Tconfiggb
   Left = 0
   Top = 0
   Caption = 'Config GB/GBC'
-  ClientHeight = 203
-  ClientWidth = 316
+  ClientHeight = 185
+  ClientWidth = 304
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

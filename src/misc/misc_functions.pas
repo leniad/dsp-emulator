@@ -254,7 +254,8 @@ begin
 case main_vars.system_type of
   SNES:begin
             ext[1]:='NES';
-            total_ext:=1;
+            ext[2]:='DSP';
+            total_ext:=2;
           end;
   SCOLECO:begin
             ext[1]:='COL';
@@ -266,7 +267,8 @@ case main_vars.system_type of
   SGB:begin
             ext[1]:='GB';
             ext[2]:='GBC';
-            total_ext:=2;
+            ext[3]:='DSP';
+            total_ext:=3;
           end;
   SSG1000:begin
             ext[1]:='SG';
@@ -386,7 +388,7 @@ case main_vars.system_type of
        end;
   SNES:begin
          opendialog.InitialDir:=directory.nes;
-         Opendialog.Filter:='NES Game (*.nes;*zip)|*.nes;*.zip';
+         Opendialog.Filter:='NES Game (*.nes;*.dsp;*zip)|*.nes;*.dsp;*.zip';
        end;
   SSMS:begin
          opendialog.InitialDir:=directory.sms;
@@ -394,7 +396,7 @@ case main_vars.system_type of
        end;
   SGB:begin
          opendialog.InitialDir:=directory.gameboy;
-         Opendialog.Filter:='GB Game (*.gb;*.gbc;*zip)|*.gb;*.gbc;*.zip';
+         Opendialog.Filter:='GB Game (*.gb;*.gbc;*.dsp;*zip)|*.gb;*.gbc;*.dsp;*.zip';
        end;
   SCHIP8:begin
          opendialog.InitialDir:=directory.chip8;
@@ -476,6 +478,10 @@ case main_vars.system_type of
        end;
   SNES:begin
          savedialog.InitialDir:=directory.nes;
+         saveDialog.Filter:='DSP Format (*.DSP)|*.DSP';
+       end;
+  SGB:begin
+         savedialog.InitialDir:=directory.gameboy;
          saveDialog.Filter:='DSP Format (*.DSP)|*.DSP';
        end;
   SSG1000:begin

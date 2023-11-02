@@ -824,7 +824,7 @@ if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.t
   ym2151_0.change_port_func(ym2151_snd_port);
   //Creo el segundo chip de sonido
   mcs48_0:=cpu_mcs48.create(6000000,262*CPU_SYNC,N7751);
-  mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport);
+  mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport,nil,nil);
   mcs48_0.i8243.change_calls(nil,n7751_rom_offset_w);
   dac_0:=dac_chip.Create(1);
 end else begin

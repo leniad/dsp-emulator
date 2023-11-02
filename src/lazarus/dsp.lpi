@@ -16,8 +16,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="22"/>
-      <RevisionNr Value="4"/>
-      <BuildNr Value="1351"/>
+      <RevisionNr Value="6"/>
+      <BuildNr Value="1353"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.22"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="62">
+    <Units Count="55">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,11 +59,14 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="683"/>
-        <CursorPos X="30" Y="701"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="6"/>
+        <CursorPos X="15" Y="18"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\ordenadores\spectrum_misc.pas"/>
@@ -221,9 +224,8 @@
       <Unit19>
         <Filename Value="..\consolas\coleco.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit19>
       <Unit20>
@@ -455,7 +457,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos Y="61"/>
-        <UsageCount Value="174"/>
+        <UsageCount Value="316"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit43>
       <Unit44>
@@ -479,11 +481,10 @@
       <Unit46>
         <Filename Value="..\consolas\sega_gg.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="195"/>
         <CursorPos X="58" Y="207"/>
-        <UsageCount Value="165"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="307"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit46>
       <Unit47>
@@ -492,216 +493,189 @@
         <ComponentName Value="configgb"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="36"/>
-        <CursorPos Y="49"/>
-        <UsageCount Value="65"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="34"/>
+        <CursorPos X="13" Y="40"/>
+        <UsageCount Value="207"/>
+        <Loaded Value="True"/>
       </Unit47>
       <Unit48>
-        <Filename Value="..\cpu\mcs51.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="645"/>
-        <CursorPos Y="656"/>
-        <UsageCount Value="11"/>
+        <Filename Value="..\misc\init_games.pas"/>
+        <TopLine Value="808"/>
+        <CursorPos X="44" Y="820"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit48>
       <Unit49>
-        <Filename Value="..\arcade\hangon_hw.pas"/>
+        <Filename Value="..\consolas\super_cassette_vision.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="181"/>
-        <CursorPos X="6" Y="191"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="401"/>
+        <CursorPos X="40" Y="424"/>
+        <UsageCount Value="81"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit49>
       <Unit50>
-        <Filename Value="..\misc\main_engine.pas"/>
+        <Filename Value="..\consolas\sms.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="321"/>
-        <CursorPos X="16" Y="340"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="354"/>
+        <CursorPos X="58" Y="382"/>
+        <UsageCount Value="83"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit50>
       <Unit51>
-        <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
+        <Filename Value="..\misc\snapshot.pas"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="27" Y="12"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="2155"/>
+        <CursorPos Y="2115"/>
+        <UsageCount Value="83"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit51>
       <Unit52>
-        <Filename Value="..\misc\init_games.pas"/>
+        <Filename Value="..\consolas\sg1000.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="812"/>
-        <CursorPos X="45" Y="825"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="5" Y="176"/>
+        <UsageCount Value="81"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit52>
       <Unit53>
-        <Filename Value="..\misc\pal_engine.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="148"/>
-        <CursorPos X="34" Y="159"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="79"/>
+        <CursorPos Y="90"/>
         <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <Loaded Value="True"/>
       </Unit53>
       <Unit54>
-        <Filename Value="..\consolas\nes_mappers.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="811"/>
-        <CursorPos X="6" Y="823"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="522"/>
+        <CursorPos Y="534"/>
         <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <Loaded Value="True"/>
       </Unit54>
-      <Unit55>
-        <Filename Value="..\consolas\gb.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="33"/>
-        <CursorPos Y="53"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit55>
-      <Unit56>
-        <Filename Value="..\consolas\super_cassette_vision.pas"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="401"/>
-        <CursorPos X="40" Y="424"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit56>
-      <Unit57>
-        <Filename Value="..\consolas\sms.pas"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="354"/>
-        <CursorPos X="58" Y="382"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-      </Unit57>
-      <Unit58>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="2159"/>
-        <CursorPos Y="2115"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit58>
-      <Unit59>
-        <Filename Value="..\devices\tms99xx.pas"/>
-        <EditorIndex Value="-1"/>
-        <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit59>
-      <Unit60>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="899"/>
-        <CursorPos Y="937"/>
-        <UsageCount Value="12"/>
-      </Unit60>
-      <Unit61>
-        <Filename Value="..\consolas\sg1000.pas"/>
-        <EditorIndex Value="6"/>
-        <CursorPos X="5" Y="176"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit61>
     </Units>
-    <JumpHistory Count="23" HistoryIndex="22">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="339" TopLine="306"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="74" TopLine="59"/>
       </Position1>
       <Position2>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="340" TopLine="307"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="75" TopLine="59"/>
       </Position2>
       <Position3>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="341" TopLine="308"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="76" TopLine="59"/>
       </Position3>
       <Position4>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="342" TopLine="309"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="77" TopLine="59"/>
       </Position4>
       <Position5>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="343" TopLine="310"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="84" TopLine="73"/>
       </Position5>
       <Position6>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="347" TopLine="314"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="85" TopLine="73"/>
       </Position6>
       <Position7>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2115" TopLine="2097"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="86" TopLine="73"/>
       </Position7>
       <Position8>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2116" TopLine="2097"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="87" TopLine="73"/>
       </Position8>
       <Position9>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2115" Column="37" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="518" TopLine="507"/>
       </Position9>
       <Position10>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2118" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="519" TopLine="507"/>
       </Position10>
       <Position11>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2119" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="520" TopLine="507"/>
       </Position11>
       <Position12>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2120" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="521" TopLine="507"/>
       </Position12>
       <Position13>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2121" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="525" TopLine="507"/>
       </Position13>
       <Position14>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2122" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="526" TopLine="507"/>
       </Position14>
       <Position15>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="2123" TopLine="2097"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="527" TopLine="508"/>
       </Position15>
       <Position16>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="325" Column="54" TopLine="314"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="531" TopLine="520"/>
       </Position16>
       <Position17>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="16" Column="46"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="533" TopLine="520"/>
       </Position17>
       <Position18>
-        <Filename Value="..\consolas\sega_gg.pas"/>
-        <Caret Line="209" Column="58" TopLine="182"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="518" TopLine="507"/>
       </Position18>
       <Position19>
-        <Filename Value="..\consolas\sms.pas"/>
-        <Caret Line="362" Column="24" TopLine="348"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="533" TopLine="522"/>
       </Position19>
       <Position20>
-        <Filename Value="..\consolas\coleco.pas"/>
-        <Caret Line="367" Column="26" TopLine="288"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="534" TopLine="522"/>
       </Position20>
       <Position21>
-        <Filename Value="..\consolas\coleco.pas"/>
-        <Caret Line="269" Column="80" TopLine="246"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="89" TopLine="73"/>
       </Position21>
       <Position22>
-        <Filename Value="..\consolas\sega_gg.pas"/>
-        <Caret Line="207" Column="58"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="90" TopLine="73"/>
       </Position22>
       <Position23>
-        <Filename Value="..\consolas\super_cassette_vision.pas"/>
-        <Caret Line="14" Column="9"/>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="71" TopLine="59"/>
       </Position23>
+      <Position24>
+        <Filename Value="..\consolas\nes.pas"/>
+        <Caret Line="90" TopLine="79"/>
+      </Position24>
+      <Position25>
+        <Filename Value="principal.pas"/>
+        <Caret Line="989" TopLine="977"/>
+      </Position25>
+      <Position26>
+        <Filename Value="principal.pas"/>
+        <Caret Line="954" Column="3" TopLine="952"/>
+      </Position26>
+      <Position27>
+        <Filename Value="principal.pas"/>
+        <Caret Line="955" Column="3" TopLine="953"/>
+      </Position27>
+      <Position28>
+        <Filename Value="principal.pas"/>
+        <Caret Line="956" Column="3" TopLine="954"/>
+      </Position28>
+      <Position29>
+        <Filename Value="principal.pas"/>
+        <Caret Line="957" Column="3" TopLine="955"/>
+      </Position29>
+      <Position30>
+        <Filename Value="principal.pas"/>
+        <Caret Line="18" Column="24" TopLine="6"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

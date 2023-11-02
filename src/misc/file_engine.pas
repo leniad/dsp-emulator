@@ -143,7 +143,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   //Configuracion SMS
   sms_0.model:=fich_ini.ReadInteger('sms','model',1);
   //Configuracion GB
-  gb_palette:=fich_ini.ReadInteger('gb','palette',0);
+  gb_0.palette:=fich_ini.ReadInteger('gb','palette',0);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
@@ -270,7 +270,7 @@ end else begin
   //Configuracion basica SMS
   sms_0.model:=0;
   //Config GB
-  gb_palette:=0;
+  gb_0.palette:=0;
   //Teclas
   arcade_input.nup[0]:=KEYBOARD_UP;
   arcade_input.ndown[0]:=KEYBOARD_DOWN;
@@ -446,7 +446,7 @@ fich_ini.WriteInteger('cpc','cpcbright',cpc_crt.bright);
 //Config SMS
 fich_ini.WriteInteger('sms','model',sms_0.model);
 //Config GB
-fich_ini.WriteInteger('gb','palette',gb_palette);
+fich_ini.WriteInteger('gb','palette',gb_0.palette);
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);

@@ -235,6 +235,7 @@ begin
   end;
 end;
 
+procedure sms_outbyte(puerto:word;valor:byte);
 procedure config_io(valor:byte);
 begin
 //Bit 2 y 0 son para ver si la consola es internacional.
@@ -255,7 +256,6 @@ if (((sms_0.old_3f and 8)=0) and ((valor and 8)<>0)) then vdp_0.hpos:=vdp_0.hpos
 sms_0.old_3f:=valor;
 end;
 
-procedure sms_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $ff) of
     0..$3f:if (puerto and $1)<>0 then config_io(valor)
@@ -381,6 +381,7 @@ begin
   while SMSConfig.Showing do application.ProcessMessages;
 end;
 
+procedure abrir_sms;
 function abrir_cartucho_sms(data:pbyte;long:dword):boolean;
 var
   ptemp:pbyte;
@@ -429,7 +430,6 @@ abrir_cartucho_sms_bios:=true;
 reset_sms;
 end;
 
-procedure abrir_sms;
 var
   extension,nombre_file,romfile:string;
   datos:pbyte;

@@ -1,5 +1,4 @@
 unit taitosj_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
@@ -62,7 +61,6 @@ const
         coin_dip:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$0f;dip_name:'9C 1C'),(dip_val:$0e;dip_name:'8C 1C'),(dip_val:$0d;dip_name:'7C 1C'),(dip_val:$0c;dip_name:'6C 1C'),(dip_val:$0b;dip_name:'5C 1C'),(dip_val:$0a;dip_name:'4C 1C'),(dip_val:$09;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$00;dip_name:'1C 1C'),(dip_val:$01;dip_name:'1C 2C'),(dip_val:$02;dip_name:'1C 3C'),(dip_val:$03;dip_name:'1C 4C'),(dip_val:$04;dip_name:'1C 5C'),(dip_val:$05;dip_name:'1C 6C'),(dip_val:$06;dip_name:'1C 7C'),(dip_val:$07;dip_name:'1C 8C'))),
         (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$f0;dip_name:'9C 1C'),(dip_val:$e0;dip_name:'8C 1C'),(dip_val:$d0;dip_name:'7C 1C'),(dip_val:$c0;dip_name:'6C 1C'),(dip_val:$b0;dip_name:'5C 1C'),(dip_val:$a0;dip_name:'4C 1C'),(dip_val:$90;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$00;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$20;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'),(dip_val:$40;dip_name:'1C 5C'),(dip_val:$50;dip_name:'1C 6C'),(dip_val:$60;dip_name:'1C 7C'),(dip_val:$70;dip_name:'1C 8C'))),());
-
 var
  memoria_rom:array[0..1,0..$1fff] of byte;
  gfx_rom:array[0..$7fff] of byte;
@@ -96,7 +94,6 @@ begin
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
   convert_gfx(1,0,@memoria[$9000],@ps_x,@ps_y,false,false);
 end;
-
 procedure conv_chars2;
 begin
   //Chars 2
@@ -106,7 +103,6 @@ begin
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
   convert_gfx(3,0,@memoria[$a800],@ps_x,@ps_y,false,false);
 end;
-
 procedure taitosj_putsprites(sprite_offset:byte);
 var
   f,sx,sy,nchar,which,atrib,ngfx,offs,color:byte;
@@ -128,7 +124,6 @@ for f:=$1f downto 0 do begin
   end;
 end;
 end;
-
 var
   color_back,color_mid,color_front,gfx_back,gfx_mid,gfx_front,nchar,layer:byte;
   f,x,y:word;
@@ -310,7 +305,6 @@ begin
 		color.r:=combine_3_weights(@rweights,bit0,bit1,bit2);
     set_pal_color(color,dir shr 1);
 end;
-
 begin
 case direccion of
   0..$7fff,$d700..$ffff:;

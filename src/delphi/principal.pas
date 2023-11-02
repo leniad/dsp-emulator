@@ -530,6 +530,10 @@ type
     PacnPal1: TMenuItem;
     pv1000: TMenuItem;
     pv2000: TMenuItem;
+    Birdiy1: TMenuItem;
+    M63HW1: TMenuItem;
+    WilyTower1: TMenuItem;
+    FightingBasketball1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

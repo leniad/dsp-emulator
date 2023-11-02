@@ -348,7 +348,8 @@ uses
   missilecommand_hw in '..\arcade\missilecommand_hw.pas',
   gaplus_hw in '..\arcade\gaplus_hw.pas',
   pv1000 in '..\consolas\pv1000.pas',
-  pv2000 in '..\consolas\pv2000.pas';
+  pv2000 in '..\consolas\pv2000.pas',
+  m63_hw in '..\arcade\m63_hw.pas';
 
 {$R *.res}
 begin

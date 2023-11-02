@@ -1,4 +1,45 @@
 # DSP Emulator status #
+<b>02/11/23 - DSP Emulator 0.22WIP6. Updated Windows binary and source.<br>
+<pre>
+-General
+    +CPU
+        -lr35902
+            +Added snapshots
+            +Change ime flag to 'disabled' on reset (Fixes Hook)
+        -MCS48
+            +Added external IO, and fixed internal IO
+            +Fixed conditional jumps
+            +Fixed ROM reads with and without PC increment
+            +Fixed CPU clock init
+            +Fixed IRQs
+            +Added opcodes $25, $45, $70, $71 and $90
+            +Fixed opcodes $80, $81, $a3, $b3 and $e3
+        -na2a03
+            +Added snapshots
+            +Rewrited sound part
+            +Fixed audio buffer
+            +Fixed dpcm sound... But clicks a lot
+-Gameboy/Gameboy Color
+    +Added snapshots
+    +Modernized mappers, better mapper reset
+    +Changed a bit screen timings
+    +Added 'Wisdom Treee' mapper
+    +Added partial mapper MBC6
+-NES
+    +Added snapshots
+    +Modernized mappers
+    +Added black&white palette
+    +Changed a bit screen timings
+-Pacman HW
+    +Birdiy: added driver with sound
+-Irem M63 HW
+    +Wily Tower: added driver with sound
+    +Fighting Basketball: added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/F0v4vkF/birdiy.png"><img src="https://i.ibb.co/SdNWnDY/wilytowr.png"><br>
+<img src="https://i.ibb.co/yPQFCSn/fghtbskt.png"><img src="https://i.ibb.co/YbQ9SYB/noas-ark.png" alt="NES black&white pal"><br>
+<img src="https://i.ibb.co/XYtx8P5/hook.png" alt="GB Hook"><br><br>
+
 <b>22/08/23 - DSP Emulator 0.22WIP5. Updated Windows binary and source.<br>
 <pre>
 -General
@@ -9,7 +50,7 @@
         -Sega VDP (SMS/GG): Added snapshots
     +CPU
         -UPD7810: Added snapshots
-    -Sound
+    +Sound
         -UPD1771: Added snapshots 
     +Misc
         +I2Cmem: Added snapshots
@@ -21,7 +62,7 @@
     +Added the new ROM/tape/snapshot load system
 -Chip 8
     +Added the new ROM load game system
-    +Added snapshot
+    +Added snapshots
 -Coleco
     +Moved to new snapshot system
     +Added eeprom to snapshot (if present)

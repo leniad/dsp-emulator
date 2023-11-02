@@ -5,7 +5,7 @@ uses {$IFDEF windows}windows,{$ENDIF}
      sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
      init_games,ppi8255,tms99xx,pal_engine,sn_76496,m6502,misc_functions,
      i2cmem,lenguaje,sg1000,sms,sega_gg,sega_vdp,super_cassette_vision,upd1771,
-     upd7810,chip8_hw;
+     upd7810,chip8_hw,n2a03,nes_ppu,nes_mappers,gb,gb_mappers,gb_sound,lr35902;
 
 type
   tmain_block=packed record
@@ -2151,15 +2151,136 @@ inc(ptemp,blk_size+SIZE_BLK);
 inc(longitud,blk_size+SIZE_BLK);
 end;
 
+procedure write_n2a03(n2a03:cpu_n2a03);
+var
+  ptemp2:pbyte;
+  blk_size:integer;
+begin
+fillchar(snapshot_block^,SIZE_BLK,0);
+snapshot_block.nombre:='2A03';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+blk_size:=n2a03.save_snapshot(ptemp2);
+snapshot_block.longitud:=blk_size;
+copymemory(ptemp,snapshot_block,SIZE_BLK);
+inc(ptemp,blk_size+SIZE_BLK);
+inc(longitud,blk_size+SIZE_BLK);
+end;
+
+procedure write_nes_ppu;
+var
+  ptemp2,ptemp3:pbyte;
+  tms_size,blk_size:integer;
+begin
+fillchar(snapshot_block^,SIZE_BLK,0);
+snapshot_block.nombre:='NPPU';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+getmem(ptemp3,$10000);
+tms_size:=ppu_nes_0.save_snapshot(ptemp3);
+compress_zlib(ptemp3,tms_size,ptemp2,blk_size);
+freemem(ptemp3);
+snapshot_block.longitud:=blk_size;
+copymemory(ptemp,snapshot_block,SIZE_BLK);
+inc(ptemp,blk_size+SIZE_BLK);
+inc(longitud,blk_size+SIZE_BLK);
+end;
+
+procedure write_nes_mapper;
+var
+  ptemp2,ptemp3:pbyte;
+  tms_size,blk_size:integer;
+begin
+fillchar(snapshot_block^,SIZE_BLK,0);
+snapshot_block.nombre:='NMAP';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+getmem(ptemp3,$900000);
+tms_size:=nes_mapper_0.save_snapshot(ptemp3);
+compress_zlib(ptemp3,tms_size,ptemp2,blk_size);
+freemem(ptemp3);
+snapshot_block.longitud:=blk_size;
+copymemory(ptemp,snapshot_block,SIZE_BLK);
+inc(ptemp,blk_size+SIZE_BLK);
+inc(longitud,blk_size+SIZE_BLK);
+end;
+
+procedure write_gb_mapper;
+var
+  ptemp2,ptemp3:pbyte;
+  tms_size,blk_size:integer;
+begin
+fillchar(snapshot_block^,SIZE_BLK,0);
+snapshot_block.nombre:='NMAP';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+getmem(ptemp3,$900000);
+tms_size:=gb_mapper_0.save_snapshot(ptemp3);
+compress_zlib(ptemp3,tms_size,ptemp2,blk_size);
+freemem(ptemp3);
+snapshot_block.longitud:=blk_size;
+copymemory(ptemp,snapshot_block,SIZE_BLK);
+inc(ptemp,blk_size+SIZE_BLK);
+inc(longitud,blk_size+SIZE_BLK);
+end;
+
+procedure write_gb_snd;
+var
+  ptemp2:pbyte;
+  blk_size:integer;
+begin
+fillchar(snapshot_block^,SIZE_BLK,0);
+snapshot_block.nombre:='GBSN';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+blk_size:=gb_snd_0.save_snapshot(ptemp2);
+snapshot_block.longitud:=blk_size;
+copymemory(ptemp,snapshot_block,SIZE_BLK);
+inc(ptemp,blk_size+SIZE_BLK);
+inc(longitud,blk_size+SIZE_BLK);
+end;
+
+procedure write_lr35902;
+var
+  ptemp2:pbyte;
+  blk_size:integer;
+begin
+fillchar(snapshot_block^,SIZE_BLK,0);
+snapshot_block.nombre:='LR35';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+blk_size:=lr35902_0.save_snapshot(ptemp2);
+snapshot_block.longitud:=blk_size;
+copymemory(ptemp,snapshot_block,SIZE_BLK);
+inc(ptemp,blk_size+SIZE_BLK);
+inc(longitud,blk_size+SIZE_BLK);
+end;
+
 begin
 //Cabeceras y espacio en memoria
 getmem(snapshot_header,SIZE_MH);
 fillchar(snapshot_header^,SIZE_MH,0);
 getmem(snapshot_block,SIZE_BLK);
 fillchar(snapshot_block^,SIZE_BLK,0);
-getmem(pdata,$200000);
+getmem(pdata,$1000000);
 ptemp:=pdata;
 case main_vars.system_type of
+  SNES:begin
+            write_main_header('NES0',$1);
+            write_ram(@memoria[0],$10000);
+            write_misc(@nes_0,sizeof(tnes_machine));
+            write_n2a03(n2a03_0);
+            write_nes_ppu;
+            write_nes_mapper;
+       end;
+  SGB:begin
+            write_main_header('GBC0',$1);
+            write_ram(@memoria[0],$10000);
+            write_misc(@gb_0,sizeof(tgameboy_machine));
+            write_lr35902;
+            write_gb_mapper;
+            write_gb_snd;
+       end;
   SCOLECO:begin
             write_main_header('CLSN',$310);
             write_ram(@memoria[0],$10000);
@@ -2237,7 +2358,7 @@ var
   ptemp:pbyte;
   blk_size:integer;
 begin
-getmem(ptemp,$20000);
+getmem(ptemp,$10000);
 decompress_zlib(data,snapshot_block.longitud,pointer(ptemp),blk_size);
 copymemory(ram_dest,ptemp,blk_size);
 freemem(ptemp);
@@ -2287,11 +2408,45 @@ upd1771_0.load_snapshot(ptemp);
 freemem(ptemp);
 end;
 
+procedure load_nes_ppu;
+var
+  ptemp:pbyte;
+  blk_size:integer;
+begin
+getmem(ptemp,$10000);
+decompress_zlib(data,snapshot_block.longitud,pointer(ptemp),blk_size);
+ppu_nes_0.load_snapshot(ptemp);
+freemem(ptemp);
+end;
+
+procedure load_nes_mapper;
+var
+  ptemp:pbyte;
+  blk_size:integer;
+begin
+getmem(ptemp,$900000);
+decompress_zlib(data,snapshot_block.longitud,pointer(ptemp),blk_size);
+nes_mapper_0.load_snapshot(ptemp);
+freemem(ptemp);
+end;
+
+procedure load_gb_mapper;
+var
+  ptemp:pbyte;
+  blk_size:integer;
+begin
+getmem(ptemp,$900000);
+decompress_zlib(data,snapshot_block.longitud,pointer(ptemp),blk_size);
+gb_mapper_0.load_snapshot(ptemp);
+freemem(ptemp);
+end;
+
 begin
 snapshot_r:=false;
 getmem(snapshot_header,SIZE_MH);
 copymemory(snapshot_header,data,SIZE_MH);
 system:=$ff;
+if snapshot_header.magic='NES0' then system:=SNES;
 if snapshot_header.magic='PV1K' then system:=SPV1000;
 if snapshot_header.magic='PV2K' then system:=SPV2000;
 if snapshot_header.magic='SG1K' then system:=SSG1000;
@@ -2299,6 +2454,7 @@ if snapshot_header.magic='SMS0' then system:=SSMS;
 if snapshot_header.magic='SGG0' then system:=SGG;
 if snapshot_header.magic='SCVI' then system:=SSUPERCASSETTE;
 if snapshot_header.magic='CHP8' then system:=SCHIP8;
+if snapshot_header.magic='GBC0' then system:=SGB;
 if ((system=$ff) or (system<>main_vars.system_type)) then begin
   MessageDlg('Snapshot no válido para este sistema.'+chr(10)+chr(13)+'Snapshot not valid for this system.', mtInformation,[mbOk], 0);
   freemem(snapshot_header);
@@ -2312,6 +2468,30 @@ while longitud<long do begin
   inc(data,SIZE_BLK);
   inc(longitud,SIZE_BLK);
   case main_vars.system_type of
+    SNES:begin
+              if snapshot_block.nombre='CRAM' then load_ram(@memoria[0]);
+              if snapshot_block.nombre='MISC' then load_misc(@nes_0);
+              if snapshot_block.nombre='2A03' then n2a03_0.load_snapshot(data);
+              if snapshot_block.nombre='NPPU' then load_nes_ppu;
+              if snapshot_block.nombre='NMAP' then begin
+                                                      load_nes_mapper;
+                                                      nes_mapper_0.set_mapper(nes_mapper_0.mapper,nes_mapper_0.submapper);
+                                                   end;
+         end;
+    SGB:begin
+             if snapshot_block.nombre='CRAM' then load_ram(@memoria[0]);
+             if snapshot_block.nombre='MISC' then begin
+                                                      load_misc(@gb_0);
+                                                      gb_change_model(gb_0.is_gbc,gb_0.unlicensed);
+                                                      gb_change_timer;
+                                                   end;
+             if snapshot_block.nombre='LR35' then lr35902_0.load_snapshot(data);
+             if snapshot_block.nombre='NMAP' then begin
+                                                      load_gb_mapper;
+                                                      gb_mapper_0.set_mapper(gb_mapper_0.mapper,gb_mapper_0.crc32,gb_mapper_0.rom_size,gb_mapper_0.ram_size);
+                                                   end;
+             if snapshot_block.nombre='GBSN' then gb_snd_0.load_snapshot(data);
+        end;
     SCHIP8:begin
               if snapshot_block.nombre='CRAM' then load_ram(@memoria[0]);
               if snapshot_block.nombre='MISC' then load_misc(@chip8_0);

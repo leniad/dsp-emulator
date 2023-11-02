@@ -37,7 +37,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
-  oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000;
+  oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw;
 
 type
   tgame_desc=record
@@ -65,7 +65,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=370;
+  GAMES_CONT=373;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -424,6 +424,9 @@ const
   (name:'Super Xevious';year:'1984';snd:1;hi:false;zip:'sxevious';grid:350;company:'Namco';rom:@sxevious_roms;samples:@xevious_samples;tipo:ARCADE or SHOT),
   (name:'Grobda';year:'1984';snd:1;hi:false;zip:'grobda';grid:351;company:'Namco';rom:@grobda_roms;tipo:ARCADE or SHOT),
   (name:'Pac & Pal';year:'1983';snd:1;hi:false;zip:'pacnpal';grid:352;company:'Namco';rom:@pacnpal_roms;tipo:ARCADE or MAZE),
+  (name:'Birdiy';year:'1983';snd:1;hi:false;zip:'birdiy';grid:353;company:'Mama Top';rom:@birdiy_roms;tipo:ARCADE or MAZE),
+  (name:'Wily Tower';year:'1984';snd:1;hi:false;zip:'wilytowr';grid:354;company:'Irem';rom:@wilytower_roms;tipo:ARCADE or MAZE),
+  (name:'Fighting Basketball';year:'1984';snd:1;hi:false;zip:'fghtbskt';grid:355;company:'Irem';rom:@fightbasket_roms;tipo:ARCADE or SPORT),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -812,6 +815,9 @@ case numero of
   350:principal1.CambiarMaquina(principal1.superxevious1);
   351:principal1.CambiarMaquina(principal1.grobda1);
   352:principal1.CambiarMaquina(principal1.pacnpal1);
+  353:principal1.CambiarMaquina(principal1.birdiy1);
+  354:principal1.CambiarMaquina(principal1.wilytower1);
+  355:principal1.CambiarMaquina(principal1.FightingBasketball1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1188,6 +1194,9 @@ principal1.gaplus1.Checked:=false;
 principal1.superxevious1.Checked:=false;
 principal1.grobda1.Checked:=false;
 principal1.pacnpal1.Checked:=false;
+principal1.birdiy1.Checked:=false;
+principal1.wilytower1.Checked:=false;
+principal1.FightingBasketball1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1269,24 +1278,20 @@ case driver of
           principal1.BitBtn9.visible:=true; //Load Snapshot
           main_vars.system_type:=SORIC;
        end;
-  10..999:begin
-            principal1.BitBtn8.enabled:=true;  //Arcade
-          end;
-  1000,1008:begin
+  10..999:principal1.BitBtn8.enabled:=true;  //Arcade
+  1008:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
-          case driver of
-            1000:main_vars.system_type:=SNES;
-            1008:main_vars.system_type:=SGENESIS;
-          end;
+          main_vars.system_type:=SGENESIS;
        end;
-  1001,1003,1005,1006,1007,1009,1010:begin
+  1000,1001,1003,1005,1006,1007,1009,1010:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartcuho
           principal1.BitBtn11.visible:=true; //Snapshot
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
           case driver of
+            1000:main_vars.system_type:=SNES;
             1001:main_vars.system_type:=SCOLECO;
             1003:main_vars.system_type:=SCHIP8;
             1005:main_vars.system_type:=SSG1000;
@@ -1296,20 +1301,16 @@ case driver of
             1010:main_vars.system_type:=SPV2000;
           end;
        end;
-  1002:begin
-          principal1.Panel2.visible:=true;
-          principal1.BitBtn1.visible:=true;   //Config
-          principal1.BitBtn10.visible:=true; //Cartucho
-          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
-          main_vars.system_type:=SGB;
-       end;
-  1004:begin
+  1002,1004:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn1.visible:=true; //Config
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn11.visible:=true; //Snapshot
           principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
-          main_vars.system_type:=SSMS;
+          case driver of
+            1002:main_vars.system_type:=SGB;
+            1004:main_vars.system_type:=SSMS;
+          end;
        end;
   2000..2002:main_vars.system_type:=SGANDW; //G&W
 end;
@@ -1325,7 +1326,7 @@ case tmaquina of
   3000:llamadas_maquina.iniciar:=iniciar_c64;
   3001,3002:llamadas_maquina.iniciar:=iniciar_oric;
   //arcade
-  10,88,234,305:llamadas_maquina.iniciar:=iniciar_pacman;
+  10,88,234,305,353:llamadas_maquina.iniciar:=iniciar_pacman;
   11,202:llamadas_maquina.iniciar:=phoenix_iniciar;
   12:llamadas_maquina.iniciar:=iniciar_ms;
   13:llamadas_maquina.iniciar:=bombjack_iniciar;
@@ -1497,6 +1498,7 @@ case tmaquina of
   341,342,343:llamadas_maquina.iniciar:=iniciar_twins;
   344,345:llamadas_maquina.iniciar:=iniciar_missilec;
   349:llamadas_maquina.iniciar:=iniciar_gaplus;
+  354,355:llamadas_maquina.iniciar:=iniciar_irem_m63;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -2939,6 +2941,18 @@ end;
 if sender=principal1.pacnpal1 then begin
   tipo:=352;
   principal1.pacnpal1.Checked:=true;
+end;
+if sender=principal1.birdiy1 then begin
+  tipo:=353;
+  principal1.birdiy1.Checked:=true;
+end;
+if sender=principal1.wilytower1 then begin
+  tipo:=354;
+  principal1.wilytower1.Checked:=true;
+end;
+if sender=principal1.FightingBasketball1 then begin
+  tipo:=355;
+  principal1.FightingBasketball1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

@@ -284,6 +284,10 @@ type
     centipede1: TMenuItem;
     Gaplus1: TMenuItem;
     grobda1: TMenuItem;
+    birdiy1: TMenuItem;
+    MenuItem51: TMenuItem;
+    FightingBasketball1: TMenuItem;
+    wilytower1: TMenuItem;
     pv2000: TMenuItem;
     pv1000: TMenuItem;
     pacnpal1: TMenuItem;

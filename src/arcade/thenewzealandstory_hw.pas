@@ -621,7 +621,7 @@ case main_vars.tipo_maquina of
         //MCU
         mcs48_0:=cpu_mcs48.create(6000000,$100*CPU_SYNC,I8042);
         if not(roms_load(mcs48_0.get_rom_addr,extrmatn_mcu)) then exit;
-        mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport);
+        mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport,nil,nil);
         //Sound chip
         ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);

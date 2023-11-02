@@ -371,7 +371,7 @@ z80_0.change_io_calls(spacefb_inbyte,spacefb_outbyte);
 //MCU
 mcs48_0:=cpu_mcs48.create(6000000,256,I8035);
 mcs48_0.change_ram_calls(spacefb_snd_getbyte,nil);
-mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport);
+mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport,nil,nil);
 mcs48_0.init_sound(spacefb_sound_update);
 //cargar roms
 if not(roms_load(@memoria,spacefb_rom)) then exit;

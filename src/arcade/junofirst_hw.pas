@@ -299,7 +299,7 @@ z80_0.init_sound(junofrst_sound_update);
 //Sound CPU 2
 mcs48_0:=cpu_mcs48.create(8000000,$100,I8039);
 mcs48_0.change_ram_calls(junofrst_sound2_getbyte,nil);
-mcs48_0.change_io_calls(junofrst_sound2_inport,junofrst_sound2_outport);
+mcs48_0.change_io_calls(nil,junofrst_sound2_outport,junofrst_sound2_inport,nil);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1789750,AY8910,0.3);
 ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);

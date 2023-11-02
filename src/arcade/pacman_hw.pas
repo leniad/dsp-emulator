@@ -42,6 +42,15 @@ const
         (n:'3__2516.5f';l:$800;p:$0;crc:$22b0188a),(n:'1__2516.5j';l:$800;p:$800;crc:$0a8c46a0));
         mspactwin_pal:array[0..1] of tipo_roms=(
         (n:'mb7051.8h';l:$20;p:0;crc:$ff344446),(n:'82s129.4a';l:$100;p:$20;crc:$a8202d0d));
+        //Birdiy
+        birdiy_rom:array[0..3] of tipo_roms=(
+        (n:'a6.6a';l:$1000;p:0;crc:$3a58f8ad),(n:'c6.6c';l:$1000;p:$1000;crc:$fec61ea2),
+        (n:'a4.4a';l:$1000;p:$2000;crc:$3392783b),(n:'c4.4c';l:$1000;p:$3000;crc:$2391d83d));
+        birdiy_pal:array[0..1] of tipo_roms=(
+        (n:'n82s123n.10n';l:$20;p:0;crc:$ff344446),(n:'n82s129n.9m';l:$100;p:$20;crc:$63efb927));
+        birdiy_char:tipo_roms=(n:'c1.1c';l:$1000;p:0;crc:$8f6bf54f);
+        birdiy_sound:tipo_roms=(n:'n82s129n.4k';l:$100;p:0;crc:$a9cc86bf);
+        birdiy_sprites:tipo_roms=(n:'c3.3c';l:$1000;p:0;crc:$10b55440);
         //DIP
         pacman_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -73,12 +82,18 @@ const
         (mask:$10;name:'Jama';number:2;dip:((dip_val:$10;dip_name:'Slow'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         mspactwin_dip_c:array [0..1] of def_dip=(
         (mask:$80;name:'Skip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        birdiy_dip_a:array [0..4] of def_dip=(
+        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$8;dip_name:'3'),(dip_val:$c;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$10;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Skip Screen';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_vblank,dec_enable,croller_disable_protection:boolean;
  rom_decode:array[0..$bfff] of byte;
  read_events:procedure;
  croller_counter,croller_offset,unk_latch:byte;
+ sprite_ram:array[0..$f] of byte;
 
 procedure update_video_pacman;
 var
@@ -103,7 +118,7 @@ actualiza_trozo(0,0,224,288,1,0,0,224,288,2);
 //sprites pacman posicion $5060
 //byte 0 --> x
 //byte 1 --> y
-//sprites pacman atributos $4FF0
+//sprites pacman atributos $4ff0
 //byte 0
 //      bit 0 --> flipy
 //      bit 1 --> flipx
@@ -113,13 +128,13 @@ for f:=7 downto 0 do begin
         nchar:=atrib shr 2;
         color:=(memoria[$4ff1+(f*2)] and $1f) shl 2;
         if main_screen.flip_main_screen then begin
-          x:=memoria[$5060+(f*2)]-32;
-          y:=memoria[$5061+(f*2)];
+          x:=sprite_ram[$0+(f*2)]-32;
+          y:=sprite_ram[$1+(f*2)];
           flip_y:=(atrib and 1)=0;
           flip_x:=(atrib and 2)=0;
         end else begin
-          x:=240-memoria[$5060+(f*2)]-1;
-          y:=272-memoria[$5061+(f*2)];
+          x:=240-sprite_ram[$0+(f*2)]-1;
+          y:=272-sprite_ram[$1+(f*2)];
           flip_y:=(atrib and 1)<>0;
           flip_x:=(atrib and 2)<>0;
         end;
@@ -217,7 +232,7 @@ case direccion of
                         1:namco_snd_0.enabled:=valor<>0;
                         3:main_screen.flip_main_screen:=(valor and 1)<>0;
                         $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
-                        $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
+                        $60..$6f:sprite_ram[direccion and $f]:=valor;
                      end;
 end;
 end;
@@ -350,7 +365,7 @@ case direccion of
 	                             end;
                           end;
                         $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
-                        $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
+                        $60..$6f:sprite_ram[direccion and $f]:=valor;
                      end;
         else pacman_putbyte(direccion,valor);
 end;
@@ -393,10 +408,48 @@ case direccion of
                               1:namco_snd_0.enabled:=valor<>0;
                               3:main_screen.flip_main_screen:=(valor and 1)<>0;
                               $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
-                              $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
+                              $60..$6f:sprite_ram[direccion and $f]:=valor;
                               $80..$bf:unk_latch:=valor;
                               $c0..$ff:; //WD
                             end;
+end;
+end;
+
+//Birdiy
+function birdiy_getbyte(direccion:word):byte;
+begin
+direccion:=direccion and $7fff;
+case direccion of
+        0..$3fff:birdiy_getbyte:=memoria[direccion];
+        $4000..$47ff:birdiy_getbyte:=memoria[(direccion and $7ff)+$4000];
+        $4c00..$4fff:birdiy_getbyte:=memoria[(direccion and $3ff)+$4c00];
+        $5000..$5fff:case (direccion and $ff) of
+                        $00..$3f:birdiy_getbyte:=marcade.in0 or $10;
+                        $40..$7f:birdiy_getbyte:=marcade.in1;
+                        $80..$bf:birdiy_getbyte:=marcade.dswa;
+                        $c0..$ff:birdiy_getbyte:=$ff;
+                     end;
+end;
+end;
+
+procedure birdiy_putbyte(direccion:word;valor:byte);
+begin
+direccion:=direccion and $7fff;
+case direccion of
+        0..$3fff:; //ROM
+        $4000..$47ff:if memoria[(direccion and $7ff)+$4000]<>valor then begin
+                        memoria[(direccion and $7ff)+$4000]:=valor;
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                     end;
+        $4c00..$4fff:memoria[(direccion and $3ff)+$4c00]:=valor;
+        $5000..$5fff:case (direccion and $ff) of
+                        1:begin
+                            irq_vblank:=valor<>0;
+                            if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
+                          end;
+                        $80..$9f:namco_snd_0.regs[direccion and $1f]:=valor;
+                        $a0..$af:sprite_ram[direccion and $f]:=valor;
+                     end;
 end;
 end;
 
@@ -411,6 +464,7 @@ case main_vars.tipo_maquina of
   88:open_qsnapshot_save('mspacman'+nombre);
   234:open_qsnapshot_save('crushroller'+nombre);
   305:open_qsnapshot_save('mspactwin'+nombre);
+  353:open_qsnapshot_save('birdiy'+nombre);
 end;
 getmem(data,2000);
 //CPU
@@ -420,6 +474,7 @@ savedata_qsnapshot(data,size);
 size:=namco_snd_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
+savedata_com_qsnapshot(@sprite_ram[0],$10);
 savedata_com_qsnapshot(@memoria[$4000],$4000);
 if main_vars.tipo_maquina=88 then savedata_com_qsnapshot(@memoria[$c000],$4000);
 //MISC
@@ -444,6 +499,7 @@ case main_vars.tipo_maquina of
   88:if not(open_qsnapshot_load('mspacman'+nombre)) then exit;
   234:if not(open_qsnapshot_load('crushroller'+nombre)) then exit;
   305:if not(open_qsnapshot_load('mspactwin'+nombre)) then exit;
+  353:if not(open_qsnapshot_load('birdiy'+nombre)) then exit;
 end;
 getmem(data,2000);
 //CPU
@@ -453,6 +509,7 @@ z80_0.load_snapshot(data);
 loaddata_qsnapshot(data);
 namco_snd_0.load_snapshot(data);
 //MEM
+loaddata_qsnapshot(@sprite_ram[0]);
 loaddata_qsnapshot(@memoria[$4000]);
 if main_vars.tipo_maquina=88 then loaddata_qsnapshot(@memoria[$c000]);
 //MISC
@@ -491,45 +548,45 @@ begin
 	// copy forty 8-byte patches into Pac-Man code
 	for i:=0 to 7 do begin
 		rom_decode[$0410+i]:=rom_decode[$8008+i];
-		rom_decode[$08E0+i]:=rom_decode[$81D8+i];
-		rom_decode[$0A30+i]:=rom_decode[$8118+i];
-		rom_decode[$0BD0+i]:=rom_decode[$80D8+i];
-		rom_decode[$0C20+i]:=rom_decode[$8120+i];
-		rom_decode[$0E58+i]:=rom_decode[$8168+i];
-		rom_decode[$0EA8+i]:=rom_decode[$8198+i];
+		rom_decode[$08e0+i]:=rom_decode[$81d8+i];
+		rom_decode[$0a30+i]:=rom_decode[$8118+i];
+		rom_decode[$0bd0+i]:=rom_decode[$80d8+i];
+		rom_decode[$0c20+i]:=rom_decode[$8120+i];
+		rom_decode[$0e58+i]:=rom_decode[$8168+i];
+		rom_decode[$0ea8+i]:=rom_decode[$8198+i];
 		rom_decode[$1000+i]:=rom_decode[$8020+i];
 		rom_decode[$1008+i]:=rom_decode[$8010+i];
 		rom_decode[$1288+i]:=rom_decode[$8098+i];
 		rom_decode[$1348+i]:=rom_decode[$8048+i];
 		rom_decode[$1688+i]:=rom_decode[$8088+i];
-		rom_decode[$16B0+i]:=rom_decode[$8188+i];
-		rom_decode[$16D8+i]:=rom_decode[$80C8+i];
-		rom_decode[$16F8+i]:=rom_decode[$81C8+i];
-		rom_decode[$19A8+i]:=rom_decode[$80A8+i];
-		rom_decode[$19B8+i]:=rom_decode[$81A8+i];
+		rom_decode[$16b0+i]:=rom_decode[$8188+i];
+		rom_decode[$16d8+i]:=rom_decode[$80c8+i];
+		rom_decode[$16f8+i]:=rom_decode[$81c8+i];
+		rom_decode[$19a8+i]:=rom_decode[$80a8+i];
+		rom_decode[$19b8+i]:=rom_decode[$81a8+i];
 		rom_decode[$2060+i]:=rom_decode[$8148+i];
 		rom_decode[$2108+i]:=rom_decode[$8018+i];
-		rom_decode[$21A0+i]:=rom_decode[$81A0+i];
-		rom_decode[$2298+i]:=rom_decode[$80A0+i];
-		rom_decode[$23E0+i]:=rom_decode[$80E8+i];
+		rom_decode[$21a0+i]:=rom_decode[$81a0+i];
+		rom_decode[$2298+i]:=rom_decode[$80a0+i];
+		rom_decode[$23e0+i]:=rom_decode[$80e8+i];
 		rom_decode[$2418+i]:=rom_decode[$8000+i];
 		rom_decode[$2448+i]:=rom_decode[$8058+i];
 		rom_decode[$2470+i]:=rom_decode[$8140+i];
 		rom_decode[$2488+i]:=rom_decode[$8080+i];
-		rom_decode[$24B0+i]:=rom_decode[$8180+i];
-		rom_decode[$24D8+i]:=rom_decode[$80C0+i];
-		rom_decode[$24F8+i]:=rom_decode[$81C0+i];
+		rom_decode[$24b0+i]:=rom_decode[$8180+i];
+		rom_decode[$24d8+i]:=rom_decode[$80c0+i];
+		rom_decode[$24f8+i]:=rom_decode[$81c0+i];
 		rom_decode[$2748+i]:=rom_decode[$8050+i];
 		rom_decode[$2780+i]:=rom_decode[$8090+i];
-		rom_decode[$27B8+i]:=rom_decode[$8190+i];
+		rom_decode[$27b8+i]:=rom_decode[$8190+i];
 		rom_decode[$2800+i]:=rom_decode[$8028+i];
-		rom_decode[$2B20+i]:=rom_decode[$8100+i];
-		rom_decode[$2B30+i]:=rom_decode[$8110+i];
-		rom_decode[$2BF0+i]:=rom_decode[$81D0+i];
-		rom_decode[$2CC0+i]:=rom_decode[$80D0+i];
-		rom_decode[$2CD8+i]:=rom_decode[$80E0+i];
-		rom_decode[$2CF0+i]:=rom_decode[$81E0+i];
-		rom_decode[$2D60+i]:=rom_decode[$8160+i];
+		rom_decode[$2b20+i]:=rom_decode[$8100+i];
+		rom_decode[$2b30+i]:=rom_decode[$8110+i];
+		rom_decode[$2bf0+i]:=rom_decode[$81d0+i];
+		rom_decode[$2cc0+i]:=rom_decode[$80d0+i];
+		rom_decode[$2cd8+i]:=rom_decode[$80e0+i];
+		rom_decode[$2cf0+i]:=rom_decode[$81e0+i];
+		rom_decode[$2d60+i]:=rom_decode[$8160+i];
 	end;
 end;
 
@@ -580,7 +637,7 @@ case main_vars.tipo_maquina of
         z80_0.change_ram_calls(pacman_getbyte,pacman_putbyte);
         //cargar roms
         if not(roms_load(@memoria,pacman_rom)) then exit;
-        //cargar sonido & iniciar_sonido
+        //cargar sonido
         if not(roms_load(namco_snd_0.get_wave_dir,pacman_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,pacman_char)) then exit;
@@ -617,7 +674,7 @@ case main_vars.tipo_maquina of
         copymemory(@rom_decode[$a000],@memoria[$2000],$1000); // mirror of pacman.6h
         copymemory(@rom_decode[$b000],@memoria[$3000],$1000); // mirror of pacman.6j
         mspacman_install_patches;
-        //cargar sonido & iniciar_sonido
+        //cargar sonido
         if not(roms_load(namco_snd_0.get_wave_dir,pacman_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,mspacman_char)) then exit;
@@ -640,7 +697,7 @@ case main_vars.tipo_maquina of
         z80_0.change_ram_calls(crush_getbyte,crush_putbyte);
         //cargar roms
         if not(roms_load(@memoria,crush_rom)) then exit;
-        //cargar sonido & iniciar_sonido
+        //cargar sonido
         if not(roms_load(namco_snd_0.get_wave_dir,pacman_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,crush_char)) then exit;
@@ -675,7 +732,7 @@ case main_vars.tipo_maquina of
 		      memoria[$8000+(f*2)]:=BITSWAP8(memoria[$8000+(f*2)],0,1,2,3,4,5,6,7);
 		      memoria[$8001+(f*2)]:=BITSWAP8(memoria[$8001+(f*2)] xor $a3,2,4,6,3,7,0,5,1);
 	      end;
-        //cargar sonido & iniciar_sonido
+        //cargar sonido
         if not(roms_load(namco_snd_0.get_wave_dir,pacman_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,mspactwin_char)) then exit;
@@ -693,6 +750,19 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@mspactwin_dip_b;
         marcade.dswc:=$80;
         marcade.dswc_val:=@mspactwin_dip_c;
+     end;
+     353:begin  //Birdiy
+        z80_0.change_ram_calls(birdiy_getbyte,birdiy_putbyte);
+        if not(roms_load(@memoria,birdiy_rom)) then exit;
+        if not(roms_load(namco_snd_0.get_wave_dir,pacman_sound)) then exit;
+        if not(roms_load(@memoria_temp,birdiy_char)) then exit;
+        conv_chars;
+        if not(roms_load(@memoria_temp,birdiy_sprites)) then exit;
+        conv_sprites;
+        if not(roms_load(@memoria_temp,birdiy_pal)) then exit;
+        read_events:=eventos_mspacman;
+        marcade.dswa:=$e9;
+        marcade.dswa_val:=@birdiy_dip_a;
      end;
 end;
 compute_resistor_weights(0,	255, -1.0,

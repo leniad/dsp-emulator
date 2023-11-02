@@ -122,12 +122,12 @@ case direccion of
 end;
 end;
 
+procedure gg_outbyte(puerto:word;valor:byte);
 procedure memory_control(valor:byte);
 begin
   //gg_0.bios_enabled:=(valor and 8)=0;
 end;
 
-procedure gg_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $ff) of
     0..6:gg_0.io[puerto and $ff]:=valor;
@@ -203,25 +203,25 @@ procedure abrir_gg;
 function abrir_cartucho_gg(data:pbyte;long:dword):boolean;
 var
   ptemp:pbyte;
-  long_temp:dword;
+  f:byte;
 begin
-fillchar(sms_0.mapper.rom[0],sizeof(sms_0.mapper.rom),0);
-ptemp:=data;
-gg_0.mapper.max:=0;
-if (long mod $4000)=512 then begin
-  inc(ptemp,512);
-  long_temp:=long-512;
-end else long_temp:=long;
-while long_temp>0 do begin
-  if long_temp<$4000 then begin
-    copymemory(@gg_0.mapper.rom[gg_0.mapper.max,0],ptemp,long_temp);
-    long_temp:=0;
-  end else begin
-    copymemory(@gg_0.mapper.rom[gg_0.mapper.max,0],ptemp,$4000);
+fillchar(gg_0.mapper.rom[0],sizeof(gg_0.mapper.rom),0);
+if long<$4000 then begin
+  copymemory(@gg_0.mapper.rom[0,0],data,long);
+  gg_0.mapper.max:=1;
+end else begin
+  ptemp:=data;
+  if (long mod $4000)<>0 then inc(ptemp,long mod $4000);
+  gg_0.mapper.max:=long div $4000;
+  if (long div $4000)>64 then begin
+    gg_0.mapper.max:=1;
+    abrir_cartucho_gg:=false;
+    exit;
+  end else gg_0.mapper.max:=long div $4000;
+  for f:=0 to (gg_0.mapper.max-1) do begin
+    copymemory(@gg_0.mapper.rom[f,0],ptemp,$4000);
     inc(ptemp,$4000);
-    long_temp:=long_temp-$4000;
   end;
-  gg_0.mapper.max:=gg_0.mapper.max+1;
 end;
 abrir_cartucho_gg:=true;
 reset_gg;

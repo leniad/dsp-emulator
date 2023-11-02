@@ -3,7 +3,7 @@ object load_dsk: Tload_dsk
   Top = 154
   Caption = 'Open/Abrir Disk'
   ClientHeight = 464
-  ClientWidth = 681
+  ClientWidth = 694
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

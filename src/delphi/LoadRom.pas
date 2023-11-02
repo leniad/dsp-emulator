@@ -81,7 +81,10 @@ case GAMES_DESC[numero].grid of
   1004:dir:='sms.png';
   1005:dir:='sg1000.png';
   1006:dir:='gg.png';
+  1007:dir:='scv.png';
   1008:dir:='genesis.png';
+  1009:dir:='pv1000.png';
+  1010:dir:='pv2000.png';
   else dir:=GAMES_DESC[numero].zip+'.png';
 end;
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)

@@ -304,8 +304,6 @@ end;
 
 //Gun.Smoke
 function gunsmoke_getbyte(direccion:word):byte;
-const
-  prot:array[1..3] of byte=($ff,0,0);
 begin
 case direccion of
   0..$7fff,$d000..$d7ff,$e000..$ffff:gunsmoke_getbyte:=memoria[direccion];
@@ -315,7 +313,9 @@ case direccion of
   $c002:gunsmoke_getbyte:=marcade.in2;
   $c003:gunsmoke_getbyte:=marcade.dswa;
   $c004:gunsmoke_getbyte:=marcade.dswb;
-  $c4c9..$c4cb:gunsmoke_getbyte:=prot[direccion and $3]; //Proteccion
+  $c4c9:gunsmoke_getbyte:=$ff; //Procteccion 1
+  $c4ca:gunsmoke_getbyte:=0;   //Procteccion 2
+  $c4cb:gunsmoke_getbyte:=0;   //Proteccion  3
 end;
 end;
 
