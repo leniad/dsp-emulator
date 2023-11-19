@@ -5,7 +5,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      controls,forms,sysutils,misc_functions,pal_engine,sound_engine,
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 const
-        DSP_VERSION='0.22WIP6';
+        DSP_VERSION='0.22F';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;

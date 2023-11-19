@@ -3,8 +3,8 @@ unit tmnt_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,upd7759,ym_2151,k052109,k051960,
-     misc_functions,samples,k053244_k053245,k053260,k053251,eepromser,k007232;
+     pal_engine,sound_engine,upd7759,ym_2151,k052109,k051960,misc_functions,
+     samples,k053244_k053245,k053260,k053251,eepromser,k007232;
 
 function iniciar_tmnt:boolean;
 
@@ -388,7 +388,7 @@ case direccion of
     $1c0006:ssriders_getword:=$ff; //p4
     $1c0100:ssriders_getword:=marcade.in0; //coin
     $1c0102:begin
-              res:=(byte(not(main_vars.service1)) shl 7)+$78+er5911_do_read+(er5911_ready_read shl 1); //eeprom
+              res:=(byte(not(main_vars.service1)) shl 7)+$78+eepromser_0.do_read+(eepromser_0.ready_read shl 1);
               //falta vblank en bit 8
 	            toggle:=toggle xor $04;
 	            ssriders_getword:=res xor toggle;
@@ -457,9 +457,9 @@ case direccion of
                         end;
                      end;
     $1c0200:begin// eeprom
-              er5911_di_write(valor and 1);
-              er5911_cs_write((valor shr 1) and 1);
-              er5911_clk_write((valor shr 2) and 1);
+              eepromser_0.di_write(valor and 1);
+              eepromser_0.cs_write((valor shr 1) and 1);
+              eepromser_0.clk_write((valor shr 2) and 1);
               k053245_bankselect(((valor and $20) shr 5) shl 2);
             end;
     $1c0300:begin
@@ -530,7 +530,7 @@ begin
         k053245_reset;
         k053251_0.reset;
         k053260_0.reset;
-        eepromser_reset;
+        eepromser_0.reset;
       end;
  end;
  reset_audio;
@@ -552,7 +552,7 @@ case main_vars.tipo_maquina of
   215:begin
         //k053245_0.free;
         if k053260_rom<>nil then freemem(k053260_rom);
-        //eeprom free
+        eepromser_0.write_data('ssriders.nv')
       end;
 end;
 if char_rom<>nil then freemem(char_rom);
@@ -566,7 +566,7 @@ end;
 function iniciar_tmnt:boolean;
 var
   f,tempdw:dword;
-  mem_temp:array[0..$1ff] of byte;
+  memoria_temp:array[0..$1ff] of byte;
   ptemp:pbyte;
   ptempw:pword;
 procedure desencriptar_sprites;
@@ -609,7 +609,7 @@ begin
   copymemory(temp,sprite_rom,$200000);
 	for a:=0 to (len-1) do begin
 		// pick the correct entry in the PROM (top 8 bits of the address) */
-		entry:=mem_temp[(A and $7f800) shr 11] and 7;
+		entry:=memoria_temp[(A and $7f800) shr 11] and 7;
 		// the bits to scramble are the low 10 ones */
 		for i:=0 to 9 do bits[i]:=(A shr i) and $1;
 		B:=A and $7fc00;
@@ -717,7 +717,7 @@ case main_vars.tipo_maquina of
         //Init sprites
         getmem(sprite_rom,$200000);
         if not(roms_load32b(sprite_rom,tmnt_sprites)) then exit;
-        if not(roms_load(@mem_temp,tmnt_prom)) then exit;
+        if not(roms_load(@memoria_temp,tmnt_prom)) then exit;
         //Ordenar
         for f:=0 to $7ffff do begin
           tempdw:=sprite_rom[(f*4)+0];
@@ -775,9 +775,11 @@ case main_vars.tipo_maquina of
         //Prioridades
         k053251_0:=k053251_chip.create;
         //eeprom
-        eepromser_init(ER5911,8);
-        if not(roms_load(@mem_temp,ssriders_eeprom)) then exit;
-        eepromser_load_data(@mem_temp[0],$80);
+        eepromser_0:=eepromser_chip.create(ER5911,8);
+        if not(eepromser_0.load_data('ssriders.nv')) then begin
+          if not(roms_load(@memoria_temp,ssriders_eeprom)) then exit;
+          copymemory(eepromser_0.get_data,@memoria_temp,$80);
+        end;
   end;
 end;
 //final

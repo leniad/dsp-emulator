@@ -22,6 +22,7 @@ interface
 uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,
      spectrum_misc,sysutils,lenguaje,misc_functions,tape_window,file_engine,
      lenslock,samples,sound_engine;
+
 const
     MAX_TZX=$3fff;
 type
@@ -120,7 +121,8 @@ function abrir_c64_tap(data:pbyte;long:integer):boolean;
 function abrir_oric_tap(data:pbyte;long:integer):boolean;
 
 implementation
-uses spectrum_48k,spectrum_128k,spectrum_3;
+uses spectrum_48k,spectrum_128k,spectrum_3,principal;
+
 const
     TZX_CLOCK_PAUSE=3500;
 
@@ -628,6 +630,7 @@ var
   f:byte;
 begin
 if not(tape_window1.Showing) or not(cinta_tzx.cargada) then exit;
+principal1.BitBtn14.Enabled:=false;
 temp:=0;
 while cinta_tzx.datos_tzx[temp]<>nil do begin
   for f:=0 to $ff do

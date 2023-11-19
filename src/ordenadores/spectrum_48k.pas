@@ -335,12 +335,8 @@ begin
 if main_vars.tipo_maquina=0 then spec_16k:=false
   else spec_16k:=true;
 llamadas_maquina.bucle_general:=spectrum48_main;
-llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.reset:=spec48k_reset;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=3500000/69888;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
 interface2.hay_if2:=false;
 iniciar_48k:=false;
 //Iniciar el Z80 y pantalla

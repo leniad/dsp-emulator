@@ -469,6 +469,10 @@ var
   f:byte;
 begin
 spec_comun:=false;
+llamadas_maquina.cintas:=spectrum_tapes;
+llamadas_maquina.close:=spec_cerrar_comun;
+llamadas_maquina.configurar:=spectrum_config;
+llamadas_maquina.grabar_snapshot:=grabar_spec;
 spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
@@ -484,11 +488,16 @@ case main_vars.tipo_maquina of
   1,2,3,4:timers.init(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,nil,true);
 end;
 principal1.BitBtn10.Glyph:=nil;
+principal1.BitBtn12.Enabled:=false;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
-principal1.BitBtn14.Glyph:=nil;
-principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
-//Tape Stop and Fastload enabled
-var_spectrum.fastload:=true;
+if not(cinta_tzx.cargada) then begin
+  principal1.BitBtn14.Glyph:=nil;
+  principal1.BitBtn14.Enabled:=false;
+  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+  //Fastload disabled
+  var_spectrum.fastload:=false;
+end;
+//Tape Stop
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;

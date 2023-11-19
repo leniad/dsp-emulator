@@ -1,5 +1,4 @@
 unit simpsons_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
@@ -195,7 +194,7 @@ case direccion of
                 else simpsons_getbyte:=k052109_0.read(direccion);
     $1000..$1fff:case direccion of
                    $1f80:simpsons_getbyte:=marcade.in2; //coin
-                   $1f81:simpsons_getbyte:=$cf+(er5911_do_read shl 4)+(er5911_ready_read shl 5); //eeprom+service
+                   $1f81:simpsons_getbyte:=$cf+(eepromser_0.do_read shl 4)+(eepromser_0.ready_read shl 5);
                    $1f90:simpsons_getbyte:=marcade.in0; //p1
                    $1f91:simpsons_getbyte:=marcade.in1; //p2
                    $1f92:simpsons_getbyte:=$ff; //p3
@@ -225,7 +224,6 @@ end;
 procedure simpsons_putbyte(direccion:word;valor:byte);
 var
    tempw:word;
-
 procedure cambiar_color(pos:word);
 var
   color:tcolor;
@@ -238,7 +236,6 @@ begin
   set_pal_color_alpha(color,pos);
   k052109_0.clean_video_buffer;
 end;
-
 begin
 case direccion of
     0..$fff:if bank0_bank=1 then begin
@@ -257,9 +254,9 @@ case direccion of
                                 else k053246_0.set_objcha_line(CLEAR_LINE);
                         end;
                   $1fc2:if (valor<>$ff) then begin
-                           er5911_di_write((valor shr 7) and 1);
-                           er5911_cs_write((valor shr 3) and 1);
-                           er5911_clk_write((valor shr 4) and 1);
+                           eepromser_0.di_write((valor shr 7) and 1);
+                           eepromser_0.cs_write((valor shr 3) and 1);
+                           eepromser_0.clk_write((valor shr 4) and 1);
                            bank0_bank:=valor and 1;
                            bank2000_bank:=(valor shr 1) and 1;
                            firq_enabled:=(valor and $4)<>0;
@@ -328,6 +325,7 @@ procedure reset_simpsons;
 begin
  konami_0.reset;
  z80_0.reset;
+ eepromser_0.reset;
  k052109_0.reset;
  k053251_0.reset;
  k053246_0.reset;
@@ -352,11 +350,12 @@ if k053260_rom<>nil then freemem(k053260_rom);
 sprite_rom:=nil;
 tiles_rom:=nil;
 k053260_rom:=nil;
+eepromser_0.write_data('simpsons.nv')
 end;
 
 function iniciar_simpsons:boolean;
 var
-   temp_mem:array[0..$7ffff] of byte;
+   memoria_temp:array[0..$7ffff] of byte;
    f:byte;
 begin
 llamadas_maquina.close:=cerrar_simpsons;
@@ -374,13 +373,13 @@ screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(true);
 //cargar roms y ponerlas en su sitio...
-if not(roms_load(@temp_mem,simpsons_rom)) then exit;
-copymemory(@memoria[$8000],@temp_mem[$78000],$8000);
-for f:=0 to $3f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+if not(roms_load(@memoria_temp,simpsons_rom)) then exit;
+copymemory(@memoria[$8000],@memoria_temp[$78000],$8000);
+for f:=0 to $3f do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
 //cargar sonido
-if not(roms_load(@temp_mem,simpsons_sound)) then exit;
-copymemory(@mem_snd,@temp_mem,$8000);
-for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[f*$4000],$4000);
+if not(roms_load(@memoria_temp,simpsons_sound)) then exit;
+copymemory(@mem_snd,@memoria_temp,$8000);
+for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@memoria_temp[f*$4000],$4000);
 //Main CPU
 konami_0:=cpu_konami.create(3000000,264);
 konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
@@ -396,9 +395,11 @@ getmem(k053260_rom,$140000);
 if not(roms_load(k053260_rom,simpsons_k053260)) then exit;
 k053260_0:=tk053260_chip.create(3579545,k053260_rom,$140000,0.70);
 //eeprom
-eepromser_init(ER5911,8);
-if not(roms_load(@temp_mem,simpsons_eeprom)) then exit;
-eepromser_load_data(@temp_mem,$80);
+eepromser_0:=eepromser_chip.create(ER5911,8);
+if not(eepromser_0.load_data('simpsons.nv')) then begin
+  if not(roms_load(@memoria_temp,simpsons_eeprom)) then exit;
+  copymemory(eepromser_0.get_data,@memoria_temp,$80);
+end;
 //Prioridades
 k053251_0:=k053251_chip.create;
 //Iniciar video

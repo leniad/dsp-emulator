@@ -93,61 +93,25 @@ object FLoadRom: TFLoadRom
     ColCount = 3
     Ctl3D = False
     DefaultColWidth = 120
-    DefaultRowHeight = 15
+    DefaultRowHeight = 16
     FixedCols = 0
     RowCount = 41
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = []
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect]
     ParentCtl3D = False
+    ParentFont = False
     TabOrder = 0
     Visible = False
     OnClick = RomListClick
     OnDblClick = RomListDblClick
     ColWidths = (
       193
-      71
+      57
       120)
-    RowHeights = (
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15
-      15)
   end
   object BitBtn3: TBitBtn
     Left = 553

@@ -61,12 +61,8 @@ case main_vars.tipo_maquina of
   end;
 end;
 llamadas_maquina.bucle_general:=spectrum3_main;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.reset:=spec3_reset;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=17734475/5/70908;
-llamadas_maquina.configurar:=spectrum_config;
 iniciar_3:=false;
 //Iniciar el Z80 y pantalla
 if not(spec_comun(17734475 div 5)) then exit;

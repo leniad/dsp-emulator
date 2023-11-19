@@ -3,7 +3,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,timer_engine,ym_2151,
      oki6295,kabuki_decript,qsound,rom_engine,misc_functions,pal_engine,
-     sound_engine,eeprom;
+     sound_engine,eepromser;
 function iniciar_cps1:boolean;
 implementation
 type
@@ -769,7 +769,7 @@ case direccion of
     //qsound
     $f18000..$f19fff:cps1_qsnd_getword:=$ff00+qram1[(direccion shr 1) and $fff];
     $f1c000,$f1c002:cps1_qsnd_getword:=$ff;
-    $f1c006:cps1_qsnd_getword:=eeprom_0.readbit;
+    $f1c006:cps1_qsnd_getword:=eepromser_0.do_read;
     $f1e000..$f1ffff:cps1_qsnd_getword:=$ff00+qram2[(direccion shr 1) and $fff];
     $ff0000..$ffffff:cps1_qsnd_getword:=ram[(direccion and $ffff) shr 1];
 end;
@@ -785,9 +785,9 @@ case direccion of
                      end;
     $f18000..$f19fff:qram1[(direccion shr 1) and $fff]:=valor and $ff;
     $f1c006:begin
-              eeprom_0.write_bit(valor and 1);
-              eeprom_0.set_clock_line(valor and $40);
-              eeprom_0.set_cs_line(not(valor) and $80);
+              eepromser_0.di_write(valor and 1);
+              eepromser_0.clk_write((valor shr 6) and 1);
+              eepromser_0.cs_write((valor shr 7) and 1);
             end;
     $f1e000..$f1ffff:qram2[(direccion shr 1) and $fff]:=valor and $ff;
     $ff0000..$ffffff:ram[(direccion and $ffff) shr 1]:=valor;
@@ -831,7 +831,7 @@ begin
            end;
   112,113:begin
              qsound_reset;
-             eeprom_0.reset;
+             eepromser_0.reset;
           end;
  end;
  marcade.in0:=$ffff;
@@ -908,12 +908,18 @@ begin
     ptemp^:=(dwval shr 24) and $ff;
 	end;
 end;
+
 procedure cerrar_cps1;
 begin
 case main_vars.tipo_maquina of
-  112..113:qsound_close;
+  112..113:begin
+              qsound_close;
+              if main_vars.tipo_maquina=112 then eepromser_0.write_data('dino.nv')
+                else eepromser_0.write_data('punisher.nv');
+           end;
 end;
 end;
+
 function iniciar_cps1:boolean;
 var
   memoria_temp,ptemp:pbyte;
@@ -1266,7 +1272,8 @@ case main_vars.tipo_maquina of
         nbank:=9;
         cps_b:=8;
         //eeprom
-        eeprom_0:=eeprom_class.create(7,8,'0110','0101','0111');
+        eepromser_0:=eepromser_chip.create(E93C46,8);
+        eepromser_0.load_data('dino.nv');
         //cargar roms
         if not(roms_load_swap_word(memoria_temp,dino_rom1)) then exit;
         poner_roms_word;
@@ -1298,7 +1305,8 @@ case main_vars.tipo_maquina of
         nbank:=10;
         cps_b:=9;
         //eeprom
-        eeprom_0:=eeprom_class.create(7,8,'0110','0101','0111');
+        eepromser_0:=eepromser_chip.create(E93C46,8);
+        eepromser_0.load_data('punisher.nv');
         //cargar roms
         if not(roms_load16b(memoria_temp,punisher_rom1)) then exit;
         if not(roms_load_swap_word(memoria_temp,punisher_rom2)) then exit;

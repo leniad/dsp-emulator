@@ -21,7 +21,7 @@ const
         raiden_fgtiles:tipo_roms=(n:'sei430';l:$80000;p:0;crc:$ac1f57ac);
         raiden_sprites:tipo_roms=(n:'sei440';l:$80000;p:0;crc:$946d7bde);
         raiden_oki:tipo_roms=(n:'7.u203';l:$10000;p:0;crc:$8f927822);
-        CPU_SYNC=1;
+        CPU_SYNC=4;
 
 var
  main_rom:array[0..$5ffff] of byte;

@@ -67,7 +67,7 @@ for f:=$0 to $120 do begin
   x:=f div 17;
   y:=f mod 17;
   //background
-  sx:=x+((scroll_x1 and $3FF0) shr 4);
+  sx:=x+((scroll_x1 and $3ff0) shr 4);
   sy:=y+((scroll_y1 and $1f0) shr 4);
   pos:=(sy and $1f)+((sx and $3ff) shl 5);
   atrib:=fondo_rom[pos];
@@ -78,7 +78,7 @@ for f:=$0 to $120 do begin
     gfx[2].buffer[pos]:=false;
   end;
   //background 2
-  sx:=x+((scroll_x2 and $FF0) shr 4);
+  sx:=x+((scroll_x2 and $ff0) shr 4);
   sy:=y+((scroll_y2 and $1f0) shr 4);
   pos:=(sy and $1f)+((sx and $ff) shl 5);
   atrib:=back_ram[pos];

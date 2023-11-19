@@ -121,12 +121,12 @@ var
   f,h,pos:word;
 begin
 BitBtn1.Caption:=leng[main_vars.idioma].mensajes[8];
-romlist.ColWidths[0]:=romlist.Width-90;
-romlist.ColWidths[1]:=86;
+romlist.ColWidths[0]:=romlist.Width-65;
+romlist.ColWidths[1]:=40;
 romlist.ColWidths[2]:=-1;
 romlist.Visible:=true;
 romlist.Cells[0,0]:='Driver Name';
-romlist.Cells[1,0]:='ROM Found';
+romlist.Cells[1,0]:='ROM';
 //Los ordeno...
 for f:=1 to GAMES_CONT do orden_games[f]:=f;
   for f:=1 to GAMES_CONT-1 do begin

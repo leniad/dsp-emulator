@@ -37,7 +37,8 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
-  oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw;
+  oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
+  mugsmashers_hw,steelforce_hw;
 
 type
   tgame_desc=record
@@ -65,7 +66,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=373;
+  GAMES_CONT=377;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -156,7 +157,7 @@ const
   (name:'1943';year:'1987';snd:1;hi:false;zip:'1943';grid:82;company:'Capcom';rom:@hw1943;tipo:ARCADE or SHOT),
   (name:'1943 Kai';year:'1987';snd:1;hi:false;zip:'1943kai';grid:83;company:'Capcom';rom:@hw1943kai;tipo:ARCADE or SHOT),
   (name:'Jail Break';year:'1986';snd:1;hi:false;zip:'jailbrek';grid:84;company:'Konami';rom:@jailbrek;tipo:ARCADE or RUN_GUN),
-  (name:'Circus Chalie';year:'1984';snd:1;hi:false;zip:'circusc';grid:85;company:'Konami';rom:@circusc;tipo:ARCADE or RUN_GUN),
+  (name:'Circus Charlie';year:'1984';snd:1;hi:false;zip:'circusc';grid:85;company:'Konami';rom:@circusc;tipo:ARCADE or RUN_GUN),
   (name:'Iron Horse';year:'1986';snd:1;hi:false;zip:'ironhors';grid:86;company:'Konami';rom:@ironhors;tipo:ARCADE or RUN_GUN),
   (name:'R-Type';year:'1987';snd:0;hi:false;zip:'rtype';grid:87;company:'Irem';rom:@rtype;tipo:ARCADE or SHOT),
   (name:'MS. Pac-man';year:'1981';snd:1;hi:false;zip:'mspacman';grid:88;company:'Namco';rom:@mspacman;tipo:ARCADE or MAZE),
@@ -427,6 +428,10 @@ const
   (name:'Birdiy';year:'1983';snd:1;hi:false;zip:'birdiy';grid:353;company:'Mama Top';rom:@birdiy_roms;tipo:ARCADE or MAZE),
   (name:'Wily Tower';year:'1984';snd:1;hi:false;zip:'wilytowr';grid:354;company:'Irem';rom:@wilytower_roms;tipo:ARCADE or MAZE),
   (name:'Fighting Basketball';year:'1984';snd:1;hi:false;zip:'fghtbskt';grid:355;company:'Irem';rom:@fightbasket_roms;tipo:ARCADE or SPORT),
+  (name:'Diverboy';year:'1992';snd:1;hi:false;zip:'diverboy';grid:356;company:'Gamart';rom:@diverboy_roms;tipo:ARCADE or MAZE),
+  (name:'Mug Smashers';year:'1990';snd:1;hi:false;zip:'mugsmash';grid:357;company:'Electronic Devices Italy';rom:@mugsmash_roms;tipo:ARCADE or FIGHT),
+  (name:'Steel Force';year:'1994';snd:1;hi:false;zip:'stlforce';grid:358;company:'Ecogames';rom:@steelforce_roms;tipo:ARCADE or MAZE or SHOT),
+  (name:'Twin Brats';year:'1995';snd:1;hi:false;zip:'twinbrat';grid:359;company:'Ecogames';rom:@twinbrats_roms;tipo:ARCADE or MAZE),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -818,6 +823,10 @@ case numero of
   353:principal1.CambiarMaquina(principal1.birdiy1);
   354:principal1.CambiarMaquina(principal1.wilytower1);
   355:principal1.CambiarMaquina(principal1.FightingBasketball1);
+  356:principal1.CambiarMaquina(principal1.diverboy1);
+  357:principal1.CambiarMaquina(principal1.mugsmashers1);
+  358:principal1.CambiarMaquina(principal1.steelforce1);
+  359:principal1.CambiarMaquina(principal1.twinbrats1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1197,6 +1206,10 @@ principal1.pacnpal1.Checked:=false;
 principal1.birdiy1.Checked:=false;
 principal1.wilytower1.Checked:=false;
 principal1.FightingBasketball1.Checked:=false;
+principal1.diverboy1.Checked:=false;
+principal1.mugsmashers1.Checked:=false;
+principal1.steelforce1.Checked:=false;
+principal1.twinbrats1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1499,6 +1512,9 @@ case tmaquina of
   344,345:llamadas_maquina.iniciar:=iniciar_missilec;
   349:llamadas_maquina.iniciar:=iniciar_gaplus;
   354,355:llamadas_maquina.iniciar:=iniciar_irem_m63;
+  356:llamadas_maquina.iniciar:=iniciar_diverboy;
+  357:llamadas_maquina.iniciar:=iniciar_mugsmash;
+  358,359:llamadas_maquina.iniciar:=iniciar_steelforce;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -2953,6 +2969,22 @@ end;
 if sender=principal1.FightingBasketball1 then begin
   tipo:=355;
   principal1.FightingBasketball1.Checked:=true;
+end;
+if sender=principal1.diverboy1 then begin
+  tipo:=356;
+  principal1.diverboy1.Checked:=true;
+end;
+if sender=principal1.MugSmashers1 then begin
+  tipo:=357;
+  principal1.MugSmashers1.Checked:=true;
+end;
+if sender=principal1.steelforce1 then begin
+  tipo:=358;
+  principal1.steelforce1.Checked:=true;
+end;
+if sender=principal1.twinbrats1 then begin
+  tipo:=359;
+  principal1.twinbrats1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

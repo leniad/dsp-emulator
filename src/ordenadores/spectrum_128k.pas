@@ -47,11 +47,7 @@ begin
 principal1.panel2.Visible:=true;
 llamadas_maquina.bucle_general:=spectrum128_main;
 llamadas_maquina.reset:=spec128k_reset;
-llamadas_maquina.cintas:=spectrum_tapes;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=17734475/5/70908;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
 iniciar_128k:=false;
 //Iniciar el Z80 y pantalla
 if not(spec_comun(17734475 div 5)) then exit;

@@ -209,7 +209,6 @@ uses
   operationwolf_hw in '..\arcade\operationwolf_hw.pas',
   opwolf_cchip in '..\arcade\misc\opwolf_cchip.pas',
   joystick_calibrate in 'joystick_calibrate.pas' {joy_calibration},
-  eeprom in '..\devices\eeprom.pas',
   outrun_hw in '..\arcade\outrun_hw.pas',
   taitosj_hw in '..\arcade\taitosj_hw.pas',
   fd1089 in '..\devices\fd1089.pas',
@@ -349,7 +348,10 @@ uses
   gaplus_hw in '..\arcade\gaplus_hw.pas',
   pv1000 in '..\consolas\pv1000.pas',
   pv2000 in '..\consolas\pv2000.pas',
-  m63_hw in '..\arcade\m63_hw.pas';
+  m63_hw in '..\arcade\m63_hw.pas',
+  diverboy_hw in '..\arcade\diverboy_hw.pas',
+  mugsmashers_hw in '..\arcade\mugsmashers_hw.pas',
+  steelforce_hw in '..\arcade\steelforce_hw.pas';
 
 {$R *.res}
 begin

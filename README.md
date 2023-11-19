@@ -1,4 +1,35 @@
 # DSP Emulator status #
+<b>15/11/23 - DSP Emulator 0.22Final. Updated Windows binary and source. Please read 'Whats New 0.22' file for full details.<br>
+<pre>
+-General
+    +Updated preview images
+    +Uploaded samples for Bosconian and Gaplus
+    +Devices
+        -Eeprom: 
+            +Mix two source files
+            +Converted to classes
+            +Fixed 16bits writes
+            +Added functions to load/save content
+            +Added E93CXX devices
+    +Sound
+        -OKI6295: fixed playing voices
+-Spectrum
+    +Changed 'fast load' button
+        -Disabled if no tape is loaded
+        -Set 'on' by default when 'TAP' file is loaded
+        -Set 'off' by default when 'TXZ' and 'PZX' files are loaded
+-Sega SG-1000
+    +Safari Hunting: fixed cartridge mirroring, not works
+-Diverboy
+    +Added driver with sound
+-Mug Smashers
+    +Added driver with sound
+-Steel Force HW
+    +Steel Force: added driver with sound
+    +Twin Brats: added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/3k72TKq/diverboy.png"><img src="https://i.ibb.co/MkRDhV9/mugsmash.png"><br>
+<img src="https://i.ibb.co/5BnT7Yq/stlforce.png"><img src="https://i.ibb.co/Gd5mZSQ/twinbrat.png"><br><br>
 <b>02/11/23 - DSP Emulator 0.22WIP6. Updated Windows binary and source.<br>
 <pre>
 -General

@@ -287,6 +287,11 @@ type
     birdiy1: TMenuItem;
     MenuItem51: TMenuItem;
     FightingBasketball1: TMenuItem;
+    diverboy1: TMenuItem;
+    MenuItem52: TMenuItem;
+    twinbrats1: TMenuItem;
+    steelforce1: TMenuItem;
+    mugsmashers1: TMenuItem;
     wilytower1: TMenuItem;
     pv2000: TMenuItem;
     pv1000: TMenuItem;

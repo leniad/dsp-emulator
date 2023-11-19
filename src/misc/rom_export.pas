@@ -3328,13 +3328,44 @@ const
         (n:'fb_g.10e';l:$100;p:$100;crc:$1460c936),(n:'fb_b.11e';l:$100;p:$200;crc:$fca5bf0e),
         (n:'fb08.12f';l:$1000;p:0;crc:$271cd7b8),(n:'fb21.25e';l:$2000;p:0;crc:$02843591),
         (n:'fb22.23e';l:$2000;p:$2000;crc:$cd51d8e7),(n:'fb23.22e';l:$2000;p:$4000;crc:$62bcac87),
-        (n:'fb07.0b';l:$1000;p:$0;crc:$50432dbd),(n:'fb16.35a';l:$2000;p:0;crc:$d1bf0670),
-        (n:'fb15.37a';l:$2000;p:$2000;crc:$83c39a0e),(n:'fb18.32a';l:$2000;p:$4000;crc:$e7e468ae),
-        (n:'fb17.34a';l:$2000;p:$6000;crc:$0741d1a9),(n:'fb20.29a';l:$2000;p:$8000;crc:$7299f362),
-        (n:'fb19.31a';l:$2000;p:$a000;crc:$9b37d50d),(n:'fb06.12a';l:$2000;p:$0;crc:$bea3df99),
+        (n:'fb16.35a';l:$2000;p:0;crc:$a5df1652),(n:'fb15.37a';l:$2000;p:$2000;crc:$59c4de06),
+        (n:'fb18.32a';l:$2000;p:$4000;crc:$c23ddcd7),(n:'fb17.34a';l:$2000;p:$6000;crc:$7db28013),
+        (n:'fb20.29a';l:$2000;p:$8000;crc:$1a1b48f8),(n:'fb19.31a';l:$2000;p:$a000;crc:$7ff7e321),
+        (n:'fb06.12a';l:$2000;p:$0;crc:$bea3df99),(n:'fb07.0b';l:$1000;p:$0;crc:$50432dbd),
         (n:'fb01.42a';l:$2000;p:0;crc:$1200b220),(n:'fb02.41a';l:$2000;p:$2000;crc:$0b67aa82),
         (n:'fb03.40a';l:$2000;p:$4000;crc:$c71269ed),(n:'fb04.39a';l:$2000;p:$6000;crc:$02ddc42d),
         (n:'fb05.38a';l:$2000;p:$8000;crc:$72ea6b49),());
+        diverboy_roms:array[0..11] of tipo_roms=(
+        (n:'db_01.bin';l:$20000;p:0;crc:$6aa11366),(n:'db_02.bin';l:$20000;p:$1;crc:$45f8a673),
+        (n:'db_05.bin';l:$10000;p:0;crc:$ffeb49ec),(n:'db_08.bin';l:$80000;p:0;crc:$7bb96220),
+        (n:'db_09.bin';l:$80000;p:$1;crc:$12b15476),(n:'db_07.bin';l:$20000;p:0;crc:$18485741),
+        (n:'db_10.bin';l:$20000;p:$1;crc:$c381d1cc),(n:'db_06.bin';l:$20000;p:$40000;crc:$21b4e352),
+        (n:'db_11.bin';l:$20000;p:$40001;crc:$41d29c81),(n:'db_03.bin';l:$80000;p:0;crc:$50457505),
+        (n:'db_04.bin';l:$20000;p:$80000;crc:$01b81da0),());
+        mugsmash_roms:array[0..15] of tipo_roms=(
+        (n:'mugs_04.bin';l:$40000;p:0;crc:$2498fd27),(n:'mugs_05.bin';l:$40000;p:$1;crc:$95efb40b),
+        (n:'mugs_12.bin';l:$80000;p:0;crc:$c0a6ed98),(n:'mugs_13.bin';l:$80000;p:$80000;crc:$e2be8595),
+        (n:'mugs_14.bin';l:$80000;p:$100000;crc:$24e81068),(n:'mugs_15.bin';l:$80000;p:$180000;crc:$82e8187c),
+        (n:'mugs_11.bin';l:$80000;p:0;crc:$1c9f5acf),(n:'mugs_10.bin';l:$80000;p:1;crc:$6b3c22d9),
+        (n:'mugs_09.bin';l:$80000;p:$100000;crc:$4e9490f3),(n:'mugs_08.bin';l:$80000;p:$100001;crc:$716328d5),
+        (n:'mugs_07.bin';l:$80000;p:$200000;crc:$9e3167fd),(n:'mugs_06.bin';l:$80000;p:$200001;crc:$8df75d29),
+        (n:'mugs_02.bin';l:$20000;p:0;crc:$f92a7f4a),(n:'mugs_01.bin';l:$20000;p:$20000;crc:$1a3a0b39),
+        (n:'mugs_03.bin';l:$10000;p:0;crc:$0101df2d),());
+        steelforce_roms:array[0..12] of tipo_roms=(
+        (n:'stlforce.105';l:$20000;p:0;crc:$3ec804ca),(n:'stlforce.104';l:$20000;p:$1;crc:$69b5f429),
+        (n:'stlforce.u27';l:$80000;p:1;crc:$c42ef365),(n:'stlforce.u28';l:$80000;p:0;crc:$6a4b7c98),
+        (n:'stlforce.u29';l:$80000;p:$100001;crc:$30488f44),(n:'stlforce.u30';l:$80000;p:$100000;crc:$cf19d43a),
+        (n:'stlforce.u36';l:$40000;p:0;crc:$037dfa9f),(n:'stlforce.u31';l:$40000;p:$40000;crc:$305a8eb5),
+        (n:'stlforce.u32';l:$40000;p:$80000;crc:$760e8601),(n:'stlforce.u33';l:$40000;p:$c0000;crc:$19415cf3),
+        (n:'stlforce.u1';l:$80000;p:0;crc:$0a55edf1),(n:'eeprom-stlforce.bin';l:$80;p:0;crc:$3fb83951),());
+        twinbrats_roms:array[0..12] of tipo_roms=(
+        (n:'12.u105';l:$20000;p:0;crc:$552529b1),(n:'13.u104';l:$20000;p:$1;crc:$9805ba90),
+        (n:'6.bin';l:$80000;p:0;crc:$af10ddfd),(n:'7.bin';l:$80000;p:1;crc:$3696345a),
+        (n:'4.bin';l:$80000;p:$100000;crc:$1ae8a751),(n:'5.bin';l:$80000;p:$100001;crc:$cf235eeb),
+        (n:'11.bin';l:$40000;p:0;crc:$00eecb03),(n:'10.bin';l:$40000;p:$40000;crc:$7556bee9),
+        (n:'9.bin';l:$40000;p:$80000;crc:$13194d89),(n:'8.bin';l:$40000;p:$c0000;crc:$79f14528),
+        (n:'1.bin';l:$80000;p:0;crc:$76296578),(n:'eeprom-twinbrat.bin';l:$80;p:0;crc:$9366263d),());
+
 
 implementation
 uses principal,init_games;
@@ -3386,8 +3417,12 @@ writeln(fichero,'  </header>');
 for f:=1 to games_cont do begin
   rom_data:=games_desc[f];
   if rom_data.zip<>'' then begin
-    if ((rom_data.grid=5) or (rom_data.grid=3) or (rom_data.grid=247)) then continue;
-    writeln(fichero,'  <game name="'+rom_data.zip+'">');
+    case rom_data.grid of
+      3,5,247:continue;
+      188,346,347:writeln(fichero,'  <game name="'+rom_data.zip+'" cloneof="zaxxon">'); //Super Zaxxon y Future Spy
+      231,350:writeln(fichero,'  <game name="'+rom_data.zip+'" cloneof="xevious">'); //Super Xevious
+      else  writeln(fichero,'  <game name="'+rom_data.zip+'">');
+    end;
     change_name:=StringReplace(rom_data.name,'&','&amp;',[rfReplaceAll, rfIgnoreCase]);
     case rom_data.grid of
       0:writeln(fichero,'   <description>Spectrum 16K/48K</description>');

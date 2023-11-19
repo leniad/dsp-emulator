@@ -156,11 +156,12 @@ begin
          end;
   crc_val:=calc_crc(datos,longitud);
   freemem(datos);
-  case dword(crc_val) of
-    //BomberMan Super (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
+  case crc_val of
+    //BomberMan Special (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
     $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:sg1000_0.ram_8k:=true;
     //Castle, Othello (2)
     $92f29d6,$af4f14bc,$1d1a0ca3:sg1000_0.mid_8k_ram:=true;
+    $49e9718b:copymemory(@memoria[$4000],@memoria[0],$4000); //Safari Hunting ¿proteccion?
   end;
   change_caption(nombre_file);
   Directory.sg1000:=ExtractFilePath(romfile);

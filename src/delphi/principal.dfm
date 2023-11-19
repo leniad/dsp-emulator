@@ -3878,6 +3878,25 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object Diverboy1: TMenuItem
+            Caption = 'Diverboy'
+            OnClick = CambiarMaquina
+          end
+          object MugSmashers1: TMenuItem
+            Caption = 'Mug Smashers'
+            OnClick = CambiarMaquina
+          end
+          object SteelForceHW1: TMenuItem
+            Caption = 'Steel Force HW'
+            object SteelForce1: TMenuItem
+              Caption = 'Steel Force'
+              OnClick = CambiarMaquina
+            end
+            object twinbrats1: TMenuItem
+              Caption = 'Twin Brats'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'

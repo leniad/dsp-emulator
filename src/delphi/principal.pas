@@ -534,6 +534,11 @@ type
     M63HW1: TMenuItem;
     WilyTower1: TMenuItem;
     FightingBasketball1: TMenuItem;
+    Diverboy1: TMenuItem;
+    MugSmashers1: TMenuItem;
+    SteelForceHW1: TMenuItem;
+    SteelForce1: TMenuItem;
+    twinbrats1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
