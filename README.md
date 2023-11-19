@@ -19,7 +19,7 @@
         -Set 'on' by default when 'TAP' file is loaded
         -Set 'off' by default when 'TXZ' and 'PZX' files are loaded
 -Sega SG-1000
-    +Safari Hunting: fixed cartridge mirroring, not works
+    +Safari Hunting: fixed cartridge mirroring, now works
 -Diverboy
     +Added driver with sound
 -Mug Smashers
