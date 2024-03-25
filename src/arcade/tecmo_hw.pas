@@ -62,13 +62,16 @@ const
         (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$80;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- mem_adpcm:array[0..$7fff] of byte;
  bank_rom:array[0..$1f,0..$7ff] of byte;
- adpcm_end,adpcm_pos,adpcm_data,scroll_x1,scroll_x2:word;
+ scroll_x1,scroll_x2:word;
  nbank_rom,scroll_y1,scroll_y2,soundlatch,tipo_video:byte;
  bg_ram,fg_ram:array[0..$3ff] of byte;
  txt_ram:array[0..$7ff] of byte;
 
+procedure update_video_tecmo;
+var
+  f,color,nchar,x,y:word;
+  atrib:byte;
 procedure draw_sprites(prioridad:byte);
 const
   layout:array[0..7,0..7] of byte = (
@@ -114,11 +117,6 @@ for f:=0 to $ff do begin
  end;
 end;
 end;
-
-procedure update_video_tecmo;
-var
-  f,color,nchar,x,y:word;
-  atrib:byte;
 begin
 //chars
 for f:=0 to $3ff do begin
@@ -199,7 +197,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -310,10 +308,10 @@ begin
      $8000:ym3812_0.control(valor);
      $8001:ym3812_0.write(valor);
      $c000:begin
-              adpcm_pos:=(valor shl 8);
-              msm5205_0.reset_w(0);
+              msm5205_0.pos:=(valor shl 8);
+              msm5205_0.reset_w(false);
            end;
-     $d000:adpcm_end:=((valor+1) shl 8);
+     $d000:msm5205_0.end_:=((valor+1) shl 8);
      //$e000:volumen
      $f000:z80_1.change_nmi(CLEAR_LINE);
   end;
@@ -394,10 +392,10 @@ begin
      $a000:ym3812_0.control(valor);
      $a001:ym3812_0.write(valor);
      $c000:begin
-              adpcm_pos:=(valor shl 8);
-              msm5205_0.reset_w(0);
+              msm5205_0.pos:=(valor shl 8);
+              msm5205_0.reset_w(false);
            end;
-     $c400:adpcm_end:=((valor+1) shl 8);
+     $c400:msm5205_0.end_:=((valor+1) shl 8);
      //$c800:volumen
      $cc00:z80_1.change_nmi(CLEAR_LINE);
   end;
@@ -411,22 +409,7 @@ end;
 procedure snd_sound_play;
 begin
   YM3812_0.update;
-end;
-
-procedure snd_adpcm;
-begin
-if ((adpcm_pos>=adpcm_end) or	(adpcm_pos>$7fff)) then begin
-  msm5205_0.reset_w(1);
-  exit;
-end;
-if (adpcm_data<>$100) then begin
-		msm5205_0.data_w(adpcm_data and $0f);
-		adpcm_data:=$100;
-end	else begin
-		adpcm_data:=mem_adpcm[adpcm_pos];
-    adpcm_pos:=adpcm_pos+1;
-    msm5205_0.data_w((adpcm_data and $f0) shr 4);
-end;
+  msm5205_0.update;
 end;
 
 //Main
@@ -437,9 +420,6 @@ begin
  ym3812_0.reset;
  msm5205_0.reset;
  reset_audio;
- adpcm_end:=0;
- adpcm_pos:=0;
- adpcm_data:=$100;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -505,7 +485,7 @@ iniciar_video(256,224);
 z80_1:=cpu_z80.create(4000000,$100);
 z80_1.init_sound(snd_sound_play);
 //Sound Chip
-msm5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,snd_adpcm);
+msm5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,$8000);
 //cargar roms
 case main_vars.tipo_maquina of
   26:begin
@@ -523,7 +503,7 @@ case main_vars.tipo_maquina of
       for f:=0 to $1f do copymemory(@bank_rom[f,0],@memoria_temp[$10000+(f*$800)],$800);
       //cargar sonido
       if not(roms_load(@mem_snd,rygar_sound)) then exit;
-      if not(roms_load(@mem_adpcm,rygar_adpcm)) then exit;
+      if not(roms_load(msm5205_0.rom_data,rygar_adpcm)) then exit;
       //convertir chars
       if not(roms_load(@memoria_temp,rygar_char)) then exit;
       char_convert(1024);
@@ -557,7 +537,7 @@ case main_vars.tipo_maquina of
       for f:=0 to $1f do copymemory(@bank_rom[f,0],@memoria_temp[$10000+(f*$800)],$800);
       //cargar sonido
       if not(roms_load(@mem_snd,sw_sound)) then exit;
-      if not(roms_load(@mem_adpcm,sw_adpcm)) then exit;
+      if not(roms_load(msm5205_0.rom_data,sw_adpcm)) then exit;
       //convertir chars
       if not(roms_load(@memoria_temp,sw_char)) then exit;
       char_convert($400);

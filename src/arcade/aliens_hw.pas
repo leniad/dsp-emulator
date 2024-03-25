@@ -120,7 +120,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to $ff do begin
       //main
       konami_0.run(frame_m);
@@ -143,19 +143,19 @@ case direccion of
     $400..$1fff,$8000..$ffff:aliens_getbyte:=memoria[direccion];
     $2000..$3fff:aliens_getbyte:=rom_bank[rom_bank1,direccion and $1fff];
     $4000..$7fff:case direccion of
-                           $5f80:aliens_getbyte:=marcade.dswc; //DSW3
-                           $5f81:aliens_getbyte:=marcade.in0; //p1
-                           $5f82:aliens_getbyte:=marcade.in1; //p2
-                           $5f83:aliens_getbyte:=marcade.dswb; //dsw2
-                           $5f84:aliens_getbyte:=marcade.dswa; //dsw1
-                           else begin
-                                direccion:=direccion and $3fff;
-                                if k052109_0.get_rmrd_line=CLEAR_LINE then begin
-                                   if ((direccion>=$3800) and (direccion<$3808)) then aliens_getbyte:=k051960_0.k051937_read(direccion-$3800)
-                                      else if (direccion<$3c00) then aliens_getbyte:=k052109_0.read(direccion)
-                                           else aliens_getbyte:=k051960_0.read(direccion-$3c00);
-                                end else aliens_getbyte:=k052109_0.read(direccion and $3fff);
-                           end;
+                    $5f80:aliens_getbyte:=marcade.dswc; //DSW3
+                    $5f81:aliens_getbyte:=marcade.in0; //p1
+                    $5f82:aliens_getbyte:=marcade.in1; //p2
+                    $5f83:aliens_getbyte:=marcade.dswb; //dsw2
+                    $5f84:aliens_getbyte:=marcade.dswa; //dsw1
+                    else if k052109_0.get_rmrd_line=CLEAR_LINE then begin
+                            direccion:=direccion and $3fff;
+                            case direccion of
+                              0..$37ff,$3808..$3bff:aliens_getbyte:=k052109_0.read(direccion);
+                              $3800..$3807:aliens_getbyte:=k051960_0.k051937_read(direccion-$3800);
+                              $3c00..$3fff:aliens_getbyte:=k051960_0.read(direccion-$3c00);
+                            end;
+                         end else aliens_getbyte:=k052109_0.read(direccion and $3fff);
                  end;
     end;
 end;
@@ -200,9 +200,11 @@ case direccion of
                                end;
                          else begin
                               direccion:=direccion and $3fff;
-                              if ((direccion>=$3800) and (direccion<$3808)) then k051960_0.k051937_write(direccion-$3800,valor)
-                                 else if (direccion<$3c00) then k052109_0.write(direccion,valor)
-                                      else k051960_0.write(direccion-$3c00,valor);
+                              case direccion of
+                                0..$37ff,$3808..$3bff:k052109_0.write(direccion,valor);
+                                $3800..$3807:k051960_0.k051937_write(direccion-$3800,valor);
+                                $3c00..$3fff:k051960_0.write(direccion-$3c00,valor);
+                              end;
                          end;
                  end;
     $8000..$ffff:; //ROM

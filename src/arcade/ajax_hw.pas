@@ -171,7 +171,7 @@ init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_sub:=hd6309_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to $ff do begin
       //main
       konami_0.run(frame_m);
@@ -395,7 +395,7 @@ for f:=0 to 7 do copymemory(@rom_sub_bank[f,0],@temp_mem[$8000+(f*$2000)],$2000)
 //cargar sonido
 if not(roms_load(@mem_snd,ajax_sound)) then exit;
 //Main CPU
-konami_0:=cpu_konami.create(3000000,256);
+konami_0:=cpu_konami.create(12000000,256);
 konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
 //Sub CPU
 hd6309_0:=cpu_hd6309.create(3000000,256,TCPU_HD6309E);

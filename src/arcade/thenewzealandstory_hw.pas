@@ -124,7 +124,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_misc:=z80_2.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -205,7 +205,7 @@ begin
   color.r:=pal5bit(tmp_color shr 10);
   color.g:=pal5bit(tmp_color shr 5);
   color.b:=pal5bit(tmp_color);
-  set_pal_color(color,(dir and $3ff) shr 1);
+  set_pal_color(color,dir shr 1);
 end;
 
 procedure tnzs_misc_putbyte(direccion:word;valor:byte);
@@ -297,7 +297,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_misc:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -410,7 +410,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_misc:=z80_1.tframes;
 frame_mcu:=mcs48_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     for h:=1 to CPU_SYNC do begin
       //main

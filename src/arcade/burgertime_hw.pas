@@ -225,7 +225,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6502_0.tframes;
 frame_s:=m6502_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
   //Main CPU
   m6502_0.run(frame_m);

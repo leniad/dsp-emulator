@@ -42,9 +42,6 @@ const
 var
   rom_mem:array[0..1,0..$3fff] of byte;
   mcu_mem:array[0..$7ff] of byte;
-  adpcm_rom:array[0..$17fff] of byte;
-  adpcm_play:boolean;
-  adpcm_pos,adpcm_end:dword;
   rom_bank,sound_latch:byte;
   scroll_comp,scroll_x:word;
   port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
@@ -150,7 +147,7 @@ init_controls(false,false,false,true);
 frame_m:=m6502_0.tframes;
 frame_s:=m6809_0.tframes;
 frame_mcu:=m6805_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
    m6502_0.run(frame_m);
    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
@@ -266,32 +263,26 @@ procedure putbyte_snd_renegade(direccion:word;valor:byte);
 begin
 case direccion of
   0..$fff:mem_snd[direccion]:=valor;
-  $1800:begin //adpcm start
-           msm5205_0.reset_w(0);
-           adpcm_play:=true;
-        end;
+  $1800:msm5205_0.reset_w(false); //adpcm start
   $2000:begin //adpcm addr
            case (valor and  $1c) of
-		          $18:adpcm_pos:=0*$8000*2;    // 110 -> ic33
-		          $14:adpcm_pos:=1*$8000*2;    // 101 -> ic32
-		          $0c:adpcm_pos:=2*$8000*2;    // 011 -> ic31
+		          $18:msm5205_0.pos:=0*$8000*2;    // 110 -> ic33
+		          $14:msm5205_0.pos:=1*$8000*2;    // 101 -> ic32
+		          $0c:msm5205_0.pos:=2*$8000*2;    // 011 -> ic31
               else begin
-                adpcm_pos:=0;
-                adpcm_end:=0;
+                msm5205_0.pos:=0;
+                msm5205_0.end_:=0;
                 exit;
               end;
            end;
 	         // bits 0-1 are a13-a14
-           adpcm_pos:= adpcm_pos or ((valor and $03)*$2000*2);
+           msm5205_0.pos:=msm5205_0.pos or ((valor and $03)*$2000*2);
 	         // a0-a12 are driven by a binary counter; playback ends when it rolls over
-	        adpcm_end:=adpcm_pos+$2000*2;
+	        msm5205_0.end_:=msm5205_0.pos+$2000*2;
         end;
   $2800:ym3812_0.control(valor);
   $2801:ym3812_0.write(valor);
-  $3000:begin //adpcm stop
-          msm5205_0.reset_w(1);
-          adpcm_play:=false;
-        end;
+  $3000:msm5205_0.reset_w(true); //adpcm stop
   $8000..$ffff:; //ROM
 end;
 end;
@@ -339,6 +330,7 @@ end;
 procedure renegade_sound_update;
 begin
   ym3812_0.update;
+  msm5205_0.update;
 end;
 
 procedure snd_irq(irqstate:byte);
@@ -350,16 +342,15 @@ procedure snd_adpcm;
 var
   data:byte;
 begin
-  if not(adpcm_play) then exit;
-  if (adpcm_pos>=adpcm_end) then begin
-    msm5205_0.reset_w(1);
-		adpcm_play:=false;
+  if msm5205_0.idle then exit;
+  if (msm5205_0.pos>=msm5205_0.end_) then begin
+    msm5205_0.reset_w(true);
     m6809_0.change_nmi(PULSE_LINE);
 	end else begin
-		data:=adpcm_rom[adpcm_pos shr 1];
-    if (adpcm_pos and 1)<>0 then msm5205_0.data_w(data and $f)
+		data:=msm5205_0.rom_data[msm5205_0.pos shr 1];
+    if (msm5205_0.pos and 1)<>0 then msm5205_0.data_w(data and $f)
       else msm5205_0.data_w(data shr 4);
-		adpcm_pos:=adpcm_pos+1;
+		msm5205_0.pos:=msm5205_0.pos+1;
 	end;
 end;
 
@@ -370,7 +361,7 @@ m6502_0.reset;
 m6809_0.reset;
 m6805_0.reset;
 ym3812_0.reset;
-msm5205_0.reset_w(1);
+msm5205_0.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 rom_bank:=0;
@@ -390,9 +381,6 @@ from_mcu:=0;
 main_sent:=false;
 mcu_sent:=false;
 scroll_comp:=256;
-adpcm_play:=false;
-adpcm_pos:=0;
-adpcm_end:=0;
 end;
 
 function iniciar_renegade:boolean;
@@ -428,8 +416,9 @@ m6805_0.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
-msm5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,1,snd_adpcm);
-if not(roms_load(@adpcm_rom,renegade_adpcm)) then exit;
+msm5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,1,$18000);
+msm5205_0.change_advance(snd_adpcm);
+if not(roms_load(msm5205_0.rom_data,renegade_adpcm)) then exit;
 //cargar roms
 if not(roms_load(@memoria_temp,renegade_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);

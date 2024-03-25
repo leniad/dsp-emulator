@@ -15,19 +15,12 @@ var
    old_1ffd:byte;
    memoria_3:array[0..11,0..$3fff] of byte;
    paginacion_especial,disk_present:boolean;
-   linea:word;
+   linea_3:word;
 
 function iniciar_3:boolean;
-procedure spec3_reset;
-procedure spectrum3_loaddisk;
 //CPU
-procedure spectrum3_main;
-function spec3_getbyte(direccion:word):byte;
 procedure spec3_putbyte(direccion:word;valor:byte);
-function spec3_inbyte(puerto:word):byte;
 procedure spec3_outbyte(puerto:word;valor:byte);
-procedure spec3_retraso_memoria(direccion:word);
-procedure spec3_retraso_puerto(puerto:word);
 
 implementation
 uses tap_tzx,spectrum_misc;
@@ -36,59 +29,6 @@ procedure spectrum3_loaddisk;
 begin
 load_dsk.show;
 while load_dsk.Showing do application.ProcessMessages;
-end;
-
-function iniciar_3:boolean;
-const
-  cmem3:array[0..127] of byte=(
-   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
-   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
-   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
-   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2);
-var
-  f:integer;
-  h:byte;
-  mem_temp:array[0..$ffff] of byte;
-begin
-case main_vars.tipo_maquina of
-  2:begin
-      llamadas_maquina.cartuchos:=spectrum3_loaddisk;
-      disk_present:=true;
-  end;
-  3:begin
-      llamadas_maquina.cartuchos:=nil;
-      disk_present:=false;
-  end;
-end;
-llamadas_maquina.bucle_general:=spectrum3_main;
-llamadas_maquina.reset:=spec3_reset;
-llamadas_maquina.fps_max:=17734475/5/70908;
-iniciar_3:=false;
-//Iniciar el Z80 y pantalla
-if not(spec_comun(17734475 div 5)) then exit;
-spec_z80.change_ram_calls(spec3_getbyte,spec3_putbyte);
-spec_z80.change_io_calls(spec3_inbyte,spec3_outbyte);
-spec_z80.change_retraso_call(spec3_retraso_memoria,spec3_retraso_puerto);
-ay8910_0:=ay8910_chip.create(17734475 div 10,AY8912,1);
-ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
-ay8910_1:=ay8910_chip.create(17734475 div 10,AY8912,1);
-if not(roms_load(@mem_temp,plus3_rom)) then exit;
-copymemory(@memoria_3[8,0],@mem_temp[0],$4000);
-copymemory(@memoria_3[9,0],@mem_temp[$4000],$4000);
-copymemory(@memoria_3[10,0],@mem_temp[$8000],$4000);
-copymemory(@memoria_3[11,0],@mem_temp[$c000],$4000);
-fillchar(var_spectrum.retraso[0],71000,0);
-f:=14361;
-for h:=0 to 191 do begin
-  copymemory(@var_spectrum.retraso[f],@cmem3[0],128);
-  inc(f,228);
-  end;
-case var_spectrum.audio_128k of
-  0:iniciar_audio(false);
-  1,2:iniciar_audio(true);
-end;
-spec3_reset;
-iniciar_3:=true;
 end;
 
 procedure spec3_reset;
@@ -111,7 +51,7 @@ end;
 procedure spec3_retraso_memoria(direccion:word);
 begin
 //Esto esta mal!! deberia ser 228T, pero si pongo 228 Gauntlet no funciona
-if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea*227+spec_z80.contador];
+if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea_3*227+spec_z80.contador];
 end;
 
 procedure spec3_retraso_puerto(puerto:word);
@@ -123,11 +63,11 @@ end;
 procedure spectrum3_main;
 begin
 init_controls(true,true,true,false);
-while EmuStatus=EsRuning do begin
-  for linea:=0 to 310 do begin  //16 lineas despues IRQ
+while EmuStatus=EsRunning do begin
+  for linea_3:=0 to 310 do begin  //16 lineas despues IRQ
     spec_z80.run(228);
-    borde.borde_spectrum(linea);
-    video_128k(linea,@memoria_3[var_spectrum.pantalla_128k,0]);
+    borde.borde_spectrum(linea_3);
+    video_128k(linea_3,@memoria_3[var_spectrum.pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
   end;
   if spec_z80.contador<28 then begin
@@ -192,6 +132,10 @@ end else begin
 end;
 end;
 
+procedure spec3_outbyte(puerto:word;valor:byte);
+var
+        old_pant:byte;
+        color:tcolor;
 procedure memoria_spectrum3;
 begin
 paginacion_activa:=(var_spectrum.old_7ffd and $20)=0;
@@ -203,15 +147,10 @@ if not(paginacion_especial) then begin //Paginacion normal
   var_spectrum.marco[3]:=var_spectrum.old_7ffd and $7;
 end else copymemory(@var_spectrum.marco[0],@ram_bank[(old_1ffd shr 1) and $3,0],4);
 end;
-
-procedure spec3_outbyte(puerto:word;valor:byte);
-var
-        old_pant:byte;
-        color:tcolor;
 begin
         if (puerto and 1)=0 then begin
           if borde.tipo=2 then begin
-            fillchar(borde.buffer[linea*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
+            fillchar(borde.buffer[linea_3*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
             borde.posicion:=spec_z80.contador;
           end;
           if (ulaplus.activa and ulaplus.enabled) then borde.color:=(valor and 7)+16
@@ -299,6 +238,59 @@ begin
 temp:=direccion shr 14;
 temp2:=direccion and $3fff;
 spec3_getbyte:=memoria_3[var_spectrum.marco[temp],temp2];
+end;
+
+function iniciar_3:boolean;
+const
+  cmem3:array[0..127] of byte=(
+   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
+   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
+   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
+   1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2);
+var
+  f:integer;
+  h:byte;
+  mem_temp:array[0..$ffff] of byte;
+begin
+case main_vars.tipo_maquina of
+  2:begin
+      llamadas_maquina.cartuchos:=spectrum3_loaddisk;
+      disk_present:=true;
+  end;
+  3:begin
+      llamadas_maquina.cartuchos:=nil;
+      disk_present:=false;
+  end;
+end;
+llamadas_maquina.bucle_general:=spectrum3_main;
+llamadas_maquina.reset:=spec3_reset;
+llamadas_maquina.fps_max:=17734475/5/70908;
+iniciar_3:=false;
+//Iniciar el Z80 y pantalla
+if not(spec_comun(17734475 div 5)) then exit;
+spec_z80.change_ram_calls(spec3_getbyte,spec3_putbyte);
+spec_z80.change_io_calls(spec3_inbyte,spec3_outbyte);
+spec_z80.change_retraso_call(spec3_retraso_memoria,spec3_retraso_puerto);
+ay8910_0:=ay8910_chip.create(17734475 div 10,AY8912,1);
+ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
+ay8910_1:=ay8910_chip.create(17734475 div 10,AY8912,1);
+if not(roms_load(@mem_temp,plus3_rom)) then exit;
+copymemory(@memoria_3[8,0],@mem_temp[0],$4000);
+copymemory(@memoria_3[9,0],@mem_temp[$4000],$4000);
+copymemory(@memoria_3[10,0],@mem_temp[$8000],$4000);
+copymemory(@memoria_3[11,0],@mem_temp[$c000],$4000);
+fillchar(var_spectrum.retraso[0],71000,0);
+f:=14361;
+for h:=0 to 191 do begin
+  copymemory(@var_spectrum.retraso[f],@cmem3[0],128);
+  inc(f,228);
+  end;
+case var_spectrum.audio_128k of
+  0:iniciar_audio(false);
+  1,2:iniciar_audio(true);
+end;
+spec3_reset;
+iniciar_3:=true;
 end;
 
 end.

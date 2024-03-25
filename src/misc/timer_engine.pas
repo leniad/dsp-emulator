@@ -41,7 +41,7 @@ var
   timers:timer_eng;
 
 implementation
-uses controls_engine,cpu_misc,main_engine;
+uses controls_engine,cpu_misc;
 
 procedure auto_fire;
 begin
@@ -120,8 +120,9 @@ end;
 
 procedure timer_eng.autofire_init;
 begin
-  self.autofire_timer:=self.init(cpu_info[0].num_cpu,1,auto_fire,nil,timers.autofire_on);
-  self.timer[self.autofire_timer].time_final:=cpu_info[0].clock/1000;
+  //Siempre contra la primera CPU!!!
+  self.autofire_timer:=self.init(0,1,auto_fire,nil,timers.autofire_on);
+  self.timer[self.autofire_timer].time_final:=cpu_0_clock/1000;
 end;
 
 function timer_eng.init(cpu:byte;time:single;exec_simple:exec_type_simple;exec_param:exec_type_param;ena:boolean;param0:byte=0):byte;

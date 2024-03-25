@@ -1,8 +1,10 @@
 unit system1_hw_misc;
 
 interface
-uses main_engine,gfx_engine,nz80,sn_76496,controls_engine,sega_decrypt,
-     z80pio,ppi8255,rom_engine,pal_engine,sound_engine,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
+     main_engine,gfx_engine,nz80,sn_76496,controls_engine,sega_decrypt,
+     z80pio,ppi8255,rom_engine,pal_engine,sound_engine,timer_engine,
+     sega_decrypt_2;
 
 function iniciar_system1:boolean;
 procedure system1_principal;
@@ -143,64 +145,31 @@ const
     (mask:$c;name:'Lives';number:4;dip:((dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$4;dip_name:'5'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
     (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'30K 80K 160K'),(dip_val:$20;dip_name:'30K 100K 200K'),(dip_val:$10;dip_name:'40K 120K 240K'),(dip_val:$0;dip_name:'40K 140K 280K'),(),(),(),(),(),(),(),(),(),(),(),())),
     (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+    //Gardia
+    gardia_rom:array[0..2] of tipo_roms=(
+    (n:'epr-10255.1';l:$8000;p:0;crc:$89282a6b),(n:'epr-10254.2';l:$8000;p:$8000;crc:$2826b6d8),
+    (n:'epr-10253.3';l:$8000;p:$10000;crc:$7911260f));
+    gardia_char:array[0..2] of tipo_roms=(
+    (n:'epr-10249.61';l:$4000;p:0;crc:$4e0ad0f2),(n:'epr-10248.64';l:$4000;p:$4000;crc:$3515d124),
+    (n:'epr-10247.66';l:$4000;p:$8000;crc:$541e1555));
+    gardia_sound:tipo_roms=(n:'epr-10243.120';l:$4000;p:0;crc:$87220660);
+    gardia_sprites:array[0..3] of tipo_roms=(
+    (n:'epr-10234.117';l:$8000;p:0;crc:$8a6aed33),(n:'epr-10233.110';l:$8000;p:$8000;crc:$c52784d3),
+    (n:'epr-10236.04';l:$8000;p:$10000;crc:$b35ab227),(n:'epr-10235.5';l:$8000;p:$18000;crc:$006a3151));
+    gardia_proms:array[0..2] of tipo_roms=(
+    (n:'pr-7345.3';l:$100;p:0;crc:$8eee0f72),(n:'pr-7344.2';l:$100;p:$100;crc:$3e7babd7),
+    (n:'pr-7343.1';l:$100;p:$200;crc:$371c44a6));
+    gardia_video_prom:tipo_roms=(n:'pr5317.4';l:$100;p:0;crc:$648350b8);
+    gardia_dip_b:array [0..6] of def_dip=(
+    (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$c;name:'Lives';number:4;dip:((dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$4;dip_name:'5'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$10;dip_name:'30K 100K 170K 240K'),(dip_val:$0;dip_name:'30K 120K 210K 300K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$20;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$20;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-procedure decodifica_wonder_boy;
-const
-  //Wonder Boy
-    opcode_xor:array[0..63] of byte=(
-		$04,$51,$40,$01,$55,$44,$05,$50,$41,$00,$54,$45,
-		$04,$51,$40,$01,$55,$44,$05,$50,$41,$00,$54,$45,
-		$04,$51,$40,$01,$55,$44,$05,$50,
-		$04,$51,$40,$01,$55,$44,$05,$50,$41,$00,$54,$45,
-		$04,$51,$40,$01,$55,$44,$05,$50,$41,$00,$54,$45,
-		$04,$51,$40,$01,$55,$44,$05,$50);
-	  data_xor:array[0..63] of byte=(
-		$54,$15,$44,$51,$10,$41,$55,$14,$45,$50,$11,$40,
-		$54,$15,$44,$51,$10,$41,$55,$14,$45,$50,$11,$40,
-		$54,$15,$44,$51,$10,$41,$55,$14,
-		$54,$15,$44,$51,$10,$41,$55,$14,$45,$50,$11,$40,
-		$54,$15,$44,$51,$10,$41,$55,$14,$45,$50,$11,$40,
-		$54,$15,$44,$51,$10,$41,$55,$14);
-	  opcode_swap_select:array[0..63] of byte=(
-		0,0,1,1,1,2,2,3,3,4,4,4,5,5,6,6,
-		6,7,7,8,8,9,9,9,10,10,11,11,11,12,12,13,
-		8,8,9,9,9,10,10,11,11,12,12,12,13,13,14,14,
-		14,15,15,16,16,17,17,17,18,18,19,19,19,20,20,21);
-	  data_swap_select:array[0..63] of byte=(
-		0,0,1,1,2,2,2,3,3,4,4,5,5,5,6,6,
-		7,7,7,8,8,9,9,10,10,10,11,11,12,12,12,13,
-		8,8,9,9,10,10,10,11,11,12,12,13,13,13,14,14,
-		15,15,15,16,16,17,17,18,18,18,19,19,20,20,20,21);
-    swaptable:array[0..23,0..3] of byte=(
-		  ( 6,4,2,0 ), ( 4,6,2,0 ), ( 2,4,6,0 ), ( 0,4,2,6 ),
-		  ( 6,2,4,0 ), ( 6,0,2,4 ), ( 6,4,0,2 ), ( 2,6,4,0 ),
-		  ( 4,2,6,0 ), ( 4,6,0,2 ), ( 6,0,4,2 ), ( 0,6,4,2 ),
-		  ( 4,0,6,2 ), ( 0,4,6,2 ), ( 6,2,0,4 ), ( 2,6,0,4 ),
-		  ( 0,6,2,4 ), ( 2,0,6,4 ), ( 0,2,6,4 ), ( 4,2,0,6 ),
-		  ( 2,4,0,6 ), ( 4,0,2,6 ), ( 2,0,4,6 ), ( 0,2,4,6 ));
 var
-  a:word;
-  row,src,tbl0,tbl1,tbl2,tbl3:byte;
-begin
-    for a:=0 to $7fff do begin
-		  src:=memoria[a];
-		  // pick the translation table from bits 0, 3, 6, 9, 12 and 14 of the address */
-		  row:= (a and 1) + (((a shr 3) and 1) shl 1) + (((a shr 6) and 1) shl 2)
-				+ (((a shr 9) and 1) shl 3) + (((a shr 12) and 1) shl 4) + (((a shr 14) and 1) shl 5);
-		  // decode the opcodes */
-      tbl0:=swaptable[opcode_swap_select[row]][0];
-      tbl1:=swaptable[opcode_swap_select[row]][1];
-      tbl2:=swaptable[opcode_swap_select[row]][2];
-      tbl3:=swaptable[opcode_swap_select[row]][3];
-		  mem_dec[a]:=((src and $aa) or (((src shr tbl0) and 1) shl 6) or (((src shr tbl1) and 1) shl 4) or (((src shr tbl2) and 1) shl 2) or (((src shr tbl3) and 1) shl 0)) xor opcode_xor[row];
-		  // decode the data */
-      tbl0:=swaptable[data_swap_select[row]][0];
-      tbl1:=swaptable[data_swap_select[row]][1];
-      tbl2:=swaptable[data_swap_select[row]][2];
-      tbl3:=swaptable[data_swap_select[row]][3];
-		  memoria[a]:=((src and $aa) or (((src shr tbl0) and 1) shl 6) or (((src shr tbl1) and 1) shl 4) or (((src shr tbl2) and 1) shl 2) or (((src shr tbl3) and 1) shl 0)) xor data_xor[row];
-    end;
-end;
+  rweights,gweights,bweights:array[0..2] of single;
 
 procedure update_video;
 var
@@ -222,7 +191,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -256,10 +225,19 @@ end;
 procedure cambiar_color_system1(valor:byte;pos:word);
 var
   color:tcolor;
+  bit0,bit1,bit2:byte;
 begin
-  color.r:=pal3bit(valor shr 0);
-  color.g:=pal3bit(valor shr 3);
-	color.b:=pal2bit(valor shr 6);
+  bit0:=(valor shr 0) and 1;
+	bit1:=(valor shr 1) and 1;
+	bit2:=(valor shr 2) and 1;
+  color.r:=combine_3_weights(@rweights,bit0,bit1,bit2);
+  bit0:=(valor shr 3) and 1;
+	bit1:=(valor shr 4) and 1;
+	bit2:=(valor shr 5) and 1;
+  color.g:=combine_3_weights(@gweights,bit0,bit1,bit2);
+  bit0:=(valor shr 6) and 1;
+	bit1:=(valor shr 7) and 1;
+	color.b:=combine_2_weights(@bweights,bit0,bit1);
   set_pal_color(color,pos);
 end;
 
@@ -320,26 +298,41 @@ case (puerto and $1f) of
 end;
 end;
 
-//PIO
-procedure system1_pio_porta_write(valor:byte);
+function system1_getbyte_bank(direccion:word):byte;
 begin
-  sound_latch:=valor;
+case direccion of
+  $8000..$bfff:system1_getbyte_bank:=roms[rom_bank,direccion and $3fff];
+  else system1_getbyte_bank:=system1_getbyte(direccion);
+end;
 end;
 
+procedure system1_putbyte_bank(direccion:word;valor:byte);
+var
+  pos_bg:word;
+begin
+case direccion of
+        0..$bfff:;
+        $d800..$ddff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                        cambiar_color_system2(valor,direccion and $7ff);
+                        buffer_paleta[direccion and $7ff]:=valor;
+                     end;
+        else system1_putbyte(direccion,valor);
+end;
+end;
+
+//PIO
 procedure system1_pio_porta_nmi(state:boolean);
 begin
   z80_1.change_nmi(PULSE_LINE);
 end;
 
-procedure system1_pio_portb_write(valor:byte);
-begin
-  system1_videomode:=valor;
-end;
-
 //Main
 function iniciar_system1:boolean;
+const
+  resistances:array[0..2] of integer=(995,495,250);
 var
-  memoria_temp:array[0..$ffff] of byte;
+  memoria_temp:array[0..$1ffff] of byte;
+  f:byte;
 procedure convert_gfx_system1;
 begin
   init_gfx(0,8,8,2048);
@@ -353,17 +346,16 @@ iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,false,true);
 case main_vars.tipo_maquina of
-  152,154:begin
+  152,154,384:begin
              main_screen.rot270_screen:=true;
              iniciar_video(240,224);
           end;
   else iniciar_video(256,224);
 end;
 //Main CPU
-//Deberia ser 20Mhz, pero si lo pongo falla PFII
-z80_0:=cpu_z80.create(19300000,260);
+z80_0:=cpu_z80.create(20000000 div 5,260);
 z80_0.change_ram_calls(system1_getbyte,system1_putbyte);
-z80_0.change_timmings(@z80t_a,@z80t_cb_a,@z80t_dd_a,@z80t_ddcb_a,@z80t_ed_a,@z80t_ex_a);
+z80_0.change_misc_calls(nil,nil,system1_adjust_cycle);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.init_sound(system1_sound_update);
@@ -372,6 +364,8 @@ timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_s
 sn_76496_0:=sn76496_chip.Create(2000000,0.5);
 sn_76496_1:=sn76496_chip.Create(4000000);
 sprite_num_banks:=1;
+marcade.dswa:=$ff;
+marcade.dswa_val:=@system1_dip_credit;
 case main_vars.tipo_maquina of
   27:begin //Pitfall II
       //cargar roms
@@ -387,8 +381,6 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,pitfall2_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswa_val:=@system1_dip_credit;
       marcade.dswb:=$dc;
       marcade.dswb_val:=@pitfall2_dip_b;
      end;
@@ -407,8 +399,6 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,teddy_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswa_val:=@system1_dip_credit;
       marcade.dswb:=$fe;
       marcade.dswb_val:=@teddy_dip_b;
      end;
@@ -416,7 +406,7 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=2;
       //cargar roms
       if not(roms_load(@memoria,wboy_rom)) then exit;
-      decodifica_wonder_boy;
+      decode_sega_type2(@memoria,@mem_dec,S315_5177);
       //cargar sonido
       if not(roms_load(@mem_snd,wboy_sound)) then exit;
       //convertir chars
@@ -427,8 +417,6 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,wboy_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswa_val:=@system1_dip_credit;
       marcade.dswb:=$ec;
       marcade.dswb_val:=@wboy_dip_b;
      end;
@@ -446,8 +434,6 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,mrviking_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswa_val:=@system1_dip_credit;
       marcade.dswb:=$fc;
       marcade.dswb_val:=@mrviking_dip_b;
      end;
@@ -466,8 +452,6 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,seganinj_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswa_val:=@system1_dip_credit;
       marcade.dswb:=$dc;
       marcade.dswb_val:=@seganinj_dip_b;
      end;
@@ -485,8 +469,6 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,upndown_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswb_val:=@system1_dip_credit;
       marcade.dswb:=$fe;
       marcade.dswb_val:=@upndown_dip_b;
      end;
@@ -504,12 +486,37 @@ case main_vars.tipo_maquina of
       //Cargar PROM
       if not(roms_load(@lookup_memory,flicky_video_prom)) then exit;
       //dip
-      marcade.dswa:=$ff;
-      marcade.dswa_val:=@system1_dip_credit;
       marcade.dswb:=$fe;
       marcade.dswb_val:=@flicky_dip_b;
      end;
+  384:begin  //Gardia
+      z80_0.change_ram_calls(system1_getbyte_bank,system1_putbyte_bank);
+      sprite_num_banks:=4;
+      //cargar roms
+      if not(roms_load(@memoria_temp,gardia_rom)) then exit;
+      copymemory(@memoria,@memoria_temp,$8000);
+      for f:=0 to 3 do copymemory(@roms[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+      decode_sega_type2(@memoria,@mem_dec,S317_000X,2);
+      //cargar sonido
+      if not(roms_load(@mem_snd,gardia_sound)) then exit;
+      //convertir chars
+      if not(roms_load(@memoria_temp,gardia_char)) then exit;
+      convert_gfx_system1;
+      //Meter los sprites en memoria
+      if not(roms_load(@memoria_sprites,gardia_sprites)) then exit;
+      //Cargar PROMs
+      if not(roms_load(@memoria_proms,gardia_proms)) then exit;
+      if not(roms_load(@lookup_memory,gardia_video_prom)) then exit;
+      //dip
+      marcade.dswb:=$7c;
+      marcade.dswb_val:=@wboy_dip_b;
+     end;
 end;
+//Paleta
+compute_resistor_weights(0,	255, -1.0,
+			3,@resistances,@rweights,0,0,
+			3,@resistances,@gweights,0,0,
+			2,@resistances[1],@bweights,0,0);
 case main_vars.tipo_maquina of
   152,154:begin
              //Main CPU
@@ -526,7 +533,7 @@ case main_vars.tipo_maquina of
     //Sound CPU
     z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
     //Z80 PIO
-    z80pio_init(0,nil,nil,system1_pio_porta_write,system1_pio_porta_nmi,nil,system1_pio_portb_write,nil);
+    z80pio_init(0,nil,nil,system1_port_a_write,system1_pio_porta_nmi,nil,system1_port_b_write,nil);
   end;
 end;
 char_screen:=1;

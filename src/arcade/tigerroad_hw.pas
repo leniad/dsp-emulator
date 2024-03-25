@@ -158,7 +158,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     m68000_0.run(frame_m);
@@ -368,7 +368,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     m68000_0.run(frame_m);
@@ -503,7 +503,7 @@ case main_vars.tipo_maquina of
         if not(roms_load16w(@rom,f1dream_rom)) then exit;
         if not(roms_load(@mem_snd,f1dream_sound)) then exit;
         //MCU
-        mcs51_0:=cpu_mcs51.create(10000000,256);
+        mcs51_0:=cpu_mcs51.create(I8X51,10000000,256);
         mcs51_0.change_io_calls(nil,nil,nil,nil,nil,out_port1,nil,out_port3);
         mcs51_0.change_ram_calls(mcu_ext_ram_read,mcu_ext_ram_write);
         if not(roms_load(mcs51_0.get_rom_addr,f1dream_mcu)) then exit;

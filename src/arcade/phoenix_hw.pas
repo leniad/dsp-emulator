@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms36xx,phoenix_audio_digital,
      rom_engine,pal_engine,sound_engine;
 
-function phoenix_iniciar:boolean;
+function iniciar_phoenix:boolean;
 
 implementation
 var
@@ -94,7 +94,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -164,7 +164,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -247,7 +247,7 @@ begin
   if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
 end;
 
-function phoenix_iniciar:boolean;
+function iniciar_phoenix:boolean;
 var
       colores:tpaleta;
       ctemp1,ctemp2,f:byte;
@@ -261,7 +261,7 @@ begin
 llamadas_maquina.close:=phoenix_cerrar;
 llamadas_maquina.reset:=phoenix_reset;
 llamadas_maquina.fps_max:=61.035156;
-phoenix_iniciar:=false;
+iniciar_phoenix:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_mod_scroll(1,256,256,255,256,256,255);
@@ -332,7 +332,7 @@ end;
 set_pal(colores,256);
 //final
 phoenix_reset;
-phoenix_iniciar:=true;
+iniciar_phoenix:=true;
 end;
 
 end.

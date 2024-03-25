@@ -84,7 +84,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=h6280_0.tframes;
 frame_s:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
    //Main
    h6280_0.run(trunc(frame_m));

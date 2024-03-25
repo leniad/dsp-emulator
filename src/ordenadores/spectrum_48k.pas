@@ -7,6 +7,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 var
     rom_cambiada_48:boolean=false;
+    linea_48:word;
+    spec_16k:boolean;
 
 function iniciar_48k:boolean;
 procedure spec48_putbyte(direccion:word;valor:byte);
@@ -16,10 +18,6 @@ procedure borde_48_full(linea:word);
 implementation
 
 uses tap_tzx,spectrum_misc;
-
-var
-    spec_16k:boolean;
-    linea:word;
 
 procedure video48k(linea:word);
 var
@@ -80,7 +78,8 @@ for x:=0 to 31 do begin
   end;
   pos_video:=pos_video+1;
 end;
-if poner_linea then actualiza_trozo_simple(48,linea+48,256,1,1);
+if poner_linea then
+  actualiza_trozo_simple(48,linea+48,256,1,1);
 end;
 
 procedure borde_48_full(linea:word);
@@ -136,11 +135,11 @@ end;
 procedure spectrum48_main;
 begin
 init_controls(true,true,true,false);
-while EmuStatus=EsRuning do begin
-  for linea:=0 to 311 do begin
+while EmuStatus=EsRunning do begin
+  for linea_48:=0 to 311 do begin
     spec_z80.run(224);
-    borde.borde_spectrum(linea);
-    video48k(linea);
+    borde.borde_spectrum(linea_48);
+    video48k(linea_48);
     spec_z80.contador:=spec_z80.contador-224;
   end;
   if spec_z80.contador<28 then begin
@@ -157,7 +156,7 @@ end;
 
 procedure spec48_retraso_memoria(direccion:word);
 begin
-  if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea*224+spec_z80.contador];
+  if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea_48*224+spec_z80.contador];
 end;
 
 procedure spec48_retraso_puerto(puerto:word);
@@ -165,7 +164,7 @@ var
   estados:byte;
   posicion:dword;
 begin
-posicion:=linea*224+spec_z80.contador;
+posicion:=linea_48*224+spec_z80.contador;
 if (puerto and $c000)=$4000 then begin //Contenida
     if (puerto and 1)<>0 then begin //ultimo bit 1
        estados:=var_spectrum.retraso[posicion]+1;
@@ -227,7 +226,7 @@ if (puerto and 1)=0 then begin //ULA
 end else begin //Resto
     //Floating bus
     cont:=spec_z80.contador mod 224;
-    lin:=linea+(spec_z80.contador div 224);
+    lin:=linea_48+(spec_z80.contador div 224);
     if ((lin>63) and (lin<256) and (cont<128)) then begin
       lin:=lin-64;
       col:=$4000+((cont and $f8) shr 2);// div 8)*2);
@@ -275,7 +274,7 @@ var
 begin
 if (puerto and 1)=0 then begin //ULA
   if borde.tipo=2 then begin
-      fillchar(borde.buffer[linea*224+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
+      fillchar(borde.buffer[linea_48*224+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
       borde.posicion:=spec_z80.contador;
     end;
   if (ulaplus.activa and ulaplus.enabled) then borde.color:=(valor and 7)+16

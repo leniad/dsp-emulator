@@ -134,7 +134,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     z80_0.run(frame_m);
@@ -240,7 +240,7 @@ begin
  scroll_x:=0;
  scroll_y:=0;
  sound_command:=0;
- palette_bank:=0;
+ palette_bank:=$ff;
 end;
 
 function iniciar_vulgus:boolean;

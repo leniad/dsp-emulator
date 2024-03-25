@@ -117,8 +117,8 @@ end;
 
 procedure TFLoadRom.FormShow(Sender: TObject);
 var
-  png:TPngImage;
   f,h,pos:word;
+  png:TPngImage;
 begin
 BitBtn1.Caption:=leng[main_vars.idioma].mensajes[8];
 romlist.ColWidths[0]:=romlist.Width-65;
@@ -127,6 +127,19 @@ romlist.ColWidths[2]:=-1;
 romlist.Visible:=true;
 romlist.Cells[0,0]:='Driver Name';
 romlist.Cells[1,0]:='ROM';
+//Creo la imagen si no existe
+if not(FileExists(Directory.Preview+'preview.png')) then begin
+   ImgPreview.canvas.Brush.Color:=clWhite;
+   ImgPreview.canvas.Brush.Style:=bsSolid;
+   ImgPreview.canvas.Rectangle(0,0,ImgPreview.Width,ImgPreview.Height);
+   ImgPreview.Canvas.Font.Color:=clblue;
+   ImgPreview.Canvas.Font.Size:=12;
+   ImgPreview.Canvas.TextOut(70,80,'Image not available!');
+   PNG:=TPngImage.Create;
+   PNG.Assign(imgpreview.Picture.Bitmap);
+   PNG.SaveToFile(Directory.Preview+'preview.png');
+   PNG.free;
+end;
 //Los ordeno...
 for f:=1 to GAMES_CONT do orden_games[f]:=f;
   for f:=1 to GAMES_CONT-1 do begin
@@ -154,19 +167,6 @@ case main_vars.sort of
       //El orden es importante!!
       radiobutton5.checked:=true;
     end;
-end;
-//Muestro la imagen
-if not(FileExists(Directory.Preview+'preview.png')) then begin
-   ImgPreview.canvas.Brush.Color:=clWhite;
-   ImgPreview.canvas.Brush.Style:=bsSolid;
-   ImgPreview.canvas.Rectangle(0,0,ImgPreview.Width,ImgPreview.Height);
-   ImgPreview.Canvas.Font.Color:=clblue;
-   ImgPreview.Canvas.Font.Size:=12;
-   ImgPreview.Canvas.TextOut(70,80,'Image not available!');
-   PNG:=TPngImage.Create;
-   PNG.Assign(imgpreview.Picture.Bitmap);
-   PNG.SaveToFile(Directory.Preview+'preview.png');
-   PNG.free;
 end;
 show_picture;
 end;
@@ -290,6 +290,7 @@ procedure TFLoadRom.RomListClick(Sender: TObject);
 begin
 show_picture;
 end;
+
 procedure TFLoadRom.RadioButton3Click(Sender: TObject);
 begin
   init_game_desc(8);

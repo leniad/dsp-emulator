@@ -36,10 +36,6 @@ var
   inputs:array[0..4] of byte;
   scroll_x:array[0..271] of word;
   scroll_x_temp:word;
-  //adpcm
-  adpcm_rom:array[0..1,0..$ffff] of byte;
-  adpcm_pos,adpcm_end:array[0..1] of dword;
-  adpcm_data:array[0..1] of integer;
 
 procedure update_video_sdodgeball;
 var
@@ -112,7 +108,7 @@ init_controls(false,false,false,true);
 frame_m:=m6502_0.tframes;
 frame_s:=m6809_0.tframes;
 frame_mcu:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     m6502_0.run(frame_m);
     frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
@@ -203,50 +199,23 @@ case direccion of
   0..$fff:mem_snd[direccion]:=valor;
   $2800:ym3812_0.control(valor);
   $2801:ym3812_0.write(valor);
-  $3800:msm5205_0.reset_w(0);
-  $3801:msm5205_1.reset_w(0);
-  $3802:adpcm_end[0]:=(valor and $7f)*$200;
-  $3803:adpcm_end[1]:=(valor and $7f)*$200;
-  $3804:adpcm_pos[0]:=(valor and $7f)*$200;
-  $3805:adpcm_pos[1]:=(valor and $7f)*$200;
-  $3806:msm5205_0.reset_w(1);
-  $3807:msm5205_1.reset_w(1);
+  $3800:msm5205_0.reset_w(false);
+  $3801:msm5205_1.reset_w(false);
+  $3802:msm5205_0.end_:=(valor and $7f)*$200;
+  $3803:msm5205_1.end_:=(valor and $7f)*$200;
+  $3804:msm5205_0.pos:=(valor and $7f)*$200;
+  $3805:msm5205_1.pos:=(valor and $7f)*$200;
+  $3806:msm5205_0.reset_w(true);
+  $3807:msm5205_1.reset_w(true);
   $8000..$ffff:;
 end;
-end;
-
-procedure msm5205_sound1;
-begin
-if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
-		msm5205_0.reset_w(1);
-	end	else if (adpcm_data[0]<>-1) then begin
-		        msm5205_0.data_w(adpcm_data[0] and $0f);
-		        adpcm_data[0]:=-1;
-           end else begin
-		                  adpcm_data[0]:=adpcm_rom[0,adpcm_pos[0]];
-                      adpcm_pos[0]:=adpcm_pos[0]+1;
-		                  msm5205_0.data_w(adpcm_data[0] shr 4);
-                    end;
-end;
-
-procedure msm5205_sound2;
-begin
-if ((adpcm_pos[1]>=adpcm_end[1]) or (adpcm_pos[1]>=$10000)) then begin
-		msm5205_1.reset_w(1);
-	end	else if (adpcm_data[1]<>-1) then begin
-		        msm5205_1.data_w(adpcm_data[1] and $0f);
-		        adpcm_data[1]:=-1;
-           end else begin
-		                  adpcm_data[1]:=adpcm_rom[1,adpcm_pos[1]];
-                      adpcm_pos[1]:=adpcm_pos[1]+1;
-		                  msm5205_1.data_w(adpcm_data[1] shr 4);
-                    end;
-
 end;
 
 procedure sdodgeball_sound_update;
 begin
   ym3812_0.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 //MCU
@@ -312,12 +281,6 @@ tile_pal:=0;
 sprite_pal:=0;
 mcu_latch:=0;
 fillword(@scroll_x[0],272,0);
-adpcm_pos[0]:=0;
-adpcm_pos[1]:=0;
-adpcm_end[0]:=0;
-adpcm_end[1]:=0;
-adpcm_data[0]:=0;
-adpcm_data[1]:=0;
 end;
 
 function iniciar_sdodgeball:boolean;
@@ -363,11 +326,11 @@ if not(roms_load(@mem_misc,sdodgeball_mcu)) then exit;
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.6);
 ym3812_0.change_irq_calls(snd_irq);
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,msm5205_sound1);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,msm5205_sound2);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,$10000);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,$10000);
 if not(roms_load(@memoria_temp,sdodgeball_adpcm)) then exit;
-copymemory(@adpcm_rom[0,0],@memoria_temp[0],$10000);
-copymemory(@adpcm_rom[1,0],@memoria_temp[$10000],$10000);
+copymemory(msm5205_0.rom_data,@memoria_temp[0],$10000);
+copymemory(msm5205_1.rom_data,@memoria_temp[$10000],$10000);
 //Cargar chars
 if not(roms_load(@memoria_temp,sdodgeball_char)) then exit;
 init_gfx(0,8,8,$2000);

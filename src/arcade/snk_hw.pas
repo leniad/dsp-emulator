@@ -3,12 +3,11 @@ unit snk_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,ym_3812,timer_engine,sysutils;
+     pal_engine,sound_engine,ym_3812,timer_engine;
 
 function iniciar_snk:boolean;
 
 implementation
-uses principal;
 const
         //ikari
         ikari_main:tipo_roms=(n:'1.rom';l:$10000;p:0;crc:$52a8b2dd);
@@ -509,7 +508,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_sub:=z80_1.tframes;
 frame_snd:=z80_2.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 223 do begin
     for h:=1 to CPU_SYNC do begin
         //Main

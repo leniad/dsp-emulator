@@ -1,7 +1,8 @@
 unit k053260;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,misc_functions,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,misc_functions,timer_engine,
+     main_engine,cpu_misc;
 
 type
   tKDSC_Voice=class
@@ -14,7 +15,7 @@ type
 	private
 		  // live state
 		  position:dword;
-		  pan_volume:array[0..1] of word;
+		  pan_volume:array[0..1] of dword;
 		  counter:word;
 		  output:shortint;
       out1,out2:integer;
@@ -48,6 +49,7 @@ type
 	    procedure main_write(direccion,valor:byte);
 	    function read(direccion:byte):byte;
 	    procedure write(direccion,valor:byte);
+      procedure change_calls(sh1,sh2:cpu_outport_call);
    private
       // configuration
 	    rgnoverride:byte;
@@ -56,20 +58,35 @@ type
 	    keyon:byte;
 	    mode:byte;
       voice:array[0..3] of tKDSC_Voice;
-      ntimer,tsample_num2:byte;
+      ntimer,ntimer2,state_output,tsample_num2:byte;
       buffer:array[0..1,0..4] of integer;
       posicion:byte;
+      sh1_call,sh2_call:cpu_outport_call;
       procedure internal_update;
   end;
 
 var
   k053260_0:tk053260_chip;
 
-procedure internal_update_k053260;
-
 implementation
 const
-  CLOCKS_PER_SAMPLE=32;
+  CLOCKS_PER_SAMPLE=64;
+
+procedure internal_update_k053260;
+begin
+  k053260_0.internal_update;
+end;
+
+procedure call_update_k053260;
+begin
+k053260_0.state_output:=(k053260_0.state_output+1) and 3;
+case k053260_0.state_output of
+  0:if @k053260_0.sh1_call<>nil then k053260_0.sh1_call(ASSERT_LINE);
+  1:if @k053260_0.sh1_call<>nil then k053260_0.sh1_call(CLEAR_LINE);
+  2:if @k053260_0.sh2_call<>nil then k053260_0.sh2_call(ASSERT_LINE);
+  3:if @k053260_0.sh2_call<>nil then k053260_0.sh2_call(CLEAR_LINE);
+end;
+end;
 
 constructor tk053260_chip.create(clock:dword;rom:pbyte;size:dword;amp:single);
 var
@@ -77,6 +94,7 @@ var
 begin
   for f:=0 to 3 do self.voice[f]:=tKDSC_Voice.create(rom,size);
   self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/CLOCKS_PER_SAMPLE),internal_update_k053260,nil,true);
+  //self.ntimer2:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock/16,call_update_k053260,nil,true);
   self.tsample_num:=init_channel;
   self.tsample_num2:=init_channel;
   self.amp:=amp;
@@ -99,6 +117,12 @@ begin
     self.buffer[0,f]:=0;
     self.buffer[1,f]:=0;
   end;
+end;
+
+procedure tk053260_chip.change_calls(sh1,sh2:cpu_outport_call);
+begin
+  self.sh1_call:=sh1;
+  self.sh2_call:=sh2;
 end;
 
 function tk053260_chip.main_read(direccion:byte):byte;
@@ -212,11 +236,6 @@ for f:=0 to 4 do begin
 end;
 end;
 
-procedure internal_update_k053260;
-begin
-  k053260_0.internal_update;
-end;
-
 function sshr(num:int64;fac:byte):int64;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
@@ -230,8 +249,8 @@ begin
 if (self.mode and 2)<>0 then begin
 			for f:=0 to 3 do begin
 				if (self.voice[f].voice_playing) then self.voice[f].play;
-        self.buffer[0,self.posicion]:=self.buffer[0,self.posicion]+sshr(self.voice[f].out1,1);
-        self.buffer[1,self.posicion]:=self.buffer[1,self.posicion]+sshr(self.voice[f].out2,1);
+        self.buffer[0,self.posicion]:=self.buffer[0,self.posicion]+sshr(self.voice[f].out1,16);
+        self.buffer[1,self.posicion]:=self.buffer[1,self.posicion]+sshr(self.voice[f].out2,16);
 			end;
 end;
 self.posicion:=self.posicion+1;
@@ -299,9 +318,18 @@ begin
 end;
 
 procedure tKDSC_Voice.update_pan_volume;
+const pan_mul:array[0..7,0..1] of dword=(
+	(     0,     0 ), // No sound for pan 0
+	( 65536,     0 ), //  0 degrees
+	( 59870, 26656 ), // 24 degrees
+	( 53684, 37950 ), // 35 degrees
+	( 46341, 46341 ), // 45 degrees
+	( 37950, 53684 ), // 55 degrees
+	( 26656, 59870 ), // 66 degrees
+	(     0, 65536 ));  // 90 degrees
 begin
-	self.pan_volume[0]:=self.volume*(8-self.pan);
-	self.pan_volume[1]:=self.volume*self.pan;
+	self.pan_volume[0]:=self.volume*pan_mul[self.pan,0];
+	self.pan_volume[1]:=self.volume*pan_mul[self.pan,1];
 end;
 
 procedure tKDSC_Voice.key_on;

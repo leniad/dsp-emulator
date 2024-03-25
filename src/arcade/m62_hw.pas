@@ -295,7 +295,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     z80_0.run(frame_m);
@@ -542,8 +542,8 @@ end;
 procedure ay0_portb_w(valor:byte);
 begin
   // bits 0 and 1 reset the two chips
-	msm5205_0.reset_w(valor and 1);
-  msm5205_1.reset_w(valor and 2);
+	msm5205_0.reset_w((valor and 1)<>0);
+  msm5205_1.reset_w((valor and 2)<>0);
 end;
 
 procedure adpcm_int;
@@ -555,6 +555,8 @@ procedure irem_m62_play_sound;
 begin
   ay8910_0.update;
   ay8910_1.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 //Main
@@ -707,8 +709,10 @@ m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(irem_m62_play_sound);
 //sound chips
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,0);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,0);
+msm5205_0.change_advance(adpcm_int);
+msm5205_1.change_advance(nil);
 ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
 ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910,1);

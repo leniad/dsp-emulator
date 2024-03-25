@@ -36,10 +36,9 @@ const
         CPU_SYNC=4;
 
 var
- scroll_x,adpcm_pos,adpcm_data:word;
+ scroll_x:word;
  sound_latch,sound_latch2,scroll_y:byte;
  track0,track1:array[0..1] of byte;
- mem_adpcm:array[0..$7fff] of byte;
 
 procedure update_video_tehkanwc;
 var
@@ -114,7 +113,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_m2:=z80_1.tframes;
 frame_s:=z80_2.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     for h:=1 to CPU_SYNC do begin
       //CPU 1
@@ -242,7 +241,7 @@ begin
 case direccion of
   0..$3fff:;
   $4000..$47ff:mem_snd[direccion]:=valor;
-  $8001:msm5205_0.reset_w((valor xor $1) and 1);
+  $8001:msm5205_0.reset_w((valor and 1)=0);
   $8003:z80_2.change_nmi(CLEAR_LINE);
   $c000:sound_latch2:=valor;
 end;
@@ -259,42 +258,42 @@ end;
 procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:ay8910_0.Write(valor);
-  $1:ay8910_0.Control(valor);
-  $2:ay8910_1.Write(valor);
-  $3:ay8910_1.Control(valor);
+  $0:ay8910_0.write(valor);
+  $1:ay8910_0.control(valor);
+  $2:ay8910_1.write(valor);
+  $3:ay8910_1.control(valor);
 end;
 end;
 
 procedure tehkan_porta_write(valor:byte);
 begin
-adpcm_pos:=(adpcm_pos and $ff00) or valor;
+msm5205_0.pos:=(msm5205_0.pos and $ff00) or valor;
 end;
 
 procedure tehkan_portb_write(valor:byte);
 begin
-adpcm_pos:=(adpcm_pos and $ff) or (valor shl 8);
+msm5205_0.pos:=(msm5205_0.pos and $ff) or (valor shl 8);
 end;
 
 function tehkan_porta_read:byte;
 begin
-tehkan_porta_read:=adpcm_pos and $ff;
+tehkan_porta_read:=msm5205_0.pos and $ff;
 end;
 
 function tehkan_portb_read:byte;
 begin
-tehkan_portb_read:=adpcm_pos shr 8;
+tehkan_portb_read:=msm5205_0.pos shr 8;
 end;
 
 procedure msm5205_sound;
 begin
-if (adpcm_data and $100)=0 then begin
-   msm5205_0.data_w((adpcm_data and $f0) shr 4);
-   adpcm_pos:=adpcm_pos+1;
-   adpcm_data:=$100;
+if msm5205_0.data_val<>-1 then begin
+   msm5205_0.data_w(msm5205_0.data_val and $f);
+   msm5205_0.pos:=(msm5205_0.pos+1) and $7fff;
+   msm5205_0.data_val:=-1;
 end else begin
-    adpcm_data:=mem_adpcm[adpcm_pos and $7fff];
-    msm5205_0.data_w(adpcm_data and $0f);
+    msm5205_0.data_val:=msm5205_0.rom_data[msm5205_0.pos and $7fff];
+    msm5205_0.data_w(msm5205_0.data_val shr 4);
 end;
 end;
 
@@ -302,6 +301,7 @@ procedure tehkanwc_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
+  msm5205_0.update;
 end;
 
 //Main
@@ -317,8 +317,6 @@ begin
  marcade.in0:=$20;
  marcade.in1:=$20;
  marcade.in2:=$f;
- adpcm_pos:=0;
- adpcm_data:=$100;
  scroll_x:=0;
  scroll_y:=0;
  sound_latch:=0;
@@ -363,15 +361,15 @@ ay8910_0:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
 ay8910_1:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.2,msm5205_sound);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.2,$8000);
+msm5205_0.change_advance(msm5205_sound);
+if not(roms_load(msm5205_0.rom_data,tehkanwc_adpcm)) then exit;
 //cargar roms
 if not(roms_load(@memoria,tehkanwc_rom)) then exit;
 //cargar cpu 2
 if not(roms_load(@mem_misc,tehkanwc_cpu2)) then exit;
 //cargar sonido
 if not(roms_load(@mem_snd,tehkanwc_sound)) then exit;
-//Cargar ADPCM
-if not(roms_load(@mem_adpcm,tehkanwc_adpcm)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,tehkanwc_chars)) then exit;
 init_gfx(0,8,8,512);

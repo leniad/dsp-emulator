@@ -81,7 +81,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=nec_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 311 do begin
     //Main CPU
     nec_0.run(frame);

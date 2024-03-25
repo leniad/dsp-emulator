@@ -72,7 +72,7 @@ begin
   init_controls(false,true,false,true);
   frame:=n2a03_0.m6502.tframes;
   even:=true;
-  while EmuStatus=EsRuning do begin
+  while EmuStatus=EsRunning do begin
     while ppu_nes_0.linea<NTSC_lines do begin
       case ppu_nes_0.linea of
           0..239:begin  //render

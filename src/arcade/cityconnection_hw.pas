@@ -130,7 +130,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6809_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -262,12 +262,12 @@ size:=m6809_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
-size:=AY8910_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+size:=ay8910_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria,$4000);
-savedata_com_qsnapshot(@mem_snd,$8000);
+savedata_qsnapshot(@memoria,$4000);
+savedata_qsnapshot(@mem_snd,$8000);
 //MISC
 buffer[0]:=fondo;
 buffer[1]:=soundlatch;
@@ -276,8 +276,8 @@ buffer[3]:=scroll_x and $ff;
 buffer[4]:=scroll_x shr 8;
 buffer[5]:=byte(cambia_fondo);
 savedata_qsnapshot(@buffer[0],6);
-savedata_com_qsnapshot(@lines_color_look,$100);
-savedata_com_qsnapshot(@buffer_paleta,$500*2);
+savedata_qsnapshot(@lines_color_look,$100);
+savedata_qsnapshot(@buffer_paleta,$500*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -323,7 +323,7 @@ procedure reset_citycon;
 begin
  m6809_0.reset;
  m6809_1.reset;
- YM2203_0.Reset;
+ ym2203_0.Reset;
  ay8910_0.reset;
  reset_audio;
  fillchar(lines_color_look[0],$100,0);

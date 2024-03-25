@@ -620,7 +620,7 @@ begin
 principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then sync_all;
 if main_vars.driver_ok then begin
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   principal1.timer1.Enabled:=true;
   llamadas_maquina.bucle_general;
 end;
@@ -881,7 +881,7 @@ end;
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
 principal1.BitBtn3.Glyph:=nil;
-if emustatus=EsRuning then begin
+if emustatus=EsRunning then begin
    principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
    timer1.Enabled:=false;
    EmuStatus:=EsPause;
@@ -889,7 +889,7 @@ if emustatus=EsRuning then begin
    SDL_PauseAudioDevice(sound_device,1);
 end else begin
    principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
-   EmuStatus:=EsRuning;
+   EmuStatus:=EsRunning;
    timer1.Enabled:=true;
    SDL_PauseAudioDevice(sound_device,0);
    sync_all;
@@ -1023,7 +1023,7 @@ end else begin
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
   principal1.Enabled:=true;
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   llamadas_maquina.bucle_general;
 end;
 end;

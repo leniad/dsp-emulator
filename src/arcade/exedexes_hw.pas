@@ -116,7 +116,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     z80_0.run(frame_m);
@@ -258,7 +258,7 @@ begin
 for f:=0 to $fff do begin
   x:=f div 64;
   y:=f mod 64;
-  pos:=((y*32 and $e0) shr 5) + ((x*32 and $e0) shr 2) + ((y*32 and $3f00) shr 1);
+  pos:=((y*32 and $e0) shr 5)+((x*32 and $e0) shr 2)+((y*32 and $3f00) shr 1);
   atrib:=memoria_temp[pos+$4000];
 	nchar:=atrib and $3f;
 	color:=(memoria_temp[pos+(8*8)+$4000]) shl 2;

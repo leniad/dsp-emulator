@@ -3,8 +3,10 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k053260,k053246_k053247_k055673,
-     k054000,k053251,timer_engine,eepromser;
+     k054000,k053251,eepromser,timer_engine;
+
 function iniciar_vendetta:boolean;
+
 implementation
 const
         //vendetta
@@ -27,17 +29,20 @@ const
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         vendetta_dip_c:array [0..1] of def_dip=(
         (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
  tiles_rom,sprite_rom,k053260_rom:pbyte;
  sound_latch,sprite_colorbase,rom_bank1,video_bank,timer_n:byte;
  irq_enabled:boolean;
  layer_colorbase,layerpri:array[0..2] of byte;
  rom_bank:array[0..27,0..$1fff] of byte;
+
 procedure vendetta_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
 code:=code or (((color and $03) shl 8) or ((color and $30) shl 6) or ((color and $0c) shl 10) or (bank shl 14));
 color:=layer_colorbase[layer]+((color and $c0) shr 6);
 end;
+
 procedure vendetta_sprite_cb(var code:dword;var color:word;var priority_mask:word);
 var
   pri:integer;
@@ -49,6 +54,7 @@ begin
 	      else priority_mask:=3;
 	color:=sprite_colorbase+(color and $001f);
 end;
+
 procedure update_video_vendetta;
 var
   bg_colorbase:byte;
@@ -90,6 +96,7 @@ k052109_0.draw_layer(sorted_layer[2],4);
 k053246_0.k053247_draw_sprites(0);
 actualiza_trozo_final(112,16,288,224,4);
 end;
+
 procedure eventos_vendetta;
 begin
 if event.arcade then begin
@@ -114,6 +121,7 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
 end;
 end;
+
 procedure vendetta_principal;
 var
   frame_m,frame_s:single;
@@ -122,7 +130,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to $ff do begin
       //main
       konami_0.run(frame_m);
@@ -139,6 +147,7 @@ while EmuStatus=EsRuning do begin
     video_sync;
 end;
 end;
+
 function vendetta_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -165,6 +174,7 @@ case direccion of
     else vendetta_getbyte:=k052109_0.read(direccion and $3fff);
 end;
 end;
+
 procedure vendetta_putbyte(direccion:word;valor:byte);
 procedure cambiar_color(pos:word);
 var
@@ -203,21 +213,20 @@ case direccion of
           end;
     $5fe4:z80_0.change_irq(HOLD_LINE);
     $5fe6..$5fe7:k053260_0.main_write(direccion and 1,valor);
-    $6000..$6fff:if video_bank=0 then begin
-                  direccion:=direccion and $fff;
-                  if ((direccion=$1d80) or (direccion=$1e00) or (direccion=$1f00)) then k052109_0.write(direccion,valor);
-	                k052109_0.write(direccion+$2000,valor);
-                 end else if buffer_paleta[direccion and $fff]<>valor then begin
-                          buffer_paleta[direccion and $fff]:=valor;
-                          cambiar_color((direccion and $fff) shr 1);
-                       end;
+    $6000..$6fff:if video_bank=0 then k052109_0.write((direccion and $fff)+$2000,valor)
+                    else if buffer_paleta[direccion and $fff]<>valor then begin
+                      buffer_paleta[direccion and $fff]:=valor;
+                      cambiar_color((direccion and $fff) shr 1);
+                    end;
     else k052109_0.write(direccion and $3fff,valor);
 end;
 end;
+
 procedure vendetta_bank(valor:byte);
 begin
   rom_bank1:=valor and $1f;
 end;
+
 function vendetta_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -226,6 +235,7 @@ case direccion of
   $fc00..$fc2f:vendetta_snd_getbyte:=k053260_0.read(direccion and $3f);
 end;
 end;
+
 procedure vendetta_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -235,21 +245,31 @@ case direccion of
   $f801:ym2151_0.write(valor);
   $fa00:begin
           z80_0.change_nmi(ASSERT_LINE);
+          //nmi_block:=true;
           timers.enabled(timer_n,true);
         end;
   $fc00..$fc2f:k053260_0.write(direccion and $3f,valor);
 end;
 end;
+
+//procedure vendetta_snd_nmi(valor:byte);
+//begin
+//  if ((valor=ASSERT_LINE) and not(nmi_block)) then z80_0.change_nmi(ASSERT_LINE);
+//end;
+
 procedure vendetta_clear_nmi;
 begin
   timers.enabled(timer_n,false);
+  //nmi_block:=false;
   z80_0.change_nmi(CLEAR_LINE);
 end;
+
 procedure vendetta_sound_update;
 begin
   ym2151_0.update;
   k053260_0.update;
 end;
+
 //Main
 procedure reset_vendetta;
 begin
@@ -270,7 +290,8 @@ begin
  rom_bank1:=0;
  irq_enabled:=false;
  video_bank:=0;
-end;
+ end;
+
 procedure cerrar_vendetta;
 begin
 if k053260_rom<>nil then freemem(k053260_rom);
@@ -281,6 +302,7 @@ sprite_rom:=nil;
 tiles_rom:=nil;
 eepromser_0.write_data('vendetta.nv')
 end;
+
 function iniciar_vendetta:boolean;
 var
    memoria_temp:array[0..$3ffff] of byte;
@@ -307,19 +329,20 @@ for f:=0 to 27 do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
 //cargar sonido
 if not(roms_load(@mem_snd,vendetta_sound)) then exit;
 //Main CPU
-konami_0:=cpu_konami.create(3000000,256);
+konami_0:=cpu_konami.create(12000000,256);
 konami_0.change_ram_calls(vendetta_getbyte,vendetta_putbyte);
 konami_0.change_set_lines(vendetta_bank);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(vendetta_snd_getbyte,vendetta_snd_putbyte);
 z80_0.init_sound(vendetta_sound_update);
-timer_n:=timers.init(z80_0.numero_cpu,90,vendetta_clear_nmi,nil,false);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k053260_rom,$100000);
 if not(roms_load(k053260_rom,vendetta_k053260)) then exit;
 k053260_0:=tk053260_chip.create(3579545,k053260_rom,$100000,0.70);
+//k053260_0.change_calls(vendetta_snd_nmi,nil);
+timer_n:=timers.init(z80_0.numero_cpu,90,vendetta_clear_nmi,nil,false);
 //Iniciar video
 layer_colorbase[0]:=0;
 layer_colorbase[1]:=0;
@@ -358,4 +381,5 @@ marcade.dswc_val:=@vendetta_dip_c;
 reset_vendetta;
 iniciar_vendetta:=true;
 end;
+
 end.

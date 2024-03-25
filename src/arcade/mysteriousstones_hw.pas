@@ -145,7 +145,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
     m6502_0.run(frame);
     frame:=frame+m6502_0.tframes-m6502_0.contador;
@@ -245,11 +245,11 @@ size:=m6502_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ay8910_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=ay8910_1.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria,$4000);
+savedata_qsnapshot(@memoria,$4000);
 //MISC
 buffer[0]:=scroll;
 buffer[1]:=soundlatch;

@@ -96,7 +96,7 @@ var
 begin
 init_controls(false,true,true,false);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
       z80_0.run(frame);
       frame:=frame+z80_0.tframes-z80_0.contador;

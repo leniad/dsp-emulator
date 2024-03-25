@@ -56,7 +56,8 @@ for f:=0 to $3ff do begin
 end;
 scroll__x(1,2,scroll);
 actualiza_trozo(0,0,256,32,1,0,0,256,32,2);
-for f:=$17 downto 0 do if ((memoria[$3100+(f*32)]<>0) and (memoria[$3106+(f*32)]<>0)) then begin
+for f:=$17 downto 0 do begin
+  if ((memoria[$3100+(f*32)]=0) and (memoria[$3106+(f*32)]=0)) then continue;
   atrib:=memoria[$3109+(f*32)];
   color:=((atrib and $f)+($10*banco_pal)) shl 4;
   x:=memoria[$3104+(f*32)]-8;
@@ -100,7 +101,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m6809_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     m6809_0.run(trunc(frame));
     frame:=frame+m6809_0.tframes-m6809_0.contador;
@@ -172,7 +173,7 @@ savedata_qsnapshot(data,size);
 size:=sn_76496_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria,$4000);
+savedata_qsnapshot(@memoria,$4000);
 //MISC
 buffer[0]:=banco_pal;
 buffer[1]:=scroll;

@@ -132,7 +132,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main
     z80_0.run(frame_m);
@@ -245,8 +245,8 @@ savedata_qsnapshot(data,size);
 size:=ay8910_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$c000],$4000);
-savedata_com_qsnapshot(@mem_snd[$4000],$800);
+savedata_qsnapshot(@memoria[$c000],$4000);
+savedata_qsnapshot(@mem_snd[$4000],$800);
 //MISC
 buffer[0]:=scroll and $ff;
 buffer[1]:=scroll shr 8;

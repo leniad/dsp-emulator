@@ -1,13 +1,10 @@
 unit spectrum_misc;
-
 interface
-
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
-     z80pio,z80daisy,disk_file_format,timer_engine,misc_functions;
-
+     z80pio,z80daisy,disk_file_format,timer_engine,misc_functions,qsnapshot;
 const
         tabla_scr:array[0..191] of word=(
         0,    256, 512, 768,1024,1280,1536,1792,
@@ -34,25 +31,21 @@ const
         4256,4512,4768,5024,5280,5536,5792,6048,
         4288,4544,4800,5056,5312,5568,5824,6080,
         4320,4576,4832,5088,5344,5600,5856,6112);
-
         spec_paleta:array[0..15] of integer=(
         $000000,$C00000,$0000C0,$C000C0,
         $00C000,$C0C000,$00C0C0,$C0C0C0,
         $000000,$FF0000,$0000FF,$FF00FF,
         $00FF00,$FFFF00,$00FFFF,$FFFFFF);
-
         gif_paleta:array[0..15] of integer=(
         $000000,$E70000,$0000E7,$E700E7,
         $00E700,$E7E700,$00E7E7,$E7E7E7,
         $000000,$FF0000,$0000FF,$FF00FF,
         $00FF00,$FFFF00,$00FFFF,$FFFFFF);
-
         cmemory:array[0..127] of byte=(
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0);
-
         JKEMPSTON=1;
         JCURSOR=2;
         JSINCLAIR1=3;
@@ -63,7 +56,6 @@ const
         MKEMPSTON=2;
         MAMX=3;
         BORDE_HIGH=40;
-
 type
   tmouse_spectrum=record
     //General
@@ -113,17 +105,15 @@ type
     irq_pos:byte;
     issue2,sd_1,fastload:boolean;
   end;
-
 var
       ulaplus:tulaplus_spectrum;
       var_spectrum:tvar_spectrum;
       interface2:tinterface2_spectrum;
       mouse:tmouse_spectrum;
       borde:tborde_spectrum;
-
 procedure spectrum_config;
 function spectrum_mensaje:string;
-procedure borde_normal(linea:word);
+procedure borde_normal  (linea:word);
 procedure eventos_spectrum;
 function spec_comun(clock:dword):boolean;
 procedure spec_cerrar_comun;
@@ -138,10 +128,8 @@ procedure spectrum_reset_video;
 procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
 function pio_read_portb:byte;
-
 implementation
 uses tap_tzx,snapshot,config;
-
 procedure evalua_gunstick;
 var
   gs_temp:byte;
@@ -164,13 +152,11 @@ if ((gs_temp=63) or (gs_temp=127)) then begin
   mouse.lg_val:=mouse.lg_val or $10;
 end;
 end;
-
 procedure spectrum_reset_video;
 begin
 fillchar(var_spectrum.buffer_video,6144,1);
 fillchar(borde.buffer,78000,$80);
 end;
-
 procedure borde_normal(linea:word);
 var
         linea_actual:word;
@@ -193,11 +179,9 @@ case linea of
                 end;
 end;
 end;
-
 procedure teclado_matriz;
 begin
 end;
-
 procedure eventos_spectrum;
 begin
 if (event.mouse and (mouse.tipo<>MNONE)) then begin
@@ -410,7 +394,6 @@ if event.arcade then begin
   end;
 end;
 end;
-
 //Audio!!
 procedure spectrum_beeper_sound;
 var
@@ -422,12 +405,10 @@ begin
   if sound_status.stereo then tsample[var_spectrum.ear_channel,sound_status.posicion_sonido+1]:=res;
   var_spectrum.posicion_beeper:=0;
 end;
-
 procedure beeper_get;
 begin
   var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+var_spectrum.altavoz;
 end;
-
 procedure spectrum_ay8912_sound;
 var
   audio:pinteger;
@@ -462,6 +443,104 @@ if var_spectrum.turbo_sound then begin
     end;
   end;
 end;
+//Quick save/load
+procedure spec_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..11] of byte;
+  f:byte;
+begin
+if not(open_qsnapshot_load('spec'+inttostr(main_vars.tipo_maquina)+nombre)) then exit;
+getmem(data,200);
+//MISC
+loaddata_qsnapshot(@buffer);
+linea_48:=buffer[0] or (buffer[1] shl 8);
+rom_cambiada_48:=buffer[2]<>0;
+spec_16k:=buffer[3]<>0;
+linea_128:=buffer[4] or (buffer[5] shl 8);
+paginacion_activa:=buffer[6]<>0;
+linea_3:=buffer[7] or (buffer[8] shl 8);
+old_1ffd:=buffer[9];
+paginacion_especial:=buffer[10]<>0;
+disk_present:=buffer[11]<>0;
+//CPU
+loaddata_qsnapshot(data);
+spec_z80.load_snapshot(data);
+//SND+MEM
+case main_vars.tipo_maquina of
+  0,5:loaddata_qsnapshot(@memoria[0]);
+  1,2,3,4:begin
+            loaddata_qsnapshot(data);
+            ay8910_0.load_snapshot(data);
+            loaddata_qsnapshot(data);
+            ay8910_1.load_snapshot(data);
+            if main_vars.tipo_maquina=1 then for f:=0 to 9 do loaddata_qsnapshot(@memoria_128k[f,0])
+              else for f:=0 to 11 do loaddata_qsnapshot(@memoria_3[f,0]);
+          end;
+end;
+//Vars
+loaddata_qsnapshot(@ulaplus);
+loaddata_qsnapshot(@var_spectrum);
+loaddata_qsnapshot(@interface2);
+loaddata_qsnapshot(@mouse);
+loaddata_qsnapshot(@borde);
+borde.borde_spectrum:=borde_normal;
+spectrum_reset_video;
+close_qsnapshot;
+end;
+
+procedure spec_qsave(nombre:string);
+var
+  data:pbyte;
+  size:dword;
+  buffer:array[0..11] of byte;
+  f:byte;
+begin
+open_qsnapshot_save('spec'+inttostr(main_vars.tipo_maquina)+nombre);
+getmem(data,200);
+//MISC
+buffer[0]:=linea_48 and $ff;
+buffer[1]:=linea_48 shr 8;
+buffer[2]:=byte(rom_cambiada_48);
+buffer[3]:=byte(spec_16k);
+buffer[4]:=linea_128 and $ff;
+buffer[5]:=linea_128 shr 8;
+buffer[6]:=byte(paginacion_activa);
+buffer[7]:=linea_3 and $ff;
+buffer[8]:=linea_3 shr 8;
+buffer[9]:=old_1ffd;
+buffer[10]:=byte(paginacion_especial);
+buffer[11]:=byte(disk_present);
+savedata_qsnapshot(@buffer,12);
+//CPU
+size:=spec_z80.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND+MEM
+case main_vars.tipo_maquina of
+  0,5:savedata_qsnapshot(@memoria[0],$10000);
+  1,2,3,4:begin
+            size:=ay8910_0.save_snapshot(data);
+            savedata_qsnapshot(data,size);
+            size:=ay8910_1.save_snapshot(data);
+            savedata_qsnapshot(data,size);
+            if main_vars.tipo_maquina=1 then for f:=0 to 9 do savedata_qsnapshot(@memoria_128k[f,0],$4000)
+              else for f:=0 to 11 do savedata_qsnapshot(@memoria_3[f,0],$4000);
+          end;
+end;
+//Vars
+size:=sizeof(tulaplus_spectrum);
+savedata_qsnapshot(@ulaplus,size);
+size:=sizeof(tvar_spectrum);
+savedata_qsnapshot(@var_spectrum,size);
+size:=sizeof(tinterface2_spectrum);
+savedata_qsnapshot(@interface2,size);
+size:=sizeof(tmouse_spectrum);
+savedata_qsnapshot(@mouse,size);
+size:=sizeof(tborde_spectrum);
+savedata_qsnapshot(@borde,size);
+freemem(data);
+close_qsnapshot;
+end;
 
 function spec_comun(clock:dword):boolean;
 var
@@ -473,6 +552,8 @@ llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.close:=spec_cerrar_comun;
 llamadas_maquina.configurar:=spectrum_config;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
+llamadas_maquina.save_qsnap:=spec_qsave;
+llamadas_maquina.load_qsnap:=spec_qload;
 spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
@@ -524,8 +605,7 @@ if mouse.tipo<>MNONE then show_mouse_cursor
 //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;
-
-if cinta_tzx.cargada then tape_window1.Show;
+if cinta_tzx.cargada then tape_window1.show;
 end;
 
 procedure reset_misc;

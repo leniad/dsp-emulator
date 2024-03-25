@@ -30,7 +30,7 @@ var
 
 //GFX
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
-procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
+procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;invert:boolean=false);
 procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
 //GFX put
@@ -164,7 +164,7 @@ for y_final:=0 to (ngfx.x-1) do
 copymemory(pos,@t[0],long);
 end;
 
-procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
+procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;invert:boolean=false);
 var
   n,elements:dword;
   oct,b0,o,i,bit_pixel:byte;
@@ -195,6 +195,7 @@ for n:=0 to elements do begin
      oct:=0;
      for bit_pixel:=0 to (des_gfx.bit_pixel-1) do begin
       b0:=GetBit(des_gfx.pos_planos[bit_pixel]+Cy^+Cx^+SpriteNbr,SpriteRom);
+      if invert then b0:=not(b0) and 1;
       oct:=oct or (b0 shl (des_gfx.bit_pixel-1-bit_pixel));
      end;
      ngfx.datos[ind+increment]:=oct;

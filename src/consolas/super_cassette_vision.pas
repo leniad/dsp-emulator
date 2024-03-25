@@ -2,7 +2,7 @@ unit super_cassette_vision;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     upd7810,lenguaje,main_engine,controls_engine,sysutils,dialogs,gfx_engine,
+     upd7810,main_engine,controls_engine,sysutils,dialogs,gfx_engine,
      rom_engine,misc_functions,sound_engine,file_engine,pal_engine,upd1771;
 
 function iniciar_scv:boolean;
@@ -280,7 +280,7 @@ var
 begin
 init_controls(false,true,true,false);
 frame:=upd7810_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
       upd7810_0.run(frame);
       frame:=frame+upd7810_0.tframes-upd7810_0.contador;

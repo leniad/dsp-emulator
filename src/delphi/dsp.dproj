@@ -153,18 +153,17 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_MinorVer>22</VerInfo_MinorVer>
+        <VerInfo_MinorVer>23</VerInfo_MinorVer>
         <Manifest_File>(None)</Manifest_File>
         <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>995</VerInfo_Build>
+        <VerInfo_Build>1025</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.22.7.995;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.22;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.23.1.1025;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.23;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <UWP_DelphiLogo44>..\..\icons\main.png</UWP_DelphiLogo44>
         <UWP_DelphiLogo150>..\..\icons\main.png</UWP_DelphiLogo150>
-        <VerInfo_Release>7</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
@@ -175,10 +174,10 @@
         <BRCC_Defines>CPU64;WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>322</VerInfo_Build>
+        <VerInfo_Build>325</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
         <VerInfo_Release>3</VerInfo_Release>
-        <VerInfo_Keys>CompanyName=;FileVersion=0.14.3.322;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=0.14;Comments=;ProgramID=com.embarcadero.$(ModuleName);FileDescription=$(ModuleName);ProductName=$(ModuleName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileVersion=0.14.3.325;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=0.14;Comments=;ProgramID=com.embarcadero.$(ModuleName);FileDescription=$(ModuleName);ProductName=$(ModuleName)</VerInfo_Keys>
     </PropertyGroup>
     <ProjectExtensions>
         <Borland.Personality>Delphi.Personality.12</Borland.Personality>
@@ -1296,8 +1295,6 @@
         <DCCReference Include="..\arcade\galivan_hw.pas"/>
         <DCCReference Include="..\arcade\lastduel_hw.pas"/>
         <DCCReference Include="..\ordenadores\commodore64.pas"/>
-        <DCCReference Include="..\ordenadores\misc\mos6526.pas"/>
-        <DCCReference Include="..\ordenadores\misc\mos6566.pas"/>
         <DCCReference Include="..\ordenadores\misc\mos6526_old.pas"/>
         <DCCReference Include="..\snd\sid_sound.pas"/>
         <DCCReference Include="..\snd\sid_tables.pas"/>
@@ -1358,6 +1355,17 @@
         <DCCReference Include="..\arcade\diverboy_hw.pas"/>
         <DCCReference Include="..\arcade\mugsmashers_hw.pas"/>
         <DCCReference Include="..\arcade\steelforce_hw.pas"/>
+        <DCCReference Include="..\ordenadores\misc\mos6566.pas"/>
+        <DCCReference Include="..\ordenadores\misc\mos6526.pas"/>
+        <DCCReference Include="..\arcade\misc\avg_dvg.pas"/>
+        <DCCReference Include="..\arcade\bankpanic_hw.pas"/>
+        <DCCReference Include="..\arcade\appoooh_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\sega_decrypt_2.pas"/>
+        <DCCReference Include="..\arcade\hw_88games.pas"/>
+        <DCCReference Include="..\arcade\dooyong_hw.pas"/>
+        <DCCReference Include="..\arcade\blueprint_hw.pas"/>
+        <DCCReference Include="..\arcade\unico_hw.pas"/>
+        <DCCReference Include="..\arcade\caloriekun_hw.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

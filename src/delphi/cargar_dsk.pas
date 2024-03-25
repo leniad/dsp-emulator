@@ -202,7 +202,7 @@ end;
 
 procedure Tload_dsk.StringGrid1DblClick(Sender: TObject);
 var
-  crc:integer;
+  crc:dword;
   file_inside_zip:string;
 begin
 if stringgrid1.RowCount=1 then exit;

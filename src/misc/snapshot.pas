@@ -2,7 +2,7 @@ unit snapshot;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
-     sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
+     sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,file_engine,
      init_games,ppi8255,tms99xx,pal_engine,sn_76496,m6502,misc_functions,
      i2cmem,lenguaje,sg1000,sms,sega_gg,sega_vdp,super_cassette_vision,upd1771,
      upd7810,chip8_hw,n2a03,nes_ppu,nes_mappers,gb,gb_mappers,gb_sound,lr35902;

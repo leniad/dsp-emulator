@@ -120,7 +120,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -221,9 +221,9 @@ savedata_qsnapshot(data,size);
 size:=sn_76496_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$c000],$4000);
+savedata_qsnapshot(@memoria[$c000],$4000);
 //MISC
-savedata_com_qsnapshot(@scroll_lineas,$20*2);
+savedata_qsnapshot(@scroll_lineas,$20*2);
 buffer[0]:=interrupt_mask;
 buffer[1]:=interrupt_ticks;
 buffer[2]:=sound_latch;

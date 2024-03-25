@@ -149,7 +149,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -373,7 +373,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s1:=n2a03_0.m6502.tframes;
 frame_s2:=n2a03_1.m6502.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     //Main CPU
     z80_0.run(frame_m);

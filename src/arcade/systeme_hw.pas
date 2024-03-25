@@ -112,7 +112,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
       z80_0.run(frame);
       frame:=frame+z80_0.tframes-z80_0.contador;

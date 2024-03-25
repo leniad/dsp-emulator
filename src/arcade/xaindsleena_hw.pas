@@ -229,7 +229,7 @@ frame_m:=m6809_0.tframes;
 frame_s:=m6809_1.tframes;
 frame_snd:=m6809_2.tframes;
 frame_mcu:=m6805_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     for h:=1 to CPU_SYNC do begin
       //main

@@ -95,7 +95,7 @@ type
   end;
 
 var
-  upd7759_0:upd7759_chip;
+  upd7759_0,upd7759_1:upd7759_chip;
 
 implementation
 

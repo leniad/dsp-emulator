@@ -3,8 +3,7 @@ unit arcade_config;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls;
+  Classes, Controls, Forms, Dialogs, StdCtrls;
 
 const
   MAX_DIP=3-1;

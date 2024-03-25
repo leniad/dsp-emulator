@@ -116,7 +116,7 @@ frame_m:=z80_0.tframes;
 frame_mi:=z80_1.tframes;
 frame_s:=z80_2.tframes;
 frame_mcu:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 263 do begin
   //main
   z80_0.run(frame_m);
@@ -370,7 +370,7 @@ ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(roms_load(@memoria_temp,bublbobl_rom)) then exit;
 //poner las roms y los bancos de rom
-copymemory(@memoria[0],@memoria_temp[0],$8000);
+copymemory(@memoria,@memoria_temp,$8000);
 for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Segunda CPU
 if not(roms_load(@mem_misc,bublbobl_rom2)) then exit;

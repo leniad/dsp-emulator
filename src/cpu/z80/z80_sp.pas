@@ -3691,6 +3691,7 @@ case instruccion of
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                 end;
         end;
         $b3:begin //otir añadido el dia 18-09-04 >16t o 21t<
@@ -3715,6 +3716,7 @@ case instruccion of
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                 end;
             end;
         { $b4..$b7:nop*2}
@@ -3794,6 +3796,7 @@ case instruccion of
                         self.retraso(r.hl.w);self.contador:=self.contador+1;
                         self.retraso(r.hl.w);self.contador:=self.contador+1;
                         r.pc:=r.pc-2;
+                        r.wz:=r.pc+1;
                  end;
             end;
         $bb:begin //otdr
@@ -3819,6 +3822,7 @@ case instruccion of
                     self.retraso(r.hl.w);self.contador:=self.contador+1;
                     self.retraso(r.hl.w);self.contador:=self.contador+1;
                     r.pc:=r.pc-2;
+                    r.wz:=r.pc+1;
                 end;
             end;
         $fb:main_vars.mensaje_principal:='Instruccion no implmentada EDFB';

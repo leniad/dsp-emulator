@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 function iniciar_arkanoid:boolean;
 
 implementation
-
 const
         arkanoid_rom:array[0..1] of tipo_roms=(
         (n:'a75-01-1.ic17';l:$8000;p:$0;crc:$5bcda3b0),(n:'a75-11.ic16';l:$8000;p:$8000;crc:$eafd7191));
@@ -87,7 +86,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_mcu:=m6805_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to 263 do begin
         z80_0.run(frame_m);
         frame_m:=frame_m+z80_0.tframes-z80_0.contador;

@@ -96,7 +96,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m6809_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     m6809_0.run(frame);
     frame:=frame+m6809_0.tframes-m6809_0.contador;
@@ -176,7 +176,7 @@ savedata_qsnapshot(data,size);
 size:=vlm5030_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$0],$8000);
+savedata_qsnapshot(@memoria[$0],$8000);
 //MISC
 buffer[0]:=byte(irq_ena);
 buffer[1]:=byte(nmi_ena);

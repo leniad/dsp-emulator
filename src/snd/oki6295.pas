@@ -18,10 +18,10 @@ type
       ADPCMVoice=record
 	        playing:boolean;			//if we are actively playing
 	        base_offset:dword;		// pointer to the base memory location
-	        sample:dword;			// current sample number
-	        count:dword;			// total samples to play
-          adpcm:adpcm_state; // current ADPCM state
-	        volume:dword;			// output volume
+	        sample:dword;			    // current sample number
+	        count:dword;			    // total samples to play
+          adpcm:adpcm_state;    // current ADPCM state
+	        volume:byte;			    // output volume
       end;
       snd_okim6295=class(snd_chip_class)
             constructor Create(clock:dword;pin7:byte;amp:single=1);
@@ -47,8 +47,6 @@ type
             function generate_adpcm(num_voice:byte):integer;
             procedure stream_update;
       end;
-
-procedure internal_update_oki6295(index:byte);
 
 var
     oki_6295_0,oki_6295_1:snd_okim6295;
@@ -106,6 +104,14 @@ begin
 				 stepval/4*nbl2bit[nib][3]+
 				 stepval/8);
 		end;
+  end;
+end;
+
+procedure internal_update_oki6295(index:byte);
+begin
+  case index of
+    0:oki_6295_0.stream_update;
+    1:oki_6295_1.stream_update;
   end;
 end;
 
@@ -315,14 +321,6 @@ begin
     if self.voice[f].playing then self.out_:=self.out_+self.generate_adpcm(f);
   if self.out_<-32767 then self.out_:=-32767
     else if self.out_>32767 then self.out_:=32767;
-end;
-
-procedure internal_update_oki6295(index:byte);
-begin
-  case index of
-    0:oki_6295_0.stream_update;
-    1:oki_6295_1.stream_update;
-  end;
 end;
 
 procedure snd_okim6295.update;

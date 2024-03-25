@@ -141,7 +141,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6502_0.tframes;
 frame_s:=m6809_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
    m6502_0.run(frame_m);
    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
@@ -262,12 +262,12 @@ size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=ym3812_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[0],$4000);
-savedata_com_qsnapshot(@mem_snd[0],$8000);
+savedata_qsnapshot(@memoria[0],$4000);
+savedata_qsnapshot(@mem_snd[0],$8000);
 //MISC
 buffer[0]:=vb;
 buffer[1]:=prot_val;
@@ -337,8 +337,8 @@ procedure reset_expraid;
 begin
 m6502_0.reset;
 m6809_0.reset;
-YM2203_0.Reset;
-YM3812_0.reset;
+ym2203_0.Reset;
+ym3812_0.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;

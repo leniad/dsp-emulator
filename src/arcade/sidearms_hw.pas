@@ -47,6 +47,8 @@ var
  vcount_191,latch_374,hflop_74a_n:byte;
  hcount_191:word;
 
+procedure update_video_sidearms;
+
 procedure draw_sprites;
 procedure draw_sprites_def(total:byte;pos:word);
 var
@@ -71,7 +73,6 @@ draw_sprites_def($38,$800);
 draw_sprites_def($38,0);
 end;
 
-procedure update_video_sidearms;
 procedure draw_back;
 var
   pos,offset,f,color,nchar:word;
@@ -182,7 +183,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main
     z80_0.run(frame_m);
@@ -219,6 +220,7 @@ case direccion of
 end;
 end;
 
+procedure sidearms_putbyte(direccion:word;valor:byte);
 procedure cambiar_color(numero:word);
 var
   color:tcolor;
@@ -235,7 +237,6 @@ begin
   end;
 end;
 
-procedure sidearms_putbyte(direccion:word;valor:byte);
 var
   last_state:word;
 begin

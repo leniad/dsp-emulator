@@ -1,9 +1,8 @@
 unit spectrum_128k;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ay_8910,z80_sp,sysutils,
-     controls_engine,dialogs,rom_engine,pal_engine,sound_engine,z80pio,
-     gfx_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ay_8910,z80_sp,
+     controls_engine,rom_engine,pal_engine,sound_engine,z80pio,gfx_engine;
 
 const
   spec128_rom:array[0..1] of tipo_roms=(
@@ -14,18 +13,12 @@ const
 var
    memoria_128k:array[0..9,0..$3fff] of byte;
    paginacion_activa:boolean;
-   linea:word;
+   linea_128:word;
 
 function iniciar_128k:boolean;
-procedure spectrum128_main;
-function spec128_getbyte(direccion:word):byte;
 procedure spec128_putbyte(direccion:word;valor:byte);
-function spec128_inbyte(puerto:word):byte;
 procedure spec128_outbyte(puerto:word;valor:byte);
-procedure spec128k_reset;
-procedure spec128_retraso_memoria(direccion:word);
-procedure spec128_retraso_puerto(puerto:word);
-function spec128_lg():byte;
+function spec128_lg:byte;
 //Video
 procedure borde_128_full(linea:word);
 procedure video_128k(linea:word;pvideo:pbyte);
@@ -36,45 +29,6 @@ uses tap_tzx,principal,spectrum_misc;
 function spec128_lg:byte;
 begin
 spec128_lg:=mouse.lg_val;
-end;
-
-function iniciar_128k:boolean;
-var
- f:dword;
- h:byte;
- mem_temp:array[0..$7fff] of byte;
-begin
-principal1.panel2.Visible:=true;
-llamadas_maquina.bucle_general:=spectrum128_main;
-llamadas_maquina.reset:=spec128k_reset;
-llamadas_maquina.fps_max:=17734475/5/70908;
-iniciar_128k:=false;
-//Iniciar el Z80 y pantalla
-if not(spec_comun(17734475 div 5)) then exit;
-spec_z80.change_ram_calls(spec128_getbyte,spec128_putbyte);
-spec_z80.change_io_calls(spec128_inbyte,spec128_outbyte);
-spec_z80.change_retraso_call(spec128_retraso_memoria,spec128_retraso_puerto);
-ay8910_0:=ay8910_chip.create(17734475 div 10,AY8912,1);
-ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
-ay8910_1:=ay8910_chip.create(17734475 div 10,AY8912,1);
-case main_vars.tipo_maquina of
-  1:if not(roms_load(@mem_temp,spec128_rom)) then exit;
-  4:if not(roms_load(@mem_temp,spec_plus2_rom)) then exit;
-end;
-copymemory(@memoria_128k[8,0],@mem_temp[0],$4000);
-copymemory(@memoria_128k[9,0],@mem_temp[$4000],$4000);
-fillchar(var_spectrum.retraso[0],71000,0);
-f:=14361;
-for h:=0 to 191 do begin
-  copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
-  f:=f+228;
-end;
-case var_spectrum.audio_128k of
-  0:iniciar_audio(false);
-  1,2:iniciar_audio(true);
-end;
-spec128k_reset;
-iniciar_128k:=true;
 end;
 
 procedure spec128k_reset;
@@ -200,11 +154,11 @@ end;
 procedure spectrum128_main;
 begin
 init_controls(true,true,true,false);
-while EmuStatus=EsRuning do begin
-  for linea:=0 to 310 do begin
+while EmuStatus=EsRunning do begin
+  for linea_128:=0 to 310 do begin
     spec_z80.run(228);
-    borde.borde_spectrum(linea);
-    video_128k(linea,@memoria_128k[var_spectrum.pantalla_128k,0]);
+    borde.borde_spectrum(linea_128);
+    video_128k(linea_128,@memoria_128k[var_spectrum.pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
   end;
   if spec_z80.contador<28 then begin
@@ -225,7 +179,7 @@ var
   posicion:dword;
 begin
 estados:=0;
-posicion:=linea*228+spec_z80.contador;
+posicion:=linea_128*228+spec_z80.contador;
 case (direccion and $c000) of
   $4000:estados:=var_spectrum.retraso[posicion];
   $c000:if ((var_spectrum.marco[3] and 1)<>0) then estados:=var_spectrum.retraso[posicion];
@@ -238,7 +192,7 @@ var
   estados:byte;
   posicion:dword;
 begin
-posicion:=linea*228+spec_z80.contador;
+posicion:=linea_128*228+spec_z80.contador;
 if (puerto and $c000)=$4000 then begin //Contenida
     if (puerto and 1)<>0 then begin //ultimo bit 1
        estados:=var_spectrum.retraso[posicion]+1;
@@ -301,7 +255,7 @@ if (puerto and 1)=0 then begin //ULA
 end else begin //Resto
    //Floating bus
     cont:=spec_z80.contador mod 228;
-    lin:=linea+(spec_z80.contador div 228);
+    lin:=linea_128+(spec_z80.contador div 228);
     if ((lin>62) and (lin<255) and (cont<128)) then begin
       lin:=lin-63;
       col:=(cont and $f8) shr 2;//div 8)*2;
@@ -337,9 +291,9 @@ end else begin //Resto
     end;
     if mouse.tipo=MKEMPSTON then begin //Kempston Mouse
         case puerto of
-            $FADF:temp:=mouse.botones;
-            $FBDF:temp:=mouse.x;
-            $FFDF:temp:=mouse.y;
+            $fadf:temp:=mouse.botones;
+            $fbdf:temp:=mouse.x;
+            $ffdf:temp:=mouse.y;
         end;
     end;
   end;
@@ -354,7 +308,7 @@ var
 begin
 if (puerto and $1)=0 then begin //ULA
   if borde.tipo=2 then begin
-    fillchar(borde.buffer[linea*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
+    fillchar(borde.buffer[linea_128*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
     borde.posicion:=spec_z80.contador;
   end;
   if (ulaplus.activa and ulaplus.enabled) then borde.color:=(valor and 7)+16
@@ -406,6 +360,45 @@ end else begin //resto
         end;
   if mouse.tipo=MAMX then z80pio_cd_ba_w(0,puerto shr 5,valor);
 end;
+end;
+
+function iniciar_128k:boolean;
+var
+ f:dword;
+ h:byte;
+ mem_temp:array[0..$7fff] of byte;
+begin
+principal1.panel2.Visible:=true;
+llamadas_maquina.bucle_general:=spectrum128_main;
+llamadas_maquina.reset:=spec128k_reset;
+llamadas_maquina.fps_max:=17734475/5/70908;
+iniciar_128k:=false;
+//Iniciar el Z80 y pantalla
+if not(spec_comun(17734475 div 5)) then exit;
+spec_z80.change_ram_calls(spec128_getbyte,spec128_putbyte);
+spec_z80.change_io_calls(spec128_inbyte,spec128_outbyte);
+spec_z80.change_retraso_call(spec128_retraso_memoria,spec128_retraso_puerto);
+ay8910_0:=ay8910_chip.create(17734475 div 10,AY8912,1);
+ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
+ay8910_1:=ay8910_chip.create(17734475 div 10,AY8912,1);
+case main_vars.tipo_maquina of
+  1:if not(roms_load(@mem_temp,spec128_rom)) then exit;
+  4:if not(roms_load(@mem_temp,spec_plus2_rom)) then exit;
+end;
+copymemory(@memoria_128k[8,0],@mem_temp[0],$4000);
+copymemory(@memoria_128k[9,0],@mem_temp[$4000],$4000);
+fillchar(var_spectrum.retraso[0],71000,0);
+f:=14361;
+for h:=0 to 191 do begin
+  copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
+  f:=f+228;
+end;
+case var_spectrum.audio_128k of
+  0:iniciar_audio(false);
+  1,2:iniciar_audio(true);
+end;
+spec128k_reset;
+iniciar_128k:=true;
 end;
 
 end.

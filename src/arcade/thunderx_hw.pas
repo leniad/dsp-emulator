@@ -94,110 +94,66 @@ var
  tiles_rom,sprite_rom,k007232_rom:pbyte;
  sound_latch,sprite_colorbase,bank0_bank,rom_bank1,latch_1f98,priority,thunderx_timer:byte;
  rom_bank:array[0..$f,0..$1fff] of byte;
- ram_bank:array[0..2,0..$7ff] of byte;
+ pmc_ram:array[0..$7ff] of byte;
  video_bank_call:tvideo_bank_func;
  call_function_1f98:tfunction_1f98;
 
 procedure scontra_videobank(valor:byte);
 begin
-     rom_bank1:=valor and $f;
-     bank0_bank:=(valor and $10) shr 4;
-     priority:=valor and $80;
+  rom_bank1:=valor and $f;
+  bank0_bank:=(valor and $10) shr 4;
+  priority:=valor and $80;
 end;
 
 procedure gbusters_videobank(valor:byte);
 begin
-     bank0_bank:=valor and $1;
-     priority:=valor and $8;
+  bank0_bank:=valor and $1;
+  priority:=valor and $8;
 end;
 
 procedure thunderx_videobank(valor:byte);
 begin
-     if (valor and $10)<>0 then bank0_bank:=2
-        else bank0_bank:=valor and $1;
-     priority:=valor and $8;
+  if (valor and $10)<>0 then bank0_bank:=2 //PCM
+    else bank0_bank:=valor and $1; //1 --> RAM 0 --> Paleta
+  priority:=valor and $8;
 end;
 
 procedure scontra_1f98_call(valor:byte);
 begin
-     if (valor and $1)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
-        else k052109_0.set_rmrd_line(CLEAR_LINE);
-     latch_1f98:=valor;
-end;
-
-procedure run_collisions(s0,e0,s1,e1:integer;cm,hm:byte);
-var
-   p0,p1:integer;
-   ii,jj:integer;
-   l0,r0,b0,t0,l1,r1,b1,t1:integer;
-begin
-p0:=(16+5*s0)-5;
-for ii:=s0 to (e0-1) do begin
-    p0:=p0+5;
-    if ((ram_bank[2,p0+0] and cm)=0) then continue; // check valid
-    // get area
-    l0:=ram_bank[2,p0+3]-ram_bank[2,p0+1];
-    r0:=ram_bank[2,p0+3]+ram_bank[2,p0+1];
-    t0:=ram_bank[2,p0+4]-ram_bank[2,p0+2];
-    b0:=ram_bank[2,p0+4]+ram_bank[2,p0+2];
-    p1:=(16+5*s1)-5;
-    for jj:=s1 to (e1-1) do begin
-        p1:=p1+5;
-	      if ((ram_bank[2,p1+0] and hm)=0) then continue; // check valid
-	      // get area
-      	l1:=ram_bank[2,p1+3]-ram_bank[2,p1+1];
-      	r1:=ram_bank[2,p1+3]+ram_bank[2,p1+1];
-      	t1:=ram_bank[2,p1+4]-ram_bank[2,p1+2];
-      	b1:=ram_bank[2,p1+4]+ram_bank[2,p1+2];
-      	// overlap check
-      	if (l1>=r0) then continue;
-      	if (l0>=r1) then continue;
-      	if (t1>=b0) then continue;
-      	if (t0>=b1) then continue;
-      	// set flags
-      	ram_bank[2,p0+0]:=(ram_bank[2,p0+0] and $9f) or (ram_bank[2,p1+0] and $04) or $10;
-      	ram_bank[2,p1+0]:=(ram_bank[2,p1+0] and $9f) or $10;
-    end;
-end;
+  if (valor and $1)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
+    else k052109_0.set_rmrd_line(CLEAR_LINE);
+  latch_1f98:=valor;
 end;
 
 procedure calculate_collisions;
 var
-    X0,Y0,X1,Y1:integer;
-    CM,HM:byte;
+   p0,p1,f,h,e0:word;
+   s0,s1,e1,cm,hm,p0_lim:byte;
 begin
-	// the data at 0x00 to 0x06 defines the operation
-	//
-	// 0x00 : word : last byte of set 0
-	// 0x02 : byte : last byte of set 1
-	// 0x03 : byte : collide mask
-	// 0x04 : byte : hit mask
-	// 0x05 : byte : first byte of set 0
-	// 0x06 : byte : first byte of set 1
-	//
-	// the USA version is slightly different:
-	//
-	// 0x05 : word : first byte of set 0
-	// 0x07 : byte : first byte of set 1
-	//
-	// the operation is to intersect set 0 with set 1
-	// collide mask specifies objects to ignore
-	// hit mask is 40 to set bit on object 0 and object 1
-	// hit mask is 20 to set bit on object 1 only
-	Y0:=(ram_bank[2,0] shl 8)+ram_bank[2,1];
-	Y0:=(Y0-15) div 5;
-	Y1:=(ram_bank[2,2]-15) div 5;
-	if (ram_bank[2,5]<16) then begin // US Thunder Cross uses this form
-		  X0:=(ram_bank[2,5] shl 8)+ram_bank[2,6];
-		  X0:=(X0-16) div 5;
-		  X1:= (ram_bank[2,7]-16) div 5;
-	end else begin // Japan Thunder Cross uses this form
-		  X0:=(ram_bank[2,5]-16) div 5;
-      X1:=(ram_bank[2,6]-16) div 5;
-  end;
-	CM:=ram_bank[2,3];
-	HM:=ram_bank[2,4];
-	run_collisions(X0,Y0,X1,Y1,CM,HM);
+e0:=(pmc_ram[0] shl 8)+pmc_ram[1];
+e0:=(e0-15) div 5;
+e1:=(pmc_ram[2]-15) div 5;
+s0:=(pmc_ram[5]-16) div 5;
+s1:=(pmc_ram[6]-16) div 5;
+cm:=pmc_ram[3];
+hm:=pmc_ram[4];
+p0:=(16+5*s0)-5;
+p0_lim:=$e6;
+for f:=s0 to (e0-1) do begin
+    p0:=p0+5;
+    if ((pmc_ram[p0+0] and cm)=0) then continue;
+    p1:=(16+5*s1)-5;
+    for h:=s1 to (e1-1) do begin
+        p1:=p1+5;
+	      if ((pmc_ram[p1+0] and hm)=0) then continue;
+        if ((pmc_ram[p1+1]+pmc_ram[p0+1])<abs(pmc_ram[p1+3]-pmc_ram[p0+3])) then continue;
+			  if ((pmc_ram[p1+2]+pmc_ram[p0+2])<abs(pmc_ram[p1+4]-pmc_ram[p0+4])) then continue;
+      	// set flags
+        pmc_ram[p1+0]:=(pmc_ram[p1+0] and $8f) or $10;
+      	if (p0+4)>=p0_lim then pmc_ram[p0+0]:=(pmc_ram[p0+0] and $9b) or (pmc_ram[p1+0] and $04) or $10;
+        break;
+    end;
+end;
 end;
 
 procedure thunderx_1f98_call(valor:byte);
@@ -303,7 +259,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     konami_0.run(frame_m);
@@ -334,22 +290,28 @@ case direccion of
                    $1f95:thunderx_getbyte:=marcade.dswb; //dsw2
                    $1f98:thunderx_getbyte:=latch_1f98;
                    else if k052109_0.get_rmrd_line=CLEAR_LINE then begin
-                           if ((direccion>=$3800) and (direccion<$3808)) then thunderx_getbyte:=k051960_0.k051937_read(direccion-$3800)
-                              else if (direccion<$3c00) then thunderx_getbyte:=k052109_0.read(direccion)
-                                  else thunderx_getbyte:=k051960_0.read(direccion-$3c00);
+                           case direccion of
+                              0..$1f8f,$1f96..$1f97,$1f99..$37ff,$3808..$3bff:thunderx_getbyte:=k052109_0.read(direccion);
+                              $3800..$3807:thunderx_getbyte:=k051960_0.k051937_read(direccion-$3800);
+                              $3c00..$3fff:thunderx_getbyte:=k051960_0.read(direccion-$3c00);
+                           end;
                         end else thunderx_getbyte:=k052109_0.read(direccion);
               end;
     $4000..$57ff,$8000..$ffff:thunderx_getbyte:=memoria[direccion];
-    $5800..$5fff:if (bank0_bank=2) then begin
-                    if (latch_1f98 and 2)<>0 then thunderx_getbyte:=ram_bank[2,direccion and $7ff]
-                       else thunderx_getbyte:=0;
-                 end else thunderx_getbyte:=ram_bank[bank0_bank,direccion and $7ff];
+    $5800..$5fff:begin
+                    direccion:=direccion and $7ff;
+                    case bank0_bank of
+                      0:thunderx_getbyte:=buffer_paleta[direccion];
+                      1:thunderx_getbyte:=memoria[$5800+direccion];
+                      2:if (latch_1f98 and 2)<>0 then thunderx_getbyte:=pmc_ram[direccion]
+                          else thunderx_getbyte:=0;
+                    end;
+                 end;
     $6000..$7fff:thunderx_getbyte:=rom_bank[rom_bank1,direccion and $1fff];
     end;
 end;
 
 procedure thunderx_putbyte(direccion:word;valor:byte);
-
 procedure cambiar_color(pos:word);
 var
   color:tcolor;
@@ -362,30 +324,28 @@ begin
   set_pal_color_alpha(color,pos);
   k052109_0.clean_video_buffer;
 end;
-
 begin
 case direccion of
     $0..$3fff:case direccion of
+                   0..$1f7f,$1f81..$1f83,$1f85..$1f87,$1f89..$1f97,$1f99..$37ff,$3808..$3bff:k052109_0.write(direccion,valor);
                    $1f80:video_bank_call(valor);
                    $1f84:sound_latch:=valor;
                    $1f88:z80_0.change_irq(HOLD_LINE);
                    $1f98:call_function_1f98(valor);
-                   else if ((direccion>=$3800) and (direccion<$3808)) then k051960_0.k051937_write(direccion-$3800,valor)
-                           else if (direccion<$3c00) then k052109_0.write(direccion,valor)
-                               else k051960_0.write(direccion-$3c00,valor);
+                   $3800..$3807:k051960_0.k051937_write(direccion-$3800,valor);
+                   $3c00..$3fff:k051960_0.write(direccion-$3c00,valor);
               end;
     $4000..$57ff:memoria[direccion]:=valor;
     $5800..$5fff:begin
                  direccion:=direccion and $7ff;
-                 if bank0_bank=0 then begin
-                    if buffer_paleta[direccion]<>valor then begin
-                       buffer_paleta[direccion]:=valor;
-                       cambiar_color(direccion shr 1);
-                    end;
+                 case bank0_bank of
+                    0:if buffer_paleta[direccion]<>valor then begin
+                        buffer_paleta[direccion]:=valor;
+                        cambiar_color(direccion shr 1);
+                      end;
+                    1:memoria[$5800+direccion]:=valor;
+                    2:if (latch_1f98 and 2)<>0 then pmc_ram[direccion]:=valor;
                  end;
-                 if (bank0_bank=2) then begin
-                    if (latch_1f98 and 2)<>0 then ram_bank[2,direccion]:=valor;
-                 end else ram_bank[bank0_bank,direccion]:=valor;
             end;
     $6000..$ffff:; //ROM
 end;
@@ -487,7 +447,7 @@ iniciar_thunderx:=false;
 llamadas_maquina.close:=cerrar_thunderx;
 llamadas_maquina.reset:=reset_thunderx;
 llamadas_maquina.bucle_general:=thunderx_principal;
-llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.fps_max:=59.17;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
@@ -499,7 +459,7 @@ if main_vars.tipo_maquina<>224 then main_screen.rot90_screen:=true;
 iniciar_video(288,224,true);
 iniciar_audio(false);
 //Main CPU
-konami_0:=cpu_konami.create(3000000,256);
+konami_0:=cpu_konami.create(12000000,256);
 konami_0.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);

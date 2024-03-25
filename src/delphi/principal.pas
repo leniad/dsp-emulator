@@ -92,7 +92,7 @@ type
     wboy1: TMenuItem;
     wbml1: TMenuItem;
     tehkanwc1: TMenuItem;
-    Popeye1: TMenuItem;
+    PopeyeHW1: TMenuItem;
     Psychic51: TMenuItem;
     Brazil1: TMenuItem;
     M680001: TMenuItem;
@@ -119,7 +119,7 @@ type
     TigerRoadHW1: TMenuItem;
     TigerRoad1: TMenuItem;
     F1Dream1: TMenuItem;
-    SnowBros1: TMenuItem;
+    SnowBrosHW1: TMenuItem;
     Toki1: TMenuItem;
     FullScreen1: TMenuItem;
     Timer2: TTimer;
@@ -539,6 +539,41 @@ type
     SteelForceHW1: TMenuItem;
     SteelForce1: TMenuItem;
     twinbrats1: TMenuItem;
+    MortalRace1: TMenuItem;
+    BankPanicHW1: TMenuItem;
+    BankPanic1: TMenuItem;
+    CombatHawk1: TMenuItem;
+    AntEater1: TMenuItem;
+    AppooohHW1: TMenuItem;
+    Appoooh1: TMenuItem;
+    RoboWres1: TMenuItem;
+    ArmoredCar1: TMenuItem;
+    N88Games1: TMenuItem;
+    Avengers1: TMenuItem;
+    TheEnd1: TMenuItem;
+    BattleofAtlantis1: TMenuItem;
+    DooyongHW1: TMenuItem;
+    BlueHawk1: TMenuItem;
+    LastDay1: TMenuItem;
+    GulfStorm1: TMenuItem;
+    Pollux1: TMenuItem;
+    FlyingTiger1: TMenuItem;
+    Popeye1: TMenuItem;
+    SkySkipper1: TMenuItem;
+    BluePrintHW1: TMenuItem;
+    BLuePrint1: TMenuItem;
+    Saturn1: TMenuItem;
+    Grasspin1: TMenuItem;
+    UnicoHW1: TMenuItem;
+    BurglarX1: TMenuItem;
+    ZeroPoint1: TMenuItem;
+    Calipso1: TMenuItem;
+    CalorieKun1: TMenuItem;
+    Gardia1: TMenuItem;
+    Cavelon1: TMenuItem;
+    SnowBros1: TMenuItem;
+    ComeBackToto1: TMenuItem;
+    HyperPacman1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -624,13 +659,13 @@ end;
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
 principal1.BitBtn3.Glyph:=nil;
-if EmuStatus=EsRuning then begin //Cambiar a pausa
+if EmuStatus=EsRunning then begin //Cambiar a pausa
   timer1.Enabled:=false;
   EmuStatus:=EsPause;
   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
   principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[1];
 end else begin //Cambiar a play
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   timer1.Enabled:=true;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[2];
@@ -733,7 +768,7 @@ end else begin
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
   principal1.Enabled:=true;
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   llamadas_maquina.bucle_general;
 end;
@@ -745,7 +780,7 @@ begin
 principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 if main_vars.driver_ok then begin
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   principal1.timer1.Enabled:=true;
   llamadas_maquina.bucle_general;
 end;

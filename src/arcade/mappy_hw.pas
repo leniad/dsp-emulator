@@ -402,7 +402,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6809_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -494,6 +494,7 @@ case direccion of
    $e000..$ffff:; //ROM
 end;
 end;
+
 procedure mappy_sound_update;
 begin
   namco_snd_0.update;

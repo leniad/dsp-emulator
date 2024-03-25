@@ -100,7 +100,7 @@ for f:=0 to $1ff do begin
     y:=512-(((sprite_ram[$2+(f shl 2)]) shr 7)+144) and $1ff;
     flipy:=(atrib and $100)<>0;
     flipx:=(atrib and $200)<>0;
-    if flipy then y:=y+14;		// should really be 15 */
+    if flipy then y:=y+14;
     put_gfx_sprite(nchar,color shl 4,flipx,flipy,3);
     actualiza_gfx_sprite((x-16) and $1ff,(y-32) and $1ff,4,3);
   end;
@@ -188,7 +188,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 frame_mcu:=tms32010_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 285 do begin
     //MAIN CPU
     m68000_0.run(frame_m);
@@ -360,7 +360,7 @@ end;
 
 function twincobr_dsp_r:word;
 begin
-	// DSP can read data from main CPU RAM via DSP IO port 1 */
+	// DSP can read data from main CPU RAM via DSP IO port 1
 	case main_ram_seg of
 		$30000,$40000,$50000:twincobr_dsp_r:=twincobr_getword(main_ram_seg+dsp_addr_w);
       else twincobr_dsp_r:=0;
@@ -369,7 +369,7 @@ end;
 
 procedure twincobr_dsp_w(valor:word);
 begin
-  // Data written to main CPU RAM via DSP IO port 1 */
+  // Data written to main CPU RAM via DSP IO port 1
 	dsp_execute:=false;
 	case main_ram_seg of
     $30000:begin

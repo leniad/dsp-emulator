@@ -153,7 +153,7 @@ frame_m:=z80_0.tframes;
 frame_sub:=z80_1.tframes;
 frame_s:=z80_2.tframes;
 frame_mcu:=m6805_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to 223 do begin
         z80_0.run(frame_m);
         frame_m:=frame_m+z80_0.tframes-z80_0.contador;

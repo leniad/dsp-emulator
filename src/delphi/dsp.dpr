@@ -292,8 +292,6 @@ uses
   galivan_hw in '..\arcade\galivan_hw.pas',
   lastduel_hw in '..\arcade\lastduel_hw.pas',
   commodore64 in '..\ordenadores\commodore64.pas',
-  mos6526 in '..\ordenadores\misc\mos6526.pas',
-  mos6566 in '..\ordenadores\misc\mos6566.pas',
   mos6526_old in '..\ordenadores\misc\mos6526_old.pas',
   sid_sound in '..\snd\sid_sound.pas',
   sid_tables in '..\snd\sid_tables.pas',
@@ -351,7 +349,18 @@ uses
   m63_hw in '..\arcade\m63_hw.pas',
   diverboy_hw in '..\arcade\diverboy_hw.pas',
   mugsmashers_hw in '..\arcade\mugsmashers_hw.pas',
-  steelforce_hw in '..\arcade\steelforce_hw.pas';
+  steelforce_hw in '..\arcade\steelforce_hw.pas',
+  mos6566 in '..\ordenadores\misc\mos6566.pas',
+  mos6526 in '..\ordenadores\misc\mos6526.pas',
+  avg_dvg in '..\arcade\misc\avg_dvg.pas',
+  bankpanic_hw in '..\arcade\bankpanic_hw.pas',
+  appoooh_hw in '..\arcade\appoooh_hw.pas',
+  sega_decrypt_2 in '..\arcade\misc\sega_decrypt_2.pas',
+  hw_88games in '..\arcade\hw_88games.pas',
+  dooyong_hw in '..\arcade\dooyong_hw.pas',
+  blueprint_hw in '..\arcade\blueprint_hw.pas',
+  unico_hw in '..\arcade\unico_hw.pas',
+  caloriekun_hw in '..\arcade\caloriekun_hw.pas';
 
 {$R *.res}
 begin

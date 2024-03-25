@@ -132,7 +132,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     m6809_0.run(frame_m);

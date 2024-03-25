@@ -60,8 +60,8 @@ begin
 case direccion of
   0..$1fff:konamisnd_jungler_getbyte:=konamisnd_0.memoria[direccion];
   $2000..$2fff:konamisnd_jungler_getbyte:=konamisnd_0.memoria[$2000+(direccion and $3ff)];
-  $4000..$4fff:konamisnd_jungler_getbyte:=ay8910_0.Read;
-  $6000..$6fff:konamisnd_jungler_getbyte:=ay8910_1.Read;
+  $4000..$4fff:konamisnd_jungler_getbyte:=ay8910_0.read;
+  $6000..$6fff:konamisnd_jungler_getbyte:=ay8910_1.read;
 end;
 end;
 
@@ -71,10 +71,10 @@ case direccion of
      0..$1fff:;
      $2000..$2fff:konamisnd_0.memoria[$2000+(direccion and $3ff)]:=valor;
      $3000..$3fff:; //filtros
-     $4000..$4fff:ay8910_0.Write(valor);
-     $5000..$5fff:ay8910_0.Control(valor);
-     $6000..$6fff:ay8910_1.Write(valor);
-     $7000..$7fff:ay8910_1.Control(valor);
+     $4000..$4fff:ay8910_0.write(valor);
+     $5000..$5fff:ay8910_0.control(valor);
+     $6000..$6fff:ay8910_1.write(valor);
+     $7000..$7fff:ay8910_1.control(valor);
 end;
 end;
 

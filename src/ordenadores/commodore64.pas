@@ -1,5 +1,5 @@
 unit commodore64;
-//{$DEFINE CIA_OLD}
+{$DEFINE CIA_OLD}
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,misc_functions,
@@ -8,8 +8,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      {$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
 
 function iniciar_c64:boolean;
-
-//Para los snapshots
+//CPU
 procedure c64_putbyte(direccion:word;valor:byte);
 
 var
@@ -28,23 +27,25 @@ const
 var
   kernel_rom,basic_rom:array[0..$1fff] of byte;
   tape_control,port_bits,port_val:byte;
-  char_ram,kernel_enabled,basic_enabled,char_enabled:boolean;
+  write_ram:boolean;
+  read_ram_a,read_ram_e:boolean;
+  read_ram_d:byte;
 
 procedure eventos_c64;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fe) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 1);
-  if arcade_input.down[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fd) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 2);
-  if arcade_input.left[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fb) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 4);
-  if arcade_input.right[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $f7) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $8);
-  if arcade_input.but0[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $ef) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $10);
+  if arcade_input.up[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fe) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 1);
+  if arcade_input.down[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fd) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 2);
+  if arcade_input.left[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fb) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 4);
+  if arcade_input.right[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $f7) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $8);
+  if arcade_input.but0[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $ef) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $10);
   //P2
-  if arcade_input.up[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fe) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 1);
-  if arcade_input.down[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fd) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 2);
-  if arcade_input.left[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fb) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 4);
-  if arcade_input.right[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $f7) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 8);
-  if arcade_input.but0[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $ef) else mos6526_0.joystick2:=(mos6526_0.joystick2 or $10);
+  if arcade_input.up[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fe) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 1);
+  if arcade_input.down[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fd) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 2);
+  if arcade_input.left[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fb) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 4);
+  if arcade_input.right[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $f7) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 8);
+  if arcade_input.but0[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $ef) else mos6526_0.joystick2:=(mos6526_0.joystick2 or $10);
 end;
 if event.keyboard then begin
   if keyboard[KEYBOARD_F1] then begin
@@ -148,7 +149,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=0;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 311 do begin
     frame:=frame+mos6566_0.update(f);
     m6502_0.run(frame);
@@ -165,13 +166,14 @@ function c64_getbyte(direccion:word):byte;
 begin
 case direccion of
   0:c64_getbyte:=port_bits;
-  1:c64_getbyte:=tape_control or (byte(tape_motor)*$20) or (port_val and $7);
+  1:c64_getbyte:=tape_control or (byte(not(tape_motor))*$20) or (port_val and $7);
   2..$9fff,$c000..$cfff:c64_getbyte:=memoria[direccion];
-  $a000..$bfff:if basic_enabled then c64_getbyte:=basic_rom[direccion and $1fff]
-                  else c64_getbyte:=memoria[direccion];
-  $d000..$dfff:if char_ram then c64_getbyte:=memoria[direccion] else
-                  if char_enabled then c64_getbyte:=char_rom[direccion and $fff]
-                    else case ((direccion shr 8) and $f) of
+  $a000..$bfff:if read_ram_a then c64_getbyte:=memoria[direccion]
+                  else c64_getbyte:=basic_rom[direccion and $1fff];
+  $d000..$dfff:case read_ram_d of
+                  0:c64_getbyte:=memoria[direccion];
+                  1:c64_getbyte:=char_rom[direccion and $fff];
+                  2:case ((direccion shr 8) and $f) of
                       0..3:c64_getbyte:=mos6566_0.read(direccion and $3f);   //VICII
                       4..7:c64_getbyte:=sid_0.read(direccion and $1f); //SID
                       8..$b:c64_getbyte:=color_ram[direccion and $3ff];
@@ -184,8 +186,9 @@ case direccion of
                       {$ENDIF}
                       $e..$f:c64_getbyte:=$ff;//MessageDlg('Leyendo de la expansion...', mtInformation,[mbOk], 0);
                     end;
-  $e000..$ffff:if kernel_enabled then c64_getbyte:=kernel_rom[direccion and $1fff]
-                  else c64_getbyte:=memoria[direccion];
+               end;
+  $e000..$ffff:if read_ram_e then c64_getbyte:=memoria[direccion]
+                  else c64_getbyte:=kernel_rom[direccion and $1fff];
 end;
 end;
 
@@ -194,26 +197,62 @@ var
   res:byte;
 begin
 res:=port_val or not(port_bits);
-//Casos de los tres primeros bits:
-// X00 --> Todo ram (todos disabled), este caso es especial, ya que ignora el bit de los char y lo desactiva sin mirarlo
-// En el resto de casos, si tiene en cuenta el bit2 de los chars
-if (res and $3)=0 then begin
-  char_ram:=true;
-  char_enabled:=false;
-end else begin
-  char_ram:=false;
-  char_enabled:=(res and 4)=0;
-end;
-kernel_enabled:=(res and 2)<>0;
-basic_enabled:=(res and 3)=3;
 tape_motor:=(port_val and $20)=0;
+case (res and 7) of
+  0:begin
+      write_ram:=true;
+      read_ram_d:=0;
+      read_ram_a:=true;
+      read_ram_e:=true;
+    end;
+  1:begin
+      write_ram:=true;
+      read_ram_d:=1;
+      read_ram_a:=true;
+      read_ram_e:=true;
+    end;
+  2:begin
+      write_ram:=true;
+      read_ram_d:=1;
+      read_ram_a:=true;
+      read_ram_e:=false;
+    end;
+  3:begin
+      write_ram:=true;
+      read_ram_d:=1;
+      read_ram_a:=false;
+      read_ram_e:=false;
+    end;
+  4:begin
+      write_ram:=true;
+      read_ram_d:=0;
+      read_ram_a:=true;
+      read_ram_e:=true;
+    end;
+  5:begin
+      write_ram:=false;
+      read_ram_d:=2;
+      read_ram_a:=true;
+      read_ram_e:=true;
+    end;
+  6:begin
+      write_ram:=false;
+      read_ram_d:=2;
+      read_ram_a:=true;
+      read_ram_e:=false;
+    end;
+  7:begin
+      write_ram:=false;
+      read_ram_d:=2;
+      read_ram_a:=false;
+      read_ram_e:=false;
+    end;
+end;
 end;
 
 procedure c64_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-    //Aqui escribe los bits de la direccion 1 que se pueden manejar
-    //Si el valor es 0, solo lectura, si el valor es 1 leer/escribir
     0:begin
         port_bits:=valor;
         actualiza_mem;
@@ -222,7 +261,7 @@ case direccion of
         port_val:=valor;
         actualiza_mem;
       end;
-    $d000..$dfff:if (char_ram or char_enabled) then memoria[direccion]:=valor
+    $d000..$dfff:if write_ram then memoria[direccion]:=valor
                   else case ((direccion shr 8) and $f) of
                         0..3:mos6566_0.write(direccion and $3f,valor); //VICII
                         4..7:sid_0.write(direccion and $1f,valor); //SID
@@ -257,10 +296,12 @@ begin
   if ((mos6526_0.pa and $80)=0) then ret:=ret and c64_keyboard[7];
   cia1_portb_r:=ret;
 end;
+
 procedure cia2_porta_w(valor:byte);
 begin
   mos6566_0.ChangedVA(not(valor) and 3);
 end;
+
 procedure cia2_portb_w(valor:byte);
 begin
 end;
@@ -268,20 +309,20 @@ end;
 
 procedure c64_cia_irq(state:byte);
 begin
-  m6502_0.change_irq(state);
   cia_irq:=(state=ASSERT_LINE);
+  if not(cia_irq) then m6502_0.change_irq(CLEAR_LINE);
 end;
 
 procedure c64_vic_irq(state:byte);
 begin
-  m6502_0.change_irq(state);
   vic_irq:=(state=ASSERT_LINE);
+  if not(vic_irq) then m6502_0.change_irq(CLEAR_LINE);
 end;
 
 procedure c64_nmi(state:byte);
 begin
-  m6502_0.change_nmi(state);
   cia_nmi:=(state=ASSERT_LINE);
+  if not(cia_nmi) then m6502_0.change_nmi(CLEAR_LINE);
 end;
 
 procedure c64_despues_instruccion(tstates:word);
@@ -292,6 +333,7 @@ begin
     if cinta_tzx.play_tape then begin
       if tape_motor then begin
         mos6526_0.flag_w(cinta_tzx.value shr 6);
+        //3500/985 =3.5524
         play_cinta_tzx(tstates);
       end;
     end;
@@ -326,11 +368,15 @@ for f:=0 to 7 do begin
   c64_keyboard[f]:=$ff;
   c64_keyboard_i[f]:=$ff;
 end;
-tape_control:=$30;
+tape_control:=$10;
 vic_irq:=false;
 cia_irq:=false;
 cia_nmi:=false;
 tape_motor:=false;
+write_ram:=false;
+read_ram_a:=false;
+read_ram_e:=false;
+read_ram_d:=2;
 end;
 
 procedure c64_tape_start;
@@ -342,7 +388,7 @@ end;
 procedure c64_tape_stop;
 begin
   main_screen.rapido:=false;
-  tape_control:=$30;
+  tape_control:=$10;
 end;
 
 procedure c64_sound_update;
@@ -418,7 +464,7 @@ begin
   llamadas_maquina.cartuchos:=c64_loaddisk;
   iniciar_c64:=false;
   iniciar_audio(true);
-  //Total 5--> 504x312
+  //Total --> 504x312
   //Linea --> 76 HBLANK
   //          48 Borde
   //           7 Borde 38 cols o visible si 40 cols
@@ -464,4 +510,5 @@ begin
   cinta_tzx.tape_start:=c64_tape_start;
   cinta_tzx.tape_stop:=c64_tape_stop;
 end;
+
 end.

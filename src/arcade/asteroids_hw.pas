@@ -2,7 +2,7 @@ unit asteroids_hw;
 
 interface
 uses asteroids_hw_audio,m6502,main_engine,controls_engine,gfx_engine,
-     timer_engine,samples,rom_engine,pal_engine,sound_engine;
+     timer_engine,samples,rom_engine,pal_engine,sound_engine,avg_dvg;
 
 function iniciar_as:boolean;
 
@@ -11,6 +11,7 @@ const
         as_rom:array[0..3] of tipo_roms=(
         (n:'035145-04e.ef2';l:$800;p:$6800;crc:$b503eaf7),(n:'035144-04e.h2';l:$800;p:$7000;crc:$25233192),
         (n:'035143-02.j2';l:$800;p:$7800;crc:$312caa02),(n:'035127-02.np3';l:$800;p:$5000;crc:$8b71fd9e));
+        as_prom:tipo_roms=(n:'034602-01.c8';l:$100;p:$0;crc:$97953db8);
         as_samples:array[0..2] of tipo_nombre_samples=((nombre:'explode1.wav'),
         (nombre:'explode2.wav'),(nombre:'explode3.wav'));
         asteroids_dip_a:array [0..5] of def_dip=(
@@ -23,10 +24,12 @@ const
         (n:'034572-02.f1';l:$800;p:$6000;crc:$b8763eea),(n:'034571-02.de1';l:$800;p:$6800;crc:$77da4b2f),
         (n:'034570-01.c1';l:$800;p:$7000;crc:$2724e591),(n:'034569-02.b1';l:$800;p:$7800;crc:$72837a4e),
         (n:'034599-01.r3';l:$800;p:$4800;crc:$355a9371),(n:'034598-01.np3';l:$800;p:$5000;crc:$9c4ffa68),
-        (n:'034597-01.m3';l:$800;p:$5800;crc:$503f992e));
+        (n:'034597-01.m3';l:$800;p:$5800;crc:$ebb744f2));
+        llander_prom:tipo_roms=(n:'034602-01.c8';l:$100;p:$0;crc:$97953db8);
+
 
 var
-  hay_samples,dibujar:boolean;
+  hay_samples:boolean;
   ram:array[0..1,0..$ff] of byte;
   x_actual,y_actual:integer;
   ram_bank:byte;
@@ -127,7 +130,6 @@ while not(salir) do begin
     draw_line(x+ADD_SPRITE,y+ADD_SPRITE,xa_d+ADD_SPRITE,ya_d+ADD_SPRITE,color,1);
   end;
 end;
-dibujar:=false;
 actualiza_trozo_final(0,40,400,320,1);
 end;
 
@@ -153,11 +155,10 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 299 do begin
     m6502_0.run(frame);
     frame:=frame+m6502_0.tframes-m6502_0.contador;
-    if ((f=282) and dibujar) then update_video_as;
  end;
  eventos_as;
  video_sync;
@@ -175,11 +176,12 @@ case direccion of
   $200..$2ff:getbyte_as:=ram[ram_bank,direccion and $ff];
   $300..$3ff:getbyte_as:=ram[1-ram_bank,direccion and $ff];
   $2001:getbyte_as:=(m6502_0.totalt and $100) shr 8;
-  $2000,$2002..$2007:begin
+  $2000,$2003..$2007:begin
                         mascara:=1 shl (direccion and $7);
                         if (marcade.in0 and mascara)<>0 then getbyte_as:=$80
                           else getbyte_as:=$7f;
                      end;
+  $2002:getbyte_as:=avgdvg_0.done_r*$80;
   $2400..$2407:begin
                   mascara:=1 shl (direccion and $7);
                   if (marcade.in1 and mascara)<>0 then getbyte_as:=$80
@@ -195,19 +197,16 @@ end;
 procedure putbyte_as(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7fff;
-if direccion>$4fff then exit;
 case direccion of
-  0..$1ff:memoria[direccion]:=valor;
+  0..$1ff,$4000..$47ff:memoria[direccion]:=valor;
   $200..$2ff:ram[ram_bank,direccion and $ff]:=valor;
   $300..$3ff:ram[1-ram_bank,direccion and $ff]:=valor;
+  $3000:avgdvg_0.go_w;
   $3200:ram_bank:=(valor and 4) shr 2;
   $3600:asteroid_explode_w(valor,hay_samples);
   $3a00:asteroid_thump_w(valor);
   $3c00..$3c05:asteroid_sounds_w(direccion and $7,valor);
-  $4000..$47ff:begin
-                  memoria[direccion]:=valor;
-                  dibujar:=true;
-               end;
+  $5000..$57ff,$6800..$7fff:;
 end;
 end;
 
@@ -219,7 +218,7 @@ begin
 direccion:=direccion and $7fff;
 case direccion of
   0..$1fff:getbyte_llander:=memoria[direccion and $ff];
-  $2000:getbyte_llander:=$bf or ((m6502_0.totalt and $100) shr 2);
+  $2000:getbyte_llander:=not(avgdvg_0.done_r) or ((m6502_0.totalt and $100) shr 2) or $be;
   $2400..$2407:begin
                   mascara:=1 shl (direccion and $7);
                   if ($50 and mascara)<>0 then getbyte_llander:=$80
@@ -237,15 +236,13 @@ end;
 procedure putbyte_llander(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7fff;
-if direccion>$4fff then exit;
 case direccion of
   0..$1fff:memoria[direccion and $ff]:=valor;
+  $3000:avgdvg_0.go_w;
   $3c00:;
   $3e00:;
-  $4000..$47ff:begin
-                  memoria[direccion]:=valor;
-                  dibujar:=true;
-               end;
+  $4000..$47ff:memoria[direccion]:=valor;
+  $4800..$7fff:;
 end;
 end;
 
@@ -269,7 +266,6 @@ marcade.in1:=0;
 x_actual:=0;
 y_actual:=0;
 ram_bank:=0;
-dibujar:=true;
 end;
 
 function iniciar_as:boolean;
@@ -295,6 +291,9 @@ case main_vars.tipo_maquina of
         timers.init(0,1512000/(12096000/4096/12),as_snd_nmi,nil,true);
         //cargar roms
         if not(roms_load(@memoria,as_rom)) then exit;
+        //Vectors
+        avgdvg_0:=avgdvg_chip.create(m6502_0.numero_cpu,1,$4000,40);
+        if not(roms_load(avgdvg_0.get_prom_data,as_prom)) then exit;
         //samples
         hay_samples:=load_samples(as_samples);
         //dip
@@ -308,8 +307,12 @@ case main_vars.tipo_maquina of
         timers.init(0,1512000/(12096000/4096/12),as_snd_nmi,nil,true);
         //cargar roms
         if not(roms_load(@memoria,llander_rom)) then exit;
+        //Vectors
+        avgdvg_0:=avgdvg_chip.create(m6502_0.numero_cpu,1,$4000,80);
+        if not(roms_load(avgdvg_0.get_prom_data,llander_prom)) then exit;
         //samples
         //hay_samples:=load_samples('asteroid.zip',@as_samples,3);
+        hay_samples:=false;
         //dip
         marcade.dswa:=$84;
         marcade.dswa_val:=@asteroids_dip_a;
@@ -321,7 +324,7 @@ for f:=0 to 15 do begin
   colores[f].g:=17*f;
   colores[f].b:=17*f;
 end;
-set_pal(colores,16);
+set_pal(colores,256);
 //final
 reset_as;
 iniciar_as:=true;

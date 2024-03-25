@@ -14,10 +14,7 @@ type
       procedure adr_w(dir:word;valor:byte);
       procedure ctl_w(valor:byte);
     private
-      mem:pbyte;
-      nibble,msm5205_num:byte;
-      current,end_:dword;
-      playing:boolean;
+      msm5205_num:byte;
   end;
   seibu_snd_type=class(snd_chip_class)
       constructor create(snd_type:byte;clock,cpu_sync:dword;snd_rom:pbyte;encrypted:boolean;amp:single=1);
@@ -137,6 +134,8 @@ end;
 procedure adpcm_sound_update;
 begin
   ym2151_0.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 procedure snd_irq(irqstate:byte);
@@ -297,20 +296,22 @@ begin
 end;
 
 //ADPCM
-procedure adpcm_0_update;
+{procedure adpcm_0_update;
 var
   tempb:byte;
 begin
 if not(seibu_snd_0.adpcm_0.playing) then exit;
-tempb:=(seibu_snd_0.adpcm_0.mem[seibu_snd_0.adpcm_0.current] shr seibu_snd_0.adpcm_0.nibble) and $f;
-msm5205_0.data_w(tempb);
-seibu_snd_0.adpcm_0.nibble:=seibu_snd_0.adpcm_0.nibble xor 4;
-if (seibu_snd_0.adpcm_0.nibble=4) then begin
-  seibu_snd_0.adpcm_0.current:=seibu_snd_0.adpcm_0.current+1;
-		if (seibu_snd_0.adpcm_0.current>=seibu_snd_0.adpcm_0.end_) then begin
-			msm5205_0.reset_w(1);
-			seibu_snd_0.adpcm_0.playing:=false;
-    end;
+if (msm5205_0.data_val<>-1) then begin
+  msm5205_0.data_w(msm5205_0.data_val and $f);
+  msm5205_0.data_val:=-1;
+  msm5205_0.pos:=msm5205_0.pos+1;
+  if (msm5205_0.pos>=msm5205_0.end_) then begin
+		msm5205_0.reset_w(1);
+    seibu_snd_0.adpcm_0.playing:=false;
+  end;
+end else begin
+  msm5205_0.data_val:=msm5205_0.rom_data[msm5205_0.pos];
+  msm5205_0.data_w(msm5205_0.data_val shr 4);
 end;
 end;
 
@@ -319,25 +320,33 @@ var
   tempb:byte;
 begin
 if not(seibu_snd_0.adpcm_1.playing) then exit;
-tempb:=(seibu_snd_0.adpcm_1.mem[seibu_snd_0.adpcm_1.current] shr seibu_snd_0.adpcm_1.nibble) and $f;
-msm5205_1.data_w(tempb);
-seibu_snd_0.adpcm_1.nibble:=seibu_snd_0.adpcm_1.nibble xor 4;
-if (seibu_snd_0.adpcm_1.nibble=4) then begin
-  seibu_snd_0.adpcm_1.current:=seibu_snd_0.adpcm_1.current+1;
-		if (seibu_snd_0.adpcm_1.current>=seibu_snd_0.adpcm_1.end_) then begin
-			msm5205_1.reset_w(1);
-			seibu_snd_0.adpcm_1.playing:=false;
-    end;
+if (msm5205_1.data_val<>-1) then begin
+  msm5205_1.data_w(msm5205_1.data_val and $f);
+  msm5205_1.data_val:=-1;
+  msm5205_1.pos:=msm5205_1.pos+1;
+  if (msm5205_1.pos>=msm5205_1.end_) then begin
+		msm5205_1.reset_w(1);
+    seibu_snd_0.adpcm_1.playing:=false;
+  end;
+end else begin
+  msm5205_1.data_val:=msm5205_1.rom_data[msm5205_1.pos];
+  msm5205_1.data_w(msm5205_1.data_val shr 4);
 end;
-end;
+end;}
 
 constructor seibu_adpcm_chip.create;
 begin
   num_msm5205:=num_msm5205+1;
   self.msm5205_num:=num_msm5205;
   case num_msm5205 of
-    0:msm5205_0:=msm5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.4,adpcm_0_update);
-    1:msm5205_1:=msm5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.4,adpcm_1_update);
+    0:begin
+        msm5205_0:=msm5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.4,$10000);
+        //msm5205_0.change_advance(adpcm_0_update);
+      end;
+    1:begin
+        msm5205_1:=msm5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.4,$10000);
+        //msm5205_1.change_advance(adpcm_1_update);
+    end;
   end;
 end;
 
@@ -348,14 +357,11 @@ begin
     1:if msm5205_1<>nil then msm5205_1.free;
   end;
   num_msm5205:=num_msm5205-1;
-  freemem(self.mem);
 end;
 
 procedure seibu_adpcm_chip.reset;
 begin
-  self.nibble:=0;
-  self.current:=0;
-  self.playing:=false;
+  //self.playing:=false;
   case self.msm5205_num of
       0:msm5205_0.reset;
       1:msm5205_1.reset;
@@ -364,27 +370,23 @@ end;
 
 procedure seibu_adpcm_chip.adr_w(dir:word;valor:byte);
 begin
-if (dir<>0) then self.end_:=valor shl 8
-  else begin
-		self.current:=valor shl 8;
-		self.nibble:=4;
-	end;
+if self.msm5205_num=0 then begin
+  if (dir<>0) then msm5205_0.end_:=valor shl 8
+    else msm5205_0.pos:=valor shl 8;
+end else begin
+  if (dir<>0) then msm5205_1.end_:=valor shl 8
+    else msm5205_1.pos:=valor shl 8;
+end;
 end;
 
 procedure seibu_adpcm_chip.ctl_w(valor:byte);
 begin
   // sequence is 00 02 01 each time.
 	case valor of
-		0:begin
-			  if self.msm5205_num=0 then msm5205_0.reset_w(1)
-          else msm5205_1.reset_w(1);
-			  self.playing:=false;
-      end;
-		1:begin
-        if self.msm5205_num=0 then msm5205_0.reset_w(0)
-          else msm5205_1.reset_w(0);
-			  self.playing:=true;
-			end;
+		0:if self.msm5205_num=0 then msm5205_0.reset_w(true)
+          else msm5205_1.reset_w(true);
+		1:if self.msm5205_num=0 then msm5205_0.reset_w(false)
+          else msm5205_1.reset_w(false);
     2:;
   end;
 end;
@@ -393,11 +395,9 @@ procedure seibu_snd_type.adpcm_load_roms(adpcm_rom:pbyte;size:dword);
 var
   f:dword;
 begin
-getmem(self.adpcm_0.mem,size);
-getmem(self.adpcm_1.mem,size);
 for f:=0 to (size-1) do begin
-  self.adpcm_0.mem[f]:=BITSWAP8(adpcm_rom[f],7,5,3,1,6,4,2,0);
-  self.adpcm_1.mem[f]:=BITSWAP8(adpcm_rom[size+f],7,5,3,1,6,4,2,0);
+  msm5205_0.rom_data[f]:=BITSWAP8(adpcm_rom[f],7,5,3,1,6,4,2,0);
+  msm5205_1.rom_data[f]:=BITSWAP8(adpcm_rom[size+f],7,5,3,1,6,4,2,0);
 end;
 end;
 

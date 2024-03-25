@@ -1,12 +1,9 @@
 unit pacland_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine;
-
 function iniciar_pacland:boolean;
-
 implementation
 const
         pacland_rom:array[0..5] of tipo_roms=(
@@ -44,9 +41,7 @@ var
  rom_nbank,palette_bank:byte;
  scroll_x1,scroll_x2:word;
  irq_enable,irq_enable_mcu:boolean;
-
 procedure update_video_pacland;
-
 procedure put_sprite_pacland(nchar,color:word;flipx,flipy:boolean;pri:byte);
 var
   x,y,punto:byte;
@@ -97,7 +92,6 @@ end else begin
   end;
 end;
 end;
-
 procedure draw_sprites(pri:byte);
 const
   gfx_offs:array[0..1,0..1] of byte=((0,1),(2,3));
@@ -128,7 +122,6 @@ begin
 		end;
 	end;
 end;
-
 procedure put_gfx_pacland(pos_x,pos_y,nchar:dword;color:word;screen,ngfx:byte;flipx,flipy:boolean);
 var
   x,y,py,cant_x,cant_y,punto:byte;
@@ -168,7 +161,6 @@ for y:=0 to (cant_y-1) do begin
   py:=py+dir_y;
 end;
 end;
-
 var
   f,color,nchar:word;
   x,y,atrib:byte;
@@ -208,7 +200,6 @@ scroll__x_part(4,3,0,0,232,16);
 draw_sprites(2);
 actualiza_trozo_final(24,16,288,224,3);
 end;
-
 procedure eventos_pacland;
 begin
 if event.arcade then begin
@@ -226,7 +217,6 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
 end;
 end;
-
 procedure pacland_principal;
 var
   f:word;
@@ -235,7 +225,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_mcu:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -253,7 +243,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function pacland_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -262,7 +251,6 @@ case direccion of
   $6800..$6bff:pacland_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
 end;
 end;
-
 procedure pacland_putbyte(direccion:word;valor:byte);
 procedure cambiar_paleta;
 var
@@ -290,7 +278,6 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,$100);
 end;
-
 begin
 case direccion of
   $0..$fff:if memoria[direccion]<>valor then begin
@@ -324,7 +311,6 @@ case direccion of
   $9000..$9fff:main_screen.flip_main_screen:=(direccion and $800)=0;
 end;
 end;
-
 function mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -337,7 +323,6 @@ case direccion of
   $d003:mcu_getbyte:=((marcade.in1 and $f) shl 4) or $f;
   end;
 end;
-
 procedure mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -351,22 +336,18 @@ case direccion of
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
-
 function in_port1:byte;
 begin
   in_port1:=marcade.in0;
 end;
-
 function in_port2:byte;
 begin
   in_port2:=$ff; //Sin uso
 end;
-
 procedure pacland_sound_update;
 begin
   namco_snd_0.update;
 end;
-
 //Main
 procedure reset_pacland;
 begin
@@ -383,7 +364,6 @@ begin
  scroll_x2:=0;
  palette_bank:=$ff;
 end;
-
 function iniciar_pacland:boolean;
 var
   f:word;
@@ -460,5 +440,4 @@ marcade.dswc_val:=@pacland_dip_c;
 reset_pacland;
 iniciar_pacland:=true;
 end;
-
 end.

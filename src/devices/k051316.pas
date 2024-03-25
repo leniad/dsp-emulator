@@ -22,7 +22,7 @@ type
               control:array[0..$f] of byte;
               rom_size,rom_mask:dword;
               k051316_cb:t_k051316_cb;
-              pant,ngfx,pixels_per_byte:byte;
+              color_type,pant,ngfx,pixels_per_byte:byte;
      end;
 
 const
@@ -51,20 +51,23 @@ begin
   self.rom_mask:=rom_size-1;
   self.k051316_cb:=call_back;
   self.ngfx:=ngfx;
-  init_gfx(ngfx,16,16,rom_size div 256);
-  gfx[ngfx].trans[0]:=true;
   case tipo of
     BPP4:begin
+        init_gfx(ngfx,16,16,rom_size div 128);
         gfx_set_desc_data(4,0,8*128,0,1,2,3);
         convert_gfx(ngfx,0,rom,@pc_x_4,@pc_y_4,false,false);
         self.pixels_per_byte:=2;
+        self.color_type:=4;
       end;
     BPP7:begin
+        init_gfx(ngfx,16,16,rom_size div 256);
         gfx_set_desc_data(7,0,8*256,1,2,3,4,5,6,7);
         convert_gfx(ngfx,0,rom,@pc_x_7,@pc_y_7,false,false);
         self.pixels_per_byte:=1;
+        self.color_type:=7;
       end;
-end;
+  end;
+  gfx[ngfx].trans[0]:=true;
 end;
 
 destructor k051316_chip.free;
@@ -122,7 +125,7 @@ for f:=0 to $3ff do begin //Background
     color:=self.ram[f+$400];
     nchar:=self.ram[f];
     self.k051316_cb(nchar,color,pri);
-    put_gfx_trans(x*16,y*16,nchar,color shl 7,self.pant,self.ngfx);
+    put_gfx_trans(x*16,y*16,nchar,color shl self.color_type,self.pant,self.ngfx);
     gfx[self.ngfx].buffer[f]:=false;
   end;
 end;
@@ -136,8 +139,8 @@ startx:=startx-(16*incyx);
 starty:=starty-(16*incyy);
 startx:=startx-(89*incxx);
 starty:=starty-(89*incxy);
-actualiza_trozo(0,0,512,512,self.pant,0,0,512,512,screen);
-//scroll_x_y(4,5,startx shr 3,starty shr 3);
+//actualiza_trozo(0,0,512,512,self.pant,0,0,512,512,screen);
+scroll_x_y(self.pant,screen,startx,starty);
 end;
 
 end.

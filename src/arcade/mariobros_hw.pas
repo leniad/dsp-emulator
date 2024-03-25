@@ -92,7 +92,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -217,9 +217,8 @@ getmem(data,20000);
 //CPU
 size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-//SND
 //MEM
-savedata_com_qsnapshot(@memoria[$6000],$1800);
+savedata_qsnapshot(@memoria[$6000],$1800);
 //MISC
 buffer[0]:=byte(haz_nmi);
 buffer[1]:=gfx_bank;
@@ -242,7 +241,6 @@ getmem(data,20000);
 //CPU
 loaddata_qsnapshot(data);
 z80_0.load_snapshot(data);
-//SND
 //MEM
 loaddata_qsnapshot(@memoria[$6000]);
 //MISC

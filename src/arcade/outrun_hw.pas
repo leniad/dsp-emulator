@@ -410,7 +410,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_sub:=m68000_1.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
      for h:=1 to CPU_SYNC do begin
         //main
@@ -813,6 +813,7 @@ begin
  marcade.in0:=$ef;
  s16_info.screen_enabled:=false;
  fillchar(s16_info.tile_buffer,$4000,1);
+ fillchar(char_ram,$1000,0);  //Si no limpio esto, aparecen cosas raras en pantalla
  adc_select:=0;
  sound_latch:=0;
  gear_hi:=false;

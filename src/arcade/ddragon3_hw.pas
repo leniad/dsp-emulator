@@ -238,7 +238,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
     //main
     m68000_0.run(frame_m);
@@ -484,14 +484,14 @@ size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2151_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=oki_6295_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@fg_ram,$800*2);
-savedata_com_qsnapshot(@bg_ram,$400*2);
-savedata_com_qsnapshot(@ram,$2000*2);
-savedata_com_qsnapshot(@buffer_sprites_w,$800*2);
+savedata_qsnapshot(@fg_ram,$800*2);
+savedata_qsnapshot(@bg_ram,$400*2);
+savedata_qsnapshot(@ram,$2000*2);
+savedata_qsnapshot(@buffer_sprites_w,$800*2);
 buffer[0]:=vreg and $ff;
 buffer[1]:=vreg shr 8;
 buffer[2]:=bg_tilebase and $ff;
@@ -507,7 +507,7 @@ buffer[11]:=bg_scrolly shr 8;
 buffer[12]:=sound_latch;
 buffer[13]:=vblank;
 savedata_qsnapshot(@buffer,14);
-savedata_com_qsnapshot(@buffer_paleta,$400*2);
+savedata_qsnapshot(@buffer_paleta,$400*2);
 freemem(data);
 close_qsnapshot;
 end;

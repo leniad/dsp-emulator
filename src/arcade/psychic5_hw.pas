@@ -175,7 +175,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -369,23 +369,23 @@ size:=z80_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=ym2203_1.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$8000],$8000);
-savedata_com_qsnapshot(@mem_snd[$8000],$8000);
+savedata_qsnapshot(@memoria[$8000],$8000);
+savedata_qsnapshot(@mem_snd[$8000],$8000);
 //MISC
-savedata_com_qsnapshot(@mem_ram[0,0],$1000);
-savedata_com_qsnapshot(@mem_ram[1,0],$1000);
-savedata_com_qsnapshot(@mem_ram[2,0],$1000);
+savedata_qsnapshot(@mem_ram[0,0],$1000);
+savedata_qsnapshot(@mem_ram[1,0],$1000);
+savedata_qsnapshot(@mem_ram[2,0],$1000);
 buffer[0]:=banco_rom;
 buffer[1]:=banco_vram;
 buffer[2]:=byte(title_screen);
 buffer[3]:=sound_latch;
 buffer[4]:=bg_control;
 savedata_qsnapshot(@buffer,5);
-savedata_com_qsnapshot(@buffer_paleta,$600*2);
+savedata_qsnapshot(@buffer_paleta,$600*2);
 freemem(data);
 close_qsnapshot;
 end;

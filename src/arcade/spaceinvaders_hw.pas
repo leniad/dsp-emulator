@@ -80,7 +80,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -170,7 +170,7 @@ getmem(data,2000);
 size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$2000],$2000);
+savedata_qsnapshot(@memoria[$2000],$2000);
 //MISC
 buffer[0]:=shift_data shr 8;
 buffer[1]:=shift_data and $ff;

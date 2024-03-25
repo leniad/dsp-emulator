@@ -17,7 +17,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="22"/>
       <RevisionNr Value="7"/>
-      <BuildNr Value="1355"/>
+      <BuildNr Value="1356"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.22"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="56">
+    <Units Count="57">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -60,8 +60,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="6"/>
-        <CursorPos X="15" Y="18"/>
+        <TopLine Value="1014"/>
+        <CursorPos X="19" Y="1026"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -491,7 +491,7 @@
         <ComponentName Value="configgb"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="34"/>
         <CursorPos X="12" Y="40"/>
         <UsageCount Value="207"/>
@@ -537,7 +537,7 @@
       </Unit52>
       <Unit53>
         <Filename Value="..\consolas\nes.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="79"/>
         <CursorPos Y="90"/>
         <UsageCount Value="10"/>
@@ -545,7 +545,7 @@
       </Unit53>
       <Unit54>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="522"/>
         <CursorPos Y="534"/>
         <UsageCount Value="10"/>
@@ -553,133 +553,141 @@
       </Unit54>
       <Unit55>
         <Filename Value="..\snd\oki6295.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="248"/>
         <CursorPos X="9" Y="255"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit55>
+      <Unit56>
+        <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="28" Y="12"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit56>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="76" TopLine="59"/>
+        <Caret Line="86" TopLine="73"/>
       </Position1>
       <Position2>
         <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="77" TopLine="59"/>
+        <Caret Line="87" TopLine="73"/>
       </Position2>
       <Position3>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="84" TopLine="73"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="518" TopLine="507"/>
       </Position3>
       <Position4>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="85" TopLine="73"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="519" TopLine="507"/>
       </Position4>
       <Position5>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="86" TopLine="73"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="520" TopLine="507"/>
       </Position5>
       <Position6>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="87" TopLine="73"/>
+        <Filename Value="..\consolas\nes_ppu.pas"/>
+        <Caret Line="521" TopLine="507"/>
       </Position6>
       <Position7>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="518" TopLine="507"/>
+        <Caret Line="525" TopLine="507"/>
       </Position7>
       <Position8>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="519" TopLine="507"/>
+        <Caret Line="526" TopLine="507"/>
       </Position8>
       <Position9>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="520" TopLine="507"/>
+        <Caret Line="527" TopLine="508"/>
       </Position9>
       <Position10>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="521" TopLine="507"/>
+        <Caret Line="531" TopLine="520"/>
       </Position10>
       <Position11>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="525" TopLine="507"/>
+        <Caret Line="533" TopLine="520"/>
       </Position11>
       <Position12>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="526" TopLine="507"/>
+        <Caret Line="518" TopLine="507"/>
       </Position12>
       <Position13>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="527" TopLine="508"/>
+        <Caret Line="533" TopLine="522"/>
       </Position13>
       <Position14>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="531" TopLine="520"/>
+        <Caret Line="534" TopLine="522"/>
       </Position14>
       <Position15>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="533" TopLine="520"/>
-      </Position15>
-      <Position16>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="518" TopLine="507"/>
-      </Position16>
-      <Position17>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="533" TopLine="522"/>
-      </Position17>
-      <Position18>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="534" TopLine="522"/>
-      </Position18>
-      <Position19>
         <Filename Value="..\consolas\nes.pas"/>
         <Caret Line="89" TopLine="73"/>
-      </Position19>
-      <Position20>
+      </Position15>
+      <Position16>
         <Filename Value="..\consolas\nes.pas"/>
         <Caret Line="90" TopLine="73"/>
-      </Position20>
-      <Position21>
+      </Position16>
+      <Position17>
         <Filename Value="..\consolas\nes.pas"/>
         <Caret Line="71" TopLine="59"/>
-      </Position21>
-      <Position22>
+      </Position17>
+      <Position18>
         <Filename Value="..\consolas\nes.pas"/>
         <Caret Line="90" TopLine="79"/>
+      </Position18>
+      <Position19>
+        <Filename Value="principal.pas"/>
+        <Caret Line="989" TopLine="977"/>
+      </Position19>
+      <Position20>
+        <Filename Value="principal.pas"/>
+        <Caret Line="954" Column="3" TopLine="952"/>
+      </Position20>
+      <Position21>
+        <Filename Value="principal.pas"/>
+        <Caret Line="955" Column="3" TopLine="953"/>
+      </Position21>
+      <Position22>
+        <Filename Value="principal.pas"/>
+        <Caret Line="956" Column="3" TopLine="954"/>
       </Position22>
       <Position23>
         <Filename Value="principal.pas"/>
-        <Caret Line="989" TopLine="977"/>
+        <Caret Line="957" Column="3" TopLine="955"/>
       </Position23>
       <Position24>
         <Filename Value="principal.pas"/>
-        <Caret Line="954" Column="3" TopLine="952"/>
+        <Caret Line="18" Column="42" TopLine="6"/>
       </Position24>
       <Position25>
         <Filename Value="principal.pas"/>
-        <Caret Line="955" Column="3" TopLine="953"/>
+        <Caret Line="14" Column="122" TopLine="6"/>
       </Position25>
       <Position26>
-        <Filename Value="principal.pas"/>
-        <Caret Line="956" Column="3" TopLine="954"/>
+        <Filename Value="..\snd\oki6295.pas"/>
       </Position26>
       <Position27>
-        <Filename Value="principal.pas"/>
-        <Caret Line="957" Column="3" TopLine="955"/>
+        <Filename Value="..\snd\oki6295.pas"/>
+        <Caret Line="255" Column="9" TopLine="248"/>
       </Position27>
       <Position28>
         <Filename Value="principal.pas"/>
-        <Caret Line="18" Column="42" TopLine="6"/>
+        <Caret Line="623" Column="19" TopLine="611"/>
       </Position28>
       <Position29>
         <Filename Value="principal.pas"/>
-        <Caret Line="14" Column="122" TopLine="6"/>
+        <Caret Line="922" Column="20" TopLine="899"/>
       </Position29>
       <Position30>
-        <Filename Value="..\snd\oki6295.pas"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="1026" Column="19" TopLine="1014"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

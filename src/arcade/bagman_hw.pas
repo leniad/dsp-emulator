@@ -1,9 +1,12 @@
 unit bagman_hw;
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,bagman_pal;
+
 function iniciar_bagman:boolean;
+
 implementation
 const
         //bagman
@@ -104,7 +107,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -148,14 +151,14 @@ end;
 
 function bagman_inbyte(puerto:word):byte;
 begin
-  if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.Read;
+  if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.read;
 end;
 
 procedure bagman_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $08:AY8910_0.Control(valor);
-  $09:AY8910_0.Write(valor);
+  $08:ay8910_0.control(valor);
+  $09:ay8910_0.write(valor);
 end;
 end;
 

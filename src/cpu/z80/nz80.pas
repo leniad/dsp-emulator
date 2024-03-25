@@ -3622,6 +3622,7 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                   self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
            end;
@@ -3641,6 +3642,7 @@ case instruccion of
                 r.f.bit3:=(r.bc.h and 8)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                   self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
             end;
@@ -3697,8 +3699,9 @@ case instruccion of
                  r.f.bit3:=(r.bc.h and 8)<>0;
                  r.f.s:=(r.bc.h and $80)<>0;
                  if (r.bc.h<>0) then begin
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
-                        dec(r.pc,2);
+                  self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                  r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                  end;
                  r.hl.w:=r.hl.w-1;
             end;
@@ -3719,7 +3722,8 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if (r.bc.h<>0) then begin
                     self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
-                    dec(r.pc,2);
+                    r.pc:=r.pc-2;
+                    r.wz:=r.pc+1;
                 end;
             end;
 end;

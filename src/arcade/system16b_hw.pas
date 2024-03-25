@@ -392,7 +392,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
      //main
      m68000_0.run(frame_m);
@@ -421,7 +421,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
      //main
      m68000_0.run(frame_m);
@@ -1028,7 +1028,7 @@ z80_0.init_sound(system16b_sound_act);
 //Memory Mapper
 s315_5195_0:=t315_5195.create(m68000_0,z80_0,system16b_snd_irq);
 //MCU
-mcs51_0:=cpu_mcs51.create(8000000,262);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000,262);
 mcs51_0.change_ram_calls(system16b_mcu_getbyte,system16b_mcu_putbyte);
 mcs51_0.change_io_calls(nil,in_port1,nil,nil,nil,nil{out_port1},nil,nil);
 //Sound

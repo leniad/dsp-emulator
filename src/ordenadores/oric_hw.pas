@@ -193,7 +193,7 @@ var
 begin
 init_controls(false,true,true,false);
 frame:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 311 do begin
     //main
     m6502_0.run(frame);

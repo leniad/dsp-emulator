@@ -162,7 +162,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to 263 do begin
       //main
       konami_0.run(frame_m);
@@ -381,7 +381,7 @@ if not(roms_load(@memoria_temp,simpsons_sound)) then exit;
 copymemory(@mem_snd,@memoria_temp,$8000);
 for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@memoria_temp[f*$4000],$4000);
 //Main CPU
-konami_0:=cpu_konami.create(3000000,264);
+konami_0:=cpu_konami.create(12000000,264);
 konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
 konami_0.change_set_lines(simpsons_bank);
 //Sound CPU

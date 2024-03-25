@@ -3,7 +3,9 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
+
 function iniciar_wardnerhw:boolean;
+
 implementation
 const
         wardner_rom:array[0..3] of tipo_roms=(
@@ -37,6 +39,7 @@ const
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'30k 80k 50k+'),(dip_val:$4;dip_name:'50k 100k 50k+'),(dip_val:$8;dip_name:'30k'),(dip_val:$c;dip_name:'50k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'1'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
  mem_rom:array[0..7,0..$7fff] of byte;
  rom_bank:byte;
@@ -156,7 +159,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=tms32010_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 285 do begin
     //MAIN CPU
     z80_0.run(frame_m);
@@ -217,6 +220,7 @@ begin
 	dsp_addr_w:=(valor and $7ff) shl 1;
 	if (main_ram_seg=$6000) then main_ram_seg:=$7000;
 end;
+
 procedure wardner_dsp_bio_w(valor:word);
 begin
   if (valor and $8000)<>0 then wardner_dsp_BIO:=false;

@@ -42,7 +42,6 @@ procedure update_video_combatsc;
 var
   x,y,f,nchar,color:word;
   atrib:byte;
-
 procedure draw_sprites(bank:byte);
 var
   color_base:word;
@@ -50,7 +49,6 @@ begin
   color_base:=(bank*4)*16+(K007121_chip[bank].control[$06] and $10)*2;
   K007121_draw_sprites(bank,5,0,color_base,false);
 end;
-
 procedure draw_chip(chip,pant1,pant2:byte);
 begin
 if (K007121_chip[chip].control[1] and 2)<>0 then begin
@@ -61,7 +59,6 @@ if (K007121_chip[chip].control[1] and 2)<>0 then begin
     scroll_x_y(pant2,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
   end;
 end;
-
 function calc_bank(registro:byte):byte;
 var
   res:byte;
@@ -74,7 +71,6 @@ if (atrib and $10)<>0 then res:=res+2;
 if (atrib and $20)<>0 then res:=res+4;
 calc_bank:=res;
 end;
-
 begin
 for f:=$0 to $3ff do begin
     y:=f div 32;
@@ -178,7 +174,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=hd6309_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     hd6309_0.run(frame_m);

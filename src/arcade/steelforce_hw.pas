@@ -29,17 +29,23 @@ const
         (n:'9.bin';l:$40000;p:$80000;crc:$13194d89),(n:'8.bin';l:$40000;p:$c0000;crc:$79f14528));
         twinbrats_oki:tipo_roms=(n:'1.bin';l:$80000;p:0;crc:$76296578);
         twinbrats_eeprom:tipo_roms=(n:'eeprom-twinbrat.bin';l:$80;p:0;crc:$9366263d);
-
-type
-  video_mem_device=record
-        txt_ram,bg_ram,fglow_ram,fghigh_ram:array[0..$7ff] of word;
-  end;
+        mortalrace_rom:array[0..1] of tipo_roms=(
+        (n:'2.u105';l:$80000;p:0;crc:$550c48e3),(n:'3.u104';l:$80000;p:$1;crc:$92fad747));
+        mortalrace_tiles:array[0..5] of tipo_roms=(
+        (n:'8_bot.u27';l:$80000;p:1;crc:$042297f3),(n:'9_bot.u28';l:$80000;p:0;crc:$ab330185),
+        (n:'12_top.u27';l:$80000;p:$100001;crc:$fa95773c),(n:'13_top.u28';l:$80000;p:$100000;crc:$f2342348),
+        (n:'10.u29';l:$80000;p:$200001;crc:$fb39b032),(n:'11.u30';l:$80000;p:$200000;crc:$a82f2421));
+        mortalrace_sprites:array[0..3] of tipo_roms=(
+        (n:'4.u36';l:$80000;p:0;crc:$6d1e6367),(n:'5.u31';l:$80000;p:$80000;crc:$54b223bf),
+        (n:'6.u32';l:$80000;p:$100000;crc:$dab08a04),(n:'7.u33';l:$80000;p:$180000;crc:$9a856797));
+        mortalrace_oki:tipo_roms=(n:'1.u1';l:$80000;p:0;crc:$e5c730c2);
 
 var
- rom:array[0..$1ffff] of word;
+ rom:array[0..$7ffff] of word;
  ram:array[0..$ffff] of word;
+ ram2:array[0..$7fff] of word;
  x_pos,sprite_x_add:byte;
- video_ram:video_mem_device;
+ txt_ram,bg_ram,fglow_ram,fghigh_ram:array[0..$7ff] of word;
  x_size:word;
  which:boolean;
  oki_rom:array[0..3,0..$1ffff] of byte;
@@ -53,7 +59,7 @@ begin
   for f:=0 to $ff do begin
     atrib:=buffer_sprites_w[f*4];
     atrib2:=buffer_sprites_w[(f*4)+1];
-    if (atrib2 and $20)<>pri then continue;
+    if (atrib2 and $30)<>pri then continue;
     if (atrib and $800)<>0 then begin
       y:=$1ff-(atrib and $1ff);
       x:=buffer_sprites_w[(f*4)+3]+8;
@@ -74,7 +80,7 @@ for f:=0 to $7ff do begin
   x:=f mod 64;
   y:=f div 64;
   //FG
-  atrib:=video_ram.txt_ram[f];
+  atrib:=txt_ram[f];
   nchar:=atrib and $1fff;
   color:=(atrib and $e000) shr 13;
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
@@ -85,21 +91,21 @@ end;
 for f:=0 to $3ff do begin
   x:=f div 16;
   y:=f mod 16;
-  atrib:=video_ram.bg_ram[f];
+  atrib:=bg_ram[f];
   nchar:=atrib and $1fff;
   color:=(atrib and $e000) shr 13;
   if (gfx[1].buffer[f] or buffer_color[color+$10]) then begin
     put_gfx(x*16,y*16,nchar,color shl 4,2,1);
     gfx[1].buffer[f]:=false;
   end;
-  atrib:=video_ram.fglow_ram[f];
+  atrib:=fglow_ram[f];
   nchar:=atrib and $1fff;
   color:=(atrib and $e000) shr 13;
   if (gfx[2].buffer[f] or buffer_color[color+$20]) then begin
     put_gfx_trans(x*16,y*16,nchar,$80+(color shl 4),3,2);
     gfx[2].buffer[f]:=false;
   end;
-  atrib:=video_ram.fghigh_ram[f];
+  atrib:=fghigh_ram[f];
   nchar:=atrib and $1fff;
   color:=(atrib and $e000) shr 13;
   if (gfx[3].buffer[f] or buffer_color[color+$30]) then begin
@@ -120,12 +126,16 @@ if (atrib2 and 2)<>0 then begin
   if (atrib and 4)<>0 then scroll__x_part2(3,5,16,@ram[$3400 shr 1],0,scroll_y)
     else scroll_x_y(3,5,ram[$3400 shr 1]-1,scroll_y);
 end;
+if (atrib2 and $10)<>0 then draw_sprites($10);
 if (atrib2 and 4)<>0 then begin
   scroll_y:=ram[$3c06 shr 1]+1;
   if (atrib and $10)<>0 then scroll__x_part2(4,5,16,@ram[$3800 shr 1],0,scroll_y)
     else scroll_x_y(4,5,ram[$3800 shr 1],scroll_y);
 end;
-if (atrib2 and $10)<>0 then draw_sprites($20);
+if (atrib2 and $10)<>0 then begin
+  draw_sprites($20);
+  draw_sprites($30);
+end;
 if (atrib2 and 8)<>0 then scroll_x_y(1,5,ram[$3c00 shr 1]-3,ram[$3c08 shr 1]+1);
 actualiza_trozo_final(x_pos,0,x_size,240,5);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
@@ -165,7 +175,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -186,13 +196,14 @@ end;
 function steelforce_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$3ffff:steelforce_getword:=rom[direccion shr 1];
-  $100000..$1007ff:steelforce_getword:=video_ram.bg_ram[(direccion and $7ff) shr 1];
-  $100800..$100fff:steelforce_getword:=video_ram.fglow_ram[(direccion and $7ff) shr 1];
-  $101000..$1017ff:steelforce_getword:=video_ram.fghigh_ram[(direccion and $7ff) shr 1];
-  $101800..$1027ff:steelforce_getword:=video_ram.txt_ram[(direccion-$101800) shr 1];
+  $0..$fffff:steelforce_getword:=rom[direccion shr 1];
+  $100000..$1007ff:steelforce_getword:=bg_ram[(direccion and $7ff) shr 1];
+  $100800..$100fff:steelforce_getword:=fglow_ram[(direccion and $7ff) shr 1];
+  $101000..$1017ff:steelforce_getword:=fghigh_ram[(direccion and $7ff) shr 1];
+  $101800..$1027ff:steelforce_getword:=txt_ram[(direccion-$101800) shr 1];
   $102800..$103fff,$105000..$11ffff:steelforce_getword:=ram[(direccion and $1ffff) shr 1];
   $104000..$104fff:steelforce_getword:=buffer_paleta[(direccion and $fff) shr 1];
+  $120000..$12ffff:steelforce_getword:=ram2[(direccion and $ffff) shr 1];
   $400000:steelforce_getword:=marcade.in0;
   $400002:steelforce_getword:=marcade.in1 or (eepromser_0.do_read shl 6);
   $410000:steelforce_getword:=oki_6295_0.read;
@@ -219,21 +230,21 @@ begin
 end;
 begin
 case direccion of
-    0..$3ffff:; //ROM
-    $100000..$1007ff:if video_ram.bg_ram[(direccion and $7ff) shr 1]<>valor then begin
-                        video_ram.bg_ram[(direccion and $7ff) shr 1]:=valor;
+    0..$fffff:; //ROM
+    $100000..$1007ff:if bg_ram[(direccion and $7ff) shr 1]<>valor then begin
+                        bg_ram[(direccion and $7ff) shr 1]:=valor;
                         gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                      end;
-    $100800..$100fff:if video_ram.fglow_ram[(direccion and $7ff) shr 1]<>valor then begin
-                        video_ram.fglow_ram[(direccion and $7ff) shr 1]:=valor;
+    $100800..$100fff:if fglow_ram[(direccion and $7ff) shr 1]<>valor then begin
+                        fglow_ram[(direccion and $7ff) shr 1]:=valor;
                         gfx[2].buffer[(direccion and $7ff) shr 1]:=true;
                      end;
-    $101000..$1017ff:if video_ram.fghigh_ram[(direccion and $7ff) shr 1]<>valor then begin
-                        video_ram.fghigh_ram[(direccion and $7ff) shr 1]:=valor;
+    $101000..$1017ff:if fghigh_ram[(direccion and $7ff) shr 1]<>valor then begin
+                        fghigh_ram[(direccion and $7ff) shr 1]:=valor;
                         gfx[3].buffer[(direccion and $7ff) shr 1]:=true;
                      end;
-    $101800..$1027ff:if video_ram.txt_ram[(direccion-$101800) shr 1]<>valor then begin
-                        video_ram.txt_ram[(direccion-$101800) shr 1]:=valor;
+    $101800..$1027ff:if txt_ram[(direccion-$101800) shr 1]<>valor then begin
+                        txt_ram[(direccion-$101800) shr 1]:=valor;
                         gfx[0].buffer[(direccion-$101800) shr 1]:=true;
                      end;
     $102800..$103fff,$105000..$11ffff:ram[(direccion and $1ffff) shr 1]:=valor;
@@ -241,6 +252,7 @@ case direccion of
                         buffer_paleta[(direccion and $fff) shr 1]:=valor;
                         cambiar_color(valor,(direccion and $fff) shr 1);
                    end;
+    $120000..$12ffff:ram2[(direccion and $ffff) shr 1]:=valor;
     $400010:begin
               eepromser_0.di_write(valor and 1);
               eepromser_0.cs_write((valor shr 1) and 1);
@@ -286,8 +298,11 @@ end;
 
 procedure cerrar_steelforce;
 begin
-  if main_vars.tipo_maquina=358 then eepromser_0.write_data('steelforce.nv')
-    else eepromser_0.write_data('twinbrats.nv')
+  case main_vars.tipo_maquina of
+    358:eepromser_0.write_data('steelforce.nv');
+    359:eepromser_0.write_data('twinbrats.nv');
+    360:eepromser_0.write_data('mortalrace.nv');
+  end;
 end;
 
 function iniciar_steelforce:boolean;
@@ -303,27 +318,27 @@ const
 var
   memoria_temp:pbyte;
   cpu_clock,snd_clock:dword;
-procedure ext_chars_tiles;
+procedure ext_chars_tiles(num:word);
 begin
-init_gfx(0,8,8,$4000);
+init_gfx(0,8,8,num);
 gfx_set_desc_data(4,0,8*32,0,1,2,3);
 gfx[0].trans[0]:=true;
-convert_gfx(0,0,@memoria_temp[$180000],@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp[$20*num*3],@pc_x,@pc_y,false,false);
 //tiles 1,2 & 3
-init_gfx(1,16,16,$1000);
+init_gfx(1,16,16,num shr 2);
 gfx_set_desc_data(4,0,32*32,0,1,2,3);
 convert_gfx(1,0,memoria_temp,@pc_x,@pc_y,false,false);
-init_gfx(2,16,16,$1000);
-convert_gfx(2,0,@memoria_temp[$80000],@pc_x,@pc_y,false,false);
+init_gfx(2,16,16,num shr 2);
+convert_gfx(2,0,@memoria_temp[$20*num*1],@pc_x,@pc_y,false,false);
 gfx[2].trans[0]:=true;
-init_gfx(3,16,16,$1000);
-convert_gfx(3,0,@memoria_temp[$100000],@pc_x,@pc_y,false,false);
+init_gfx(3,16,16,num shr 2);
+convert_gfx(3,0,@memoria_temp[$20*num*2],@pc_x,@pc_y,false,false);
 gfx[3].trans[0]:=true;
 end;
-procedure ext_sprites;
+procedure ext_sprites(num:word);
 begin
-init_gfx(4,16,16,$2000);
-gfx_set_desc_data(4,0,32*8,$40000*3*8,$40000*2*8,$40000*1*8,$40000*0*8);
+init_gfx(4,16,16,num);
+gfx_set_desc_data(4,0,32*8,$20*num*3*8,$20*num*2*8,$20*num*1*8,$20*num*0*8);
 convert_gfx(4,0,memoria_temp,@ps_x,@ps_y,false,false);
 gfx[4].trans[0]:=true;
 end;
@@ -343,14 +358,18 @@ screen_mod_scroll(3,1024,512,1023,256,256,255);
 screen_init(4,1024,256,true);
 screen_mod_scroll(4,1024,512,1023,256,256,255);
 screen_init(5,512,512,false,true);
-if main_vars.tipo_maquina=358 then begin
+if main_vars.tipo_maquina<>359 then begin
   cpu_clock:=15000000;
   snd_clock:=32000000 div 32;
-  x_size:=366;
+  x_size:=372;
+  sprite_x_add:=0;
+  x_pos:=24;
 end else begin
   cpu_clock:=14745600;
   snd_clock:=30000000 div 32;
   x_size:=328;
+  sprite_x_add:=9;
+  x_pos:=24+16;
 end;
 iniciar_video(x_size,240);
 //Main CPU
@@ -361,7 +380,7 @@ m68000_0.change_ram16_calls(steelforce_getword,steelforce_putword);
 oki_6295_0:=snd_okim6295.Create(snd_clock,OKIM6295_PIN7_HIGH,1);
 //eeprom
 eepromser_0:=eepromser_chip.create(E93C46,16);
-getmem(memoria_temp,$200000);
+getmem(memoria_temp,$300000);
 case main_vars.tipo_maquina of
   358:begin //Steel Force
         //cpu data
@@ -380,12 +399,10 @@ case main_vars.tipo_maquina of
         end;
         //char
         if not(roms_load16b(memoria_temp,steelforce_tiles)) then exit;
-        ext_chars_tiles;
+        ext_chars_tiles($4000);
         //sprites
         if not(roms_load(memoria_temp,steelforce_sprites)) then exit;
-        ext_sprites;
-        sprite_x_add:=0;
-        x_pos:=24;
+        ext_sprites($2000);
   end;
   359:begin //Twin Brats
         //cpu data
@@ -404,12 +421,29 @@ case main_vars.tipo_maquina of
         end;
         //char
         if not(roms_load16b(memoria_temp,twinbrats_tiles)) then exit;
-        ext_chars_tiles;
+        ext_chars_tiles($4000);
         //sprites
         if not(roms_load(memoria_temp,twinbrats_sprites)) then exit;
-        ext_sprites;
-        sprite_x_add:=9;
-        x_pos:=24+16;
+        ext_sprites($2000);
+  end;
+  360:begin //Mortal Race
+        //cpu data
+        if not(roms_load16w(@rom,mortalrace_rom)) then exit;
+        //Sound data
+        if not(roms_load(memoria_temp,mortalrace_oki)) then exit;
+        copymemory(oki_6295_0.get_rom_addr,@memoria_temp[0],$40000);
+        copymemory(@oki_rom[0,0],@memoria_temp[$20000],$20000); //El banco está fijo
+        copymemory(@oki_rom[1,0],@memoria_temp[$20000],$20000);
+        copymemory(@oki_rom[2,0],@memoria_temp[$20000],$20000);
+        copymemory(@oki_rom[3,0],@memoria_temp[$20000],$20000);
+        //eeprom
+        eepromser_0.load_data('mortalrace.nv');
+        //char
+        if not(roms_load16b(memoria_temp,mortalrace_tiles)) then exit;
+        ext_chars_tiles($8000);
+        //sprites
+        if not(roms_load(memoria_temp,mortalrace_sprites)) then exit;
+        ext_sprites($4000);
   end;
 end;
 //final

@@ -1,4 +1,139 @@
 # DSP Emulator status #
+<b>25/03/24 - DSP Emulator 0.23WIP1. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Misc
+        -Fixed preview screen generation
+        -Fixed CRC show when a ROM file is not found
+    +Snapshot
+        -Simplified snapshot system functions 
+    +Video
+        -AVG/DVG: Added new vector draw system. WIP.
+        -GFX: Added invert option when convert GFX
+    +Sound
+        -MSM5205
+            +Rewrited all sound playing functions
+            +Make all variables, adpcm ROMS, and timing internal, removed all variables from drivers
+            +Make standart adpcm play functions by default, removed all repeated funcions from drivers
+    +CPU
+        -M68000
+            +Fixed some timings
+            +Fixed 'divs' opcode (Now 'Space Harrier' works fine!)
+            +Fixed privilege exception in 'stop', 'move to sr' and 'move from sr' opcodes
+        -MCS51
+            +Added 8X52 and CMOS CPU types
+            +Enhanced internal RAM read/write
+            +Fixed IRQ generation
+            +Fixed parity calculation
+            +Fixed push/pop
+            +Fixed timer0 and timer1
+            +Fixed many opcodes
+            +Added opcodes $84
+        -Z80
+            +Added some more WZ
+    +Misc
+        -Sega deCript: Added anoter SEGA ROMs decript
+-Spectrum
+    +Added quick save/load (F7-F8/F9-F10)
+    +Spectrum 128/+3 some code cleaning
+-Amstrad CPC
+    +Added quick save/load (F7-F8/F9-F10)
+-Commodore 64
+    +Some memory functions clean
+    +Some tape control changes
+    +Added quick save/load (F7-F8/F9-F10)
+-Sega Master System
+    +Fixed pause (Fixes 'Bart Simpsons and the Space Mutants')
+    +Fixed BIOS loading
+-88 Games
+    +Added driver, screen draw problems... Maybe CPU bugs?
+-Ajax
+    +Fixed CPU clock
+-Aliens
+    +CPU map cleaning
+-Appoooh HW
+    +Appohhh: Added driver with sound
+    +Robo Wres 2001: Added driver with sound
+-Asteroids HW
+    +Added new vector system
+    +Lunar lander: added AVG-DVG prom
+-Bank Panic HW
+    +Bank Panic: added driver with sound
+    +Combat Hawk: added driver with sound
+-Bionic Commando
+    +Fixed background wrong colors
+-Blue Print HW
+    +Blue Print: added driver with sound
+    +Saturn: added driver with sound
+    +Grasspin: added driver with sound
+-Calorie Kun vs Moguranian
+    +Added driver with sound
+-Dooyong HW
+    +Blue Hawk: added driver with sound
+    +The Last Day: added driver with sound
+    +Gulf Storm: added driver with sound
+    +Pollux: added driver with sound
+    +Flying Tiger: added driver with sound
+-Galaxian HW
+    +Fixed background
+    +Fixed NMI clear
+    +Fixed sprite calculation procedures
+    +Fixed bullet draw
+    +Fixed scramble protection
+    +Ant Eater: added driver with sound
+    +Armored Car: added driver with sound
+    +The End: added driver with sound
+    +Battle of Atlantis: added driver with sound
+    +Calipso: added driver with sound
+    +Cavelon: added driver with sound
+-Gaplus
+    +Fixed sprites
+-Pirate Hihemaru
+    +Added screen priorities
+-Karnov HW
+    +Added IRQ assert/clean
+-Legendary Wings HW
+    +Legendary Wings: Update ROMs names
+    +Trojan: Fixed palette
+    +Avengers: added driver with sound, some sync problems...
+-Popeye HW
+    +Fixed DMA
+    +Popeye: Fixed screen draw
+    +Sky Skipper: adder driver with sound
+-The Simpsons
+    +Fixed CPU clock
+-Snowbros HW
+    +Come Back Toto: added driver with sound
+    +Hyper Pacman: added driver with sound
+-Steel Force HW
+    +Mortal Race: added driver with sound
+-Sega System 1/2 HW
+    +Removed Z80 special timings, added adjust cycle function, remove all CPU clock hacks
+    +Fixed palette
+    +Wonder Boy: removed decript procedures, now using new SEGA deCript
+    +Gardia: added driver with sound
+-ThunderX
+	+Better collisions functions
+	+Some CPU map cleaning
+	+Fixed CPU clock
+-Unico HW
+    +BurglarX: added driver with sound
+    +ZeroPoint: added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/Gd0fzzt/88-Games.png"><img src="https://i.ibb.co/fCC9Ky4/Ant-Eater.png"><br>
+<img src="https://i.ibb.co/cbXntKx/Appoooh.png"><img src="https://i.ibb.co/BC3GsSW/Armored-Car.png"><br>
+<img src="https://i.ibb.co/8Nd5wLZ/Avengers.png"><img src="https://i.ibb.co/c2F2PDM/Bank-Panic.png"><br>
+<img src="https://i.ibb.co/4V7TQv1/Battle-of-Atlantis.png"><img src="https://i.ibb.co/7gjqpc1/Blue-Hawk.png"><br>
+<img src="https://i.ibb.co/mTCjxxm/Blue-Print.png"><img src="https://i.ibb.co/YDmRccd/BurglarX.png"><br>
+<img src="https://i.ibb.co/1b2GPCz/Calipso.png"><img src="https://i.ibb.co/Fq6wsf3/Calorie-Kun-vs-Moguranian.png"><br>
+<img src="https://i.ibb.co/h8rpQbf/Cavelon.png"><img src="https://i.ibb.co/1nx7pZ3/Combat-Hawk.png"><br>
+<img src="https://i.ibb.co/z6fCfKs/Come-Back-Toto.png"><img src="https://i.ibb.co/j56Wwry/Flying-Tiger.png"><br>
+<img src="https://i.ibb.co/0VL7KWV/Gardia.png"><img src="https://i.ibb.co/qg9q1Qf/Grasspin.png"><br>
+<img src="https://i.ibb.co/M6RDCg1/Gulf-Storm.png"><img src="https://i.ibb.co/Z8gjwws/Hyper-Pacman.png"><br>
+<img src="https://i.ibb.co/CQ00JH3/Mortal-Race.png"><img src="https://i.ibb.co/SccXJ38/Pollux.png"><br>
+<img src="https://i.ibb.co/N1VK9cx/Robo-Wres-2001.png"><img src="https://i.ibb.co/MDYzgVP/Saturn.png"><br>
+<img src="https://i.ibb.co/WWgfTdr/Sky-Skipper.png"><img src="https://i.ibb.co/1d8j9SQ/The-End.png"><br>
+<img src="https://i.ibb.co/bv9ThLB/The-Last-Day.png"><img src="https://i.ibb.co/w6Q3pN5/Zero-Point.png"><br><br>
 <b>15/11/23 - DSP Emulator 0.22Final. Updated Windows binary and source. Please read 'Whats New 0.22' file for full details.<br>
 <pre>
 -General

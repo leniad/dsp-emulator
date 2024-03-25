@@ -214,7 +214,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for linea:=0 to 259 do begin
     for h:=1 to CPU_SYNC do begin
       //main

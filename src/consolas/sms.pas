@@ -59,8 +59,8 @@ if event.arcade then begin
   if arcade_input.but0[1] then sms_0.keys[1]:=(sms_0.keys[1] and $fb) else sms_0.keys[1]:=(sms_0.keys[1] or 4);
   if arcade_input.but1[1] then sms_0.keys[1]:=(sms_0.keys[1] and $f7) else sms_0.keys[1]:=(sms_0.keys[1] or 8);
   if arcade_input.coin[0] then sms_0.push_pause:=true
-    else begin
-      if sms_0.push_pause then z80_0.change_nmi(PULSE_LINE);
+    else if sms_0.push_pause then begin
+      z80_0.change_nmi(PULSE_LINE);
       sms_0.push_pause:=false;
     end;
 end;
@@ -73,7 +73,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
       z80_0.run(frame);
       frame:=frame+z80_0.tframes-z80_0.contador;
@@ -337,7 +337,7 @@ begin
  end;
  sms_0.mapper.bios_bank[3]:=0;
  sms_0.mapper.slot2_bank:=0;
- sms_0.push_pause:=true;
+ sms_0.push_pause:=false;
  //Alibaba confia en este inicio de la RAM!!!
  fillchar(sms_0.mapper.ram[0],$2000,$f0);
 end;
@@ -346,7 +346,10 @@ procedure change_sms_model(model:byte;load_bios:boolean=true);
 begin
 case model of
   0:begin
-      if load_bios then roms_load(@sms_0.mapper.bios[0],sms_bios);
+      if load_bios then begin
+        fillchar(sms_0.mapper.bios[0],sizeof(sms_0.mapper.bios),0);
+        roms_load(@sms_0.mapper.bios[0],sms_bios);
+      end;
       llamadas_maquina.fps_max:=FPS_PAL;
       z80_0.clock:=CLOCK_PAL;
       z80_0.tframes:=(CLOCK_PAL/LINES_PAL)/FPS_PAL;
@@ -359,6 +362,7 @@ case model of
     end;
   1,2:begin
       if load_bios then begin
+        fillchar(sms_0.mapper.bios[0],sizeof(sms_0.mapper.bios),0);
         if model=1 then roms_load(@sms_0.mapper.bios[0],sms_bios_j)
           else roms_load(@sms_0.mapper.bios[0],sms_bios);
       end;
@@ -415,6 +419,7 @@ var
   f:byte;
 begin
 fillchar(sms_0.mapper.bios[0],sizeof(sms_0.mapper.bios),0);
+fillchar(sms_0.mapper.rom[0],sizeof(sms_0.mapper.rom),0);
 ptemp:=data;
 sms_0.mapper.max_bios:=long div $4000;
 if sms_0.mapper.max_bios>16 then begin
@@ -500,8 +505,10 @@ screen_init(1,284,294);
 if sms_0.model=0 then begin
   iniciar_video(284,294);
   z80_0:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
+  sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
 end else begin
   iniciar_video(284,243);
+  sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
   z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
 end;
 //Main CPU
@@ -512,27 +519,11 @@ z80_0.change_misc_calls(sms_set_hpos);
 //VDP
 vdp_0:=vdp_chip.create(1,sms_interrupt,z80_0.numero_cpu,read_memory,write_memory);
 vdp_0.set_gg(false);
-//Bios
-if sms_0.model=0 then begin
-  if not(roms_load(@sms_0.mapper.bios[0,0],sms_bios)) then exit;
-  vdp_0.video_pal(0);
-  sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
-  //ym2413_0:=ym2413_chip.create(YM3812_FM,CLOCK_PAL);
-end else begin
-  if sms_0.model=1 then begin
-    if not(roms_load(@sms_0.mapper.bios[0,0],sms_bios_j)) then exit;
-  end else begin
-    if not(roms_load(@sms_0.mapper.bios[0,0],sms_bios)) then exit;
-  end;
-  vdp_0.video_ntsc(0);
-  sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
-  //ym2413_0:=ym2413_chip.create(YM3812_FM,CLOCK_NTSC);
-end;
 //Importante!!!
-fillchar(sms_0.mapper.bios[0],sizeof(sms_0.mapper.bios),0);
-fillchar(sms_0.mapper.rom[0],sizeof(sms_0.mapper.rom),0);
 sms_0.mapper.max:=1;
 sms_0.mapper.max_bios:=1;
+//Bios
+change_sms_model(sms_0.model,true);
 reset_sms;
 if main_vars.console_init then abrir_sms;
 iniciar_sms:=true;

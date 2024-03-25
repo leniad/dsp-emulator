@@ -38,7 +38,8 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
   oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
-  mugsmashers_hw,steelforce_hw;
+  mugsmashers_hw,steelforce_hw,bankpanic_hw,appoooh_hw,hw_88games,dooyong_hw,
+  blueprint_hw,unico_hw,caloriekun_hw;
 
 type
   tgame_desc=record
@@ -66,7 +67,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=377;
+  GAMES_CONT=405;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -119,7 +120,7 @@ const
   (name:'Vigilante';year:'1988';snd:1;hi:false;zip:'vigilant';grid:44;company:'Irem';rom:@vigilant;tipo:ARCADE or FIGHT),
   (name:'Jackal';year:'1986';snd:1;hi:false;zip:'jackal';grid:45;company:'Konami';rom:@jackal;tipo:ARCADE or RUN_GUN),
   (name:'Bubble Bobble';year:'1986';snd:1;hi:false;zip:'bublbobl';grid:46;company:'Taito';rom:@bublbobl;tipo:ARCADE or MAZE),
-  (name:'Galaxian';year:'1980';snd:2;hi:false;zip:'galaxian';grid:47;company:'Namco';rom:@galaxian;samples:@galaxian_samples;tipo:ARCADE or SHOT),
+  (name:'Galaxian';year:'1979';snd:2;hi:false;zip:'galaxian';grid:47;company:'Namco';rom:@galaxian;samples:@galaxian_samples;tipo:ARCADE or SHOT),
   (name:'Jump Bug';year:'1981';snd:1;hi:false;zip:'jumpbug';grid:48;company:'Rock-Ola';rom:@jumpbug;tipo:ARCADE or RUN_GUN),
   (name:'Moon Cresta';year:'1980';snd:0;hi:false;zip:'mooncrst';grid:49;company:'Nichibutsu';rom:@mooncrst;samples:@mooncrst_samples;tipo:ARCADE or SHOT),
   (name:'Rally X';year:'1980';snd:3;hi:false;zip:'rallyx';grid:50;company:'Namco';rom:@rallyx;samples:@rallyx_samples;tipo:ARCADE or DRIVE or MAZE),
@@ -131,9 +132,9 @@ const
   (name:'Contra';year:'1987';snd:1;hi:false;zip:'contra';grid:56;company:'Konami';rom:@contra;tipo:ARCADE or RUN_GUN),
   (name:'Mappy';year:'1983';snd:1;hi:false;zip:'mappy';grid:57;company:'Namco';rom:@mappy;tipo:ARCADE or MAZE),
   (name:'Rastan';year:'1987';snd:1;hi:false;zip:'rastan';grid:58;company:'Taito';rom:@rastan;tipo:ARCADE or RUN_GUN),
-  (name:'Legendary Wings';year:'1986';snd:1;hi:false;zip:'lwings';grid:59;company:'Capcom';rom:@lwings;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'Section Z';year:'1985';snd:1;hi:false;zip:'sectionz';grid:60;company:'Capcom';rom:@sectionz;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'Trojan';year:'1986';snd:1;hi:false;zip:'trojan';grid:61;company:'Capcom';rom:@trojan;tipo:ARCADE or RUN_GUN),
+  (name:'Legendary Wings';year:'1986';snd:1;hi:false;zip:'lwings';grid:59;company:'Capcom';rom:@lwings_roms;tipo:ARCADE or RUN_GUN or SHOT),
+  (name:'Section Z';year:'1985';snd:1;hi:false;zip:'sectionz';grid:60;company:'Capcom';rom:@sectionz_roms;tipo:ARCADE or RUN_GUN or SHOT),
+  (name:'Trojan';year:'1986';snd:1;hi:false;zip:'trojan';grid:61;company:'Capcom';rom:@trojan_roms;tipo:ARCADE or RUN_GUN),
   (name:'Street Fighter';year:'1987';snd:1;hi:false;zip:'sf';grid:62;company:'Capcom';rom:@sfighter;tipo:ARCADE or FIGHT),
   (name:'DigDug II';year:'1985';snd:1;hi:false;zip:'digdug2';grid:63;company:'Namco';rom:@digdug2;tipo:ARCADE or MAZE),
   (name:'Super Pacman';year:'1985';snd:1;hi:false;zip:'superpac';grid:64;company:'Namco';rom:@spacman;tipo:ARCADE or MAZE),
@@ -432,6 +433,34 @@ const
   (name:'Mug Smashers';year:'1990';snd:1;hi:false;zip:'mugsmash';grid:357;company:'Electronic Devices Italy';rom:@mugsmash_roms;tipo:ARCADE or FIGHT),
   (name:'Steel Force';year:'1994';snd:1;hi:false;zip:'stlforce';grid:358;company:'Ecogames';rom:@steelforce_roms;tipo:ARCADE or MAZE or SHOT),
   (name:'Twin Brats';year:'1995';snd:1;hi:false;zip:'twinbrat';grid:359;company:'Ecogames';rom:@twinbrats_roms;tipo:ARCADE or MAZE),
+  (name:'Mortal Race';year:'1995';snd:1;hi:false;zip:'mortalr';grid:360;company:'Ecogames';rom:@mortalrace_roms;tipo:ARCADE or DRIVE),
+  (name:'Bank Panic';year:'1985';snd:1;hi:false;zip:'bankp';grid:361;company:'Sanritsu/Sega';rom:@bankpanic_roms;tipo:ARCADE or SHOT),
+  (name:'Combat Hawk';year:'1987';snd:1;hi:false;zip:'combh';grid:362;company:'Sanritsu/Sega';rom:@combathawk_roms;tipo:ARCADE or SHOT),
+  (name:'Ant Eater';year:'1982';snd:1;hi:false;zip:'anteater';grid:363;company:'Tago Electronics';rom:@anteater_roms;tipo:ARCADE or MAZE),
+  (name:'Appoooh';year:'1984';snd:1;hi:false;zip:'appoooh';grid:364;company:'Sanritsu/Sega';rom:@appoooh_roms;tipo:ARCADE or SPORT),
+  (name:'Robo Wres 2001';year:'1986';snd:1;hi:false;zip:'robowres';grid:365;company:'Sanritsu/Sega';rom:@robowres_roms;tipo:ARCADE or SPORT),
+  (name:'Armored Car';year:'1981';snd:1;hi:false;zip:'armorcar';grid:366;company:'Stern Electronics';rom:@armoredcar_roms;tipo:ARCADE or MAZE),
+  (name:'88 Games';year:'1988';snd:1;hi:false;zip:'88games';grid:367;company:'Konami';rom:@hw88games_roms;tipo:ARCADE or SPORT),
+  (name:'Avengers';year:'1987';snd:1;hi:false;zip:'avengers';grid:368;company:'Capcom';rom:@avengers_roms;tipo:ARCADE or RUN_GUN),
+  (name:'The End';year:'1980';snd:1;hi:false;zip:'theend';grid:369;company:'Konami';rom:@theend_roms;tipo:ARCADE or SHOT),
+  (name:'Battle of Atlantis';year:'1981';snd:1;hi:false;zip:'atlantis';grid:370;company:'Comsoft';rom:@atlantis_roms;tipo:ARCADE or SHOT),
+  (name:'Blue Hawk';year:'1993';snd:1;hi:false;zip:'bluehawk';grid:371;company:'Dooyong';rom:@bluehawk_roms;tipo:ARCADE or SHOT),
+  (name:'The Last Day';year:'1990';snd:1;hi:false;zip:'lastday';grid:372;company:'Dooyong';rom:@lastday_roms;tipo:ARCADE or SHOT),
+  (name:'Gulf Storm';year:'1991';snd:1;hi:false;zip:'gulfstrm';grid:373;company:'Dooyong';rom:@gulfstorm_roms;tipo:ARCADE or SHOT),
+  (name:'Pollux';year:'1991';snd:1;hi:false;zip:'pollux';grid:374;company:'Dooyong';rom:@pollux_roms;tipo:ARCADE or SHOT),
+  (name:'Flying Tiger';year:'1992';snd:1;hi:false;zip:'flytiger';grid:375;company:'Dooyong';rom:@flytiger_roms;tipo:ARCADE or SHOT),
+  (name:'Sky Skipper';year:'1981';snd:1;hi:false;zip:'skyskipr';grid:376;company:'Nintendo';rom:@skyskipper_roms;tipo:ARCADE or SHOT),
+  (name:'Blue Print';year:'1982';snd:1;hi:false;zip:'blueprnt';grid:377;company:'Zilec Electronics/Bally Midway';rom:@blueprint_roms;tipo:ARCADE or MAZE),
+  (name:'Saturn';year:'1983';snd:1;hi:false;zip:'saturnzi';grid:378;company:'Zilec Electronics/Jaleco';rom:@saturnzi_roms;tipo:ARCADE or SHOT),
+  (name:'Grasspin';year:'1983';snd:1;hi:false;zip:'grasspin';grid:379;company:'Zilec Electronics/Jaleco';rom:@grasspin_roms;tipo:ARCADE or MAZE),
+  (name:'BurglarX';year:'1997';snd:1;hi:false;zip:'burglarx';grid:380;company:'Unico';rom:@burglarx_roms;tipo:ARCADE or MAZE),
+  (name:'Zero Point';year:'1998';snd:1;hi:false;zip:'zeropnt';grid:381;company:'Unico';rom:@zeropnt_roms;tipo:ARCADE or SHOT),
+  (name:'Calipso';year:'1982';snd:1;hi:false;zip:'calipso';grid:382;company:'Tago Electronics';rom:@calipso_roms;tipo:ARCADE or MAZE),
+  (name:'Calorie Kun vs Moguranian';year:'1986';snd:1;hi:false;zip:'calorie';grid:383;company:'Sega';rom:@caloriekun_roms;tipo:ARCADE or MAZE),
+  (name:'Gardia';year:'1986';snd:1;hi:false;zip:'gardia';grid:384;company:'Sega';rom:@gardia_roms;tipo:ARCADE or SHOT),
+  (name:'Cavelon';year:'1983';snd:1;hi:false;zip:'cavelon';grid:385;company:'Jetsoft';rom:@cavelon_roms;tipo:ARCADE or MAZE),
+  (name:'Come Back Toto';year:'1996';snd:1;hi:false;zip:'toto';grid:386;company:'SoftClub';rom:@toto_roms;tipo:ARCADE or MAZE),
+  (name:'Hyper Pacman';year:'1995';snd:1;hi:false;zip:'hyperpac';grid:387;company:'SemiCom';rom:@hyperpac_roms;tipo:ARCADE or MAZE),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -827,6 +856,34 @@ case numero of
   357:principal1.CambiarMaquina(principal1.mugsmashers1);
   358:principal1.CambiarMaquina(principal1.steelforce1);
   359:principal1.CambiarMaquina(principal1.twinbrats1);
+  360:principal1.CambiarMaquina(principal1.mortalrace1);
+  361:principal1.CambiarMaquina(principal1.bankpanic1);
+  362:principal1.CambiarMaquina(principal1.combathawk1);
+  363:principal1.CambiarMaquina(principal1.anteater1);
+  364:principal1.CambiarMaquina(principal1.appoooh1);
+  365:principal1.CambiarMaquina(principal1.robowres1);
+  366:principal1.CambiarMaquina(principal1.armoredcar1);
+  367:principal1.CambiarMaquina(principal1.n88games1);
+  368:principal1.CambiarMaquina(principal1.avengers1);
+  369:principal1.CambiarMaquina(principal1.theend1);
+  370:principal1.CambiarMaquina(principal1.battleofatlantis1);
+  371:principal1.CambiarMaquina(principal1.bluehawk1);
+  372:principal1.CambiarMaquina(principal1.lastday1);
+  373:principal1.CambiarMaquina(principal1.gulfstorm1);
+  374:principal1.CambiarMaquina(principal1.pollux1);
+  375:principal1.CambiarMaquina(principal1.flyingtiger1);
+  376:principal1.CambiarMaquina(principal1.skyskipper1);
+  377:principal1.CambiarMaquina(principal1.blueprint1);
+  378:principal1.CambiarMaquina(principal1.saturn1);
+  379:principal1.CambiarMaquina(principal1.grasspin1);
+  380:principal1.CambiarMaquina(principal1.burglarx1);
+  381:principal1.CambiarMaquina(principal1.zeropoint1);
+  382:principal1.CambiarMaquina(principal1.calipso1);
+  383:principal1.CambiarMaquina(principal1.caloriekun1);
+  384:principal1.CambiarMaquina(principal1.gardia1);
+  385:principal1.CambiarMaquina(principal1.cavelon1);
+  386:principal1.CambiarMaquina(principal1.comebacktoto1);
+  387:principal1.CambiarMaquina(principal1.hyperpacman1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1210,6 +1267,34 @@ principal1.diverboy1.Checked:=false;
 principal1.mugsmashers1.Checked:=false;
 principal1.steelforce1.Checked:=false;
 principal1.twinbrats1.Checked:=false;
+principal1.mortalrace1.Checked:=false;
+principal1.bankpanic1.Checked:=false;
+principal1.combathawk1.Checked:=false;
+principal1.anteater1.Checked:=false;
+principal1.appoooh1.Checked:=false;
+principal1.robowres1.Checked:=false;
+principal1.armoredcar1.Checked:=false;
+principal1.n88games1.Checked:=false;
+principal1.avengers1.Checked:=false;
+principal1.theend1.Checked:=false;
+principal1.battleofatlantis1.Checked:=false;
+principal1.bluehawk1.Checked:=false;
+principal1.lastday1.Checked:=false;
+principal1.gulfstorm1.Checked:=false;
+principal1.pollux1.Checked:=false;
+principal1.flyingtiger1.Checked:=false;
+principal1.skyskipper1.Checked:=false;
+principal1.blueprint1.Checked:=false;
+principal1.saturn1.Checked:=false;
+principal1.grasspin1.Checked:=false;
+principal1.burglarx1.Checked:=false;
+principal1.ZeroPoint1.Checked:=false;
+principal1.calipso1.Checked:=false;
+principal1.caloriekun1.Checked:=false;
+principal1.gardia1.Checked:=false;
+principal1.cavelon1.Checked:=false;
+principal1.comebacktoto1.Checked:=false;
+principal1.hyperpacman1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1340,10 +1425,10 @@ case tmaquina of
   3001,3002:llamadas_maquina.iniciar:=iniciar_oric;
   //arcade
   10,88,234,305,353:llamadas_maquina.iniciar:=iniciar_pacman;
-  11,202:llamadas_maquina.iniciar:=phoenix_iniciar;
+  11,202:llamadas_maquina.iniciar:=iniciar_phoenix;
   12:llamadas_maquina.iniciar:=iniciar_ms;
-  13:llamadas_maquina.iniciar:=bombjack_iniciar;
-  14,47,48,49,143,144,145:llamadas_maquina.iniciar:=iniciar_hgalaxian;
+  13:llamadas_maquina.iniciar:=iniciar_bombjack;
+  14,47,48,49,143,144,145,363,366,369,370,382,385:llamadas_maquina.iniciar:=iniciar_galaxian;
   15,168,169:llamadas_maquina.iniciar:=iniciar_dkong;
   16:llamadas_maquina.iniciar:=iniciar_blktiger;
   17,203:llamadas_maquina.iniciar:=iniciar_gberet;
@@ -1356,7 +1441,7 @@ case tmaquina of
   24:llamadas_maquina.iniciar:=iniciar_sonson;
   25,319,320:llamadas_maquina.iniciar:=iniciar_starforce;
   26,97:llamadas_maquina.iniciar:=iniciar_tecmo;
-  27,35,36,37,151,152,153,154,155:Cargar_system1; //Este lo dejo!!
+  27,35,36,37,151,152,153,154,155,384:cargar_system1; //Este lo dejo!!
   28:llamadas_maquina.iniciar:=iniciar_pooyan;
   29,50,70:llamadas_maquina.iniciar:=iniciar_rallyxh;
   30:llamadas_maquina.iniciar:=iniciar_citycon;
@@ -1365,7 +1450,7 @@ case tmaquina of
   33:llamadas_maquina.iniciar:=iniciar_sbasketb;
   34,200,201:llamadas_maquina.iniciar:=iniciar_ladybug;
   38:llamadas_maquina.iniciar:=iniciar_tehkanwc;
-  39:llamadas_maquina.iniciar:=iniciar_popeye;
+  39,376:llamadas_maquina.iniciar:=iniciar_popeye;
   40:llamadas_maquina.iniciar:=iniciar_psychic5;
   41,265:llamadas_maquina.iniciar:=iniciar_terracre;
   42,72,73,74,75:llamadas_maquina.iniciar:=iniciar_irem_m62;
@@ -1375,12 +1460,12 @@ case tmaquina of
   46:llamadas_maquina.iniciar:=iniciar_bublbobl;
   51:llamadas_maquina.iniciar:=iniciar_prehisle;
   52,53:llamadas_maquina.iniciar:=iniciar_tigeroad;
-  54:llamadas_maquina.iniciar:=iniciar_snowbros;
+  54,386,387:llamadas_maquina.iniciar:=iniciar_snowbros;
   55:llamadas_maquina.iniciar:=iniciar_toki;
   56:llamadas_maquina.iniciar:=iniciar_contra;
   57,63,64,192,193,351,352:llamadas_maquina.iniciar:=iniciar_mappyhw;
   58:llamadas_maquina.iniciar:=iniciar_rastan;
-  59,60,61:llamadas_maquina.iniciar:=iniciar_lwings;
+  59,60,61,368:llamadas_maquina.iniciar:=iniciar_lwings;
   62:llamadas_maquina.iniciar:=iniciar_sfighter;
   65,167,231,250,350:llamadas_maquina.iniciar:=iniciar_galagahw;
   66:llamadas_maquina.iniciar:=iniciar_xain;
@@ -1514,7 +1599,14 @@ case tmaquina of
   354,355:llamadas_maquina.iniciar:=iniciar_irem_m63;
   356:llamadas_maquina.iniciar:=iniciar_diverboy;
   357:llamadas_maquina.iniciar:=iniciar_mugsmash;
-  358,359:llamadas_maquina.iniciar:=iniciar_steelforce;
+  358,359,360:llamadas_maquina.iniciar:=iniciar_steelforce;
+  361,362:llamadas_maquina.iniciar:=iniciar_bankpanic;
+  364,365:llamadas_maquina.iniciar:=iniciar_appoooh;
+  367:llamadas_maquina.iniciar:=iniciar_hw88games;
+  371,372,373,374,375:llamadas_maquina.iniciar:=iniciar_dooyong;
+  377,378,379:llamadas_maquina.iniciar:=iniciar_blueprint;
+  380,381:llamadas_maquina.iniciar:=iniciar_unico;
+  383:llamadas_maquina.iniciar:=iniciar_caloriekun;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -2986,6 +3078,119 @@ if sender=principal1.twinbrats1 then begin
   tipo:=359;
   principal1.twinbrats1.Checked:=true;
 end;
+if sender=principal1.mortalrace1 then begin
+  tipo:=360;
+  principal1.mortalrace1.Checked:=true;
+end;
+if sender=principal1.bankpanic1 then begin
+  tipo:=361;
+  principal1.bankpanic1.Checked:=true;
+end;
+if sender=principal1.combathawk1 then begin
+  tipo:=362;
+  principal1.combathawk1.Checked:=true;
+end;
+if sender=principal1.anteater1 then begin
+  tipo:=363;
+  principal1.anteater1.Checked:=true;
+end;
+if sender=principal1.appoooh1 then begin
+  tipo:=364;
+  principal1.appoooh1.Checked:=true;
+end;
+if sender=principal1.robowres1 then begin
+  tipo:=365;
+  principal1.robowres1.Checked:=true;
+end;
+if sender=principal1.armoredcar1 then begin
+  tipo:=366;
+  principal1.armoredcar1.Checked:=true;
+end;
+if sender=principal1.n88games1 then begin
+  tipo:=367;
+  principal1.n88games1.Checked:=true;
+end;
+if sender=principal1.avengers1 then begin
+  tipo:=368;
+  principal1.avengers1.Checked:=true;
+end;
+if sender=principal1.theend1 then begin
+  tipo:=369;
+  principal1.theend1.Checked:=true;
+end;
+if sender=principal1.battleofatlantis1 then begin
+  tipo:=370;
+  principal1.battleofatlantis1.Checked:=true;
+end;
+if sender=principal1.bluehawk1 then begin
+  tipo:=371;
+  principal1.bluehawk1.Checked:=true;
+end;
+if sender=principal1.lastday1 then begin
+  tipo:=372;
+  principal1.lastday1.Checked:=true;
+end;
+if sender=principal1.gulfstorm1 then begin
+  tipo:=373;
+  principal1.gulfstorm1.Checked:=true;
+end;
+if sender=principal1.pollux1 then begin
+  tipo:=374;
+  principal1.pollux1.Checked:=true;
+end;
+if sender=principal1.flyingtiger1 then begin
+  tipo:=375;
+  principal1.flyingtiger1.Checked:=true;
+end;
+if sender=principal1.skyskipper1 then begin
+  tipo:=376;
+  principal1.skyskipper1.Checked:=true;
+end;
+if sender=principal1.blueprint1 then begin
+  tipo:=377;
+  principal1.blueprint1.Checked:=true;
+end;
+if sender=principal1.saturn1 then begin
+  tipo:=378;
+  principal1.saturn1.Checked:=true;
+end;
+if sender=principal1.grasspin1 then begin
+  tipo:=379;
+  principal1.grasspin1.Checked:=true;
+end;
+if sender=principal1.burglarx1 then begin
+  tipo:=380;
+  principal1.burglarx1.Checked:=true;
+end;
+if sender=principal1.zeropoint1 then begin
+  tipo:=381;
+  principal1.zeropoint1.Checked:=true;
+end;
+if sender=principal1.calipso1 then begin
+  tipo:=382;
+  principal1.calipso1.Checked:=true;
+end;
+if sender=principal1.caloriekun1 then begin
+  tipo:=383;
+  principal1.caloriekun1.Checked:=true;
+end;
+if sender=principal1.gardia1 then begin
+  tipo:=384;
+  principal1.gardia1.Checked:=true;
+end;
+if sender=principal1.cavelon1 then begin
+  tipo:=385;
+  principal1.cavelon1.Checked:=true;
+end;
+if sender=principal1.comebacktoto1 then begin
+  tipo:=386;
+  principal1.comebacktoto1.Checked:=true;
+end;
+if sender=principal1.hyperpacman1 then begin
+  tipo:=387;
+  principal1.hyperpacman1.Checked:=true;
+end;
+
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;

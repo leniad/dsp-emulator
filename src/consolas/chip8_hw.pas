@@ -349,7 +349,7 @@ var
   f:byte;
 begin
 init_controls(false,true,false,false);
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 11 do begin
     chip8_cpu;
     if chip8_0.sound_timer<>0 then tsample[chip8_0.sound_channel,sound_status.posicion_sonido]:=$7fff;

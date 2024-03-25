@@ -97,7 +97,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
       //main
       m6809_0.run(frame_m);
@@ -215,8 +215,8 @@ savedata_qsnapshot(data,size);
 size:=dac_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria,$6000);
-savedata_com_qsnapshot(@mem_snd[$2000],$e000);
+savedata_qsnapshot(@memoria,$6000);
+savedata_qsnapshot(@mem_snd[$2000],$e000);
 //MISC
 buffer[0]:=byte(irq_ena);
 buffer[1]:=sound_latch;

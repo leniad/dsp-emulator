@@ -143,7 +143,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   {$ifdef speed_debug}
   QueryPerformanceCounter(cont1);
   {$endif}
@@ -362,14 +362,14 @@ size:=mcs51_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=ym2203_1.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$c000],$4000);
-savedata_com_qsnapshot(@mem_snd[$8000],$8000);
+savedata_qsnapshot(@memoria[$c000],$4000);
+savedata_qsnapshot(@mem_snd[$8000],$8000);
 //MISC
-savedata_com_qsnapshot(@scroll_ram,$4000);
+savedata_qsnapshot(@scroll_ram,$4000);
 buffer[0]:=banco_rom;
 buffer[1]:=soundlatch;
 buffer[2]:=scroll_x and $ff;
@@ -391,8 +391,8 @@ buffer[17]:=byte(bg_on);
 buffer[18]:=byte(ch_on);
 buffer[19]:=byte(spr_on);
 savedata_qsnapshot(@buffer,20);
-savedata_com_qsnapshot(@buffer_paleta,$800*2);
-savedata_com_qsnapshot(@buffer_sprites,$200);
+savedata_qsnapshot(@buffer_paleta,$800*2);
+savedata_qsnapshot(@buffer_sprites,$200);
 freemem(data);
 close_qsnapshot;
 end;
@@ -517,7 +517,7 @@ z80_1:=cpu_z80.create(3579545,262);
 z80_1.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
 z80_1.init_sound(blktiger_sound_update);
 //MCU
-mcs51_0:=cpu_mcs51.create(24000000 div 3,262);
+mcs51_0:=cpu_mcs51.create(I8X51,24000000 div 3,262);
 mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3579545,0.15,0.15);

@@ -127,7 +127,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -249,12 +249,12 @@ size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=ym2203_1.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$0],$4000);
-savedata_com_qsnapshot(@mem_snd[$8000],$8000);
+savedata_qsnapshot(@memoria[$0],$4000);
+savedata_qsnapshot(@mem_snd[$8000],$8000);
 //MISC
 buffer[0]:=banco;
 buffer[1]:=soundlatch;
@@ -263,8 +263,8 @@ buffer[3]:=scroll_x shr 8;
 buffer[4]:=scroll_y and $ff;
 buffer[5]:=scroll_y shr 8;
 savedata_qsnapshot(@buffer[0],6);
-savedata_com_qsnapshot(@buffer_sprites,$200);
-savedata_com_qsnapshot(@buffer_paleta,$200*2);
+savedata_qsnapshot(@buffer_sprites,$200);
+savedata_qsnapshot(@buffer_paleta,$200*2);
 freemem(data);
 close_qsnapshot;
 end;

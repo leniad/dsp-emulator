@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,controls_engine,ay_8910,sysutils,gfx_engine,upd765,cargar_dsk,forms,
      dialogs,rom_engine,misc_functions,main_engine,pal_engine,sound_engine,
      tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc,
-     timer_engine;
+     timer_engine,qsnapshot;
 
 const
   cpc464_rom:tipo_roms=(n:'cpc464.rom';l:$8000;p:0;crc:$40852f25);
@@ -338,7 +338,7 @@ var
 begin
 init_controls(false,true,true,false);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   z80_0.run(frame);
   frame:=frame+z80_0.tframes-z80_0.contador;
   eventos_cpc;
@@ -1165,6 +1165,73 @@ main_screen.rapido:=false;
 cpc_ppi.tape_motor:=false;
 end;
 
+//Quick save/load
+procedure cpc_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..2] of byte;
+  f:byte;
+begin
+if not(open_qsnapshot_load('cpc'+inttostr(main_vars.tipo_maquina)+nombre)) then exit;
+getmem(data,200);
+//MISC
+loaddata_qsnapshot(@buffer);
+tape_timer:=buffer[0];
+cpc_line:=buffer[1] or (buffer[2] shl 8);
+//CPU
+loaddata_qsnapshot(data);
+z80_0.load_snapshot(data);
+//SND
+loaddata_qsnapshot(data);
+ay8910_0.load_snapshot(data);
+//MEM
+for f:=0 to 31 do loaddata_qsnapshot(@cpc_mem[f,0]);
+for f:=0 to 16 do loaddata_qsnapshot(@cpc_rom[f]);
+//Vars
+loaddata_qsnapshot(@cpc_crt);
+loaddata_qsnapshot(@cpc_ga);
+loaddata_qsnapshot(@cpc_ppi);
+loaddata_qsnapshot(@cpc_dandanator);
+close_qsnapshot;
+end;
+
+procedure cpc_qsave(nombre:string);
+var
+  data:pbyte;
+  size:dword;
+  buffer:array[0..2] of byte;
+  f:byte;
+begin
+open_qsnapshot_save('cpc'+inttostr(main_vars.tipo_maquina)+nombre);
+getmem(data,200);
+//MISC
+buffer[0]:=tape_timer;
+buffer[1]:=cpc_line and $ff;
+buffer[2]:=cpc_line shr 8;
+savedata_qsnapshot(@buffer,3);
+//CPU
+size:=z80_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+size:=ay8910_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//MEM
+for f:=0 to 31 do savedata_qsnapshot(@cpc_mem[f,0],$4000);
+size:=sizeof(tcpc_rom);
+for f:=0 to 16 do savedata_qsnapshot(@cpc_rom[f],size);
+//Vars
+size:=sizeof(tcpc_crt);
+savedata_qsnapshot(@cpc_crt,size);
+size:=sizeof(tcpc_ga);
+savedata_qsnapshot(@cpc_ga,size);
+size:=sizeof(tcpc_ppi);
+savedata_qsnapshot(@cpc_ppi,size);
+size:=sizeof(tcpc_dandanator);
+savedata_qsnapshot(@cpc_dandanator,size);
+freemem(data);
+close_qsnapshot;
+end;
+
 procedure cpc_close;
 begin
 clear_disk(0);
@@ -1185,6 +1252,8 @@ llamadas_maquina.cintas:=amstrad_tapes;
 llamadas_maquina.cartuchos:=amstrad_loaddisk;
 llamadas_maquina.grabar_snapshot:=grabar_amstrad;
 llamadas_maquina.configurar:=cpc_config_call;
+llamadas_maquina.save_qsnap:=cpc_qsave;
+llamadas_maquina.load_qsnap:=cpc_qload;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
 iniciar_audio(false);

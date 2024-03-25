@@ -101,7 +101,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m6809_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
       m6809_0.run(frame);
       frame:=frame+m6809_0.tframes-m6809_0.contador;

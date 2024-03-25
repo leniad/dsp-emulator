@@ -123,6 +123,7 @@ var
   SDL_GetClosestDisplayMode:function(displayIndex:LongInt;const mode:libsdlp_DisplayMode;closest:libsdlp_DisplayMode):libsdlp_DisplayMode;cdecl;
   SDL_SetWindowDisplayMode:function(window:libsdlP_Window;const mode:libsdlp_DisplayMode):LongInt; cdecl;
   SDL_GetTicks:function:Cardinal;cdecl;
+  SDL_SetWindowFullscreen:function(window:libsdlP_Window;flags:LongInt):LongInt;cdecl;
   {$ifdef fpc}
   SDL_SetError:function(const fmt:PAnsiChar):LongInt;cdecl;
   SDL_GetError:function:PAnsiChar;cdecl;
@@ -200,6 +201,7 @@ end;
 @SDL_UpdateWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UpdateWindowSurface');
 @SDL_GetClosestDisplayMode:=GetProcAddress(sdl_dll_Handle,'SDL_GetClosestDisplayMode');
 @SDL_SetWindowDisplayMode:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowDisplayMode');
+@SDL_SetWindowFullscreen:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowFullscreen');
 //rwops
 @SDL_RWFromFile:=GetProcAddress(sdl_dll_Handle,'SDL_RWFromFile');
 //pixels

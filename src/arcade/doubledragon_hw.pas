@@ -64,11 +64,7 @@ var
  rom:array[0..5,0..$3fff] of byte;
  tipo_video,fg_mask,banco_rom,soundlatch,dd_sub_port:byte;
  scroll_x,scroll_y:word;
- adpcm_mem:array[0..$1ffff] of byte;
- adpcm_data:array[0..1] of byte;
- adpcm_pos,adpcm_end:array[0..1] of dword;
  ddragon_scanline:array[0..271] of word;
- adpcm_ch,adpcm_idle:array [0..1] of boolean;
 
 procedure update_video_ddragon;
 var
@@ -189,7 +185,7 @@ init_controls(false,false,false,true);
 frame_m:=hd6309_0.tframes;
 frame_s:=m6800_0.tframes;
 frame_snd:=m6809_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -342,35 +338,26 @@ case direccion of
           ddragon_snd_getbyte:=soundlatch;
           m6809_0.change_irq(CLEAR_LINE);
         end;
-  $1800:ddragon_snd_getbyte:=byte(adpcm_idle[0]) or (byte(adpcm_idle[1]) shl 1);
+  $1800:ddragon_snd_getbyte:=byte(msm5205_0.idle) or (byte(msm5205_1.idle) shl 1);
   $2801:ddragon_snd_getbyte:=ym2151_0.status;
 end;
 end;
 
 procedure ddragon_snd_putbyte(direccion:word;valor:byte);
-var
-  adpcm_chip:byte;
 begin
 case direccion of
   0..$fff:mem_snd[direccion]:=valor;
   $2800:ym2151_0.reg(valor);
   $2801:ym2151_0.write(valor);
-  $3800..$3807:begin
-                  adpcm_chip:=direccion and $1;
-                  case ((direccion and $7) shr 1) of
-                    3:begin
-			                  adpcm_idle[adpcm_chip]:=true;
-			                  if adpcm_chip=0 then msm5205_0.reset_w(1)
-                          else msm5205_1.reset_w(1);
-                    end;
-		                2:adpcm_pos[adpcm_chip]:=(valor and $7f)*$200;
-		                1:adpcm_end[adpcm_chip]:=(valor and $7f)*$200;
-		                0:begin
-			                  adpcm_idle[adpcm_chip]:=false;
-			                  if adpcm_chip=0 then msm5205_0.reset_w(0)
-                          else msm5205_1.reset_w(0);
-                    end;
-                  end;
+  $3800..$3807:case (direccion and $7) of
+                  0:msm5205_0.reset_w(false);
+                  1:msm5205_1.reset_w(false);
+                  2:msm5205_0.end_:=(valor and $7f)*$200;
+                  3:msm5205_1.end_:=(valor and $7f)*$200;
+                  4:msm5205_0.pos:=(valor and $7f)*$200;
+                  5:msm5205_1.pos:=(valor and $7f)*$200;
+                  6:msm5205_0.reset_w(true);
+                  7:msm5205_1.reset_w(true);
                end;
   $8000..$ffff:; //ROM
 end;
@@ -381,41 +368,11 @@ begin
   m6809_0.change_firq(irqstate);
 end;
 
-procedure snd_adpcm0;
-begin
-if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
-		adpcm_idle[0]:=true;
-		msm5205_0.reset_w(1);
-end else if not(adpcm_ch[0]) then begin
-		          msm5205_0.data_w(adpcm_data[0] and $0f);
-		          adpcm_ch[0]:=true;
-	       end else begin
-              adpcm_ch[0]:=false;
-              adpcm_data[0]:=adpcm_mem[adpcm_pos[0]];
-              adpcm_pos[0]:=(adpcm_pos[0]+1) and $ffff;
-          		msm5205_0.data_w(adpcm_data[0] shr 4);
-         end;
-end;
-
-procedure snd_adpcm1;
-begin
-if ((adpcm_pos[1]>=adpcm_end[1]) or (adpcm_pos[1]>=$10000)) then begin
-		adpcm_idle[1]:=true;
-		msm5205_1.reset_w(1);
-	end else if not(adpcm_ch[1]) then begin
-		          msm5205_1.data_w(adpcm_data[1] and $0f);
-		          adpcm_ch[1]:=true;
-	          end else begin
-              adpcm_ch[1]:=false;
-              adpcm_data[1]:=adpcm_mem[adpcm_pos[1]+$10000];
-              adpcm_pos[1]:=(adpcm_pos[1]+1) and $ffff;
-          		msm5205_1.data_w(adpcm_data[1] shr 4);
-            end;
-end;
-
 procedure ddragon_sound_update;
 begin
   ym2151_0.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 //Double Dragon II
@@ -429,7 +386,7 @@ init_controls(false,false,false,true);
 frame_m:=hd6309_0.tframes;
 frame_s:=z80_0.tframes;
 frame_snd:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -613,12 +570,6 @@ begin
  dd_sub_port:=0;
  scroll_x:=0;
  scroll_y:=0;
- adpcm_idle[0]:=false;
- adpcm_idle[1]:=false;
- adpcm_ch[0]:=true;
- adpcm_ch[1]:=true;
- adpcm_data[0]:=0;
- adpcm_data[1]:=0;
 end;
 
 function iniciar_ddragon:boolean;
@@ -680,8 +631,11 @@ case main_vars.tipo_maquina of
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         ym2151_0.change_irq_func(ym2151_snd_irq);
-        msm5205_0:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm0);
-        msm5205_1:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm1);
+        msm5205_0:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,$10000);
+        msm5205_1:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,$10000);
+        if not(roms_load(@memoria_temp,ddragon_adpcm)) then exit;
+        copymemory(msm5205_0.rom_data,@memoria_temp,$10000);
+        copymemory(msm5205_1.rom_data,@memoria_temp[$10000],$10000);
         //Main roms
         if not(roms_load(@memoria_temp,ddragon_rom)) then exit;
         //Pongo las ROMs en su banco
@@ -691,7 +645,6 @@ case main_vars.tipo_maquina of
         if not(roms_load(@mem_misc,ddragon_sub)) then exit;
         //Sound roms
         if not(roms_load(@mem_snd,ddragon_snd)) then exit;
-        if not(roms_load(@adpcm_mem,ddragon_adpcm)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,ddragon_char)) then exit;
         extract_chars($400);

@@ -2,10 +2,10 @@
 interface
 uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
-     controls,forms,sysutils,misc_functions,pal_engine,sound_engine,
+     forms,sysutils,misc_functions,pal_engine,sound_engine,
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 const
-        DSP_VERSION='0.22F';
+        DSP_VERSION='0.23WIP1';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -104,7 +104,7 @@ type
           dip:array[0..MAX_DIP_VALUES] of def_dip_value;
         end;
         pdef_dip=^def_dip;
-        TEmuStatus=(EsPause,EsRuning,EsStoped);
+        TEmuStatus=(EsPause,EsRunning,EsStoped);
 //Video
 procedure iniciar_video(x,y:word;alpha:boolean=false);
 procedure close_video;
@@ -389,32 +389,36 @@ begin
 end;
 procedure pasar_pantalla_completa;
 var
-  i:integer;
   mode,closest:libsdl_DisplayMode;
   {$ifndef fpc}
   handle_:integer;
   {$endif}
 begin
 if not(main_screen.pantalla_completa) then begin
-  main_screen.old_video_mode:=main_screen.video_mode;
-  main_screen.video_mode:=6;
-  principal1.n1x1.Checked:=false;
-  principal1.n2x1.Checked:=false;
-  principal1.scanlines1.Checked:=false;
-  principal1.scanlines2x1.Checked:=false;
-  principal1.n3x1.Checked:=false;
-  principal1.FullScreen1.Checked:=true;
-  SDL_FreeSurface(pantalla[0]);
-  SDL_DestroyWindow(window_render);
-  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
   mode.w:=p_final[0].x;
   mode.h:=p_final[0].y;
   mode.format:=libSDL_PIXELTYPE_UNKNOWN;
   mode.refresh_rate:=0;
   mode.driverdata:=nil;
-  i:=0;
-  if SDL_GetClosestDisplayMode(i,@mode,@closest)<>nil then begin
-    SDL_SetWindowDisplayMode(window_render,@closest);
+  if SDL_GetClosestDisplayMode(0,@mode,@closest)<>nil then begin
+    {$ifndef fpc}
+    if child<>nil then begin
+      child.Free;
+      child:=nil;
+    end;
+    {$endif}
+    main_screen.old_video_mode:=main_screen.video_mode;
+    main_screen.video_mode:=6;
+    principal1.n1x1.Checked:=false;
+    principal1.n2x1.Checked:=false;
+    principal1.scanlines1.Checked:=false;
+    principal1.scanlines2x1.Checked:=false;
+    principal1.n3x1.Checked:=false;
+    principal1.FullScreen1.Checked:=true;
+    SDL_FreeSurface(pantalla[0]);
+    SDL_DestroyWindow(window_render);
+    window_render:=nil;
+    window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,closest.w,closest.h,libSDL_WINDOW_FULLSCREEN);
   end;
   main_screen.pantalla_completa:=true;
 end else begin
@@ -423,7 +427,10 @@ end else begin
   SDL_DestroyWindow(window_render);
   window_render:=nil;
   {$ifndef fpc}
-  if child<>nil then child.Free;
+  if child<>nil then begin
+    child.Free;
+    child:=nil;
+  end;
   Child:=TfrChild.Create(application);
   child.Left:=0;
   child.Top:=0;
@@ -437,6 +444,7 @@ end else begin
 end;
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 end;
+
 procedure close_video;
 var
   h:byte;
@@ -492,6 +500,7 @@ end else begin
     SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@origen);
 end;
 end;
+
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
 var
   origen,destino:libsdl_rect;
@@ -510,6 +519,7 @@ if p_final[dest].final_mix then begin
 end;
 SDL_UpperBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
 end;
+
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 var
   origen,destino:libsdl_rect;
@@ -589,6 +599,7 @@ end else if main_screen.rot180_screen then begin
                               SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
                            end;
 end;
+
 procedure flip_surface(pant:byte;flipx,flipy:boolean);
 var
   f,i,h:word;
@@ -644,6 +655,7 @@ end else if flipx then begin
                       SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[pant],@origen);
                   end;
 end;
+
 procedure actualiza_video;
 var
   punt,punt2,punt3,punt4:pword;

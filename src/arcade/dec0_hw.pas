@@ -318,7 +318,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -349,7 +349,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=h6280_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -381,7 +381,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=h6280_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -411,7 +411,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -1047,7 +1047,7 @@ case main_vars.tipo_maquina of
         init_sound_chips;
         if not(roms_load(@mem_snd,baddudes_sound)) then exit;
         //MCU
-        mcs51_0:=cpu_mcs51.create(8000000,272);
+        mcs51_0:=cpu_mcs51.create(I8X51,8000000,272);
         mcs51_0.change_io_calls(in_port0,in_port1,in_port1,in_port1,out_port0,out_port1,out_port2,out_port3);
         if not(roms_load(mcs51_0.get_rom_addr,baddudes_mcu)) then exit;
         //OKI rom

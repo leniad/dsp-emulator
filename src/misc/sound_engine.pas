@@ -1,7 +1,8 @@
 unit sound_engine;
 
 interface
-uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$endif}lib_sdl2,timer_engine,dialogs;
+uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$else}lib_sdl2,{$endif}
+     timer_engine,dialogs;
 
 const
         MAX_AUDIO_BUFFER=$f;

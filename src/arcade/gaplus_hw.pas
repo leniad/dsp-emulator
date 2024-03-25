@@ -214,7 +214,7 @@ init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_sub:=m6809_1.tframes;
 frame_sound:=m6809_2.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 223 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -505,6 +505,7 @@ init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,32*8,4,6);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //sprites
+fillchar(memoria_temp,$ff,$20000);
 if not(roms_load(@memoria_temp,gaplus_sprites)) then exit;
 for f:=$6000 to $7fff do memoria_temp[f+$2000]:=memoria_temp[f] shl 4;
 init_gfx(1,16,16,$180);

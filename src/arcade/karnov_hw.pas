@@ -71,6 +71,7 @@ var
  background_ram,video_ram:array[0..$3ff] of word;
  sound_latch,mcu_p0,mcu_p1,mcu_p2:byte;
  scroll_x,scroll_y,maincpu_to_mcu,mcu_to_maincpu:word;
+ irq_ena:boolean;
 
 procedure eventos_karnov;
 begin
@@ -181,7 +182,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -193,7 +194,7 @@ while EmuStatus=EsRuning do begin
       30:marcade.in1:=marcade.in1 and $7f;
       247:begin
             marcade.in1:=marcade.in1 or $80;
-            m68000_0.irq[7]:=ASSERT_LINE;
+            if irq_ena then m68000_0.irq[7]:=ASSERT_LINE;
             update_video_karnov;
           end;
    end;
@@ -254,7 +255,10 @@ case direccion of
 	          main_screen.flip_main_screen:=(valor and $8000)<>0;
          end;
   $c000a:scroll_y:=valor and $1ff;
-  $c000e:m68000_0.irq[7]:=CLEAR_LINE;
+  $c000c,$c000e:begin
+            m68000_0.irq[7]:=CLEAR_LINE;
+            irq_ena:=(direccion and 2)<>0;
+         end;
 end;
 end;
 
@@ -345,6 +349,7 @@ begin
  mcu_p2:=0;
  mcu_to_maincpu:=0;
  maincpu_to_mcu:=0;
+ irq_ena:=false;
 end;
 
 function iniciar_karnov:boolean;
@@ -390,7 +395,7 @@ m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
 m6502_0.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
 m6502_0.init_sound(karnov_sound_update);
 //MCU
-mcs51_0:=cpu_mcs51.create(8000000,256);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000,256);
 mcs51_0.change_io_calls(in_port0,in_port1,nil,in_port3,out_port0,out_port1,out_port2,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);

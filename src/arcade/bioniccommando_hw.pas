@@ -50,7 +50,7 @@ procedure update_video_bionicc;
 var
   f,color,x,y,nchar,atrib,sx,sy,pos:word;
 begin
-fill_full_screen(3,1024);
+fill_full_screen(5,$400);
 for f:=$0 to $440 do begin
   //BG
   x:=f mod 33;
@@ -62,7 +62,7 @@ for f:=$0 to $440 do begin
   color:=(atrib and $18) shr 3;
   if (gfx[1].buffer[pos] or buffer_color[color+$40]) then begin
     nchar:=(bg_ram[pos shl 1] and $ff) or ((atrib and $7) shl 8);
-    put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,4,1,(atrib and $80)<>0,(atrib and $40)<>0);
+    put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,2,1,(atrib and $80)<>0,(atrib and $40)<>0);
     gfx[1].buffer[f]:=false;
   end;
 end;
@@ -81,9 +81,9 @@ for f:=$0 to $120 do begin // $121=17*17
     color:=(atrib and $18) shr 3;
     if (gfx[2].buffer[pos] or buffer_color[color+$44]) then begin
       nchar:=(fg_ram[pos shl 1] and $ff) or ((atrib and $7) shl 8);
-      put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,5,2,(atrib and $80)<>0,(atrib and $40)<>0,0);
-      if (atrib and $20)<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,6,2,(atrib and $80)<>0,(atrib and $40)<>0,1)
-        else put_gfx_block_trans(x*16,y*16,6,16,16);
+      put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,3,2,(atrib and $80)<>0,(atrib and $40)<>0,0);
+      if (atrib and $20)<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,4,2,(atrib and $80)<>0,(atrib and $40)<>0,1)
+        else put_gfx_block_trans(x*16,y*16,4,16,16);
       gfx[2].buffer[pos]:=false;
     end;
   end;
@@ -101,8 +101,8 @@ for f:=$0 to $3ff do begin
   end;
 end;
 // back
-scroll_x_y(4,3,scroll_bg_x and $7,scroll_bg_y and $7);
-scroll_x_y(5,3,scroll_fg_x and $f,scroll_fg_y and $f);
+scroll_x_y(2,5,scroll_bg_x and $7,scroll_bg_y and $7);
+scroll_x_y(3,5,scroll_fg_x and $f,scroll_fg_y and $f);
 //sprites
 for f:=$9f downto 0 do begin
   nchar:=buffer_sprites_w[f*4] and $7ff;
@@ -112,13 +112,13 @@ for f:=$9f downto 0 do begin
     y:=buffer_sprites_w[(f*4)+2];
     x:=buffer_sprites_w[(f*4)+3];
     put_gfx_sprite(nchar,color,(atrib and 2)<>0,false,3);
-    actualiza_gfx_sprite(x,y,3,3);
+    actualiza_gfx_sprite(x,y,5,3);
   end;
 end;
-scroll_x_y(6,3,scroll_fg_x and $f,scroll_fg_y and $f);
+scroll_x_y(4,5,scroll_fg_x and $f,scroll_fg_y and $f);
 //front
-actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
-actualiza_trozo_final(0,16,256,224,3);
+actualiza_trozo(0,0,256,256,1,0,0,256,256,5);
+actualiza_trozo_final(0,16,256,224,5);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
@@ -156,7 +156,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
     //main
     m68000_0.run(frame_m);
@@ -168,12 +168,12 @@ while EmuStatus=EsRuning do begin
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
     case f of
-    127:m68000_0.irq[4]:=HOLD_LINE;
-    239:begin
-          m68000_0.irq[2]:=HOLD_LINE;
-          update_video_bionicc;
-          copymemory(@buffer_sprites_w,@ram[$400],$280*2);
-        end;
+      127:m68000_0.irq[4]:=HOLD_LINE;
+      239:begin
+            m68000_0.irq[2]:=HOLD_LINE;
+            update_video_bionicc;
+            copymemory(@buffer_sprites_w,@ram[$400],$280*2);
+          end;
     end;
  end;
  eventos_bionicc;
@@ -200,7 +200,6 @@ end;
 end;
 
 procedure bionicc_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(pos,data:word);
 var
   bright:byte;
@@ -392,13 +391,13 @@ iniciar_bionicc:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
-screen_init(3,512,512,false,true);
-screen_init(4,256+8,256+8);
-screen_mod_scroll(4,264,256,255,264,256,255);
-screen_init(5,256+16,256+16,true);
-screen_mod_scroll(5,272,256,255,272,256,255);
-screen_init(6,256+16,256+16,true);
-screen_mod_scroll(6,272,256,255,272,256,255);
+screen_init(2,256+8,256+8,true);
+screen_mod_scroll(2,264,256,255,264,256,255);
+screen_init(3,256+16,256+16,true);
+screen_mod_scroll(3,272,256,255,272,256,255);
+screen_init(4,256+16,256+16,true);
+screen_mod_scroll(4,272,256,255,272,256,255);
+screen_init(5,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
 m68000_0:=cpu_m68000.create(12000000,256);
@@ -414,7 +413,7 @@ if not(roms_load16w(@rom,bionicc_rom)) then exit;
 //cargar sonido
 if not(roms_load(@mem_snd,bionicc_sound)) then exit;
 //MCU
-mcs51_0:=cpu_mcs51.create(6000000,256);
+mcs51_0:=cpu_mcs51.create(I8X51,6000000,256);
 mcs51_0.change_io_calls(nil,in_port1,nil,nil,nil,out_port1,nil,out_port3);
 mcs51_0.change_ram_calls(mcu_ext_ram_read,mcu_ext_ram_write);
 if not(roms_load(mcs51_0.get_rom_addr,bionicc_mcu)) then exit;

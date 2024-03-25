@@ -3,7 +3,7 @@ unit pv1000;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sysutils,gfx_engine,timer_engine,
-     sound_engine,file_engine,pal_engine,misc_functions,dialogs,lenguaje;
+     sound_engine,pal_engine,misc_functions;
 
 function iniciar_pv1000:boolean;
 
@@ -115,7 +115,7 @@ var
 begin
 init_controls(false,true,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
       z80_0.run(frame);
       frame:=frame+z80_0.tframes-z80_0.contador;

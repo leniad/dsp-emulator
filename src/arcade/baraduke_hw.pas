@@ -1,12 +1,9 @@
 unit baraduke_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,misc_functions,sound_engine;
-
 function iniciar_baraduke:boolean;
-
 implementation
 const
         //Baraduke
@@ -59,13 +56,11 @@ const
         (mask:$20;name:'Freeze';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Round Select';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
 var
  inputport_selected,scroll_y0,scroll_y1:byte;
  sprite_mask,counter,scroll_x0,scroll_x1:word;
  prio,copy_sprites:boolean;
  spritex_add,spritey_add:integer;
-
 procedure update_video_baraduke;
 procedure draw_sprites(prior:byte);
 var
@@ -147,7 +142,6 @@ draw_sprites(1);
 actualiza_trozo(0,0,288,224,1,0,0,288,224,4);
 actualiza_trozo_final(0,0,288,224,4);
 end;
-
 procedure eventos_baraduke;
 begin
 if event.arcade then begin
@@ -170,7 +164,6 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
 end;
-
 procedure copy_sprites_hw;
 var
   i,j:byte;
@@ -180,7 +173,6 @@ for i:=0 to $7f do begin
 end;
 copy_sprites:=false;
 end;
-
 procedure baraduke_principal;
 var
   f:word;
@@ -189,7 +181,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_mcu:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -208,7 +200,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function baraduke_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -216,7 +207,6 @@ case direccion of
   $4000..$43ff:baraduke_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
 end;
 end;
-
 procedure baraduke_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -252,7 +242,6 @@ case direccion of
   $6000..$7fff,$8001..$87ff,$8801..$afff,$b003,$b007..$ffff:; //ROM
 end;
 end;
-
 function baraduke_mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -265,7 +254,6 @@ case direccion of
   $8000..$c7ff,$f000..$ffff:baraduke_mcu_getbyte:=mem_snd[direccion];
 end;
 end;
-
 procedure baraduke_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -275,7 +263,6 @@ case direccion of
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
-
 function in_port1:byte;
 var
   ret:byte;
@@ -292,17 +279,14 @@ case inputport_selected of
   end;
 in_port1:=ret;
 end;
-
 procedure out_port1(valor:byte);
 begin
   if (valor and $e0)=$60 then inputport_selected:=valor and $7;
 end;
-
 procedure sound_update_baraduke;
 begin
   namco_snd_0.update;
 end;
-
 procedure reset_baraduke;
 begin
  m6809_0.reset;
@@ -318,7 +302,6 @@ begin
  scroll_y1:=0;
  copy_sprites:=false;
 end;
-
 function iniciar_baraduke:boolean;
 var
   colores:tpaleta;
@@ -452,5 +435,4 @@ set_pal(colores,$800);
 reset_baraduke;
 iniciar_baraduke:=true;
 end;
-
 end.

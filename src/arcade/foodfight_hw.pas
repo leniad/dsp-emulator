@@ -99,7 +99,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 258 do begin
     //main
     m68000_0.run(frame_m);

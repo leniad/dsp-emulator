@@ -15,7 +15,7 @@ type
       function read(direccion:byte):byte;
       procedure write(direccion,valor:byte);
       procedure change_calls(pa_read,pb_read:cpu_inport_call;pa_write,pb_write,irq_call:cpu_outport_call);
-      procedure sync(frame:single);
+      procedure sync(frame:word);
       procedure flag_w(valor:byte);
       procedure clock_tod;
     private
@@ -149,12 +149,11 @@ begin
   self.flag:=1;
 end;
 
-procedure mos6526_chip.sync(frame:single);
+procedure mos6526_chip.sync(frame:word);
 var
-  tframe:single;
+  f:word;
 begin
-  tframe:=frame;
-  while (tframe>0) do begin
+  for f:=1 to frame do begin
     if (self.pc=0) then begin
   		self.pc:=1;
       //MessageDlg('writepc', mtInformation,[mbOk], 0);
@@ -166,13 +165,9 @@ begin
   	self.update_pb;
   	self.update_interrupt;
   	self.clock_pipeline;
-    tframe:=tframe-1;
   end;
 end;
 
-//-------------------------------------------------
-//  clock_ta - clock timer A
-//-------------------------------------------------
 procedure mos6526_chip.clock_ta;
 begin
 	if (self.count_a3<>0) then self.ta:=self.ta-1;
@@ -193,9 +188,6 @@ begin
 	end;
 end;
 
-//-------------------------------------------------
-//  clock_tb - clock timer B
-//-------------------------------------------------
 procedure mos6526_chip.clock_tb;
 begin
 	if (self.count_b3<>0) then self.tb:=self.tb-1;
@@ -216,17 +208,11 @@ begin
 	end;
 end;
 
-//-------------------------------------------------
-//  serial_output -
-//-------------------------------------------------
 procedure mos6526_chip.serial_output;
 begin
-	if ((self.ta_out<>0) and ((self.cra and $40)<>0)) then MessageDlg('serial write', mtInformation,[mbOk], 0);
+	//if ((self.ta_out<>0) and ((self.cra and $40)<>0)) then MessageDlg('serial write', mtInformation,[mbOk], 0);
 end;
 
-//-------------------------------------------------
-//  update_interrupt -
-//-------------------------------------------------
 procedure mos6526_chip.update_interrupt;
 begin
 	if (not(self.irq) and (self.ir1<>0)) then begin
@@ -238,21 +224,18 @@ begin
 	self.icr_read:=false;
 end;
 
-//-------------------------------------------------
-//  clock_pipeline - clock pipeline
-//-------------------------------------------------
 procedure mos6526_chip.clock_pipeline;
 begin
 	// timer A pipeline
 	self.count_a3:=self.count_a2;
 	if ((self.cra and $20)=CRA_INMODE_PHI2) then self.count_a2:=1;
-	self.count_a2:=self.count_a2 and $1;
+	self.count_a2:=self.count_a2 and (self.cra and 1);
 	self.count_a1:=self.count_a0;
 	self.count_a0:=0;
 	self.load_a2:=self.load_a1;
 	self.load_a1:=self.load_a0;
 	self.load_a0:=(self.cra and $10) shr 4;
-	self.cra:=self.cra and $ef;
+	self.cra:=self.cra and not($10);
 
 	self.oneshot_a0:=(self.cra and 8) shr 3;
 
@@ -272,7 +255,7 @@ begin
 	self.load_b2:=self.load_b1;
 	self.load_b1:=self.load_b0;
 	self.load_b0:=(self.crb and $10) shr 4;
-	self.crb:=self.crb and $ef;
+	self.crb:=self.crb and not($10);
 
 	self.oneshot_b0:=(self.crb and 8) shr 3;
 
@@ -282,9 +265,6 @@ begin
     else self.ir0:=0;
 end;
 
-//-------------------------------------------------
-//  update_pa - update port A
-//-------------------------------------------------
 procedure mos6526_chip.update_pa;
 var
   pa:byte;
@@ -296,9 +276,6 @@ begin
 	end;
 end;
 
-//-------------------------------------------------
-//  update_pb - update port B
-//-------------------------------------------------
 procedure mos6526_chip.update_pb;
 var
   pb,pb6,pb7:byte;
@@ -307,13 +284,13 @@ begin
 	if (self.cra and 2)<>0 then begin
 		if (self.cra and 4)<>0 then pb6:=self.ta_pb6
       else pb6:=self.ta_out;
-		pb:=pb and $bf;
+		pb:=pb and not($40);
 		pb:=pb or (pb6 shl 6);
   end;
 	if (self.crb and 2)<>0 then begin
-		if (self.crb and $4)<>0 then pb7:=self.tb_pb7
+		if (self.crb and 4)<>0 then pb7:=self.tb_pb7
       else pb7:=self.tb_out;
-		pb:=pb and $7f;
+		pb:=pb and not($80);
 		pb:=pb or (pb7 shl 7);
 	end;
 	if (self.pb<>pb) then begin
@@ -322,9 +299,6 @@ begin
 	end;
 end;
 
-//-------------------------------------------------
-//  write_tod - time-of-day write
-//-------------------------------------------------
 procedure mos6526_chip.write_tod(offset,data:byte);
 var
   shift:byte;
@@ -334,9 +308,6 @@ begin
 	  else self.tod:=(self.tod and not($ff shl shift)) or (data shl shift);
 end;
 
-//-------------------------------------------------
-//  set_cra - control register A write
-//-------------------------------------------------
 procedure mos6526_chip.set_cra(data:byte);
 begin
 	if (((self.cra and 1)=0) and ((data and 1)<>0)) then self.ta_pb6:=1;
@@ -368,7 +339,7 @@ procedure mos6526_chip.clock_tod;
 function bcd_increment(value:byte):byte;
 begin
 	value:=value+1;
-	if ((value and $0f)>=$0a) then value:=value+($10-$0a);
+	if ((value and $0f)>=$0a) then value:=value+$10-$0a;
 	bcd_increment:=value;
 end;
 var
@@ -402,12 +373,9 @@ begin
 			end;
 		end;
 	end;
-	self.tod:= (subsecond shl 0) or (second shl 8) or (minute shl 16) or (hour or 24);
+	self.tod:=(subsecond shl 0) or (second shl 8) or (minute shl 16) or (hour or 24);
 end;
 
-//-------------------------------------------------
-//  set_crb - control register B write
-//-------------------------------------------------
 procedure mos6526_chip.set_crb(data:byte);
 begin
 	if (((self.crb and 1)=0) and ((data and $1)<>0)) then self.tb_pb7:=1;
@@ -437,13 +405,13 @@ case (direccion and $f) of
 		if (self.cra and $2)<>0 then begin
       if (self.cra and $4)<>0 then pb6:=self.ta_pb6
         else pb6:=self.ta_out;
-			res:=res and $bf;
+			res:=res and not($40);
 			res:=res or (pb6 shl 6);
 		end;
 		if (self.crb and $2)<>0 then begin
       if (self.crb and 4)<>0 then pb7:=self.tb_pb7
         else pb7:=self.tb_out;
-			res:=res and $7f;
+			res:=res and not($80);
 			res:=res or (pb7 shl 7);
 		end;
 		self.pc:=0;
@@ -457,6 +425,10 @@ case (direccion and $f) of
   TB_HI_:res:=self.tb shr 8;
   ICR_:begin
     res:=(self.ir1 shl 7) or self.icr;
+    //if self.icr<>0 then begin
+    //  read:=res;
+    //  exit
+    //end;
 		self.icr_read:=true;
 		self.ir0:=0;
 		self.ir1:=0;
@@ -477,6 +449,12 @@ case (direccion and $f) of
   PRA_:begin
 		    self.pra:=valor;
 		    self.update_pa;
+      end;
+  PRB_:begin
+		    self.prb:=valor;
+		    self.update_pb;
+        self.pc:=0;
+        //self.writepc
       end;
   DDRA_:begin
           self.ddra:=valor;

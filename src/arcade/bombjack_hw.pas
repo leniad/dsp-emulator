@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-function bombjack_iniciar:boolean;
+function iniciar_bombjack:boolean;
 
 implementation
 const
@@ -114,7 +114,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -262,15 +262,15 @@ savedata_qsnapshot(data,size);
 size:=ay8910_2.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$8000],$8000);
-savedata_com_qsnapshot(@mem_snd[$2000],$e000);
+savedata_qsnapshot(@memoria[$8000],$8000);
+savedata_qsnapshot(@mem_snd[$2000],$e000);
 //MISC
 buffer[0]:=numero_fondo;
 buffer[1]:=sound_latch;
 buffer[2]:=byte(fondo_activo);
 buffer[3]:=byte(nmi_vblank);
 savedata_qsnapshot(@buffer,4);
-savedata_com_qsnapshot(@buffer_paleta,$100*2);
+savedata_qsnapshot(@buffer_paleta,$100*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -308,7 +308,7 @@ loaddata_qsnapshot(@buffer_paleta);
 freemem(data);
 close_qsnapshot;
 for f:=0 to $7f do cambiar_color(f*2);
-if fondo_activo then cambia_fondo(numero_fondo*$200);
+cambia_fondo(numero_fondo*$200);
 end;
 
 //Main
@@ -323,13 +323,13 @@ reset_audio;
 nmi_vblank:=false;
 fondo_activo:=false;
 sound_latch:=0;
-numero_fondo:=0;
+numero_fondo:=$ff;
 marcade.in0:=0;
 marcade.in1:=0;
 marcade.in2:=$f0;
 end;
 
-function bombjack_iniciar:boolean;
+function iniciar_bombjack:boolean;
 const
       pt_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
@@ -346,7 +346,7 @@ llamadas_maquina.bucle_general:=bombjack_principal;
 llamadas_maquina.reset:=bombjack_reset;
 llamadas_maquina.save_qsnap:=bombjack_qsave;
 llamadas_maquina.load_qsnap:=bombjack_qload;
-bombjack_iniciar:=false;
+iniciar_bombjack:=false;
 iniciar_audio(false);
 screen_init(1,256,256); //Fondo
 screen_init(2,256,256,true); //Chars
@@ -399,7 +399,7 @@ marcade.dswb:=$50;
 marcade.dswb_val:=@bombjack_dipb;
 //final
 bombjack_reset;
-bombjack_iniciar:=true;
+iniciar_bombjack:=true;
 end;
 
 end.

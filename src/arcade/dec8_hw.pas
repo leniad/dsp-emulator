@@ -139,7 +139,7 @@ init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 263 do begin
    //Main
    m6809_0.run(frame_m);
@@ -377,7 +377,7 @@ m6502_0:=cpu_m6502.create(1500000,264,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
 m6502_0.init_sound(dec8_sound_update);
 //MCU
-mcs51_0:=cpu_mcs51.create(8000000,264);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000,264);
 mcs51_0.change_io_calls(in_port0,nil,in_port2,in_port3,out_port0,nil,out_port2,nil);
 mcu_irq_timer:=timers.init(mcs51_0.numero_cpu,64,i8751_irq,nil,false);
 //Sound Chip

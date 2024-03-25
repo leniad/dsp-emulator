@@ -1,6 +1,6 @@
 unit mos6566;
 
-//{$DEFINE CIA_OLD}
+{$DEFINE CIA_OLD}
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}dialogs,sysutils,pal_engine,cpu_misc,

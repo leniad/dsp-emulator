@@ -183,7 +183,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -474,9 +474,9 @@ savedata_qsnapshot(data,size);
 size:=namco_snd_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@sprite_ram[0],$10);
-savedata_com_qsnapshot(@memoria[$4000],$4000);
-if main_vars.tipo_maquina=88 then savedata_com_qsnapshot(@memoria[$c000],$4000);
+savedata_qsnapshot(@sprite_ram[0],$10);
+savedata_qsnapshot(@memoria[$4000],$4000);
+if main_vars.tipo_maquina=88 then savedata_qsnapshot(@memoria[$c000],$4000);
 //MISC
 buffer[0]:=byte(irq_vblank);
 buffer[1]:=byte(dec_enable);

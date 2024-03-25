@@ -111,7 +111,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
     //main
     m68000_0.run(frame_m);
@@ -189,7 +189,7 @@ case direccion of
               sound_latch:=valor and $ff;
               z80_0.change_nmi(PULSE_LINE);
             end;
-    $180000..$1bffff:begin
+    $180000..$1bffff:if video_ram[(direccion and $3ffff) shr 1]<>valor then begin
                         video_ram[(direccion and $3ffff) shr 1]:=valor;
                         video_ram_buff[(direccion and $3ffff) shr 1]:=true;
                       end;

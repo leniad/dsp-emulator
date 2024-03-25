@@ -102,7 +102,7 @@ frame_m:=z80_0.tframes;
 frame_m2:=z80_1.tframes;
 frame_s:=z80_2.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
   //CPU 1
   z80_0.run(frame_m);
@@ -413,7 +413,7 @@ z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.change_io_calls(snd_inbyte,snd_outbyte);
 z80_2.init_sound(hvyunit_sound_update);
 //mcu cpu
-mcs51_0:=cpu_mcs51.create(6000000,$100);
+mcs51_0:=cpu_mcs51.create(I8X51,6000000,$100);
 mcs51_0.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
 //pandora
 pandora_0:=pandora_gfx.create($3fff,$100,false);

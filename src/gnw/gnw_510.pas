@@ -140,7 +140,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=sm510_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   //Main CPU
   sm510_0.run(frame_m);
   frame_m:=frame_m+sm510_0.tframes-sm510_0.contador;

@@ -938,7 +938,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=lr35902_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   while gb_0.linea_actual<>154 do begin
     lr35902_0.run(frame_m);
     frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;

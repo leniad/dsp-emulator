@@ -99,7 +99,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6809_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -198,8 +198,8 @@ savedata_qsnapshot(data,size);
 size:=AY8910_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria,$4000);
-savedata_com_qsnapshot(@mem_snd,$e000);
+savedata_qsnapshot(@memoria,$4000);
+savedata_qsnapshot(@mem_snd,$e000);
 //MISC
 buffer[0]:=soundlatch;
 buffer[1]:=last;

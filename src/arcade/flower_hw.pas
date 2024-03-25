@@ -164,7 +164,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_sub:=z80_1.tframes;
 frame_sound:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
    for h:=1 to CPU_SYNC do begin
     //Main CPU

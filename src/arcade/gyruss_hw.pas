@@ -113,7 +113,7 @@ frame_m:=z80_0.tframes;
 frame_sub:=m6809_0.tframes;
 frame_s:=z80_1.tframes;
 frame_s_sub:=mcs48_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for scan_line:=0 to $ff do begin
     //main
     z80_0.run(frame_m);

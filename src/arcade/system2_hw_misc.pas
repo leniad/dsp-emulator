@@ -7,10 +7,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 function iniciar_system2:boolean;
 procedure system2_principal;
-procedure cambiar_color_system2(numero:byte;pos:word);
-
-var
-  bg_ram_bank,rom_bank:byte;
 
 implementation
 uses system1_hw;
@@ -62,7 +58,7 @@ const
 
 var
   type_row_scroll:boolean;
-  roms,roms_dec:array[0..3,0..$3fff] of byte;
+  roms_dec:array[0..3,0..$3fff] of byte;
 
 procedure update_video;
 var
@@ -94,7 +90,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -127,16 +123,6 @@ case direccion of
   $f000..$f3ff:system2_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
   $f800..$fbff:system2_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
 end;
-end;
-
-procedure cambiar_color_system2(numero:byte;pos:word);
-var
-  color:tcolor;
-begin
-  color.r:=pal4bit(memoria_proms[numero]);
-  color.g:=pal4bit(memoria_proms[numero+$100]);
-  color.b:=pal4bit(memoria_proms[numero+$200]);
-  set_pal_color(color,pos);
 end;
 
 procedure system2_putbyte(direccion:word;valor:byte);
@@ -189,10 +175,10 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(20000000,260);
+z80_0:=cpu_z80.create(20000000 div 5,260);
 z80_0.change_ram_calls(system2_getbyte,system2_putbyte);
 z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
-z80_0.change_timmings(@z80t_a,@z80t_cb_a,@z80t_dd_a,@z80t_ddcb_a,@z80t_ed_a,@z80t_ex_a);
+z80_0.change_misc_calls(nil,nil,system1_adjust_cycle);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
