@@ -1,4 +1,9 @@
 # DSP Emulator status #
+<b>??/??/?? - DSP Emulator 0.23WIP2. Updated Windows binary and source.<br>
+<pre>
+-General
+    +CPU
+        -NEC V60/V70
 <b>25/03/24 - DSP Emulator 0.23WIP1. Updated Windows binary and source.<br>
 <pre>
 -General
