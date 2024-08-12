@@ -18,7 +18,7 @@ const
         skykid_sprites:array[0..1] of tipo_roms=(
         (n:'sk1_8.10n';l:$4000;p:0;crc:$44bb7375),(n:'sk1_7.10m';l:$4000;p:$4000;crc:$3454671d));
         skykid_mcu:array[0..1] of tipo_roms=(
-        (n:'sk2_4.3c';l:$2000;p:$8000;crc:$a460d0e0),(n:'cus63-63a1.mcu';l:$1000;p:$f000;crc:$6ef08fb3));
+        (n:'sk2_4.3c';l:$2000;p:$1000;crc:$a460d0e0),(n:'cus63-63a1.mcu';l:$1000;p:0;crc:$6ef08fb3));
         skykid_prom:array[0..4] of tipo_roms=(
         (n:'sk1-1.2n';l:$100;p:$0;crc:$0218e726),(n:'sk1-2.2p';l:$100;p:$100;crc:$fc0d5b85),
         (n:'sk1-3.2r';l:$100;p:$200;crc:$d06b620b),(n:'sk1-4.5n';l:$200;p:$300;crc:$c697ac72),
@@ -32,7 +32,7 @@ const
         drgnbstr_sprites:array[0..1] of tipo_roms=(
         (n:'db1_8.10n';l:$4000;p:0;crc:$11942c61),(n:'db1_7.10m';l:$4000;p:$4000;crc:$cc130fe2));
         drgnbstr_mcu:array[0..1] of tipo_roms=(
-        (n:'db1_4.3c';l:$2000;p:$8000;crc:$8a0b1fc1),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'db1_4.3c';l:$2000;p:$1000;crc:$8a0b1fc1),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         drgnbstr_prom:array[0..4] of tipo_roms=(
         (n:'db1-1.2n';l:$100;p:$0;crc:$3f8cce97),(n:'db1-2.2p';l:$100;p:$100;crc:$afe32436),
         (n:'db1-3.2r';l:$100;p:$200;crc:$c95ff576),(n:'db1-4.5n';l:$200;p:$300;crc:$b2180c21),
@@ -243,22 +243,20 @@ end;
 function mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
-  $8000..$c7ff,$f000..$ffff:mcu_getbyte:=mem_snd[direccion];
+  $8000..$c7ff:mcu_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $4000..$7fff:begin
                   irq_enable_mcu:=not(BIT(direccion and $3fff,13));
                   if not(irq_enable_mcu) then m6800_0.change_irq(CLEAR_LINE);
                end;
-  $8000..$bfff,$f000..$ffff:; //ROM
+  $8000..$bfff:; //ROM
   $c000..$cfff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -316,6 +314,7 @@ var
   colores:tpaleta;
   f:word;
   memoria_temp:array[0..$ffff] of byte;
+  ptemp:pbyte;
 const
     pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
@@ -339,7 +338,7 @@ iniciar_video(288,224);
 m6809_0:=cpu_m6809.Create(1536000,224,TCPU_M6809);
 m6809_0.change_ram_calls(skykid_getbyte,skykid_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(6144000,224,TCPU_HD63701);
+m6800_0:=cpu_m6800.create(6144000,224,TCPU_HD63701V);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
 m6800_0.init_sound(skykid_sound_update);
@@ -352,7 +351,10 @@ case  main_vars.tipo_maquina of
           copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
           for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
           //Cargar MCU
-          if not(roms_load(@mem_snd,skykid_mcu)) then exit;
+          if not(roms_load(@memoria_temp,skykid_mcu)) then exit;
+          ptemp:=m6800_0.get_rom_addr;
+          copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+          copymemory(@mem_snd[$8000],@memoria_temp[$1000],$2000);
           //convertir chars
           if not(roms_load(@memoria_temp,skykid_char)) then exit;
           init_gfx(0,8,8,$200);
@@ -387,7 +389,10 @@ case  main_vars.tipo_maquina of
           copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
           for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
           //Cargar MCU
-          if not(roms_load(@mem_snd,drgnbstr_mcu)) then exit;
+          if not(roms_load(@memoria_temp,drgnbstr_mcu)) then exit;
+          ptemp:=m6800_0.get_rom_addr;
+          copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+          copymemory(@mem_snd[$8000],@memoria_temp[$1000],$2000);
           //convertir chars
           if not(roms_load(@memoria_temp,drgnbstr_char)) then exit;
           init_gfx(0,8,8,$200);

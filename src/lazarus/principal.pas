@@ -66,7 +66,7 @@ type
     M65021: TMenuItem;
     M680911: TMenuItem;
     M680001: TMenuItem;
-    BombJack1: TMenuItem;
+    BombJackHW1: TMenuItem;
     GalaxianHardware1: TMenuItem;
     dkonghw1: TMenuItem;
     BlackTiger1: TMenuItem;
@@ -289,6 +289,45 @@ type
     FightingBasketball1: TMenuItem;
     diverboy1: TMenuItem;
     MenuItem52: TMenuItem;
+    MenuItem53: TMenuItem;
+    bankpanic1: TMenuItem;
+    combathawk1: TMenuItem;
+    anteater1: TMenuItem;
+    MenuItem54: TMenuItem;
+    appoooh1: TMenuItem;
+    armoredcar1: TMenuItem;
+    avengers1: TMenuItem;
+    battleofatlantis1: TMenuItem;
+    calipso1: TMenuItem;
+    cavelon1: TMenuItem;
+    MenuItem55: TMenuItem;
+    burglarx1: TMenuItem;
+    MenuItem56: TMenuItem;
+    bluehawk1: TMenuItem;
+    lastday1: TMenuItem;
+    gulfstorm1: TMenuItem;
+    flyingtiger1: TMenuItem;
+    MenuItem57: TMenuItem;
+    blueprint1: TMenuItem;
+    grasspin1: TMenuItem;
+    gardia1: TMenuItem;
+    hyperpacman1: TMenuItem;
+    BombJack1: TMenuItem;
+    caloriekun1: TMenuItem;
+    MenuItem58: TMenuItem;
+    kikikaikai1: TMenuItem;
+    kickandrun1: TMenuItem;
+    snowbros1: TMenuItem;
+    comebacktoto1: TMenuItem;
+    popeye1: TMenuItem;
+    skyskipper1: TMenuItem;
+    saturn1: TMenuItem;
+    pollux1: TMenuItem;
+    zeropoint1: TMenuItem;
+    theend1: TMenuItem;
+    n88games1: TMenuItem;
+    robowres1: TMenuItem;
+    MortalRace1: TMenuItem;
     twinbrats1: TMenuItem;
     steelforce1: TMenuItem;
     mugsmashers1: TMenuItem;
@@ -504,7 +543,7 @@ type
     SectionZ1: TMenuItem;
     Rastan1: TMenuItem;
     Toki1: TMenuItem;
-    SnowBros1: TMenuItem;
+    SnowBrosHW1: TMenuItem;
     F1Dream1: TMenuItem;
     TigerRoad1: TMenuItem;
     TigerRoadHW1: TMenuItem;
@@ -521,7 +560,7 @@ type
     RallyXHardware1: TMenuItem;
     Vigilante1: TMenuItem;
     Psychic51: TMenuItem;
-    Popeye1: TMenuItem;
+    PopeyeHW1: TMenuItem;
     tehkanwc1: TMenuItem;
     Pooyan1: TMenuItem;
     wbml1: TMenuItem;
@@ -799,6 +838,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.close)<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 reset_dsp;
 file_ini_save;
 close_joystick;
@@ -842,8 +882,13 @@ procedure Tprincipal1.BitBtn14Click(Sender: TObject);
 begin
 var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
-  else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+if var_spectrum.fastload then begin
+  principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=true;
+end else begin
+  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=false;
+end;
 sync_all;
 end;
 
@@ -996,6 +1041,7 @@ procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);

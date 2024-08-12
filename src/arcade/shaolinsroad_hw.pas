@@ -57,12 +57,11 @@ end;
 scroll__x(1,2,scroll);
 actualiza_trozo(0,0,256,32,1,0,0,256,32,2);
 for f:=$17 downto 0 do begin
-  if ((memoria[$3100+(f*32)]=0) and (memoria[$3106+(f*32)]=0)) then continue;
-  atrib:=memoria[$3109+(f*32)];
+  atrib:=memoria[$2800+(f*2)];
   color:=((atrib and $f)+($10*banco_pal)) shl 4;
-  x:=memoria[$3104+(f*32)]-8;
-  y:=240-memoria[$3106+(f*32)];
-  nchar:=memoria[$3108+(f*32)];
+  y:=memoria[$3000+(f*2)];
+  x:=memoria[$2801+(f*2)];
+  nchar:=memoria[$3001+(f*2)];
   put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
   actualiza_gfx_sprite(x,y,2,1);
 end;

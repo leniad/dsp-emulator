@@ -15,9 +15,9 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
-      <MinorVersionNr Value="22"/>
-      <RevisionNr Value="7"/>
-      <BuildNr Value="1356"/>
+      <MinorVersionNr Value="23"/>
+      <RevisionNr Value="2"/>
+      <BuildNr Value="1368"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.22"/>
     </VersionInfo>
@@ -43,13 +43,13 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="57">
+    <Units Count="64">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="8"/>
-        <CursorPos Y="37"/>
+        <CursorPos X="12" Y="24"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
@@ -59,9 +59,7 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="1014"/>
-        <CursorPos X="19" Y="1026"/>
+        <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -157,8 +155,8 @@
         <Filename Value="..\misc\controls_engine.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="484"/>
-        <CursorPos Y="495"/>
+        <TopLine Value="488"/>
+        <CursorPos X="3" Y="496"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
@@ -169,6 +167,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
         <TopLine Value="11"/>
         <CursorPos X="28" Y="15"/>
         <UsageCount Value="200"/>
@@ -194,8 +193,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="691"/>
-        <CursorPos X="3" Y="698"/>
+        <TopLine Value="502"/>
+        <CursorPos Y="514"/>
         <UsageCount Value="202"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
@@ -278,8 +277,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="16"/>
-        <CursorPos Y="28"/>
+        <TopLine Value="189"/>
+        <CursorPos X="29" Y="195"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit26>
@@ -302,8 +301,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="79"/>
-        <CursorPos Y="85"/>
+        <TopLine Value="62"/>
+        <CursorPos X="40" Y="86"/>
         <UsageCount Value="224"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
@@ -314,8 +313,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="57"/>
-        <CursorPos X="10" Y="70"/>
+        <TopLine Value="88"/>
+        <CursorPos X="7" Y="107"/>
         <UsageCount Value="224"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit29>
@@ -326,8 +325,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="151"/>
-        <CursorPos X="15" Y="170"/>
+        <TopLine Value="108"/>
+        <CursorPos X="27" Y="119"/>
         <UsageCount Value="224"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit30>
@@ -354,13 +353,12 @@
       </Unit32>
       <Unit33>
         <Filename Value="joystick_calibration.pas"/>
-        <IsPartOfProject Value="True"/>
         <ComponentName Value="joy_calibration"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="41"/>
-        <CursorPos X="7" Y="57"/>
+        <TopLine Value="54"/>
+        <CursorPos X="14" Y="65"/>
         <UsageCount Value="226"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit33>
@@ -453,8 +451,8 @@
         <Filename Value="..\misc\misc_functions.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="42"/>
-        <CursorPos Y="61"/>
+        <TopLine Value="329"/>
+        <CursorPos X="21" Y="351"/>
         <UsageCount Value="316"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit43>
@@ -491,18 +489,20 @@
         <ComponentName Value="configgb"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="34"/>
         <CursorPos X="12" Y="40"/>
         <UsageCount Value="207"/>
-        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit47>
       <Unit48>
         <Filename Value="..\misc\init_games.pas"/>
-        <TopLine Value="815"/>
-        <CursorPos X="44" Y="826"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="879"/>
+        <CursorPos X="44" Y="890"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit48>
       <Unit49>
         <Filename Value="..\consolas\super_cassette_vision.pas"/>
@@ -537,158 +537,94 @@
       </Unit52>
       <Unit53>
         <Filename Value="..\consolas\nes.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="79"/>
         <CursorPos Y="90"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit53>
       <Unit54>
         <Filename Value="..\consolas\nes_ppu.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="522"/>
         <CursorPos Y="534"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit54>
       <Unit55>
         <Filename Value="..\snd\oki6295.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="248"/>
         <CursorPos X="9" Y="255"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit55>
       <Unit56>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <CursorPos X="28" Y="12"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="27" Y="12"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit56>
+      <Unit57>
+        <Filename Value="..\arcade\caloriekun_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="61" Y="34"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="principal.lfm"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="..\misc\main_engine.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="153"/>
+        <CursorPos X="6" Y="165"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="..\misc\file_engine.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="800"/>
+        <CursorPos X="32" Y="811"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="..\devices\k051960.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="99"/>
+        <CursorPos X="55" Y="111"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="..\misc\tap_tzx.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="191"/>
+        <CursorPos Y="203"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="..\devices\z80pio.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="10" Y="34"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit63>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="1">
       <Position1>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="86" TopLine="73"/>
+        <Filename Value="principal.pas"/>
       </Position1>
-      <Position2>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="87" TopLine="73"/>
-      </Position2>
-      <Position3>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="518" TopLine="507"/>
-      </Position3>
-      <Position4>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="519" TopLine="507"/>
-      </Position4>
-      <Position5>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="520" TopLine="507"/>
-      </Position5>
-      <Position6>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="521" TopLine="507"/>
-      </Position6>
-      <Position7>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="525" TopLine="507"/>
-      </Position7>
-      <Position8>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="526" TopLine="507"/>
-      </Position8>
-      <Position9>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="527" TopLine="508"/>
-      </Position9>
-      <Position10>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="531" TopLine="520"/>
-      </Position10>
-      <Position11>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="533" TopLine="520"/>
-      </Position11>
-      <Position12>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="518" TopLine="507"/>
-      </Position12>
-      <Position13>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="533" TopLine="522"/>
-      </Position13>
-      <Position14>
-        <Filename Value="..\consolas\nes_ppu.pas"/>
-        <Caret Line="534" TopLine="522"/>
-      </Position14>
-      <Position15>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="89" TopLine="73"/>
-      </Position15>
-      <Position16>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="90" TopLine="73"/>
-      </Position16>
-      <Position17>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="71" TopLine="59"/>
-      </Position17>
-      <Position18>
-        <Filename Value="..\consolas\nes.pas"/>
-        <Caret Line="90" TopLine="79"/>
-      </Position18>
-      <Position19>
-        <Filename Value="principal.pas"/>
-        <Caret Line="989" TopLine="977"/>
-      </Position19>
-      <Position20>
-        <Filename Value="principal.pas"/>
-        <Caret Line="954" Column="3" TopLine="952"/>
-      </Position20>
-      <Position21>
-        <Filename Value="principal.pas"/>
-        <Caret Line="955" Column="3" TopLine="953"/>
-      </Position21>
-      <Position22>
-        <Filename Value="principal.pas"/>
-        <Caret Line="956" Column="3" TopLine="954"/>
-      </Position22>
-      <Position23>
-        <Filename Value="principal.pas"/>
-        <Caret Line="957" Column="3" TopLine="955"/>
-      </Position23>
-      <Position24>
-        <Filename Value="principal.pas"/>
-        <Caret Line="18" Column="42" TopLine="6"/>
-      </Position24>
-      <Position25>
-        <Filename Value="principal.pas"/>
-        <Caret Line="14" Column="122" TopLine="6"/>
-      </Position25>
-      <Position26>
-        <Filename Value="..\snd\oki6295.pas"/>
-      </Position26>
-      <Position27>
-        <Filename Value="..\snd\oki6295.pas"/>
-        <Caret Line="255" Column="9" TopLine="248"/>
-      </Position27>
-      <Position28>
-        <Filename Value="principal.pas"/>
-        <Caret Line="623" Column="19" TopLine="611"/>
-      </Position28>
-      <Position29>
-        <Filename Value="principal.pas"/>
-        <Caret Line="922" Column="20" TopLine="899"/>
-      </Position29>
-      <Position30>
-        <Filename Value="principal.pas"/>
-        <Caret Line="1026" Column="19" TopLine="1014"/>
-      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

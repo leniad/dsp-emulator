@@ -79,11 +79,11 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   //P2
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   //system
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
@@ -102,15 +102,15 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    if f=240 then begin
+      if nmi_vblank then z80_0.change_nmi(ASSERT_LINE);
+      update_video_pooyan;
+    end;
     //Main CPU
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND CPU
     konamisnd_0.run;
-    if f=239 then begin
-      if nmi_vblank then z80_0.change_nmi(ASSERT_LINE);
-      update_video_pooyan;
-    end;
   end;
   eventos_pooyan;
   video_sync;
@@ -172,23 +172,24 @@ begin
  konamisnd_0.reset;
  nmi_vblank:=false;
  last:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
 end;
 
 function iniciar_pooyan:boolean;
 var
   colores:tpaleta;
   f:word;
-  ctemp1:byte;
+  ctemp1,bit0,bit1,bit2:byte;
   memoria_temp:array[0..$1fff] of byte;
+  rweights,gweights,bweights:array[0..2] of single;
 const
   ps_x:array[0..15] of dword=(0, 1, 2, 3,  8*8+0, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3,  24*8+0, 24*8+1, 24*8+2, 24*8+3);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-
+  resistances:array[0..2] of integer=(1000,470,220);
 begin
 llamadas_maquina.bucle_general:=pooyan_principal;
 llamadas_maquina.reset:=reset_pooyan;
@@ -218,13 +219,27 @@ gfx_set_desc_data(4,0,64*8,$1000*8+4,$1000*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //poner la paleta
 if not(roms_load(@memoria_temp,pooyan_pal)) then exit;
-for f:=0 to 31 do begin
-    ctemp1:=memoria_temp[f];
-    colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
-    colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
-    colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
+compute_resistor_weights(0,	255, -1.0,
+			3,@resistances,@rweights,0,0,
+			3,@resistances,@gweights,0,0,
+			2,@resistances[1],@bweights,0,0);
+for f:=0 to $1f do begin
+		// red component
+		bit0:=(memoria_temp[f] shr 0) and $1;
+		bit1:=(memoria_temp[f] shr 1) and $1;
+		bit2:=(memoria_temp[f] shr 2) and $1;
+		colores[f].r:=combine_3_weights(@rweights,bit0,bit1,bit2);
+		// green component
+		bit0:=(memoria_temp[f] shr 3) and $1;
+		bit1:=(memoria_temp[f] shr 4) and $1;
+		bit2:=(memoria_temp[f] shr 5) and $1;
+		colores[f].g:=combine_3_weights(@gweights,bit0,bit1,bit2);
+		// blue component
+		bit0:=(memoria_temp[f] shr 6) and $1;
+		bit1:=(memoria_temp[f] shr 7) and $1;
+		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);
 end;
-set_pal(colores,32);
+set_pal(colores,$20);
 for f:=0 to $ff do begin
   gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
   gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;

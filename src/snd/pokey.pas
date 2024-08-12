@@ -1,7 +1,7 @@
 unit pokey;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine,dialogs;
 
 const
   // POKEY WRITE LOGICALS */
@@ -440,6 +440,7 @@ constructor pokey_chip.Create(clock:dword);
 var
   i:integer;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   self.number:=chips_total;
   self.buf_pos:=0;

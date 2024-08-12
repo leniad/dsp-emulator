@@ -4,8 +4,8 @@ object MConfig: TMConfig
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config DSP'
-  ClientHeight = 502
-  ClientWidth = 498
+  ClientHeight = 504
+  ClientWidth = 492
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,7 +19,7 @@ object MConfig: TMConfig
   TextHeight = 13
   object Button1: TButton
     Left = 90
-    Top = 457
+    Top = 459
     Width = 113
     Height = 41
     Caption = 'OK'
@@ -29,7 +29,7 @@ object MConfig: TMConfig
   end
   object Button2: TButton
     Left = 304
-    Top = 457
+    Top = 459
     Width = 113
     Height = 41
     Caption = 'CANCELAR'
@@ -646,11 +646,11 @@ object MConfig: TMConfig
           ParentColor = False
           TabOrder = 12
           object Button7: TButton
-            Left = 55
+            Left = 43
             Top = 27
-            Width = 52
+            Width = 64
             Height = 24
-            Caption = 'Calibrate'
+            Caption = 'Get Center'
             TabOrder = 0
             OnClick = Button7Click
           end
@@ -905,11 +905,11 @@ object MConfig: TMConfig
             OnChange = ComboBox2Change
           end
           object Button8: TButton
-            Left = 60
+            Left = 48
             Top = 27
-            Width = 52
+            Width = 64
             Height = 24
-            Caption = 'Calibrate'
+            Caption = 'Get Center'
             TabOrder = 1
             OnClick = Button8Click
           end

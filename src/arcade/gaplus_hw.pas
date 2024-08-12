@@ -117,7 +117,7 @@ for f:=0 to $3f do begin
   // is it on?
   if (memoria[$1f81+(f*2)] and 2)=0 then begin
       atrib:=memoria[$1f80+(f*2)];
-      nchar:=memoria[$f80+(f*2)] or ((atrib and $40) shl 2);
+      nchar:=(memoria[$f80+(f*2)] or ((atrib and $40) shl 2)) mod $180;
 			color:=(memoria[$f81+(f*2)] and $3f) shl 3;
 			sy:=memoria[$1781+(f*2)]+$100*(memoria[$1f81+(f*2)] and 1)-71;
 			sx:=memoria[$1780+(f*2)]-8;
@@ -417,7 +417,7 @@ end;
 function iniciar_gaplus:boolean;
 var
   f:word;
-  memoria_temp:array[0..$1ffff] of byte;
+  memoria_temp:array[0..$ffff] of byte;
   ctemp0,ctemp1,ctemp2,ctemp3:byte;
   colores:tpaleta;
 const
@@ -495,9 +495,6 @@ namco_5x_0:=namco_5x_chip.create(m6809_0.numero_cpu,NAMCO_56XX);
 namco_5x_0.change_io(inport0_0,inport0_1,inport0_2,inport0_3,nil,nil);
 namco_5x_1:=namco_5x_chip.create(m6809_0.numero_cpu,NAMCO_58XX);
 namco_5x_1.change_io(inport1_0,inport1_1,inport1_2,inport1_3,nil,nil);
-//Ojo, lee mas halla de la posicion $10000... Por eso lo pongo todo en $ff, para que salga blanco y
-//se vea bien la pantalla de inicio (sprites)
-fillchar(memoria_temp,$ff,$20000);
 //chars
 if not(roms_load(@memoria_temp,gaplus_char)) then exit;
 for f:=0 to $1fff do memoria_temp[f+$2000]:=memoria_temp[f] shr 4;
@@ -505,9 +502,9 @@ init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,32*8,4,6);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //sprites
-fillchar(memoria_temp,$ff,$20000);
 if not(roms_load(@memoria_temp,gaplus_sprites)) then exit;
 for f:=$6000 to $7fff do memoria_temp[f+$2000]:=memoria_temp[f] shl 4;
+fillchar(memoria_temp[$a000],$2000,0);
 init_gfx(1,16,16,$180);
 gfx_set_desc_data(3,0,64*8,$180*64*8,0,4);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);

@@ -2,7 +2,7 @@ unit upd1771;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}timer_engine,
-     sound_engine,vars_hide;
+     sound_engine,vars_hide,dialogs;
 
 const
   MAX_PACKET_SIZE=$8000;
@@ -130,6 +130,7 @@ end;
 
 constructor upd1771_chip.create(clock:integer;amp:single);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.clock:=clock;
   self.amp:=amp;
   self.tsample_num:=init_channel;

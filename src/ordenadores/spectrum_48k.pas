@@ -36,7 +36,7 @@ for x:=0 to 31 do begin
   atrib:=memoria[$5800+pos_video];
   if ((spec_z80_reg.i>=$40) and (spec_z80_reg.i<=$7f)) then video:=memoria[$4000+tabla_scr[linea]+x+spec_z80_reg.r]
     else video:=memoria[$4000+tabla_scr[linea]+x];
-  if (var_spectrum.buffer_video[tabla_scr[linea]+x] or (((atrib and $80)<>0) and not(main_screen.rapido))) then begin
+  if (var_spectrum.buffer_video[tabla_scr[linea]+x] or ((atrib and $80)<>0)) then begin
     var_spectrum.buffer_video[tabla_scr[linea]+x]:=false;
     poner_linea:=true;
     pant_x:=48+(x shl 3);
@@ -47,11 +47,11 @@ for x:=0 to 31 do begin
     end else begin
       color2:=(atrib shr 3) and 7;
       color:=atrib and 7;
-      if (atrib and 64)<>0 then begin
+      if (atrib and $40)<>0 then begin
         color:=color+8;
         color2:=color2+8;
       end;
-      if (((atrib and 128)<>0) and var_spectrum.haz_flash) then begin
+      if (((atrib and $80)<>0) and var_spectrum.haz_flash) then begin
         temp:=color;
         color:=color2;
         color2:=temp;
@@ -78,8 +78,7 @@ for x:=0 to 31 do begin
   end;
   pos_video:=pos_video+1;
 end;
-if poner_linea then
-  actualiza_trozo_simple(48,linea+48,256,1,1);
+if poner_linea then actualiza_trozo(48,linea+48,256,1,1,48,linea+48,256,1,PANT_TEMP);
 end;
 
 procedure borde_48_full(linea:word);
@@ -88,7 +87,7 @@ var
   ptemp:pword;
   posicion:dword;
 begin
-if (main_screen.rapido and ((linea and 7)<>0) or (borde.tipo=0) or (linea<15) or (linea>296)) then exit;
+if ((borde.tipo=0) or (linea<15) or (linea>296)) then exit;
 fillchar(borde.buffer[linea*224+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
 borde.posicion:=spec_z80.contador-224;
 //El borde izquierdo lo rellena en la linea siguiente!!! Para que la linea 16 o la linea 295 (princio y
@@ -104,7 +103,7 @@ for f:=200 to 223 do begin
   inc(ptemp);
 end;
 putpixel(0,linea-16,48,punbuf,1);
-actualiza_trozo_simple(0,linea-16,48,1,1);
+actualiza_trozo(0,linea-16,48,1,1,0,linea-16,48,1,PANT_TEMP);
 //Como el es borde izquierdo, si estoy en la linea 296 me salgo, ya no hay resto de borde
 if linea=296 then exit;
 //24t borde der --> 48 pixels
@@ -118,7 +117,7 @@ for f:=128 to 151 do begin
   inc(ptemp);
 end;
 putpixel(304,linea-16,48,punbuf,1);
-actualiza_trozo_simple(304,linea-16,48,1,1);
+actualiza_trozo(304,linea-16,48,1,1,304,linea-16,48,1,PANT_TEMP);
 //128t Centro pantalla --> 256 pixels
 if ((linea>63) and (linea<256)) then exit;
 ptemp:=punbuf;
@@ -129,7 +128,7 @@ for f:=0 to 127 do begin
     inc(ptemp);
 end;
 putpixel(48,linea-16,256,punbuf,1);
-actualiza_trozo_simple(48,linea-16,256,1,1);
+actualiza_trozo(48,linea-16,256,1,1,48,linea-16,256,1,PANT_TEMP);
 end;
 
 procedure spectrum48_main;
@@ -254,7 +253,7 @@ end else begin //Resto
     if mouse.tipo<>MNONE then begin
         if mouse.tipo=MAMX then begin //AMX Mouse
             if (puerto and $80)<>0 then temp:=mouse.botones
-              else temp:=z80pio_cd_ba_r(0,(puerto shr 5) and $3);
+              else temp:=pio_0.cd_ba_r((puerto shr 5) and $3);
         end;
         if mouse.tipo=MKEMPSTON then begin //Kempston Mouse
           case puerto of
@@ -314,7 +313,7 @@ end else begin
       1:ulaplus.activa:=(valor and 1)<>0;
     end;
   end;
-  if mouse.tipo=MAMX then z80pio_cd_ba_w(0,(puerto shr 5) and 3,valor);
+  if mouse.tipo=MAMX then pio_0.cd_ba_w((puerto shr 5) and 3,valor);
 end;
 end;
 
@@ -331,6 +330,7 @@ var
   pos:integer;
   cadena:string;
 begin
+iniciar_audio(false);
 if main_vars.tipo_maquina=0 then spec_16k:=false
   else spec_16k:=true;
 llamadas_maquina.bucle_general:=spectrum48_main;
@@ -356,7 +356,6 @@ if not(rom_cargada) then begin
   MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
   exit;
 end else copymemory(@memoria,@mem_snd,$4000);
-iniciar_audio(false);
 fillchar(var_spectrum.retraso,70000,0);
 f:=14335;  //24 del borde
 for h:=0 to 191 do begin

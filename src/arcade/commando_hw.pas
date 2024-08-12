@@ -192,17 +192,17 @@ begin
 case direccion of
   0..$3fff:; //ROM
   $4000..$47ff:mem_snd[direccion]:=valor;
-  $8000:ym2203_0.Control(valor);
-  $8001:ym2203_0.Write(valor);
-  $8002:ym2203_1.Control(valor);
-  $8003:ym2203_1.Write(valor);
+  $8000:ym2203_0.control(valor);
+  $8001:ym2203_0.write(valor);
+  $8002:ym2203_1.control(valor);
+  $8003:ym2203_1.write(valor);
 end;
 end;
 
 procedure commando_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 procedure commando_snd_irq;
@@ -216,8 +216,8 @@ begin
  z80_0.reset;
  z80_0.im0:=$d7;  //rst 10
  z80_1.reset;
- YM2203_0.reset;
- YM2203_1.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -262,8 +262,8 @@ z80_1.init_sound(commando_sound_update);
 //IRQ Sound CPU
 timers.init(z80_1.numero_cpu,3000000/(4*60),commando_snd_irq,nil,true);
 //Sound Chips
-YM2203_0:=ym2203_chip.create(1500000,0.4);
-YM2203_1:=ym2203_chip.create(1500000,0.4);
+ym2203_0:=ym2203_chip.create(1500000,0.4);
+ym2203_1:=ym2203_chip.create(1500000,0.4);
 //cargar y desencriptar las ROMS
 if not(roms_load(@memoria,commando_rom)) then exit;
 memoria_dec[0]:=memoria[0];

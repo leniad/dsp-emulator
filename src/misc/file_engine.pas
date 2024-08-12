@@ -206,10 +206,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
-    arcade_input.joy_left[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
-    arcade_input.joy_right[f]:=fich_ini.ReadInteger('keyboard','joy_right_'+inttostr(f),0);
-    arcade_input.joy_up[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
-    arcade_input.joy_down[f]:=fich_ini.ReadInteger('keyboard','joy_down_'+inttostr(f),0);
+    arcade_input.joy_x[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
+    arcade_input.joy_y[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
   end;
   //Cerrar fichero
   fich_ini.free;
@@ -331,10 +329,8 @@ end else begin
   timers.autofire_on:=false;
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
-    arcade_input.joy_left[f]:=0;
-    arcade_input.joy_right[f]:=0;
-    arcade_input.joy_up[f]:=0;
-    arcade_input.joy_down[f]:=0;
+    arcade_input.joy_x[f]:=0;
+    arcade_input.joy_y[f]:=0;
   end;
 end;
 if ((directory.Nes='') or (directory.Nes=main_vars.cadena_dir)) then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
@@ -511,10 +507,8 @@ fich_ini.WriteInteger('keyboard','num_joy_0',arcade_input.num_joystick[0]);
 fich_ini.WriteInteger('keyboard','num_joy_1',arcade_input.num_joystick[1]);
 //Joystick calibration
 for f:=0 to NUM_PLAYERS do begin
-  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_up[f]);
-  fich_ini.WriteInteger('keyboard','joy_down_'+inttostr(f),arcade_input.joy_down[f]);
-  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_left[f]);
-  fich_ini.WriteInteger('keyboard','joy_right_'+inttostr(f),arcade_input.joy_right[f]);
+  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_y[f]);
+  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_x[f]);
 end;
 //Cerrar
 fich_ini.Free;
@@ -814,7 +808,7 @@ begin
   end;
   zfile:=unzOpen(pchar(nombre_zip));
   longitud:=ZipFile.Entries[f].Size;
-  crc:=ZipFile.Entries[f].Crc;
+  crc:=ZipFile.Entries[f].CRC32;
   unzLocateFile(zfile,pchar(ZipFile.Entries[f].ArchiveFileName),0);
   unzOpenCurrentFile(zfile);
   unzReadCurrentFile(zfile,pointer(donde),longitud);

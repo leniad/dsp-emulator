@@ -4,9 +4,9 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
       z80daisy,timer_engine,main_engine,cpu_misc;
 
-function ctc0_irq_state(num:byte):byte;
-function ctc0_irq_ack(num:byte):byte;
-procedure ctc0_irq_reti(num:byte);
+function ctc0_irq_state:byte;
+function ctc0_irq_ack:byte;
+procedure ctc0_irq_reti;
 
 const
   NOTIMER_0=(1 shl 0);
@@ -115,17 +115,17 @@ begin
   ctc_0.trigger(3,valor);
 end;
 
-function ctc0_irq_state(num:byte):byte;
+function ctc0_irq_state:byte;
 begin
   ctc0_irq_state:=ctc_0.irq_state;
 end;
 
-function ctc0_irq_ack(num:byte):byte;
+function ctc0_irq_ack:byte;
 begin
   ctc0_irq_ack:=ctc_0.irq_ack;
 end;
 
-procedure ctc0_irq_reti(num:byte);
+procedure ctc0_irq_reti;
 begin
   ctc_0.irq_reti;
 end;

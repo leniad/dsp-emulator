@@ -148,6 +148,11 @@ while EmuStatus=EsRunning do begin
   QueryPerformanceCounter(cont1);
   {$endif}
   for f:=0 to 261 do begin
+    if f=246 then begin
+      z80_0.change_irq(HOLD_LINE);
+      copymemory(@buffer_sprites,@memoria[$fe00],$200);
+      update_video_blktiger;
+    end;
     //Main CPU
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -157,11 +162,6 @@ while EmuStatus=EsRunning do begin
     //MCU
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
-    if f=245 then begin
-      z80_0.change_irq(HOLD_LINE);
-      copymemory(@buffer_sprites,@memoria[$fe00],$200);
-      update_video_blktiger;
-    end;
   end;
   eventos_blktiger;
   {$ifdef speed_debug}

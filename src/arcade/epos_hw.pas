@@ -49,7 +49,7 @@ for f:=0 to $7fff do begin
     buffer[f]:=false;
   end;
 end;
-actualiza_trozo_simple(0,0,236,272,1);
+actualiza_trozo(0,0,236,272,1,0,0,236,272,PANT_TEMP);
 end;
 
 procedure eventos_epos;

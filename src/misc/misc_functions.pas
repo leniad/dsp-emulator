@@ -324,7 +324,8 @@ case main_vars.system_type of
   SPV1000,SPV2000:begin
             ext[1]:='BIN';
             ext[2]:='DSP';
-            total_ext:=2;
+            ext[3]:='ROM';
+            total_ext:=3;
           end;
   else begin
           MessageDlg('Sistema sin definir!!!', mtInformation,[mbOk], 0);
@@ -436,11 +437,11 @@ case main_vars.system_type of
        end;
   SPV1000:begin
          opendialog.InitialDir:=directory.pv1000;
-         Opendialog.Filter:='PV1000 Game/Snapshot (*.bin;*.dsp;*.zip)|*.bin;*.dsp;*.zip';
+         Opendialog.Filter:='PV1000 Game/Snapshot (*.rom;*.bin;*.dsp;*.zip)|*.rom;*.bin;*.dsp;*.zip';
        end;
   SPV2000:begin
          opendialog.InitialDir:=directory.pv2000;
-         Opendialog.Filter:='PV2000 Game/Snapshot (*.bin;*.dsp;*.zip)|*.bin;*.dsp;*.zip';
+         Opendialog.Filter:='PV2000 Game/Snapshot (*.rom;*.bin;*.dsp;*.zip)|*.rom;*.bin;*.dsp;*.zip';
        end;
 end;
 openrom:=opendialog.execute;

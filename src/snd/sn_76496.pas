@@ -1,12 +1,12 @@
 unit sn_76496;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,dialogs;
 
 type
 
  SN76496_chip=class(snd_chip_class)
-      constructor Create(clock:dword;amp:single=1);
+      constructor create(clock:dword;amp:single=1);
       destructor free;
     public
       UpdateStep:dword;
@@ -41,8 +41,9 @@ const
      FB_PNOISE=$8000;
      NG_PRESET=$0f35;
 
-constructor sn76496_chip.Create(clock:dword;amp:single=1);
+constructor sn76496_chip.create(clock:dword;amp:single=1);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.amp:=amp;
   self.set_gain(0);
 	self.clock:=clock;

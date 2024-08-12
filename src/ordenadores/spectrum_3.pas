@@ -118,7 +118,7 @@ end else begin
   if mouse.tipo<>MNONE then begin
       if mouse.tipo=MAMX then begin //AMX Mouse
         if (puerto and $80)<>0 then temp:=mouse.botones
-          else temp:=z80pio_cd_ba_r(0,puerto shr 5);
+          else temp:=pio_0.cd_ba_r(puerto shr 5);
       end;
       if mouse.tipo=MKEMPSTON then begin //Kempston Mouse
         case puerto of
@@ -205,7 +205,7 @@ begin
                    memoria_spectrum3;
                 end;
         end;
-        if mouse.tipo=MAMX then z80pio_cd_ba_w(0,puerto shr 5,valor);
+        if mouse.tipo=MAMX then pio_0.cd_ba_w(puerto shr 5,valor);
 end;
 
 procedure spec3_putbyte(direccion:word;valor:byte);
@@ -252,6 +252,10 @@ var
   h:byte;
   mem_temp:array[0..$ffff] of byte;
 begin
+case var_spectrum.audio_128k of
+  0:iniciar_audio(false);
+  1,2:iniciar_audio(true);
+end;
 case main_vars.tipo_maquina of
   2:begin
       llamadas_maquina.cartuchos:=spectrum3_loaddisk;
@@ -285,10 +289,6 @@ for h:=0 to 191 do begin
   copymemory(@var_spectrum.retraso[f],@cmem3[0],128);
   inc(f,228);
   end;
-case var_spectrum.audio_128k of
-  0:iniciar_audio(false);
-  1,2:iniciar_audio(true);
-end;
 spec3_reset;
 iniciar_3:=true;
 end;

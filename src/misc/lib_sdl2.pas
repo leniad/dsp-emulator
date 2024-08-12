@@ -82,11 +82,12 @@ const
 var
   sdl_dll_handle:int64;
   SDL_Init:function(flags:Cardinal):LongInt; cdecl;
-  SDL_WasInit:function(flags:Cardinal):Cardinal; cdecl;
+  SDL_WasInit:function(flags:Cardinal):Cardinal;cdecl;
   SDL_Quit:procedure;cdecl;
   SDL_LoadBMP_RW:function(src:libsdlp_RWops;freesrc:LongInt):libsdlp_Surface;cdecl;
   SDL_CreateRGBSurface:function(flags:Cardinal;width:LongInt;height:LongInt;depth:LongInt;Rmask:Cardinal;Gmask:Cardinal;Bmask:Cardinal;Amask:Cardinal):libsdlp_Surface;cdecl;
   SDL_UpperBlit:function(src:libsdlp_Surface;const srcrect:libsdlp_rect;dst:libsdlp_Surface;dstrect:libsdlp_rect):LongInt;cdecl;
+  SDL_UpperBlitScaled:function(src:libsdlp_Surface;const srcrect:libsdlp_rect;dst:libsdlp_Surface;dstrect:libsdlp_rect):LongInt;cdecl;
   SDL_LockSurface:function(surface:libsdlp_Surface):LongInt;cdecl;
   SDL_UnlockSurface:function(surface:libsdlp_Surface):LongInt;cdecl;
   SDL_FreeSurface:procedure(surface:libsdlp_Surface);cdecl;
@@ -120,6 +121,7 @@ var
   SDL_SetHint:function(const title:PAnsiChar;const value:PAnsiChar):LongBool;cdecl;
   SDL_JoystickUpdate:procedure;cdecl;
   SDL_JoystickEventState:function(state:LongInt):LongInt;cdecl;
+  SDL_JoystickGetAxisInitialState:function(joystick:libsdlp_joystick;axis:LongInt;state:psmallint):LongBool;cdecl;
   SDL_GetClosestDisplayMode:function(displayIndex:LongInt;const mode:libsdlp_DisplayMode;closest:libsdlp_DisplayMode):libsdlp_DisplayMode;cdecl;
   SDL_SetWindowDisplayMode:function(window:libsdlP_Window;const mode:libsdlp_DisplayMode):LongInt; cdecl;
   SDL_GetTicks:function:Cardinal;cdecl;
@@ -168,6 +170,7 @@ end;
 @SDL_LoadBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_LoadBMP_RW');
 @SDL_CreateRGBSurface:=GetProcAddress(sdl_dll_Handle,'SDL_CreateRGBSurface');
 @SDL_UpperBlit:=GetProcAddress(sdl_dll_Handle,'SDL_UpperBlit');
+@SDL_UpperBlitScaled:=GetProcAddress(sdl_dll_Handle,'SDL_UpperBlitScaled');
 @SDL_FreeSurface:=GetProcAddress(sdl_dll_Handle,'SDL_FreeSurface');
 @SDL_SaveBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_SaveBMP_RW');
 @SDL_SetColorKey:=GetProcAddress(sdl_dll_Handle,'SDL_SetColorKey');
@@ -184,6 +187,7 @@ end;
 @SDL_JoystickNumHats:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickNumHats');
 @SDL_JoystickUpdate:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickUpdate');
 @SDL_JoystickEventState:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickEventState');
+@SDL_JoystickGetAxisInitialState:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickGetAxisInitialState');
 //events
 @SDL_PollEvent:=GetProcAddress(sdl_dll_Handle,'SDL_PollEvent');
 //mouse

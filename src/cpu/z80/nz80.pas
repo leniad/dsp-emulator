@@ -36,9 +36,10 @@ type
   band_z80 = record
      c,n,p_v,bit3,h,bit5,z,s:boolean;
   end;
-  tdespues_instruccion=procedure (estados_t:word);
+  tdespues_instruccion=procedure(estados_t:word);
   type_raised=procedure;
   type_m1_raise=procedure(opcode:byte);
+  type_external_vector=function:byte;
   nreg_z80=packed record
         ppc,pc,sp:word;
         bc,de,hl:parejas;
@@ -61,7 +62,7 @@ type
           procedure run(maximo:single);
           procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
           procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
-          procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil);
+          procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil;external_vector:type_external_vector=nil);
           function get_safe_pc:word;
           function get_internal_r:npreg_z80;
           procedure set_internal_r(r:npreg_z80);
@@ -103,6 +104,7 @@ type
           z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..255] of byte;
           raised_z80:type_raised;
           m1_raised:type_m1_raise;
+          external_vector:type_external_vector;
           function call_nmi:byte;
           function call_irq:byte;
           //resto de opcodes
@@ -578,6 +580,8 @@ self.in_port:=res_ff;
 self.out_port:=out_ff;
 self.despues_instruccion:=nil;
 self.raised_z80:=nil;
+self.m1_raised:=nil;
+self.external_vector:=nil;
 copymemory(@z80t,@z80t_m,$100);
 copymemory(@z80t_cb,@z80t_cb_m,$100);
 copymemory(@z80t_dd,@z80t_dd_m,$100);
@@ -690,11 +694,12 @@ begin
   if @out_port<>nil then self.out_port:=out_port;
 end;
 
-procedure cpu_z80.change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil);
+procedure cpu_z80.change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil;external_vector:type_external_vector=nil);
 begin
   self.despues_instruccion:=despues_instruccion;
   self.raised_z80:=raised_z80;
   self.m1_raised:=m1_raised;
+  self.external_vector:=external_vector;
 end;
 
 function cpu_z80.call_nmi:byte;
@@ -738,9 +743,9 @@ case r.im of
             estados_t:=estados_t+13;
         end;
         2:begin
-            if self.daisy then posicion:=z80daisy_ack
-              else posicion:=self.im2_lo;
-            posicion:=posicion or (r.i shl 8);
+            if self.daisy then self.im2_lo:=z80daisy_ack
+              else if @self.external_vector<>nil then self.im2_lo:=self.external_vector;
+            posicion:=self.im2_lo or (r.i shl 8);
             r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);
             estados_t:=estados_t+19;
         end;

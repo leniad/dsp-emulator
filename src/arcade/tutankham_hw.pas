@@ -39,15 +39,15 @@ var
 
 procedure update_video_tutankham;
 var
-  x,y,effx,yscroll,effy,vrambyte,shifted:byte;
+  x,y,effx,effy,vrambyte,shifted:byte;
   punt:array[0..$ffff] of word;
 begin
 for y:=0 to 255 do begin
 		for x:=0 to 255 do begin
 			effy:=y xor xory;
-      if effy<192 then yscroll:=scroll_y
-        else yscroll:=0;
-			effx:=(x xor xorx)+yscroll;
+      //La parte de arriba es fija!
+      if effy<192 then effx:=(x xor xorx)+scroll_y
+        else effx:=(x xor xorx);
 			vrambyte:=memoria[effx*128+effy shr 1];
 			shifted:=vrambyte shr (4*(effy and 1));
       punt[y*256+x]:=paleta[shifted and $0f];

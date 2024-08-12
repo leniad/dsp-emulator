@@ -208,7 +208,6 @@ uses
   volfied_cchip in '..\arcade\misc\volfied_cchip.pas',
   operationwolf_hw in '..\arcade\operationwolf_hw.pas',
   opwolf_cchip in '..\arcade\misc\opwolf_cchip.pas',
-  joystick_calibrate in 'joystick_calibrate.pas' {joy_calibration},
   outrun_hw in '..\arcade\outrun_hw.pas',
   taitosj_hw in '..\arcade\taitosj_hw.pas',
   fd1089 in '..\devices\fd1089.pas',
@@ -360,7 +359,7 @@ uses
   dooyong_hw in '..\arcade\dooyong_hw.pas',
   blueprint_hw in '..\arcade\blueprint_hw.pas',
   unico_hw in '..\arcade\unico_hw.pas',
-  caloriekun_hw in '..\arcade\caloriekun_hw.pas';
+  kikikaikai_hw in '..\arcade\kikikaikai_hw.pas';
 
 {$R *.res}
 begin
@@ -376,7 +375,6 @@ begin
   Application.CreateForm(TAboutBox, AboutBox);
   Application.CreateForm(Tload_dsk, load_dsk);
   Application.CreateForm(Tconfig_arcade, config_arcade);
-  Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(TConfigCPC, ConfigCPC);
   Application.CreateForm(Tconfiggb, configgb);

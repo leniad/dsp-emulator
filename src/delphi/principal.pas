@@ -32,7 +32,7 @@ type
     Timer1: TTimer;
     Spectrum128K1: TMenuItem;
     consonido1: TMenuItem;
-    BombJack1: TMenuItem;
+    BombJackHW: TMenuItem;
     PacmanHW1: TMenuItem;
     Emulacion1: TMenuItem;
     Ordenadores8bits1: TMenuItem;
@@ -568,12 +568,16 @@ type
     BurglarX1: TMenuItem;
     ZeroPoint1: TMenuItem;
     Calipso1: TMenuItem;
-    CalorieKun1: TMenuItem;
     Gardia1: TMenuItem;
     Cavelon1: TMenuItem;
     SnowBros1: TMenuItem;
     ComeBackToto1: TMenuItem;
     HyperPacman1: TMenuItem;
+    BombJack1: TMenuItem;
+    CalorieKun1: TMenuItem;
+    KiKiKaiKaiHW1: TMenuItem;
+    KiKiKaiKai1: TMenuItem;
+    KickandRun1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -739,6 +743,7 @@ procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
@@ -853,6 +858,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 reset_dsp;
 file_ini_save;
 close_joystick;
@@ -967,8 +973,13 @@ procedure Tprincipal1.ffastload(Sender: TObject);
 begin
 var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
-  else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+if var_spectrum.fastload then begin
+  principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=true;
+end else begin
+  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=false;
+end;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 

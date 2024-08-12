@@ -39,7 +39,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
   oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
   mugsmashers_hw,steelforce_hw,bankpanic_hw,appoooh_hw,hw_88games,dooyong_hw,
-  blueprint_hw,unico_hw,caloriekun_hw;
+  blueprint_hw,unico_hw,kikikaikai_hw;
 
 type
   tgame_desc=record
@@ -67,7 +67,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=405;
+  GAMES_CONT=407;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -461,6 +461,8 @@ const
   (name:'Cavelon';year:'1983';snd:1;hi:false;zip:'cavelon';grid:385;company:'Jetsoft';rom:@cavelon_roms;tipo:ARCADE or MAZE),
   (name:'Come Back Toto';year:'1996';snd:1;hi:false;zip:'toto';grid:386;company:'SoftClub';rom:@toto_roms;tipo:ARCADE or MAZE),
   (name:'Hyper Pacman';year:'1995';snd:1;hi:false;zip:'hyperpac';grid:387;company:'SemiCom';rom:@hyperpac_roms;tipo:ARCADE or MAZE),
+  (name:'KiKi KaiKai';year:'1986';snd:1;hi:false;zip:'kikikai';grid:388;company:'Taito';rom:@kikikaikai_roms;tipo:ARCADE or RUN_GUN OR MAZE),
+  (name:'Kick and Run';year:'1986';snd:1;hi:false;zip:'kicknrun';grid:389;company:'Taito';rom:@kickrun_roms;tipo:ARCADE or SPORT),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -884,6 +886,8 @@ case numero of
   385:principal1.CambiarMaquina(principal1.cavelon1);
   386:principal1.CambiarMaquina(principal1.comebacktoto1);
   387:principal1.CambiarMaquina(principal1.hyperpacman1);
+  388:principal1.CambiarMaquina(principal1.kikikaikai1);
+  389:principal1.CambiarMaquina(principal1.kickandrun1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1295,6 +1299,8 @@ principal1.gardia1.Checked:=false;
 principal1.cavelon1.Checked:=false;
 principal1.comebacktoto1.Checked:=false;
 principal1.hyperpacman1.Checked:=false;
+principal1.kikikaikai1.Checked:=false;
+principal1.kickandrun1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1427,7 +1433,7 @@ case tmaquina of
   10,88,234,305,353:llamadas_maquina.iniciar:=iniciar_pacman;
   11,202:llamadas_maquina.iniciar:=iniciar_phoenix;
   12:llamadas_maquina.iniciar:=iniciar_ms;
-  13:llamadas_maquina.iniciar:=iniciar_bombjack;
+  13,383:llamadas_maquina.iniciar:=iniciar_bombjack;
   14,47,48,49,143,144,145,363,366,369,370,382,385:llamadas_maquina.iniciar:=iniciar_galaxian;
   15,168,169:llamadas_maquina.iniciar:=iniciar_dkong;
   16:llamadas_maquina.iniciar:=iniciar_blktiger;
@@ -1606,7 +1612,7 @@ case tmaquina of
   371,372,373,374,375:llamadas_maquina.iniciar:=iniciar_dooyong;
   377,378,379:llamadas_maquina.iniciar:=iniciar_blueprint;
   380,381:llamadas_maquina.iniciar:=iniciar_unico;
-  383:llamadas_maquina.iniciar:=iniciar_caloriekun;
+  388,389:llamadas_maquina.iniciar:=iniciar_kikikaikai;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -3190,7 +3196,14 @@ if sender=principal1.hyperpacman1 then begin
   tipo:=387;
   principal1.hyperpacman1.Checked:=true;
 end;
-
+if sender=principal1.kikikaikai1 then begin
+  tipo:=388;
+  principal1.kikikaikai1.Checked:=true;
+end;
+if sender=principal1.kickandrun1 then begin
+  tipo:=389;
+  principal1.kickandrun1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;

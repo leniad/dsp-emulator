@@ -152,25 +152,24 @@ end;
 end;
 
 procedure blockout_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(pos,data:word);
 var
   bit0,bit1,bit2,bit3:byte;
   color:tcolor;
 begin
-  // red component */
+  // red component
 	bit0:=(data shr 0) and $01;
 	bit1:=(data shr 1) and $01;
 	bit2:=(data shr 2) and $01;
 	bit3:=(data shr 3) and $01;
 	color.r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-	// green component */
+	// green component
 	bit0:=(data shr 4) and $01;
 	bit1:=(data shr 5) and $01;
 	bit2:=(data shr 6) and $01;
 	bit3:=(data shr 7) and $01;
 	color.g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-	// blue component */
+	// blue component
 	bit0:=(data shr 8) and $01;
 	bit1:=(data shr 9) and $01;
 	bit2:=(data shr 10) and $01;

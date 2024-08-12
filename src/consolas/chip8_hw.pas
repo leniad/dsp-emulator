@@ -362,7 +362,7 @@ while EmuStatus=EsRunning do begin
   if chip8_0.sound_timer<>0 then chip8_0.sound_timer:=chip8_0.sound_timer-1;
   eventos_chip8;
   update_video_chip8;
-  actualiza_trozo_simple(0,0,64*4,32*4,1);
+  actualiza_trozo(0,0,64*4,32*4,1,0,0,64*4,32*4,PANT_TEMP);
   video_sync;
 end;
 end;

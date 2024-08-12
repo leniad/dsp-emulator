@@ -364,7 +364,7 @@ z80_0.change_io_calls(tapper_inbyte,tapper_outbyte);
 z80_0.daisy:=true;
 ctc_0:=tz80ctc.create(z80_0.numero_cpu,5000000,z80_0.clock,0,CTC0_TRG01);
 ctc_0.change_calls(z80ctc_int);
-z80daisy_init(Z80_CTC0_TYPE,Z80_DAISY_NONE);
+z80daisy_init(Z80_CTC0_TYPE);
 //Sound CPU
 z80_1:=cpu_z80.create(2000000,480*CPU_SYNC);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);

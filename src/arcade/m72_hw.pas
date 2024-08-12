@@ -226,7 +226,7 @@ while EmuStatus=EsRunning do begin
       end else fill_full_screen(0,0);
     end;
  end;
- actualiza_trozo_simple(0,0,384,256,6);
+ actualiza_trozo(0,0,384,256,6,0,0,384,256,PANT_TEMP);
  eventos_irem_m72;
  video_sync;
 end;

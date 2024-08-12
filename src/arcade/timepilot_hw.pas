@@ -74,10 +74,10 @@ end;
 procedure eventos_timepilot;
 begin
 if event.arcade then begin
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.coin[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or $1;
+  if arcade_input.coin[1] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or $2;
+  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or $8;
+  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
   if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or $1;
   if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or $2;
   if arcade_input.up[0] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or $4;
@@ -94,12 +94,12 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for scan_line:=0 to $ff do begin
+    if ((scan_line=244) and nmi_enable) then z80_0.change_nmi(ASSERT_LINE);
     //Main
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
     konamisnd_0.run;
-    if ((scan_line=244) and nmi_enable) then z80_0.change_nmi(ASSERT_LINE);
   end;
   update_video_timepilot;
   eventos_timepilot;

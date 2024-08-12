@@ -133,8 +133,8 @@ procedure deco16_double_snd_putbyte(direccion:dword;valor:byte);
 begin
 case direccion of
   0..$ffff:; //ROM
-  $100000:ym2203_0.Control(valor);
-  $100001:ym2203_0.Write(valor);
+  $100000:ym2203_0.control(valor);
+  $100001:ym2203_0.write(valor);
   $110000:ym2151_0.reg(valor);
   $110001:ym2151_0.write(valor);
   $120000..$120001:oki_6295_0.write(valor);

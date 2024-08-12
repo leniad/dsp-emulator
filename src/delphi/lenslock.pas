@@ -85,11 +85,18 @@ case main_vars.tipo_maquina of
   2,3:spec_a_pantalla(@memoria_3[var_spectrum.pantalla_128k,0],imagen1);
   7,8,9:begin
           cargar_bmp;
-          x:=192;
+          x:=200;
           case lenslok.indice of
-            1:y:=115;
-            5:y:=90;
-            7:y:=100;
+            1:begin
+                y:=135;
+                x:=199;
+              end;
+            5:y:=112;
+            7:y:=122;
+            8:begin
+                x:=208;
+                y:=98;
+            end;
           end;
         end;
 end;

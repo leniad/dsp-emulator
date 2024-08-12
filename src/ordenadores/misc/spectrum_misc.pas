@@ -1,10 +1,13 @@
 unit spectrum_misc;
+
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
      z80pio,z80daisy,disk_file_format,timer_engine,misc_functions,qsnapshot;
+
 const
         tabla_scr:array[0..191] of word=(
         0,    256, 512, 768,1024,1280,1536,1792,
@@ -55,7 +58,7 @@ const
         MGUNSTICK=1;
         MKEMPSTON=2;
         MAMX=3;
-        BORDE_HIGH=40;
+
 type
   tmouse_spectrum=record
     //General
@@ -105,15 +108,17 @@ type
     irq_pos:byte;
     issue2,sd_1,fastload:boolean;
   end;
+
 var
       ulaplus:tulaplus_spectrum;
       var_spectrum:tvar_spectrum;
       interface2:tinterface2_spectrum;
       mouse:tmouse_spectrum;
       borde:tborde_spectrum;
+
 procedure spectrum_config;
 function spectrum_mensaje:string;
-procedure borde_normal  (linea:word);
+procedure borde_normal(linea:word);
 procedure eventos_spectrum;
 function spec_comun(clock:dword):boolean;
 procedure spec_cerrar_comun;
@@ -128,8 +133,10 @@ procedure spectrum_reset_video;
 procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
 function pio_read_portb:byte;
+
 implementation
 uses tap_tzx,snapshot,config;
+
 procedure evalua_gunstick;
 var
   gs_temp:byte;
@@ -152,36 +159,39 @@ if ((gs_temp=63) or (gs_temp=127)) then begin
   mouse.lg_val:=mouse.lg_val or $10;
 end;
 end;
+
 procedure spectrum_reset_video;
 begin
 fillchar(var_spectrum.buffer_video,6144,1);
 fillchar(borde.buffer,78000,$80);
 end;
+
 procedure borde_normal(linea:word);
 var
-        linea_actual:word;
+  linea_actual:word;
 begin
-if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<16) or (linea>295)) then exit;
-if borde.buffer[linea]=borde.color then exit;
-//poner_linea:=true;
+//if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<16) or (linea>295)) then exit;
+if ((borde.tipo=0) or (linea<16) or (linea>295) or (borde.buffer[linea]=borde.color)) then exit;
 borde.buffer[linea]:=borde.color;
 linea_actual:=linea-16;
 case linea of
         16..63,256..295:begin
                           single_line(0,linea_actual,paleta[borde.color],352,1);
-                          actualiza_trozo_simple(0,linea_actual,352,1,1);
+                          actualiza_trozo(0,linea_actual,352,1,1,0,linea_actual,352,1,PANT_TEMP);
                         end;
         64..255:begin
                     single_line(0,linea_actual,paleta[borde.color],48,1);
-                    actualiza_trozo_simple(0,linea_actual,48,1,1);
+                    actualiza_trozo(0,linea_actual,48,1,1,0,linea_actual,48,1,PANT_TEMP);
                     single_line(304,linea_actual,paleta[borde.color],48,1);
-                    actualiza_trozo_simple(304,linea_actual,48,1,1);
+                    actualiza_trozo(304,linea_actual,48,1,1,304,linea_actual,48,1,PANT_TEMP);
                 end;
 end;
 end;
+
 procedure teclado_matriz;
 begin
 end;
+
 procedure eventos_spectrum;
 begin
 if (event.mouse and (mouse.tipo<>MNONE)) then begin
@@ -227,12 +237,12 @@ if (event.mouse and (mouse.tipo<>MNONE)) then begin
         if raton.button2 then mouse.botones:=mouse.botones and $df // $bf
           else mouse.botones:=mouse.botones or $20;
         if mouse.x<>mouse.x_act then begin
-          z80pio_astb_w(0,false);
-          z80pio_astb_w(0,true);
+          pio_0.astb_w(false);
+          pio_0.astb_w(true);
         end;
         if mouse.y<>mouse.y_act then begin
-          z80pio_bstb_w(0,false);
-          z80pio_bstb_w(0,true);
+          pio_0.bstb_w(false);
+          pio_0.bstb_w(true);
         end;
     end;
   end;
@@ -394,6 +404,7 @@ if event.arcade then begin
   end;
 end;
 end;
+
 //Audio!!
 procedure spectrum_beeper_sound;
 var
@@ -405,10 +416,12 @@ begin
   if sound_status.stereo then tsample[var_spectrum.ear_channel,sound_status.posicion_sonido+1]:=res;
   var_spectrum.posicion_beeper:=0;
 end;
+
 procedure beeper_get;
 begin
   var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+var_spectrum.altavoz;
 end;
+
 procedure spectrum_ay8912_sound;
 var
   audio:pinteger;
@@ -443,6 +456,7 @@ if var_spectrum.turbo_sound then begin
     end;
   end;
 end;
+
 //Quick save/load
 procedure spec_qload(nombre:string);
 var
@@ -652,9 +666,10 @@ var_spectrum.adr_13:=false;
 var_spectrum.adr_14:=false;
 var_spectrum.adr_15:=false;
 if mouse.tipo=MAMX then begin
-  z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb);
-  z80daisy_init(Z80_PIO_TYPE);
-  z80pio_reset(0);
+  pio_0:=tz80pio.create;
+  pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb);
+  z80daisy_init(Z80_PIO0_TYPE);
+  pio_0.reset;
   spec_z80.daisy:=true;
 end;
 mouse.x:=0;
@@ -729,7 +744,7 @@ if cinta_tzx.cargada then begin
     end else begin
       if ((spec_z80.get_safe_pc=$0556) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
-       if not(cinta_tzx.es_tap) then main_screen.rapido:=true;
+       main_screen.rapido:=true;
        tape_window1.fPlayCinta(nil);
       end;
     end;
@@ -800,7 +815,7 @@ if mouse.x<>mouse.x_act then begin
     mouse.data_a:=1;
     mouse.x_act:=mouse.x_act-1;
   end;
-  z80_pio[0].m_port[PORT_A].m_ip:=true;
+  pio_0.pio_port[PIO_PORT_A].ip:=true;
 end;
 if mouse.y<>mouse.y_act then begin
   if mouse.y_act<mouse.y then begin
@@ -810,7 +825,7 @@ if mouse.y<>mouse.y_act then begin
     mouse.data_b:=0;
     mouse.y_act:=mouse.y_act-1;
   end;
-  z80_pio[0].m_port[PORT_B].m_ip:=true;
+  pio_0.pio_port[PIO_PORT_B].ip:=true;
 end;
 end;
 

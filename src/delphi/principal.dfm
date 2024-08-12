@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 208
+  ClientHeight = 235
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 147
+    Height = 174
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 147
+    Height = 174
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 138
+    ExplicitHeight = 165
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 189
+    Top = 216
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 180
+    ExplicitTop = 207
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -2154,10 +2154,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object BombJack1: TMenuItem
-            Caption = 'Bomb Jack'
+          object BombJackHW: TMenuItem
+            Caption = 'Bomb Jack HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object BombJack1: TMenuItem
+              Caption = 'Bomb Jack'
+              OnClick = CambiarMaquina
+            end
+            object CalorieKun1: TMenuItem
+              Caption = 'Calorie Kun vs Moguranian'
+              OnClick = CambiarMaquina
+            end
           end
           object PacmanHW1: TMenuItem
             Caption = 'Pacman HW'
@@ -3040,10 +3047,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object CalorieKun1: TMenuItem
-            Caption = 'Calorie Kun vs Moguranian'
+          object KiKiKaiKaiHW1: TMenuItem
+            Caption = 'KiKi KaiKai HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object KiKiKaiKai1: TMenuItem
+              Caption = 'KiKi KaiKai'
+              OnClick = CambiarMaquina
+            end
+            object KickandRun1: TMenuItem
+              Caption = 'Kick and Run'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object M65021: TMenuItem

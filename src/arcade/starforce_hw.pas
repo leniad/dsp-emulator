@@ -340,9 +340,9 @@ while EmuStatus=EsRunning do begin
       if f=239 then begin
         z80_0.change_irq(ASSERT_LINE);
         draw_video;
+        eventos_starforce;
       end;
   end;
-  eventos_starforce;
   video_sync;
 end;
 end;
@@ -430,8 +430,8 @@ case direccion of
         $d002:z80_0.change_irq(CLEAR_LINE);
         $d004:begin
                 sound_latch:=valor;
-                z80pio_astb_w(0,false);
-	              z80pio_astb_w(0,true);
+                pio_0.astb_w(false);
+	              pio_0.astb_w(true);
               end;
 end;
 end;
@@ -448,9 +448,9 @@ begin
 case direccion of
   0..$1fff:;
   $4000..$43ff:mem_snd[direccion]:=valor;
-  $8000:sn_76496_0.Write(valor);
-  $9000:sn_76496_1.Write(valor);
-  $a000:sn_76496_2.Write(valor);
+  $8000:sn_76496_0.write(valor);
+  $9000:sn_76496_1.write(valor);
+  $a000:sn_76496_2.write(valor);
   //$d000:volumen
 end;
 end;
@@ -458,7 +458,7 @@ end;
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-    $0..$3:snd_inbyte:=z80pio_ba_cd_r(0,puerto and $3);
+    $0..$3:snd_inbyte:=pio_0.ba_cd_r(puerto and $3);
     $8..$b:snd_inbyte:=ctc_0.read(puerto and $3);
 end;
 end;
@@ -466,16 +466,16 @@ end;
 procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0..$3:z80pio_ba_cd_w(0,puerto and $3,valor);
+  $0..$3:pio_0.ba_cd_w(puerto and $3,valor);
   $8..$b:ctc_0.write(puerto and $3,valor);
 end;
 end;
 
 procedure starforce_sound_update;
 begin
-  sn_76496_0.Update;
-  sn_76496_1.Update;
-  sn_76496_2.Update;
+  sn_76496_0.update;
+  sn_76496_1.update;
+  sn_76496_2.update;
 end;
 
 //PIO
@@ -495,7 +495,7 @@ procedure reset_starforce;
 begin
  z80_0.reset;
  z80_1.reset;
- z80pio_reset(0);
+ pio_0.reset;
  ctc_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
@@ -508,11 +508,6 @@ begin
  fillchar(scroll_y,3,0);
  sound_latch:=0;
  fillword(@char_scroll,$20,0);
-end;
-
-procedure cerrar_starforce;
-begin
-  z80pio_close(0);
 end;
 
 function iniciar_starforce:boolean;
@@ -544,7 +539,6 @@ convert_gfx(gfx_num,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
 end;
 begin
 llamadas_maquina.bucle_general:=starforce_principal;
-llamadas_maquina.close:=cerrar_starforce;
 llamadas_maquina.reset:=reset_starforce;
 iniciar_starforce:=false;
 iniciar_audio(false);
@@ -581,12 +575,13 @@ z80_1.init_sound(starforce_sound_update);
 //Daisy Chain PIO+CTC
 ctc_0:=tz80ctc.create(z80_1.numero_cpu,2000000,z80_1.clock,NOTIMER_2,CTC0_TRG01);
 ctc_0.change_calls(pio_int_main);
-z80pio_init(0,pio_int_main,pio_read_porta);
-z80daisy_init(Z80_PIO_TYPE,Z80_CTC0_TYPE);
+pio_0:=tz80pio.create;
+pio_0.change_calls(pio_int_main,pio_read_porta);
+z80daisy_init(Z80_PIO0_TYPE,Z80_CTC0_TYPE);
 //Chip CPU
-sn_76496_0:=sn76496_chip.Create(2000000);
-sn_76496_1:=sn76496_chip.Create(2000000);
-sn_76496_2:=sn76496_chip.Create(2000000);
+sn_76496_0:=sn76496_chip.create(2000000);
+sn_76496_1:=sn76496_chip.create(2000000);
+sn_76496_2:=sn76496_chip.create(2000000);
 case main_vars.tipo_maquina of
   25:begin  //Star Force
         draw_video:=update_video_starforce;

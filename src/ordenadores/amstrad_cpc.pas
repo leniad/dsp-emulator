@@ -351,7 +351,7 @@ end;
 function cpc_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$3fff:if (not(cpc_dandanator.follow_rom_ena) and  cpc_dandanator.enabled and cpc_dandanator.zone0_ena and (cpc_dandanator.zone0_seg=0)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom,direccion]
+  0..$3fff:if (not(cpc_dandanator.follow_rom_ena) and cpc_dandanator.enabled and cpc_dandanator.zone0_ena and (cpc_dandanator.zone0_seg=0)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom,direccion]
             else if cpc_ga.rom_low then begin
                   if not(cpc_dandanator.follow_rom_ena) then cpc_getbyte:=cpc_rom[16].data[direccion]
                     else cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.follow_rom,direccion];
@@ -961,7 +961,7 @@ var
   resultado,es_cinta:boolean;
 begin
   if not(OpenRom(romfile)) then exit;
-  getmem(datos,$400000);
+  getmem(datos,$3000000);
   if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
     freemem(datos);
     exit;

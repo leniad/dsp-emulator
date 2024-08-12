@@ -359,17 +359,10 @@ begin
 end;
 
 //Main
-procedure cerrar_system1;
-begin
-case main_vars.tipo_maquina of
-  27,35,36,153,155,384:z80pio_close(0);
-end;
-end;
-
 procedure reset_system1;
 begin
 case main_vars.tipo_maquina of
-  27,35,36,153,155,384:z80pio_reset(0);
+  27,35,36,153,155,384:pio_0.reset;
   37,151,152,154:pia8255_0.reset;
 end;
 sn_76496_0.reset;
@@ -548,7 +541,6 @@ end;
 llamadas_maquina.reset:=reset_system1;
 llamadas_maquina.save_qsnap:=system1_qsave;
 llamadas_maquina.load_qsnap:=system1_qload;
-llamadas_maquina.close:=cerrar_system1;
 llamadas_maquina.fps_max:=60.096154;
 end;
 

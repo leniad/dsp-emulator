@@ -57,7 +57,7 @@ case linea of
         63..254:begin
                 nlinea1:=linea-63;
                 nlinea2:=linea-15;
-                pos_video:=((linea-63) shr 3) shl 5;
+                pos_video:=(nlinea1 shr 3) shl 5;
                 for x:=0 to 31 do begin
                       ptvideo:=pvideo;
                       inc(ptvideo,$1800+pos_video);
@@ -65,7 +65,7 @@ case linea of
                       ptvideo:=pvideo;
                       inc(ptvideo,tabla_scr[nlinea1]+x);
                       video:=ptvideo^;
-                      if (var_spectrum.buffer_video[tabla_scr[nlinea1]+x] or (((atrib and $80)<>0) and not(main_screen.rapido))) then begin
+                      if (var_spectrum.buffer_video[tabla_scr[nlinea1]+x] or ((atrib and $80)<>0)) then begin
                         var_spectrum.buffer_video[tabla_scr[nlinea1]+x]:=false;
                         poner_linea:=true;
                         pant_x:=48+(x shl 3);
@@ -76,8 +76,15 @@ case linea of
                         end else begin
                           color2:=(atrib shr 3) and 7;
                           color:=atrib and 7;
-                          if (atrib and $40)<>0 then begin color:=color+8;color2:=color2+8;end;
-                          if ((atrib and $80)<>0) and var_spectrum.haz_flash then begin temp:=color;color:=color2;color2:=temp;end;
+                          if (atrib and $40)<>0 then begin
+                            color:=color+8;
+                            color2:=color2+8;
+                          end;
+                          if (((atrib and $80)<>0) and var_spectrum.haz_flash) then begin
+                            temp:=color;
+                            color:=color2;
+                            color2:=temp;
+                          end;
                         end;
                         ptemp:=punbuf;
                         if (video and 128)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
@@ -102,7 +109,7 @@ case linea of
         end; {del selector}
         else exit;
 end; {del case}
-if poner_linea then actualiza_trozo_simple(48,nlinea2,256,1,1);
+if poner_linea then actualiza_trozo(48,nlinea2,256,1,1,48,nlinea2,256,1,PANT_TEMP);
 end;
 
 procedure borde_128_full(linea:word);
@@ -111,7 +118,7 @@ var
   f:word;
   posicion:dword;
 begin
-if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<14) or (linea>296)) then exit;
+if ((borde.tipo=0) or (linea<14) or (linea>296)) then exit;
 fillchar(borde.buffer[linea*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
 borde.posicion:=spec_z80.contador-228;
 if linea=14 then exit;
@@ -125,7 +132,7 @@ for f:=203 to 227 do begin
   inc(ptemp);
 end;
 putpixel(0,linea-15,48,punbuf,1);
-actualiza_trozo_simple(0,linea-15,48,1,1);
+actualiza_trozo(0,linea-15,48,1,1,0,linea-15,48,1,PANT_TEMP);
 if linea=296 then exit;
 //24t borde der --> 48 pixels
 ptemp:=punbuf;
@@ -137,7 +144,7 @@ for f:=128 to 151 do begin
   inc(ptemp);
 end;
 putpixel(304,linea-15,48,punbuf,1);
-actualiza_trozo_simple(304,linea-15,48,1,1);
+actualiza_trozo(304,linea-15,48,1,1,304,linea-15,48,1,PANT_TEMP);
 if ((linea>62) and (linea<255)) then exit;
 //128t Centro pantalla --> 256 pixels
 ptemp:=punbuf;
@@ -148,7 +155,7 @@ for f:=0 to 127 do begin
     inc(ptemp);
 end;
 putpixel(48,linea-15,256,punbuf,1);
-actualiza_trozo_simple(48,linea-15,256,1,1);
+actualiza_trozo(48,linea-15,256,1,1,48,linea-15,256,1,PANT_TEMP);
 end;
 
 procedure spectrum128_main;
@@ -287,7 +294,7 @@ end else begin //Resto
   if mouse.tipo<>MNONE then begin
     if mouse.tipo=MAMX then begin //AMX Mouse
         if (puerto and $80)<>0 then temp:=mouse.botones
-          else temp:=z80pio_cd_ba_r(0,puerto shr 5);
+          else temp:=pio_0.cd_ba_r(puerto shr 5);
     end;
     if mouse.tipo=MKEMPSTON then begin //Kempston Mouse
         case puerto of
@@ -358,7 +365,7 @@ end else begin //resto
                   end;
                 end;
         end;
-  if mouse.tipo=MAMX then z80pio_cd_ba_w(0,puerto shr 5,valor);
+  if mouse.tipo=MAMX then pio_0.cd_ba_w(puerto shr 5,valor);
 end;
 end;
 
@@ -368,6 +375,10 @@ var
  h:byte;
  mem_temp:array[0..$7fff] of byte;
 begin
+case var_spectrum.audio_128k of
+  0:iniciar_audio(false);
+  1,2:iniciar_audio(true);
+end;
 principal1.panel2.Visible:=true;
 llamadas_maquina.bucle_general:=spectrum128_main;
 llamadas_maquina.reset:=spec128k_reset;
@@ -392,10 +403,6 @@ f:=14361;
 for h:=0 to 191 do begin
   copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
   f:=f+228;
-end;
-case var_spectrum.audio_128k of
-  0:iniciar_audio(false);
-  1,2:iniciar_audio(true);
 end;
 spec128k_reset;
 iniciar_128k:=true;

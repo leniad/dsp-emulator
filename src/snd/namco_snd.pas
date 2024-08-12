@@ -2,7 +2,7 @@ unit namco_snd;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine,timer_engine;
+     sound_engine,timer_engine,dialogs;
 
 const
   max_voices=8;
@@ -68,6 +68,7 @@ const
 
 constructor namco_snd_chip.create(num_voces:byte;wave_ram:boolean=false);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.num_voces:=num_voces;
   self.wave_on_ram:=wave_ram;
   self.tsample_num:=init_channel;

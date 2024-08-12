@@ -63,7 +63,7 @@ end;
 procedure Tload_spec.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 begin
 case key of
-  13:Button2Click(sender);
+  13:if filelistbox1.FileName<>'' then Button2Click(sender);
   27:button1click(sender);
 end;
 end;

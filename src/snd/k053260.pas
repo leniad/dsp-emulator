@@ -1,8 +1,7 @@
 unit k053260;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,misc_functions,timer_engine,
-     main_engine,cpu_misc;
+     main_engine,cpu_misc,dialogs;
 
 type
   tKDSC_Voice=class
@@ -64,14 +63,11 @@ type
       sh1_call,sh2_call:cpu_outport_call;
       procedure internal_update;
   end;
-
 var
   k053260_0:tk053260_chip;
-
 implementation
 const
   CLOCKS_PER_SAMPLE=64;
-
 procedure internal_update_k053260;
 begin
   k053260_0.internal_update;
@@ -92,6 +88,7 @@ constructor tk053260_chip.create(clock:dword;rom:pbyte;size:dword;amp:single);
 var
   f:byte;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   for f:=0 to 3 do self.voice[f]:=tKDSC_Voice.create(rom,size);
   self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/CLOCKS_PER_SAMPLE),internal_update_k053260,nil,true);
   //self.ntimer2:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock/16,call_update_k053260,nil,true);
@@ -99,14 +96,12 @@ begin
   self.tsample_num2:=init_channel;
   self.amp:=amp;
 end;
-
 destructor tk053260_chip.free;
 var
   f:byte;
 begin
   for f:=0 to 3 do self.voice[f].free;
 end;
-
 procedure tk053260_chip.reset;
 var
   f:byte;
@@ -118,7 +113,6 @@ begin
     self.buffer[1,f]:=0;
   end;
 end;
-
 procedure tk053260_chip.change_calls(sh1,sh2:cpu_outport_call);
 begin
   self.sh1_call:=sh1;
@@ -129,12 +123,10 @@ function tk053260_chip.main_read(direccion:byte):byte;
 begin
   main_read:=self.portdata[2+(direccion and 1)];
 end;
-
 procedure tk053260_chip.main_write(direccion,valor:byte);
 begin
   self.portdata[direccion and 1]:=valor;
 end;
-
 function tk053260_chip.read(direccion:byte):byte;
 var
   ret,f:byte;
@@ -148,7 +140,6 @@ begin
   end;
 read:=ret;
 end;
-
 procedure tk053260_chip.write(direccion,valor:byte);
 var
   f,rising_edge:byte;
@@ -200,7 +191,6 @@ begin
 			  end;
 end;
 end;
-
 procedure tk053260_chip.update;
 var
   out1,out2:integer;
@@ -235,13 +225,11 @@ for f:=0 to 4 do begin
   self.buffer[1,f]:=0;
 end;
 end;
-
 function sshr(num:int64;fac:byte):int64;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;
 end;
-
 procedure tk053260_chip.internal_update;
 var
   f:byte;
@@ -255,23 +243,19 @@ if (self.mode and 2)<>0 then begin
 end;
 self.posicion:=self.posicion+1;
 end;
-
 //KDSC Voice
 constructor tKDSC_Voice.create(adpcm_rom:pbyte;size:dword);
 begin
   self.rom:=adpcm_rom;
   self.rom_size:=size;
 end;
-
 destructor tKDSC_Voice.free;
 begin
 end;
-
 function tKDSC_Voice.voice_playing:boolean;
 begin
  voice_playing:=self.is_playing;
 end;
-
 procedure tKDSC_Voice.voice_reset;
 begin
 	self.position:=0;
@@ -287,7 +271,6 @@ begin
 	self.kadpcm:=false;
 	self.update_pan_volume;
 end;
-
 procedure tKDSC_Voice.set_register(offset:word;data:byte);
 begin
 	case offset and $7 of
@@ -304,19 +287,16 @@ begin
       end;
 	end;
 end;
-
 procedure tKDSC_Voice.set_loop_kadpcm(data:byte);
 begin
 	self.loop:=BIT(data,0);
 	self.kadpcm:=BIT(data,4);
 end;
-
 procedure tKDSC_Voice.set_pan(data:byte);
 begin
 	self.pan:=data and $7;
 	self.update_pan_volume;
 end;
-
 procedure tKDSC_Voice.update_pan_volume;
 const pan_mul:array[0..7,0..1] of dword=(
 	(     0,     0 ), // No sound for pan 0
@@ -336,25 +316,21 @@ procedure tKDSC_Voice.key_on;
 begin
 {	if (self.start >= m_device->m_rom_size)
 		logerror("K053260: Attempting to start playing past the end of the ROM ( start = %06x, length = %06x )\n", m_start, m_length);
-
 	else if (m_start + m_length >= m_device->m_rom_size)
 		logerror("K053260: Attempting to play past the end of the ROM ( start = %06x, length = %06x )\n",
 					m_start, m_length);
-
 	else }
 		self.position:=byte(self.kadpcm); // for kadpcm low bit is nybble offset, so must start at 1 due to preincrement
 		self.counter:=$1000-CLOCKS_PER_SAMPLE; // force update on next sound_stream_update
 		self.output:=0;
 		self.is_playing:=true;
 end;
-
 procedure tKDSC_Voice.key_off;
 begin
 	self.position:=0;
 	self.output:=0;
 	self.is_playing:=false;
 end;
-
 procedure tKDSC_Voice.play;
 const
   kadpcm_table:array[0..15] of shortint=(0,1,2,4,8,16,32,64,-128,-64,-32,-16,-8,-4,-2,-1);
@@ -396,7 +372,6 @@ begin
 	  self.out2:=self.output*self.pan_volume[1];
 end;
 end;
-
 function tKDSC_Voice.read_rom:byte;
 var
   offs:dword;
@@ -406,5 +381,4 @@ begin
 	if (offs>=self.rom_size) then read_rom:=0
 	  else read_rom:=self.rom[offs];
 end;
-
 end.

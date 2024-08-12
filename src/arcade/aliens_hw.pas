@@ -302,7 +302,7 @@ for f:=0 to 19 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
 if not(roms_load(@mem_snd,aliens_sound)) then exit;
 //Main CPU
-konami_0:=cpu_konami.create(3000000,256);
+konami_0:=cpu_konami.create(12000000,256);
 konami_0.change_ram_calls(aliens_getbyte,aliens_putbyte);
 konami_0.change_set_lines(aliens_bank);
 //Sound CPU

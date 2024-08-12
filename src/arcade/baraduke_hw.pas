@@ -3,7 +3,9 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,misc_functions,sound_engine;
+
 function iniciar_baraduke:boolean;
+
 implementation
 const
         //Baraduke
@@ -11,7 +13,7 @@ const
         (n:'bd1_3.9c';l:$2000;p:$6000;crc:$ea2ea790),(n:'bd1_1.9a';l:$4000;p:$8000;crc:$4e9f2bdc),
         (n:'bd1_2.9b';l:$4000;p:$c000;crc:$40617fcd));
         baraduke_mcu:array[0..1] of tipo_roms=(
-        (n:'bd1_4b.3b';l:$4000;p:$8000;crc:$a47ecd32),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'bd1_4b.3b';l:$4000;p:$1000;crc:$a47ecd32),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         baraduke_chars:tipo_roms=(n:'bd1_5.3j';l:$2000;p:0;crc:$706b7fee);
         baraduke_tiles:array[0..2] of tipo_roms=(
         (n:'bd1_8.4p';l:$4000;p:0;crc:$b0bb0710),(n:'bd1_7.4n';l:$4000;p:$4000;crc:$0d7ebec9),
@@ -39,7 +41,7 @@ const
         (n:'mc1-3.9c';l:$2000;p:$6000;crc:$3390b33c),(n:'mc1-1.9a';l:$4000;p:$8000;crc:$10b0977e),
         (n:'mc1-2.9b';l:$4000;p:$c000;crc:$5c846f35));
         metrocross_mcu:array[0..1] of tipo_roms=(
-        (n:'mc1-4.3b';l:$2000;p:$8000;crc:$9c88f898),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'mc1-4.3b';l:$2000;p:$1000;crc:$9c88f898),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         metrocross_chars:tipo_roms=(n:'mc1-5.3j';l:$2000;p:0;crc:$9b5ea33a);
         metrocross_tiles:array[0..1] of tipo_roms=(
         (n:'mc1-7.4p';l:$4000;p:0;crc:$c9dfa003),(n:'mc1-6.4n';l:$4000;p:$4000;crc:$9686dc3c));
@@ -61,6 +63,7 @@ var
  sprite_mask,counter,scroll_x0,scroll_x1:word;
  prio,copy_sprites:boolean;
  spritex_add,spritey_add:integer;
+
 procedure update_video_baraduke;
 procedure draw_sprites(prior:byte);
 var
@@ -142,6 +145,7 @@ draw_sprites(1);
 actualiza_trozo(0,0,288,224,1,0,0,288,224,4);
 actualiza_trozo_final(0,0,288,224,4);
 end;
+
 procedure eventos_baraduke;
 begin
 if event.arcade then begin
@@ -164,6 +168,12 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
 end;
+
+procedure baraduke_principal;
+var
+  f:word;
+  frame_m,frame_mcu:single;
+
 procedure copy_sprites_hw;
 var
   i,j:byte;
@@ -173,10 +183,7 @@ for i:=0 to $7f do begin
 end;
 copy_sprites:=false;
 end;
-procedure baraduke_principal;
-var
-  f:word;
-  frame_m,frame_mcu:single;
+
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
@@ -200,6 +207,7 @@ while EmuStatus=EsRunning do begin
   video_sync;
 end;
 end;
+
 function baraduke_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -207,6 +215,7 @@ case direccion of
   $4000..$43ff:baraduke_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
 end;
 end;
+
 procedure baraduke_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -229,7 +238,7 @@ case direccion of
                   memoria[direccion]:=valor;
            end;
   $8000:; //WD
-  $8800:m6809_0.change_irq(CLEAR_LINE);       // irq acknowledge
+  $8800:m6809_0.change_irq(CLEAR_LINE); // irq ack
 	$b000:begin
           scroll_x0:=(scroll_x0 and $ff) or (valor shl 8);
           prio:=((scroll_x0 and $e00) shr 9)=6;
@@ -242,27 +251,28 @@ case direccion of
   $6000..$7fff,$8001..$87ff,$8801..$afff,$b003,$b007..$ffff:; //ROM
 end;
 end;
+
 function baraduke_mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:baraduke_mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$1104,$1106..$13ff:baraduke_mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
   $1105:begin
           counter:=counter+1;
           baraduke_mcu_getbyte:=(counter shr 4) and $ff;
         end;
-  $8000..$c7ff,$f000..$ffff:baraduke_mcu_getbyte:=mem_snd[direccion];
+  $8000..$c7ff:baraduke_mcu_getbyte:=mem_snd[direccion];
 end;
 end;
+
 procedure baraduke_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
-  $8000..$bfff,$f000..$ffff:exit;
+  $8000..$bfff:exit;
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
+
 function in_port1:byte;
 var
   ret:byte;
@@ -279,14 +289,17 @@ case inputport_selected of
   end;
 in_port1:=ret;
 end;
+
 procedure out_port1(valor:byte);
 begin
   if (valor and $e0)=$60 then inputport_selected:=valor and $7;
 end;
+
 procedure sound_update_baraduke;
 begin
   namco_snd_0.update;
 end;
+
 procedure reset_baraduke;
 begin
  m6809_0.reset;
@@ -302,11 +315,13 @@ begin
  scroll_y1:=0;
  copy_sprites:=false;
 end;
+
 function iniciar_baraduke:boolean;
 var
   colores:tpaleta;
   f:word;
   memoria_temp:array[0..$7ffff] of byte;
+  ptemp:pbyte;
 const
     pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
     pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
@@ -364,7 +379,7 @@ iniciar_video(288,224);
 m6809_0:=cpu_m6809.Create(49152000 div 32,264,TCPU_M6809);
 m6809_0.change_ram_calls(baraduke_getbyte,baraduke_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(49152000 div 8,264,TCPU_HD63701);
+m6800_0:=cpu_m6800.create(49152000 div 8,264,TCPU_HD63701V);
 m6800_0.change_ram_calls(baraduke_mcu_getbyte,baraduke_mcu_putbyte);
 m6800_0.change_io_calls(in_port1,nil,nil,nil,out_port1,nil,nil,nil);
 m6800_0.init_sound(sound_update_baraduke);
@@ -375,7 +390,10 @@ case main_vars.tipo_maquina of
             //cargar roms main CPU
             if not(roms_load(@memoria,baraduke_rom)) then exit;
             //Cargar MCU
-            if not(roms_load(@mem_snd,baraduke_mcu)) then exit;
+            if not(roms_load(@memoria_temp,baraduke_mcu)) then exit;
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$8000],@memoria_temp[$1000],$4000);
             //convertir chars
             if not(roms_load(@memoria_temp,baraduke_chars)) then exit;
             convert_chars;
@@ -401,7 +419,10 @@ case main_vars.tipo_maquina of
             //cargar roms main CPU
             if not(roms_load(@memoria,metrocross_rom)) then exit;
             //Cargar MCU
-            if not(roms_load(@mem_snd,metrocross_mcu)) then exit;
+            if not(roms_load(@memoria_temp,metrocross_mcu)) then exit;
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$8000],@memoria_temp[$1000],$2000);
             //convertir chars
             if not(roms_load(@memoria_temp,metrocross_chars)) then exit;
             convert_chars;
@@ -435,4 +456,5 @@ set_pal(colores,$800);
 reset_baraduke;
 iniciar_baraduke:=true;
 end;
+
 end.

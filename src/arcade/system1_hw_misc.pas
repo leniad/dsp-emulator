@@ -272,9 +272,9 @@ case direccion of
   $0000..$7fff:system1_snd_getbyte_pio:=mem_snd[direccion];
   $8000..$9fff:system1_snd_getbyte_pio:=mem_snd[(direccion and $7ff)+$8000];
   $e000..$efff:begin
-                  system1_snd_getbyte_pio:=z80pio_port_read(0,PORT_A);
-                  z80pio_astb_w(0,false);
-                  z80pio_astb_w(0,true);
+                  system1_snd_getbyte_pio:=pio_0.port_read(PIO_PORT_A);
+                  pio_0.astb_w(false);
+                  pio_0.astb_w(true);
                end;
 end;
 end;
@@ -287,14 +287,14 @@ case (puerto and $1f) of
   $8..$b:system1_inbyte_pio:=marcade.in0;
   $c,$e:system1_inbyte_pio:=marcade.dswa;
   $d,$f,$10..$13:system1_inbyte_pio:=marcade.dswb;
-  $18..$1b:system1_inbyte_pio:=z80pio_cd_ba_r(0,puerto and $1f);
+  $18..$1b:system1_inbyte_pio:=pio_0.cd_ba_r(puerto and $1f);
 end;
 end;
 
 procedure system1_outbyte_pio(puerto:word;valor:byte);
 begin
 case (puerto and $1f) of
-  $18..$1b:z80pio_cd_ba_w(0,puerto and $1f,valor);
+  $18..$1b:pio_0.cd_ba_w(puerto and $1f,valor);
 end;
 end;
 
@@ -307,8 +307,6 @@ end;
 end;
 
 procedure system1_putbyte_bank(direccion:word;valor:byte);
-var
-  pos_bg:word;
 begin
 case direccion of
         0..$bfff:;
@@ -533,7 +531,8 @@ case main_vars.tipo_maquina of
     //Sound CPU
     z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
     //Z80 PIO
-    z80pio_init(0,nil,nil,system1_port_a_write,system1_pio_porta_nmi,nil,system1_port_b_write,nil);
+    pio_0:=tz80pio.create;
+    pio_0.change_calls(nil,nil,system1_port_a_write,system1_pio_porta_nmi,nil,system1_port_b_write,nil);
   end;
 end;
 char_screen:=1;

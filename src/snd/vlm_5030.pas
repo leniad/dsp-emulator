@@ -2,7 +2,7 @@ unit vlm_5030;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine,timer_engine;
+     sound_engine,timer_engine,dialogs;
 
 const
   FR_SIZE=4;
@@ -79,7 +79,7 @@ VLM5030_speed_table:array[0..8-1] of integer=(
 
 type
   vlm5030_chip=class(snd_chip_class)
-        constructor Create(clock:integer;rom_size:dword;amplificador:byte);
+        constructor create(clock:integer;rom_size:dword;amplificador:byte);
         destructor free;
       public
         procedure reset;
@@ -140,8 +140,9 @@ procedure vlm5030_update_stream;
 implementation
 
 // start VLM5030 with sound rom              */
-constructor vlm5030_chip.Create(clock:integer;rom_size:dword;amplificador:byte);
+constructor vlm5030_chip.create(clock:integer;rom_size:dword;amplificador:byte);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   getmem(self.rom,rom_size);
 	//emulation_rate:= clock / 440;
 	// reset input pins */

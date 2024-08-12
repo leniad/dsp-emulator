@@ -1,12 +1,9 @@
 unit breakthru_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,ym_3812,ym_2203,rom_engine,
      pal_engine,sound_engine;
-
 function iniciar_brkthru:boolean;
-
 implementation
 const
         //Break Thru
@@ -60,7 +57,6 @@ const
         (mask:$2;name:'Bonus Life';number:2;dip:((dip_val:$2;dip_name:'20K 50K+'),(dip_val:$0;dip_name:'30K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$c;dip_name:'Easy'),(dip_val:$8;dip_name:'Meidum'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$10;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
 var
  rom:array[0..7,0..$1fff] of byte;
  mem_sprt:array[0..$ff] of byte;
@@ -68,19 +64,17 @@ var
  nmi_ena,old_val,old_val2:boolean;
  scroll_x:word;
  bg_video,fg_video:array[0..$3ff] of byte;
-
 procedure update_video_brkthru;
 var
   x,y,atrib:byte;
   f,nchar,color:word;
-
 procedure draw_sprites(prio:byte);
 var
   f,x,y,nchar,color:word;
   atrib:byte;
 begin
 	{ Draw the sprites. Note that it is important to draw them exactly in this
-	  order, to have the correct priorities. */
+	  order, to have the correct priorities.
         0         1         2         3
         ccc- ---- ---- ---- ---- ---- ---- ---- = Color
         ---d ---- ---- ---- ---- ---- ---- ---- = Double Size
@@ -92,11 +86,11 @@ begin
         ---- ---- ---- ---- ---- ---- xxxx xxxx = X position}
 	for f:=0 to $3f do begin
     atrib:=mem_sprt[$0+(f*4)];
-		if ((atrib and $9)=prio) then begin	// Enable && Low Priority
+		if ((atrib and $9)=prio) then begin	// Enabled + Priority
       nchar:=mem_sprt[$1+(f*4)]+((atrib and $06) shl 7);
 			color:=(atrib and $e0) shr 2;
-      x:=240-mem_sprt[$3+(f*4)];
-      y:=224-mem_sprt[$2+(f*4)];
+      x:=(240-mem_sprt[$3+(f*4)]) and $ff;
+      y:=(224-mem_sprt[$2+(f*4)]) and $ff;
       if (atrib and $10)<>0 then begin	// double height
           put_gfx_sprite_diff((nchar and $3fe),$40+color,false,false,2,0,0);
           put_gfx_sprite_diff((nchar or 1),$40+color,false,false,2,0,16);
@@ -108,7 +102,6 @@ begin
     end;
 	end;
 end;
-
 begin
 for f:=0 to $1ff do begin
     if gfx[1].buffer[f] then begin
@@ -138,7 +131,6 @@ draw_sprites($9);
 actualiza_trozo(0,0,256,256,1,0,0,256,256,4);
 actualiza_trozo_final(8,8,240,240,4);
 end;
-
 procedure eventos_brkthru;
 begin
 if event.arcade then begin
@@ -175,7 +167,6 @@ if event.arcade then begin
   old_val2:=arcade_input.coin[1];
 end;
 end;
-
 procedure brkthru_principal;
 var
   frame_m,frame_s:single;
@@ -203,30 +194,27 @@ while EmuStatus=EsRunning do begin
   video_sync;
 end;
 end;
-
-function brkthru_getbyte(direccion:word):byte;
+function read_mem_gen(direccion:word):byte;
 begin
 case direccion of
-    0..$3ff:brkthru_getbyte:=bg_video[direccion];
-    $400..$bff,$1100..$17ff,$4000..$ffff:brkthru_getbyte:=memoria[direccion];
-    $c00..$fff:brkthru_getbyte:=fg_video[direccion];
-    $1000..$10ff:brkthru_getbyte:=mem_sprt[direccion and $ff];
-    $1800:brkthru_getbyte:=marcade.in0;
-    $1801:brkthru_getbyte:=marcade.in1;
-    $1802:brkthru_getbyte:=marcade.dswa;
-    $1803:brkthru_getbyte:=marcade.dswb or marcade.in2;
-    $2000..$3fff:brkthru_getbyte:=rom[rom_bank,direccion and $1fff];
+  0..$3ff:read_mem_gen:=bg_video[direccion];
+  $400..$bff:read_mem_gen:=memoria[direccion];
+  $c00..$fff:read_mem_gen:=fg_video[direccion and $3ff];
+  $1000..$10ff:read_mem_gen:=mem_sprt[direccion and $ff];
+  $1800:read_mem_gen:=marcade.in0;
+  $1801:read_mem_gen:=marcade.in1;
+  $1802:read_mem_gen:=marcade.dswa;
+  $1803:read_mem_gen:=marcade.dswb or marcade.in2;
 end;
 end;
-
-procedure brkthru_putbyte(direccion:word;valor:byte);
+procedure write_mem_gen(direccion:word;valor:byte);
 begin
 case direccion of
     $0..$3ff:if bg_video[direccion]<>valor then begin
                 gfx[0].buffer[direccion]:=true;
                 bg_video[direccion]:=valor;
              end;
-    $400..$bff,$1100..$17ff:memoria[direccion]:=valor;
+    $400..$bff:memoria[direccion]:=valor;
     $c00..$fff:if fg_video[direccion and $3ff]<>valor then begin
                 gfx[1].buffer[(direccion and $3ff) shr 1]:=true;
                 fg_video[direccion and $3ff]:=valor;
@@ -246,6 +234,22 @@ case direccion of
             sound_latch:=valor;
             m6809_1.change_nmi(PULSE_LINE);
           end;
+end;
+end;
+//Break Thru
+function brkthru_getbyte(direccion:word):byte;
+begin
+case direccion of
+    $0..$10ff,$1800..$1803:brkthru_getbyte:=read_mem_gen(direccion);
+    $1100..$17ff,$4000..$ffff:brkthru_getbyte:=memoria[direccion];
+    $2000..$3fff:brkthru_getbyte:=rom[rom_bank,direccion and $1fff];
+end;
+end;
+procedure brkthru_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+    $0..$10ff,$1800..$1802:write_mem_gen(direccion,valor);
+    $1100..$17ff:memoria[direccion]:=valor;
     $1803:begin
             nmi_ena:=((valor and 1)=0);
             if (valor and 2)<>2 then m6809_0.change_irq(CLEAR_LINE);
@@ -253,57 +257,6 @@ case direccion of
     $2000..$ffff:; //ROM
 end;
 end;
-
-function darwin_getbyte(direccion:word):byte;
-begin
-case direccion of
-    0..$ff:darwin_getbyte:=mem_sprt[direccion];
-    $1000..$13ff:darwin_getbyte:=bg_video[direccion and $3ff];
-    $1400..$1bff,$4000..$ffff:darwin_getbyte:=memoria[direccion];
-    $1c00..$1fff:darwin_getbyte:=fg_video[direccion and $3ff];
-    $800:darwin_getbyte:=marcade.in0;
-    $801:darwin_getbyte:=marcade.in1;
-    $802:darwin_getbyte:=marcade.dswa;
-    $803:darwin_getbyte:=marcade.dswb or marcade.in2;
-    $2000..$3fff:darwin_getbyte:=rom[rom_bank,direccion and $1fff];
-end;
-end;
-
-procedure darwin_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-    $0..$ff:mem_sprt[direccion]:=valor;
-    $800:scroll_x:=(scroll_x and $ff00) or valor;
-    $801:begin
-            rom_bank:=valor and $7;
-            if ((valor and $38) shr 2)<>bg_color then begin
-              bg_color:=(valor and $38) shr 2;
-              fillchar(gfx[1].buffer[0],$200,1);
-            end;
-            main_screen.flip_main_screen:=(valor and $40)<>0;
-            scroll_x:=(scroll_x and $00ff) or ((valor shr 7) shl 8);
-          end;
-    $802:begin
-            sound_latch:=valor;
-            m6809_1.change_nmi(PULSE_LINE);
-          end;
-    $803:begin
-            nmi_ena:=(valor and 1)<>0;
-            if (valor and 2)<>2 then m6809_0.change_irq(CLEAR_LINE);
-         end;
-    $1000..$13ff:if bg_video[direccion and $3ff]<>valor then begin
-                    gfx[0].buffer[direccion and $3ff]:=true;
-                    bg_video[direccion and $3ff]:=valor;
-                 end;
-    $1400..$1bff:memoria[direccion]:=valor;
-    $1c00..$1fff:if fg_video[direccion and $3ff]<>valor then begin
-                    gfx[1].buffer[(direccion and $3ff) shr 1]:=true;
-                    fg_video[direccion and $3ff]:=valor;
-                 end;
-    $2000..$ffff:; //ROM
-end;
-end;
-
 function brkthru_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -313,7 +266,6 @@ case direccion of
   $6000:brkthru_snd_getbyte:=ym2203_0.status;
 end;
 end;
-
 procedure brkthru_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -325,18 +277,37 @@ case direccion of
   $8000..$ffff:; //ROM
 end;
 end;
-
 procedure brkthru_snd_irq(irqstate:byte);
 begin
   m6809_1.change_irq(irqstate);
 end;
-
 procedure brkthru_sound_update;
 begin
-  YM2203_0.Update;
-  YM3812_0.update;
+  ym2203_0.update;
+  ym3812_0.update;
 end;
-
+//Darwin
+function darwin_getbyte(direccion:word):byte;
+begin
+case direccion of
+    0..$ff,$800..$803:darwin_getbyte:=read_mem_gen(direccion+$1000);
+    $1000..$1fff:darwin_getbyte:=read_mem_gen(direccion-$1000);
+    $2000..$3fff:darwin_getbyte:=rom[rom_bank,direccion and $1fff];
+    $4000..$ffff:darwin_getbyte:=memoria[direccion];
+end;
+end;
+procedure darwin_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+    $0..$ff,$800..$802:write_mem_gen(direccion+$1000,valor);
+    $803:begin
+            nmi_ena:=(valor and 1)<>0;
+            if (valor and 2)<>2 then m6809_0.change_irq(CLEAR_LINE);
+         end;
+    $1000..$1fff:write_mem_gen(direccion-$1000,valor);
+    $2000..$ffff:; //ROM
+end;
+end;
 //Main
 procedure reset_brkthru;
 begin
@@ -347,7 +318,7 @@ begin
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
- marcade.in2:=$ff;
+ marcade.in2:=$e0;
  rom_bank:=0;
  scroll_x:=0;
  old_val:=false;
@@ -356,22 +327,20 @@ begin
  bg_color:=0;
  nmi_ena:=true;
 end;
-
 function iniciar_brkthru:boolean;
 var
-      colores:tpaleta;
-      bit0,bit1,bit2,bit3:byte;
-      f:word;
-      memoria_temp:array[0..$1ffff] of byte;
+  colores:tpaleta;
+  bit0,bit1,bit2,bit3:byte;
+  f:word;
+  memoria_temp:array[0..$1ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3, 0, 1, 2, 3);
-    ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+  pc_x:array[0..7] of dword=(256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3, 0, 1, 2, 3);
+  ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
+  pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+1024*8*8+0, 16*8+1024*8*8+1, 16*8+1024*8*8+2, 16*8+1024*8*8+3);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+  pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-
 procedure convert_chars;
 begin
   init_gfx(0,8,8,$100);
@@ -384,17 +353,17 @@ var
   memoria_temp2:array[0..$1ffff] of byte;
   f:byte;
 begin
-  copymemory(@memoria_temp2[0],@memoria_temp[0],$4000);	// bitplanes 1,2 for bank 1,2 */
-  copymemory(@memoria_temp2[$8000],@memoria_temp[$4000],$4000);  // bitplanes 1,2 for bank 3,4 */
-  copymemory(@memoria_temp2[$10000],@memoria_temp[$8000],$4000); // bitplanes 1,2 for bank 5,6 */
-  copymemory(@memoria_temp2[$18000],@memoria_temp[$c000],$4000); // bitplanes 1,2 for bank 7,8 */
-  copymemory(@memoria_temp2[$4000],@memoria_temp[$10000],$1000); // bitplane 3 for bank 1,2 */
+  copymemory(@memoria_temp2[0],@memoria_temp[0],$4000);	          // bitplanes 1,2 for bank 1,2
+  copymemory(@memoria_temp2[$8000],@memoria_temp[$4000],$4000);   // bitplanes 1,2 for bank 3,4
+  copymemory(@memoria_temp2[$10000],@memoria_temp[$8000],$4000);  // bitplanes 1,2 for bank 5,6
+  copymemory(@memoria_temp2[$18000],@memoria_temp[$c000],$4000);  // bitplanes 1,2 for bank 7,8
+  copymemory(@memoria_temp2[$4000],@memoria_temp[$10000],$1000);  // bitplane 3 for bank 1,2
   copymemory(@memoria_temp2[$6000],@memoria_temp[$11000],$1000);
-  copymemory(@memoria_temp2[$c000],@memoria_temp[$12000],$1000); // bitplane 3 for bank 3,4 */
+  copymemory(@memoria_temp2[$c000],@memoria_temp[$12000],$1000);  // bitplane 3 for bank 3,4
   copymemory(@memoria_temp2[$e000],@memoria_temp[$13000],$1000);
-  copymemory(@memoria_temp2[$14000],@memoria_temp[$14000],$1000);  // bitplane 3 for bank 5,6 */
+  copymemory(@memoria_temp2[$14000],@memoria_temp[$14000],$1000); // bitplane 3 for bank 5,6
   copymemory(@memoria_temp2[$16000],@memoria_temp[$15000],$1000);
-  copymemory(@memoria_temp2[$1c000],@memoria_temp[$16000],$1000); // bitplane 3 for bank 7,8 */
+  copymemory(@memoria_temp2[$1c000],@memoria_temp[$16000],$1000); // bitplane 3 for bank 7,8
   copymemory(@memoria_temp2[$1e000],@memoria_temp[$17000],$1000);
   init_gfx(1,16,16,$400);
   gfx[1].trans[0]:=true;
@@ -412,7 +381,6 @@ begin
   gfx_set_desc_data(3,0,32*8,2*1024*32*8,1024*32*8,0);
   convert_gfx(2,0,@memoria_temp,@ps_x,@pt_y,false,false);
 end;
-
 begin
 llamadas_maquina.bucle_general:=brkthru_principal;
 llamadas_maquina.reset:=reset_brkthru;
@@ -427,9 +395,9 @@ screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(240,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,272,TCPU_M6809);
+m6809_0:=cpu_m6809.create(12000000 div 8,272,TCPU_MC6809E);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(1500000,272,TCPU_M6809);
+m6809_1:=cpu_m6809.create(12000000 div 2,272,TCPU_MC6809);
 m6809_1.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
 m6809_1.init_sound(brkthru_sound_update);
 //Sound Chip
@@ -511,5 +479,4 @@ set_pal(colores,$100);
 reset_brkthru;
 iniciar_brkthru:=true;
 end;
-
 end.

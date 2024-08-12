@@ -143,18 +143,18 @@ frame_m:=m6502_0.tframes;
 frame_s:=m6809_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
+   case f of
+      8:vb:=0;
+      248:begin
+            update_video_expraid;
+            vb:=$2;
+          end;
+   end;
    m6502_0.run(frame_m);
    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
    //Sound
    m6809_0.run(frame_s);
    frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
-   case f of
-      7:vb:=0;
-      247:begin
-            update_video_expraid;
-            vb:=$2;
-          end;
-   end;
  end;
  eventos_expraid;
  video_sync;

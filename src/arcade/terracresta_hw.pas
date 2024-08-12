@@ -459,7 +459,7 @@ case main_vars.tipo_maquina of
       z80_0.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
       z80_0.init_sound(terracre_sound_update);
       //Sound Chips
-      YM2203_0:=ym2203_chip.create(4000000,0.8,0.4);
+      YM2203_0:=ym2203_chip.create(4000000,0.6,1);
       //convertir chars
       if not(roms_load(@memoria_temp,terracre_char)) then exit;
       convert_chars;
@@ -485,7 +485,7 @@ case main_vars.tipo_maquina of
       z80_0.change_io_calls(terracre_snd_inbyte,amazon_snd_outbyte);
       z80_0.init_sound(amazon_sound_update);
       //Sound Chips
-      ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,0.3);
+      ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,1);
       //convertir chars
       if not(roms_load(@memoria_temp,amazon_char)) then exit;
       convert_chars;

@@ -1,15 +1,12 @@
 unit sound_engine;
-
 interface
 uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$else}lib_sdl2,{$endif}
      timer_engine,dialogs;
-
 const
         MAX_AUDIO_BUFFER=$f;
         MAX_CANALES=9;
         LONG_MAX_AUDIO=3000;  //Tapper necesita esto tan alto...
         FREQ_BASE_AUDIO=44100;
-
 type
         tipo_sonido=record
           posicion_sonido:word;
@@ -32,7 +29,6 @@ type
             amp:single;
             clock:dword;
         end;
-
 var
         sound_status:tipo_sonido;
         update_sound_proc:exec_type_simple;
@@ -45,24 +41,21 @@ var
         tsample:array[0..MAX_CANALES-1,0..LONG_MAX_AUDIO-1] of integer;
         sample_final:array[0..LONG_MAX_AUDIO-1] of smallint;
         {$endif}
-
 function iniciar_audio(stereo_sound:boolean):boolean;
 procedure sound_engine_init(num_cpu:byte;clock:dword;update_call:exec_type_simple);
+procedure sound_engine_close;
 procedure sound_engine_change_clock(clock:single);
 procedure reset_audio;
 procedure play_sonido;
 procedure close_audio;
 procedure sound_update_internal;
 function init_channel:byte;
-
 implementation
 uses main_engine;
-
 function snd_chip_class.get_sample_num:byte;
 begin
   get_sample_num:=self.tsample_num;
 end;
-
 {$ifndef fpc}
 function iniciar_audio(stereo_sound:boolean):boolean;
 var
@@ -103,8 +96,8 @@ end;
 reset_audio;
 iniciar_audio:=true;
 sound_status.hay_tsonido:=true;
+sound_engine_close;
 end;
-
 procedure close_audio;
 var
   j,f:byte;
@@ -154,13 +147,11 @@ sound_status.hay_tsonido:=true;
 reset_audio;
 iniciar_audio:=true;
 end;
-
 procedure close_audio;
 begin
 SDL_CloseAudioDevice(sound_device);
 end;
 {$endif}
-
 procedure play_sonido;
 var
   f{$ifdef fpc},h,j{$endif}:integer;
@@ -202,6 +193,14 @@ begin
   sound_status.cpu_num:=num_cpu;
   sound_engine_timer:=timers.init(num_cpu,clock/FREQ_BASE_AUDIO,sound_update_internal,nil,true);
   update_sound_proc:=update_call;
+end;
+
+procedure sound_engine_close;
+begin
+  sound_status.cpu_clock:=0;
+  sound_status.cpu_num:=$ff;
+  sound_engine_timer:=$ff;
+  update_sound_proc:=nil;
 end;
 
 procedure sound_engine_change_clock(clock:single);

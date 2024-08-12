@@ -335,6 +335,7 @@ begin
  z80_0.reset;
  m6502_0.reset;
  mcs51_0.reset;
+ msm5205_0.reset;
  ym3812_0.reset;
  reset_audio;
  marcade.in0:=$ff;

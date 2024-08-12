@@ -1,7 +1,7 @@
 unit ay_8910;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc,dialogs;
 
 type
   ay8910_chip=class(snd_chip_class)
@@ -101,6 +101,7 @@ end;
 
 constructor ay8910_chip.create(clock:integer;type_:byte;amp:single=1;internal:boolean=false);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   init_table;
   self.clock:=clock;
   self.UpdateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);

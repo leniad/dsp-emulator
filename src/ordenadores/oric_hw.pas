@@ -26,31 +26,31 @@ var
   via_ca2,via_cb2,via_irq,ext_irq:boolean;
   key_row:array[0..7] of byte;
 
-procedure update_video_oric;
+procedure update_video_oric(linea:word);
 var
   blink_state:boolean;
-  tpattr,x,y,lattr,ch,pat,off:byte;
+  tpattr,x,lattr,ch,pat,off:byte;
   base,fgcol,bgcol,c_fgcol,c_bgcol:word;
   ptemp:pword;
 begin
+  if ((linea<44) or (linea>267)) then exit;
+  linea:=linea-44;
   blink_state:=(blink_counter and $20)<>0;
-	blink_counter:=(blink_counter+1) and $3f;
 	tpattr:=pattr;
-	for y:=0 to 223 do begin
-    ptemp:=punbuf;
-		// Line attributes and current colors
-		lattr:=0;
-		fgcol:=paleta[7];
-		bgcol:=paleta[0];
-		for x:=0 to 39 do begin
+	ptemp:=punbuf;
+	// Line attributes and current colors
+	lattr:=0;
+	fgcol:=paleta[7];
+	bgcol:=paleta[0];
+	for x:=0 to 39 do begin
 			// Lookup the byte and, if needed, the pattern data
-			if (((tpattr and PATTR_HIRES)<>0) and (y<200)) then begin
-				ch:=memoria[$a000+y*40+x];
+			if (((tpattr and PATTR_HIRES)<>0) and (linea<200)) then begin
+				ch:=memoria[$a000+linea*40+x];
         pat:=ch;
       end else begin
-				ch:=memoria[$bb80+(y shr 3)*40+x];
-        if (lattr and LATTR_DSIZE)<>0 then off:=(y shr 1) and 7
-          else off:=y and 7;
+				ch:=memoria[$bb80+(linea shr 3)*40+x];
+        if (lattr and LATTR_DSIZE)<>0 then off:=(linea shr 1) and 7
+          else off:=linea and 7;
 				if (tpattr and PATTR_HIRES)<>0 then begin
 					if (lattr and LATTR_ALT)<>0 then base:=$9c00
 					  else base:=$9800;
@@ -99,22 +99,18 @@ begin
       if (pat and $01)<>0 then ptemp^:=c_fgcol
         else ptemp^:=c_bgcol;
       inc(ptemp);
-		end;
-    putpixel(0,y,240,punbuf,1);
 	end;
+  putpixel(0,linea,240,punbuf,1);
 	pattr:=tpattr;
-  actualiza_trozo(0,0,240,224,1,0,0,240,224,PANT_TEMP);
 end;
 
 procedure eventos_oric;
 begin
 if event.arcade then begin
-  //P1
   if arcade_input.up[0] then key_row[4]:=(key_row[4] and $f7) else key_row[4]:=(key_row[4] or $8);
   if arcade_input.down[0] then key_row[4]:=(key_row[4] and $bf) else key_row[4]:=(key_row[4] or $40);
   if arcade_input.left[0] then key_row[4]:=(key_row[4] and $df) else key_row[4]:=(key_row[4] or $20);
   if arcade_input.right[0] then key_row[4]:=(key_row[4] and $7f) else key_row[4]:=(key_row[4] or $80);
-  //P2
 end else if event.keyboard then begin
   //Row 0
   if keyboard[KEYBOARD_7] then key_row[0]:=(key_row[0] and $fe) else key_row[0]:=(key_row[0] or $1);
@@ -195,13 +191,14 @@ init_controls(false,true,true,false);
 frame:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 311 do begin
-    //main
     m6502_0.run(frame);
     frame:=frame+m6502_0.tframes-m6502_0.contador;
+    update_video_oric(f);
   end;
-  update_video_oric;
+  blink_counter:=(blink_counter+1) and $3f;
   eventos_oric;
   video_sync;
+  actualiza_trozo(0,0,240,224,1,0,0,240,224,PANT_TEMP);
 end;
 end;
 
@@ -289,7 +286,6 @@ begin
     if cinta_tzx.play_tape then tape_window1.fStopCinta(nil);
     timers.enabled(tape_timer,false);
   end;
-	//m_cassette->output(data & 0x80 ? -1.0 : +1.0);
 end;
 
 procedure via_ca2_w(valor:byte);
@@ -385,7 +381,7 @@ var
   es_cinta:boolean;
 begin
   if not(openrom(romfile)) then exit;
-  getmem(datos,$100000);
+  getmem(datos,$200000);
   if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
     freemem(datos);
     exit;
@@ -429,10 +425,10 @@ m6502_0.change_despues_instruccion(oric_update_timers);
 //Cinta 22microsegs
 tape_timer:=timers.init(m6502_0.numero_cpu,1000000/45454.5454545454,oric_tape_play,nil,false);
 //VIA
-via6522_0:=via6522_chip.create(1000000);
+via6522_0:=via6522_chip.create(m6502_0.numero_cpu,1000000);
 via6522_0.change_calls(nil,nil,via_a_w,via_b_w,oric_irq,via_ca2_w,via_cb2_w);
 //sound chips
-ay8910_0:=ay8910_chip.create(1000000,AY8910,1);
+ay8910_0:=ay8910_chip.create(1000000,AY8912,1);
 ay8910_0.change_io_calls(nil,nil,psg_a_w,nil);
 tape_sound_channel:=init_channel;
 //cargar roms

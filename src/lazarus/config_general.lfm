@@ -1,12 +1,12 @@
 object MConfig: TMConfig
-  Left = 1017
-  Height = 595
-  Top = 165
+  Left = 677
+  Height = 591
+  Top = 224
   Width = 628
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config DSP'
-  ClientHeight = 595
+  ClientHeight = 591
   ClientWidth = 628
   DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
@@ -23,7 +23,7 @@ object MConfig: TMConfig
   object Button1: TButton
     Left = 120
     Height = 51
-    Top = 510
+    Top = 528
     Width = 141
     Caption = 'OK'
     Font.CharSet = ANSI_CHARSET
@@ -37,9 +37,9 @@ object MConfig: TMConfig
     TabOrder = 0
   end
   object Button2: TButton
-    Left = 370
+    Left = 376
     Height = 51
-    Top = 510
+    Top = 528
     Width = 141
     Caption = 'CANCELAR'
     Font.CharSet = ANSI_CHARSET
@@ -57,7 +57,7 @@ object MConfig: TMConfig
     Height = 491
     Top = 10
     Width = 600
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -65,7 +65,7 @@ object MConfig: TMConfig
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ParentFont = False
-    TabIndex = 0
+    TabIndex = 2
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
@@ -636,11 +636,11 @@ object MConfig: TMConfig
       ParentFont = False
       object GroupBox1: TGroupBox
         Left = 4
-        Height = 440
+        Height = 448
         Top = 10
         Width = 276
         Caption = 'Player 1'
-        ClientHeight = 418
+        ClientHeight = 426
         ClientWidth = 272
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
@@ -650,10 +650,11 @@ object MConfig: TMConfig
         Font.Quality = fqDraft
         ParentFont = False
         TabOrder = 0
+        OnClick = GroupBox1Click
         object Label6: TLabel
-          Left = 0
+          Left = 9
           Height = 17
-          Top = 314
+          Top = 291
           Width = 33
           Caption = 'But 0'
           Font.CharSet = ANSI_CHARSET
@@ -666,9 +667,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label7: TLabel
-          Left = 0
+          Left = 9
           Height = 17
-          Top = 344
+          Top = 321
           Width = 33
           Caption = 'But 1'
           Font.CharSet = ANSI_CHARSET
@@ -681,9 +682,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label8: TLabel
-          Left = 0
+          Left = 9
           Height = 17
-          Top = 372
+          Top = 349
           Width = 33
           Caption = 'But 2'
           Font.CharSet = ANSI_CHARSET
@@ -696,9 +697,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label15: TLabel
-          Left = 122
+          Left = 142
           Height = 17
-          Top = 314
+          Top = 291
           Width = 33
           Caption = 'But 3'
           Font.CharSet = ANSI_CHARSET
@@ -711,9 +712,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label16: TLabel
-          Left = 124
+          Left = 144
           Height = 17
-          Top = 344
+          Top = 321
           Width = 33
           Caption = 'But 4'
           Font.CharSet = ANSI_CHARSET
@@ -726,9 +727,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label17: TLabel
-          Left = 124
+          Left = 144
           Height = 17
-          Top = 372
+          Top = 349
           Width = 33
           Caption = 'But 5'
           Font.CharSet = ANSI_CHARSET
@@ -743,7 +744,7 @@ object MConfig: TMConfig
         object RadioButton1: TRadioButton
           Left = 14
           Height = 23
-          Top = 18
+          Top = 9
           Width = 83
           Caption = 'Keyboard'
           Checked = True
@@ -761,7 +762,7 @@ object MConfig: TMConfig
         object RadioButton2: TRadioButton
           Left = 14
           Height = 23
-          Top = 46
+          Top = 34
           Width = 73
           Caption = 'Joystick'
           Enabled = False
@@ -776,9 +777,9 @@ object MConfig: TMConfig
           TabOrder = 1
         end
         object BitBtn2: TBitBtn
-          Left = 181
+          Left = 159
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -788,9 +789,9 @@ object MConfig: TMConfig
           TabOrder = 2
         end
         object BitBtn3: TBitBtn
-          Left = 112
+          Left = 108
           Height = 41
-          Top = 241
+          Top = 231
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -800,9 +801,9 @@ object MConfig: TMConfig
           TabOrder = 3
         end
         object BitBtn1: TBitBtn
-          Left = 39
+          Left = 59
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -812,9 +813,9 @@ object MConfig: TMConfig
           TabOrder = 4
         end
         object BitBtn4: TBitBtn
-          Left = 112
+          Left = 108
           Height = 41
-          Top = 160
+          Top = 152
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -824,9 +825,9 @@ object MConfig: TMConfig
           TabOrder = 5
         end
         object BitBtn9: TBitBtn
-          Left = 44
+          Left = 49
           Height = 34
-          Top = 302
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -839,9 +840,9 @@ object MConfig: TMConfig
           TabOrder = 6
         end
         object BitBtn10: TBitBtn
-          Left = 44
+          Left = 49
           Height = 34
-          Top = 334
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -854,9 +855,9 @@ object MConfig: TMConfig
           TabOrder = 7
         end
         object BitBtn11: TBitBtn
-          Left = 44
+          Left = 49
           Height = 35
-          Top = 365
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -869,9 +870,9 @@ object MConfig: TMConfig
           TabOrder = 8
         end
         object BitBtn15: TBitBtn
-          Left = 166
+          Left = 184
           Height = 34
-          Top = 334
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -884,9 +885,9 @@ object MConfig: TMConfig
           TabOrder = 9
         end
         object BitBtn16: TBitBtn
-          Left = 166
+          Left = 184
           Height = 35
-          Top = 365
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -899,9 +900,9 @@ object MConfig: TMConfig
           TabOrder = 10
         end
         object BitBtn17: TBitBtn
-          Left = 166
+          Left = 184
           Height = 34
-          Top = 302
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -916,7 +917,7 @@ object MConfig: TMConfig
         object GroupBox7: TGroupBox
           Left = 8
           Height = 85
-          Top = 70
+          Top = 60
           Width = 221
           ClientHeight = 63
           ClientWidth = 217
@@ -935,8 +936,8 @@ object MConfig: TMConfig
             Left = 64
             Height = 30
             Top = 31
-            Width = 65
-            Caption = 'Calibrate'
+            Width = 80
+            Caption = 'Get Center'
             Enabled = False
             Font.CharSet = ANSI_CHARSET
             Font.Color = clBlack
@@ -968,14 +969,46 @@ object MConfig: TMConfig
             Text = 'ComboBox1'
           end
         end
+        object Label13: TLabel
+          Left = 55
+          Height = 17
+          Top = 376
+          Width = 89
+          Caption = ' COIN/SELECT'
+          ParentColor = False
+        end
+        object Button10: TButton
+          Left = 53
+          Height = 30
+          Top = 395
+          Width = 75
+          OnClick = Button10Click
+          TabOrder = 13
+        end
+        object Label14: TLabel
+          Left = 169
+          Height = 17
+          Top = 376
+          Width = 62
+          Caption = 'P1/START'
+          ParentColor = False
+        end
+        object Button11: TButton
+          Left = 158
+          Height = 30
+          Top = 395
+          Width = 75
+          OnClick = Button11Click
+          TabOrder = 14
+        end
       end
       object GroupBox2: TGroupBox
         Left = 290
-        Height = 440
+        Height = 448
         Top = 10
         Width = 280
         Caption = 'Player 2'
-        ClientHeight = 418
+        ClientHeight = 426
         ClientWidth = 276
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
@@ -988,7 +1021,7 @@ object MConfig: TMConfig
         object Label9: TLabel
           Left = 14
           Height = 17
-          Top = 314
+          Top = 291
           Width = 33
           Caption = 'But 0'
           Font.CharSet = ANSI_CHARSET
@@ -1003,7 +1036,7 @@ object MConfig: TMConfig
         object Label10: TLabel
           Left = 14
           Height = 17
-          Top = 344
+          Top = 321
           Width = 33
           Caption = 'But 1'
           Font.CharSet = ANSI_CHARSET
@@ -1018,7 +1051,7 @@ object MConfig: TMConfig
         object Label11: TLabel
           Left = 14
           Height = 17
-          Top = 372
+          Top = 349
           Width = 33
           Caption = 'But 2'
           Font.CharSet = ANSI_CHARSET
@@ -1031,9 +1064,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label18: TLabel
-          Left = 141
+          Left = 144
           Height = 17
-          Top = 312
+          Top = 291
           Width = 33
           Caption = 'But 3'
           Font.CharSet = ANSI_CHARSET
@@ -1046,9 +1079,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label19: TLabel
-          Left = 141
+          Left = 144
           Height = 17
-          Top = 342
+          Top = 321
           Width = 33
           Caption = 'But 4'
           Font.CharSet = ANSI_CHARSET
@@ -1061,9 +1094,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label20: TLabel
-          Left = 141
+          Left = 144
           Height = 17
-          Top = 371
+          Top = 350
           Width = 33
           Caption = 'But 5'
           Font.CharSet = ANSI_CHARSET
@@ -1078,7 +1111,7 @@ object MConfig: TMConfig
         object RadioButton3: TRadioButton
           Left = 20
           Height = 23
-          Top = 18
+          Top = 9
           Width = 83
           Caption = 'Keyboard'
           Checked = True
@@ -1096,7 +1129,7 @@ object MConfig: TMConfig
         object RadioButton4: TRadioButton
           Left = 20
           Height = 23
-          Top = 46
+          Top = 34
           Width = 73
           Caption = 'Joystick'
           Enabled = False
@@ -1113,7 +1146,7 @@ object MConfig: TMConfig
         object BitBtn5: TBitBtn
           Left = 112
           Height = 41
-          Top = 160
+          Top = 152
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1126,9 +1159,9 @@ object MConfig: TMConfig
           TabOrder = 2
         end
         object BitBtn6: TBitBtn
-          Left = 45
+          Left = 59
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1141,9 +1174,9 @@ object MConfig: TMConfig
           TabOrder = 3
         end
         object BitBtn7: TBitBtn
-          Left = 182
+          Left = 168
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1158,7 +1191,7 @@ object MConfig: TMConfig
         object BitBtn8: TBitBtn
           Left = 112
           Height = 41
-          Top = 241
+          Top = 231
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1173,7 +1206,7 @@ object MConfig: TMConfig
         object BitBtn12: TBitBtn
           Left = 52
           Height = 34
-          Top = 302
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1188,7 +1221,7 @@ object MConfig: TMConfig
         object BitBtn13: TBitBtn
           Left = 52
           Height = 34
-          Top = 334
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1203,7 +1236,7 @@ object MConfig: TMConfig
         object BitBtn14: TBitBtn
           Left = 52
           Height = 35
-          Top = 365
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1216,9 +1249,9 @@ object MConfig: TMConfig
           TabOrder = 8
         end
         object BitBtn18: TBitBtn
-          Left = 180
+          Left = 185
           Height = 34
-          Top = 304
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1231,9 +1264,9 @@ object MConfig: TMConfig
           TabOrder = 9
         end
         object BitBtn19: TBitBtn
-          Left = 180
+          Left = 185
           Height = 34
-          Top = 335
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1246,9 +1279,9 @@ object MConfig: TMConfig
           TabOrder = 10
         end
         object BitBtn20: TBitBtn
-          Left = 180
-          Height = 34
-          Top = 366
+          Left = 185
+          Height = 35
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1262,10 +1295,10 @@ object MConfig: TMConfig
         end
         object GroupBox10: TGroupBox
           Left = 24
-          Height = 84
-          Top = 70
+          Height = 85
+          Top = 60
           Width = 221
-          ClientHeight = 62
+          ClientHeight = 63
           ClientWidth = 217
           Color = clWhite
           Font.CharSet = ANSI_CHARSET
@@ -1297,11 +1330,11 @@ object MConfig: TMConfig
             Text = 'ComboBox2'
           end
           object Button8: TButton
-            Left = 69
+            Left = 56
             Height = 29
             Top = 31
-            Width = 71
-            Caption = 'Calibrate'
+            Width = 84
+            Caption = 'Get Center'
             Enabled = False
             Font.CharSet = ANSI_CHARSET
             Font.Color = clBlack
@@ -1314,142 +1347,38 @@ object MConfig: TMConfig
             TabOrder = 1
           end
         end
-      end
-    end
-    object TabSheet4: TTabSheet
-      Caption = 'Main Keys'
-      ClientHeight = 461
-      ClientWidth = 592
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -14
-      Font.Name = 'Tahoma'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      ParentFont = False
-      object Label21: TLabel
-        Left = 75
-        Height = 17
-        Top = 50
-        Width = 44
-        Caption = 'COIN 1'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
-      end
-      object Button3: TButton
-        Left = 50
-        Height = 31
-        Top = 70
-        Width = 91
-        Caption = '5'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button3Click
-        ParentFont = False
-        TabOrder = 0
-      end
-      object Label22: TLabel
-        Left = 185
-        Height = 17
-        Top = 50
-        Width = 44
-        Caption = 'COIN 2'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
-      end
-      object Button4: TButton
-        Left = 160
-        Height = 31
-        Top = 69
-        Width = 91
-        Caption = '6'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button4Click
-        ParentFont = False
-        TabOrder = 1
-      end
-      object Label24: TLabel
-        Left = 160
-        Height = 17
-        Top = 120
-        Width = 94
-        Caption = 'Player 2 START'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
-      end
-      object Button6: TButton
-        Left = 160
-        Height = 31
-        Top = 140
-        Width = 91
-        Caption = '2'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button6Click
-        ParentFont = False
-        TabOrder = 2
-      end
-      object Button5: TButton
-        Left = 50
-        Height = 31
-        Top = 140
-        Width = 91
-        Caption = '1'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button5Click
-        ParentFont = False
-        TabOrder = 3
-      end
-      object Label23: TLabel
-        Left = 50
-        Height = 17
-        Top = 120
-        Width = 94
-        Caption = 'Player 1 START'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
+        object Button12: TButton
+          Left = 47
+          Height = 30
+          Top = 395
+          Width = 75
+          OnClick = Button12Click
+          TabOrder = 13
+        end
+        object Label25: TLabel
+          Left = 48
+          Height = 17
+          Top = 376
+          Width = 85
+          Caption = 'COIN/SELECT'
+          ParentColor = False
+        end
+        object Label26: TLabel
+          Left = 169
+          Height = 17
+          Top = 376
+          Width = 62
+          Caption = 'P2/START'
+          ParentColor = False
+        end
+        object Button13: TButton
+          Left = 158
+          Height = 30
+          Top = 395
+          Width = 75
+          OnClick = Button13Click
+          TabOrder = 14
+        end
       end
     end
     object TabSheet5: TTabSheet

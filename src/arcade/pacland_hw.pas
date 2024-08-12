@@ -16,7 +16,7 @@ const
         (n:'pl1-9.6f';l:$4000;p:0;crc:$f5d5962b),(n:'pl1-8.6e';l:$4000;p:$4000;crc:$a2ebfa4a),
         (n:'pl1-10.7e';l:$4000;p:$8000;crc:$c7cf1904),(n:'pl1-11.7f';l:$4000;p:$c000;crc:$6621361a));
         pacland_mcu:array[0..1] of tipo_roms=(
-        (n:'pl1_7.3e';l:$2000;p:$8000;crc:$8c5becae),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'pl1_7.3e';l:$2000;p:$1000;crc:$8c5becae),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         pacland_prom:array[0..4] of tipo_roms=(
         (n:'pl1-2.1t';l:$400;p:$0;crc:$472885de),(n:'pl1-1.1r';l:$400;p:$400;crc:$a78ebdaf),
         (n:'pl1-5.5t';l:$400;p:$800;crc:$4b7ee712),(n:'pl1-4.4n';l:$400;p:$c00;crc:$3a7be418),
@@ -314,7 +314,6 @@ end;
 function mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
   $8000..$c7ff,$f000..$ffff:mcu_getbyte:=mem_snd[direccion];
   $d000:mcu_getbyte:=(marcade.dswa and $f0) or (marcade.dswb shr 4);
@@ -326,7 +325,6 @@ end;
 procedure mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $4000..$7fff:begin
                   irq_enable_mcu:=((direccion and $2000)=0);
@@ -368,6 +366,7 @@ function iniciar_pacland:boolean;
 var
   f:word;
   memoria_temp:array[0..$17fff] of byte;
+  ptemp:pbyte;
 const
     pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
@@ -392,17 +391,20 @@ iniciar_video(288,224);
 m6809_0:=cpu_m6809.Create(1536000,264,TCPU_M6809);
 m6809_0.change_ram_calls(pacland_getbyte,pacland_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(6144000,264,TCPU_HD63701);
+m6800_0:=cpu_m6800.create(6144000,264,TCPU_HD63701V);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
 m6800_0.init_sound(pacland_sound_update);
 //cargar roms
 if not(roms_load(@memoria_temp,pacland_rom)) then exit;
 //Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
+copymemory(@memoria[$8000],@memoria_temp,$8000);
 for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
 //Cargar MCU
-if not(roms_load(@mem_snd,pacland_mcu)) then exit;
+if not(roms_load(@memoria_temp,pacland_mcu)) then exit;
+ptemp:=m6800_0.get_rom_addr;
+copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+copymemory(@mem_snd[$8000],@memoria_temp[$1000],$2000);
 namco_snd_0:=namco_snd_chip.create(8,true);
 //convertir chars
 if not(roms_load(@memoria_temp,pacland_char)) then exit;

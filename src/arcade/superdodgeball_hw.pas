@@ -11,7 +11,7 @@ implementation
 const
         sdodgeball_rom:tipo_roms=(n:'22a-04.139';l:$10000;p:$0;crc:$66071fda);
         sdodgeball_snd:tipo_roms=(n:'22j5-0.33';l:$8000;p:$8000;crc:$c31e264e);
-        sdodgeball_mcu:tipo_roms=(n:'22ja-0.162';l:$4000;p:$c000;crc:$7162a97b);
+        sdodgeball_mcu:tipo_roms=(n:'22ja-0.162';l:$4000;p:0;crc:$7162a97b);
         sdodgeball_char:array[0..1] of tipo_roms=(
         (n:'22a-4.121';l:$20000;p:$0;crc:$acc26051),(n:'22a-3.107';l:$20000;p:$20000;crc:$10bb800d));
         sdodgeball_sprites:array[0..1] of tipo_roms=(
@@ -221,20 +221,13 @@ end;
 //MCU
 function sdodgeball_mcu_getbyte(direccion:word):byte;
 begin
-case direccion of
-  $0..$27:sdodgeball_mcu_getbyte:=m6800_0.hd6301y_internal_reg_r(direccion);
-  $40..$13f,$c000..$ffff:sdodgeball_mcu_getbyte:=mem_misc[direccion];
-  $8080:sdodgeball_mcu_getbyte:=mcu_latch;
-end;
+if direccion=$8080 then sdodgeball_mcu_getbyte:=mcu_latch;
 end;
 
 procedure sdodgeball_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$27:m6800_0.hd6301y_internal_reg_w(direccion,valor);
-  $40..$13f:mem_misc[direccion]:=valor;
   $8081..$8085:inputs[direccion-$8081]:=valor;
-  $c000..$ffff:;
 end;
 end;
 
@@ -318,11 +311,11 @@ m6809_0.change_ram_calls(getbyte_snd_sdodgeball,putbyte_snd_sdodgeball);
 m6809_0.init_sound(sdodgeball_sound_update);
 if not(roms_load(@mem_snd,sdodgeball_snd)) then exit;
 //MCU CPU
-m6800_0:=cpu_m6800.create(4000000,272,TCPU_HD63701);
+m6800_0:=cpu_m6800.create(4000000,272,TCPU_HD63701Y);
 m6800_0.change_ram_calls(sdodgeball_mcu_getbyte,sdodgeball_mcu_putbyte);
 m6800_0.change_io_calls(nil,sdodgeball_r2,nil,nil,nil,nil,nil,nil);
 m6800_0.change_iox_calls(sdodgeball_r5,sdodgeball_r6,sdodgeball_w5,nil);
-if not(roms_load(@mem_misc,sdodgeball_mcu)) then exit;
+if not(roms_load(m6800_0.get_rom_addr,sdodgeball_mcu)) then exit;
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.6);
 ym3812_0.change_irq_calls(snd_irq);

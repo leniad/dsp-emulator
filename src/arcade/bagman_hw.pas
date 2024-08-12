@@ -71,7 +71,7 @@ if video_enable then begin
     x:=memoria[$9802+(f*4)];
     if ((x<>0) and (y<>0)) then begin
       put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1);
-      actualiza_gfx_sprite((x+1) and $ff,(y-1) and $ff,2,1);
+      actualiza_gfx_sprite(x+1,y-1,2,1);
     end;
   end;
 end else fill_full_screen(2,$3ff);
@@ -287,17 +287,17 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances_rg,@gweights,470,0,
 			2,@resistances_b,@bweights,470,0);
 for f:=0 to $3f do begin
-		// red component */
+		// red component
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
 		colores[f].r:=combine_3_weights(@rweights,bit0,bit1,bit2);
-		// green component */
+		// green component
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
 		colores[f].g:=combine_3_weights(@gweights,bit0,bit1,bit2);
-		// blue component */
+		// blue component
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
 		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);

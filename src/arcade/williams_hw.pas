@@ -285,18 +285,15 @@ end;
 function williams_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7f:williams_snd_getbyte:=m6800_0.internal_ram[direccion];
-  $80..$ff:williams_snd_getbyte:=mem_snd[direccion];
+  $0..$ff,$b000..$ffff:williams_snd_getbyte:=mem_snd[direccion];
   $400..$403,$8400..$8403:williams_snd_getbyte:=pia6821_2.read(direccion and $3);
-  $b000..$ffff:williams_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure williams_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$7f:m6800_0.internal_ram[direccion]:=valor;
-  $80..$ff:mem_snd[direccion]:=valor;
+  $0..$ff:mem_snd[direccion]:=valor;
   $400..$403,$8400..$8403:pia6821_2.write(direccion and $3,valor);
   $b000..$ffff:;
 end;

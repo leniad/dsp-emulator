@@ -79,7 +79,7 @@ while EmuStatus=EsRunning do begin
       frame:=frame+z80_0.tframes-z80_0.contador;
       vdp_0.refresh(f);
   end;
-  actualiza_trozo_simple(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1);
+  actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,PANT_TEMP);
   eventos_sms;
   video_sync;
 end;

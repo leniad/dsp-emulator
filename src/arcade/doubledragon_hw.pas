@@ -13,7 +13,7 @@ const
         ddragon_rom:array[0..3] of tipo_roms=(
         (n:'21j-1-5.26';l:$8000;p:$0;crc:$42045dfd),(n:'21j-2-3.25';l:$8000;p:$8000;crc:$5779705e),
         (n:'21j-3.24';l:$8000;p:$10000;crc:$3bdea613),(n:'21j-4-1.23';l:$8000;p:$18000;crc:$728f87b9));
-        ddragon_sub:tipo_roms=(n:'63701.bin';l:$4000;p:$c000;crc:$f5232d03);
+        ddragon_sub:tipo_roms=(n:'63701.bin';l:$4000;p:0;crc:$f5232d03);
         ddragon_snd:tipo_roms=(n:'21j-0-1';l:$8000;p:$8000;crc:$9efa95bb);
         ddragon_char:tipo_roms=(n:'21j-5';l:$8000;p:0;crc:$7a8b8db4);
         ddragon_tiles:array[0..3] of tipo_roms=(
@@ -311,23 +311,23 @@ end;
 
 function ddragon_sub_getbyte(direccion:word):byte;
 begin
-  case direccion of
-      $0..$1e:ddragon_sub_getbyte:=0;
-      $1f..$fff,$8000..$81ff,$c000..$ffff:ddragon_sub_getbyte:=mem_misc[direccion];
-  end;
+case direccion of
+  $8000..$81ff:ddragon_sub_getbyte:=mem_misc[direccion];
+end;
 end;
 
 procedure ddragon_sub_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $17:begin
-        if (valor and 1)=0 then m6800_0.change_nmi(CLEAR_LINE);
-        if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then hd6309_0.change_irq(ASSERT_LINE);
-        dd_sub_port:=valor;
-      end;
-  $1f..$fff,$8000..$81ff:mem_misc[direccion]:=valor;
-  $c000..$ffff:; //ROM
+  $8000..$81ff:mem_misc[direccion]:=valor;
 end;
+end;
+
+procedure ddragon_sub_port1x_w(valor:byte);
+begin
+if (valor and 1)=0 then m6800_0.change_nmi(CLEAR_LINE);
+if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then hd6309_0.change_irq(ASSERT_LINE);
+dd_sub_port:=valor;
 end;
 
 function ddragon_snd_getbyte(direccion:word):byte;
@@ -621,13 +621,19 @@ case main_vars.tipo_maquina of
         //Main CPU
         hd6309_0:=cpu_hd6309.create(12000000,272*CPU_SYNC,TCPU_HD6309);
         hd6309_0.change_ram_calls(ddragon_getbyte,ddragon_putbyte);
+        if not(roms_load(@memoria_temp,ddragon_rom)) then exit;
+        copymemory(@memoria[$8000],@memoria_temp,$8000);
+        for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //Sub CPU
-        m6800_0:=cpu_m6800.create(6000000+(6000000*byte(main_vars.tipo_maquina=247)),272*CPU_SYNC,TCPU_HD63701);
+        m6800_0:=cpu_m6800.create(6000000+(6000000*byte(main_vars.tipo_maquina=247)),272*CPU_SYNC,TCPU_HD63701Y);
         m6800_0.change_ram_calls(ddragon_sub_getbyte,ddragon_sub_putbyte);
+        m6800_0.change_iox_calls(nil,nil,nil,ddragon_sub_port1x_w);
+        if not(roms_load(m6800_0.get_rom_addr,ddragon_sub)) then exit;
         //Sound CPU
         m6809_0:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
         m6809_0.change_ram_calls(ddragon_snd_getbyte,ddragon_snd_putbyte);
         m6809_0.init_sound(ddragon_sound_update);
+        if not(roms_load(@mem_snd,ddragon_snd)) then exit;
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         ym2151_0.change_irq_func(ym2151_snd_irq);
@@ -636,15 +642,6 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,ddragon_adpcm)) then exit;
         copymemory(msm5205_0.rom_data,@memoria_temp,$10000);
         copymemory(msm5205_1.rom_data,@memoria_temp[$10000],$10000);
-        //Main roms
-        if not(roms_load(@memoria_temp,ddragon_rom)) then exit;
-        //Pongo las ROMs en su banco
-        copymemory(@memoria[$8000],@memoria_temp,$8000);
-        for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-        //Sub roms
-        if not(roms_load(@mem_misc,ddragon_sub)) then exit;
-        //Sound roms
-        if not(roms_load(@mem_snd,ddragon_snd)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,ddragon_char)) then exit;
         extract_chars($400);

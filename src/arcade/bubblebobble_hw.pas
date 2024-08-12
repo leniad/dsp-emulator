@@ -1,5 +1,4 @@
 unit bubblebobble_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ym_2203,ym_3812,
@@ -34,22 +33,19 @@ const
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$8;dip_name:'20K 80K 300K'),(dip_val:$c;dip_name:'30K 100K 400K'),(dip_val:$4;dip_name:'40K 200K 500K'),(dip_val:$0;dip_name:'50K 250K 500K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'ROM Type';number:2;dip:((dip_val:$80;dip_name:'IC52=512kb, IC53=none'),(dip_val:$0;dip_name:'IC52=256kb, IC53=256kb'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
  memoria_rom:array [0..3,$0..$3fff] of byte;
- mem_mcu:array[0..$fff] of byte;
  mem_prom:array[0..$ff] of byte;
  banco_rom,sound_stat,sound_latch:byte;
  sound_nmi,video_enable:boolean;
- ddr1,ddr2,ddr3,ddr4:byte;
- port1_in,port1_out,port2_in,port2_out,port3_in,port3_out,port4_in,port4_out:byte;
+ mcu_port3_in,mcu_port1_out,mcu_port2_out,mcu_port3_out,mcu_port4_out:byte;
 
 procedure update_video_bublbobl;
 var
-    nchar,color:word;
-    sx,x,goffs,gfx_offs:word;
+    nchar,color,sx,x,goffs,gfx_offs:word;
     flipx,flipy:boolean;
-    prom_line,atrib,atrib2,offs:byte;
-    xc,yc,sy,y,gfx_attr,gfx_num:byte;
+    prom_line,atrib,atrib2,offs,xc,yc,sy,y,gfx_attr,gfx_num:byte;
 begin
 fill_full_screen(1,$100);
 if video_enable then begin
@@ -64,12 +60,12 @@ if video_enable then begin
 		sy:=256-memoria[$dd00+(offs*4)];
 		for yc:=0 to $1f do begin
       atrib2:=mem_prom[prom_line+(yc shr 1)];
-			if (atrib2 and $08)<>0 then	continue;	// NEXT
-			if (atrib2 and $04)=0 then sx:=memoria[$dd02+(offs*4)]+((gfx_attr and $40) shl 2); // next column
+			if (atrib2 and $8)<>0 then	continue;
+			if (atrib2 and $4)=0 then sx:=memoria[$dd02+(offs*4)]+((gfx_attr and $40) shl 2); // next column
 			for xc:=0 to 1 do begin
-				goffs:=gfx_offs+(xc shl 6)+((yc and 7) shl 1)+((atrib2 and $03) shl 4);
+				goffs:=gfx_offs+(xc shl 6)+((yc and 7) shl 1)+((atrib2 and $3) shl 4);
         atrib:=memoria[$c001+goffs];
-				nchar:=memoria[$c000+goffs]+((atrib and $03) shl 8)+((gfx_attr and $0f) shl 10);
+				nchar:=memoria[$c000+goffs]+((atrib and $03) shl 8)+((gfx_attr and $f) shl 10);
 				color:=(atrib and $3c) shl 2;
 				flipx:=(atrib and $40)<>0;
 				flipy:=(atrib and $80)<>0;
@@ -143,35 +139,6 @@ while EmuStatus=EsRunning do begin
 end;
 end;
 
-function bbsnd_getbyte(direccion:word):byte;
-begin
-  case direccion of
-    0..$8fff:bbsnd_getbyte:=mem_snd[direccion];
-    $9000:bbsnd_getbyte:=ym2203_0.status;
-    $9001:bbsnd_getbyte:=ym2203_0.read;
-    $a000:bbsnd_getbyte:=ym3812_0.status;
-    $a001:bbsnd_getbyte:=ym3812_0.read;
-    $b000:bbsnd_getbyte:=sound_latch;
-  end;
-end;
-
-procedure bbsnd_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-  0..$7fff:; //ROM
-  $8000..$8fff:mem_snd[direccion]:=valor;
-  $9000:ym2203_0.control(valor);
-  $9001:ym2203_0.write(valor);
-  $a000:YM3812_0.control(valor);
-  $a001:YM3812_0.write(valor);
-  $b000:sound_stat:=valor;
-  $b002:begin
-          sound_nmi:=false;
-          z80_2.change_nmi(CLEAR_LINE);
-        end;
-end;
-end;
-
 function bublbobl_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -183,7 +150,6 @@ end;
 end;
 
 procedure bublbobl_putbyte(direccion:word;valor:byte);
-
 procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
@@ -196,7 +162,6 @@ begin
   color.b:=pal4bit(tmp_color shr 4);
   set_pal_color(color,dir shr 1);
 end;
-
 begin
 case direccion of
         0..$bfff:; //ROM
@@ -240,6 +205,35 @@ case direccion of
 end;
 end;
 
+function bbsnd_getbyte(direccion:word):byte;
+begin
+  case direccion of
+    0..$8fff:bbsnd_getbyte:=mem_snd[direccion];
+    $9000:bbsnd_getbyte:=ym2203_0.status;
+    $9001:bbsnd_getbyte:=ym2203_0.read;
+    $a000:bbsnd_getbyte:=ym3812_0.status;
+    $a001:bbsnd_getbyte:=ym3812_0.read;
+    $b000:bbsnd_getbyte:=sound_latch;
+  end;
+end;
+
+procedure bbsnd_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$7fff:; //ROM
+  $8000..$8fff:mem_snd[direccion]:=valor;
+  $9000:ym2203_0.control(valor);
+  $9001:ym2203_0.write(valor);
+  $a000:ym3812_0.control(valor);
+  $a001:ym3812_0.write(valor);
+  $b000:sound_stat:=valor;
+  $b002:begin
+          sound_nmi:=false;
+          z80_2.change_nmi(CLEAR_LINE);
+        end;
+end;
+end;
+
 procedure bb_sound_update;
 begin
   ym2203_0.update;
@@ -251,66 +245,60 @@ begin
   z80_2.change_irq(irqstate);
 end;
 
-function mcu_getbyte(direccion:word):byte;
+function bublbobl_irq_vector:byte;
 begin
-case direccion of
-  $0:mcu_getbyte:=ddr1;
-  $1:mcu_getbyte:=ddr2;
-  $2:begin //port1
-        port1_in:=marcade.in0;
-        mcu_getbyte:=(port1_out and ddr1) or (port1_in and not(ddr1));
-     end;
-  $3:mcu_getbyte:=(port2_out and ddr2) or (port2_in and not(ddr2)); //port2
-  $4:mcu_getbyte:=ddr3;
-  $5:mcu_getbyte:=ddr4;
-  $6:mcu_getbyte:=(port3_out and ddr3) or (port3_in and not(ddr3)); //port3
-  $7:mcu_getbyte:=(port4_out and ddr4) or (port4_in and not(ddr4)); //port4
-  $40..$ff:mcu_getbyte:=m6800_0.internal_ram[direccion];
-  $f000..$ffff:mcu_getbyte:=mem_mcu[direccion and $fff];
-end;
+  z80_0.change_irq(CLEAR_LINE);
+  bublbobl_irq_vector:=memoria[$fc00];
 end;
 
-procedure mcu_putbyte(direccion:word;valor:byte);
+function mcu_port1_r:byte;
+begin
+  mcu_port1_r:=marcade.in0;
+end;
+
+function mcu_port3_r:byte;
+begin
+  mcu_port3_r:=mcu_port3_in;
+end;
+
+procedure mcu_port1_w(valor:byte);
+begin
+if (((mcu_port1_out and $40)<>0) and ((not(valor) and $40)<>0)) then z80_0.change_irq(ASSERT_LINE);
+mcu_port1_out:=valor;
+end;
+
+procedure mcu_port2_w(valor:byte);
 var
   address:word;
 begin
-case direccion of
-  $0:ddr1:=valor;
-  $1:ddr2:=valor;
-  $2:begin //port1
-       if (((port1_out and $40)<>0) and ((not(valor) and $40)<>0)) then begin
-          z80_0.im2_lo:=memoria[$fc00];
-          z80_0.change_irq(HOLD_LINE);
-	      end;
-	      port1_out:=valor;
-     end;
-  $3:begin //port2
-        if (((not(port2_out) and $10)<>0) and ((valor and $10)<>0)) then begin
-		      address:=port4_out or ((valor and $0f) shl 8);
-      		if (port1_out and $80)<>0 then begin //read
-      			if ((address and $0800)=$0000) then	begin
-              case (address and $3) of
-                0:port3_in:=marcade.dswa;
-                1:port3_in:=marcade.dswb;
-                2:port3_in:=marcade.in1;
-                3:port3_in:=marcade.in2;
-              end;
-      			end else begin
-              if ((address and $0c00)=$0c00) then port3_in:=memoria[$fc00+(address and $03ff)];
-            end;
-          end	else begin //write
-      			if ((address and $0c00)=$0c00) then memoria[$fc00+(address and $03ff)]:=port3_out;
-		      end;
-        end;
-	      port2_out:=valor;
-     end;
-  $4:ddr3:=valor;
-  $5:ddr4:=valor;
-  $6:port3_out:=valor;
-  $7:port4_out:=valor;
-  $40..$ff:m6800_0.internal_ram[direccion]:=valor;
-  $f000..$ffff:; //ROM
+if (((not(mcu_port2_out) and $10)<>0) and ((valor and $10)<>0)) then begin
+  address:=mcu_port4_out or ((valor and $0f) shl 8);
+  if (mcu_port1_out and $80)<>0 then begin //read
+    if ((address and $800)=0) then begin
+      case (address and $3) of
+        0:mcu_port3_in:=marcade.dswa;
+        1:mcu_port3_in:=marcade.dswb;
+        2:mcu_port3_in:=marcade.in1;
+        3:mcu_port3_in:=marcade.in2;
+      end;
+    end else begin
+      if ((address and $c00)=$c00) then mcu_port3_in:=memoria[$fc00+(address and $3ff)];
+    end;
+  end	else begin //write
+    if ((address and $c00)=$c00) then memoria[$fc00+(address and $3ff)]:=mcu_port3_out;
+  end;
 end;
+mcu_port2_out:=valor;
+end;
+
+procedure mcu_port3_w(valor:byte);
+begin
+  mcu_port3_out:=valor;
+end;
+
+procedure mcu_port4_w(valor:byte);
+begin
+  mcu_port4_out:=valor;
 end;
 
 //Main
@@ -330,13 +318,16 @@ begin
  marcade.in1:=$ff;
  marcade.in2:=$ff;
  sound_latch:=0;
- ddr1:=0;ddr2:=0;ddr3:=0;ddr4:=0;
- port1_in:=0;port1_out:=0;port2_in:=0;port2_out:=0;port3_in:=0;port3_out:=0;port4_in:=0;port4_out:=0;
+ mcu_port3_in:=0;
+ mcu_port1_out:=0;
+ mcu_port2_out:=0;
+ mcu_port3_out:=0;
+ mcu_port4_out:=0;
 end;
 
 function iniciar_bublbobl:boolean;
 var
-  f:dword;
+  f:byte;
   memoria_temp:array[0..$7ffff] of byte;
 const
   pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
@@ -352,41 +343,36 @@ iniciar_video(256,224);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,264);
 z80_0.change_ram_calls(bublbobl_getbyte,bublbobl_putbyte);
+z80_0.change_misc_calls(nil,nil,nil,bublbobl_irq_vector);
+if not(roms_load(@memoria_temp,bublbobl_rom)) then exit;
+copymemory(@memoria,@memoria_temp,$8000);
+for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Second CPU
 z80_1:=cpu_z80.create(6000000,264);
 z80_1.change_ram_calls(bb_misc_getbyte,bb_misc_putbyte);
+if not(roms_load(@mem_misc,bublbobl_rom2)) then exit;
 //Sound CPU
 z80_2:=cpu_z80.create(3000000,264);
 z80_2.change_ram_calls(bbsnd_getbyte,bbsnd_putbyte);
 z80_2.init_sound(bb_sound_update);
+if not(roms_load(@mem_snd,bublbobl_snd)) then exit;
 //MCU
 m6800_0:=cpu_m6800.create(4000000,264,TCPU_M6801);
-m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
+m6800_0.change_io_calls(mcu_port1_r,nil,mcu_port3_r,nil,mcu_port1_w,mcu_port2_w,mcu_port3_w,mcu_port4_w);
+if not(roms_load(m6800_0.get_rom_addr,bublbobl_mcu_rom)) then exit;
 //Sound Chip
-ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);
+ym2203_0:=ym2203_chip.create(3000000,0.5,0.5);
 ym2203_0.change_irq_calls(snd_irq);
-ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.5);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,1);
 ym3812_0.change_irq_calls(snd_irq);
-//cargar roms
-if not(roms_load(@memoria_temp,bublbobl_rom)) then exit;
-//poner las roms y los bancos de rom
-copymemory(@memoria,@memoria_temp,$8000);
-for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//Segunda CPU
-if not(roms_load(@mem_misc,bublbobl_rom2)) then exit;
-//MCU
-if not(roms_load(@mem_mcu,bublbobl_mcu_rom)) then exit;
-//sonido
-if not(roms_load(@mem_snd,bublbobl_snd)) then exit;
 //proms video
 if not(roms_load(@mem_prom,bublbobl_prom)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,bublbobl_chars)) then exit;
-for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]); //invertir las roms
 init_gfx(0,8,8,$4000);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,16*8,0,4,$4000*16*8+0,$4000*16*8+4);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false,true);
 //DIP
 marcade.dswa:=$fe;
 marcade.dswb:=$ff;

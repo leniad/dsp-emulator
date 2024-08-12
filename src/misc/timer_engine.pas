@@ -147,9 +147,9 @@ for f:=self.timer_count downto 0 do begin
     self.timer[f].actual_time:=self.timer[f].actual_time+time_add;
     //Atencion!!! si desactivo el timer dentro de la funcion, ya no tiene que hacer nada!
     while ((self.timer[f].actual_time>=self.timer[f].time_final) and self.timer[f].enabled) do begin
+        self.timer[f].actual_time:=self.timer[f].actual_time-self.timer[f].time_final;
         if @self.timer[f].execute_simple<>nil then self.timer[f].execute_simple
           else self.timer[f].execute_param(self.timer[f].param0);
-        self.timer[f].actual_time:=self.timer[f].actual_time-self.timer[f].time_final;
     end;
   end;
 end;

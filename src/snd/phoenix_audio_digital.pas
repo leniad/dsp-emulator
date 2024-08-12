@@ -1,7 +1,7 @@
 unit phoenix_audio_digital;
 
 interface
-uses sound_engine;
+uses sound_engine,dialogs;
 
 procedure phoenix_audio_reset;
 procedure phoenix_audio_update;
@@ -60,6 +60,7 @@ var
   i,j:integer;
   shiftreg,bits:cardinal;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   getmem(phoenix_sound[0],sizeof(phoenix_voz));
   getmem(phoenix_sound[1],sizeof(phoenix_voz));
   fillchar(phoenix_sound[0]^,sizeof(phoenix_voz),0);

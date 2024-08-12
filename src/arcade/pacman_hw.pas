@@ -185,12 +185,12 @@ init_controls(false,false,false,true);
 frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    z80_0.run(frame);
-    frame:=frame+z80_0.tframes-z80_0.contador;
     //Si no pinto la pantalla aqui, Ms Pac Man Twin no hace el efecto de la pantalla...
     //Los timings del Z80 estan bien, supongo que es correcto (parece que no hay daños colaterales!)
-    if f=95 then update_video_pacman;
-    if ((f=223) and irq_vblank) then z80_0.change_irq(ASSERT_LINE);
+    if f=96 then update_video_pacman;
+    if ((f=224) and irq_vblank) then z80_0.change_irq(ASSERT_LINE);
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
   end;
   read_events;
   video_sync;
@@ -664,11 +664,11 @@ case main_vars.tipo_maquina of
         copymemory(@rom_decode[$1000],@memoria[$1000],$1000); // pacman.6f
         copymemory(@rom_decode[$2000],@memoria[$2000],$1000); // pacman.6h
         for f:=0 to $fff do
-      	      rom_decode[$3000+f]:=BITSWAP8(memoria[$b000+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt u7 */
+      	      rom_decode[$3000+f]:=BITSWAP8(memoria[$b000+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt u7
 	      for f:=0 to $7ff do begin
-		      rom_decode[$8000+f]:=BITSWAP8(memoria[$8000+BITSWAP16(f,15,14,13,12,11,8,7,5,9,10,6,3,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt u5 */
-		      rom_decode[$8800+f]:=BITSWAP8(memoria[$9800+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt half of u6 */
-		      rom_decode[$9000+f]:=BITSWAP8(memoria[$9000+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt half of u6 */
+		      rom_decode[$8000+f]:=BITSWAP8(memoria[$8000+BITSWAP16(f,15,14,13,12,11,8,7,5,9,10,6,3,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt u5
+		      rom_decode[$8800+f]:=BITSWAP8(memoria[$9800+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt half of u6
+		      rom_decode[$9000+f]:=BITSWAP8(memoria[$9000+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt half of u6
 	      end;
         copymemory(@rom_decode[$9800],@memoria[$1800],$800); // mirror of pacman.6f high
         copymemory(@rom_decode[$a000],@memoria[$2000],$1000); // mirror of pacman.6h
@@ -771,19 +771,19 @@ compute_resistor_weights(0,	255, -1.0,
 			2,@resistances[1],@bweights,0,0);
 for f:=0 to $1f do begin
 		// red component
-		bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rweights, bit0, bit1, bit2);
+		bit0:=(memoria_temp[f] shr 0) and $1;
+		bit1:=(memoria_temp[f] shr 1) and $1;
+		bit2:=(memoria_temp[f] shr 2) and $1;
+		colores[f].r:=combine_3_weights(@rweights,bit0,bit1,bit2);
 		// green component
-		bit0:=(memoria_temp[f] shr 3) and $01;
-		bit1:=(memoria_temp[f] shr 4) and $01;
-		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@gweights, bit0, bit1, bit2);
+		bit0:=(memoria_temp[f] shr 3) and $1;
+		bit1:=(memoria_temp[f] shr 4) and $1;
+		bit2:=(memoria_temp[f] shr 5) and $1;
+		colores[f].g:=combine_3_weights(@gweights,bit0,bit1,bit2);
 		// blue component
-		bit0:=(memoria_temp[f] shr 6) and $01;
-		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights, bit0, bit1);
+		bit0:=(memoria_temp[f] shr 6) and $1;
+		bit1:=(memoria_temp[f] shr 7) and $1;
+		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);
 end;
 set_pal(colores,$20);
 for f:=0 to 255 do begin

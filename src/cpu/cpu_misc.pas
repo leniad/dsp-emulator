@@ -5,17 +5,17 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}timer_engine,sound_engine,main_engine;
 
 type
      //Call functions
-     tgetbyte=function (direccion:word):byte;
-     tputbyte=procedure (direccion:word;valor:byte);
-     tgetbyte16=function (direccion:dword):byte;
-     tputbyte16=procedure (direccion:dword;valor:byte);
-     tgetword=function (direccion:dword):word;
-     tputword=procedure (direccion:dword;valor:word);
-     tdespues_instruccion=procedure (tstates:word);
+     tgetbyte=function(direccion:word):byte;
+     tputbyte=procedure(direccion:word;valor:byte);
+     tgetbyte16=function(direccion:dword):byte;
+     tputbyte16=procedure(direccion:dword;valor:byte);
+     tgetword=function(direccion:dword):word;
+     tputword=procedure(direccion:dword;valor:word);
+     tdespues_instruccion=procedure(tstates:word);
      cpu_inport_call=function:byte;
-     cpu_outport_call=procedure (valor:byte);
+     cpu_outport_call=procedure(valor:byte);
      cpu_inport_call16=function:word;
-     cpu_outport_call16=procedure (valor:word);
+     cpu_outport_call16=procedure(valor:word);
      cpu_class=class
           public
             //Misc

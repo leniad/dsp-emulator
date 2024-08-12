@@ -74,6 +74,10 @@ var
  spritebank:array[0..$ff] of byte;
  layers,rom_bank,sound_latch:byte;
 
+procedure update_video_galivan;
+var
+  f,color,x,y,nchar:word;
+  atrib:byte;
 procedure draw_sprites;
 var
   atrib,color,f:byte;
@@ -89,11 +93,6 @@ for f:=0 to $3f do begin
   actualiza_gfx_sprite(x,y,4,2);
 end;
 end;
-
-procedure update_video_galivan;
-var
-  f,color,x,y,nchar:word;
-  atrib:byte;
 begin
 //background
 if (layers and $40)<>0 then fill_full_screen(4,$100)
@@ -163,17 +162,17 @@ frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+  if f=240 then begin
+    update_video_galivan;
+    copymemory(@buffer_sprites,@memoria[$e000],$100);
+    z80_0.change_irq(ASSERT_LINE);
+  end;
   //main
   z80_0.run(frame_m);
   frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //sound
   z80_1.run(frame_s);
   frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-  if f=239 then begin
-    update_video_galivan;
-    copymemory(@buffer_sprites,@memoria[$e000],$100);
-    z80_0.change_irq(ASSERT_LINE);
-  end;
  end;
  eventos_galivan;
  video_sync;
@@ -426,8 +425,8 @@ case main_vars.tipo_maquina of
       copymemory(@spritebank,@memoria_temp[$400],$100);
       end;
 end;
-dac_0:=dac_chip.Create(0.5);
-dac_1:=dac_chip.Create(0.5);
+dac_0:=dac_chip.create(0.5);
+dac_1:=dac_chip.create(0.5);
 timers.init(z80_1.numero_cpu,4000000/(4000000/512),galivan_snd_timer,nil,true);
 for f:=0 to $ff do begin
   colores[f].r:=pal4bit(memoria_temp[f]);

@@ -234,6 +234,7 @@ case direccion of
 end;
 end;
 
+procedure bloodbros_putword(direccion:dword;valor:word);
 procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
@@ -249,7 +250,6 @@ begin
   end;
 end;
 
-procedure bloodbros_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM

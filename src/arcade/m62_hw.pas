@@ -478,7 +478,6 @@ end;
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $4000..$ffff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -486,7 +485,6 @@ end;
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $800..$8ff:case direccion and $3 of
                   0:m6800_0.change_irq(CLEAR_LINE);
                   1:msm5205_0.data_w(valor);
@@ -504,29 +502,25 @@ end;
 procedure out_port2(valor:byte);
 begin
   if (((val_port2 and $01)<>0) and ((not(valor and $01))<>0)) then begin
-		// control or data port? */
+		// control or data port?
 		if (val_port2 and $04)<>0 then begin
-			// PSG 0 or 1? control */
+			// PSG 0 or 1? control
 			if (val_port2 and $08)<>0 then ay8910_0.control(val_port1);
 			if (val_port2 and $10)<>0 then ay8910_1.control(val_port1);
 		end else begin
-			// PSG 0 or 1? data */
-			if (val_port2 and $08)<>0 then AY8910_0.Write(val_port1);
-			if (val_port2 and $10)<>0 then AY8910_1.Write(val_port1);
+			// PSG 0 or 1? data
+			if (val_port2 and $08)<>0 then ay8910_0.write(val_port1);
+			if (val_port2 and $10)<>0 then ay8910_1.write(val_port1);
 		end;
 	end;
   val_port2:=valor;
 end;
 
 function in_port1:byte;
-var
-  ret:byte;
 begin
- ret:=$ff;
- // PSG 0 or 1? */
-	if (val_port2 and $08)<>0 then ret:=AY8910_0.Read
-    else if (val_port2 and $10)<>0 then ret:=AY8910_1.Read;
-	in_port1:=ret;
+ // PSG 0 or 1?
+	if (val_port2 and $08)<>0 then in_port1:=ay8910_0.read
+    else if (val_port2 and $10)<>0 then in_port1:=ay8910_1.read;
 end;
 
 function in_port2:byte;

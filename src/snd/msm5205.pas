@@ -1,6 +1,6 @@
 unit msm5205;
 interface
-uses math,timer_engine,sound_engine{$ifdef windows},windows{$endif};
+uses math,timer_engine,dialogs,sound_engine{$ifdef windows},windows{$endif};
 
 const
   MSM5205_S96_3B=0;     // prescaler 1/96(4KHz) , data 3bit
@@ -145,6 +145,7 @@ end;
 
 constructor MSM5205_chip.create(clock:dword;select:byte;amp:single;size:dword);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   self.prescaler:=$ff;
   self.amp:=amp;

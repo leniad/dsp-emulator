@@ -165,18 +165,18 @@ init_controls(false,false,false,true);
 frame_m:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+    case f of
+      0:marcade.dswc:=marcade.dswc and $bf;
+      16,80,144,208:m6502_0.change_irq(CLEAR_LINE);
+      48,112,176:m6502_0.change_irq(ASSERT_LINE);
+      240:begin
+            update_video_centipede_hw;
+            m6502_0.change_irq(ASSERT_LINE);
+            marcade.dswc:=marcade.dswc or $40;
+          end;
+    end;
     m6502_0.run(frame_m);
     frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
-    case f of
-    0:marcade.dswc:=marcade.dswc and $bf;
-    31,95,159,224:m6502_0.change_irq(CLEAR_LINE);
-    47,111,175:m6502_0.change_irq(ASSERT_LINE);
-    239:begin
-          update_video_centipede_hw;
-          m6502_0.change_irq(ASSERT_LINE);
-          marcade.dswc:=marcade.dswc or $40;
-        end;
-    end;
  end;
  eventos_centipede_hw;
  video_sync;

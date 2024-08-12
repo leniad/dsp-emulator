@@ -27,7 +27,7 @@ const
         (n:'b_12a.rom';l:$8000;p:$30000;crc:$ce107f3c),(n:'b_14a.rom';l:$8000;p:$38000;crc:$dba06076));
         sidearms_back_tiles:tipo_roms=(n:'b_03d.rom';l:$8000;p:0;crc:$6f348008);
         sidearms_dip_a:array [0..4] of def_dip=(
-        (mask:$07;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'0 (Easiest)'),(dip_val:$6;dip_name:'1'),(dip_val:$5;dip_name:'2'),(dip_val:$4;dip_name:'3 (Normal)'),(dip_val:$3;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$1;dip_name:'6'),(dip_val:$0;dip_name:'7 (Hardest)'),(),(),(),(),(),(),(),())),
+        (mask:$7;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'0 (Easiest)'),(dip_val:$6;dip_name:'1'),(dip_val:$5;dip_name:'2'),(dip_val:$4;dip_name:'3 (Normal)'),(dip_val:$3;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$1;dip_name:'6'),(dip_val:$0;dip_name:'7 (Hardest)'),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Lives';number:2;dip:((dip_val:$8;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'100K'),(dip_val:$20;dip_name:'100K 100K'),(dip_val:$10;dip_name:'150K 150K'),(dip_val:$0;dip_name:'200K 200K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());

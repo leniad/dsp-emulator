@@ -1,16 +1,16 @@
 unit via6522;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,sysutils,dialogs,lib_sdl2;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,sysutils,dialogs,lib_sdl2,timer_engine;
 
 type
   tin_handler=function:byte;
   tout_handler=procedure(valor:byte);
   via6522_chip=class
-      constructor create(clock:dword);
+      constructor create(numero_cpu:byte;clock:dword);
       destructor free;
     public
-      Joystick1,Joystick2:byte;
+      joystick1,joystick2:byte;
       procedure reset;
       function read(direccion:byte):byte;
       procedure write(direccion,valor:byte);
@@ -22,15 +22,17 @@ type
     private
       t1_pb7,sr,pcr,acr,ier,ifr:byte;
       out_a,out_b,in_a,in_b,ddr_a,ddr_b,latch_a,latch_b:byte;
-      out_ca2,out_cb1,out_cb2,t1_active,t2_active,in_cb2:byte;
+      out_ca2,out_cb1,out_cb2,in_cb2:byte;
+      t1_active,t2_active:boolean;
       t1ll,t1lh,t2ll,t2lh:byte;
       t1cl,t1ch,t2cl,t2ch:byte;
       shift_counter:byte;
       in_a_handler,in_b_handler:tin_handler;
       irq_handler,ca2_handler,cb1_handler,cb2_handler,out_a_handler,out_b_handler:tout_handler;
       in_cb1,shift_timer,shift_irq_enabled:boolean;
-      t1_contador,t2_contador,shift_irq_contador:integer;
-      time1,time2,clock:dword;
+      shift_irq_contador:integer;
+      time1,time2,clock:word;
+      timer1,timer2:byte;
       procedure clr_pa_int;
       procedure clr_pb_int;
       procedure set_int(valor:byte);
@@ -202,7 +204,29 @@ begin
   SO_T2_CONTROL:=((valor and $1c)=$14);
 end;
 
-constructor via6522_chip.create(clock:dword);
+procedure timer1_0_tick;
+begin
+if T1_CONTINUOUS(via6522_0.acr) then begin
+  via6522_0.t1_pb7:=not(via6522_0.t1_pb7) and 1;
+  timers.timer[via6522_0.timer1].time_final:=via6522_0.t1ll+(via6522_0.t1lh shl 8)+IFR_DELAY;
+end else begin
+  via6522_0.t1_pb7:=1;
+  via6522_0.t1_active:=false;
+  timers.enabled(via6522_0.timer1,false);
+end;
+if T1_SET_PB7(via6522_0.acr) then via6522_0.output_pb;
+via6522_0.set_int(INT_T1);
+end;
+
+procedure timer2_0_tick;
+begin
+timers.enabled(via6522_0.timer2,false);
+via6522_0.t2_active:=false;
+via6522_0.set_int(INT_T2);
+via6522_0.time2:=0;
+end;
+
+constructor via6522_chip.create(numero_cpu:byte;clock:dword);
 begin
   self.clock:=clock;
   self.in_a_handler:=nil;
@@ -212,6 +236,8 @@ begin
   self.irq_handler:=nil;
   self.ca2_handler:=nil;
   self.cb2_handler:=nil;
+  self.timer1:=timers.init(numero_cpu,1,timer1_0_tick,nil,false);
+  self.timer2:=timers.init(numero_cpu,1,timer2_0_tick,nil,false);
 end;
 
 destructor via6522_chip.free;
@@ -237,15 +263,17 @@ begin
 	self.acr:=0;
 	self.ier:=0;
 	self.ifr:=0;
-	self.t1_active:=0;
+	self.t1_active:=false;
 	self.t1_pb7:=1;
-	self.t2_active:=0;
+  timers.enabled(via6522_0.timer1,false);
+  timers.enabled(via6522_0.timer2,false);
+	self.t2_active:=false;
   self.in_cb1:=false;
 	self.shift_counter:=0;
   self.in_cb2:=0;
   shift_irq_contador:=0;
-  time1:=sdl_getticks;
-  time2:=sdl_getticks;
+  time1:=0;
+  time2:=0;
   self.t1ll:=$f3; // via at 0x9110 in vic20 show these values
 	self.t1lh:=$b5; // ports are not written by kernel!
 	self.t2ll:=$ff; // taken from vice
@@ -271,29 +299,6 @@ end;
 
 procedure via6522_chip.update_timers(estados:word);
 begin
-  if (self.t1_active<>0) then begin
-    self.t1_contador:=self.t1_contador-estados;
-    if self.t1_contador<=0 then begin //t1_tick
-      if T1_CONTINUOUS(self.acr) then begin
-		      self.t1_pb7:=not(self.t1_pb7) and 1;
-		      t1_contador:=t1_contador+self.t1ll+(self.t1lh shl 8)+IFR_DELAY;
-	    end else begin
-		      self.t1_pb7:=1;
-		      self.t1_active:=0;
-		      time1:=SDL_GetTicks;
-      end;
-	    if T1_SET_PB7(self.acr) then self.output_pb;
-	    self.set_int(INT_T1);
-    end;
-  end;
-  if (self.t2_active<>0) then begin
-    self.t2_contador:=self.t2_contador-estados;
-    if self.t2_contador<=0 then begin //t2_tick
-      self.t2_active:=0;
-	    time2:=SDL_GetTicks;
-      self.set_int(INT_T2);
-    end;
-  end;
   if shift_irq_enabled then begin
     self.shift_irq_contador:=self.shift_irq_contador-estados;
     if self.shift_irq_contador<=0 then begin
@@ -301,6 +306,8 @@ begin
       self.set_int(INT_SR);  // triggered from shift_in or shift_out on the last rising edge
     end;
   end;
+  self.time2:=self.time2+estados;
+  self.time1:=self.time1+estados;
 end;
 
 procedure via6522_chip.set_pb_line(line:byte;state:boolean);
@@ -441,8 +448,9 @@ begin
   self.t2ch:=self.t2ch-1;
 	if (self.t2ch<>0) then exit;
 	// underflow causes only one interrupt between T2CH writes
-	if (self.t2_active)<>0 then begin
-		self.t2_active:=0;
+	if self.t2_active then begin
+    timers.enabled(via6522_0.timer2,false);
+		self.t2_active:=false;
 		self.set_int(INT_T2);
 	end;
 end;
@@ -450,19 +458,18 @@ end;
 function via6522_chip.read(direccion:byte):byte;
 var
   res:byte;
-  tdword:dword;
 begin
   res:=0;
   direccion:=direccion and $f;
   case direccion of
     VIA_PB:begin // update the input
-		          if not(PB_LATCH_ENABLE(self.acr)) then res:=self.input_pb
-                else res:=self.latch_b;
+		          if (not(PB_LATCH_ENABLE(self.acr)) and ((self.ifr and INT_CB1)<>0)) then res:=self.latch_b
+                else res:=self.input_pb;
 			        self.CLR_PB_INT;
            end;
     VIA_PA:begin // update the input
-		          if not(PA_LATCH_ENABLE(self.acr)) then res:=self.input_pa
-                else res:=self.latch_a;
+		          if (not(PA_LATCH_ENABLE(self.acr)) and ((self.ifr and INT_CA1)<>0)) then res:=self.latch_a
+                else res:=self.input_pa;
 			        self.CLR_PA_INT;
 			        if ((self.out_ca2<>0) and (CA2_PULSE_OUTPUT(self.pcr) or CA2_AUTO_HS(self.pcr))) then begin
 				        self.out_ca2:=0;
@@ -481,21 +488,18 @@ begin
 	  VIA_T1LH:res:=self.t1lh;
     VIA_T2CL:begin
 			          clear_int(INT_T2);
-		            if ((self.t2_active<>0) and (self.t2_contador>0)) then begin
-                  res:=self.t2_contador and $ff
+		            if (self.t2_active and timers.timer[self.timer2].enabled) then begin
+                  res:=trunc(timers.timer[self.timer2].time_final-timers.timer[self.timer2].actual_time) and $ff;
                 end else begin
                     if T2_COUNT_PB6(self.acr) then res:=self.t2cl
-                      else begin
-                        tdword:=SDL_GetTicks;
-                        res:=((($10000-(tdword-time2)) and $ffff)-1) and $ff;
-                      end;
+                      else res:=((($10000-time2) and $ffff)-1) and $ff;
                   end;
               end;
-    VIA_T2CH:if ((self.t2_active<>0) and (self.t2_contador>0)) then begin
-			          res:=t2_contador shr 8;
+    VIA_T2CH:if (self.t2_active and timers.timer[self.timer2].enabled) then begin
+			          res:=trunc(timers.timer[self.timer2].time_final-timers.timer[self.timer2].actual_time) shr 8;
              end else begin
                 if (T2_COUNT_PB6(self.acr)) then res:=self.t2ch
-                  else res:=((($10000-(SDL_GetTicks-time2)) and $ffff)-1) shr 8;
+                  else res:=((($10000-time2) and $ffff)-1) shr 8;
 			       end;
     VIA_SR:begin
 		          res:=self.sr;
@@ -514,8 +518,8 @@ begin
     VIA_PCR:res:=self.pcr;
     VIA_IER:res:=self.ier or $80;
     VIA_IFR:res:=self.ifr;
-    VIA_PANH:if (not(PA_LATCH_ENABLE(self.acr))) then res:=input_pa
-              else res:=self.latch_a;
+    VIA_PANH:if (not(PA_LATCH_ENABLE(self.acr)) and ((self.ifr and INT_CA1)<>0)) then res:=self.latch_a
+              else res:=self.input_pa;
     else MessageDlg('Read: '+inttohex(direccion,2), mtInformation,[mbOk], 0);
   end;
   read:=res;
@@ -525,8 +529,8 @@ function via6522_chip.get_counter1_value:word;
 var
   val:word;
 begin
-	if (self.t1_active<>0) then val:=t1_contador-IFR_DELAY
-	  else val:=$ffff-((SDL_GetTicks-time1)*1000);
+	if self.t1_active then val:=trunc(timers.timer[self.timer1].actual_time)-IFR_DELAY
+	  else val:=$ffff-(time1*1000);
 	get_counter1_value:=val;
 end;
 
@@ -572,8 +576,10 @@ begin
 		            self.clear_int(INT_T1);
 		            self.t1_pb7:=0;
 		            if T1_SET_PB7(self.acr) then self.output_pb;
-                t1_contador:=(self.t1ll+(self.t1lh shl 8)+IFR_DELAY);
-		            self.t1_active:=1;
+                timers.timer[self.timer1].time_final:=self.t1ll+(self.t1lh shl 8)+IFR_DELAY;
+                timers.enabled(self.timer1,true);
+                timers.reset(self.timer1);
+		            self.t1_active:=true;
               end;
     VIA_T1LH:begin
                 self.t1lh:=valor;
@@ -586,16 +592,15 @@ begin
 		            self.t2cl:=self.t2ll;
 		            self.clear_int(INT_T2);
 		            if not(T2_COUNT_PB6(self.acr)) then begin
-                  t2_contador:=self.t2ll+(self.t2lh shl 8)+IFR_DELAY;
-			            self.t2_active:=1;
-		            end else begin
-			            self.t2_active:=1;
-			            time2:=SDL_GetTicks;
-		            end;
+                  timers.timer[self.timer2].time_final:=self.t2ll+(self.t2lh shl 8)+IFR_DELAY;
+                  timers.enabled(self.timer2,true);
+                  timers.reset(self.timer2);
+                end else time2:=0;
+                self.t2_active:=true;
             end;
     VIA_SR:begin
 		          self.sr:=valor;
-		          if (not(SI_EXT_CONTROL(self.acr) or SO_EXT_CONTROL(self.acr))) then begin
+		          if not(SI_EXT_CONTROL(self.acr) or SO_EXT_CONTROL(self.acr)) then begin
 			          self.out_cb1:=1;
 			          if @self.cb1_handler<>nil then self.cb1_handler(self.out_cb1);
 			          self.shift_counter:=$0f;
@@ -612,8 +617,10 @@ begin
 			        self.output_pb;
 			        if (SR_DISABLED(self.acr) or SI_EXT_CONTROL(self.acr) or SO_EXT_CONTROL(self.acr)) then shift_timer:=false;
 			        if (T1_CONTINUOUS(self.acr)) then begin
-                t1_contador:=tword+IFR_DELAY;
-				        self.t1_active:=1;
+                timers.timer[self.timer1].time_final:=tword+IFR_DELAY;
+                timers.enabled(self.timer1,true);
+                timers.reset(self.timer1);
+				        self.t1_active:=true;
               end;
 			        if (SI_T2_CONTROL(self.acr) or SI_O2_CONTROL(self.acr) or SI_EXT_CONTROL(self.acr)) then begin
 				        self.out_cb2:=1;
@@ -631,10 +638,7 @@ begin
 			              if @self.cb2_handler<>nil then self.cb2_handler(self.out_cb2);
                 end;
             end;
-    VIA_IFR:begin
-		            if (valor and INT_ANY)<>0 then valor:=$7f;
-		            self.clear_int(valor);
-            end;
+    VIA_IFR:self.clear_int(valor and $7f);
     VIA_IER:begin
 		            if (valor and $80)<>0 then self.ier:=self.ier or (valor and $7f)
                   else self.ier:=self.ier and not(valor and $7f);

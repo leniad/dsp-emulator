@@ -26,7 +26,7 @@ const
         (n:'rt1_13.12p';l:$10000;p:$40000;crc:$489686d7),(n:'rt1_14.12r';l:$10000;p:$50000;crc:$689e56a8),
         (n:'rt1_15.12t';l:$10000;p:$60000;crc:$1d8bf2ca),(n:'rt1_16.12u';l:$10000;p:$70000;crc:$1bbcf37b));
         rthunder_mcu:array[0..1] of tipo_roms=(
-        (n:'rt3_4.6b';l:$8000;p:$4000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'rt3_4.6b';l:$8000;p:$1000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:$0;crc:$076ea82a));
         rthunder_prom:array[0..4] of tipo_roms=(
         (n:'rt1-1.3r';l:$200;p:$0;crc:$8ef3bb9d),(n:'rt1-2.3s';l:$200;p:$200;crc:$6510a8f2),
         (n:'rt1-3.4v';l:$800;p:$400;crc:$95c7d944),(n:'rt1-4.5v';l:$800;p:$c00;crc:$1391fec9),
@@ -54,7 +54,7 @@ const
         hopmappy_tiles:tipo_roms=(n:'hm1_5.4r';l:$4000;p:$0;crc:$9c4f31ae);
         hopmappy_sprites:tipo_roms=(n:'hm1_4.12h';l:$8000;p:$0;crc:$78719c52);
         hopmappy_mcu:array[0..1] of tipo_roms=(
-        (n:'hm1_3.6b';l:$2000;p:$8000;crc:$6496e1db),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'hm1_3.6b';l:$2000;p:$1000;crc:$6496e1db),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         hopmappy_prom:array[0..4] of tipo_roms=(
         (n:'hm1-1.3r';l:$200;p:$0;crc:$cc801088),(n:'hm1-2.3s';l:$200;p:$200;crc:$a1cb71c5),
         (n:'hm1-3.4v';l:$800;p:$400;crc:$e362d613),(n:'hm1-4.5v';l:$800;p:$c00;crc:$678252b4),
@@ -81,7 +81,7 @@ const
         skykiddx_sprites:array[0..1] of tipo_roms=(
         (n:'sk3_5.12h';l:$8000;p:$0;crc:$5c7d4399),(n:'sk3_6.12k';l:$8000;p:$8000;crc:$c908a3b2));
         skykiddx_mcu:array[0..1] of tipo_roms=(
-        (n:'sk3_4.6b';l:$4000;p:$8000;crc:$e6cae2d6),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'sk3_4.6b';l:$4000;p:$1000;crc:$e6cae2d6),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         skykiddx_prom:array[0..4] of tipo_roms=(
         (n:'sk3-1.3r';l:$200;p:$0;crc:$9e81dedd),(n:'sk3-2.3s';l:$200;p:$200;crc:$cbfec4dd),
         (n:'sk3-3.4v';l:$800;p:$400;crc:$81714109),(n:'sk3-4.5v';l:$800;p:$c00;crc:$1bf25acc),
@@ -110,7 +110,7 @@ const
         (n:'ri1_9.12p';l:$8000;p:$20000;crc:$f3de3c2a),(n:'ri1_10.12r';l:$8000;p:$28000;crc:$6dacc70d),
         (n:'ri1_11.12t';l:$8000;p:$30000;crc:$fb6bc533));
         roishtar_mcu:array[0..1] of tipo_roms=(
-        (n:'ri1_4.6b';l:$8000;p:$0;crc:$552172b8),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'ri1_4.6b';l:$8000;p:$1000;crc:$552172b8),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         roishtar_prom:array[0..4] of tipo_roms=(
         (n:'ri1-1.3r';l:$200;p:$0;crc:$29cd0400),(n:'ri1-2.3s';l:$200;p:$200;crc:$02fd278d),
         (n:'ri1-3.4v';l:$800;p:$400;crc:$cbd7e53f),(n:'ri1-4.5v';l:$800;p:$c00;crc:$22921617),
@@ -136,7 +136,7 @@ const
         (n:'gt1_15.12p';l:$20000;p:$80000;crc:$198b6878),(n:'gt1_16.12r';l:$20000;p:$a0000;crc:$801e29c7),
         (n:'gt1_8.12t';l:$10000;p:$c0000;crc:$ad7bc770),(n:'gt1_9.12u';l:$10000;p:$e0000;crc:$d95a5fd7));
         genpeitd_mcu:array[0..1] of tipo_roms=(
-        (n:'gt1_3.6b';l:$8000;p:$4000;crc:$315cd988),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'gt1_3.6b';l:$8000;p:$1000;crc:$315cd988),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         genpeitd_prom:array[0..4] of tipo_roms=(
         (n:'gt1-1.3r';l:$200;p:$0;crc:$2f0ddddb),(n:'gt1-2.3s';l:$200;p:$200;crc:$87d27025),
         (n:'gt1-3.4v';l:$800;p:$400;crc:$c178de99),(n:'gt1-4.5v';l:$800;p:$c00;crc:$9f48ef17),
@@ -169,7 +169,7 @@ const
         (n:'wm1_12.12p';l:$10000;p:$40000;crc:$de64c12f),(n:'wm1_13.12r';l:$10000;p:$50000;crc:$cfe589ad),
         (n:'wm1_14.12t';l:$10000;p:$60000;crc:$2ae21a53),(n:'wm1_15.12u';l:$10000;p:$70000;crc:$b5c98be0));
         wndrmomo_mcu:array[0..1] of tipo_roms=(
-        (n:'wm1_3.6b';l:$8000;p:$4000;crc:$55f01df7),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        (n:'wm1_3.6b';l:$8000;p:$1000;crc:$55f01df7),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         wndrmomo_prom:array[0..4] of tipo_roms=(
         (n:'wm1-1.3r';l:$200;p:$0;crc:$1af8ade8),(n:'wm1-2.3s';l:$200;p:$200;crc:$8694e213),
         (n:'wm1-3.4v';l:$800;p:$400;crc:$2ffaf9a4),(n:'wm1-4.5v';l:$800;p:$c00;crc:$f4e83e0b),
@@ -452,9 +452,8 @@ end;
 function system86_mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:system86_mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:system86_mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
-  $1400..$1fff,$4000..$bfff,$f000..$ffff:system86_mcu_getbyte:=mem_snd[direccion];
+  $1400..$1fff,$4000..$bfff:system86_mcu_getbyte:=mem_snd[direccion];
   $2001,$2801,$3801:system86_mcu_getbyte:=ym2151_0.status;
   $2020,$2820,$3820:system86_mcu_getbyte:=marcade.in0;
   $2021,$2821,$3821:system86_mcu_getbyte:=marcade.in1;
@@ -466,12 +465,11 @@ end;
 procedure system86_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $1400..$1fff:mem_snd[direccion]:=valor;
   $2000,$2800,$3800:ym2151_0.reg(valor);
   $2001,$2801,$3801:ym2151_0.write(valor);
-  $4000..$bfff,$f000..$ffff:;
+  $4000..$bfff:;
 end;
 end;
 
@@ -576,7 +574,6 @@ end;
 function roishtar_mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:roishtar_mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:roishtar_mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
   $1400..$1fff,$2000..$3fff,$8000..$bfff,$f000..$ffff:roishtar_mcu_getbyte:=mem_snd[direccion];
   $6001:roishtar_mcu_getbyte:=ym2151_0.status;
@@ -590,7 +587,6 @@ end;
 procedure roishtar_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $1400..$1fff:mem_snd[direccion]:=valor;
   $6000:ym2151_0.reg(valor);
@@ -694,6 +690,7 @@ var
   colores:tpaleta;
   f:word;
   memoria_temp:pbyte;
+  ptemp:pbyte;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
     pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
@@ -775,7 +772,7 @@ m6809_0:=cpu_m6809.Create(49152000 div 32,264*MAIN_DIV,TCPU_M6809);
 //Sub CPU
 m6809_1:=cpu_m6809.Create(49152000 div 32,264*MAIN_DIV,TCPU_M6809);
 //MCU CPU
-m6800_0:=cpu_m6800.create(49152000 div 8,264*MAIN_DIV,TCPU_HD63701);
+m6800_0:=cpu_m6800.create(49152000 div 8,264*MAIN_DIV,TCPU_HD63701V);
 m6800_0.change_io_calls(system86_in_port1,system86_in_port2,nil,nil,nil,nil,nil,nil);
 if ((main_vars.tipo_maquina=124) or (main_vars.tipo_maquina=290) or (main_vars.tipo_maquina=291)) then m6800_0.init_sound(sound_update_rthunder)
   else m6800_0.init_sound(sound_update_system86);
@@ -797,7 +794,10 @@ case main_vars.tipo_maquina of
             copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
             for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
             //Cargar MCU
-            if not(roms_load(@mem_snd,rthunder_mcu)) then exit;
+            if not(roms_load(memoria_temp,rthunder_mcu)) then exit;
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$4000],@memoria_temp[$1000],$8000);
             m6800_0.change_ram_calls(system86_mcu_getbyte,system86_mcu_putbyte);
             //Cargar ADPCM
             namco_63701x_start(6000000);
@@ -828,7 +828,10 @@ case main_vars.tipo_maquina of
             if not(roms_load(@mem_misc,hopmappy_sub_rom)) then exit;
             m6809_1.change_ram_calls(system86_sub_getbyte,system86_sub_putbyte);
             //Cargar MCU
-            if not(roms_load(@mem_snd,hopmappy_mcu)) then exit;
+            if not(roms_load(memoria_temp,hopmappy_mcu)) then exit;
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$8000],@memoria_temp[$1000],$2000);
             m6800_0.change_ram_calls(system86_mcu_getbyte,system86_mcu_putbyte);
             //convertir chars
             fillchar(memoria_temp[0],$6000,0);
@@ -861,7 +864,10 @@ case main_vars.tipo_maquina of
             if not(roms_load(@mem_misc,skykiddx_sub_rom)) then exit;
             m6809_1.change_ram_calls(system86_sub_getbyte,system86_sub_putbyte);
             //Cargar MCU
-            if not(roms_load(@mem_snd,skykiddx_mcu)) then exit;
+            if not(roms_load(memoria_temp,skykiddx_mcu)) then exit;
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$8000],@memoria_temp[$1000],$4000);
             m6800_0.change_ram_calls(system86_mcu_getbyte,system86_mcu_putbyte);
             //convertir chars
             if not(roms_load(memoria_temp,skykiddx_chars)) then exit;
@@ -893,9 +899,9 @@ case main_vars.tipo_maquina of
             m6809_1.change_ram_calls(roishtar_sub_getbyte,roishtar_sub_putbyte);
             //Cargar MCU
             if not(roms_load(memoria_temp,roishtar_mcu)) then exit;
-            copymemory(@mem_snd[0],@memoria_temp[0],$4000);
-            copymemory(@mem_snd[$8000],@memoria_temp[$4000],$4000);
-            copymemory(@mem_snd[$f000],@memoria_temp[$f000],$1000);
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$8000],@memoria_temp[$5000],$4000);
             m6800_0.change_ram_calls(roishtar_mcu_getbyte,roishtar_mcu_putbyte);
             //convertir chars
             fillchar(memoria_temp[0],$6000,0);
@@ -929,8 +935,11 @@ case main_vars.tipo_maquina of
             if not(roms_load(@mem_misc,genpeitd_sub_rom)) then exit;
             m6809_1.change_ram_calls(genpeitd_sub_getbyte,genpeitd_sub_putbyte);
             //Cargar MCU
-            if not(roms_load(@mem_snd,genpeitd_mcu)) then exit;
+            if not(roms_load(memoria_temp,genpeitd_mcu)) then exit;
             m6800_0.change_ram_calls(system86_mcu_getbyte,system86_mcu_putbyte);
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$4000],@memoria_temp[$1000],$8000);
             //Cargar ADPCM
             namco_63701x_start(6000000);
             if not(roms_load(namco_63701_rom,genpeitd_adpcm)) then exit;
@@ -963,7 +972,10 @@ case main_vars.tipo_maquina of
             if not(roms_load(@mem_misc,wndrmomo_sub_rom)) then exit;
             m6809_1.change_ram_calls(wndrmomo_sub_getbyte,wndrmomo_sub_putbyte);
             //Cargar MCU
-            if not(roms_load(@mem_snd,wndrmomo_mcu)) then exit;
+            if not(roms_load(memoria_temp,wndrmomo_mcu)) then exit;
+            ptemp:=m6800_0.get_rom_addr;
+            copymemory(@ptemp[$1000],@memoria_temp[0],$1000);
+            copymemory(@mem_snd[$4000],@memoria_temp[$1000],$8000);
             m6800_0.change_ram_calls(system86_mcu_getbyte,system86_mcu_putbyte);
             //Cargar ADPCM
             namco_63701x_start(6000000);

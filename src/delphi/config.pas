@@ -198,9 +198,10 @@ with ConfigSP do begin
   if (mouse.tipo<>0) then show_mouse_cursor
     else hide_mouse_cursor;
   if mouse.tipo=3 then begin
-    z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
-    z80daisy_init(Z80_PIO_TYPE,Z80_DAISY_NONE,Z80_DAISY_NONE,0,0,0);
-    z80pio_reset(0);
+    pio_0:=tz80pio.create;
+    pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
+    z80daisy_init(Z80_PIO0_TYPE);
+    pio_0.reset;
     spec_z80.daisy:=true;
   end;
   lenslok.activo:=radiobutton12.Checked;

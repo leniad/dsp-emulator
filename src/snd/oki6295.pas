@@ -117,6 +117,7 @@ end;
 
 constructor snd_okim6295.create(clock:dword;pin7:byte;amp:single=1);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   getmem(self.rom,$40000);
 	compute_tables;

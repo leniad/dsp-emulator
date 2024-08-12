@@ -176,9 +176,9 @@ case direccion of
                     3:begin
                         offset:=direccion and $3ff;
                         changes:=offset xor last_addr;
-                        // A4 VLM5030 ST pin */
+                        // A4 VLM5030 ST pin
                         if (changes and $100)<>0 then vlm5030_0.set_st((offset and $100) shr 8);
-                        // A5 VLM5030 RST pin */
+                        // A5 VLM5030 RST pin
                         if (changes and $200)<>0 then vlm5030_0.set_rst((offset and $200) shr 9);
                         last_addr:=offset;
                       end;

@@ -71,7 +71,7 @@ for f:=0 to $3fff do begin
       data2:=data2 shr 1;
     end;
 end;
-actualiza_trozo_simple(0,0,255,255,1);
+actualiza_trozo(0,0,255,255,1,0,0,255,255,PANT_TEMP);
 end;
 
 procedure update_video_speakres;
@@ -96,7 +96,7 @@ for f:=0 to $3fff do begin
       data2:=data2 shr 1;
     end;
 end;
-actualiza_trozo_simple(0,0,255,255,1);
+actualiza_trozo(0,0,255,255,1,0,0,255,255,PANT_TEMP);
 end;
 
 procedure eventos_route16;

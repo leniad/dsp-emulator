@@ -1,7 +1,7 @@
 unit sega_pcm;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine,dialogs;
 
 type
   tread_rom_call=function(dir:dword):byte;
@@ -39,6 +39,7 @@ implementation
 
 constructor tsega_pcm.create(clock:dword;read_rom_call:tread_rom_call;amp:single);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.tsample_num:=init_channel;
   self.amp:=amp;
   self.clock:=clock;
