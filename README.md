@@ -22,7 +22,7 @@
         -Add timer lapse, before call timer function
     +CPU
         -M6502
-            +Fixed 'brk' opcode (fixes Oric's SkoolDaze' and many others)
+            +Fixed 'brk' opcode (fixes Oric's 'SkoolDaze' and many others)
         -M680X
             +Added opcodes $2c, $2f and $85
             +Rewrited get/put byte functions
@@ -58,14 +58,14 @@
 -Aliens
     +Fixed CPU clock
 -Baraduke HW
-	+Changed to new M680X CPU engine
+    +Changed to new M680X CPU engine
 -BombJack HW
-	+Merged with Calorie Kun
-	+Fixed background layer
-	+Changed memory map to a generalized one
-	+Added rotation screen
-	+Changed screen parameters
-	+Enhanced NMI
+    +Merged with Calorie Kun
+    +Fixed background layer
+    +Changed memory map to a generalized one
+    +Added rotation screen
+    +Changed screen parameters
+    +Enhanced NMI
 -Breakthru HW
     +Changed memory map to a generalized one
     +Fixed DIPs
@@ -109,7 +109,7 @@
     +Changed to new M680X CPU engine
     
     
-        Before                                           0.23WIP2
+        Before                                               0.23WIP2
 Full Screen
 <img src="https://i.ibb.co/kxByHxd/gng-before.jpg"> <img src="https://i.ibb.co/rxkbkpB/gng-023wip2.jpg">
 
