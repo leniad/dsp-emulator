@@ -109,8 +109,7 @@
     +Changed to new M680X CPU engine
     
     
-        Before                                        0.23WIP2
-        
+        Before                                           0.23WIP2
 Full Screen
 <img src="https://i.ibb.co/kxByHxd/gng-before.jpg"> <img src="https://i.ibb.co/rxkbkpB/gng-023wip2.jpg">
 
