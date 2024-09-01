@@ -24,6 +24,7 @@ const
   SAMSTRADROM=16;
   SROM=17;
   SEXPORT=18;
+  SEXPORT_SAMPLES=22;
   SBITMAP=19;
   SGENESIS=20;
   SGANDW=21;
@@ -40,10 +41,10 @@ function BITSWAP16(val:word;B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B
 function BITSWAP24(val:dword;B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
 function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
 //Load/Save Systems ROM
-function openrom(var name:string):boolean;
-function saverom(var name:string;var index:byte):boolean;
+function openrom(var name:string;system_type:byte):boolean;
+function saverom(var name:string;var index:byte;system_type:byte):boolean;
 //Load data
-function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string):boolean;
+function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte):boolean;
 
 implementation
 uses principal,main_engine,file_engine;
@@ -242,7 +243,7 @@ calc_crc:=crc;
 end;
 {$endif}
 
-function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string):boolean;
+function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte):boolean;
 var
   nombre_file,extension:string;
   datos:pbyte;
@@ -251,7 +252,7 @@ var
   ext:array[1..10] of string;
   f,total_ext:byte;
 begin
-case main_vars.system_type of
+case system_type of
   SNES:begin
             ext[1]:='NES';
             ext[2]:='DSP';
@@ -377,12 +378,12 @@ if datos<>nil then freemem(datos);
 extract_data:=true;
 end;
 
-function openrom(var name:string):boolean;
+function openrom(var name:string;system_type:byte):boolean;
 var
   opendialog:topendialog;
 begin
 opendialog:=TOpenDialog.Create(principal1);
-case main_vars.system_type of
+case system_type of
   SCOLECO:begin
          opendialog.InitialDir:=directory.coleco;
          Opendialog.Filter:='ColecoVision Game/Snapshots (*.col;*.rom;*.csn;*.dsp;*.bin;*.zip)|*.col;*.rom;*.csn;*.dsp;*.bin;*.zip';
@@ -449,12 +450,12 @@ name:=opendialog.FileName;
 opendialog.free;
 end;
 
-function saverom(var name:string;var index:byte):boolean;
+function saverom(var name:string;var index:byte;system_type:byte):boolean;
 var
   SaveDialog:tsavedialog;
 begin
 SaveDialog:=TSaveDialog.Create(principal1);
-case main_vars.system_type of
+case system_type of
   SCOLECO:begin
          SaveDialog.InitialDir:=directory.coleco;
          SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp|CSN Format (*.csn)|*.csn';
@@ -466,6 +467,10 @@ case main_vars.system_type of
   SEXPORT:begin
          SaveDialog.Filter:='DAT File (*.dat)|*.dat';
          SaveDialog.FileName:='dsp_roms_dat.dat';
+       end;
+  SEXPORT_SAMPLES:begin
+         SaveDialog.Filter:='DAT File (*.dat)|*.dat';
+         SaveDialog.FileName:='dsp_samples_dat.dat';
        end;
   SSPECTRUM:begin
          SaveDialog.InitialDir:=directory.spectrum_tap_snap;

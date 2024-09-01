@@ -14,13 +14,13 @@ const
         blockout_sound:tipo_roms=(n:'bo29e3-0.bin';l:$8000;p:0;crc:$3ea01f78);
         blockout_oki:tipo_roms=(n:'bo29e2-0.bin';l:$20000;p:0;crc:$15c5a99d);
         //DIP
-        blockout_dipa:array [0..3] of def_dip=(
-        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'1 Coint to Continue';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        blockout_dipb:array [0..2] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Rotate Buttons';number:2;dip:((dip_val:$0;dip_name:'2'),(dip_val:$4;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        blockout_dipa:array [0..3] of def_dip2=(
+        (mask:$3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$10;name:'1 Coint to Continue';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),());
+        blockout_dipb:array [0..2] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$4;name:'Rotate Buttons';number:2;val2:(0,4);name2:('2','3')),());
 
 var
  rom:array[0..$1ffff] of word;
@@ -283,9 +283,9 @@ if not(roms_load16w(@rom,blockout_rom)) then exit;
 if not(roms_load(@mem_snd,blockout_sound)) then exit;
 //DIP
 marcade.dswa:=$ffff;
-marcade.dswa_val:=@blockout_dipa;
+marcade.dswa_val2:=@blockout_dipa;
 marcade.dswb:=$ffff;
-marcade.dswb_val:=@blockout_dipb;
+marcade.dswb_val2:=@blockout_dipb;
 //final
 reset_blockout;
 iniciar_blockout:=true;

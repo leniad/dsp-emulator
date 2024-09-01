@@ -40,8 +40,32 @@ type
 var
   timers:timer_eng;
 
+procedure one_shot_timer_0(cpu:byte;time:single;final_procedure:exec_type_simple);
+procedure one_shot_timer_1(cpu:byte;time:single;final_procedure:exec_type_simple);
+
 implementation
 uses controls_engine,cpu_misc;
+
+var
+  one_shot_0,one_shot_1:ttimers;
+
+procedure one_shot_timer_0(cpu:byte;time:single;final_procedure:exec_type_simple);
+begin
+  one_shot_0.cpu:=cpu;
+  one_shot_0.actual_time:=0;
+  one_shot_0.time_final:=time;
+  one_shot_0.enabled:=true;
+  one_shot_0.execute_simple:=final_procedure;
+end;
+
+procedure one_shot_timer_1(cpu:byte;time:single;final_procedure:exec_type_simple);
+begin
+  one_shot_1.cpu:=cpu;
+  one_shot_1.actual_time:=0;
+  one_shot_1.time_final:=time;
+  one_shot_1.enabled:=true;
+  one_shot_1.execute_simple:=final_procedure;
+end;
 
 procedure auto_fire;
 begin
@@ -153,6 +177,20 @@ for f:=self.timer_count downto 0 do begin
     end;
   end;
 end;
+if ((one_shot_0.enabled) and (one_shot_0.cpu=cpu)) then begin
+  one_shot_0.actual_time:=one_shot_0.actual_time+time_add;
+  if one_shot_0.actual_time>=one_shot_0.time_final then begin
+    one_shot_0.enabled:=false;
+    one_shot_0.execute_simple;
+  end;
+end;
+if ((one_shot_1.enabled) and (one_shot_1.cpu=cpu)) then begin
+  one_shot_1.actual_time:=one_shot_1.actual_time+time_add;
+  if one_shot_1.actual_time>=one_shot_1.time_final then begin
+    one_shot_1.enabled:=false;
+    one_shot_1.execute_simple;
+  end;
+end;
 end;
 
 procedure timer_eng.enabled(timer_num:byte;state:boolean);
@@ -176,11 +214,15 @@ for f:=0 to MAX_TIMERS do begin
   self.timer[f].enabled:=false;
 end;
 for f:=0 to 11 do autofire_status[f]:=false;
+one_shot_0.execute_simple:=nil;
+one_shot_1.execute_simple:=nil;
 end;
 
 procedure timer_eng.reset(timer_num:byte);
 begin
   self.timer[timer_num].actual_time:=0;
+  one_shot_0.actual_time:=0;
+  one_shot_1.actual_time:=0;
 end;
 
 end.

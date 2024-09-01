@@ -42,18 +42,18 @@ const
         (n:'770c11-e.b7';l:$10000;p:$40000;crc:$dd553541),(n:'770c11-f.b6';l:$10000;p:$50000;crc:$3f78bd0f),
         (n:'770c11-g.b5';l:$10000;p:$60000;crc:$078c51b2),(n:'770c11-h.b4';l:$10000;p:$70000;crc:$7300c2e1));
         //DIP
-        ajax_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin'))),());
-        ajax_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 150K'),(dip_val:$10;dip_name:'10K 200K'),(dip_val:$8;dip_name:'30K'),(dip_val:$0;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        ajax_dip_c:array [0..2] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Control in 3D Stages';number:2;dip:((dip_val:$8;dip_name:'Normal'),(dip_val:$0;dip_name:'Inverted'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ajax_dip_a:array [0..2] of def_dip2=(
+        (mask:$0f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin')),());
+        ajax_dip_b:array [0..5] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
+        (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+        (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 150K','10K 200K','30K','50K')),
+        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        ajax_dip_c:array [0..2] of def_dip2=(
+        (mask:$1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
+        (mask:$8;name:'Control in 3D Stages';number:2;val2:(8,0);name2:('Normal','Inverted')),());
 
 var
  tiles_rom,sprite_rom,k007232_1_rom,k007232_2_rom,zoom_rom:pbyte;
@@ -425,11 +425,11 @@ if not(roms_load(zoom_rom,ajax_zoom)) then exit;
 k051316_0:=k051316_chip.create(4,2,ajax_k051316_cb,zoom_rom,$80000,BPP7);
 //DIP
 marcade.dswa:=$ff;
-marcade.dswa_val:=@ajax_dip_a;
+marcade.dswa_val2:=@ajax_dip_a;
 marcade.dswb:=$5a;
-marcade.dswb_val:=@ajax_dip_b;
+marcade.dswb_val2:=@ajax_dip_b;
 marcade.dswc:=$ff;
-marcade.dswc_val:=@ajax_dip_c;
+marcade.dswc_val2:=@ajax_dip_c;
 //final
 reset_ajax;
 iniciar_ajax:=true;

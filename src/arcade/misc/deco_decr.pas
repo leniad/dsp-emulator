@@ -560,12 +560,13 @@ const
 //GFX
 procedure deco56_decrypt_gfx(tag:pbyte;len:dword);
 procedure deco74_decrypt_gfx(tag:pbyte;len:dword);
+procedure deco56_remap_gfx(tag:pbyte;len:dword);
 //CPU
 procedure deco102_decrypt_cpu(datos,opcodes,data:pword;address_xor,data_select_xor,opcode_select_xor:word;size:dword);
 
 implementation
 
-procedure deco_decrypt(rgntag:pbyte;xor_table:pbyte;address_table:pword;swap_table:pbyte;len:dword);
+procedure deco_decrypt(rgntag:pbyte;xor_table:pbyte;address_table:pword;swap_table:pbyte;len:dword;remap:boolean);
 var
   rom,rom2,dec:word;
   i,addr,pat:dword;
@@ -580,6 +581,8 @@ begin
 		pat:=pbytearray(swap_table)^[i and $7ff];
     rom2:=pwordarray(buffer)^[addr];
     rom:=(rom2 shr 8) or ((rom2 and $ff) shl 8);
+    if not(remap) then dec:=rom
+    else
     dec:=BITSWAP16(rom xor xor_masks[pbytearray(xor_table)^[addr and $7ff]],
 						swap_patterns[pat][0],
 						swap_patterns[pat][1],
@@ -605,12 +608,17 @@ end;
 
 procedure deco56_decrypt_gfx(tag:pbyte;len:dword);
 begin
-	deco_decrypt(tag,@deco56_xor_table[0],@deco56_address_table[0],@deco56_swap_table[0],len);
+	deco_decrypt(tag,@deco56_xor_table[0],@deco56_address_table[0],@deco56_swap_table[0],len,true);
+end;
+
+procedure deco56_remap_gfx(tag:pbyte;len:dword);
+begin
+	deco_decrypt(tag,@deco56_xor_table[0],@deco56_address_table[0],@deco56_swap_table[0],len,false);
 end;
 
 procedure deco74_decrypt_gfx(tag:pbyte;len:dword);
 begin
-  deco_decrypt(tag,@deco74_xor_table[0],@deco74_address_table[0],@deco74_swap_table[0],len);
+  deco_decrypt(tag,@deco74_xor_table[0],@deco74_address_table[0],@deco74_swap_table[0],len,true);
 end;
 
 function decrypt_cpu102(data:word;address:dword;select_xor:dword):word;

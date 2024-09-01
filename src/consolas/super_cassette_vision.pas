@@ -70,27 +70,16 @@ end;
 procedure update_video_svc;
 procedure draw_text(x,y:byte;char_data:word;fg,bg:byte);
 var
-  f,d:byte;
+  h,f,d:byte;
   tempw:array[0..7] of word;
 begin
 	for f:=0 to 7 do begin
 		d:=scv_0.chars[char_data+f];
-    if (d and $80)<>0 then tempw[0]:=paleta[fg]
-      else tempw[0]:=paleta[bg];
-    if (d and $40)<>0 then tempw[1]:=paleta[fg]
-      else tempw[1]:=paleta[bg];
-    if (d and $20)<>0 then tempw[2]:=paleta[fg]
-      else tempw[2]:=paleta[bg];
-    if (d and $10)<>0 then tempw[3]:=paleta[fg]
-      else tempw[3]:=paleta[bg];
-    if (d and $8)<>0 then tempw[4]:=paleta[fg]
-      else tempw[4]:=paleta[bg];
-    if (d and $4)<>0 then tempw[5]:=paleta[fg]
-      else tempw[5]:=paleta[bg];
-    if (d and $2)<>0 then tempw[6]:=paleta[fg]
-      else tempw[6]:=paleta[bg];
-    if (d and $1)<>0 then tempw[7]:=paleta[fg]
-      else tempw[7]:=paleta[bg];
+    for h:=0 to 7 do begin
+      if (d and $80)<>0 then tempw[h]:=paleta[fg]
+        else tempw[h]:=paleta[bg];
+      d:=d shl 1;
+    end;
     putpixel(x,(y+f) and $ff,8,@tempw,1);
 	end;
   for f:=0 to 7 do tempw[f]:=paleta[bg];
@@ -285,7 +274,7 @@ while EmuStatus=EsRunning do begin
       upd7810_0.run(frame);
       frame:=frame+upd7810_0.tframes-upd7810_0.contador;
       case f of
-        0:upd7810_0.set_input_line_7801(UPD7810_INTF2,CLEAR_LINE);
+        8:upd7810_0.set_input_line_7801(UPD7810_INTF2,CLEAR_LINE);
         239:begin
               update_video_svc;
               upd7810_0.set_input_line_7801(UPD7810_INTF2,ASSERT_LINE);
@@ -409,7 +398,7 @@ procedure scv_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SSUPERCASSETTE);
 directory.scv:=ExtractFilePath(nombre);
 end;
 
@@ -447,9 +436,9 @@ if longitud<=$2000 then begin
 reset_scv;
 end;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SSUPERCASSETTE)) then exit;
   getmem(datos,$20000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SSUPERCASSETTE)) then begin
     freemem(datos);
     exit;
   end;
@@ -466,7 +455,7 @@ begin
   end;
   fillchar(memoria[$1000],$f000,0); //Doreamon confia en esto!
   if extension='BIN' then load_rom;
-  if extension='DSP' then snapshot_r(datos,longitud);
+  if extension='DSP' then snapshot_r(datos,longitud,SSUPERCASSETTE);
   if (extension='0') then begin //Tiene dos partes el cartucho?
     getmem(datos2,$20000);
     copymemory(datos2,datos,longitud);

@@ -30,17 +30,17 @@ const
         (n:'gp2-2.2n';l:$100;p:$200;crc:$8dabc20b),(n:'gp2-7.6s';l:$100;p:$300;crc:$2faa3e09),
         (n:'gp2-6.6p';l:$200;p:$400;crc:$6f99c2da),(n:'gp2-5.6n';l:$200;p:$600;crc:$c7d31657),
         (n:'gp2-4.3f';l:$100;p:$800;crc:$2d9fbdd8));
-        gaplus_dip_a:array [0..4] of def_dip=(
-        (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$80;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        gaplus_dip_b:array [0..3] of def_dip=(
-        (mask:$7;name:'Bonus Life';number:8;dip:((dip_val:$0;dip_name:'30K 70K 70K+'),(dip_val:$1;dip_name:'30K 100K 100K+'),(dip_val:$2;dip_name:'30K 100K 200K+'),(dip_val:$3;dip_name:'50K 100K 100K+'),(dip_val:$4;dip_name:'50K 100K 200K+'),(dip_val:$7;dip_name:'50K 150K 150K+'),(dip_val:$5;dip_name:'50K 150K 300K+'),(dip_val:$6;dip_name:'50K 150K'),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Round Advance';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'0 - Standard'),(dip_val:$60;dip_name:'1 - Easiest'),(dip_val:$50;dip_name:'2'),(dip_val:$40;dip_name:'3'),(dip_val:$30;dip_name:'4'),(dip_val:$20;dip_name:'5'),(dip_val:$10;dip_name:'6'),(dip_val:$0;dip_name:'7 - Hardest'),(),(),(),(),(),(),(),())),());
-        gaplus_dip_c:array [0..1] of def_dip=(
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$4;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        gaplus_dip_a:array [0..4] of def_dip2=(
+        (mask:$3;name:'Coin B';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
+        (mask:$30;name:'Coin A';number:4;val4:(0,$10,$30,$20);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$c0;name:'Lives';number:4;val4:($80,$c0,$40,0);name4:('2','3','4','5')),());
+        gaplus_dip_b:array [0..3] of def_dip2=(
+        (mask:$7;name:'Bonus Life';number:8;val8:(0,1,2,3,4,7,5,6);name8:('30K 70K 70K+','30K 100K 100K+','30K 100K 200K+','50K 100K 100K+','50K 100K 200K+','50K 150K 150K+','50K 150K 300K+','50K 150K')),
+        (mask:$8;name:'Round Advance';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('0 - Standard','1 - Easiest','2','3','4','5','6','7 - Hardest')),());
+        gaplus_dip_c:array [0..1] of def_dip2=(
+        (mask:$4;name:'Cabinet';number:2;val2:(4,0);name2:('Upright','Cocktail')),());
         gaplus_samples:tipo_nombre_samples=(nombre:'bang.wav');
         STARFIELD_CLIPPING_X=16;
         MAX_STARS=100-1;
@@ -531,11 +531,11 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,$100);
 marcade.dswa:=$ff;
-marcade.dswa_val:=@gaplus_dip_a;
+marcade.dswa_val2:=@gaplus_dip_a;
 marcade.dswb:=$ff;
-marcade.dswb_val:=@gaplus_dip_b;
+marcade.dswb_val2:=@gaplus_dip_b;
 marcade.dswc:=$f;
-marcade.dswc_val:=@gaplus_dip_c;
+marcade.dswc_val2:=@gaplus_dip_c;
 //CLUT chars
 for f:=0 to $ff do gfx[0].colores[f]:=$f0+(memoria_temp[$300+f] and $0f);
 //CLUT sprites

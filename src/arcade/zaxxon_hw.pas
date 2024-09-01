@@ -118,7 +118,7 @@ const
 var
  irq_vblank,bg_enable:boolean;
  congo_fg_bank,pal_offset,bg_position:word;
- bg_color,congo_color_bank,sprite_mask,sound_latch,fg_color:byte;
+ bg_color,congo_color_bank,sound_latch,fg_color:byte;
  bg_mem:array[0..$fff,0..$ff] of byte;
  bg_mem_color:array[0..$1ff,0..31] of byte;
  congo_sprite,coin_status,sound_state:array[0..2] of byte;
@@ -431,7 +431,7 @@ for f:=$1f downto 0 do begin
         y:=224-find_minimum_y(memoria[$a003+(f*4)]);
 		    flipy:=((memoria[$a002+(f*4)]) and $80)<>0;
 		    flipx:=((memoria[$a001+(f*4)]) and $80)<>0;
-		    nchar:=memoria[$a001+(f*4)] and sprite_mask;
+		    nchar:=memoria[$a001+(f*4)];
 		    color:=memoria[$a002+(f*4)] and $1f;
 		    x:=memoria[$a000+(f*4)]+$ef+1;
         put_gfx_sprite(nchar,color shl 3,flipx,flipy,2);
@@ -748,7 +748,7 @@ case main_vars.tipo_maquina of
         //poner la paleta
         if not(roms_load(@memoria_temp,congo_pal)) then exit;
         convert_palette($200);
-        //backgroud
+        //background
         if not(roms_load(@memoria_temp,congo_tilemap)) then exit;
         conv_static_background($2000);
         //DIP
@@ -773,7 +773,6 @@ case main_vars.tipo_maquina of
         //convertir sprites
         if not(roms_load(@memoria_temp,zaxxon_sprites)) then exit;
         conv_sprites($40);
-        sprite_mask:=$3f;
         //poner la paleta
         if not(roms_load(@memoria_temp,zaxxon_pal)) then exit;
         convert_palette($100);
@@ -803,7 +802,6 @@ case main_vars.tipo_maquina of
         //convertir sprites
         if not(roms_load(@memoria_temp,szaxxon_sprites)) then exit;
         conv_sprites($40);
-        sprite_mask:=$3f;
         //poner la paleta
         if not(roms_load(@memoria_temp,szaxxon_pal)) then exit;
         convert_palette($100);
@@ -833,7 +831,6 @@ case main_vars.tipo_maquina of
         //convertir sprites
         if not(roms_load(@memoria_temp,futspy_sprites)) then exit;
         conv_sprites($80);
-        sprite_mask:=$7f;
         //poner la paleta
         if not(roms_load(@memoria_temp,futspy_pal)) then exit;
         convert_palette($100);

@@ -607,7 +607,7 @@ begin
 	  UPD7810_PORTC:begin
 		    if ((self.mc<>0) and (addr(self.pc_in_cb)<>nil)) then self.pc_in:=self.pc_in_cb(self.mc);
 		    valor:=(self.pc_in and self.mc) or (self.pc_out and not(self.mc));
-		    if (self.mcc and $01)<>0 then begin // PC0 = TxD output */
+		    if (self.mcc and $01)<>0 then begin // PC0 = TxD output
             valor:=valor and not($01);
             if (self.txd and 1)<>0 then valor:=valor or $01;
         end;
@@ -1667,7 +1667,8 @@ while self.contador<maximo do begin
 	        self.pc:=tempw;
         end;
     $80..$9f:begin  //CALT
-                tempw:=$80+2*(instruccion and $1f);
+                if self.cpu_type=CPU_7810 then tempw:=$80+2*(instruccion and $1f)
+                  else tempw:=$80+2*(instruccion and $3f);
                 self.sp:=self.sp-1;
                 self.putbyte(self.sp,self.pc shr 8);
                 self.sp:=self.sp-1;
@@ -1745,7 +1746,7 @@ while self.contador<maximo do begin
                         end;
                     else MessageDlg('Instruccion CPU 7810: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
                 end;
-            end else begin //CALT
+            end else begin //CALT 7801
                         tempw:=$80+2*(instruccion and $3f);
                         self.sp:=self.sp-1;
                         self.putbyte(self.sp,self.pc shr 8);
@@ -1941,6 +1942,7 @@ begin
       else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
+
 procedure cpu_upd7810.opcode_4c;
 var
   instruccion:byte;
@@ -1966,6 +1968,7 @@ begin
       else MessageDlg('Instruccion 4C: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
+
 procedure cpu_upd7810.opcode_4d;
 var
   instruccion:byte;
@@ -2733,6 +2736,11 @@ begin
             tempb:=self.r.va.l+self.getbyte(self.r.hl.w);
 	          self.ZHC_ADD(tempb,self.r.va.l,false);
 	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $a9:begin //GTAX_B
+            tempw:=self.r.va.l-self.getbyte(self.r.bc.w)-1;
+	          self.ZHC_SUB(tempw,self.r.va.l,false);
 	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
           end;
       $aa:begin //GTAX_D

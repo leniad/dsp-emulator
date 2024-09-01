@@ -145,17 +145,16 @@ init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 255 do begin
-    m6502_0.run(frame);
-    frame:=frame+m6502_0.tframes-m6502_0.contador;
-    //video
     case f of
       0:begin
           marcade.in0:=marcade.in0 or $20;
           m6502_0.change_irq(ASSERT_LINE);
         end;
-      23:marcade.in0:=marcade.in0 and $df;
+      24:marcade.in0:=marcade.in0 and $df;
       64,128,192:m6502_0.change_irq(ASSERT_LINE);
     end;
+    m6502_0.run(frame);
+    frame:=frame+m6502_0.tframes-m6502_0.contador;
  end;
  update_video_ccastles;
  eventos_ccastles;

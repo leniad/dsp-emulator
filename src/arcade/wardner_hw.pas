@@ -29,16 +29,16 @@ const
         (n:'82s137.3d';l:$400;p:$800;crc:$70b537b9),(n:'82s137.3e';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s131.3b';l:$200;p:$1000;crc:$9dfffaff),(n:'82s131.3a';l:$200;p:$1200;crc:$712bad47),
         (n:'82s131.2a';l:$200;p:$1400;crc:$ac843ca6),(n:'82s131.1a';l:$200;p:$1600;crc:$50452ff8));
-        wardner_dip_a:array [0..5] of def_dip=(
-        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$30;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 2C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$80;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        wardner_dip_b:array [0..3] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'30k 80k 50k+'),(dip_val:$4;dip_name:'50k 100k 50k+'),(dip_val:$8;dip_name:'30k'),(dip_val:$c;dip_name:'50k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'1'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        wardner_dip_a:array [0..5] of def_dip2=(
+        (mask:$1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
+        (mask:$2;name:'Flip Screen';number:2;val2:(0,2);name2:('Off','On')),
+        (mask:$8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
+        wardner_dip_b:array [0..3] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(1,0,2,3);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('30K 80K 50K+','50K 100K 50K+','30K','50K')),
+        (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('1','3','4','5')),());
 
 var
  mem_rom:array[0..7,0..$7fff] of byte;
@@ -63,7 +63,7 @@ var
 begin
 for f:=0 to $1ff do begin
   atrib:=memoria[$8002+(f shl 3)]+(memoria[$8003+(f shl 3)] shl 8);
-  if ((atrib and $0c00)=priority) then begin
+  if ((atrib and $c00)=priority) then begin
     y:=(memoria[$8006+(f shl 3)]+(memoria[$8007+(f shl 3)] shl 8)) shr 7;
     if (y and $1ff)>$100 then continue;
     nchar:=(memoria[$8000+(f shl 3)]+(memoria[$8001+(f shl 3)] shl 8)) and $7ff;
@@ -129,21 +129,21 @@ procedure eventos_wardner;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
   //SYS
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
@@ -263,8 +263,8 @@ end;
 procedure wardner_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:ym3812_0.control(valor);
-  $1:ym3812_0.write(valor);
+  0:ym3812_0.control(valor);
+  1:ym3812_0.write(valor);
 end;
 end;
 
@@ -344,41 +344,41 @@ procedure wardner_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $10:txt_scroll_x:=(txt_scroll_x and $ff00) or valor;
-  $11:txt_scroll_x:=(txt_scroll_x and $00ff) or ((valor and $1) shl 8);
+  $11:txt_scroll_x:=(txt_scroll_x and $ff) or ((valor and 1) shl 8);
   $12:txt_scroll_y:=(txt_scroll_y and $ff00) or valor;
-  $13:txt_scroll_y:=(txt_scroll_y and $00ff) or ((valor and $1) shl 8);
+  $13:txt_scroll_y:=(txt_scroll_y and $ff) or ((valor and 1) shl 8);
   $14:txt_offs:=(txt_offs and $ff00) or valor;
-  $15:txt_offs:=(txt_offs and $00ff) or ((valor and $7) shl 8);
+  $15:txt_offs:=(txt_offs and $ff) or ((valor and 7) shl 8);
   $20:bg_scroll_x:=(bg_scroll_x and $ff00) or valor;
-  $21:bg_scroll_x:=(bg_scroll_x and $00ff) or ((valor and $1) shl 8);
+  $21:bg_scroll_x:=(bg_scroll_x and $ff) or ((valor and 1) shl 8);
   $22:bg_scroll_y:=(bg_scroll_y and $ff00) or valor;
-  $23:bg_scroll_y:=(bg_scroll_y and $00ff) or ((valor and $1) shl 8);
+  $23:bg_scroll_y:=(bg_scroll_y and $ff) or ((valor and 1) shl 8);
   $24:bg_offs:=(bg_offs and $ff00) or valor;
-  $25:bg_offs:=(bg_offs and $00ff) or ((valor and $f) shl 8);
+  $25:bg_offs:=(bg_offs and $ff) or ((valor and $f) shl 8);
   $30:fg_scroll_x:=(fg_scroll_x and $ff00) or valor;
-  $31:fg_scroll_x:=(fg_scroll_x and $00ff) or ((valor and $1) shl 8);
+  $31:fg_scroll_x:=(fg_scroll_x and $ff) or ((valor and 1) shl 8);
   $32:fg_scroll_y:=(fg_scroll_y and $ff00) or valor;
-  $33:fg_scroll_y:=(fg_scroll_y and $00ff) or ((valor and $1) shl 8);
+  $33:fg_scroll_y:=(fg_scroll_y and $ff) or ((valor and 1) shl 8);
   $34:fg_offs:=(fg_offs and $ff00) or valor;
-  $35:fg_offs:=(fg_offs and $00ff) or ((valor and $f) shl 8);
+  $35:fg_offs:=(fg_offs and $ff) or ((valor and $f) shl 8);
   $5a:case (valor and $f) of
-        $0:begin
+        0:begin
 	            tms32010_0.change_halt(CLEAR_LINE);
               z80_0.change_halt(ASSERT_LINE);
               tms32010_0.change_irq(ASSERT_LINE);
 	          end;
-	      $1:begin
+	      1:begin
               tms32010_0.change_irq(CLEAR_LINE);
 	            tms32010_0.change_halt(ASSERT_LINE);
             end;
       end;
   $5c:case (valor and $f) of
-		    $4:int_enable:=false;
-		    $5:int_enable:=true;
-		    $6:main_screen.flip_main_screen:=false;
-        $7:main_screen.flip_main_screen:=true;
-        $8:bg_bank:=0;
-        $9:bg_bank:=$1000;
+		    4:int_enable:=false;
+		    5:int_enable:=true;
+		    6:main_screen.flip_main_screen:=false;
+        7:main_screen.flip_main_screen:=true;
+        8:bg_bank:=0;
+        9:bg_bank:=$1000;
 		    $a:fg_bank:=0;
         $b:fg_bank:=$1000;
         $c:video_ena:=false;
@@ -497,7 +497,7 @@ ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(roms_load(@memoria_temp,wardner_rom)) then exit;
 //Mover las ROMS a su sitio
-copymemory(@memoria,@memoria_temp[$0],$8000);
+copymemory(@memoria,@memoria_temp[0],$8000);
 for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
 copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
 //cargar ROMS sonido
@@ -537,8 +537,8 @@ convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=1;
 marcade.dswb:=0;
-marcade.dswa_val:=@wardner_dip_a;
-marcade.dswb_val:=@wardner_dip_b;
+marcade.dswa_val2:=@wardner_dip_a;
+marcade.dswb_val2:=@wardner_dip_b;
 //final
 reset_wardnerhw;
 iniciar_wardnerhw:=true;

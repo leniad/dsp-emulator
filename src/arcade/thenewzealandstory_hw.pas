@@ -540,8 +540,8 @@ z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Misc CPU
 z80_1:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Video chips
-if main_vars.tipo_maquina=306 then seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$fff)
-  else seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$1fff);
+if main_vars.tipo_maquina=306 then seta_sprite0:=tseta_sprites.create(0,1,$800 div $40)
+  else seta_sprite0:=tseta_sprites.create(0,1,$800 div $40);
 case main_vars.tipo_maquina of
   129:begin   //TNZS
         llamadas_maquina.fps_max:=59.15;

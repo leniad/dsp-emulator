@@ -21,6 +21,14 @@ const
         bankpanic_prom:array[0..2] of tipo_roms=(
         (n:'pr-6177.8a';l:$20;p:0;crc:$eb70c5ae),(n:'pr-6178.6f';l:$100;p:$20;crc:$0acca001),
         (n:'pr-6179.5a';l:$100;p:$120;crc:$e53bafdb));
+        bankpanic_dip:array [0..7] of def_dip2=(
+        (mask:$3;name:'Coin A';number:4;val4:(3,2,0,1);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$4;name:'Coin B';number:2;val2:(4,0);name2:('2C 1C','1C 1C')),
+        (mask:$8;name:'Lives';number:2;val2:(0,8);name2:('3','4')),
+        (mask:$10;name:'Bonus Life';number:2;val2:(0,$10);name2:('70K 200K 500K','100K 400K 800K')),
+        (mask:$20;name:'Difficulty';number:2;val2:(0,$20);name2:('Easy','Hard')),
+        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')),
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
         combathawk_rom:array[0..3] of tipo_roms=(
         (n:'epr-10904.7e';l:$4000;p:0;crc:$4b106335),(n:'epr-10905.7f';l:$4000;p:$4000;crc:$a76fc390),
         (n:'epr-10906.7h';l:$4000;p:$8000;crc:$16d54885),(n:'epr-10903.7d';l:$2000;p:$c000;crc:$b7a59cab));
@@ -33,22 +41,13 @@ const
         combathawk_prom:array[0..2] of tipo_roms=(
         (n:'pr-10900.8a';l:$20;p:0;crc:$f95fcd66),(n:'pr-10901.6f';l:$100;p:$20;crc:$6fd981c8),
         (n:'pr-10902.5a';l:$100;p:$120;crc:$84d6bded));
-        //DIP
-        bankpanic_dip:array [0..7] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$3;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Coin B';number:2;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$8;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'70K 200K 500K'),(dip_val:$10;dip_name:'100K 400K 800K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$20;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        combathawk_dip:array [0..6] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$1;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$6;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$8;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Cabinet';number:2;dip:((dip_val:$10;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$40;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Fuel';number:2;dip:((dip_val:$0;dip_name:'120 Units'),(dip_val:$80;dip_name:'90 Units'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        combathawk_dip:array [0..6] of def_dip2=(
+        (mask:$1;name:'Flip Screen';number:2;val2:(0,1);name2:('Off','On')),
+        (mask:$6;name:'Coinage';number:4;val4:(6,0,2,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$8;name:'Lives';number:2;val2:(0,8);name2:('3','4')),
+        (mask:$10;name:'Cabinet';number:2;val2:($10,0);name2:('Upright','Cocktail')),
+        (mask:$40;name:'Difficulty';number:2;val2:(0,$40);name2:('Easy','Hard')),
+        (mask:$80;name:'Fuel';number:2;val2:(0,$80);name2:('120 Units','90 Units')),());
 
 var
   priority,display_on,nmi_vblank:boolean;
@@ -279,7 +278,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,bankpanic_prom)) then exit;
         //DIP
         marcade.dswa:=$c0;
-        marcade.dswa_val:=@bankpanic_dip;
+        marcade.dswa_val2:=@bankpanic_dip;
       end;
   362:begin //Combat Hawk
         if not(roms_load(@memoria,combathawk_rom)) then exit;
@@ -290,7 +289,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,combathawk_prom)) then exit;
         //DIP
         marcade.dswa:=$10;
-        marcade.dswa_val:=@combathawk_dip;
+        marcade.dswa_val2:=@combathawk_dip;
       end;
 end;
 //color

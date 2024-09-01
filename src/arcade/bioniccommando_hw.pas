@@ -28,15 +28,15 @@ const
         (n:'tse_20.13j';l:$8000;p:$20000;crc:$b03db778),(n:'tsu_19.11j';l:$8000;p:$28000;crc:$b5c82722),
         (n:'tse_22.17j';l:$8000;p:$30000;crc:$d4dedeb3),(n:'tsu_21.15j';l:$8000;p:$38000;crc:$98777006));
         //DIP
-        bionicc_dip:array [0..8] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Lives';number:4;dip:((dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'4'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$400;name:'Cabinet';number:2;dip:((dip_val:$400;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1800;name:'Bonus Life';number:4;dip:((dip_val:$1800;dip_name:'20k 40k 100k 60k+'),(dip_val:$1000;dip_name:'30k 50k 120k 70k+'),(dip_val:$800;dip_name:'20k 60k'),(dip_val:$0;dip_name:'30k 70k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$6000;name:'Difficulty';number:4;dip:((dip_val:$4000;dip_name:'Easy'),(dip_val:$6000;dip_name:'Medium'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Freeze';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bionicc_dip:array [0..8] of def_dip2=(
+        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),
+        (mask:$300;name:'Lives';number:4;val4:($300,$200,$100,0);name4:('3','4','5','7')),
+        (mask:$400;name:'Cabinet';number:2;val2:($400,0);name2:('Upright','Cocktail')),
+        (mask:$1800;name:'Bonus Life';number:4;val4:($1800,$1000,$800,0);name4:('20K 40K 100K 60K+','30K 50K 120K 70K+','20K 60K','30K 70K')),
+        (mask:$6000;name:'Difficulty';number:4;val4:($4000,$6000,$2000,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$8000;name:'Freeze';number:2;val2:($8000,0);name2:('Off','On')),());
 
 var
  scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
@@ -449,7 +449,7 @@ gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
 convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$dfff;
-marcade.dswa_val:=@bionicc_dip;
+marcade.dswa_val2:=@bionicc_dip;
 //final
 reset_bionicc;
 iniciar_bionicc:=true;

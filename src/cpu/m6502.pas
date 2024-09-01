@@ -46,7 +46,7 @@ const
   TCPU_NES=2;
   TCPU_M65C02=3;
 var
-  m6502_0,m6502_1:cpu_m6502;
+  m6502_0,m6502_1,m6502_2:cpu_m6502;
 
 implementation
 

@@ -1,4 +1,91 @@
 # DSP Emulator status #
+<b>01/09/24 - DSP Emulator 0.23WIP3. Updated Windows binary and source<br>
+<pre>
+-General
+    +Config
+        -Split ROMs and samples DAT info in two export buttons
+    +Misc
+        -Deco 104/146: converted to classes
+        -Fixed 'Gardia' ROMs export (Thanks to Neville)
+        -Fixed 'Kick'n Run' ROMs export size (Thanks to Neville)
+    +DIPs switches engine
+        -Rewrited engine
+        -New data structure, easy to maintain and easy to add
+        -Start migrate all DIPs to new structure
+    +Graphics engine
+        -Added mask to all functions, no need to mask the graphic number before call any function, removed graphic number mask from all drivers
+        -DECO BAC06
+            +Removed chars/tiles masks
+            +Added general color mask
+            +Added read/write 8bits functions
+    +Sound engine
+        -YM2413: added new sound chip
+        -SN76496: fixed snapshot
+        -VLM5030: changed to new tables values, rewrited some code
+    +CPUs
+        -M6809
+            +Added opcode $28
+        -HD6309
+            +Added opcodes $1,$28,$29 and $1X2e
+        -MCS51
+            +Added forced input function
+        -UPD781X
+            +UPD7801: Fixed CALT opcode
+            +Added opcode $a9 (makes SCV - 'Elevator Fight' playable)
+    +Timer engine
+        -One shot timers: added a new kind of timers, when called it's executed once, and then stops
+
+-Sega Master System
+    +Fixed sound chip order creation (Thanks to Neville)
+    +Removed big borders video in PAL version, NTSC and PAL have the same video size
+    +Added YM2413 sound
+-Super Cassette Vision
+    +Fixed vsync length (Fixes 'Mappy' sound speed)
+-Boogie Wings
+    +Still WIP driver, but enhanced the driver, still wrong colors and screen draw
+    +Fixed read/write maps
+    +Added screen parameters
+    +Added screen tiles and tiles bank calls
+    +Fixed ROMs loading
+-Deco 8 HW
+    +Super Real Darwin
+        -Fixed screen parameters and rotation
+        -Fixed sprites
+    +Last Mission: added driver with sound
+    +Shackled: added driver with sound
+    +Gondomania: added driver with sound
+    +Garyo Retsuden: added driver with sound
+    +Captain Silver: added driver with sound
+    +Cobra Command: added driver with sound
+    +The Real Ghostbusters: added driver with sound
+    +Psycho-Nics Oscar: added driver with sound
+-Hyper Sports HW
+    +Fixed screen rotation
+    +Hyper Sports: Fixed speech sounds
+    +Road Fighter: added driver with sound
+-Lasso HW
+    +Lasso: added driver with sound
+    +Chameleon: added driver with sound
+-Legendary Wings HW
+    +Avengers
+        -Updated ROMs to version D
+        -Added DIPs switches
+-Pang HW
+    +Added YM2413 sound
+-Track and Field
+    +Fixed speech sounds
+-Tehkan World Cup
+    +Added missing DIPs
+-Toki
+    +Added missing DIPs
+
+<img src="https://imgbb.host/images/NEG31.png"> <img src="https://imgbb.host/images/NEY07.png">
+<img src="https://imgbb.host/images/NE7JM.png"> <img src="https://imgbb.host/images/NEpX4.png">
+<img src="https://imgbb.host/images/NEgTb.png"> <img src="https://imgbb.host/images/NEapr.png">
+<img src="https://imgbb.host/images/NYXT7.png"> <img src="https://imgbb.host/images/NYFXl.png">
+<img src="https://imgbb.host/images/NYdFB.png"> <img src="https://imgbb.host/images/NYEB4.png">
+<img src="https://imgbb.host/images/NYxFc.png"> <img src="https://imgbb.host/images/NYOVL.png">
+</pre><br><br>
 <b>12/08/24 - DSP Emulator 0.23WIP2. Updated Windows binary and source<br>
 <pre>
 -General

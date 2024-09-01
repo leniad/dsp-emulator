@@ -22,17 +22,17 @@ const
         bublbobl_prom: tipo_roms=(n:'a71-25.41';l:$100;p:0;crc:$2d0f8545);
         bublbobl_mcu_rom:tipo_roms=(n:'a78-01.17';l:$1000;p:$0;crc:$b1bfb53d);
         //Dip
-        bublbobl_dip_a:array [0..5] of def_dip=(
-        (mask:$5;name:'Mode';number:4;dip:((dip_val:$4;dip_name:'Game - English'),(dip_val:$5;dip_name:'Game - Japanese'),(dip_val:$1;dip_name:'Test (Grid and Inputs)'),(dip_val:$0;dip_name:'Test (RAM and Sound)/Pause'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$20;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$80;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        bublbobl_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$8;dip_name:'20K 80K 300K'),(dip_val:$c;dip_name:'30K 100K 400K'),(dip_val:$4;dip_name:'40K 200K 500K'),(dip_val:$0;dip_name:'50K 250K 500K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'ROM Type';number:2;dip:((dip_val:$80;dip_name:'IC52=512kb, IC53=none'),(dip_val:$0;dip_name:'IC52=256kb, IC53=256kb'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bublbobl_dip_a:array [0..5] of def_dip2=(
+        (mask:$5;name:'Mode';number:4;val4:(4,5,1,0);name4:('Game - English','Game - Japanese','Test (Grid and Inputs)','Test (RAM and Sound)/Pause')),
+        (mask:$2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:$8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
+        (mask:$30;name:'Coin A';number:4;val4:($10,$30,0,$20);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
+        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
+        bublbobl_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$c;name:'Bonus Life';number:4;val4:(8,$c,4,0);name4:('20K 80K 300K','30K 100K 400K','40K 200K 500K','50K 250K 500K')),
+        (mask:$30;name:'Lives';number:4;val4:($10,0,$30,$20);name4:('1','2','3','5')),
+        (mask:$80;name:'ROM Type';number:2;val2:($80,0);name2:('IC52=512kb, IC53=none','IC52=256kb, IC53=256kb')),());
 
 var
  memoria_rom:array [0..3,$0..$3fff] of byte;
@@ -376,8 +376,8 @@ convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false,true);
 //DIP
 marcade.dswa:=$fe;
 marcade.dswb:=$ff;
-marcade.dswa_val:=@bublbobl_dip_a;
-marcade.dswb_val:=@bublbobl_dip_b;
+marcade.dswa_val2:=@bublbobl_dip_a;
+marcade.dswb_val2:=@bublbobl_dip_b;
 //final
 reset_bublbobl;
 iniciar_bublbobl:=true;

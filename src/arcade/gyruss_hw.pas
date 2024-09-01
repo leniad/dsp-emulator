@@ -24,18 +24,18 @@ const
     (n:'gyrussk.pr3';l:$20;p:0;crc:$98782db3),(n:'gyrussk.pr1';l:$100;p:$20;crc:$7ed057de),
     (n:'gyrussk.pr2';l:$100;p:$120;crc:$de823a81));
     //Dip
-    gyruss_dip_a:array [0..2] of def_dip=(
-    (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-    (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
-    gyruss_dip_b:array [0..5] of def_dip=(
-    (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),
-    (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-    (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'30K 90K 60K+'),(dip_val:$0;dip_name:'40K 110K 70K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-    (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'1 (Easiest)'),(dip_val:$60;dip_name:'2'),(dip_val:$50;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$30;dip_name:'5 (Average)'),(dip_val:$20;dip_name:'6'),(dip_val:$10;dip_name:'7'),(dip_val:$0;dip_name:'8 (Hardest)'),(),(),(),(),(),(),(),())),
-    (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-    gyruss_dip_c:array [0..1] of def_dip=(
-    (mask:$1;name:'Demo Music';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-    gyruss_timer:array[0..9] of byte=($00,$01,$02,$03,$04,$09,$0a,$0b,$0a,$0d);
+    gyruss_dip_a:array [0..2] of def_dip2=(
+    (mask:$0f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+    (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
+    gyruss_dip_b:array [0..5] of def_dip2=(
+    (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255')),
+    (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+    (mask:$8;name:'Bonus Life';number:2;val2:(8,0);name2:('30K 90K 60K+','40K 110K 70K+')),
+    (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('1 (Easiest)','2','3','4','5 (Average)','6','7','8 (Hardest)')),
+    (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+    gyruss_dip_c:array [0..1] of def_dip2=(
+    (mask:$1;name:'Demo Music';number:2;val2:(1,0);name2:('Off','On')),());
+    gyruss_timer:array[0..9] of byte=(0,1,2,3,4,9,$a,$b,$a,$d);
 
 var
   scan_line,sound_latch,sound_latch2:byte;
@@ -398,9 +398,9 @@ end;
 marcade.dswa:=$ff;
 marcade.dswb:=$3b;
 marcade.dswc:=$fe;
-marcade.dswa_val:=@gyruss_dip_a;
-marcade.dswb_val:=@gyruss_dip_b;
-marcade.dswc_val:=@gyruss_dip_c;
+marcade.dswa_val2:=@gyruss_dip_a;
+marcade.dswb_val2:=@gyruss_dip_b;
+marcade.dswc_val2:=@gyruss_dip_c;
 //Final
 gyruss_reset;
 gyruss_iniciar:=true;

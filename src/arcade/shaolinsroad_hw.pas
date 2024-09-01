@@ -136,8 +136,8 @@ case direccion of
         main_screen.flip_main_screen:=(valor and 1)<>0;
         pedir_nmi:=(valor and $2)<>0;
      end;
-  $0300:sn_76496_0.Write(valor);
-  $0400:sn_76496_1.Write(valor);
+  $0300:sn_76496_0.write(valor);
+  $0400:sn_76496_1.write(valor);
   $1800:banco_pal:=valor and $7;
   $2000:scroll:=not(valor);
   $2800..$2bff,$3000..$33ff:memoria[direccion]:=valor;

@@ -326,11 +326,11 @@ begin
     chan_calc(OPN,cch[1]);
     chan_calc(OPN,cch[2]);
     lt:=self.ay8910_int.update_internal^;
-    lt:=lt+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
+    lt:=lt+out_fm[0]+out_fm[1]+out_fm[2];
     if lt>$7fff then lt:=$7fff
       else if lt<-$7fff then lt:=-$7fff;
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
-    if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(lt*self.amp);
+    if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(lt*self.amp);
     INTERNAL_TIMER_A(self.OPN.ST,self.OPN.p_ch[2]);
     INTERNAL_TIMER_B(self.OPN.ST)
 end;

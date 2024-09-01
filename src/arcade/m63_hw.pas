@@ -22,23 +22,23 @@ const
         wilytower_tiles:array[0..2] of tipo_roms=(
         (n:'wtb5a.bin';l:$2000;p:0;crc:$efc1cbfa),(n:'wtb5b.bin';l:$2000;p:$2000;crc:$ab4bfd07),
         (n:'wtb5d.bin';l:$2000;p:$4000;crc:$40f23e1d));
-        wilytower_sound:tipo_roms=(n:'wt4d.bin';l:$1000;p:$0;crc:$25a171bf);
+        wilytower_sound:tipo_roms=(n:'wt4d.bin';l:$1000;p:0;crc:$25a171bf);
         wilytower_sprites:array[0..5] of tipo_roms=(
         (n:'wt2j.bin';l:$1000;p:0;crc:$d1bf0670),(n:'wt3k.bin';l:$1000;p:$1000;crc:$83c39a0e),
         (n:'wt_a-3m.bin';l:$1000;p:$2000;crc:$e7e468ae),(n:'wt_a-3n.bin';l:$1000;p:$3000;crc:$0741d1a9),
         (n:'wt_a-3p.bin';l:$1000;p:$4000;crc:$7299f362),(n:'wt_a-3s.bin';l:$1000;p:$5000;crc:$9b37d50d));
-        wilytower_misc:tipo_roms=(n:'wt_a-6d.bin';l:$1000;p:$0;crc:$a5dde29b);
-        wilytower_dip_a:array [0..4] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$3;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Points Rate';number:4;dip:((dip_val:$0;dip_name:'Normal'),(dip_val:$4;dip_name:'x1.2'),(dip_val:$8;dip_name:'x1.4'),(dip_val:$c;dip_name:'x1.6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 2C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$80;dip_name:'1C 5C'),(dip_val:$c0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        wilytower_dip_b:array [0..5] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$1;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Coin Mode';number:2;dip:((dip_val:$0;dip_name:'Mode 1'),(dip_val:$4;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Stop Mode';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$10;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Invulnerability';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        wilytower_misc:tipo_roms=(n:'wt_a-6d.bin';l:$1000;p:0;crc:$a5dde29b);
+        wilytower_dip_a:array [0..4] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('2','3','4','5')),
+        (mask:$c;name:'Bonus Points Rate';number:4;val4:(0,4,8,$c);name4:('Normal','x1.2','x1.4','x1.6')),
+        (mask:$30;name:'Coin A';number:4;val4:($20,$10,0,$30);name4:('3C 1C','2C 1C','1C 1C','Free Play')),
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 5C','1C 6C')),());
+        wilytower_dip_b:array [0..5] of def_dip2=(
+        (mask:1;name:'Flip Screen';number:2;val2:(0,1);name2:('Off','On')),
+        (mask:2;name:'Cabinet';number:2;val2:(2,0);name2:('Upright','Cocktail')),
+        (mask:4;name:'Coin Mode';number:2;val2:(0,4);name2:('Mode 1','Mode 2')),
+        (mask:$10;name:'Stop Mode';number:2;val2:(0,$10);name2:('Off','On')),
+        (mask:$40;name:'Invulnerability';number:2;val2:(0,$40);name2:('Off','On')),());
         //Fighting Basketball
         fightbasket_rom:array[0..4] of tipo_roms=(
         (n:'fb14.0f';l:$2000;p:0;crc:$82032853),(n:'fb13.2f';l:$2000;p:$2000;crc:$5306df0f),
@@ -51,22 +51,22 @@ const
         fightbasket_tiles:array[0..2] of tipo_roms=(
         (n:'fb21.25e';l:$2000;p:0;crc:$02843591),(n:'fb22.23e';l:$2000;p:$2000;crc:$cd51d8e7),
         (n:'fb23.22e';l:$2000;p:$4000;crc:$62bcac87));
-        fightbasket_sound:tipo_roms=(n:'fb07.0b';l:$1000;p:$0;crc:$50432dbd);
+        fightbasket_sound:tipo_roms=(n:'fb07.0b';l:$1000;p:0;crc:$50432dbd);
         fightbasket_sprites:array[0..5] of tipo_roms=(
         (n:'fb16.35a';l:$2000;p:0;crc:$a5df1652),(n:'fb15.37a';l:$2000;p:$2000;crc:$59c4de06),
         (n:'fb18.32a';l:$2000;p:$4000;crc:$c23ddcd7),(n:'fb17.34a';l:$2000;p:$6000;crc:$7db28013),
         (n:'fb20.29a';l:$2000;p:$8000;crc:$1a1b48f8),(n:'fb19.31a';l:$2000;p:$a000;crc:$7ff7e321));
-        fightbasket_misc:tipo_roms=(n:'fb06.12a';l:$2000;p:$0;crc:$bea3df99);
+        fightbasket_misc:tipo_roms=(n:'fb06.12a';l:$2000;p:0;crc:$bea3df99);
         fightbasket_samples:array[0..4] of tipo_roms=(
         (n:'fb01.42a';l:$2000;p:0;crc:$1200b220),(n:'fb02.41a';l:$2000;p:$2000;crc:$0b67aa82),
         (n:'fb03.40a';l:$2000;p:$4000;crc:$c71269ed),(n:'fb04.39a';l:$2000;p:$6000;crc:$02ddc42d),
         (n:'fb05.38a';l:$2000;p:$8000;crc:$72ea6b49));
-        fightbasket_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$3;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$4;dip_name:'1C 1C'),(dip_val:$0;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 4C'),(dip_val:$c;dip_name:'99 Credits/Sound Test'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Time Count Down';number:2;dip:((dip_val:$0;dip_name:'Slow'),(dip_val:$20;dip_name:'Too Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$40;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        fightbasket_dip_a:array [0..5] of def_dip2=(
+        (mask:3;name:'Coin A';number:4;val4:(3,1,0,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('1C 1C','1C 2C','1C 4C','99 Credits/Sound Test')),
+        (mask:$20;name:'Time Count Down';number:2;val2:(0,$20);name2:('Slow','Too Fast')),
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
 
 var
  sound_latch,snd_status,pal_bank,p1_data,p2_data,sprite_y:byte;
@@ -121,19 +121,19 @@ procedure eventos_irem_m63;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
   //P2
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
 end;
@@ -143,19 +143,19 @@ procedure eventos_irem_fb;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
   //P2
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
 end;
@@ -171,16 +171,16 @@ frame_m:=z80_0.tframes;
 frame_s:=mcs48_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    if f=240 then begin
+        if nmi_enabled then z80_0.change_nmi(PULSE_LINE);
+        update_video_m63;
+    end;
     //main
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
     mcs48_0.run(frame_s);
     frame_s:=frame_s+mcs48_0.tframes-mcs48_0.contador;
-    if f=239 then begin
-        if nmi_enabled then z80_0.change_nmi(PULSE_LINE);
-        update_video_m63;
-    end;
   end;
   eventos_func;
   video_sync;
@@ -303,16 +303,16 @@ procedure m63_snd_ext_outport(puerto:word;valor:byte);
 begin
   puerto:=puerto and $ff;
   if ((p2_data and $f0)=$e0) then	ay8910_0.control(puerto)
-	  else if ((p2_data and $f0)=$a0) then AY8910_0.Write(puerto)
+	  else if ((p2_data and $f0)=$a0) then ay8910_0.write(puerto)
 	    else if ((p1_data and $e0)=$60) then ay8910_1.control(puerto)
-	      else if ((p1_data and $e0)=$40) then AY8910_1.Write(puerto);
+	      else if ((p1_data and $e0)=$40) then ay8910_1.write(puerto);
 end;
 
 procedure fb_snd_ext_outport(puerto:word;valor:byte);
 begin
   puerto:=puerto and $ff;
   if ((p2_data and $f0)=$e0) then	ay8910_0.control(puerto)
-	  else if ((p2_data and $f0)=$a0) then AY8910_0.Write(puerto)
+	  else if ((p2_data and $f0)=$a0) then ay8910_0.write(puerto)
 	     else if ((p2_data and $f0)=$70) then snd_status:=puerto;
 end;
 
@@ -440,8 +440,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(3,0,16*8,$200*16*8*2,$200*16*8,0);
         convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //dip
-        marcade.dswa_val:=@wilytower_dip_a;
-        marcade.dswb_val:=@wilytower_dip_b;
+        marcade.dswa_val2:=@wilytower_dip_a;
+        marcade.dswb_val2:=@wilytower_dip_b;
         marcade.dswa:=1;
         marcade.dswb:=2;
         //poner la paleta
@@ -451,17 +451,17 @@ case main_vars.tipo_maquina of
           bit1:=(memoria_temp[f] shr 1) and 1;
           bit2:=(memoria_temp[f] shr 2) and 1;
           bit3:=(memoria_temp[f] shr 3) and 1;
-          colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+          colores[f].r:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
           bit0:=(memoria_temp[f+$100] shr 0) and 1;
           bit1:=(memoria_temp[f+$100] shr 1) and 1;
           bit2:=(memoria_temp[f+$100] shr 2) and 1;
           bit3:=(memoria_temp[f+$100] shr 3) and 1;
-          colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+          colores[f].g:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
           bit0:=(memoria_temp[f+$200] shr 0) and 1;
           bit1:=(memoria_temp[f+$200] shr 1) and 1;
           bit2:=(memoria_temp[f+$200] shr 2) and 1;
           bit3:=(memoria_temp[f+$200] shr 3) and 1;
-          colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+          colores[f].b:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
         end;
         for f:=0 to 3 do begin
           bit0:=(memoria_temp[f+$300] shr 0) and 1;
@@ -511,7 +511,7 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(3,0,16*8,$400*16*8*2,$400*16*8,0);
         convert_gfx(2,0,@memoria_temp,@ps_fb_x,@ps_y,false,false);
         //dip
-        marcade.dswa_val:=@fightbasket_dip_a;
+        marcade.dswa_val2:=@fightbasket_dip_a;
         marcade.dswa:=$c4;
         //poner la paleta
         if not(roms_load(@memoria_temp,fightbasket_pal)) then exit;

@@ -128,6 +128,7 @@ type
         in0,in1,in2,in3,in4:word;
         dswa,dswb,dswc:word;
         dswa_val,dswb_val,dswc_val:pdef_dip;
+        dswa_val2,dswb_val2,dswc_val2:pdef_dip2;
     end;
     def_analog_control=record
         x,y:array[0..NUM_PLAYERS] of integer;

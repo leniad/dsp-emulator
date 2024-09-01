@@ -115,7 +115,7 @@ type
     scr_ram:array[0..$1fff] of word;
     scroll_x,scroll_y:word;
     es_8x8:boolean;
-    filas,info,char_mask:word;
+    filas,info:word;
   end;
 
 var
@@ -195,7 +195,7 @@ for f:=0 to $1fff do begin
   color:=nchar shr 12;
   if (gfx[layer].buffer[pos] or buffer_color[color+(layer*$10)]) then begin
     color:=(color shl 4)+($100*layer);
-    nchar:=((nchar and $fff)*4) and layer_scr[layer].char_mask;
+    nchar:=(nchar and $fff)*4;
     if trans then begin
       put_gfx_trans(x*16,y*16,nchar,color,layer+1,layer);
       put_gfx_trans(x*16,y*16+8,nchar+1,color,layer+1,layer);
@@ -832,9 +832,6 @@ oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH,0.5);
 oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH,0.5);
 ym2151_0:=ym2151_chip.create(3500000);
 ym2151_0.change_irq_func(snd_irq);
-layer_scr[0].char_mask:=$3fff;
-layer_scr[1].char_mask:=$3fff;
-layer_scr[2].char_mask:=$1fff;
 case main_vars.tipo_maquina of
   138:begin //P-47
         //Main CPU

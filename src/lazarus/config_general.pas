@@ -39,6 +39,7 @@ type
     Button12: TButton;
     Button13: TButton;
     Button2: TButton;
+    Button3: TButton;
     Button7: TButton;
     Button8: TButton;
     Button9: TButton;
@@ -149,6 +150,7 @@ type
     procedure Button13Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure Button9Click(Sender: TObject);
@@ -657,6 +659,11 @@ end;
 procedure TMConfig.Button2Click(Sender: TObject);
 begin
   close;
+end;
+
+procedure TMConfig.Button3Click(Sender: TObject);
+begin
+export_samples;
 end;
 
 procedure TMConfig.Button7Click(Sender: TObject);

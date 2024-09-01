@@ -89,7 +89,7 @@ for f:=0 to $3f do begin
   y:=240-(buffer_sprites[(f*4)+3]-$80+((atrib and 1) shl 8));
   x:=240-(buffer_sprites[f*4] and $ff);
   color:=((atrib and $3c) shr 2)+16*(spritebank[nchar shr 2] and $f);
-  put_gfx_sprite(nchar and $1ff,color shl 4,(atrib and $80)<>0,(atrib and $40)<>0,2);
+  put_gfx_sprite(nchar,color shl 4,(atrib and $80)<>0,(atrib and $40)<>0,2);
   actualiza_gfx_sprite(x,y,4,2);
 end;
 end;

@@ -16,8 +16,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="23"/>
-      <RevisionNr Value="2"/>
-      <BuildNr Value="1368"/>
+      <RevisionNr Value="3"/>
+      <BuildNr Value="1377"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.22"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="64">
+    <Units Count="67">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -60,6 +60,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="738"/>
+        <CursorPos X="5" Y="758"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -193,10 +195,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="502"/>
-        <CursorPos Y="514"/>
+        <TopLine Value="664"/>
+        <CursorPos Y="666"/>
         <UsageCount Value="202"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="redefine.pas"/>
@@ -325,8 +326,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="108"/>
-        <CursorPos X="27" Y="119"/>
+        <TopLine Value="153"/>
+        <CursorPos X="21" Y="170"/>
         <UsageCount Value="224"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit30>
@@ -346,8 +347,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="104"/>
-        <CursorPos X="3" Y="107"/>
+        <TopLine Value="25"/>
+        <CursorPos Y="38"/>
         <UsageCount Value="301"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit32>
@@ -399,8 +400,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="89"/>
-        <CursorPos X="39" Y="98"/>
+        <TopLine Value="177"/>
+        <CursorPos X="5" Y="111"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit37>
@@ -498,8 +499,8 @@
       <Unit48>
         <Filename Value="..\misc\init_games.pas"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="879"/>
-        <CursorPos X="44" Y="890"/>
+        <TopLine Value="901"/>
+        <CursorPos X="56" Y="912"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -620,11 +621,78 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit63>
+      <Unit64>
+        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="362"/>
+        <UsageCount Value="10"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="..\arcade\centipede_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="59" Y="43"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="..\misc\rom_export.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="30" Y="13"/>
+        <UsageCount Value="10"/>
+      </Unit66>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="13" HistoryIndex="12">
       <Position1>
         <Filename Value="principal.pas"/>
       </Position1>
+      <Position2>
+        <Filename Value="principal.pas"/>
+      </Position2>
+      <Position3>
+        <Filename Value="principal.pas"/>
+        <Caret Line="748" Column="5" TopLine="728"/>
+      </Position3>
+      <Position4>
+        <Filename Value="principal.pas"/>
+        <Caret Line="748" Column="5" TopLine="728"/>
+      </Position4>
+      <Position5>
+        <Filename Value="principal.pas"/>
+        <Caret Line="749" Column="5" TopLine="729"/>
+      </Position5>
+      <Position6>
+        <Filename Value="principal.pas"/>
+        <Caret Line="750" Column="5" TopLine="730"/>
+      </Position6>
+      <Position7>
+        <Filename Value="principal.pas"/>
+        <Caret Line="751" Column="5" TopLine="731"/>
+      </Position7>
+      <Position8>
+        <Filename Value="principal.pas"/>
+        <Caret Line="752" Column="5" TopLine="732"/>
+      </Position8>
+      <Position9>
+        <Filename Value="principal.pas"/>
+        <Caret Line="753" Column="5" TopLine="733"/>
+      </Position9>
+      <Position10>
+        <Filename Value="principal.pas"/>
+        <Caret Line="754" Column="5" TopLine="734"/>
+      </Position10>
+      <Position11>
+        <Filename Value="principal.pas"/>
+        <Caret Line="755" Column="5" TopLine="735"/>
+      </Position11>
+      <Position12>
+        <Filename Value="principal.pas"/>
+        <Caret Line="756" Column="5" TopLine="736"/>
+      </Position12>
+      <Position13>
+        <Filename Value="principal.pas"/>
+        <Caret Line="757" Column="5" TopLine="737"/>
+      </Position13>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

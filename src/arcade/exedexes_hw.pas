@@ -23,17 +23,17 @@ const
         (n:'a03_ee06.bin';l:$4000;p:0;crc:$6039bdd1),(n:'a02_ee05.bin';l:$4000;p:$4000;crc:$b32d8252));
         exedexes_tilesbg_pos:array[0..1] of tipo_roms=(
         (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907));
-        exedexes_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Lives';number:4;dip:((dip_val:$8;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'2 Players Game';number:2;dip:((dip_val:$0;dip_name:'1 Credit'),(dip_val:$10;dip_name:'2 Credit'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$20;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Freeze';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        exedexes_dip_b:array [0..4] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        exedexes_dip_a:array [0..5] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$c;name:'Lives';number:4;val4:(8,4,$c,0);name4:('1','2','3','5')),
+        (mask:$10;name:'2 Players Game';number:2;val2:(0,$10);name2:('1 Credit','2 Credit')),
+        (mask:$20;name:'Languaje';number:2;val2:(0,$20);name2:('English','Japanese')),
+        (mask:$40;name:'Freeze';number:2;val2:($40,0);name2:('Off','On')),());
+        exedexes_dip_b:array [0..4] of def_dip2=(
+        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
 var
  scroll_x,scroll_y,scroll_bg:word;
  sound_command:byte;
@@ -302,9 +302,9 @@ z80_1:=cpu_z80.create(3000000,256);
 z80_1.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
 z80_1.init_sound(exedexes_sound);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,AY8910,0.1);
-sn_76496_0:=sn76496_chip.Create(3000000,0.36);
-sn_76496_1:=sn76496_chip.Create(3000000,0.36);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.4);
+sn_76496_0:=sn76496_chip.Create(3000000,1);
+sn_76496_1:=sn76496_chip.Create(3000000,1);
 timers.init(z80_1.numero_cpu,3000000/(4*60),exedexes_snd_irq,nil,true);
 //cargar roms
 if not(roms_load(@memoria,exedexes_rom)) then exit;
@@ -352,9 +352,9 @@ poner_bg;
 poner_fg;
 //DIP
 marcade.dswa:=$df;
-marcade.dswa_val:=@exedexes_dip_a;
+marcade.dswa_val2:=@exedexes_dip_a;
 marcade.dswb:=$ff;
-marcade.dswb_val:=@exedexes_dip_b;
+marcade.dswb_val2:=@exedexes_dip_b;
 //final
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;

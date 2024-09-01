@@ -5,13 +5,17 @@ uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}deco_146;
 
 type
   cpu_deco_104=class(cpu_deco_146)
-      constructor create;
+      constructor create(props:byte=0);
       public
       private
     end;
+  const
+    INTERFACE_SCRAMBLE_REVERSE=1;
+    USE_MAGIC_ADDRESS_XOR=2;
+    INTERFACE_SCRAMBLE_INTERLEAVE=4;
 
 var
-  main_deco104:cpu_deco_104;
+  deco104_0:cpu_deco_104;
 
 implementation
 const
@@ -1041,17 +1045,19 @@ const
 (wo:INPUT_PORT_C;m:($ff,$ff,$ff,$ff,$0c,$0d,$0e,$0f,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);ux:false;un:false), //0x7fc
 (wo:$d8;m:($0a,$0b,$08,$09,$0c,$0d,$0e,$0f,$00,$01,$02,$03,$04,$05,$06,$07);ux:true;un:true)); //0x7fe
 
-constructor cpu_deco_104.create;
+constructor cpu_deco_104.create(props:byte=0);
 begin
-  self.set_interface_scramble(9,8,7,6,5,4,3,2,1,0);
   self.bankswitch_swap_read_address:=$66;
 	self.magic_read_address_xor:=$2a4;
-	self.magic_read_address_xor_enabled:=false;
+  self.magic_read_address_xor_enabled:=(props and USE_MAGIC_ADDRESS_XOR)<>0;
 	self.xor_port:=$42;
 	self.mask_port:=$ee;
 	self.soundlatch_port:=$a8;
 	self.configregion:=$c;
   copymemory(@self.internal_ram,@deco_104ram,sizeof(deco_104ram));
+  if (props and INTERFACE_SCRAMBLE_REVERSE)<>0 then self.set_interface_scramble(0,1,2,3,4,5,6,7,8,9)
+    else self.set_interface_scramble(9,8,7,6,5,4,3,2,1,0);
+  if (props and INTERFACE_SCRAMBLE_INTERLEAVE)<>0 then set_interface_scramble(4,5,3,6,2,7,1,8,0,9);
 end;
 
 end.

@@ -2,7 +2,7 @@ unit pang_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,kabuki_decript,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,oki6295,sound_engine,eepromser;
+     pal_engine,oki6295,sound_engine,eepromser,ym_2413;
 
 function iniciar_pang:boolean;
 
@@ -187,6 +187,8 @@ case (puerto and $ff) of
       pal_bank:=(valor and $20) shl 6;
      end;
   $2:rom_nbank:=valor and $f;
+  $3:ym2413_0.write(valor);
+  $4:ym2413_0.address(valor);
   $5:oki_6295_0.write(valor);
   $7:video_bank:=valor;
   $8:if valor<>0 then eepromser_0.cs_write(ASSERT_LINE)
@@ -199,6 +201,7 @@ end;
 
 procedure pang_sound_update;
 begin
+  ym2413_0.update;
   oki_6295_0.update;
 end;
 
@@ -207,6 +210,7 @@ procedure reset_pang;
 begin
  z80_0.reset;
  reset_audio;
+ ym2413_0.reset;
  oki_6295_0.reset;
  eepromser_0.reset;
  marcade.in0:=$ff;
@@ -267,8 +271,8 @@ z80_0.init_sound(pang_sound_update);
 //eeprom
 eepromser_0:=eepromser_chip.create(E93C46,16);
 //Sound Chips
-//YM2413  --> Falta!
-oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,2);
+ym2413_0:=ym2413_chip.create(16000000 div 4);
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.3);
 getmem(ptemp,$100000);
 getmem(mem_temp2,$50000);
 getmem(mem_temp3,$50000);

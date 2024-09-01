@@ -19,7 +19,7 @@ const
         jailbreak_pal:array[0..3] of tipo_roms=(
         (n:'507j10.1f';l:$20;p:0;crc:$f1909605),(n:'507j11.2f';l:$20;p:$20;crc:$f70bb122),
         (n:'507j13.7f';l:$100;p:$40;crc:$d4fe5c97),(n:'507j12.6f';l:$100;p:$140;crc:$0266c7db));
-        jailbreak_vlm:tipo_roms=(n:'507l01.8c';l:$4000;p:$0;crc:$0c8a3605);
+        jailbreak_vlm:tipo_roms=(n:'507l01.8c';l:$4000;p:0;crc:$0c8a3605);
         //Dip
         jailbreak_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -73,23 +73,23 @@ procedure eventos_jailbreak;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //P2
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //SYS
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
 end;
@@ -103,12 +103,12 @@ init_controls(false,false,false,true);
 frame:=m6809_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-      m6809_0.run(frame);
-      frame:=frame+m6809_0.tframes-m6809_0.contador;
-      if f=239 then begin
+      if f=240 then begin
         if irq_ena then m6809_0.change_irq(HOLD_LINE);
         update_video_jailbreak;
       end;
+      m6809_0.run(frame);
+      frame:=frame+m6809_0.tframes-m6809_0.contador;
   end;
   eventos_jailbreak;
   video_sync;
@@ -119,12 +119,12 @@ function jailbreak_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$203f,$3000..$307f:jailbreak_getbyte:=memoria[direccion];
-  $3100:jailbreak_getbyte:=marcade.dswb; //dsw2
-  $3200:jailbreak_getbyte:=marcade.dswc;  //dsw3
+  $3100:jailbreak_getbyte:=marcade.dswb;
+  $3200:jailbreak_getbyte:=marcade.dswc;
   $3300:jailbreak_getbyte:=marcade.in2;
   $3301:jailbreak_getbyte:=marcade.in0;
-  $3302:jailbreak_getbyte:=marcade.in1; //P2
-  $3303:jailbreak_getbyte:=marcade.dswa;  //dsw1
+  $3302:jailbreak_getbyte:=marcade.in1;
+  $3303:jailbreak_getbyte:=marcade.dswa;
   $6000:jailbreak_getbyte:=vlm5030_0.get_bsy;
   $8000..$ffff:if m6809_0.opcode then jailbreak_getbyte:=mem_opcodes[direccion and $7fff]
                   else jailbreak_getbyte:=memoria[direccion];
@@ -134,7 +134,7 @@ end;
 procedure jailbreak_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$fff:if memoria[direccion]<>valor then begin
+  0..$fff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion and $7ff]:=true;
               memoria[direccion]:=valor;
            end;
@@ -147,16 +147,16 @@ case direccion of
                   scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $00ff) or ((valor and 1) shl 8);
                   memoria[direccion]:=valor;
                end;
-  $2042:scroll_dir:=(valor and $4)<>0;
+  $2042:scroll_dir:=(valor and 4)<>0;
   $2044:begin
-          nmi_ena:=((valor and $1)<>0);
-          irq_ena:=((valor and $2)<>0);
+          nmi_ena:=((valor and 1)<>0);
+          irq_ena:=((valor and 2)<>0);
           main_screen.flip_main_screen:=(valor and 8)<>0;
         end;
-  $3100:sn_76496_0.Write(valor);
+  $3100:sn_76496_0.write(valor);
   $4000:begin
            vlm5030_0.set_st((valor shr 1) and 1);
-	         vlm5030_0.set_rst((valor shr 2 ) and 1 );
+	         vlm5030_0.set_rst((valor shr 2) and 1);
         end;
   $5000:vlm5030_0.data_w(valor);
   $8000..$ffff:; //ROM
@@ -210,24 +210,22 @@ screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
 m6809_0.init_sound(jailbreak_sound);
-//Sound Chip
-sn_76496_0:=sn76496_chip.Create(18432000 div 12);
-//cargar rom sonido
-vlm5030_0:=vlm5030_chip.Create(3579545,$4000,2);
-if not(roms_load(@memoria_temp,jailbreak_vlm)) then exit;
-copymemory(@memoria_temp[$2000],@memoria_temp[0],$2000);
-copymemory(vlm5030_0.get_rom_addr,@memoria_temp,$4000);
-//NMI sonido
-timers.init(m6809_0.numero_cpu,1536000/480,jailbreak_snd_nmi,nil,true);
-//cargar roms y desencriptarlas
 if not(roms_load(@memoria,jailbreak_rom)) then exit;
 konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);
 //mem_opcodes[$9a7c and $7fff]:=$20;  //inmune
 //mem_opcodes[$9aee and $7fff]:=$39;
 //mem_opcodes[$9b4b and $7fff]:=$20;
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(18432000 div 12);
+//cargar rom sonido
+vlm5030_0:=vlm5030_chip.create(3579545,$2000,2);
+if not(roms_load(@memoria_temp,jailbreak_vlm)) then exit;
+copymemory(vlm5030_0.get_rom_addr,@memoria_temp,$2000);
+//NMI sonido
+timers.init(m6809_0.numero_cpu,1536000/480,jailbreak_snd_nmi,nil,true);
 //convertir chars
 if not(roms_load(@memoria_temp,jailbreak_char)) then exit;
 init_gfx(0,8,8,1024);

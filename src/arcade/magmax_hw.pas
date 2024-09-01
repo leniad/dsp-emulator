@@ -12,7 +12,7 @@ implementation
 
 const
         magmax_rom:array[0..5] of tipo_roms=(
-        (n:'1.3b';l:$4000;p:1;crc:$33793cbb),(n:'6.3d';l:$4000;p:$0;crc:$677ef450),
+        (n:'1.3b';l:$4000;p:1;crc:$33793cbb),(n:'6.3d';l:$4000;p:0;crc:$677ef450),
         (n:'2.5b';l:$4000;p:$8001;crc:$1a0c84df),(n:'7.5d';l:$4000;p:$8000;crc:$01c35e95),
         (n:'3.6b';l:$2000;p:$10001;crc:$d06e6cae),(n:'8.6d';l:$2000;p:$10000;crc:$790a82be));
         magmax_sound:array[0..1] of tipo_roms=(
@@ -27,21 +27,21 @@ const
         (n:'mag_a.10d';l:$100;p:$200;crc:$a7ea7718),(n:'mag_g.2e';l:$100;p:$300;crc:$830be358),
         (n:'mag_b.14d';l:$100;p:$400;crc:$a0fb7297),(n:'mag_c.15d';l:$100;p:$500;crc:$d84a6f78));
         magmax_fondo1:array[0..1] of tipo_roms=(
-        (n:'4.18b';l:$2000;p:0;crc:$1550942e),(n:'5.20b';l:$2000;p:$1;crc:$3b93017f));
+        (n:'4.18b';l:$2000;p:0;crc:$1550942e),(n:'5.20b';l:$2000;p:1;crc:$3b93017f));
         magmax_fondo2:array[0..5] of tipo_roms=(
         (n:'9.18d';l:$2000;p:$4000;crc:$9ecc9ab8),(n:'10.20d';l:$2000;p:$6000;crc:$e2ff7293),
         (n:'11.15f';l:$2000;p:$8000;crc:$91f3edb6),(n:'12.17f';l:$2000;p:$a000;crc:$99771eff),
         (n:'13.18f';l:$2000;p:$c000;crc:$75f30159),(n:'14.20f';l:$2000;p:$e000;crc:$96babcba));
-        magmax_dip:array [0..9] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$c;dip_name:'30K 80K 50K+'),(dip_val:$8;dip_name:'50K 120K 70K+'),(dip_val:$4;dip_name:'70K 160K 90K+'),(dip_val:$0;dip_name:'90K 200K 110K+'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$10;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Coin A';number:4;dip:((dip_val:$100;dip_name:'2C 1C'),(dip_val:$300;dip_name:'1C 1C'),(dip_val:$200;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$400;dip_name:'2C 3C'),(dip_val:$c00;dip_name:'1C 3C'),(dip_val:$800;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1000;name:'Difficulty';number:2;dip:((dip_val:$1000;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2000;name:'Flip Screen';number:2;dip:((dip_val:$2000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Debug Mode';number:2;dip:((dip_val:$8000;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        magmax_dip:array [0..9] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
+        (mask:$c;name:'Bonus Life';number:4;val4:($c,8,4,0);name4:('30K 80K 50K+','50K 120K 70K+','70K 160K 90K+','90K 200K 110K+')),
+        (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
+        (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
+        (mask:$300;name:'Coin A';number:4;val4:($100,$300,$200,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
+        (mask:$c00;name:'Coin B';number:4;val4:(0,$400,$c00,$800);name4:('3C 1C','2C 3C','1C 3C','1C 6C')),
+        (mask:$1000;name:'Difficulty';number:2;val2:($1000,0);name2:('Easy','Hard')),
+        (mask:$2000;name:'Flip Screen';number:2;val2:($2000,0);name2:('Off','On')),
+        (mask:$8000;name:'Debug Mode';number:2;val2:($8000,0);name2:('No','Yes')),());
 
 var
  gain_control,vreg,scroll_x,scroll_y:word;
@@ -67,7 +67,7 @@ begin
       fillword(@pixel2,$100,paleta[MAX_COLORES]);
 			map_v_scr_100:=(scroll_v+f) and $100;
 			rom18D_addr:=((scroll_v+f) and $f8)+(map_v_scr_100 shl 5);
-			rom15F_addr:=(((scroll_v+f) and $07) shl 2)+(map_v_scr_100 shl 5);
+			rom15F_addr:=(((scroll_v+f) and 7) shl 2)+(map_v_scr_100 shl 5);
 			map_v_scr_1fe_6:=((scroll_v+f) and $1fe) shl 6;
 			pen_base:=$20+(map_v_scr_100 shr 1);
 			for h:=0 to $ff do begin
@@ -80,15 +80,15 @@ begin
 				rom18D_addr:=rom18D_addr and $20f8;
 				rom18D_addr:=rom18D_addr+((prom_data and $1f00)+((LS283 and $38) shr 3));
 				rom15F_addr:=rom15F_addr and $201c;
-				rom15F_addr:=rom15F_addr+((rom18B[$4000+rom18D_addr] shl 5)+((LS283 and $6) shr 1));
+				rom15F_addr:=rom15F_addr+((rom18B[$4000+rom18D_addr] shl 5)+((LS283 and 6) shr 1));
 				rom15F_addr:=rom15F_addr+(prom_data and $4000);
 				graph_color:=prom_data and $70;
 				graph_data:=rom18B[$8000+rom15F_addr];
 				if ((LS283 and 1)<>0) then graph_data:=graph_data shr 4;
-				graph_data:=graph_data and $0f;
+				graph_data:=graph_data and $f;
 				pixel1[h]:=paleta[pen_base+graph_color+graph_data];
 				// priority: background over sprites
-				if ((map_v_scr_100<>0) and ((graph_data and $0c)=$0c)) then pixel2[h]:=pixel1[h];
+				if ((map_v_scr_100<>0) and ((graph_data and $c)=$c)) then pixel2[h]:=pixel1[h];
       end;
       putpixel(0,f,256,@pixel1,1);
 			putpixel(0,f,256,@pixel2,2);
@@ -99,7 +99,7 @@ var
   f,x,nchar:word;
   color,y,atrib:byte;
 begin
-for f:=$0 to $3ff do begin
+for f:=0 to $3ff do begin
     if gfx[1].buffer[f] then begin
       x:=f mod 32;
       y:=f div 32;
@@ -150,10 +150,10 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
   //SYSTEM
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
 end;
 end;
 
@@ -260,12 +260,12 @@ end;
 procedure magmax_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:ay8910_0.Control(valor);
-  $1:ay8910_0.Write(valor);
-  $2:ay8910_1.Control(valor);
-  $3:ay8910_1.Write(valor);
-  $4:ay8910_2.Control(valor);
-  $5:ay8910_2.Write(valor);
+  0:ay8910_0.Control(valor);
+  1:ay8910_0.Write(valor);
+  2:ay8910_1.Control(valor);
+  3:ay8910_1.Write(valor);
+  4:ay8910_2.Control(valor);
+  5:ay8910_2.Write(valor);
 end;
 end;
 
@@ -369,9 +369,6 @@ init_gfx(1,16,16,$200);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,0,1,2,3);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//DIP
-marcade.dswa:=$ffdf;
-marcade.dswa_val:=@magmax_dip;
 //poner la paleta
 if not(roms_load(@memoria_temp,magmax_pal)) then exit;
 for f:=0 to $ff do begin
@@ -386,6 +383,9 @@ end;
 set_pal(colores,$100);
 //color lookup de sprites
 for f:=0 to $ff do gfx[1].colores[f]:=(memoria_temp[$300+f] and $f) or $10;
+//DIP
+marcade.dswa:=$ffdf;
+marcade.dswa_val2:=@magmax_dip;
 //final
 reset_magmax;
 iniciar_magmax:=true;

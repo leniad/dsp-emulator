@@ -3,7 +3,7 @@ interface
 
 uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sega_vdp,sn_76496,sysutils,rom_engine,
-     misc_functions,sound_engine,forms;
+     misc_functions,sound_engine,forms,ym_2413;
 
 function iniciar_sms:boolean;
 procedure change_sms_model(model:byte;load_bios:boolean=true);
@@ -25,6 +25,7 @@ type
       push_pause,cart_enabled,io_enabled,bios_enabled:boolean;
       io:array[0..6] of byte;
       keys:array[0..1] of byte;
+      old_f2:byte;
   end;
 
 var
@@ -79,7 +80,7 @@ while EmuStatus=EsRunning do begin
       frame:=frame+z80_0.tframes-z80_0.contador;
       vdp_0.refresh(f);
   end;
-  actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,PANT_TEMP);
+  actualiza_trozo(0,vdp_0.BORDER_DIFF,284,243,1,0,0,284,243,PANT_TEMP);
   eventos_sms;
   video_sync;
 end;
@@ -229,9 +230,9 @@ begin
     $c0..$ff:if sms_0.io_enabled then begin
                 if (puerto and 1)<>0 then sms_inbyte:=sms_0.keys[1]
                   else sms_inbyte:=sms_0.keys[0];
-             end;{ else begin  //Descomentar esto para el YM2413
-                if (puerto and $ff)=$f2 then sms_inbyte:=old_3e;
-             end; }
+             end else begin
+                if (puerto and $ff)=$f2 then sms_inbyte:=sms_0.old_f2;
+             end;
   end;
 end;
 
@@ -267,11 +268,11 @@ begin
     $40..$7f:sn_76496_0.Write(valor);
     $80..$bf:if (puerto and $1)<>0 then vdp_0.register_w(valor)
                 else vdp_0.vram_w(valor);
-    $c0..$ff:;{case (puerto and $ff) of //Descomentar esto para el YM2413
-                $f0:ym2413_0.Control(valor);
+    $c0..$ff:case (puerto and $ff) of
+                $f0:ym2413_0.address(valor);
                 $f1:ym2413_0.Write(valor);
-                $f2:old_3e:=valor and 3;
-             end; }
+                $f2:sms_0.old_f2:=valor;
+             end;
   end;
 end;
 
@@ -284,7 +285,7 @@ end;
 procedure sms_sound_update;
 begin
   sn_76496_0.update;
-  //ym2413_0.update;
+  ym2413_0.update;
 end;
 
 procedure sms_set_hpos(estados:word);
@@ -308,7 +309,7 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  vdp_0.reset;
- //ym2413_0.reset;
+ ym2413_0.reset;
  reset_audio;
  sms_0.keys[0]:=$ff;
  sms_0.keys[1]:=$ff;
@@ -354,11 +355,10 @@ case model of
       z80_0.clock:=CLOCK_PAL;
       z80_0.tframes:=(CLOCK_PAL/LINES_PAL)/FPS_PAL;
       change_video_clock(FPS_PAL);
-      change_video_size(284,294);
+      //change_video_size(284,294);
       vdp_0.video_pal(vdp_0.video_mode);
       sound_engine_change_clock(CLOCK_PAL);
       sn_76496_0.change_clock(CLOCK_PAL);
-      //ym2413_0.change_clock(CLOCK_PAL);
     end;
   1,2:begin
       if load_bios then begin
@@ -370,11 +370,10 @@ case model of
       z80_0.clock:=CLOCK_NTSC;
       z80_0.tframes:=(CLOCK_NTSC/LINES_NTSC)/FPS_NTSC;
       change_video_clock(FPS_NTSC);
-      change_video_size(284,243);
+      //change_video_size(284,243);
       vdp_0.video_ntsc(vdp_0.video_mode);
       sound_engine_change_clock(CLOCK_NTSC);
       sn_76496_0.change_clock(CLOCK_NTSC);
-      //ym2413.change_clock(CLOCK_NTSC);
   end;
 end;
 end;
@@ -441,9 +440,9 @@ var
   longitud:integer;
   crc_val:dword;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SSMS)) then exit;
   getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SSMS)) then begin
     freemem(datos);
     exit;
   end;
@@ -454,7 +453,7 @@ begin
       $58fa27c6,$a577ce46,$29822980,$ea5c3a6f,$8813514b,$b9664ae1:begin //Codemasters
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_codemasters);
       end;
-      $565c799f,$dbbf4dd1,$18fb98a3,$97d03541,$89b79e77,$60d6a7c:begin //Korean $8bf3de3
+      $565c799f,$dbbf4dd1,$18fb98a3,$97d03541,$89b79e77,$60d6a7c:begin //Korean
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_korean);
       end;
       $a67f2a5c:begin //4pack
@@ -473,7 +472,7 @@ begin
       else abrir_cartucho_sms(datos,longitud);
     end;
   end;
-  if extension='DSP' then snapshot_r(datos,longitud);
+  if extension='DSP' then snapshot_r(datos,longitud,SSMS);
   freemem(datos);
   change_caption(nombre_file);
   Directory.sms:=ExtractFilePath(romfile);
@@ -483,7 +482,7 @@ procedure sms_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SSMS);
 Directory.sms:=ExtractFilePath(nombre);
 end;
 
@@ -502,20 +501,23 @@ if sms_0.model=0 then llamadas_maquina.fps_max:=FPS_PAL
   else llamadas_maquina.fps_max:=FPS_NTSC;
 iniciar_audio(false);
 screen_init(1,284,294);
+iniciar_video(284,243);
 if sms_0.model=0 then begin
-  iniciar_video(284,294);
+  //iniciar_video(284,294);
   z80_0:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
-  sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
+  z80_0.init_sound(sms_sound_update);
+  sn_76496_0:=sn76496_chip.create(CLOCK_PAL);
 end else begin
-  iniciar_video(284,243);
-  sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
+  //iniciar_video(284,243);
   z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
+  z80_0.init_sound(sms_sound_update);
+  sn_76496_0:=sn76496_chip.create(CLOCK_NTSC);
 end;
 //Main CPU
 z80_0.change_ram_calls(sms_getbyte,sms_putbyte);
 z80_0.change_io_calls(sms_inbyte,sms_outbyte);
-z80_0.init_sound(sms_sound_update);
 z80_0.change_misc_calls(sms_set_hpos);
+ym2413_0:=ym2413_chip.create(10738635 div 3);
 //VDP
 vdp_0:=vdp_chip.create(1,sms_interrupt,z80_0.numero_cpu,read_memory,write_memory);
 vdp_0.set_gg(false);

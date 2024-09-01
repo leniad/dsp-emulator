@@ -4,8 +4,8 @@ object ConfigSP: TConfigSP
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config Spectrum'
-  ClientHeight = 444
-  ClientWidth = 480
+  ClientHeight = 435
+  ClientWidth = 474
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

@@ -389,9 +389,9 @@ var
   datos:pbyte;
   longitud:integer;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SNES)) then exit;
   getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SNES)) then begin
     freemem(datos);
     exit;
   end;
@@ -399,7 +399,7 @@ begin
   //Guardar la SRAM
   if (nes_0.sram_present and (nv_ram_name<>'')) then write_file(nv_ram_name,@memoria[$6000],$2000);
   if @n2a03_0.additional_sound<>nil then n2a03_0.add_more_sound(nil);
-  if extension='DSP' then snapshot_r(datos,longitud);
+  if extension='DSP' then snapshot_r(datos,longitud,SNES);
   if extension='NES' then begin
     if abrir_cartucho(datos,longitud) then begin
       if nes_0.sram_present then nv_ram_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
@@ -415,7 +415,7 @@ procedure grabar_nes;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SNES);
 Directory.nes:=ExtractFilePath(nombre);
 end;
 

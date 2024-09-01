@@ -7,6 +7,7 @@ const
         MAX_CANALES=9;
         LONG_MAX_AUDIO=3000;  //Tapper necesita esto tan alto...
         FREQ_BASE_AUDIO=44100;
+        M_PI=3.1415926535;
 type
         tipo_sonido=record
           posicion_sonido:word;

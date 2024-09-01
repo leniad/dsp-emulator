@@ -23,18 +23,17 @@ const
         (n:'14_j07b.bin';l:$2000;p:$4000;crc:$101c858d));
         bombjack_tiles_map:tipo_roms=(n:'02_p04t.bin';l:$1000;p:0;crc:$398d4a02);
         bombjack_sonido:tipo_roms=(n:'01_h03t.bin';l:$2000;p:0;crc:$8407917d);
-        //DIP
-        bombjack_dipa:array [0..5] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$c;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$40;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        bombjack_dipb:array [0..4] of def_dip=(
-        (mask:$7;name:'Bonus Life';number:8;dip:((dip_val:$2;dip_name:'30k+'),(dip_val:$1;dip_name:'100k+'),(dip_val:$7;dip_name:'50k 100k 300k'),(dip_val:$5;dip_name:'50k 100k'),(dip_val:$3;dip_name:'50k'),(dip_val:$6;dip_name:'100k 300k'),(dip_val:$4;dip_name:'100k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Bird Speed';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$8;dip_name:'Medium'),(dip_val:$10;dip_name:'Hard'),(dip_val:$18;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Enemies Number & Speed';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$0;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$60;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Special Coin';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$80;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bombjack_dipa:array [0..5] of def_dip2=(
+        (mask:$3;name:'Coin A';number:4;val4:(0,1,2,3);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
+        (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
+        bombjack_dipb:array [0..4] of def_dip2=(
+        (mask:$7;name:'Bonus Life';number:8;val8:(2,1,7,5,3,6,4,0);name8:('30K+','100K+','50K 100K 300K','50K 100K','50K','100K 300K','100K','None')),
+        (mask:$18;name:'Bird Speed';number:4;val4:(0,8,$10,$18);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$60;name:'Enemies Number && Speed';number:4;val4:($20,0,$40,$60);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$80;name:'Special Coin';number:2;val2:(0,$80);name2:('Easy','Hard')),());
         //Calorie Kun
         caloriekun_rom:array[0..2] of tipo_roms=(
         (n:'epr10072.1j';l:$4000;p:0;crc:$ade792c1),(n:'epr10073.1k';l:$4000;p:$4000;crc:$b53e109f),
@@ -50,19 +49,18 @@ const
         (n:'epr10071.7m';l:$4000;p:0;crc:$5f55527a),(n:'epr10070.7k';l:$4000;p:$4000;crc:$97f35a23),
         (n:'epr10069.7j';l:$4000;p:$8000;crc:$c0c3deaf));
         caloriekun_tiles_map:tipo_roms=(n:'epr10079.8d';l:$2000;p:0;crc:$3c61a42c);
-        //DIP
-        caloriekun_dipa:array [0..5] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$c;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$4;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Cabinet';number:2;dip:((dip_val:$10;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$c0;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$80;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        caloriekun_dipb:array [0..5] of def_dip=(
-        (mask:$3;name:'Bonus Life';number:3;dip:((dip_val:$0;dip_name:'None'),(dip_val:$1;dip_name:'20K'),(dip_val:$3;dip_name:'20K 60K'),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Number of Bombs';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$4;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Difficulty - Mogura Nian';number:2;dip:((dip_val:$0;dip_name:'Normal'),(dip_val:$8;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Difficulty - Select of Mogura';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$20;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$30;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Infinite Lives';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        caloriekun_dipa:array [0..5] of def_dip2=(
+        (mask:$3;name:'Coin A';number:4;val4:(0,1,2,3);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
+        (mask:$c;name:'Coin B';number:4;val4:($c,0,4,8);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$10;name:'Cabinet';number:2;val2:($10,0);name2:('Upright','Cocktail')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
+        (mask:$c0;name:'Lives';number:4;val4:($c0,0,$40,$80);name4:('2','3','4','5')),());
+        caloriekun_dipb:array [0..5] of def_dip2=(
+        (mask:$3;name:'Bonus Life';number:4;val4:(0,1,3,2);name4:('None','20K','20K 60K','Invalid')),
+        (mask:$4;name:'Number of Bombs';number:2;val2:(0,4);name2:('3','5')),
+        (mask:$8;name:'Difficulty - Mogura Nian';number:2;val2:(0,8);name2:('Normal','Hard')),
+        (mask:$30;name:'Difficulty - Select of Mogura';number:4;val4:(0,$20,$10,$30);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$80;name:'Infinite Lives';number:2;val2:(0,$80);name2:('Off','On')),());
 
 var
  memoria_fondo:array[0..$1fff] of byte;
@@ -71,7 +69,6 @@ var
  memoria_sprites:array[0..$7f] of byte;
  memoria_screen:array[0..$7ff] of byte;
  memoria_ram:array[0..$fff] of byte;
- mask_chars,mask_tiles:word;
  actualiza_fondo:boolean;
  //Bomb Jack
  sprite_control:array[0..1] of byte;
@@ -91,7 +88,7 @@ for f:=0 to $ff do begin
     x:=f mod 16;
     y:=f div 16;
     nchar:=memoria_fondo[base+f]+((atrib and $30) shl 4);
-    put_gfx_flip(x*16,y*16,nchar and mask_tiles,color shl 3,1,1,(atrib and $40)<>0,false);
+    put_gfx_flip(x*16,y*16,nchar,color shl 3,1,1,(atrib and $40)<>0,false);
     gfx[1].buffer[f]:=false;
   end;
 end;
@@ -115,7 +112,7 @@ for f:=0 to $3ff do begin
     x:=f mod 32;
     y:=f div 32;
     nchar:=memoria_screen[f]+(atrib and $30) shl 4;
-    put_gfx_trans_flip(x*8,y*8,nchar and mask_chars,color shl 3,2,0,(atrib and $40)<>0,(atrib and $80)<>0);
+    put_gfx_trans_flip(x*8,y*8,nchar,color shl 3,2,0,(atrib and $40)<>0,(atrib and $80)<>0);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -596,21 +593,19 @@ case main_vars.tipo_maquina of
         //chars
         if not(roms_load(@memoria_temp,bombjack_char)) then exit;
         convert_chars($200);
-        mask_chars:=$1ff;
         //tiles
         if not(roms_load(@memoria_fondo,bombjack_tiles_map)) then exit;
         if not(roms_load(@memoria_temp,bombjack_tiles)) then exit;
         convert_tiles($100);
-        mask_tiles:=$ff;
         //sprites
         if not(roms_load(@memoria_temp,bombjack_sprites)) then exit;
         convert_sprites($100);
         mask_sprites:=$1f;
         //DIP
         marcade.dswa:=$c0;
-        marcade.dswa_val:=@bombjack_dipa;
+        marcade.dswa_val2:=@bombjack_dipa;
         marcade.dswb:=$50;
-        marcade.dswb_val:=@bombjack_dipb;
+        marcade.dswb_val2:=@bombjack_dipb;
   end;
   383:begin
         llamadas_maquina.bucle_general:=caloriekun_principal;
@@ -624,21 +619,19 @@ case main_vars.tipo_maquina of
         //convertir chars
         if not(roms_load(@memoria_temp,caloriekun_char)) then exit;
         convert_chars($400);
-        mask_chars:=$3ff;
         //convertir tiles
         if not(roms_load(@memoria_fondo,caloriekun_tiles_map)) then exit;
         if not(roms_load(@memoria_temp,caloriekun_tiles)) then exit;
         convert_tiles($200);
-        mask_tiles:=$1ff;
         //sprites
         if not(roms_load(@memoria_temp,caloriekun_sprites)) then exit;
         convert_sprites($200);
         mask_sprites:=$3f;
         //DIP
         marcade.dswa:=$30;
-        marcade.dswa_val:=@caloriekun_dipa;
+        marcade.dswa_val2:=@caloriekun_dipa;
         marcade.dswb:=0;
-        marcade.dswb_val:=@caloriekun_dipb;
+        marcade.dswb_val2:=@caloriekun_dipb;
       end;
 end;
 //final

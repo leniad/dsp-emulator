@@ -75,9 +75,9 @@ implementation
 const
     estados_t:array[0..255] of byte=(
     //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-      6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
+      6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
       0, 0, 2, 4, 0, 0, 4, 9, 0, 2, 3, 0, 3, 2, 8, 6,  // 10 *
-      3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 3,  // 20 Branch *
+      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,  // 20 Branch *
       2, 2, 2, 2, 5, 4, 5, 4, 0, 4, 3, 4,16,11, 0, 0,  // 30 *
       2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 0, 1,  // 40 reg A MODO A *
       2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 0, 1,  // 50 reg B MODO B *
@@ -94,9 +94,9 @@ const
 
     paginacion:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-        1,$f, 1, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
+        1, 1, 1, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
         0, 0, 0, 0,$f,$f, 3, 3,$f, 0, 2,$f, 2, 0, 2, 2,  //10
-        2, 2, 2, 2, 2, 2, 2, 2,$f,$f, 2, 2, 2, 2, 2, 2,  //20
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  //20
         4, 4, 4, 4, 2, 2, 2, 2,$f, 0, 0, 0, 2, 0,$f,$f,  //30
         0,$f,$f, 0, 0,$f, 0, 0, 0, 0, 0,$f, 0, 0,$f, 0,  //40
         0,$f,$f, 0, 0,$f, 0, 0, 0, 0, 0,$f, 0, 0,$f, 0,  //50
@@ -115,7 +115,7 @@ const
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  Instrucciones $10 (+1)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10
-        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 0, 5, // 20
+        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 5, 5, // 20
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50
@@ -134,7 +134,7 @@ const
       //0 1 2 3 4 5 6 7 8 9 a b c d e f
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //00
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //10
-        0,0,3,3,3,3,3,3,0,0,3,3,3,3,0,3,  //20
+        0,0,3,3,3,3,3,3,0,0,3,3,3,3,3,3,  //20
         0,0,0,0,0,0,0,0,0,0,0,0,8,8,0,0,  //30
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //40
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //50
@@ -619,7 +619,7 @@ case paginacion[instruccion] of
     else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc));  //neg 4T
+      $0,$1,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc));  //neg 4T
       $2,$3,$63,$73:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T ($2 es ilegal!!)
       $4,$64,$74:self.putbyte(posicion,m680x_lsr(self.getbyte(posicion),@r.cc)); //lsr 4T
       $6,$66,$76:self.putbyte(posicion,m680x_ror(self.getbyte(posicion),@r.cc)); //ror 4T
@@ -708,6 +708,10 @@ case instruccion of
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
+                $2e:if ((r.cc.n=r.cc.v) and not(r.cc.z)) then begin  //lbgt
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
                 $2f:if not((r.cc.n=r.cc.v) and not(r.cc.z)) then begin //ble
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
@@ -779,6 +783,8 @@ case instruccion of
       $25:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs 3T
       $26:if not(r.cc.z) then r.pc:=r.pc+shortint(numero); //bne 3T
       $27:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq 3T
+      $28:if not(r.cc.v) then r.pc:=r.pc+shortint(numero); //bvc 3T
+      $29:if r.cc.v then r.pc:=r.pc+shortint(numero); //bvs 3T
       $2a:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl 3T
       $2b:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi 3T
       $2c:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//bge 3T

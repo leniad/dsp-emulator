@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.23WIP2';
+        DSP_VERSION='0.23WIP3';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -35,6 +35,7 @@ const
         FORM_POS_LAZARUS=20;
         {$endif}
         {$endif}
+        M_PI=3.1415926535;
 
 type
         TMain_vars=record
@@ -44,7 +45,6 @@ type
             vactual:byte;
             service1,driver_ok,auto_exec,show_crc_error,center_screen,console_init:boolean;
             sort:word;
-            system_type:byte;
         end;
         TDirectory=record
             Base:string;
@@ -109,7 +109,18 @@ type
           number:byte;
           dip:array[0..MAX_DIP_VALUES] of def_dip_value;
         end;
+        def_dip2=record
+          mask:word;
+          name:string;
+          case number:byte of
+            2:(val2:array[0..1] of word;name2:array[0..1] of string[30];);
+            4:(val4:array[0..3] of word;name4:array[0..3] of string[30];);
+            8:(val8:array[0..7] of word;name8:array[0..7] of string[30];);
+            16:(val16:array[0..15] of word;name16:array[0..15] of string[30];);
+            32:(val32:array[0..31] of word;name32:array[0..31] of string[30];);
+        end;
         pdef_dip=^def_dip;
+        pdef_dip2=^def_dip2;
         TEmuStatus=(EsPause,EsRunning,EsStoped);
 
 //Video
@@ -901,6 +912,9 @@ timers.clear;
 marcade.dswa_val:=nil;
 marcade.dswb_val:=nil;
 marcade.dswc_val:=nil;
+marcade.dswa_val2:=nil;
+marcade.dswb_val2:=nil;
+marcade.dswc_val2:=nil;
 {$ifndef windows}
 cont_sincroniza:=sdl_getticks();
 {$endif}

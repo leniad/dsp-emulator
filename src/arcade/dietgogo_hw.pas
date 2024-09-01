@@ -104,7 +104,7 @@ begin
    //int real_address = 0 + (offset *2);
    deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
    cs:=0;
-   dietgo_protection_region_0_104_r:=main_deco104.read_data(deco146_addr,cs);
+   dietgo_protection_region_0_104_r:=deco104_0.read_data(deco146_addr,cs);
 end;
 
 begin
@@ -144,7 +144,7 @@ begin
 	//int real_address = 0 + (offset *2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,  17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
-	main_deco104.write_data(deco146_addr, data,cs);
+	deco104_0.write_data(deco146_addr, data,cs);
 end;
 
 begin
@@ -188,7 +188,7 @@ begin
  m68000_0.reset;
  deco16ic_0.reset;
  deco_sprites_0.reset;
- main_deco104.reset;
+ deco104_0.reset;
  copymemory(oki_6295_0.get_rom_addr,@oki_rom[0],$40000);
  deco16_snd_simple_reset;
  reset_audio;
@@ -256,9 +256,7 @@ gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,24,8,16,0);
 convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 //Proteccion deco104
-main_deco104:=cpu_deco_104.create;
-main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
-main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
+deco104_0:=cpu_deco_104.create(USE_MAGIC_ADDRESS_XOR or INTERFACE_SCRAMBLE_INTERLEAVE);
 //Dip
 marcade.dswa:=$ffff;
 marcade.dswa_val:=@dietgo_dip_a;

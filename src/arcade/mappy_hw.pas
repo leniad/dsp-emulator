@@ -145,7 +145,7 @@ const
 
 var
  snd_int,main_int:boolean;
- mux,sprite_mask:byte;
+ mux:byte;
  update_video_proc:procedure;
  scroll_x:word;
 
@@ -164,7 +164,7 @@ begin
 for f:=0 to $3f do begin
   if (memoria[$2781+(f*2)] and $2)=0 then begin
     atrib:=memoria[$2780+(f*2)];
-    nchar:=memoria[$1780+(f*2)] and sprite_mask;
+    nchar:=memoria[$1780+(f*2)];
     color:=memoria[$1781+(f*2)] shl 4;
     x:=memoria[$1f80+(f*2)]-16;
     y:=memoria[$1f81+(f*2)]+$100*(memoria[$2781+(f*2)] and 1)-40;
@@ -277,7 +277,7 @@ for f:=0 to $3f do begin
   if (memoria[$1f81+(f*2)] and $2)=0 then begin
     atrib:=memoria[$1f80+(f*2)];
     y:=memoria[$1781+(f*2)]+$100*(memoria[$1f81+(f*2)] and 1)-40;
-    nchar:=memoria[$f80+(f*2)] and sprite_mask;
+    nchar:=memoria[$f80+(f*2)];
     color:=memoria[$f81+(f*2)] shl 2;
     x:=memoria[$1780+(f*2)]-17;
     flipx:=(atrib and $02)<>0;
@@ -672,7 +672,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,mappy_sprites)) then exit;
       set_sprites(1,0);
-      sprite_mask:=$7f;
       //Color lookup
       if not(roms_load(@memoria_temp,mappy_proms)) then exit;
       set_color_lookup(0,$100);
@@ -699,7 +698,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,dd2_sprites)) then exit;
       set_sprites(2,0);
-      sprite_mask:=$ff;
       //Color lookup
       if not(roms_load(@memoria_temp,dd2_proms)) then exit;
       set_color_lookup(0,$100);
@@ -725,7 +723,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,spacman_sprites)) then exit;
       set_sprites(1,1);
-      sprite_mask:=$7f;
       //Color lookup
       if not(roms_load(@memoria_temp,spacman_proms)) then exit;
       set_color_lookup(1,$100);
@@ -752,7 +749,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,todruaga_sprites)) then exit;
       set_sprites(1,0);
-      sprite_mask:=$7f;
       //Color lookup
       if not(roms_load(@memoria_temp,todruaga_proms)) then exit;
       set_color_lookup(0,$400);
@@ -778,7 +774,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,motos_sprites)) then exit;
       set_sprites(2,0);
-      sprite_mask:=$ff;
       //Color lookup
       if not(roms_load(@memoria_temp,motos_proms)) then exit;
       set_color_lookup(0,$100);
@@ -804,7 +799,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,grobda_sprites)) then exit;
       set_sprites(2,1);
-      sprite_mask:=$ff;
       //Color lookup
       if not(roms_load(@memoria_temp,grobda_proms)) then exit;
       set_color_lookup(1,$100);
@@ -831,7 +825,6 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(roms_load(@memoria_temp,pacnpal_sprites)) then exit;
       set_sprites(1,1);
-      sprite_mask:=$7f;
       //Color lookup
       if not(roms_load(@memoria_temp,pacnpal_proms)) then exit;
       set_color_lookup(1,$100);

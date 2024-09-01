@@ -4,8 +4,8 @@ object MConfig: TMConfig
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config DSP'
-  ClientHeight = 504
-  ClientWidth = 492
+  ClientHeight = 509
+  ClientWidth = 467
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,8 +18,8 @@ object MConfig: TMConfig
   OnShow = FormShow
   TextHeight = 13
   object Button1: TButton
-    Left = 90
-    Top = 459
+    Left = 64
+    Top = 453
     Width = 113
     Height = 41
     Caption = 'OK'
@@ -28,8 +28,8 @@ object MConfig: TMConfig
     OnKeyUp = FormKeyUp
   end
   object Button2: TButton
-    Left = 304
-    Top = 459
+    Left = 257
+    Top = 453
     Width = 113
     Height = 41
     Caption = 'CANCELAR'
@@ -38,9 +38,9 @@ object MConfig: TMConfig
     OnKeyUp = FormKeyUp
   end
   object other: TPageControl
-    Left = 8
-    Top = 16
-    Width = 488
+    Left = 2
+    Top = 8
+    Width = 455
     Height = 439
     ActivePage = TabSheet1
     TabOrder = 2
@@ -933,7 +933,7 @@ object MConfig: TMConfig
       end
     end
     object ROM: TTabSheet
-      Caption = 'ROMs export'
+      Caption = 'DATs export'
       ImageIndex = 4
       object BitBtn21: TBitBtn
         Left = 40
@@ -943,6 +943,15 @@ object MConfig: TMConfig
         Caption = 'Export ROM data'
         TabOrder = 0
         OnClick = BitBtn21Click
+      end
+      object BitBtn22: TBitBtn
+        Left = 224
+        Top = 32
+        Width = 121
+        Height = 49
+        Caption = 'Export SAMPLE data'
+        TabOrder = 1
+        OnClick = BitBtn22Click
       end
     end
     object Autofire: TTabSheet

@@ -34,13 +34,13 @@ const
         sbagman_sprites:array[0..1] of tipo_roms=(
         (n:'1.1c';l:$1000;p:0;crc:$a046ff44),(n:'3.1f';l:$1000;p:$1000;crc:$a4422da4));
         //DIP
-        bagman_dip:array [0..6] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Coinage';number:2;dip:((dip_val:$0;dip_name:'2C/1C 1C/1C 1C/3C 1C/7C'),(dip_val:$4;dip_name:'1C/1C 1C/2C 1C/6C 1C/14C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Difficulty';number:4;dip:((dip_val:$18;dip_name:'Easy'),(dip_val:$10;dip_name:'Medium'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Language';number:2;dip:((dip_val:$20;dip_name:'English'),(dip_val:$0;dip_name:'French'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Bonus Life';number:2;dip:((dip_val:$40;dip_name:'30k'),(dip_val:$0;dip_name:'40k'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bagman_dip:array [0..6] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','4','5')),
+        (mask:$4;name:'Coinage';number:2;val2:(0,4);name2:('2C/1C 1C/1C 1C/3C 1C/7C','1C/1C 1C/2C 1C/6C 1C/14C')),
+        (mask:$18;name:'Difficulty';number:4;val4:($18,$10,8,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$20;name:'Language';number:2;val2:($20,0);name2:('English','French')),
+        (mask:$40;name:'Bonus Life';number:2;val2:($40,0);name2:('30K','40K')),
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
 var
  irq_enable,video_enable:boolean;
 
@@ -305,7 +305,7 @@ end;
 set_pal(colores,$40);
 //DIP
 marcade.dswa:=$fe;
-marcade.dswa_val:=@bagman_dip;
+marcade.dswa_val2:=@bagman_dip;
 //final
 reset_bagman;
 iniciar_bagman:=true;

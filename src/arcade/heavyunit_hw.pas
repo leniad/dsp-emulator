@@ -20,19 +20,19 @@ const
         (n:'b73_04.1f';l:$10000;p:$1a0000;crc:$f7badbb2),(n:'b73_05.1h';l:$10000;p:$1c0000;crc:$b8e829d2));
         hvyunit_gfx1:tipo_roms=(n:'b73_09.2p';l:$80000;p:0;crc:$537c647f);
         //Dip
-        hvyunit_dip_a:array [0..6] of def_dip=(
-        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Flip_Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Service Mode';number:2;dip:((dip_val:$0;dip_name:'On'),(dip_val:$4;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Coin Mode';number:2;dip:((dip_val:$8;dip_name:'Mode 1'),(dip_val:$0;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'1C 6C(Mode 1)/1C 4C(Mode 2)'),(dip_val:$10;dip_name:'1C 2C(Mode 1)/1C 3C(Mode 2)'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'1C 2(Mode 1)/1C 3C(Mode 2)'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$0;dip_name:'1C 6C(Mode 1)/1C 4C(Mode 2)'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        hvyunit_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Bonus';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'7'),(dip_val:$10;dip_name:'5'),(dip_val:$20;dip_name:'4'),(dip_val:$30;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        hvyunit_dip_a:array [0..6] of def_dip2=(
+        (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
+        (mask:2;name:'Flip_Screen';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:4;name:'Service Mode';number:2;val2:(0,4);name2:('On','Off')),
+        (mask:8;name:'Coin Mode';number:2;val2:(8,0);name2:('Mode 1','Mode 2')),
+        (mask:$30;name:'Coin A';number:4;val4:(0,$10,$20,$30);name4:('1C 6C(Mode 1)/1C 4C(Mode 2)','1C 2C(Mode 1)/1C 3C(Mode 2)','2C 1C','1C 1C')),
+        (mask:$c0;name:'Coin B';number:4;val4:($40,$80,$c0,0);name4:('1C 2(Mode 1)/1C 3C(Mode 2)','2C 1C','1C 1C','1C 6C(Mode 1)/1C 4C(Mode 2)')),());
+        hvyunit_dip_b:array [0..5] of def_dip2=(
+        (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:4;name:'Allow Continue';number:2;val2:(0,4);name2:('Off','On')),
+        (mask:8;name:'Bonus';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$30;name:'Lives';number:4;val4:(0,$10,$20,$30);name4:('7','5','4','3')),
+        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')),());
 
 var
  sound_latch,nrom_cpu1,nrom_cpu2,nrom_cpu3,scroll_port,scroll_x,scroll_y:byte;
@@ -76,17 +76,17 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   //marcade.in1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //marcade.in2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
 end;
@@ -104,6 +104,18 @@ frame_s:=z80_2.tframes;
 frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+ case f of
+    64:begin
+         z80_0.im2_lo:=$ff;
+         z80_0.change_irq(HOLD_LINE);
+       end;
+    240:begin
+         z80_0.im2_lo:=$fd;
+         z80_0.change_irq(HOLD_LINE);
+         z80_1.change_irq(HOLD_LINE);
+         update_video_hvyunit;
+        end;
+  end;
   //CPU 1
   z80_0.run(frame_m);
   frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -116,18 +128,6 @@ while EmuStatus=EsRunning do begin
   //MCU
   mcs51_0.run(frame_mcu);
   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
-  case f of
-    63:begin
-         z80_0.im2_lo:=$ff;
-         z80_0.change_irq(HOLD_LINE);
-       end;
-    239:begin
-         z80_0.im2_lo:=$fd;
-         z80_0.change_irq(HOLD_LINE);
-         z80_1.change_irq(HOLD_LINE);
-         update_video_hvyunit;
-        end;
-  end;
  end;
  eventos_hvyunit;
  video_sync;
@@ -137,7 +137,7 @@ end;
 function hvyunit_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$3fff:hvyunit_getbyte:=rom_cpu1[0,direccion];
+  0..$3fff:hvyunit_getbyte:=rom_cpu1[0,direccion];
   $4000..$7fff:hvyunit_getbyte:=rom_cpu1[1,direccion and $3fff];
   $8000..$bfff:hvyunit_getbyte:=rom_cpu1[nrom_cpu1,direccion and $3fff];
   $c000..$cfff:hvyunit_getbyte:=pandora_0.spriteram_r8(direccion and $fff);
@@ -157,7 +157,7 @@ end;
 procedure hvyunit_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  0,1:nrom_cpu1:=valor and $7;
+  0,1:nrom_cpu1:=valor and 7;
   2:z80_1.change_nmi(PULSE_LINE);
 end;
 end;
@@ -165,7 +165,7 @@ end;
 function hvyunit_misc_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$3fff:hvyunit_misc_getbyte:=rom_cpu2[0,direccion];
+  0..$3fff:hvyunit_misc_getbyte:=rom_cpu2[0,direccion];
   $4000..$7fff:hvyunit_misc_getbyte:=rom_cpu2[1,direccion and $3fff];
   $8000..$bfff:hvyunit_misc_getbyte:=rom_cpu2[nrom_cpu2,direccion and $3fff];
   $c000..$cfff:hvyunit_misc_getbyte:=mem_misc[direccion];
@@ -215,7 +215,7 @@ end;
 function hvyunit_misc_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $4:begin
+  4:begin
         slavelatch_data:=false;
         hvyunit_misc_inbyte:=slavelatch;
      end;
@@ -226,28 +226,28 @@ end;
 procedure hvyunit_misc_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:begin
-      nrom_cpu2:=valor and $3;
+  0:begin
+      nrom_cpu2:=valor and 3;
       scroll_port:=valor;
      end;
-  $2:begin
+  2:begin
       z80_2.change_nmi(PULSE_LINE);
       sound_latch:=valor;
      end;
-  $4:begin
+  4:begin
       mermaidlatch:=valor;
       mermaidlatch_data:=true;
       mcs51_0.change_irq0(ASSERT_LINE);
      end;
-  $6:scroll_y:=valor;
-  $8:scroll_x:=valor;
+  6:scroll_y:=valor;
+  8:scroll_x:=valor;
 end;
 end;
 
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$3fff:snd_getbyte:=rom_cpu3[0,direccion];
+  0..$3fff:snd_getbyte:=rom_cpu3[0,direccion];
   $4000..$7fff:snd_getbyte:=rom_cpu3[1,direccion and $3fff];
   $8000..$bfff:snd_getbyte:=rom_cpu3[nrom_cpu3,direccion and $3fff];
   $c000..$c7ff:snd_getbyte:=mem_snd[direccion];
@@ -262,18 +262,18 @@ end;
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $2:snd_inbyte:=ym2203_0.status;
-  $3:snd_inbyte:=ym2203_0.Read;
-  $4:snd_inbyte:=sound_latch;
+  2:snd_inbyte:=ym2203_0.status;
+  3:snd_inbyte:=ym2203_0.Read;
+  4:snd_inbyte:=sound_latch;
 end;
 end;
 
 procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-    $0:nrom_cpu3:=valor and $3;
-    $2:ym2203_0.Control(valor);
-    $3:ym2203_0.Write(valor);
+    0:nrom_cpu3:=valor and 3;
+    2:ym2203_0.Control(valor);
+    3:ym2203_0.Write(valor);
 end;
 end;
 
@@ -337,7 +337,7 @@ end;
 procedure mcu_out_port3(valor:byte);
 begin
   mermaid_p[3]:=valor;
-  if (valor and $2)<>0 then z80_1.change_reset(CLEAR_LINE)
+  if (valor and 2)<>0 then z80_1.change_reset(CLEAR_LINE)
     else z80_1.change_reset(ASSERT_LINE);
 end;
 
@@ -416,7 +416,7 @@ z80_2.init_sound(hvyunit_sound_update);
 mcs51_0:=cpu_mcs51.create(I8X51,6000000,$100);
 mcs51_0.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
 //pandora
-pandora_0:=pandora_gfx.create($3fff,$100,false);
+pandora_0:=pandora_gfx.create($100,false);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000,0.8,0.8);
 ym2203_0.change_irq_calls(hvyunit_sound_irq);
@@ -447,8 +447,8 @@ freemem(ptemp);
 //dip
 marcade.dswa:=$fe;
 marcade.dswb:=$f7;
-marcade.dswa_val:=@hvyunit_dip_a;
-marcade.dswb_val:=@hvyunit_dip_b;
+marcade.dswa_val2:=@hvyunit_dip_a;
+marcade.dswb_val2:=@hvyunit_dip_b;
 //reset
 reset_hvyunit;
 iniciar_hvyunit:=true;

@@ -233,9 +233,9 @@ var
   longitud:integer;
   crc_val:dword;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SGG)) then exit;
   getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SGG)) then begin
     freemem(datos);
     exit;
   end;
@@ -261,7 +261,7 @@ begin
                   change_video_size(284,243);
                 end;
   end;
-  if extension='DSP' then snapshot_r(datos,longitud)
+  if extension='DSP' then snapshot_r(datos,longitud,SGG)
     else abrir_cartucho_gg(datos,longitud);
   change_caption(nombre_file);
   Directory.gg:=ExtractFilePath(romfile);
@@ -272,7 +272,7 @@ procedure gg_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SGG);
 Directory.gg:=ExtractFilePath(nombre);
 end;
 

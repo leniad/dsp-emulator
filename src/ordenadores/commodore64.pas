@@ -413,9 +413,9 @@ var
   romfile,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SC64)) then exit;
   getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SC64)) then begin
     freemem(datos);
     exit;
   end;

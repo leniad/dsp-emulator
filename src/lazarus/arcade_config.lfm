@@ -1,7 +1,7 @@
 object config_arcade: Tconfig_arcade
-  Left = 83
+  Left = 351
   Height = 470
-  Top = 147
+  Top = 290
   Width = 1020
   BorderIcons = []
   BorderStyle = bsSingle
@@ -18,7 +18,7 @@ object config_arcade: Tconfig_arcade
   OnClose = FormClose
   OnKeyUp = FormKeyUp
   Position = poDesktopCenter
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.4.0.0'
   object GroupBox1: TGroupBox
     Left = 10
     Height = 371
@@ -51,9 +51,9 @@ object config_arcade: Tconfig_arcade
     Top = 400
     Width = 151
     Caption = 'CANCEL'
-    OnClick = Button2Click
     TabOrder = 3
     TabStop = False
+    OnClick = Button2Click
   end
   object Button1: TButton
     Left = 260
@@ -61,8 +61,8 @@ object config_arcade: Tconfig_arcade
     Top = 400
     Width = 151
     Caption = 'OK'
-    OnClick = Button1Click
     TabOrder = 4
     TabStop = False
+    OnClick = Button1Click
   end
 end

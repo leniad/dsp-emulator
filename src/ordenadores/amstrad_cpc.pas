@@ -960,9 +960,9 @@ var
   romfile,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
 begin
-  if not(OpenRom(romfile)) then exit;
+  if not(OpenRom(romfile,SAMSTRADCPC)) then exit;
   getmem(datos,$3000000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SAMSTRADCPC)) then begin
     freemem(datos);
     exit;
   end;
@@ -1018,7 +1018,7 @@ var
   correcto:boolean;
   indice:byte;
 begin
-if SaveRom(nombre,indice) then begin
+if SaveRom(nombre,indice,SAMSTRADCPC) then begin
         case indice of
           1:nombre:=changefileext(nombre,'.sna');
         end;

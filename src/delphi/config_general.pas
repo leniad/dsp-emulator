@@ -125,6 +125,7 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
+    BitBtn22: TBitBtn;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -178,6 +179,7 @@ type
     procedure RadioButton10Click(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
     procedure Button7Click(Sender: TObject);
+    procedure BitBtn22Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -1066,6 +1068,11 @@ end;
 procedure TMConfig.BitBtn21Click(Sender: TObject);
 begin
 export_roms;
+end;
+
+procedure TMConfig.BitBtn22Click(Sender: TObject);
+begin
+export_samples;
 end;
 
 procedure TMConfig.RadioButton5Click(Sender: TObject);

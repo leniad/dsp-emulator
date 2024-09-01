@@ -298,9 +298,9 @@ var
   datos:pbyte;
   longitud:integer;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SCOLECO)) then exit;
   getmem(datos,$50000);  //Hasta 256Kb!
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SCOLECO)) then begin
     freemem(datos);
     exit;
   end;
@@ -325,7 +325,7 @@ var
   nombre:string;
   indice:byte;
 begin
-if not(saverom(nombre,indice)) then exit;
+if not(saverom(nombre,indice,SCOLECO)) then exit;
 case indice of
     1:nombre:=changefileext(nombre,'.dsp');
     2:nombre:=changefileext(nombre,'.csn');
@@ -333,7 +333,7 @@ end;
 if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
     if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 end;
-snapshot_w(nombre);
+snapshot_w(nombre,SCOLECO);
 Directory.coleco:=ExtractFilePath(nombre);
 end;
 

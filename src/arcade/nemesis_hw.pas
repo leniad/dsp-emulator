@@ -869,7 +869,6 @@ begin
   ay8910_0:=ay8910_chip.create(18432000 div 8,AY8910,1);
   ay8910_1:=ay8910_chip.create(18432000 div 8,AY8910,1);
   ay8910_1.change_io_calls(nil,nil,ay8910_k005289_1,ay8910_k005289_2);
-  //IMPORTANTE: Necesito que ya este inicializado el sonido para crear este chip!!!
   k005289_0:=k005289_snd_chip.create(3579545,0.5);
   if not(roms_load(@k005289_0.sound_prom,rom_k005289)) then exit;
 end;

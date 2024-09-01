@@ -317,6 +317,19 @@ type
     MenuItem58: TMenuItem;
     kikikaikai1: TMenuItem;
     kickandrun1: TMenuItem;
+    MenuItem59: TMenuItem;
+    Lasso1: TMenuItem;
+    chameleon1: TMenuItem;
+    lastmission1: TMenuItem;
+    gondomania1: TMenuItem;
+    garyoretsuden1: TMenuItem;
+    captainsilver1: TMenuItem;
+    cobracommand1: TMenuItem;
+    ghostbusters1: TMenuItem;
+    roadfighter1: TMenuItem;
+    oscar1: TMenuItem;
+    shackled1: TMenuItem;
+    SRD1: TMenuItem;
     snowbros1: TMenuItem;
     comebacktoto1: TMenuItem;
     popeye1: TMenuItem;
@@ -481,7 +494,7 @@ type
     tp841: TMenuItem;
     NES1: TMenuItem;
     RType1: TMenuItem;
-    SRD1: TMenuItem;
+    dec8_menu: TMenuItem;
     MenuItem9: TMenuItem;
     SlapFight1: TMenuItem;
     tigerh1: TMenuItem;
@@ -669,7 +682,7 @@ procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice,tempb:byte;
+  indice:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlp_Surface;
@@ -681,9 +694,7 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-tempb:=main_vars.system_type;
-main_vars.system_type:=SBITMAP;
-if saverom(nombre,indice) then begin
+if saverom(nombre,indice,SBITMAP) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -693,7 +704,6 @@ if saverom(nombre,indice) then begin
     r:=application.messagebox(pansichar(leng[main_vars.idioma].mensajes[3]),pansichar(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
        principal1.Enabled:=true;
-       main_vars.system_type:=tempb;
        sync_all;
        exit;
     end;
@@ -746,7 +756,6 @@ if saverom(nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-main_vars.system_type:=tempb;
 restart_emu;
 end;
 

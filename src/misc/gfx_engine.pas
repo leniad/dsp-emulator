@@ -21,6 +21,7 @@ type
     trans_alt:array[0..4,0..$1f] of boolean;
     buffer:array[0..$7fff] of boolean;
     elements:dword;
+    mask:dword;
   end;
   pgfx=^gfx_tipo;
 var
@@ -29,7 +30,7 @@ var
   buffer_sprites_w:array[0..$fff] of word;
 
 //GFX
-procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
+procedure init_gfx(num,x_size,y_size:byte;num_elements:dword;mask:dword=0);
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;invert:boolean=false);
 procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
@@ -98,7 +99,7 @@ begin
   des_gfx.banks:=banks;
 end;
 
-procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
+procedure init_gfx(num,x_size,y_size:byte;num_elements:dword;mask:dword=0);
 var
   f:word;
 begin
@@ -112,6 +113,8 @@ begin
   for f:=0 to 4 do fillchar(gfx[num].trans_alt[f],$20,0);
   for f:=0 to MAX_COLORES-1 do gfx[num].colores[f]:=f;
   getmem(gfx[num].datos,num_elements*x_size*y_size);
+  if mask=0 then gfx[num].mask:=num_elements-1
+    else gfx[num].mask:=mask;
 end;
 
 function GetBit(bit_nbr:dword;buffer:pbyte):byte;
@@ -242,6 +245,7 @@ end; //del o
 if rot90 then Rotater(n,ngfx,increment);
 if rol90 then Rotatel(n,ngfx,increment);
 end;
+
 //Scroll functions
 procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0;adj_x:word=0;adj_y:word=0);
 var
@@ -394,6 +398,7 @@ while (pos_y<p_final[porigen].scroll.max_y) do begin
   pos_y:=pos_y+long_bloque_y;
 end;
 end;
+
 //put pixel especial interno solo para los gfx...
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
 var
@@ -421,6 +426,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -440,6 +446,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -460,6 +467,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -527,6 +535,7 @@ var
   pos:pbyte;
   punto:word;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -549,6 +558,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -586,6 +596,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -621,6 +632,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -657,6 +669,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -693,6 +706,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y-1;
@@ -729,6 +743,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -765,6 +780,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -802,6 +818,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -842,6 +859,7 @@ var
   pos_y,cant_x:word;
 begin
 if ((zx<=0) or (zy<=0)) then exit;
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 cant_x:=round(gfx[ngfx].x*zx);
@@ -890,6 +908,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -927,6 +946,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -968,6 +988,7 @@ var
   pos_y,cant_x:word;
 begin
 if ((zx<=0) or (zy<=0)) then exit;
+nchar:=nchar and gfx[ngfx].mask;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 zoom_y:=0;

@@ -306,7 +306,7 @@ for f:=0 to $9e do begin
   atrib2:=buffer_sprites[2+(f*4)];
   nchar:=((atrib2 and $7f)+((atrib and $10) shl 3)+((atrib and $04) shl 6)) xor $1ff;
   color:=((atrib and $7)+(palette_bank and $07) shl 3) shl 2;
-  put_gfx_sprite(nchar and $ff,color+48,(atrib2 and $80)<>0,(atrib and $08)<>0,1);
+  put_gfx_sprite(nchar,color+48,(atrib2 and $80)<>0,(atrib and $08)<>0,1);
   x:=(buffer_sprites[0+(f*4)] shl 1)-6;
   y:=(256-buffer_sprites[1+(f*4)]) shl 1;
   actualiza_gfx_sprite(x,y,3,1);

@@ -46,7 +46,7 @@ end;
 
 procedure video_128k(linea:word;pvideo:pbyte);
 var
-  nlinea1,nlinea2,x,color2,color,atrib,video,temp:byte;
+  f,nlinea1,nlinea2,x,color2,color,atrib,video,temp:byte;
   pant_x,pos_video:word;
   poner_linea:boolean;
   ptemp:pword;
@@ -87,7 +87,13 @@ case linea of
                           end;
                         end;
                         ptemp:=punbuf;
-                        if (video and 128)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
+                        for f:=0 to 7 do begin
+                          if (video and $80)<>0 then ptemp^:=paleta[color]
+                            else ptemp^:=paleta[color2];
+                          inc(ptemp);
+                          video:=video shl 1;
+                        end;
+                        {if (video and 128)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
                         inc(ptemp);
                         if (video and 64)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
                         inc(ptemp);
@@ -101,7 +107,7 @@ case linea of
                         inc(ptemp);
                         if (video and 2)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
                         inc(ptemp);
-                        if (video and 1)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
+                        if (video and 1)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];}
                         putpixel(pant_x,nlinea2,8,punbuf,1);
                       end;
                       inc(pos_video);

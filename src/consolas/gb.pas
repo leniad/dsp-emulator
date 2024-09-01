@@ -1340,9 +1340,9 @@ var
   f,rom_size_t:word;
   gb_head:tgb_head;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SGB)) then exit;
   getmem(datos,$1000000); //8Gb??
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SGB)) then begin
     freemem(datos);
     exit;
   end;
@@ -1350,7 +1350,7 @@ begin
   //Guardar NVRAM si la hay...
   if (gb_0.hay_nvram and (nv_ram_name<>'')) then write_file(nv_ram_name,@gb_mapper_0.ram_bank[0,0],$2000);
   gb_0.hay_nvram:=false;
-  if extension='DSP' then snapshot_r(datos,longitud)
+  if extension='DSP' then snapshot_r(datos,longitud,SGB)
   else begin //Cartucho
       ptemp:=datos;
       //Copiar datos del cartucho
@@ -1409,7 +1409,7 @@ procedure grabar_gb;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SGB);
 Directory.gameboy:=ExtractFilePath(nombre);
 end;
 

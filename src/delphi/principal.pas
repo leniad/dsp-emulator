@@ -170,7 +170,7 @@ type
     BreakThruHawrdware1: TMenuItem;
     BrkThru1: TMenuItem;
     Darwin1: TMenuItem;
-    SRD1: TMenuItem;
+    Dec8HW1: TMenuItem;
     HD63091: TMenuItem;
     ddragon_hw: TMenuItem;
     MrDo1: TMenuItem;
@@ -578,6 +578,19 @@ type
     KiKiKaiKaiHW1: TMenuItem;
     KiKiKaiKai1: TMenuItem;
     KickandRun1: TMenuItem;
+    LassoHW1: TMenuItem;
+    Lasso1: TMenuItem;
+    Chameleon1: TMenuItem;
+    SRD1: TMenuItem;
+    LastMission1: TMenuItem;
+    Shackled1: TMenuItem;
+    Gondomania1: TMenuItem;
+    GaryoRetsuden1: TMenuItem;
+    CaptainSilver1: TMenuItem;
+    CobraCommand1: TMenuItem;
+    Ghostbusters1: TMenuItem;
+    oscar1: TMenuItem;
+    RoadFighter1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -900,9 +913,7 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-tempb:=main_vars.system_type;
-main_vars.system_type:=SBITMAP;
-if saverom(nombre,indice) then begin
+if saverom(nombre,indice,SBITMAP) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -911,7 +922,6 @@ if saverom(nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
-      main_vars.system_type:=tempb;
       restart_emu;
       exit;
     end;
@@ -965,7 +975,6 @@ if saverom(nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-main_vars.system_type:=tempb;
 restart_emu;
 end;
 

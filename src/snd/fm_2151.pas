@@ -136,7 +136,6 @@ implementation
 const
   CLEAR_LINE=0;
   ASSERT_LINE=1;
-  M_PI=3.1415926535;
 	MAXOUT=32767;
 	MINOUT=-32768;
   FREQ_SH=16;  // 16.16 fixed point (frequency calculations) */
@@ -1356,7 +1355,7 @@ begin
 			else if (outl<MINOUT) then outl:=MINOUT;
 		if (outr>MAXOUT) then outr:=MAXOUT
 			else if (outr<MINOUT) then outr:=MINOUT;
-    salida_fm[0]:=(outl+outr) div 2;
+    salida_fm[0]:=outl+outr;
     salida_fm[1]:=outl;
     salida_fm[2]:=outr;
     advance(num);

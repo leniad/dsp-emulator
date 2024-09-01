@@ -24,6 +24,7 @@ type
                 function get_rom_addr:pbyte;
                 function save_snapshot(data:pbyte):word;
                 procedure load_snapshot(data:pbyte);
+                procedure set_port_forced_input(port,valor:byte);
             private
                 r:preg_mcs51;
                 pedir_irq0,pedir_irq1:byte;
@@ -37,6 +38,7 @@ type
                 last_line_state:dword;
                 in_port0,in_port1,in_port2,in_port3:cpu_inport_call;
                 out_port0,out_port1,out_port2,out_port3:cpu_outport_call;
+                forced_input:array[0..3] of byte;
                 function dame_pila:byte;
                 procedure pon_pila(valor:byte);
                 procedure do_add_flags(a,data,c:byte);
@@ -201,6 +203,11 @@ begin
   self.out_port3:=out_port3;
 end;
 
+procedure cpu_mcs51.set_port_forced_input(port,valor:byte);
+begin
+  self.forced_input[port]:=valor;
+end;
+
 function cpu_mcs51.save_snapshot(data:pbyte):word;
 var
   temp:pbyte;
@@ -309,6 +316,10 @@ procedure cpu_mcs51.reset;
 begin
   fillchar(self.ram[0],$100,0);
   fillchar(self.sfr[0],$100,0);
+  self.forced_input[0]:=0;
+  self.forced_input[1]:=0;
+  self.forced_input[2]:=0;
+  self.forced_input[3]:=0;
   r.pc:=V_RESET;
   self.sfr[ADDR_SP]:=$7;
   self.pon_pila(0);
@@ -444,14 +455,14 @@ begin
     $0..$7f:res:=self.ram[pos];
     ADDR_SP,ADDR_ACC,ADDR_PSW,ADDR_B,ADDR_DPL,ADDR_DPH,ADDR_TCON,ADDR_TMOD,ADDR_IE,ADDR_IP:res:=self.sfr[pos];
     ADDR_P0:if self.rwm then res:=self.sfr[ADDR_P0]
-            else if @self.in_port0<>nil then res:=self.sfr[ADDR_P0] and self.in_port0;
+            else if @self.in_port0<>nil then res:=(self.sfr[ADDR_P0] or self.forced_input[0]) and self.in_port0;
     ADDR_P1:if self.rwm then res:=self.sfr[ADDR_P1]
-            else if @self.in_port1<>nil then res:=self.sfr[ADDR_P1] and self.in_port1;
+            else if @self.in_port1<>nil then res:=(self.sfr[ADDR_P1] or self.forced_input[1]) and self.in_port1;
     ADDR_P2:if self.rwm then res:=self.sfr[ADDR_P2]
-            else if @self.in_port2<>nil then res:=self.sfr[ADDR_P2] and self.in_port2;
+            else if @self.in_port2<>nil then res:=(self.sfr[ADDR_P2] or self.forced_input[2]) and self.in_port2;
     ADDR_P3:if self.rwm then res:=self.sfr[ADDR_P3]
             else begin
-                    if @self.in_port3<>nil then res:=self.sfr[ADDR_P3] and self.in_port3;
+                    if @self.in_port3<>nil then res:=(self.sfr[ADDR_P3] or self.forced_input[3]) and self.in_port3;
                     if self.pedir_irq0<>CLEAR_LINE then res:=res and $fb;
                     if self.pedir_irq1<>CLEAR_LINE then res:=res and $f7;
             end;

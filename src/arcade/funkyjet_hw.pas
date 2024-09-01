@@ -76,18 +76,18 @@ frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   h6280_0.run(trunc(frame_s));
-   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
    case f of
-      247:begin
+      248:begin
             m68000_0.irq[6]:=HOLD_LINE;
             update_video_funkyjet;
             marcade.in1:=marcade.in1 or $8;
           end;
-      255:marcade.in1:=marcade.in1 and $fff7;
+      8:marcade.in1:=marcade.in1 and $fff7;
    end;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(trunc(frame_s));
+   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
  end;
  eventos_funkyjet;
  video_sync;
@@ -103,7 +103,7 @@ begin
   //real_address:=0+(offset*2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18,13,12,11,17,16,15,14,10,  9,  8,  7,  6,   5,  4,  3,  2,  1,    0) and $7fff;
 	cs:=0;
-	data:=main_deco146.read_data(deco146_addr,cs);
+	data:=deco146_0.read_data(deco146_addr,cs);
 	funkyjet_deco146_r:=data;
 end;
 
@@ -146,7 +146,7 @@ begin
 	//real_address:=0+(offset *2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,10,  9,  8,  7,  6,   5,  4,  3,  2,  1,    0) and $7fff;
 	cs:=0;
-	main_deco146.write_data(deco146_addr,data,cs);
+	deco146_0.write_data(deco146_addr,data,cs);
 end;
 
 begin
@@ -178,7 +178,7 @@ end;
 procedure reset_funkyjet;
 begin
  m68000_0.reset;
- main_deco146.reset;
+ deco146_0.reset;
  deco16ic_0.reset;
  deco_sprites_0.reset;
  deco16_snd_simple_reset;
@@ -236,8 +236,7 @@ gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$2000*64*8+8,$2000*64*8+0,8,0);
 convert_gfx(2,0,memoria_temp,@pt_x,@pt_y,false,false);
 //Deco 146
-main_deco146:=cpu_deco_146.create;
-main_deco146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
+deco146_0:=cpu_deco_146.create(INTERFACE_SCRAMBLE_INTERLEAVE);
 //Dip
 marcade.dswa:=$ffff;
 marcade.dswa_val:=@funkyjet_dip_a;

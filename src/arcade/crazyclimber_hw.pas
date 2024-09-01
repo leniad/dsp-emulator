@@ -23,13 +23,12 @@ const
         (n:'cc02';l:$800;p:$0;crc:$14f3ecc9),(n:'cc01';l:$800;p:$800;crc:$21c0f9fb));
         cclimber_samples:array[0..1] of tipo_roms=(
         (n:'cc13';l:$1000;p:$0;crc:$e0042f75),(n:'cc12';l:$1000;p:$1000;crc:$5da13aaa));
-        //DIP
-        cclimber_dip_a:array [0..3] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$30;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        cclimber_dip_b:array [0..1] of def_dip=(
-        (mask:$10;name:'Cabinet';number:2;dip:((dip_val:$10;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        cclimber_dip_a:array [0..3] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
+        (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 1C','1C 2C','1C 3C','Free Play')),());
+        cclimber_dip_b:array [0..1] of def_dip2=(
+        (mask:$10;name:'Cabinet';number:2;val2:($10,0);name2:('Upright','Cocktail')),());
 
 var
  nmi_mask:boolean;
@@ -355,8 +354,8 @@ set_pal(colores,$60);
 //DIP
 marcade.dswa:=0;
 marcade.dswb:=$10;
-marcade.dswa_val:=@cclimber_dip_a;
-marcade.dswb_val:=@cclimber_dip_b;
+marcade.dswa_val2:=@cclimber_dip_a;
+marcade.dswb_val2:=@cclimber_dip_b;
 //final
 reset_cclimber;
 iniciar_cclimber:=true;

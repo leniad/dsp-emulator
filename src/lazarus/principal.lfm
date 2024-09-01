@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 4179
+  Left = 340
   Height = 389
-  Top = 615
+  Top = 292
   Width = 400
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -13739,6 +13739,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object MenuItem59: TMenuItem
+            Caption = 'Lasso HW'
+            object Lasso1: TMenuItem
+              Caption = 'Lasso'
+              OnClick = CambiarMaquina
+            end
+            object chameleon1: TMenuItem
+              Caption = 'Chameleon'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M680911: TMenuItem
           Caption = 'M6809'
@@ -13832,9 +13843,44 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object SRD1: TMenuItem
-            Caption = 'Super Real Darwin'
-            OnClick = CambiarMaquina
+          object dec8_menu: TMenuItem
+            Caption = 'Deco 8 HW'
+            object SRD1: TMenuItem
+              Caption = 'Super Real Darwin'
+              OnClick = CambiarMaquina
+            end
+            object lastmission1: TMenuItem
+              Caption = 'Last Mission'
+              OnClick = CambiarMaquina
+            end
+            object shackled1: TMenuItem
+              Caption = 'Shackled'
+              OnClick = CambiarMaquina
+            end
+            object gondomania1: TMenuItem
+              Caption = 'Gondo Mania'
+              OnClick = CambiarMaquina
+            end
+            object garyoretsuden1: TMenuItem
+              Caption = 'Garyo Retsuden'
+              OnClick = CambiarMaquina
+            end
+            object captainsilver1: TMenuItem
+              Caption = 'Captain Silver'
+              OnClick = CambiarMaquina
+            end
+            object cobracommand1: TMenuItem
+              Caption = 'Cobra-Command'
+              OnClick = CambiarMaquina
+            end
+            object ghostbusters1: TMenuItem
+              Caption = 'The Real Ghostbusters'
+              OnClick = CambiarMaquina
+            end
+            object oscar1: TMenuItem
+              Caption = 'Psycho-Nics Oscar'
+              OnClick = CambiarMaquina
+            end
           end
           object tp841: TMenuItem
             Caption = 'Time Pilot 84'
@@ -13901,6 +13947,11 @@ object principal1: Tprincipal1
             Caption = 'Hyper Sports HW'
             object hypersports1: TMenuItem
               Caption = 'Hyper Sports'
+              OnClick = CambiarMaquina
+            end
+            object roadfighter1: TMenuItem
+              Caption = 'Road Fighter'
+              OnClick = CambiarMaquina
             end
           end
           object Megazone1: TMenuItem

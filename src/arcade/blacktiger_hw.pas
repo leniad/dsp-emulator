@@ -26,17 +26,17 @@ const
         blktiger_snd:tipo_roms=(n:'bd-06.1l';l:$8000;p:0;crc:$2cf54274);
         blktiger_mcu:tipo_roms=(n:'bd.6k';l:$1000;p:0;crc:$ac7d14f1);
         //Dip
-        blktiger_dip_a:array [0..4] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Test';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        blktiger_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1c;name:'Difficulty';number:8;dip:((dip_val:$1c;dip_name:'Very Easy'),(dip_val:$18;dip_name:'Easy 3'),(dip_val:$14;dip_name:'Easy 2'),(dip_val:$10;dip_name:'Easy 1'),(dip_val:$c;dip_name:'Normal'),(dip_val:$8;dip_name:'Difficult 1'),(dip_val:$4;dip_name:'Difficult 2'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        blktiger_dip_a:array [0..4] of def_dip2=(
+        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Test';number:2;val2:($80,0);name2:('Off','On')),());
+        blktiger_dip_b:array [0..5] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','5','7')),
+        (mask:$1c;name:'Difficulty';number:8;val8:($1c,$18,$14,$10,$c,8,4,0);name8:('Very Easy','Easy 3','Easy 2','Easy 1','Normal','Difficult 1','Difficult 2','Very Difficult')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
 
 var
  scroll_ram:array[0..$3fff] of byte;
@@ -512,28 +512,24 @@ iniciar_video(256,224);
 z80_0:=cpu_z80.create(6000000,262);
 z80_0.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
 z80_0.change_io_calls(blktiger_inbyte,blktiger_outbyte);
+if not(roms_load(@memoria_temp,blktiger_rom)) then exit;
+copymemory(@memoria,@memoria_temp,$8000);
+for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sound CPU
 z80_1:=cpu_z80.create(3579545,262);
 z80_1.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
 z80_1.init_sound(blktiger_sound_update);
+if not(roms_load(@mem_snd,blktiger_snd)) then exit;
 //MCU
 mcs51_0:=cpu_mcs51.create(I8X51,24000000 div 3,262);
 mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
+if not(roms_load(mcs51_0.get_rom_addr,blktiger_mcu)) then exit;
 //Sound Chip
-ym2203_0:=ym2203_chip.create(3579545,0.15,0.15);
+ym2203_0:=ym2203_chip.create(3579545);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(3579545,0.15,0.15);
+ym2203_1:=ym2203_chip.create(3579545);
 //Timers
 timer_hs:=timers.init(z80_0.numero_cpu,10000,blk_hi_score,nil,true);
-//cargar roms
-if not(roms_load(@memoria_temp,blktiger_rom)) then exit;
-//poner las roms y los bancos de rom
-copymemory(@memoria,@memoria_temp,$8000);
-for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//sonido
-if not(roms_load(@mem_snd,blktiger_snd)) then exit;
-//MCU ROM
-if not(roms_load(mcs51_0.get_rom_addr,blktiger_mcu)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,blktiger_char)) then exit;
 init_gfx(0,8,8,2048);
@@ -559,8 +555,8 @@ convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$6f;
-marcade.dswa_val:=@blktiger_dip_a;
-marcade.dswb_val:=@blktiger_dip_b;
+marcade.dswa_val2:=@blktiger_dip_a;
+marcade.dswb_val2:=@blktiger_dip_b;
 //final
 reset_blktiger;
 iniciar_blktiger:=true;

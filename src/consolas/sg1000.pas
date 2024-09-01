@@ -127,7 +127,7 @@ procedure sg1000_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SSG1000);
 Directory.sg1000:=ExtractFilePath(nombre);
 end;
 
@@ -138,9 +138,9 @@ var
   longitud:integer;
   crc_val:dword;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SSG1000)) then exit;
   getmem(datos,$10000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SSG1000)) then begin
     freemem(datos);
     exit;
   end;
@@ -149,7 +149,7 @@ begin
   sg1000_0.ram_8k:=false;
   sg1000_0.mid_8k_ram:=false;
   if longitud>49152 then longitud:=49152;
-  if (extension='DSP') then snapshot_r(datos,longitud)
+  if (extension='DSP') then snapshot_r(datos,longitud,SSG1000)
     else begin
             copymemory(@memoria[0],datos,longitud);
             reset_sg;

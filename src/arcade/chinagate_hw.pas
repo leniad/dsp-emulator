@@ -21,17 +21,16 @@ const
         (n:'23j9-0.101';l:$20000;p:$40000;crc:$8caf6097),(n:'23ja-0.100';l:$20000;p:$60000;crc:$f678594f));
         chinagate_adpcm:array[0..1] of tipo_roms=(
         (n:'23j1-0.53';l:$20000;p:0;crc:$f91f1001),(n:'23j2-0.52';l:$20000;p:$20000;crc:$8b6f26e9));
-        //Dip
-        chinagate_dip_a:array [0..4] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        chinagate_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Timer';number:4;dip:((dip_val:$0;dip_name:'50'),(dip_val:$20;dip_name:'55'),(dip_val:$30;dip_name:'60'),(dip_val:$10;dip_name:'70'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$c0;dip_name:'2'),(dip_val:$80;dip_name:'3'),(dip_val:$40;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        chinagate_dip_a:array [0..4] of def_dip2=(
+        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
+        chinagate_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(1,3,2,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$4;name:'Demo Sounds';number:2;val2:(0,4);name2:('Off','On')),
+        (mask:$30;name:'Timer';number:4;val4:(0,$20,$30,$10);name4:('50','55','60','70')),
+        (mask:$c0;name:'Lives';number:4;val4:(0,$c0,$80,$40);name4:('1','2','3','4')),());
         CPU_SYNC=4;
 
 var
@@ -388,8 +387,8 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //DIP
 marcade.dswa:=$bf;
 marcade.dswb:=$e7;
-marcade.dswa_val:=@chinagate_dip_a;
-marcade.dswb_val:=@chinagate_dip_b;
+marcade.dswa_val2:=@chinagate_dip_a;
+marcade.dswb_val2:=@chinagate_dip_b;
 //init scanlines
 for f:=8 to $ff do chinagate_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
 for f:=$e8 to $ff do chinagate_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF

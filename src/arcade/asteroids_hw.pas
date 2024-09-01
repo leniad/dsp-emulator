@@ -14,12 +14,12 @@ const
         as_prom:tipo_roms=(n:'034602-01.c8';l:$100;p:$0;crc:$97953db8);
         as_samples:array[0..2] of tipo_nombre_samples=((nombre:'explode1.wav'),
         (nombre:'explode2.wav'),(nombre:'explode3.wav'));
-        asteroids_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Lenguaje';number:4;dip:((dip_val:$0;dip_name:'English'),(dip_val:$1;dip_name:'German'),(dip_val:$2;dip_name:'French'),(dip_val:$3;dip_name:'Spanish'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Lives';number:2;dip:((dip_val:$4;dip_name:'3'),(dip_val:$0;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Center Mech';number:2;dip:((dip_val:$0;dip_name:'X 1'),(dip_val:$8;dip_name:'X 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Right Mech';number:4;dip:((dip_val:$0;dip_name:'X 1'),(dip_val:$10;dip_name:'X 4'),(dip_val:$20;dip_name:'X 5'),(dip_val:$30;dip_name:'X 6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$c0;dip_name:'2C 1C'),(dip_val:$80;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        asteroids_dip_a:array [0..5] of def_dip2=(
+        (mask:$3;name:'Lenguaje';number:4;val4:(0,1,2,3);name4:('English','German','French','Spanish')),
+        (mask:$4;name:'Lives';number:2;val2:(4,0);name2:('3','4')),
+        (mask:$8;name:'Center Mech';number:2;val2:(0,8);name2:('X 1','X 2')),
+        (mask:$30;name:'Right Mech';number:4;val4:(0,$10,$20,$30);name4:('X 1','X 4','X 5','X 6')),
+        (mask:$c0;name:'Coinage';number:4;val4:($c0,$80,$40,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),());
         llander_rom:array[0..6] of tipo_roms=(
         (n:'034572-02.f1';l:$800;p:$6000;crc:$b8763eea),(n:'034571-02.de1';l:$800;p:$6800;crc:$77da4b2f),
         (n:'034570-01.c1';l:$800;p:$7000;crc:$2724e591),(n:'034569-02.b1';l:$800;p:$7800;crc:$72837a4e),
@@ -298,7 +298,7 @@ case main_vars.tipo_maquina of
         hay_samples:=load_samples(as_samples);
         //dip
         marcade.dswa:=$84;
-        marcade.dswa_val:=@asteroids_dip_a;
+        marcade.dswa_val2:=@asteroids_dip_a;
       end;
   233:begin //Lunar Lander
         m6502_0.change_ram_calls(getbyte_llander,putbyte_llander);
@@ -315,7 +315,7 @@ case main_vars.tipo_maquina of
         hay_samples:=false;
         //dip
         marcade.dswa:=$84;
-        marcade.dswa_val:=@asteroids_dip_a;
+        marcade.dswa_val2:=@asteroids_dip_a;
       end;
 end;
 //poner la paleta

@@ -10,7 +10,7 @@ function iniciar_toki:boolean;
 implementation
 const
         toki_rom:array[0..3] of tipo_roms=(
-        (n:'l10_6.bin';l:$20000;p:0;crc:$94015d91),(n:'k10_4e.bin';l:$20000;p:$1;crc:$531bd3ef),
+        (n:'l10_6.bin';l:$20000;p:0;crc:$94015d91),(n:'k10_4e.bin';l:$20000;p:1;crc:$531bd3ef),
         (n:'tokijp.005';l:$10000;p:$40000;crc:$d6a82808),(n:'tokijp.003';l:$10000;p:$40001;crc:$a01a5b10));
         toki_char:array[0..1] of tipo_roms=(
         (n:'tokijp.001';l:$10000;p:0;crc:$8aa964a2),(n:'tokijp.002';l:$10000;p:$10000;crc:$86e87e48));
@@ -21,16 +21,17 @@ const
         toki_sound:array[0..1] of tipo_roms=(
         (n:'tokijp.008';l:$2000;p:0;crc:$6c87c4c5),(n:'tokijp.007';l:$10000;p:$10000;crc:$a67969c4));
         toki_adpcm:tipo_roms=(n:'tokijp.009';l:$20000;p:0;crc:$ae7a6b8b);
-        toki_dip:array [0..9] of def_dip=(
-        (mask:$1f;name:'Coinage';number:16;dip:((dip_val:$15;dip_name:'6C 1C'),(dip_val:$17;dip_name:'5C 1C'),(dip_val:$19;dip_name:'4C 1C'),(dip_val:$1b;dip_name:'3C 1C'),(dip_val:$3;dip_name:'8C 3C'),(dip_val:$1d;dip_name:'2C 1C'),(dip_val:$5;dip_name:'5C 3C'),(dip_val:$7;dip_name:'3C 2C'),(dip_val:$1f;dip_name:'1C 1C'),(dip_val:$9;dip_name:'2C 3C'),(dip_val:$13;dip_name:'1C 2C'),(dip_val:$11;dip_name:'1C 3C'),(dip_val:$f;dip_name:'1C 4C'),(dip_val:$d;dip_name:'1C 5C'),(dip_val:$b;dip_name:'1C 6C'),(dip_val:$1e;dip_name:'A 1C 1C/B 1/2'))),
-        (mask:$20;name:'Joysticks';number:2;dip:((dip_val:$20;dip_name:'1'),(dip_val:$0;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$40;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Lives';number:4;dip:((dip_val:$200;dip_name:'2'),(dip_val:$300;dip_name:'3'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Bonus Life';number:4;dip:((dip_val:$800;dip_name:'50k 150k'),(dip_val:$0;dip_name:'70k 140k 210k'),(dip_val:$c00;dip_name:'70k'),(dip_val:$400;dip_name:'100k 200k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$2000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Medium'),(dip_val:$1000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4000;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$4000;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        toki_dip:array [0..9] of def_dip2=(
+        (mask:$1f;name:'Coinage';number:32;val32:($15,$17,$19,$1b,3,$1d,5,7,$1f,9,$13,$11,$f,$d,$b,$1e,$14,$a,0,1,2,4,6,8,$c,$e,$10,$12,$16,$18,$1a,$1c);
+          name32:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','A 1C 1C/B 1/2','A 2C 1C/B 1/3','A 3C 1C/B 1/5','A 5C 1C/B 1/6','Free Play','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid')),
+        (mask:$20;name:'Joysticks';number:2;val2:($20,0);name2:('1','2')),
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),
+        (mask:$300;name:'Lives';number:4;val4:($200,$300,$100,0);name4:('2','3','5','Infinite')),
+        (mask:$c00;name:'Bonus Life';number:4;val4:($800,0,$c00,$400);name4:('50K 150K','70K 140K 210K','70K','100K 200K')),
+        (mask:$3000;name:'Difficulty';number:4;val4:($2000,$3000,$1000,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$4000;name:'Allow Continue';number:2;val2:(0,$4000);name2:('No','Yes')),
+        (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')),());
 
 var
  rom:array[0..$2ffff] of word;
@@ -90,7 +91,7 @@ for f:=$ff downto 0 do begin
     atrib2:=sprite_ram[(f*4)+2];
 		if ((atrib2<>$f000) and (atrib<>$ffff)) then begin
 			x:=atrib2+(atrib and $f0);
-			sy:=(atrib and $0f) shl 4;
+			sy:=(atrib and $f) shl 4;
 			y:=sprite_ram[(f*4)+3]+sy;
       atrib3:=sprite_ram[(f*4)+1];
 			color:=(atrib3 shr 8) and $f0;
@@ -107,21 +108,21 @@ end;
 procedure eventos_toki;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $0001);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $0002);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $0004);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $0008);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $0010);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $0020);
-  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $0100);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $0200);
-  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $0400);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $0800);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
-  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or $1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
-  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or $2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or 1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or 2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
 end;
 end;
@@ -157,7 +158,7 @@ end;
 function toki_getword(direccion:dword):word;
 begin
 case direccion of
-    $0..$5ffff:toki_getword:=rom[direccion shr 1];
+    0..$5ffff:toki_getword:=rom[direccion shr 1];
     $60000..$6dfff,$6e800..$6ffff:toki_getword:=ram[(direccion and $ffff) shr 1];
     $6e000..$6e7ff:toki_getword:=buffer_paleta[(direccion and $7ff) shr 1];
     $80000..$8000d:toki_getword:=seibu_snd_0.get((direccion and $e) shr 1);
@@ -204,8 +205,8 @@ case direccion of
                  end;
   $80000..$8000d:seibu_snd_0.put((direccion and $e) shr 1,valor);
   $a0000..$a005f:case (direccion and $ff) of
-                    $0a:scroll_x1:=(scroll_x1 and $ff) or ((valor and $10) shl 4);
-                    $0c:scroll_x1:=(scroll_x1 and $100) or ((valor and $7f) shl 1) or ((valor and $80) shr 7);
+                    $a:scroll_x1:=(scroll_x1 and $ff) or ((valor and $10) shl 4);
+                    $c:scroll_x1:=(scroll_x1 and $100) or ((valor and $7f) shl 1) or ((valor and $80) shr 7);
                     $1a:scroll_y1:=(scroll_y1 and $ff) or ((valor and $10) shl 4);
                     $1c:scroll_y1:=(scroll_y1 and $100) or ((valor and $7f) shl 1) or ((valor and $80) shr 7);
                     $2a:scroll_x2_tmp:=(scroll_x2_tmp and $ff) or ((valor and $10) shl 4);
@@ -301,7 +302,7 @@ gfx[3].trans[15]:=true;
 convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$ffdf;
-marcade.dswa_val:=@toki_dip;
+marcade.dswa_val2:=@toki_dip;
 //final
 freemem(memoria_temp);
 reset_toki;

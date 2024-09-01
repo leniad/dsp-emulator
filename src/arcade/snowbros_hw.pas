@@ -362,9 +362,9 @@ var
   memoria_temp:array[0..$bffff] of byte;
   ptemp:pbyte;
   f:dword;
-procedure convert_chars(num:word;tipo:byte);
+procedure convert_chars(num,mask:word;tipo:byte);
 begin
-  init_gfx(0,16,16,num);
+  init_gfx(0,16,16,num,mask);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,32*32,0,1,2,3);
   if tipo=0 then convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false)
@@ -407,17 +407,17 @@ case main_vars.tipo_maquina of
         oki_6295_0:=snd_okim6295.Create(16000000 div 16,OKIM6295_PIN7_HIGH,1);
       end;
 end;
+pandora_0:=pandora_gfx.create(0,true);
 case main_vars.tipo_maquina of
     54:begin //Snowbros
         //pandora
-        pandora_0:=pandora_gfx.create($fff,0,true);
         //cargar roms
         if not(roms_load16w(@rom,snowbros_rom)) then exit;
         //cargar sonido
         if not(roms_load(@mem_snd,snowbros_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,snowbros_char)) then exit;
-        convert_chars($1000,0);
+        convert_chars($1000,$fff,0);
         //DIP
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
@@ -425,8 +425,6 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@snowbros_dip_b;
     end;
     386:begin //Come Back Toto
-        //pandora
-        pandora_0:=pandora_gfx.create($fff,0,true);
         //cargar roms
         if not(roms_load16w(@rom,toto_rom)) then exit;
         ptemp:=@rom;
@@ -438,7 +436,7 @@ case main_vars.tipo_maquina of
         //convertir chars
         if not(roms_load(@memoria_temp,toto_char)) then exit;
         for f:=0 to $7ffff do memoria_temp[f]:=bitswap8(memoria_temp[f],7,6,5,3,4,2,1,0);
-        convert_chars($1000,0);
+        convert_chars($1000,$fff,0);
         //DIP
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
@@ -450,8 +448,6 @@ case main_vars.tipo_maquina of
         mcs51_0:=cpu_mcs51.create(I8XC52,16000000,262);
         mcs51_0.change_io_calls(nil,nil,nil,nil,hyperpac_out_port0,hyperpac_out_port1,hyperpac_out_port2,nil);
         if not(roms_load(mcs51_0.get_rom_addr,hyperpac_mcu)) then exit;
-        //pandora
-        pandora_0:=pandora_gfx.create($1fff,0,true);
         //cargar roms
         if not(roms_load16w(@rom,hyperpac_rom)) then exit;
         //cargar sonido
@@ -459,7 +455,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(oki_6295_0.get_rom_addr,hyperpac_oki)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,hyperpac_char)) then exit;
-        convert_chars($1800,1);
+        convert_chars($1800,$1fff,1);
         //DIP
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;

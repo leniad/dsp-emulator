@@ -19,13 +19,13 @@ const
         (n:'a75-07.ic24';l:$200;p:$0;crc:$0af8b289),(n:'a75-08.ic23';l:$200;p:$200;crc:$abb002fb),
         (n:'a75-09.ic22';l:$200;p:$400;crc:$a7c6c277));
         //Dip
-        arkanoid_dip_a:array [0..6] of def_dip=(
-        (mask:$1;name:'Allow Continue';number:2;dip:((dip_val:$1;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Difficulty';number:2;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$10;dip_name:'20K 60K 60K+'),(dip_val:$0;dip_name:'20K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Lives';number:2;dip:((dip_val:$20;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$80;dip_name:'1C 2C'),(dip_val:$0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        arkanoid_dip_a:array [0..6] of def_dip2=(
+        (mask:$1;name:'Allow Continue';number:2;val2:(1,0);name2:('No','Yes')),
+        (mask:$2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:$8;name:'Difficulty';number:2;val2:(8,0);name2:('Easy','Hard')),
+        (mask:$10;name:'Bonus Life';number:2;val2:($10,0);name2:('20K 60K 60K+','20K')),
+        (mask:$20;name:'Lives';number:2;val2:($20,0);name2:('3','5')),
+        (mask:$c0;name:'Coinage';number:4;val4:($40,$c0,$80,0);name4:('2C 1C','1C 1C','1C 2C','1C 6C')),());
 
 var
   mcu_mem:array[0..$7ff] of byte;
@@ -282,7 +282,7 @@ end;
 set_pal(colores,$200);
 //Dip
 marcade.dswa:=$fe;
-marcade.dswa_val:=@arkanoid_dip_a;
+marcade.dswa_val2:=@arkanoid_dip_a;
 //final
 reset_arkanoid;
 iniciar_arkanoid:=true;

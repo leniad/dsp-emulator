@@ -22,13 +22,13 @@ const
         (n:'c2';l:$8000;p:0;crc:$f2da4f23),(n:'c3';l:$4000;p:$8000;crc:$7ef3ac1b),
         (n:'c5';l:$2000;p:$c000;crc:$c03d8b1b));
         //Dip
-        citycon_dip_a:array [0..3] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        citycon_dip_b:array [0..2] of def_dip=(
-        (mask:$7;name:'Coinage';number:8;dip:((dip_val:$7;dip_name:'5C 1C'),(dip_val:$6;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$8;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        citycon_dip_a:array [0..3] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','Infinite')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
+        citycon_dip_b:array [0..2] of def_dip2=(
+        (mask:$7;name:'Coinage';number:8;val8:(7,6,5,4,0,1,2,3);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$8;name:'Difficulty';number:2;val2:(0,8);name2:('Easy','Hard')),());
 
 var
  fondo,soundlatch,soundlatch2:byte;
@@ -367,9 +367,9 @@ m6809_1:=cpu_m6809.Create(8000000 div 12,$100,TCPU_MC6809E); //???
 m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 m6809_1.init_sound(citycon_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(20000000 div 16,0.2,0.4);
+ym2203_0:=ym2203_chip.create(20000000 div 16,0.5,1);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
-ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910,0.40);
+ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910,1);
 //cargar roms
 if not(roms_load(@memoria,citycon_rom)) then exit;
 //Cargar Sound
@@ -399,8 +399,8 @@ end;
 //DIP
 marcade.dswa:=$0;
 marcade.dswb:=$80;
-marcade.dswa_val:=@citycon_dip_a;
-marcade.dswb_val:=@citycon_dip_b;
+marcade.dswa_val2:=@citycon_dip_a;
+marcade.dswb_val2:=@citycon_dip_b;
 //final
 reset_citycon;
 iniciar_citycon:=true;

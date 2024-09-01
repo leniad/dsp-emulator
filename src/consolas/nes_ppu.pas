@@ -146,7 +146,6 @@ const
 		(0.50,0.75,1.00,1.00),
     (0.29,0.45,0.73,0.90),
 		(0.00,0.24,0.47,0.77));
-  M_PI=3.1415;
 var
 	color_intensity,color_num,color_emphasis:integer;
 	r,g,b:single;
