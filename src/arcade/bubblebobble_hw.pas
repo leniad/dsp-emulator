@@ -18,24 +18,24 @@ const
         (n:'a78-15.30';l:$8000;p:$40000;crc:$6b61a413),(n:'a78-16.31';l:$8000;p:$48000;crc:$b5492d97),
         (n:'a78-17.32';l:$8000;p:$50000;crc:$d69762d5),(n:'a78-18.33';l:$8000;p:$58000;crc:$9f243b68),
         (n:'a78-19.34';l:$8000;p:$60000;crc:$66e9438c),(n:'a78-20.35';l:$8000;p:$68000;crc:$9ef863ad));
-        bublbobl_snd: tipo_roms=(n:'a78-07.46';l:$8000;p:0;crc:$4f9a26e8);
-        bublbobl_prom: tipo_roms=(n:'a71-25.41';l:$100;p:0;crc:$2d0f8545);
-        bublbobl_mcu_rom:tipo_roms=(n:'a78-01.17';l:$1000;p:$0;crc:$b1bfb53d);
+        bublbobl_snd:tipo_roms=(n:'a78-07.46';l:$8000;p:0;crc:$4f9a26e8);
+        bublbobl_prom:tipo_roms=(n:'a71-25.41';l:$100;p:0;crc:$2d0f8545);
+        bublbobl_mcu_rom:tipo_roms=(n:'a78-01.17';l:$1000;p:0;crc:$b1bfb53d);
         //Dip
         bublbobl_dip_a:array [0..5] of def_dip2=(
-        (mask:$5;name:'Mode';number:4;val4:(4,5,1,0);name4:('Game - English','Game - Japanese','Test (Grid and Inputs)','Test (RAM and Sound)/Pause')),
-        (mask:$2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
-        (mask:$8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
+        (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:5;name:'Mode';number:4;val4:(4,5,1,0);name4:('Game - English','Game - Japanese','Test (Grid and Inputs)','Test (RAM and Sound)/Pause')),
+        (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($10,$30,0,$20);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
         (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
         bublbobl_dip_b:array [0..4] of def_dip2=(
-        (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$c;name:'Bonus Life';number:4;val4:(8,$c,4,0);name4:('20K 80K 300K','30K 100K 400K','40K 200K 500K','50K 250K 500K')),
         (mask:$30;name:'Lives';number:4;val4:($10,0,$30,$20);name4:('1','2','3','5')),
         (mask:$80;name:'ROM Type';number:2;val2:($80,0);name2:('IC52=512kb, IC53=none','IC52=256kb, IC53=256kb')),());
 
 var
- memoria_rom:array [0..3,$0..$3fff] of byte;
+ memoria_rom:array [0..3,0..$3fff] of byte;
  mem_prom:array[0..$ff] of byte;
  banco_rom,sound_stat,sound_latch:byte;
  sound_nmi,video_enable:boolean;
@@ -60,12 +60,12 @@ if video_enable then begin
 		sy:=256-memoria[$dd00+(offs*4)];
 		for yc:=0 to $1f do begin
       atrib2:=mem_prom[prom_line+(yc shr 1)];
-			if (atrib2 and $8)<>0 then	continue;
-			if (atrib2 and $4)=0 then sx:=memoria[$dd02+(offs*4)]+((gfx_attr and $40) shl 2); // next column
+			if (atrib2 and 8)<>0 then	continue;
+			if (atrib2 and 4)=0 then sx:=memoria[$dd02+(offs*4)]+((gfx_attr and $40) shl 2); // next column
 			for xc:=0 to 1 do begin
-				goffs:=gfx_offs+(xc shl 6)+((yc and 7) shl 1)+((atrib2 and $3) shl 4);
+				goffs:=gfx_offs+(xc shl 6)+((yc and 7) shl 1)+((atrib2 and 3) shl 4);
         atrib:=memoria[$c001+goffs];
-				nchar:=memoria[$c000+goffs]+((atrib and $03) shl 8)+((gfx_attr and $f) shl 10);
+				nchar:=memoria[$c000+goffs]+((atrib and 3) shl 8)+((gfx_attr and $f) shl 10);
 				color:=(atrib and $3c) shl 2;
 				flipx:=(atrib and $40)<>0;
 				flipy:=(atrib and $80)<>0;
@@ -85,54 +85,49 @@ procedure eventos_bublbobl;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //P2
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   //SYS
-  if arcade_input.coin[0] then  marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.coin[1] then  marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.coin[0] then  marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.coin[1] then  marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
 end;
 end;
 
 procedure bublbobl_principal;
 var
-  frame_m,frame_mi,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_mi:=z80_1.tframes;
-frame_s:=z80_2.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 263 do begin
-  //main
-  z80_0.run(frame_m);
-  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-  //segunda cpu
-  z80_1.run(frame_mi);
-  frame_mi:=frame_mi+z80_1.tframes-z80_1.contador;
-  //sonido
-  z80_2.run(frame_s);
-  frame_s:=frame_s+z80_2.tframes-z80_2.contador;
-  //mcu
-  m6800_0.run(frame_mcu);
-  frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
   case f of
-    15:update_video_bublbobl;
-    239:begin
+    16:update_video_bublbobl;
+    240:begin
           z80_1.change_irq(HOLD_LINE);
           m6800_0.change_irq(HOLD_LINE);
         end;
   end;
+  //main
+  z80_0.run(frame_main);
+  frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+  //segunda cpu
+  z80_1.run(frame_sub);
+  frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
+  //sonido
+  z80_2.run(frame_snd);
+  frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
+  //mcu
+  m6800_0.run(frame_mcu);
+  frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
  end;
  eventos_bublbobl;
  video_sync;
@@ -272,10 +267,10 @@ var
   address:word;
 begin
 if (((not(mcu_port2_out) and $10)<>0) and ((valor and $10)<>0)) then begin
-  address:=mcu_port4_out or ((valor and $0f) shl 8);
+  address:=mcu_port4_out or ((valor and $f) shl 8);
   if (mcu_port1_out and $80)<>0 then begin //read
     if ((address and $800)=0) then begin
-      case (address and $3) of
+      case (address and 3) of
         0:mcu_port3_in:=marcade.dswa;
         1:mcu_port3_in:=marcade.dswb;
         2:mcu_port3_in:=marcade.in1;
@@ -308,6 +303,10 @@ begin
  z80_1.reset;
  z80_2.reset;
  m6800_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_sub:=z80_1.tframes;
+ frame_snd:=z80_2.tframes;
+ frame_mcu:=m6800_0.tframes;
  ym2203_0.reset;
  ym3812_0.reset;
  reset_audio;

@@ -175,12 +175,9 @@ end;
 
 procedure hypersports_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
       if f=240 then begin
@@ -188,11 +185,11 @@ while EmuStatus=EsRunning do begin
           update_video_call;
       end;
       //main
-      m6809_0.run(frame_m);
-      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
+      m6809_0.run(frame_main);
+      frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
       //sound
-      z80_0.run(frame_s);
-      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_snd);
+      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
   eventos_call;
   video_sync;
@@ -401,6 +398,8 @@ procedure reset_hypersports;
 begin
  m6809_0.reset;
  z80_0.reset;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=z80_0.tframes;
  dac_0.reset;
  reset_audio;
  marcade.in0:=$ff;
@@ -449,15 +448,15 @@ if (main_vars.tipo_maquina=400) then main_screen.rot90_screen:=true;
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(hypersports_getbyte,hypersports_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(14318180 div 4,$100);
 if (main_vars.tipo_maquina=400) then z80_0.init_sound(roadf_sound_update)
   else z80_0.init_sound(hypersports_sound_update);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(14318180 div 8);
-dac_0:=dac_chip.Create(0.80);
+sn_76496_0:=sn76496_chip.create(14318180 div 8);
+dac_0:=dac_chip.create(0.80);
 case main_vars.tipo_maquina of
   227:begin
         update_video_call:=update_video_hypersports;
@@ -503,7 +502,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'roadf.nv',longitud) then read_file(Directory.Arcade_nvram+'roadf.nv',@memoria[$3800],longitud);
         //convertir chars
         if not(roms_load(@memoria_temp,roadf_char)) then exit;
-        init_gfx(0,8,8,$600,$7ff);
+        init_gfx(0,8,8,$600);
         gfx_set_desc_data(4,0,16*8,$6000*8+4,$6000*8+0,4,0);
         convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //sprites

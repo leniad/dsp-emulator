@@ -137,32 +137,27 @@ end;
 
 procedure raiden_principal;
 var
-  frame_m,frame_s,frame_sub:single;
   f,h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=nec_0.tframes;
-frame_sub:=nec_1.tframes;
-frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-    for h:=1 to CPU_SYNC do begin
-      //Main CPU
-      nec_0.run(frame_m);
-      frame_m:=frame_m+nec_0.tframes-nec_0.contador;
-      //Sub CPU
-      nec_1.run(frame_sub);
-      frame_sub:=frame_sub+nec_1.tframes-nec_1.contador;
-      //Sound CPU
-      seibu_snd_0.z80.run(frame_s);
-      frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
-    end;
-    if f=239 then begin
+    if f=240 then begin
       nec_0.vect_req:=$c8 div 4;
       nec_0.change_irq(HOLD_LINE);
       nec_1.vect_req:=$c8 div 4;
       nec_1.change_irq(HOLD_LINE);
       update_video_raiden;
+    end;
+    for h:=1 to CPU_SYNC do begin
+      //Main CPU
+      nec_0.run(frame_main);
+      frame_main:=frame_main+nec_0.tframes-nec_0.contador;
+      //Sub CPU
+      nec_1.run(frame_sub);
+      frame_sub:=frame_sub+nec_1.tframes-nec_1.contador;
+      //Sound CPU
+      seibu_snd_0.run;
     end;
  end;
  eventos_raiden;
@@ -258,6 +253,8 @@ procedure reset_raiden;
 begin
  nec_0.reset;
  nec_1.reset;
+ frame_main:=nec_0.tframes;
+ frame_sub:=nec_1.tframes;
  seibu_snd_0.reset;
  reset_audio;
  marcade.in0:=$ffff;

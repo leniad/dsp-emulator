@@ -107,31 +107,27 @@ end;
 
 procedure tehkanwc_principal;
 var
-  frame_m,frame_s,frame_m2:single;
   f,h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_m2:=z80_1.tframes;
-frame_s:=z80_2.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    for h:=1 to CPU_SYNC do begin
-      //CPU 1
-      z80_0.run(frame_m);
-      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-      //CPU 2
-      z80_1.run(frame_m2);
-      frame_m2:=frame_m2+z80_1.tframes-z80_1.contador;
-      //CPU Sound
-      z80_2.run(frame_s);
-      frame_s:=frame_s+z80_2.tframes-z80_2.contador;
-    end;
-    if f=239 then begin
+    if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
       z80_2.change_irq(HOLD_LINE);
       update_video_tehkanwc;
+    end;
+    for h:=1 to CPU_SYNC do begin
+      //CPU 1
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+      //CPU 2
+      z80_1.run(frame_sub);
+      frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
+      //CPU Sound
+      z80_2.run(frame_snd);
+      frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
     end;
   end;
   eventos_tehkanwc;
@@ -158,6 +154,7 @@ case direccion of
 end;
 end;
 
+procedure mem_shared_w(direccion:word;valor:byte);
 procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
@@ -176,7 +173,6 @@ begin
   end;
 end;
 
-procedure mem_shared_w(direccion:word;valor:byte);
 begin
 memoria[direccion]:=valor;
 case (direccion-$c800) of
@@ -251,8 +247,8 @@ end;
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
- 0:snd_inbyte:=ay8910_0.Read;
- 1:snd_inbyte:=ay8910_1.Read;
+ 0:snd_inbyte:=ay8910_0.read;
+ 1:snd_inbyte:=ay8910_1.read;
 end;
 end;
 
@@ -311,6 +307,9 @@ begin
  z80_0.reset;
  z80_1.reset;
  z80_2.reset;
+ frame_main:=z80_0.tframes;
+ frame_sub:=z80_1.tframes;
+ frame_snd:=z80_2.tframes;
  ay8910_0.reset;
  ay8910_1.reset;
  msm5205_0.reset;
@@ -318,6 +317,7 @@ begin
  marcade.in0:=$20;
  marcade.in1:=$20;
  marcade.in2:=$f;
+ reset_analog;
  scroll_x:=0;
  scroll_y:=0;
  sound_latch:=0;

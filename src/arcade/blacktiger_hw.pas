@@ -27,12 +27,12 @@ const
         blktiger_mcu:tipo_roms=(n:'bd.6k';l:$1000;p:0;crc:$ac7d14f1);
         //Dip
         blktiger_dip_a:array [0..4] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$80;name:'Test';number:2;val2:($80,0);name2:('Off','On')),());
         blktiger_dip_b:array [0..5] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','5','7')),
+        (mask:3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','5','7')),
         (mask:$1c;name:'Difficulty';number:8;val8:($1c,$18,$14,$10,$c,8,4,0);name8:('Very Easy','Easy 3','Easy 2','Easy 1','Normal','Difficult 1','Difficult 2','Very Difficult')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
@@ -40,7 +40,7 @@ const
 
 var
  scroll_ram:array[0..$3fff] of byte;
- memoria_rom:array[0..$f,$0..$3fff] of byte;
+ memoria_rom:array[0..$f,0..$3fff] of byte;
  banco_rom,soundlatch,i8751_latch,z80_latch,timer_hs,mask_x,mask_y,shl_row:byte;
  mask_sx,mask_sy,scroll_x,scroll_y,scroll_bank:word;
  bg_on,ch_on,spr_on:boolean;
@@ -64,11 +64,11 @@ if bg_on then begin
     y:=f div 17;
     sx:=x+pos_x;
     sy:=y+pos_y;
-    pos:=((sx and $0f)+((sy and $0f) shl 4)+((sx and mask_x) shl 4)+((sy and mask_y) shl shl_row)) shl 1;
+    pos:=((sx and $f)+((sy and $f) shl 4)+((sx and mask_x) shl 4)+((sy and mask_y) shl shl_row)) shl 1;
     atrib:=scroll_ram[pos+1];
     color:=(atrib and $78) shr 3;
     if (gfx[2].buffer[pos shr 1] or buffer_color[color+$20]) then begin
-      nchar:=scroll_ram[pos]+((atrib and $7) shl 8);
+      nchar:=scroll_ram[pos]+((atrib and 7) shl 8);
       flip_x:=(atrib and $80)<>0;
       put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,1,2,flip_x,false);
       if split_table[color]<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,2,2,flip_x,false,split_table[color])
@@ -80,18 +80,18 @@ if bg_on then begin
 end;
 if spr_on then begin
   for f:=$7f downto 0 do begin
-    atrib:=buffer_sprites[$1+(f*4)];
+    atrib:=buffer_sprites[1+(f*4)];
     nchar:=buffer_sprites[f*4]+(atrib and $e0) shl 3;
-    color:=(atrib and $7) shl 4;
-    x:=buffer_sprites[$3+(f*4)]+(atrib and $10) shl 4;
-    y:=buffer_sprites[$2+(f*4)];
+    color:=(atrib and 7) shl 4;
+    x:=buffer_sprites[3+(f*4)]+(atrib and $10) shl 4;
+    y:=buffer_sprites[2+(f*4)];
     put_gfx_sprite(nchar,color+$200,(atrib and 8)<>0,false,1);
     actualiza_gfx_sprite(x,y,4,1);
   end;
 end;
 if bg_on then scroll_x_y(2,4,scroll_x and $f,scroll_y and $f);
 if ch_on then begin
-  for f:=$0 to $3ff do begin
+  for f:=0 to $3ff do begin
    atrib:=memoria[$d400+f];
    color:=atrib and $1f;
    if (gfx[0].buffer[f] or buffer_color[color]) then begin
@@ -117,32 +117,28 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
 end;
 end;
 
 procedure blktiger_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:word;
   {$ifdef speed_debug}cont1,cont2:int64;{$endif}
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
   {$ifdef speed_debug}
   QueryPerformanceCounter(cont1);
@@ -154,11 +150,11 @@ while EmuStatus=EsRunning do begin
       update_video_blktiger;
     end;
     //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     //MCU
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
@@ -195,7 +191,7 @@ begin
   color.b:=pal4bit(tmp_color);
   set_pal_color(color,dir);
   case dir of
-    $0..$ff:buffer_color[(dir shr 4)+$20]:=true;
+    0..$ff:buffer_color[(dir shr 4)+$20]:=true;
     $300..$37f:buffer_color[(dir shr 2) and $1f]:=true;
   end;
 end;
@@ -229,7 +225,7 @@ case (puerto and $ff) of
   2:blktiger_inbyte:=marcade.in2;
   3:blktiger_inbyte:=marcade.dswa;
   4:blktiger_inbyte:=marcade.dswb;
-  5:blktiger_inbyte:=$1; //Freeze?
+  5:blktiger_inbyte:=1; //Freeze?
   7:blktiger_inbyte:=i8751_latch;  //Proteccion
   else blktiger_inbyte:=$ff;
 end;
@@ -269,11 +265,11 @@ case (puerto and $ff) of
       scroll_y:=(scroll_y and $ff) or (valor shl 8);
     end;
   $c:begin
-      if bg_on<>((valor and $2)=0) then begin
-         bg_on:=(valor and $2)=0;
+      if bg_on<>((valor and 2)=0) then begin
+         bg_on:=(valor and 2)=0;
          if bg_on then fillchar(gfx[2].buffer,$2000,1);
       end;
-      spr_on:=(valor and $4)=0;
+      spr_on:=(valor and 4)=0;
      end;
   $d:scroll_bank:=(valor and 3) shl 12;
   $e:if ((valor and 1)<>0) then begin
@@ -455,6 +451,9 @@ begin
  z80_0.reset;
  z80_1.reset;
  mcs51_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ frame_mcu:=mcs51_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;

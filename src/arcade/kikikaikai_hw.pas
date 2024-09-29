@@ -62,7 +62,7 @@ var
 
 procedure update_video_kikikaikai;
 var
-    nchar,color,sy,sx,x,goffs,gfx_offs,offs:word;
+    nchar,color,sy,sx,goffs,gfx_offs,offs:word;
     yc,y,gfx_num,tx,ty,height:byte;
 begin
 fill_full_screen(1,$100);
@@ -104,7 +104,7 @@ end;
 procedure update_video_kickrun;
 var
     nchar,color,sy,sx,x,goffs,gfx_offs,offs:word;
-    yc,y,gfx_num,tx,ty,height,xc,gfx_attr:byte;
+    yc,y,gfx_num,height,xc,gfx_attr:byte;
     flipx:boolean;
 begin
 fill_full_screen(1,$100);

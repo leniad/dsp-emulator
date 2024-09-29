@@ -94,14 +94,9 @@ end;
 
 procedure hvyunit_principal;
 var
-  frame_m,frame_s,frame_m2,frame_mcu:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_m2:=z80_1.tframes;
-frame_s:=z80_2.tframes;
-frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
  case f of
@@ -117,14 +112,14 @@ while EmuStatus=EsRunning do begin
         end;
   end;
   //CPU 1
-  z80_0.run(frame_m);
-  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+  z80_0.run(frame_main);
+  frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   //CPU 2
-  z80_1.run(frame_m2);
-  frame_m2:=frame_m2+z80_1.tframes-z80_1.contador;
+  z80_1.run(frame_sub);
+  frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
   //CPU Sound
-  z80_2.run(frame_s);
-  frame_s:=frame_s+z80_2.tframes-z80_2.contador;
+  z80_2.run(frame_snd);
+  frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
   //MCU
   mcs51_0.run(frame_mcu);
   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
@@ -263,7 +258,7 @@ function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
   2:snd_inbyte:=ym2203_0.status;
-  3:snd_inbyte:=ym2203_0.Read;
+  3:snd_inbyte:=ym2203_0.read;
   4:snd_inbyte:=sound_latch;
 end;
 end;
@@ -272,8 +267,8 @@ procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
     0:nrom_cpu3:=valor and 3;
-    2:ym2203_0.Control(valor);
-    3:ym2203_0.Write(valor);
+    2:ym2203_0.control(valor);
+    3:ym2203_0.write(valor);
 end;
 end;
 
@@ -348,7 +343,7 @@ end;
 
 procedure hvyunit_sound_update;
 begin
-  ym2203_0.Update;
+  ym2203_0.update;
 end;
 
 //Main
@@ -359,6 +354,10 @@ begin
  z80_1.reset;
  z80_2.reset;
  mcs51_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_sub:=z80_1.tframes;
+ frame_snd:=z80_2.tframes;
+ frame_mcu:=mcs51_0.tframes;
  pandora_0.reset;
  ym2203_0.reset;
  reset_audio;
@@ -403,34 +402,30 @@ iniciar_video(256,224);
 z80_0:=cpu_z80.create(6000000,$100);
 z80_0.change_ram_calls(hvyunit_getbyte,hvyunit_putbyte);
 z80_0.change_io_calls(nil,hvyunit_outbyte);
+if not(roms_load(@memoria_temp,hvyunit_cpu1)) then exit;
+for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);
 //Misc CPU
 z80_1:=cpu_z80.create(6000000,$100);
 z80_1.change_ram_calls(hvyunit_misc_getbyte,hvyunit_misc_putbyte);
 z80_1.change_io_calls(hvyunit_misc_inbyte,hvyunit_misc_outbyte);
+if not(roms_load(@memoria_temp,hvyunit_cpu2)) then exit;
+for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
 //Sound CPU
 z80_2:=cpu_z80.create(6000000,$100);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.change_io_calls(snd_inbyte,snd_outbyte);
 z80_2.init_sound(hvyunit_sound_update);
+if not(roms_load(@memoria_temp,hvyunit_sound)) then exit;
+for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
 //mcu cpu
 mcs51_0:=cpu_mcs51.create(I8X51,6000000,$100);
 mcs51_0.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
+if not(roms_load(mcs51_0.get_rom_addr,hvyunit_mermaid)) then exit;
 //pandora
 pandora_0:=pandora_gfx.create($100,false);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(3000000,0.8,0.8);
+ym2203_0:=ym2203_chip.create(3000000);
 ym2203_0.change_irq_calls(hvyunit_sound_irq);
-//cargar roms
-if not(roms_load(@memoria_temp,hvyunit_cpu1)) then exit;
-for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);
-//cargar cpu 2
-if not(roms_load(@memoria_temp,hvyunit_cpu2)) then exit;
-for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
-//cargar sonido
-if not(roms_load(@memoria_temp,hvyunit_sound)) then exit;
-for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
-//cargar mermaid
-if not(roms_load(mcs51_0.get_rom_addr,hvyunit_mermaid)) then exit;
 //convertir chars
 getmem(ptemp,$200000);
 if not(roms_load(ptemp,hvyunit_gfx0)) then exit;

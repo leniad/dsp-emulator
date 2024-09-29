@@ -362,9 +362,9 @@ var
   memoria_temp:array[0..$bffff] of byte;
   ptemp:pbyte;
   f:dword;
-procedure convert_chars(num,mask:word;tipo:byte);
+procedure convert_chars(num:word;tipo:byte);
 begin
-  init_gfx(0,16,16,num,mask);
+  init_gfx(0,16,16,num);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,32*32,0,1,2,3);
   if tipo=0 then convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false)
@@ -417,7 +417,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@mem_snd,snowbros_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,snowbros_char)) then exit;
-        convert_chars($1000,$fff,0);
+        convert_chars($1000,0);
         //DIP
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
@@ -436,7 +436,7 @@ case main_vars.tipo_maquina of
         //convertir chars
         if not(roms_load(@memoria_temp,toto_char)) then exit;
         for f:=0 to $7ffff do memoria_temp[f]:=bitswap8(memoria_temp[f],7,6,5,3,4,2,1,0);
-        convert_chars($1000,$fff,0);
+        convert_chars($1000,0);
         //DIP
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
@@ -455,7 +455,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(oki_6295_0.get_rom_addr,hyperpac_oki)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,hyperpac_char)) then exit;
-        convert_chars($1800,$1fff,1);
+        convert_chars($1800,1);
         //DIP
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;

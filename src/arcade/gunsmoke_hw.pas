@@ -631,8 +631,8 @@ z80_1:=cpu_z80.create(3000000,262);
 timers.init(z80_1.numero_cpu,384*262/4/2,gunsmoke_snd_irq,nil,true);
 z80_1.init_sound(gunsmoke_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.14,0.22);
-ym2203_1:=ym2203_chip.create(1500000,0.14,0.22);
+ym2203_0:=ym2203_chip.create(1500000,0.5,1);
+ym2203_1:=ym2203_chip.create(1500000,0.5,1);
 case main_vars.tipo_maquina of
   80:begin
        //Main CPU

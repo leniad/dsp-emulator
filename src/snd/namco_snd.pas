@@ -86,11 +86,11 @@ end;
 procedure namco_snd_chip.update_waveform(offset:word;data:byte);
 begin
 	if self.wave_on_ram then begin
-		// use full byte, first 4 high bits, then low 4 bits */
+		// use full byte, first 4 high bits, then low 4 bits
     self.namco_wave[offset*2]:=(data shr 4) and $0f;
     self.namco_wave[offset*2+1]:=data and $0f;
   end else begin
-		// use only low 4 bits */
+		// use only low 4 bits
     self.namco_wave[offset]:=data and $0f;
   end;
 end;

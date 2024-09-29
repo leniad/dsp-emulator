@@ -58,7 +58,7 @@ const
         (mask:$8000;name:'Allow Continue';number:2;val2:(0,$8000);name2:('No','Yes')),());
 
 var
- scroll_x,scroll_y,mask_sprite,mask_back:word;
+ scroll_x,scroll_y:word;
  rom:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
  ram2:array[0..$803] of word;
@@ -74,7 +74,7 @@ var
 procedure draw_fondo;
 var
   nchar,color,pos:word;
-  x,y,f,data,atrib,sx,sy:byte;
+  x,y,f,atrib,sx,sy:byte;
 begin
 for f:=0 to $50 do begin
   x:=f div 9;
@@ -82,9 +82,8 @@ for f:=0 to $50 do begin
   sx:=(x+((scroll_x and $fe0) shr 5)) and $7f;
   sy:=(y+((scroll_y and $fe0) shr 5)) and $7f;
   pos:=(((sx and 7) shl 1)+(((127-sy) and 7) shl 4)+((sx shr 3) shl 7)+(((127-sy) shr 3) shl 11)) and $7fff;
-  data:=fondo_rom[pos];
   atrib:=fondo_rom[pos+1];
-  nchar:=(data+((atrib and $c0) shl 2)+(fondo_bank shl 10)) and mask_back;
+  nchar:=fondo_rom[pos]+((atrib and $c0) shl 2)+(fondo_bank shl 10);
   color:=(atrib and $f) shl 4;
   put_gfx_flip(x shl 5,y shl 5,nchar,color,2,1,(atrib and $20)<>0,false);
   if (atrib and $10)<>0 then put_gfx_trans_flip(x shl 5,y shl 5,nchar,color,4,1,(atrib and $20)<>0,false)
@@ -99,7 +98,7 @@ if pintar_fondo then draw_fondo;
 scroll_x_y(2,3,scroll_x and $1f,scroll_y and $1f);
 //sprites
 for f:=$9f downto 0 do begin
-    nchar:=buffer_sprites_w[f*4] and mask_sprite;
+    nchar:=buffer_sprites_w[f*4];
     atrib:=buffer_sprites_w[(f*4)+1];
   	y:=240-buffer_sprites_w[(f*4)+2];
 		x:=buffer_sprites_w[(f*4)+3];
@@ -152,25 +151,22 @@ end;
 
 procedure tigeroad_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //Main CPU
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    if f=240 then begin
       update_video_tigeroad;
       m68000_0.irq[2]:=HOLD_LINE;
       copymemory(@buffer_sprites_w,@ram2,$280*2);
     end;
+    //Main CPU
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
   eventos_tigeroad;
   video_sync;
@@ -265,10 +261,10 @@ procedure tigeroad_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$7fff:; //ROM
-  $8000:ym2203_0.Control(valor);
-  $8001:ym2203_0.Write(valor);
-  $a000:ym2203_1.Control(valor);
-  $a001:ym2203_1.Write(valor);
+  $8000:ym2203_0.control(valor);
+  $8001:ym2203_0.write(valor);
+  $a000:ym2203_1.control(valor);
+  $a001:ym2203_1.write(valor);
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -280,8 +276,8 @@ end;
 
 procedure tigeroad_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 //F1dream
@@ -361,29 +357,25 @@ end;
 
 procedure f1dream_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
-frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //Main CPU
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    //mcu
-    mcs51_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
-    if f=239 then begin
+    if f=240 then begin
       update_video_tigeroad;
       m68000_0.irq[2]:=HOLD_LINE;
       copymemory(@buffer_sprites_w,@ram2,$280*2);
     end;
+    //Main CPU
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+    //mcu
+    mcs51_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
   end;
   eventos_tigeroad;
   video_sync;
@@ -395,9 +387,14 @@ procedure reset_tigeroad;
 begin
  m68000_0.reset;
  z80_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
- if main_vars.tipo_maquina<>52 then mcs51_0.reset;
+ if main_vars.tipo_maquina<>52 then begin
+  mcs51_0.reset;
+  frame_mcu:=mcs51_0.tframes;
+ end;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
@@ -485,8 +482,6 @@ case main_vars.tipo_maquina of
         if not(roms_load(memoria_temp,tigeroad_char)) then exit;
         tiger_road_chars;
         //background
-        mask_sprite:=$fff;
-        mask_back:=$7ff;
         if not(roms_load(@fondo_rom,tigeroad_fondo_rom)) then exit;
         if not(roms_load(memoria_temp,tigeroad_fondo)) then exit;
         tiger_road_tiles($800);
@@ -511,8 +506,6 @@ case main_vars.tipo_maquina of
         if not(roms_load(memoria_temp,f1dream_char)) then exit;
         tiger_road_chars;
         //background
-        mask_sprite:=$7ff;
-        mask_back:=$3ff;
         if not(roms_load(@fondo_rom,f1dream_fondo_rom)) then exit;
         if not(roms_load(memoria_temp,f1dream_fondo)) then exit;
         tiger_road_tiles($300);

@@ -10,7 +10,7 @@ function iniciar_mugsmash:boolean;
 implementation
 const
         mugsmash_rom:array[0..1] of tipo_roms=(
-        (n:'mugs_04.bin';l:$40000;p:0;crc:$2498fd27),(n:'mugs_05.bin';l:$40000;p:$1;crc:$95efb40b));
+        (n:'mugs_04.bin';l:$40000;p:0;crc:$2498fd27),(n:'mugs_05.bin';l:$40000;p:1;crc:$95efb40b));
         mugsmash_sound:tipo_roms=(n:'mugs_03.bin';l:$10000;p:0;crc:$0101df2d);
         mugsmash_tiles:array[0..3] of tipo_roms=(
         (n:'mugs_12.bin';l:$80000;p:0;crc:$c0a6ed98),(n:'mugs_13.bin';l:$80000;p:$80000;crc:$e2be8595),
@@ -22,19 +22,20 @@ const
         mugsmash_oki:array[0..1] of tipo_roms=(
         (n:'mugs_02.bin';l:$20000;p:0;crc:$f92a7f4a),(n:'mugs_01.bin';l:$20000;p:$20000;crc:$1a3a0b39));
         //Dip
-        mugsmash_dip_a:array [0..4] of def_dip=(
-        (mask:$100;name:'Draw Objects';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$200;name:'Freeze';number:2;dip:((dip_val:$200;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1000;name:'Color Test';number:2;dip:((dip_val:$1000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2000;name:'Draw SF.';number:2;dip:((dip_val:$2000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        mugsmash_dip_b:array [0..3] of def_dip=(
-        (mask:$e00;name:'Coinage';number:8;dip:((dip_val:$c00;dip_name:'4C 1C'),(dip_val:$a00;dip_name:'3C 1C'),(dip_val:$800;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$200;dip_name:'1C 2C'),(dip_val:$400;dip_name:'1C 3C'),(dip_val:$600;dip_name:'1C 4C'),(dip_val:$e00;dip_name:'Free Play'),(),(),(),(),(),(),(),())),
-        (mask:$1000;name:'Allow Continue';number:2;dip:((dip_val:$1000;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2000;name:'Sound Test';number:2;dip:((dip_val:$2000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        mugsmash_dip_c:array [0..3] of def_dip=(
-        (mask:$100;name:'Demo Sounds';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$600;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$200;dip_name:'2'),(dip_val:$400;dip_name:'3'),(dip_val:$600;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Very Easy'),(dip_val:$1000;dip_name:'Easy'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$3000;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mugsmash_dip_a:array [0..4] of def_dip2=(
+        (mask:$100;name:'Draw Objects';number:2;val2:($100,0);name2:('Off','On')),
+        (mask:$200;name:'Freeze';number:2;val2:($200,0);name2:('Off','On')),
+        (mask:$1000;name:'Color Test';number:2;val2:($1000,0);name2:('Off','On')),
+        (mask:$2000;name:'Draw SF.';number:2;val2:($2000,0);name2:('Off','On')),());
+        mugsmash_dip_b:array [0..3] of def_dip2=(
+        (mask:$e00;name:'Coinage';number:8;val8:($c00,$a00,$800,0,$200,$400,$600,$e00);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','Free Play')),
+        (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('No','Yes')),
+        (mask:$2000;name:'Sound Test';number:2;val2:($2000,0);name2:('Off','On')),());
+        mugsmash_dip_c:array [0..3] of def_dip2=(
+        (mask:$100;name:'Demo Sounds';number:2;val2:($100,0);name2:('Off','On')),
+        (mask:$600;name:'Lives';number:4;val4:(0,$200,$400,$600);name4:('1','2','3','4')),
+        (mask:$3000;name:'Difficulty';number:4;val4:(0,$1000,$2000,$3000);name4:('Very Easy','Easy','Hard','Very Hard')),());
+
 var
  rom:array[0..$3ffff] of word;
  video_ram1,video_ram2:array[0..$7ff] of word;
@@ -87,10 +88,10 @@ procedure eventos_mugsmash;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
@@ -98,10 +99,10 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
@@ -111,22 +112,19 @@ end;
 
 procedure mugsmash_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   z80_0.run(frame_s);
-   frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-   if f=247 then begin
+   if f=248 then begin
       m68000_0.irq[6]:=ASSERT_LINE;
       update_video_mugsmash;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   z80_0.run(frame_snd);
+   frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
  eventos_mugsmash;
  video_sync;
@@ -136,16 +134,16 @@ end;
 function mugsmash_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$7ffff:mugsmash_getword:=rom[direccion shr 1];
+  0..$7ffff:mugsmash_getword:=rom[direccion shr 1];
   $80000..$80fff:mugsmash_getword:=video_ram1[(direccion and $fff) shr 1];
   $82000..$82fff:mugsmash_getword:=video_ram2[(direccion and $fff) shr 1];
   $100000..$1005ff:mugsmash_getword:=buffer_paleta[(direccion and $7ff) shr 1];
   $1c0000..$1cffff:mugsmash_getword:=ram[(direccion and $ffff) shr 1];
   $200000..$203fff:mugsmash_getword:=sprite_ram[(direccion and $3fff) shr 1];
-  $180000:mugsmash_getword:=marcade.in0 or (marcade.dswa and $3000);  //P1+dip1.1
-  $180002:mugsmash_getword:=marcade.in1 or marcade.dswb;  //P2+dip2
-  $180004:mugsmash_getword:=marcade.dswc; //dip3
-  $180006:mugsmash_getword:=$fcff or (marcade.dswa and $300); //dip 1.2
+  $180000:mugsmash_getword:=marcade.in0 or (marcade.dswa and $3000);
+  $180002:mugsmash_getword:=marcade.in1 or marcade.dswb;
+  $180004:mugsmash_getword:=marcade.dswc;
+  $180006:mugsmash_getword:=$fcff or (marcade.dswa and $300);
 end;
 end;
 
@@ -227,6 +225,8 @@ procedure reset_mugsmash;
 begin
  m68000_0.reset;
  z80_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  ym2151_0.reset;
  oki_6295_0.reset;
  reset_audio;
@@ -291,11 +291,11 @@ convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 gfx[1].trans[0]:=true;
 //DIP
 marcade.dswa:=$3300;
-marcade.dswa_val:=@mugsmash_dip_a;
+marcade.dswa_val2:=@mugsmash_dip_a;
 marcade.dswb:=$2000;
-marcade.dswb_val:=@mugsmash_dip_b;
+marcade.dswb_val2:=@mugsmash_dip_b;
 marcade.dswc:=$daff;
-marcade.dswc_val:=@mugsmash_dip_c;
+marcade.dswc_val2:=@mugsmash_dip_c;
 //final
 freemem(memoria_temp);
 reset_mugsmash;

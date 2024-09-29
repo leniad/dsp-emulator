@@ -459,16 +459,16 @@ begin
   gfx_set_desc_data(4,0,16*8,num*16*8+8,num*16*8+0,8,0);
   convert_gfx(0,0,memoria_temp,@pt_x[8],@pt_y,false,false);
 end;
-procedure cninja_convert_tiles(ngfx:byte;num,mask:word);
+procedure cninja_convert_tiles(ngfx:byte;num:word);
 begin
-  init_gfx(ngfx,16,16,num,mask);
+  init_gfx(ngfx,16,16,num);
   gfx[ngfx].trans[0]:=true;
   gfx_set_desc_data(4,0,64*8,num*64*8+8,num*64*8+0,8,0);
   convert_gfx(ngfx,0,memoria_temp2,@pt_x,@pt_y,false,false);
 end;
-procedure cninja_convert_sprites(num,mask:dword);
+procedure cninja_convert_sprites(num:dword);
 begin
-  init_gfx(3,16,16,num,mask);
+  init_gfx(3,16,16,num);
   gfx[3].trans[0]:=true;
   gfx_set_desc_data(4,0,128*8,16,0,24,8);
   convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
@@ -521,7 +521,7 @@ case main_vars.tipo_maquina of
         //Tiles
         getmem(memoria_temp2,$100000);
         if not(roms_load(memoria_temp2,cninja_tiles1)) then exit;
-        cninja_convert_tiles(1,$1000,$fff);
+        cninja_convert_tiles(1,$1000);
         if not(roms_load(memoria_temp,cninja_tiles2)) then exit;
         //ordenar
         ptemp:=memoria_temp2;
@@ -537,11 +537,11 @@ case main_vars.tipo_maquina of
         inc(ptemp2,$40000);
         inc(ptemp,$80000);
         copymemory(ptemp,ptemp2,$40000);
-        cninja_convert_tiles(2,$2000,$1fff);
+        cninja_convert_tiles(2,$2000);
         freemem(memoria_temp2);
         //Sprites
         if not(roms_load16b(memoria_temp,cninja_sprites)) then exit;
-        cninja_convert_sprites($4000,$3fff);
+        cninja_convert_sprites($4000);
         //Proteccion deco104
         deco104_0:=cpu_deco_104.create(USE_MAGIC_ADDRESS_XOR);
         //Dip
@@ -583,7 +583,7 @@ case main_vars.tipo_maquina of
         inc(ptemp2,$40000);
         inc(ptemp,$80000);
         copymemory(ptemp,ptemp2,$40000);
-        cninja_convert_tiles(1,$2000,$1fff);
+        cninja_convert_tiles(1,$2000);
         //Tiles 2
         if not(roms_load(memoria_temp,robocop2_tiles2)) then exit;
         ptemp:=memoria_temp2;
@@ -606,7 +606,7 @@ case main_vars.tipo_maquina of
         inc(ptemp2,$40000);
         inc(ptemp,$c0000);
         copymemory(ptemp,ptemp2,$40000);
-        cninja_convert_tiles(2,$3000,$3fff);
+        cninja_convert_tiles(2,$3000);
         //Tiles 8bbp
         init_gfx(4,16,16,$1000);
         gfx[4].trans[0]:=true;
@@ -615,7 +615,7 @@ case main_vars.tipo_maquina of
         freemem(memoria_temp2);
         //Sprites
         if not(roms_load16b(memoria_temp,robocop2_sprites)) then exit;
-        cninja_convert_sprites($6000,$7fff);
+        cninja_convert_sprites($6000);
         //Proteccion deco146
         deco146_0:=cpu_deco_146.create(USE_MAGIC_ADDRESS_XOR);
         //Dip

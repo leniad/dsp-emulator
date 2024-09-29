@@ -361,7 +361,12 @@ uses
   unico_hw in '..\arcade\unico_hw.pas',
   kikikaikai_hw in '..\arcade\kikikaikai_hw.pas',
   lasso_hw in '..\arcade\lasso_hw.pas',
-  ym_2413 in '..\snd\ym_2413.pas';
+  ym_2413 in '..\snd\ym_2413.pas',
+  finalstarforce_hw in '..\arcade\finalstarforce_hw.pas',
+  wyvernf0_hw in '..\arcade\wyvernf0_hw.pas',
+  taito_68705 in '..\arcade\misc\taito_68705.pas',
+  galaxian_stars in '..\arcade\misc\galaxian_stars.pas',
+  msm5232 in '..\snd\msm5232.pas';
 
 {$R *.res}
 begin

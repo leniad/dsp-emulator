@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.23WIP3';
+        DSP_VERSION='0.23WIP4';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -171,6 +171,7 @@ var
         cont_micro,valor_sync:single;
         {$endif}
         EmuStatus:TEmuStatus;
+        frame_main,frame_sub,frame_snd,frame_snd2,frame_mcu:single;
         //Basic memory...
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
 
@@ -423,6 +424,7 @@ begin
   p_final[num].final_mix:=final_mix;
   p_final[num].alpha:=alpha;
 end;
+
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
 begin
   p_final[num].scroll.long_x:=long_x;

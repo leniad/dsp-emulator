@@ -1,4 +1,100 @@
 # DSP Emulator status #
+<b>29/09/24 - DSP Emulator 0.23WIP4. Updated Windows binary and source<br>
+<pre>
+-General
+    +Controls Engine
+        -Added analog control reset
+    +Sound
+        -Konami: added mute, added to all drivers
+        -MSM5232: added sound chip, but sounds too fast (testing)
+        -YM2203: fixed sound amplification
+        -OKI6295: fixed sound amplification
+        -YM2413: bypass delphi shl function error
+    +Misc
+        -Added Taito 68705 protection device, unified from all drivers
+        -Split Galaxian stars from driver, converted into a device
+        -General cleaning and still working on new DIP switches data conversion
+        -Added new preview images
+-NES
+    +Fixed screen flicker in mapper 4 (Fixes Kings Quest V)
+-Arkanoid
+    +Removed MCU, used general Taito 68705
+-Armed Formation HW
+    +Added DIPs
+    +Removed sprite masks
+-China Gate
+    +Removed scan lines conversion
+    +Fixed FIRQs
+-City Connection
+    +Enhanced video parameters
+-Double Dragon HW
+    +Removed scan lines conversion
+    +Removed video masks
+    +Fixed FIQRs
+    +Double Dragon: change ROMs to world version
+-Food Fight
+    +Some video optimizations, removed fake scroll
+    +Fixed IRQ
+-Galaxian
+    +Removed start generation
+    +Better background color handling
+-Legend of Kage
+    +Removed MCU, used general Taito 68705
+-Legendary Wings HW
+    +Added sound CPU reset
+    +Fire Ball: added driver with sound
+-Mysterious Stones
+    +Removed scan lines conversion
+    +Fixed IRQs
+-Pacman HW
+    +Enhanced Z80 map
+    +Removed video hack, converted to rotated screen
+    +Ponpoko: added driver with sound
+    +Wood Pecker: added driver with sound
+    +Eyes: added driver with sound
+    +Ali Baba and 40 Thieves: added driver with sound
+    +Piranha added driver with sound
+-Prehistoric Isle in 1930
+    +Enhanced video parameters
+    +Fixed IRQ
+-Rally X
+    +Optimized video functions
+    +Fixed video buffer
+    +Fixed screen rotation
+-Renegade
+    +Removed MCU, used general Taito 68705
+    +Enhanced video parameters
+    +Fixed screen size
+    +Fixed IRQs
+    +Fixed sound IRQs
+-Return of Invaders
+    +Removed MCU, used general Taito 68705
+-Slap Fight
+    +Removed MCU, used general Taito 68705
+    +Removed chars and tiles masks
+-Senjyo HW
+    +Baluba: Added DIP switches
+-Super Dodge Ball
+    +Enhanced video scroll
+-Tecmo 16
+    +Final Star Force: Added driver with sound
+-Time Pilot
+    +Changed screen render to line by line, fixed sprite render
+    +Fixed screen orientation
+-Tutankhan
+    +Added background stars
+-Wyvern F-0
+    +Added driver with sound
+
+          Before                     Now
+<img src="https://i.ibb.co/Xp8cTyq/Time-Pilot-before.png"> <img src="https://i.ibb.co/kXwJ1h2/Time-Pilot-now.png">
+
+New Games
+<img src="https://i.ibb.co/8YpxJRW/Ali-Baba-and-40-Thieves.png"> <img src="https://i.ibb.co/0Zgscth/Eyes.png">
+<img src="https://i.ibb.co/7b25vVP/Final-Star-Force.png"> <img src="https://i.ibb.co/dcKTjp4/Piranha.png">
+<img src="https://i.ibb.co/zNZ8hBq/Ponpoko.png"> <img src="https://i.ibb.co/Q89cn8X/Woodpecker.png">
+<img src="https://i.ibb.co/308LXR6/Wyvern-F-0.png"> <img src="https://i.ibb.co/1rpsr0Y/Fire-Ball.png">
+</pre><br>
 <b>01/09/24 - DSP Emulator 0.23WIP3. Updated Windows binary and source<br>
 <pre>
 -General

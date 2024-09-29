@@ -12898,6 +12898,26 @@ object principal1: Tprincipal1
               Caption = 'Birdiy'
               OnClick = CambiarMaquina
             end
+            object ponpoko1: TMenuItem
+              Caption = 'Ponpoko'
+              OnClick = CambiarMaquina
+            end
+            object woodpecker1: TMenuItem
+              Caption = 'Wood Pecker'
+              OnClick = CambiarMaquina
+            end
+            object eyes1: TMenuItem
+              Caption = 'Eyes'
+              OnClick = CambiarMaquina
+            end
+            object alibaba1: TMenuItem
+              Caption = 'Ali Baba and 40 Thieves'
+              OnClick = CambiarMaquina
+            end
+            object piranha1: TMenuItem
+              Caption = 'Piranha'
+              OnClick = CambiarMaquina
+            end
           end
           object GalaxianHardware1: TMenuItem
             Caption = 'Galaxian HW'
@@ -13119,7 +13139,7 @@ object principal1: Tprincipal1
             end
           end
           object MenuItem51: TMenuItem
-            Caption = 'M63 HW'
+            Caption = 'Irem M63 HW'
             object wilytower1: TMenuItem
               Caption = 'Wily Tower'
               OnClick = CambiarMaquina
@@ -13658,6 +13678,10 @@ object principal1: Tprincipal1
               Caption = 'Kick and Run'
               OnClick = CambiarMaquina
             end
+          end
+          object WyvernF01: TMenuItem
+            Caption = 'Wyvern F-0'
+            OnClick = CambiarMaquina
           end
         end
         object M65021: TMenuItem
@@ -14655,6 +14679,13 @@ object principal1: Tprincipal1
             end
             object zeropoint1: TMenuItem
               Caption = 'Zero Point'
+              OnClick = CambiarMaquina
+            end
+          end
+          object MenuItem60: TMenuItem
+            Caption = 'Tecmo 16'
+            object finalstarforce1: TMenuItem
+              Caption = 'Final Star Force'
               OnClick = CambiarMaquina
             end
           end

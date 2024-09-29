@@ -87,19 +87,17 @@ end;
 
 procedure mario_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    z80_0.run(frame);
-    frame:=frame+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    if f=240 then begin
       if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       update_video_mario;
     end;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
   eventos_mario;
   video_sync;
@@ -194,6 +192,7 @@ end;
 procedure reset_mario;
 begin
  z80_0.reset;
+ frame_main:=z80_0.tframes;
  reset_samples;
  reset_audio;
  marcade.in0:=0;

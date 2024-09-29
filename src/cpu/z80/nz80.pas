@@ -33,7 +33,7 @@ const
         False,False,True);
 
 type
-  band_z80 = record
+  band_z80=record
      c,n,p_v,bit3,h,bit5,z,s:boolean;
   end;
   tdespues_instruccion=procedure(estados_t:word);

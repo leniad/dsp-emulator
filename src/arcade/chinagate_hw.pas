@@ -37,7 +37,6 @@ var
  rom,rom_sub:array[0..7,0..$3fff] of byte;
  banco_rom,banco_rom_sub,soundlatch:byte;
  scroll_x,scroll_y:word;
- chinagate_scanline:array[0..271] of word;
 
 procedure update_video_chinagate;
 procedure draw_sprites;
@@ -144,7 +143,7 @@ end;
 
 procedure chinagate_principal;
 var
-  f,l:word;
+  f:word;
   frame_m,frame_s,frame_snd:single;
   h:byte;
 begin
@@ -154,6 +153,16 @@ frame_s:=hd6309_1.tframes;
 frame_snd:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
+    //video
+    case f of
+      8:marcade.in0:=marcade.in0 and $fe;
+      248:begin
+            hd6309_0.change_nmi(ASSERT_LINE);
+            update_video_chinagate;
+            marcade.in0:=marcade.in0 or 1;
+          end;
+    end;
+    if (((f mod 16)=0) and (f<240)) then hd6309_0.change_firq(ASSERT_LINE);
     for h:=1 to CPU_SYNC do begin
       //main
       hd6309_0.run(frame_m);
@@ -165,17 +174,6 @@ while EmuStatus=EsRunning do begin
       z80_0.run(frame_snd);
       frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
     end;
-    //video
-    case chinagate_scanline[f] of
-      $8:marcade.in0:=marcade.in0 and $fe;
-      $f8:begin
-            hd6309_0.change_nmi(ASSERT_LINE);
-            update_video_chinagate;
-            marcade.in0:=marcade.in0 or 1;
-          end;
-    end;
-    if f<>0 then l:=f-1 else l:=271;
-    if (((chinagate_scanline[l] and $8)=0) and ((chinagate_scanline[f] and $8)<>0)) then hd6309_0.change_firq(ASSERT_LINE);
   end;
   eventos_chinagate;
   video_sync;
@@ -195,6 +193,7 @@ begin
     end;
 end;
 
+procedure chinagate_putbyte(direccion:word;valor:byte);
 procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
@@ -211,8 +210,6 @@ begin
     256..383:buffer_color[((pos shr 4) and $7)+8]:=true;
   end;
 end;
-
-procedure chinagate_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
         0..$1fff,$3800..$397f:memoria[direccion]:=valor;
@@ -261,7 +258,7 @@ procedure chinagate_sub_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
-  $2000:banco_rom_sub:=valor and $7;
+  $2000:banco_rom_sub:=valor and 7;
   $2800:hd6309_1.change_irq(CLEAR_LINE);
   $4000..$ffff:;
 end;
@@ -345,28 +342,25 @@ iniciar_video(256,240);
 //Main CPU
 hd6309_0:=cpu_hd6309.create(12000000 div 2,272*CPU_SYNC,TCPU_HD6309);
 hd6309_0.change_ram_calls(chinagate_getbyte,chinagate_putbyte);
+if not(roms_load(@memoria_temp,chinagate_rom)) then exit;
+copymemory(@memoria[$8000],@memoria_temp[$18000],$8000);
+for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[(f*$4000)],$4000);
 //Sub CPU
 hd6309_1:=cpu_hd6309.create(12000000 div 2,272*CPU_SYNC,TCPU_HD6309);
 hd6309_1.change_ram_calls(chinagate_sub_getbyte,chinagate_sub_putbyte);
+if not(roms_load(@memoria_temp,chinagate_sub)) then exit;
+copymemory(@mem_misc[$8000],@memoria_temp[$18000],$8000);
+for f:=0 to 5 do copymemory(@rom_sub[f,0],@memoria_temp[(f*$4000)],$4000);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,272*CPU_SYNC);
 z80_0.change_ram_calls(chinagate_snd_getbyte,chinagate_snd_putbyte);
 z80_0.init_sound(chinagate_sound_update);
+if not(roms_load(@mem_snd,chinagate_snd)) then exit;
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,0.5);
 if not(roms_load(oki_6295_0.get_rom_addr,chinagate_adpcm)) then exit;
-//Main roms
-if not(roms_load(@memoria_temp,chinagate_rom)) then exit;
-copymemory(@memoria[$8000],@memoria_temp[$18000],$8000);
-for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[(f*$4000)],$4000);
-//Sub roms
-if not(roms_load(@memoria_temp,chinagate_sub)) then exit;
-copymemory(@mem_misc[$8000],@memoria_temp[$18000],$8000);
-for f:=0 to 5 do copymemory(@rom_sub[f,0],@memoria_temp[(f*$4000)],$4000);
-//Sound roms
-if not(roms_load(@mem_snd,chinagate_snd)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,chinagate_char)) then exit;
 init_gfx(0,8,8,$1000);
@@ -389,9 +383,6 @@ marcade.dswa:=$bf;
 marcade.dswb:=$e7;
 marcade.dswa_val2:=@chinagate_dip_a;
 marcade.dswb_val2:=@chinagate_dip_b;
-//init scanlines
-for f:=8 to $ff do chinagate_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
-for f:=$e8 to $ff do chinagate_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
 //final
 reset_chinagate;
 iniciar_chinagate:=true;

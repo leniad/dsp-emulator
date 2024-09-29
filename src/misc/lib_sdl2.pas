@@ -238,7 +238,7 @@ end;
 procedure close_sdl_lib;
 begin
 if sdl_dll_handle<>0 then begin
-   FreeLibrary(sdl_dll_Handle);
+   FreeLibrary(sdl_dll_handle);
    sdl_dll_handle:=0;
 end;
 end;

@@ -340,6 +340,7 @@ begin
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
+ reset_analog;
 end;
 
 function iniciar_systeme:boolean;

@@ -390,7 +390,6 @@ type
     Gaunt21: TMenuItem;
     WilliamsHW1: TMenuItem;
     Defender1: TMenuItem;
-    ddragon_sh1: TMenuItem;
     Mayday1: TMenuItem;
     Colony71: TMenuItem;
     Bosconian1: TMenuItem;
@@ -591,6 +590,15 @@ type
     Ghostbusters1: TMenuItem;
     oscar1: TMenuItem;
     RoadFighter1: TMenuItem;
+    Ponpoko1: TMenuItem;
+    Woodpecker1: TMenuItem;
+    Eyes1: TMenuItem;
+    alibaba1: TMenuItem;
+    Piranha1: TMenuItem;
+    Tecmo16HW1: TMenuItem;
+    FinalStarforce1: TMenuItem;
+    WyvernF01: TMenuItem;
+    FireBall1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -901,7 +909,7 @@ procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice,tempb:byte;
+  indice:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;

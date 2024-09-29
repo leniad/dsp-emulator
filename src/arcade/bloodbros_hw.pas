@@ -10,7 +10,7 @@ function iniciar_bloodbros:boolean;
 implementation
 const
         bloodbros_rom:array[0..3] of tipo_roms=(
-        (n:'2.u021.7n';l:$20000;p:1;crc:$204dca6e),(n:'1.u022.8n';l:$20000;p:$0;crc:$ac6719e7),
+        (n:'2.u021.7n';l:$20000;p:1;crc:$204dca6e),(n:'1.u022.8n';l:$20000;p:0;crc:$ac6719e7),
         (n:'4.u023.7l';l:$20000;p:$40001;crc:$fd951c2c),(n:'3.u024.8l';l:$20000;p:$40000;crc:$18d3c460));
         bloodbros_sound:tipo_roms=(n:'bb_07.u1016.6a';l:$10000;p:0;crc:$411b94e8);
         bloodbros_char:array[0..1] of tipo_roms=(
@@ -27,7 +27,7 @@ const
         (mask:$4000;name:'Allow Continue';number:2;val2:(0,$4000);name2:('No','Yes')),
         (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')),());
         skysmash_rom:array[0..3] of tipo_roms=(
-        (n:'rom5';l:$20000;p:0;crc:$867f9897),(n:'rom6';l:$20000;p:$1;crc:$e9c1d308),
+        (n:'rom5';l:$20000;p:0;crc:$867f9897),(n:'rom6';l:$20000;p:1;crc:$e9c1d308),
         (n:'rom7';l:$20000;p:$40000;crc:$d209db4d),(n:'rom8';l:$20000;p:$40001;crc:$d3646728));
         skysmash_sound:tipo_roms=(n:'rom2';l:$10000;p:0;crc:$75b194cf);
         skysmash_char:array[0..1] of tipo_roms=(
@@ -63,7 +63,7 @@ begin
 for f:=$1ff downto 0 do begin
     atrib:=ram[$5800+(f*4)];
 		if (atrib and $8000)<>0 then continue;
-    if ((atrib and $0800) shr 11)<>prio then continue;
+    if ((atrib and $800) shr 11)<>prio then continue;
     width:=(atrib shr 7) and 7;
 		height:=(atrib shr 4) and 7;
     x:=ram[$5802+(f*4)] and $1ff;
@@ -144,48 +144,45 @@ end;
 procedure eventos_bloodbros;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $0001);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $0002);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $0004);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $0008);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $0010);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $0020);
-  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $0040);
-  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $0100);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $0200);
-  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $0400);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $0800);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  //Sys
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   //COINS por la CPU de sonido!!
-  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or $1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
-  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or $2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or 1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or 2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
 end;
 end;
 
 procedure bloodbros_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRunning do begin
    for f:=0 to $ff do begin
-     //Main CPU
-     m68000_0.run(frame_m);
-     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-     //Sound CPU
-     seibu_snd_0.z80.run(frame_s);
-     frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
-     if f=239 then begin
+     if f=240 then begin
         m68000_0.irq[irq_level]:=HOLD_LINE;
         update_video_bloodbros;
      end;
+     //Main CPU
+     m68000_0.run(frame_main);
+     frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+     //Sound CPU
+     seibu_snd_0.run;
    end;
    eventos_bloodbros;
    video_sync;
@@ -223,7 +220,7 @@ end;
 function bloodbros_getword(direccion:dword):word;
 begin
 case direccion of
-    $0..$7ffff:bloodbros_getword:=rom[direccion shr 1];
+    0..$7ffff:bloodbros_getword:=rom[direccion shr 1];
     $80000..$8e7ff,$8f800..$8ffff:bloodbros_getword:=ram[(direccion and $ffff) shr 1];
     $8e800..$8f7ff:bloodbros_getword:=buffer_paleta[(direccion-$8e800) shr 1];
     $a0000..$a000d:bloodbros_getword:=seibu_snd_0.get((direccion and $f) shr 1);
@@ -279,6 +276,7 @@ end;
 procedure reset_bloodbros;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  seibu_snd_0.reset;
  reset_audio;
  marcade.in0:=$ffff;

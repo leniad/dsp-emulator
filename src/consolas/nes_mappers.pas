@@ -421,9 +421,9 @@ end;
 
 procedure mapper_4_line(force:boolean);
 begin
-//IMPORTANTE: Revisar Gauntle II si toco algo
+//IMPORTANTE: Revisar Gauntlet II si toco algo
 //if ((ppu_nes_0.linea<240) or (ppu_nes_0.linea=261) or force) then begin
-//if (ppu_nes_0.control2 and $18)<>0 then begin
+if (ppu_nes_0.control2 and $18)<>0 then begin //IMPORTANTE KingQuest V quiere esto
   if ((nes_mapper_0.counter=0) or nes_mapper_0.reload) then begin
     nes_mapper_0.counter:=nes_mapper_0.regs[2];
     nes_mapper_0.reload:=false;
@@ -432,7 +432,7 @@ begin
     nes_mapper_0.reload:=true;
     if nes_mapper_0.irq_ena then n2a03_0.m6502.change_irq(ASSERT_LINE);
   end;
-//end;
+end;
 end;
 
 procedure mapper_5_update_prg;

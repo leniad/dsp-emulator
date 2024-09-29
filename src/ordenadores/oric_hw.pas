@@ -12,13 +12,13 @@ implementation
 uses tap_tzx;
 
 const
-    atmos_rom:tipo_roms=(n:'basic11b.rom';l:$4000;p:$0;crc:$c3a92bef);
-    oric1_rom:tipo_roms=(n:'basic10.rom';l:$4000;p:$0;crc:$f18710b4);
-    microdisc_rom:tipo_roms=(n:'microdis.rom';l:$2000;p:$0;crc:$a9664a9c);
-		PATTR_HIRES =$04;
-		LATTR_ALT   =$01;
-		LATTR_DSIZE =$02;
-		LATTR_BLINK =$04;
+    atmos_rom:tipo_roms=(n:'basic11b.rom';l:$4000;p:0;crc:$c3a92bef);
+    oric1_rom:tipo_roms=(n:'basic10.rom';l:$4000;p:0;crc:$f18710b4);
+    microdisc_rom:tipo_roms=(n:'microdis.rom';l:$2000;p:0;crc:$a9664a9c);
+		PATTR_HIRES =4;
+		LATTR_ALT   =1;
+		LATTR_DSIZE =2;
+		LATTR_BLINK =4;
 
 var
   tape_sound_channel,blink_counter,pattr,via_a,via_b,psg_a,tape_timer:byte;
@@ -62,10 +62,10 @@ begin
 			end;
 			// Handle state-chaging attributes
 			if ((ch and $60)=0) then begin
-				pat:=$00;
+				pat:=0;
 				case (ch and $18) of
-				  $00:fgcol:=paleta[ch and 7];
-				  $08:lattr:=ch and 7;
+				  0:fgcol:=paleta[ch and 7];
+				  8:lattr:=ch and 7;
           $10:bgcol:=paleta[ch and 7];
 				  $18:tpattr:=ch and 7;
 				end;
@@ -87,16 +87,16 @@ begin
       if (pat and $10)<>0 then ptemp^:=c_fgcol
         else ptemp^:=c_bgcol;
       inc(ptemp);
-      if (pat and $08)<>0 then ptemp^:=c_fgcol
+      if (pat and 8)<>0 then ptemp^:=c_fgcol
         else ptemp^:=c_bgcol;
       inc(ptemp);
-      if (pat and $04)<>0 then ptemp^:=c_fgcol
+      if (pat and 4)<>0 then ptemp^:=c_fgcol
         else ptemp^:=c_bgcol;
       inc(ptemp);
-      if (pat and $02)<>0 then ptemp^:=c_fgcol
+      if (pat and 2)<>0 then ptemp^:=c_fgcol
         else ptemp^:=c_bgcol;
       inc(ptemp);
-      if (pat and $01)<>0 then ptemp^:=c_fgcol
+      if (pat and 1)<>0 then ptemp^:=c_fgcol
         else ptemp^:=c_bgcol;
       inc(ptemp);
 	end;
@@ -107,75 +107,75 @@ end;
 procedure eventos_oric;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then key_row[4]:=(key_row[4] and $f7) else key_row[4]:=(key_row[4] or $8);
+  if arcade_input.up[0] then key_row[4]:=(key_row[4] and $f7) else key_row[4]:=(key_row[4] or 8);
   if arcade_input.down[0] then key_row[4]:=(key_row[4] and $bf) else key_row[4]:=(key_row[4] or $40);
   if arcade_input.left[0] then key_row[4]:=(key_row[4] and $df) else key_row[4]:=(key_row[4] or $20);
   if arcade_input.right[0] then key_row[4]:=(key_row[4] and $7f) else key_row[4]:=(key_row[4] or $80);
 end else if event.keyboard then begin
   //Row 0
-  if keyboard[KEYBOARD_7] then key_row[0]:=(key_row[0] and $fe) else key_row[0]:=(key_row[0] or $1);
-  if keyboard[KEYBOARD_n] then key_row[0]:=(key_row[0] and $fd) else key_row[0]:=(key_row[0] or $2);
-  if keyboard[KEYBOARD_5] then key_row[0]:=(key_row[0] and $fb) else key_row[0]:=(key_row[0] or $4);
-  if keyboard[KEYBOARD_v] then key_row[0]:=(key_row[0] and $f7) else key_row[0]:=(key_row[0] or $8);
+  if keyboard[KEYBOARD_7] then key_row[0]:=(key_row[0] and $fe) else key_row[0]:=(key_row[0] or 1);
+  if keyboard[KEYBOARD_n] then key_row[0]:=(key_row[0] and $fd) else key_row[0]:=(key_row[0] or 2);
+  if keyboard[KEYBOARD_5] then key_row[0]:=(key_row[0] and $fb) else key_row[0]:=(key_row[0] or 4);
+  if keyboard[KEYBOARD_v] then key_row[0]:=(key_row[0] and $f7) else key_row[0]:=(key_row[0] or 8);
   if keyboard[KEYBOARD_1] then key_row[0]:=(key_row[0] and $df) else key_row[0]:=(key_row[0] or $20);
   if keyboard[KEYBOARD_x] then key_row[0]:=(key_row[0] and $bf) else key_row[0]:=(key_row[0] or $40);
   if keyboard[KEYBOARD_3] then key_row[0]:=(key_row[0] and $7f) else key_row[0]:=(key_row[0] or $80);
   //Row 1
-  if keyboard[KEYBOARD_j] then key_row[1]:=(key_row[1] and $fe) else key_row[1]:=(key_row[1] or $1);
-  if keyboard[KEYBOARD_t] then key_row[1]:=(key_row[1] and $fd) else key_row[1]:=(key_row[1] or $2);
-  if keyboard[KEYBOARD_r] then key_row[1]:=(key_row[1] and $fb) else key_row[1]:=(key_row[1] or $4);
-  if keyboard[KEYBOARD_f] then key_row[1]:=(key_row[1] and $f7) else key_row[1]:=(key_row[1] or $8);
+  if keyboard[KEYBOARD_j] then key_row[1]:=(key_row[1] and $fe) else key_row[1]:=(key_row[1] or 1);
+  if keyboard[KEYBOARD_t] then key_row[1]:=(key_row[1] and $fd) else key_row[1]:=(key_row[1] or 2);
+  if keyboard[KEYBOARD_r] then key_row[1]:=(key_row[1] and $fb) else key_row[1]:=(key_row[1] or 4);
+  if keyboard[KEYBOARD_f] then key_row[1]:=(key_row[1] and $f7) else key_row[1]:=(key_row[1] or 8);
   if keyboard[KEYBOARD_tab] then key_row[1]:=(key_row[1] and $df) else key_row[1]:=(key_row[1] or $20);
   if keyboard[KEYBOARD_q] then key_row[1]:=(key_row[1] and $bf) else key_row[1]:=(key_row[1] or $40);
   if keyboard[KEYBOARD_d] then key_row[1]:=(key_row[1] and $7f) else key_row[1]:=(key_row[1] or $80);
   //Row 2
-  if keyboard[KEYBOARD_m] then key_row[2]:=(key_row[2] and $fe) else key_row[2]:=(key_row[2] or $1);
-  if keyboard[KEYBOARD_6] then key_row[2]:=(key_row[2] and $fd) else key_row[2]:=(key_row[2] or $2);
-  if keyboard[KEYBOARD_b] then key_row[2]:=(key_row[2] and $fb) else key_row[2]:=(key_row[2] or $4);
-  if keyboard[KEYBOARD_4] then key_row[2]:=(key_row[2] and $f7) else key_row[2]:=(key_row[2] or $8);
+  if keyboard[KEYBOARD_m] then key_row[2]:=(key_row[2] and $fe) else key_row[2]:=(key_row[2] or 1);
+  if keyboard[KEYBOARD_6] then key_row[2]:=(key_row[2] and $fd) else key_row[2]:=(key_row[2] or 2);
+  if keyboard[KEYBOARD_b] then key_row[2]:=(key_row[2] and $fb) else key_row[2]:=(key_row[2] or 4);
+  if keyboard[KEYBOARD_4] then key_row[2]:=(key_row[2] and $f7) else key_row[2]:=(key_row[2] or 8);
   if keyboard[KEYBOARD_LCTRL] then key_row[2]:=(key_row[2] and $ef) else key_row[2]:=(key_row[2] or $10);
   if keyboard[KEYBOARD_z] then key_row[2]:=(key_row[2] and $df) else key_row[2]:=(key_row[2] or $20);
   if keyboard[KEYBOARD_2] then key_row[2]:=(key_row[2] and $bf) else key_row[2]:=(key_row[2] or $40);
   if keyboard[KEYBOARD_c] then key_row[2]:=(key_row[2] and $7f) else key_row[2]:=(key_row[2] or $80);
   //Row 3
-  if keyboard[KEYBOARD_k] then key_row[3]:=(key_row[3] and $fe) else key_row[3]:=(key_row[3] or $1);
-  if keyboard[KEYBOARD_9] then key_row[3]:=(key_row[3] and $fd) else key_row[3]:=(key_row[3] or $2);
-  if keyboard[KEYBOARD_FILA1_T2] then key_row[3]:=(key_row[3] and $fb) else key_row[3]:=(key_row[3] or $4);
-  if keyboard[KEYBOARD_FILA3_T3] then key_row[3]:=(key_row[3] and $f7) else key_row[3]:=(key_row[3] or $8);
+  if keyboard[KEYBOARD_k] then key_row[3]:=(key_row[3] and $fe) else key_row[3]:=(key_row[3] or 1);
+  if keyboard[KEYBOARD_9] then key_row[3]:=(key_row[3] and $fd) else key_row[3]:=(key_row[3] or 2);
+  if keyboard[KEYBOARD_FILA1_T2] then key_row[3]:=(key_row[3] and $fb) else key_row[3]:=(key_row[3] or 4);
+  if keyboard[KEYBOARD_FILA3_T3] then key_row[3]:=(key_row[3] and $f7) else key_row[3]:=(key_row[3] or 8);
   //if keyboard[KEYBOARD_LCTRL] then key_row[3]:=(key_row[3] and $ef) else key_row[3]:=(key_row[3] or $10);
   //if keyboard[KEYBOARD_z] then key_row[3]:=(key_row[3] and $df) else key_row[3]:=(key_row[3] or $20);
   if keyboard[KEYBOARD_FILA3_T0] then key_row[3]:=(key_row[3] and $bf) else key_row[3]:=(key_row[3] or $40);
   if keyboard[KEYBOARD_FILA1_T1] then key_row[3]:=(key_row[3] and $7f) else key_row[3]:=(key_row[3] or $80);
   //Row 4
-  if keyboard[KEYBOARD_space] then key_row[4]:=(key_row[4] and $fe) else key_row[4]:=(key_row[4] or $1);
-  if keyboard[KEYBOARD_FILA3_T1] then key_row[4]:=(key_row[4] and $fd) else key_row[4]:=(key_row[4] or $2);
-  if keyboard[KEYBOARD_FILA3_T2] then key_row[4]:=(key_row[4] and $fb) else key_row[4]:=(key_row[4] or $4);
+  if keyboard[KEYBOARD_space] then key_row[4]:=(key_row[4] and $fe) else key_row[4]:=(key_row[4] or 1);
+  if keyboard[KEYBOARD_FILA3_T1] then key_row[4]:=(key_row[4] and $fd) else key_row[4]:=(key_row[4] or 2);
+  if keyboard[KEYBOARD_FILA3_T2] then key_row[4]:=(key_row[4] and $fb) else key_row[4]:=(key_row[4] or 4);
   //Up --> arcade
   if keyboard[KEYBOARD_LSHIFT] then key_row[4]:=(key_row[4] and $ef) else key_row[4]:=(key_row[4] or $10);
   //Left --> Arcade
   //Down --> Arcade
   //Right --> Arcade
   //Row 5
-  if keyboard[KEYBOARD_u] then key_row[5]:=(key_row[5] and $fe) else key_row[5]:=(key_row[5] or $1);
-  if keyboard[KEYBOARD_i] then key_row[5]:=(key_row[5] and $fd) else key_row[5]:=(key_row[5] or $2);
-  if keyboard[KEYBOARD_o] then key_row[5]:=(key_row[5] and $fb) else key_row[5]:=(key_row[5] or $4);
-  if keyboard[KEYBOARD_p] then key_row[5]:=(key_row[5] and $f7) else key_row[5]:=(key_row[5] or $8);
+  if keyboard[KEYBOARD_u] then key_row[5]:=(key_row[5] and $fe) else key_row[5]:=(key_row[5] or 1);
+  if keyboard[KEYBOARD_i] then key_row[5]:=(key_row[5] and $fd) else key_row[5]:=(key_row[5] or 2);
+  if keyboard[KEYBOARD_o] then key_row[5]:=(key_row[5] and $fb) else key_row[5]:=(key_row[5] or 4);
+  if keyboard[KEYBOARD_p] then key_row[5]:=(key_row[5] and $f7) else key_row[5]:=(key_row[5] or 8);
   if keyboard[KEYBOARD_backspace] then key_row[5]:=(key_row[5] and $df) else key_row[5]:=(key_row[5] or $20);
   if keyboard[KEYBOARD_FILA2_T1] then key_row[5]:=(key_row[5] and $bf) else key_row[5]:=(key_row[5] or $40);
   if keyboard[KEYBOARD_FILA2_T2] then key_row[5]:=(key_row[5] and $7f) else key_row[5]:=(key_row[5] or $80);
   //Row 6
-  if keyboard[KEYBOARD_y] then key_row[6]:=(key_row[6] and $fe) else key_row[6]:=(key_row[6] or $1);
-  if keyboard[KEYBOARD_h] then key_row[6]:=(key_row[6] and $fd) else key_row[6]:=(key_row[6] or $2);
-  if keyboard[KEYBOARD_g] then key_row[6]:=(key_row[6] and $fb) else key_row[6]:=(key_row[6] or $4);
-  if keyboard[KEYBOARD_e] then key_row[6]:=(key_row[6] and $f7) else key_row[6]:=(key_row[6] or $8);
+  if keyboard[KEYBOARD_y] then key_row[6]:=(key_row[6] and $fe) else key_row[6]:=(key_row[6] or 1);
+  if keyboard[KEYBOARD_h] then key_row[6]:=(key_row[6] and $fd) else key_row[6]:=(key_row[6] or 2);
+  if keyboard[KEYBOARD_g] then key_row[6]:=(key_row[6] and $fb) else key_row[6]:=(key_row[6] or 4);
+  if keyboard[KEYBOARD_e] then key_row[6]:=(key_row[6] and $f7) else key_row[6]:=(key_row[6] or 8);
   if keyboard[KEYBOARD_a] then key_row[6]:=(key_row[6] and $df) else key_row[6]:=(key_row[6] or $20);
   if keyboard[KEYBOARD_s] then key_row[6]:=(key_row[6] and $bf) else key_row[6]:=(key_row[6] or $40);
   if keyboard[KEYBOARD_w] then key_row[6]:=(key_row[6] and $7f) else key_row[6]:=(key_row[6] or $80);
   //Row 7
-  if keyboard[KEYBOARD_8] then key_row[7]:=(key_row[7] and $fe) else key_row[7]:=(key_row[7] or $1);
-  if keyboard[KEYBOARD_l] then key_row[7]:=(key_row[7] and $fd) else key_row[7]:=(key_row[7] or $2);
-  if keyboard[KEYBOARD_0] then key_row[7]:=(key_row[7] and $fb) else key_row[7]:=(key_row[7] or $4);
-  if keyboard[KEYBOARD_FILA0_T2] then key_row[7]:=(key_row[7] and $f7) else key_row[7]:=(key_row[7] or $8);
+  if keyboard[KEYBOARD_8] then key_row[7]:=(key_row[7] and $fe) else key_row[7]:=(key_row[7] or 1);
+  if keyboard[KEYBOARD_l] then key_row[7]:=(key_row[7] and $fd) else key_row[7]:=(key_row[7] or 2);
+  if keyboard[KEYBOARD_0] then key_row[7]:=(key_row[7] and $fb) else key_row[7]:=(key_row[7] or 4);
+  if keyboard[KEYBOARD_FILA0_T2] then key_row[7]:=(key_row[7] and $f7) else key_row[7]:=(key_row[7] or 8);
   if keyboard[KEYBOARD_RSHIFT] then key_row[7]:=(key_row[7] and $ef) else key_row[7]:=(key_row[7] or $10);
   if keyboard[KEYBOARD_return] then key_row[7]:=(key_row[7] and $df) else key_row[7]:=(key_row[7] or $20);
   if keyboard[KEYBOARD_FILA0_T1] then key_row[7]:=(key_row[7] and $7f) else key_row[7]:=(key_row[7] or $80);
@@ -184,15 +184,13 @@ end;
 
 procedure oric_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,true,true,false);
-frame:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 311 do begin
-    m6502_0.run(frame);
-    frame:=frame+m6502_0.tframes-m6502_0.contador;
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
     update_video_oric(f);
   end;
   blink_counter:=(blink_counter+1) and $3f;
@@ -205,7 +203,7 @@ end;
 function oric_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$2ff,$400..$bfff:oric_getbyte:=memoria[direccion];
+  0..$2ff,$400..$bfff:oric_getbyte:=memoria[direccion];
   $300..$3ff:oric_getbyte:=via6522_0.read(direccion and $f);
   $c000..$ffff:oric_getbyte:=bios_rom[direccion and $3fff];
 end;
@@ -224,7 +222,7 @@ end;
 function oric_getbyte_microdisc(direccion:word):byte;
 begin
 case direccion of
-  $0..$2ff,$400..$bfff:oric_getbyte_microdisc:=memoria[direccion];
+  0..$2ff,$400..$bfff:oric_getbyte_microdisc:=memoria[direccion];
   $300..$3ff:case direccion of
                 $310..$31f:oric_getbyte_microdisc:=microdisc_0.read(direccion and $f);
                 else oric_getbyte_microdisc:=via6522_0.read(direccion and $f);
@@ -358,12 +356,13 @@ begin
  //IMPORTANTE!! Hay que resetear primero esto para que ponga los valores pordefecto!
  //microdisc_0.reset;
  m6502_0.reset;
+ frame_main:=m6502_0.tframes;
  ay8910_0.reset;
  via6522_0.reset;
  reset_audio;
  via_a:=$ff;
  via_b:=$ff;
- psg_a:=$00;
+ psg_a:=0;
  via_ca2:=false;
  via_cb2:=false;
  via_irq:=false;

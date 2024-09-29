@@ -326,6 +326,14 @@ type
     captainsilver1: TMenuItem;
     cobracommand1: TMenuItem;
     ghostbusters1: TMenuItem;
+    eyes1: TMenuItem;
+    alibaba1: TMenuItem;
+    MenuItem60: TMenuItem;
+    finalstarforce1: TMenuItem;
+    WyvernF01: TMenuItem;
+    piranha1: TMenuItem;
+    woodpecker1: TMenuItem;
+    ponpoko1: TMenuItem;
     roadfighter1: TMenuItem;
     oscar1: TMenuItem;
     shackled1: TMenuItem;

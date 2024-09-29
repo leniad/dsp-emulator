@@ -27,10 +27,10 @@ const
         trackfield_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
         trackfield_dip_b:array [0..7] of def_dip2=(
-        (mask:$1;name:'Lives';number:2;val2:(1,0);name2:('1','2')),
-        (mask:$2;name:'After Last Event';number:2;val2:(2,0);name2:('Game Over','Game Continues')),
-        (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
-        (mask:$8;name:'Bonus Life';number:2;val2:(8,0);name2:('None','100K')),
+        (mask:1;name:'Lives';number:2;val2:(1,0);name2:('1','2')),
+        (mask:2;name:'After Last Event';number:2;val2:(2,0);name2:('Game Over','Game Continues')),
+        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+        (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('None','100K')),
         (mask:$10;name:'World Records';number:2;val2:($10,0);name2:('Don''t Erase','Erase on Reset')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Difficult')),
         (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
@@ -90,12 +90,9 @@ end;
 
 procedure trackfield_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
       if f=240 then begin
@@ -103,11 +100,11 @@ while EmuStatus=EsRunning do begin
           update_video_trackfield;
       end;
       //main
-      m6809_0.run(frame_m);
-      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
+      m6809_0.run(frame_main);
+      frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
       //sound
-      z80_0.run(frame_s);
-      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_snd);
+      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
   //General
   eventos_trackfield;
@@ -196,7 +193,7 @@ end;
 
 procedure trackfield_sound_update;
 begin
-  sn_76496_0.Update;
+  sn_76496_0.update;
   dac_0.update;
   vlm5030_0.update;
 end;
@@ -279,6 +276,8 @@ procedure reset_trackfield;
 begin
  m6809_0.reset;
  z80_0.reset;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=z80_0.tframes;
  vlm5030_0.reset;
  dac_0.reset;
  reset_audio;
@@ -341,7 +340,7 @@ dac_0:=dac_chip.Create(0.80);
 if read_file_size(Directory.Arcade_nvram+'trackfield.nv',longitud) then read_file(Directory.Arcade_nvram+'trackfield.nv',@memoria[$2800],longitud);
 //convertir chars
 if not(roms_load(@memoria_temp,trackfield_char)) then exit;
-init_gfx(0,8,8,$300,$3ff);
+init_gfx(0,8,8,$300);
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites

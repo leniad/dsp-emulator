@@ -8,9 +8,10 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 function iniciar_foodf:boolean;
 
 implementation
+
 const
         foodf_rom:array[0..7] of tipo_roms=(
-        (n:'136020-301.8c';l:$2000;p:1;crc:$dfc3d5a8),(n:'136020-302.9c';l:$2000;p:$0;crc:$ef92dc5c),
+        (n:'136020-301.8c';l:$2000;p:1;crc:$dfc3d5a8),(n:'136020-302.9c';l:$2000;p:0;crc:$ef92dc5c),
         (n:'136020-303.8d';l:$2000;p:$4001;crc:$64b93076),(n:'136020-204.9d';l:$2000;p:$4000;crc:$ea596480),
         (n:'136020-305.8e';l:$2000;p:$8001;crc:$e6cff1b1),(n:'136020-306.9e';l:$2000;p:$8000;crc:$95159a3e),
         (n:'136020-307.8f';l:$2000;p:$c001;crc:$17828dbb),(n:'136020-208.9f';l:$2000;p:$c000;crc:$608690c9));
@@ -19,11 +20,11 @@ const
         (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf));
         foodf_nvram:tipo_roms=(n:'foodf.nv';l:$100;p:0;crc:$a4186b13);
         //DIP
-        foodf_dip:array [0..4] of def_dip=(
-        (mask:$7;name:'Bonus Coins';number:5;dip:((dip_val:$0;dip_name:'None'),(dip_val:$5;dip_name:'1 for every 2'),(dip_val:$2;dip_name:'1 for every 4'),(dip_val:$1;dip_name:'1 for every 5'),(dip_val:$6;dip_name:'2 for every 4'),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Coin A';number:2;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$10;dip_name:'1C 5C'),(dip_val:$30;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$80;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$c0;dip_name:'1C 2C'),(dip_val:$40;dip_name:'FreePlay'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        foodf_dip:array [0..4] of def_dip2=(
+        (mask:7;name:'Bonus Coins';number:8;val8:(0,5,2,1,6,3,4,7);name8:('None','1 for every 2','1 for every 4','1 for every 5','2 for every 4','Invalid','Invalid','Invalid')),
+        (mask:8;name:'Coin A';number:2;val2:(0,8);name2:('1C 1C','1C 2C')),
+        (mask:$30;name:'Coin B';number:4;val4:(0,$20,$10,$30);name4:('1C 1C','1C 4C','1C 5C','1C 6C')),
+        (mask:$c0;name:'Coinage';number:4;val4:($80,0,$c0,$40);name4:('2C 1C','1C 1C','1C 2C','FreePlay')),());
 
 var
  rom:array[0..$ffff] of word;
@@ -36,15 +37,11 @@ var
  analog_select:byte;
 
 procedure update_video_foodf;
-var
-  f,color,x,y,nchar,atrib:word;
-
 procedure draw_sprites(prio:byte);
 var
   color,atrib,atrib2:word;
   nchar,x,y,f,pri:byte;
 begin
-// draw the motion objects front-to-back
 for f:=$10 to $3f do begin
 		atrib:=sprite_ram[f*2];
     pri:=(atrib shr 13) and 1;
@@ -58,20 +55,22 @@ for f:=$10 to $3f do begin
     actualiza_gfx_sprite(x,y,2,1);
 end;
 end;
-
+var
+  f,nchar,atrib:word;
+  x,y,color:byte;
 begin
-for f:=$0 to $3ff do begin
+for f:=0 to $3ff do begin
    atrib:=bg_ram[f];
    color:=(atrib shr 8) and $3f;
    if ((gfx[0].buffer[f]) or (buffer_color[color])) then begin
-      x:=f shr 5;
+      x:=(f shr 5)+1;
       y:=f and $1f;
-      nchar:=(atrib and $ff) or ((atrib shr 7) and $100);;
-      put_gfx(x*8,y*8,nchar,color shl 2,1,0);
+      nchar:=(atrib and $ff) or ((atrib shr 7) and $100);
+      put_gfx((x*8) and $ff,y*8,nchar,color shl 2,1,0);
       gfx[0].buffer[f]:=false;
    end;
 end;
-scroll__x(1,2,248);
+actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
 draw_sprites(0);
 draw_sprites(1);
 actualiza_trozo_final(0,0,256,224,2);
@@ -94,23 +93,21 @@ end;
 
 procedure foodf_principal;
 var
-  frame_m:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 258 do begin
-    //main
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     case f of
-    31,95,159,224:m68000_0.irq[1]:=ASSERT_LINE;
-    223:begin
+    0,64,128,192:m68000_0.irq[1]:=ASSERT_LINE;
+    224:begin
           m68000_0.irq[2]:=ASSERT_LINE;
           update_video_foodf;
         end;
     end;
+    //main
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
  end;
  analog_data[1]:=analog.c[0].y[0];
  analog_data[5]:=analog.c[0].x[0];
@@ -131,9 +128,9 @@ case direccion of
     $800000..$83ffff:foodf_getword:=bg_ram[(direccion and $7ff) shr 1];
     $900000..$93ffff:foodf_getword:=nvram[(direccion and $1ff) shr 1] and $ff;
     $940000..$97ffff:case (direccion and $1ffff) of
-                  0..$3fff:foodf_getword:=$ff00+analog_data[analog_select and $7]; //(direccion and $7) - read analog
-                  $8000..$bfff:foodf_getword:=marcade.in0; //read system
-                  $18000..$1bfff:foodf_getword:=$ffff; //read write watch dog
+                  0..$3fff:foodf_getword:=$ff00+analog_data[analog_select and 7];
+                  $8000..$bfff:foodf_getword:=marcade.in0;
+                  $18000..$1bfff:foodf_getword:=$ffff;
                end;
     $a40000..$a7ffff:foodf_getword:=pokey_1.read((direccion and $1f) shr 1);
     $a80000..$abffff:foodf_getword:=pokey_0.read((direccion and $1f) shr 1);
@@ -148,19 +145,16 @@ var
   color:tcolor;
   bit0,bit1,bit2:byte;
 begin
-  // red component */
-		bit0:=(data shr 0) and $01;
-		bit1:=(data shr 1) and $01;
-		bit2:=(data shr 2) and $01;
+		bit0:=(data shr 0) and 1;
+		bit1:=(data shr 1) and 1;
+		bit2:=(data shr 2) and 1;
 		color.r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
-		// green component */
-		bit0:=(data shr 3) and $01;
-		bit1:=(data shr 4) and $01;
-		bit2:=(data shr 5) and $01;
+		bit0:=(data shr 3) and 1;
+		bit1:=(data shr 4) and 1;
+		bit2:=(data shr 5) and 1;
 		color.g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
-		// blue component */
-		bit0:=(data shr 6) and $01;
-		bit1:=(data shr 7) and $01;
+		bit0:=(data shr 6) and 1;
+		bit1:=(data shr 7) and 1;
 		color.b:=combine_2_weights(@bweights[0], bit0, bit1);
     set_pal_color(color,pos);
     if pos<64 then buffer_color[pos]:=true;
@@ -180,12 +174,12 @@ case direccion of
                      end;
     $900000..$93ffff:nvram[(direccion and $1ff) shr 1]:=valor and $ff;
     $940000..$97ffff:case (direccion and $1ffff) of
-                  $4000..$7fff:analog_select:=(direccion and $7) xor 3; //write analog
+                  $4000..$7fff:analog_select:=(direccion and 7) xor 3;
                   $8000..$bfff:begin
-                                 if (valor and $4)=0 then m68000_0.irq[1]:=CLEAR_LINE;
-                                 if (valor and $8)=0 then m68000_0.irq[2]:=CLEAR_LINE;
+                                 if (valor and 4)=0 then m68000_0.irq[1]:=CLEAR_LINE;
+                                 if (valor and 8)=0 then m68000_0.irq[2]:=CLEAR_LINE;
                                end;
-                  $10000..$13fff:cambiar_color((direccion and $1ff) shr 1,valor); //palette write
+                  $10000..$13fff:cambiar_color((direccion and $1ff) shr 1,valor);
                   $14000:; //read nvram recall
                end;
     $a40000..$a7ffff:pokey_1.write((direccion and $1f) shr 1,valor and $ff);
@@ -210,12 +204,15 @@ end;
 procedure reset_foodf;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
+ reset_analog;
  pokey_0.reset;
  pokey_1.reset;
  pokey_2.reset;
  reset_audio;
  marcade.in0:=$ffff;
  analog_select:=0;
+ fillchar(analog_data[0],8,$ff);
 end;
 
 procedure cerrar_foodf;
@@ -249,6 +246,7 @@ iniciar_video(256,224);
 m68000_0:=cpu_m68000.create(12096000 div 2,259);
 m68000_0.change_ram16_calls(foodf_getword,foodf_putword);
 m68000_0.init_sound(foodf_sound_update);
+if not(roms_load16w(@rom,foodf_rom)) then exit;
 //Init Analog
 init_analog(m68000_0.numero_cpu,m68000_0.clock);
 analog_0(100,10,$7f,$ff,0,true);
@@ -257,8 +255,6 @@ pokey_0:=pokey_chip.create(trunc(12096000/2/10));
 pokey_0.change_all_pot(foodf_pot_r);
 pokey_1:=pokey_chip.create(trunc(12096000/2/10));
 pokey_2:=pokey_chip.create(trunc(12096000/2/10));
-//cargar roms
-if not(roms_load16w(@rom,foodf_rom)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,foodf_char)) then exit;
 init_gfx(0,8,8,$200);
@@ -276,8 +272,8 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances[0],@gweights,0,0,
 			2,@resistances[1],@bweights,0,0);
 //DIP
-marcade.dswa:=$0;
-marcade.dswa_val:=@foodf_dip;
+marcade.dswa:=0;
+marcade.dswa_val2:=@foodf_dip;
 //NVRAM
 if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram,longitud)
   else if not(roms_load(@nvram,foodf_nvram)) then exit;

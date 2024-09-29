@@ -69,15 +69,13 @@ end;
 
 procedure sms_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
       vdp_0.refresh(f);
   end;
   actualiza_trozo(0,vdp_0.BORDER_DIFF,284,243,1,0,0,284,243,PANT_TEMP);
@@ -113,7 +111,7 @@ case direccion of
   $c000..$fffb:sms_0.mapper.ram[direccion and $1fff]:=valor;
   $fffc..$ffff:begin
                   sms_0.mapper.ram[direccion and $1fff]:=valor;
-                  case (direccion and $3) of
+                  case (direccion and 3) of
                     0:begin
                           if sms_0.cart_enabled then begin
                             sms_0.mapper.slot2_ram:=(valor and 8)<>0;
@@ -225,7 +223,7 @@ begin
     0..$3f:; //return the last byte of the instruction
     $40..$7f:if (puerto and 1)<>0 then sms_inbyte:=vdp_0.hpos
                 else sms_inbyte:=vdp_0.linea_back;
-    $80..$bf:if (puerto and $01)<>0 then sms_inbyte:=vdp_0.register_r
+    $80..$bf:if (puerto and 1)<>0 then sms_inbyte:=vdp_0.register_r
           else sms_inbyte:=vdp_0.vram_r;
     $c0..$ff:if sms_0.io_enabled then begin
                 if (puerto and 1)<>0 then sms_inbyte:=sms_0.keys[1]
@@ -241,13 +239,13 @@ procedure config_io(valor:byte);
 begin
 //Bit 2 y 0 son para ver si la consola es internacional.
 //Si es JAP, devuelve lo contrario de los bits 7 y 5 (no tiene TH)
-if (valor and $5)=$5 then begin //bit 2 internacional
+if (valor and 5)=5 then begin //bit 2 internacional
   sms_0.keys[1]:=sms_0.keys[1] and $7f;
   //Si es JAP, devuelve lo contrario (no tiene TH)
   if sms_0.model=1 then sms_0.keys[1]:=sms_0.keys[1] or (not(valor) and $80)
     else sms_0.keys[1]:=sms_0.keys[1] or (valor and $80);
 end;
-if (valor and $5)=$5 then begin //bit 1 internacional
+if (valor and 5)=5 then begin //bit 1 internacional
   sms_0.keys[1]:=sms_0.keys[1] and $bf;
   if sms_0.model=1 then sms_0.keys[1]:=sms_0.keys[1] or ((not(valor) and $20) shl 1)
     else sms_0.keys[1]:=sms_0.keys[1] or ((valor and $20) shl 1)
@@ -259,14 +257,14 @@ end;
 
 begin
   case (puerto and $ff) of
-    0..$3f:if (puerto and $1)<>0 then config_io(valor)
+    0..$3f:if (puerto and 1)<>0 then config_io(valor)
               else begin
                       sms_0.bios_enabled:=(valor and 8)=0;
                       sms_0.io_enabled:=(valor and 4)=0;
                       sms_0.cart_enabled:=(valor and $e0)<>$e0;
                    end;
     $40..$7f:sn_76496_0.Write(valor);
-    $80..$bf:if (puerto and $1)<>0 then vdp_0.register_w(valor)
+    $80..$bf:if (puerto and 1)<>0 then vdp_0.register_w(valor)
                 else vdp_0.vram_w(valor);
     $c0..$ff:case (puerto and $ff) of
                 $f0:ym2413_0.address(valor);
@@ -307,6 +305,7 @@ end;
 procedure reset_sms;
 begin
  z80_0.reset;
+ frame_main:=z80_0.tframes;
  sn_76496_0.reset;
  vdp_0.reset;
  ym2413_0.reset;

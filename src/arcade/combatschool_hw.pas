@@ -371,7 +371,7 @@ z80_0:=cpu_z80.create(3579545,$100);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(combatsc_sound_update);
 //Audio chips
-ym2203_0:=ym2203_chip.create(3000000,0.4);
+ym2203_0:=ym2203_chip.create(3000000);
 upd7759_0:=upd7759_chip.create(1);
 if not(roms_load(upd7759_0.get_rom_addr,combatsc_upd)) then exit;
 //cargar roms

@@ -108,6 +108,7 @@ end;
 procedure eventos_toki;
 begin
 if event.arcade then begin
+  //P1 P2
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
@@ -120,35 +121,34 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
-  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or 1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
-  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or 2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
+  //Sys
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
+  //MCU
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or 1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or 2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
+
 end;
 end;
 
 procedure toki_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRunning do begin
    for f:=0 to $ff do begin
-     //Main CPU
-     m68000_0.run(frame_m);
-     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-     //Sound CPU
-     seibu_snd_0.z80.run(frame_s);
-     frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
-     if f=239 then begin
+     if f=240 then begin
         m68000_0.irq[1]:=HOLD_LINE;
         update_video_toki;
         copymemory(@sprite_ram[0],@ram[$6c00],$800);
      end;
      scroll_x2[f]:=scroll_x2_tmp;
+     //Main CPU
+     m68000_0.run(frame_main);
+     frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+     //Sound CPU
+     seibu_snd_0.run;
    end;
    eventos_toki;
    video_sync;
@@ -230,6 +230,7 @@ procedure reset_toki;
 begin
  m68000_0.reset;
  seibu_snd_0.reset;
+ frame_main:=m68000_0.tframes;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

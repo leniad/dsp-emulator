@@ -16,8 +16,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="23"/>
-      <RevisionNr Value="3"/>
-      <BuildNr Value="1377"/>
+      <RevisionNr Value="4"/>
+      <BuildNr Value="1381"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.22"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="67">
+    <Units Count="68">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -60,11 +60,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="738"/>
-        <CursorPos X="5" Y="758"/>
+        <TopLine Value="746"/>
+        <CursorPos X="5" Y="766"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\ordenadores\spectrum_misc.pas"/>
@@ -198,6 +199,7 @@
         <TopLine Value="664"/>
         <CursorPos Y="666"/>
         <UsageCount Value="202"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="redefine.pas"/>
@@ -498,9 +500,9 @@
       </Unit47>
       <Unit48>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="901"/>
-        <CursorPos X="56" Y="912"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="914"/>
+        <CursorPos X="53" Y="926"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -626,6 +628,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="362"/>
         <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit64>
       <Unit65>
         <Filename Value="..\arcade\centipede_hw.pas"/>
@@ -640,9 +643,19 @@
         <EditorIndex Value="-1"/>
         <CursorPos X="30" Y="13"/>
         <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit66>
+      <Unit67>
+        <Filename Value="..\arcade\mrdo_hw.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="88"/>
+        <CursorPos X="100" Y="100"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit67>
     </Units>
-    <JumpHistory Count="13" HistoryIndex="12">
+    <JumpHistory Count="24" HistoryIndex="23">
       <Position1>
         <Filename Value="principal.pas"/>
       </Position1>
@@ -693,6 +706,50 @@
         <Filename Value="principal.pas"/>
         <Caret Line="757" Column="5" TopLine="737"/>
       </Position13>
+      <Position14>
+        <Filename Value="principal.pas"/>
+        <Caret Line="758" Column="5" TopLine="738"/>
+      </Position14>
+      <Position15>
+        <Filename Value="principal.pas"/>
+        <Caret Line="759" Column="5" TopLine="739"/>
+      </Position15>
+      <Position16>
+        <Filename Value="principal.pas"/>
+        <Caret Line="760" Column="5" TopLine="740"/>
+      </Position16>
+      <Position17>
+        <Filename Value="principal.pas"/>
+        <Caret Line="761" Column="5" TopLine="741"/>
+      </Position17>
+      <Position18>
+        <Filename Value="principal.pas"/>
+        <Caret Line="762" Column="5" TopLine="742"/>
+      </Position18>
+      <Position19>
+        <Filename Value="principal.pas"/>
+        <Caret Line="763" Column="5" TopLine="743"/>
+      </Position19>
+      <Position20>
+        <Filename Value="principal.pas"/>
+        <Caret Line="764" Column="5" TopLine="744"/>
+      </Position20>
+      <Position21>
+        <Filename Value="principal.pas"/>
+        <Caret Line="765" Column="5" TopLine="745"/>
+      </Position21>
+      <Position22>
+        <Filename Value="..\arcade\mrdo_hw.pas"/>
+        <Caret Line="100" Column="100" TopLine="88"/>
+      </Position22>
+      <Position23>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="42" Column="66" TopLine="30"/>
+      </Position23>
+      <Position24>
+        <Filename Value="principal.pas"/>
+        <Caret Line="765" Column="5" TopLine="745"/>
+      </Position24>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

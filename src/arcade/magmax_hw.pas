@@ -49,14 +49,14 @@ var
  ram:array[0..$7ff] of word;
  ram_video:array[0..$3ff] of word;
  prom_mem,ram_sprites:array[0..$ff] of word;
- LS74_q,LS74_clr,sound_latch:byte;
- rom18B:array[0..$ffff] of byte;
+ ls74_q,ls74_clr,sound_latch:byte;
+ rom18b:array[0..$ffff] of byte;
  redraw_bg:boolean;
 
 procedure update_video_magmax;
 procedure draw_background;
 var
-  prom_data,pen_base,scroll_h,map_v_scr_100,rom18D_addr,rom15F_addr,map_v_scr_1fe_6,LS283:word;
+  prom_data,pen_base,scroll_h,map_v_scr_100,rom18d_addr,rom15f_addr,map_v_scr_1fe_6,ls283:word;
   scroll_v,f,h,graph_color,graph_data:byte;
   pixel1,pixel2:array[0..$ff] of word;
 begin
@@ -66,25 +66,25 @@ begin
       fillword(@pixel1,$100,paleta[$100]);
       fillword(@pixel2,$100,paleta[MAX_COLORES]);
 			map_v_scr_100:=(scroll_v+f) and $100;
-			rom18D_addr:=((scroll_v+f) and $f8)+(map_v_scr_100 shl 5);
-			rom15F_addr:=(((scroll_v+f) and 7) shl 2)+(map_v_scr_100 shl 5);
+			rom18d_addr:=((scroll_v+f) and $f8)+(map_v_scr_100 shl 5);
+			rom15f_addr:=(((scroll_v+f) and 7) shl 2)+(map_v_scr_100 shl 5);
 			map_v_scr_1fe_6:=((scroll_v+f) and $1fe) shl 6;
 			pen_base:=$20+(map_v_scr_100 shr 1);
 			for h:=0 to $ff do begin
-				LS283:=scroll_h+h;
+				ls283:=scroll_h+h;
 				if (map_v_scr_100=0) then begin
-					if (h and $80)<>0 then LS283:=LS283+(rom18B[ map_v_scr_1fe_6+(h xor $ff)] xor $ff)
-					  else LS283:=LS283+rom18B[map_v_scr_1fe_6+h]+$ff01;
+					if (h and $80)<>0 then ls283:=ls283+(rom18b[ map_v_scr_1fe_6+(h xor $ff)] xor $ff)
+					  else ls283:=ls283+rom18b[map_v_scr_1fe_6+h]+$ff01;
         end;
-				prom_data:=prom_mem[(LS283 shr 6) and $ff];
-				rom18D_addr:=rom18D_addr and $20f8;
-				rom18D_addr:=rom18D_addr+((prom_data and $1f00)+((LS283 and $38) shr 3));
-				rom15F_addr:=rom15F_addr and $201c;
-				rom15F_addr:=rom15F_addr+((rom18B[$4000+rom18D_addr] shl 5)+((LS283 and 6) shr 1));
-				rom15F_addr:=rom15F_addr+(prom_data and $4000);
+				prom_data:=prom_mem[(ls283 shr 6) and $ff];
+				rom18d_addr:=rom18d_addr and $20f8;
+				rom18d_addr:=rom18d_addr+((prom_data and $1f00)+((ls283 and $38) shr 3));
+				rom15f_addr:=rom15f_addr and $201c;
+				rom15f_addr:=rom15f_addr+((rom18b[$4000+rom18d_addr] shl 5)+((ls283 and 6) shr 1));
+				rom15f_addr:=rom15f_addr+(prom_data and $4000);
 				graph_color:=prom_data and $70;
-				graph_data:=rom18B[$8000+rom15F_addr];
-				if ((LS283 and 1)<>0) then graph_data:=graph_data shr 4;
+				graph_data:=rom18b[$8000+rom15f_addr];
+				if ((ls283 and 1)<>0) then graph_data:=graph_data shr 4;
 				graph_data:=graph_data and $f;
 				pixel1[h]:=paleta[pen_base+graph_color+graph_data];
 				// priority: background over sprites
@@ -159,27 +159,24 @@ end;
 
 procedure magmax_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-    //main
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     case f of
-       64,192:if (LS74_clr<>0) then LS74_q:=1;
-       239:begin
+       64,192:if (ls74_clr<>0) then ls74_q:=1;
+       240:begin
              update_video_magmax;
              m68000_0.irq[1]:=ASSERT_LINE;
            end;
     end;
+    //main
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
  eventos_magmax;
  video_sync;
@@ -250,10 +247,10 @@ end;
 function magmax_snd_inbyte(puerto:word):byte;
 begin
   case (puerto and $ff) of
-  0:magmax_snd_inbyte:=ay8910_0.Read;
-  2:magmax_snd_inbyte:=ay8910_1.Read;
-  4:magmax_snd_inbyte:=ay8910_2.Read;
-  6:magmax_snd_inbyte:=(sound_latch shl 1) or LS74_q;
+  0:magmax_snd_inbyte:=ay8910_0.read;
+  2:magmax_snd_inbyte:=ay8910_1.read;
+  4:magmax_snd_inbyte:=ay8910_2.read;
+  6:magmax_snd_inbyte:=(sound_latch shl 1) or ls74_q;
   end;
 end;
 
@@ -293,8 +290,8 @@ end;
 
 procedure magmax_portb_w(valor:byte);
 begin
-LS74_clr:=valor and 1;
-if (LS74_clr=0) then LS74_q:=0;
+ls74_clr:=valor and 1;
+if (ls74_clr=0) then ls74_q:=0;
 end;
 
 //Main
@@ -302,6 +299,8 @@ procedure reset_magmax;
 begin
  m68000_0.reset;
  z80_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  ay8910_0.reset;
  ay8910_1.reset;
  ay8910_2.reset;
@@ -312,8 +311,8 @@ begin
  scroll_x:=0;
  scroll_y:=0;
  sound_latch:=0;
- LS74_clr:=0;
- LS74_q:=0;
+ ls74_clr:=0;
+ ls74_q:=0;
  gain_control:=0;
  redraw_bg:=true;
 end;
@@ -355,8 +354,8 @@ ay8910_0.change_io_calls(nil,nil,magmax_porta_w,magmax_portb_w);
 ay8910_1:=ay8910_chip.create(1250000,AY8910,1);
 ay8910_2:=ay8910_chip.create(1250000,AY8910,1);
 //poner los datos de bg
-if not(roms_load16b(@rom18B,magmax_fondo1)) then exit;
-if not(roms_load(@rom18B,magmax_fondo2)) then exit;
+if not(roms_load16b(@rom18b,magmax_fondo1)) then exit;
+if not(roms_load(@rom18b,magmax_fondo2)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,magmax_char)) then exit;
 init_gfx(0,8,8,$100);

@@ -91,15 +91,13 @@ end;
 
 procedure coleco_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,true,true,false);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
       tms_0.refresh(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
@@ -221,6 +219,7 @@ var
   f:word;
 begin
  z80_0.reset;
+ frame_main:=z80_0.tframes;
  sn_76496_0.reset;
  ay8910_0.reset;
  tms_0.reset;

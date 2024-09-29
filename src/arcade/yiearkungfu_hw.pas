@@ -91,19 +91,17 @@ end;
 
 procedure yiear_principal;
 var
-  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=m6809_0.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 255 do begin
     if f=240 then begin
       if irq_ena then m6809_0.change_irq(HOLD_LINE);
       update_video_yiear;
     end;
-    m6809_0.run(frame);
-    frame:=frame+m6809_0.tframes-m6809_0.contador;
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
   end;
   eventos_yiear;
   video_sync;
@@ -218,6 +216,7 @@ end;
 procedure reset_yiear;
 begin
  m6809_0.reset;
+ frame_main:=m6809_0.tframes;
  sn_76496_0.reset;
  vlm5030_0.reset;
  reset_audio;
@@ -255,15 +254,12 @@ iniciar_video(256,224);
 m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
 m6809_0.init_sound(yiear_sound_update);
+timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
+if not(roms_load(@memoria,yiear_rom)) then exit;
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(18432000 div 12);
-//cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
 if not(roms_load(vlm5030_0.get_rom_addr,yiear_vlm)) then exit;
-//NMI sonido
-timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
-//cargar roms
-if not(roms_load(@memoria,yiear_rom)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,yiear_char)) then exit;
 init_gfx(0,8,8,512);

@@ -321,6 +321,7 @@ begin
   vscroll:=0;
   marcade.in0:=$ff;
   marcade.in1:=$df;
+  reset_analog;
 end;
 
 procedure close_ccastles;

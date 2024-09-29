@@ -39,8 +39,8 @@ object configgb: Tconfiggb
     end
   end
   object Button1: TButton
-    Left = 37
-    Top = 134
+    Left = 24
+    Top = 118
     Width = 105
     Height = 49
     Caption = 'OK'
@@ -48,8 +48,8 @@ object configgb: Tconfiggb
     OnClick = Button1Click
   end
   object Button2: TButton
-    Left = 191
-    Top = 134
+    Left = 167
+    Top = 118
     Width = 105
     Height = 49
     Caption = 'CANCEL'

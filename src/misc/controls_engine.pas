@@ -169,6 +169,7 @@ procedure show_mouse_cursor;
 procedure hide_mouse_cursor;
 //Analog
 procedure init_analog(cpu:byte;cpu_clock:integer);
+procedure reset_analog;
 procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted_x:boolean=false;inverted_y:boolean=false);
 procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
@@ -800,6 +801,20 @@ procedure init_analog(cpu:byte;cpu_clock:integer);
 begin
 analog.cpu:=cpu;
 analog.clock:=cpu_clock;
+end;
+
+procedure reset_analog;
+var
+  f:byte;
+begin
+for f:=0 to NUM_PLAYERS do begin
+    analog.c[0].x[f]:=analog.c[0].mid_val;
+    analog.c[0].y[f]:=analog.c[0].mid_val;
+    analog.c[1].val[f]:=analog.c[1].min_val;
+    analog.c[2].val[f]:=analog.c[2].min_val;
+    analog.c[3].val[f]:=analog.c[3].min_val;
+    analog.c[4].val[f]:=analog.c[4].min_val;
+end;
 end;
 
 procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted_x:boolean=false;inverted_y:boolean=false);

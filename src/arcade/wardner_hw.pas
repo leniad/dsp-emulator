@@ -43,7 +43,7 @@ const
 var
  mem_rom:array[0..7,0..$7fff] of byte;
  rom_bank:byte;
- int_enable,wardner_dsp_BIO,dsp_execute,video_ena:boolean;
+ int_enable,wardner_dsp_bio,dsp_execute,video_ena:boolean;
  txt_ram:array[0..$7ff] of word;
  bg_ram:array[0..$1fff] of word;
  fg_ram:array[0..$fff] of word;
@@ -51,10 +51,6 @@ var
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
 
 procedure update_video_wardner;
-var
-  f,nchar,x,y,atrib:word;
-  color:byte;
-
 procedure draw_sprites(priority:word);
 var
   f,nchar,atrib,x,y:word;
@@ -77,7 +73,9 @@ for f:=0 to $1ff do begin
   end;
 end;
 end;
-
+var
+  f,nchar,x,y,atrib:word;
+  color:byte;
 begin
 if video_ena then begin
   for f:=$7ff downto 0 do begin
@@ -153,26 +151,13 @@ end;
 procedure wardnerhw_principal;
 var
   f:word;
-  frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_mcu:=tms32010_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 285 do begin
-    //MAIN CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //SND CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    //MCU
-    tms32010_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
     case f of
       0:marcade.in0:=marcade.in0 and $7f;
-      239:begin
+      240:begin
             marcade.in0:=marcade.in0 or $80;
             if int_enable then begin
                 z80_0.change_irq(HOLD_LINE);
@@ -181,6 +166,15 @@ while EmuStatus=EsRunning do begin
             update_video_wardner;
           end;
     end;
+    //MAIN CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //SND CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+    //MCU
+    tms32010_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
   end;
   eventos_wardner;
   video_sync;
@@ -223,19 +217,19 @@ end;
 
 procedure wardner_dsp_bio_w(valor:word);
 begin
-  if (valor and $8000)<>0 then wardner_dsp_BIO:=false;
+  if (valor and $8000)<>0 then wardner_dsp_bio:=false;
 	if (valor=0) then begin
 		if dsp_execute then begin
       z80_0.change_halt(CLEAR_LINE);
 			dsp_execute:=false;
 		end;
-		wardner_dsp_BIO:=true;
+		wardner_dsp_bio:=true;
 	end;
 end;
 
-function wardner_BIO_r:boolean;
+function wardner_bio_r:boolean;
 begin
-  wardner_BIO_r:=wardner_dsp_BIO;
+  wardner_bio_r:=wardner_dsp_bio;
 end;
 
 function wardner_snd_getbyte(direccion:word):byte;
@@ -430,6 +424,9 @@ begin
  z80_0.reset;
  z80_1.reset;
  tms32010_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ frame_mcu:=tms32010_0.tframes;
  ym3812_0.reset;
  reset_audio;
  txt_scroll_x:=0;
@@ -449,7 +446,7 @@ begin
  fg_bank:=0;
  int_enable:=false;
  video_ena:=true;
- wardner_dsp_BIO:=false;
+ wardner_dsp_bio:=false;
  dsp_execute:=false;
  main_ram_seg:=0;
  dsp_addr_w:=0;
@@ -483,26 +480,19 @@ iniciar_video(320,240);
 z80_0:=cpu_z80.create(24000000 div 4,286);
 z80_0.change_ram_calls(wardner_getbyte,wardner_putbyte);
 z80_0.change_io_calls(wardner_inbyte,wardner_outbyte);
+if not(roms_load(@memoria_temp,wardner_rom)) then exit;
+copymemory(@memoria,@memoria_temp,$8000);
+for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
+copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
 //Sound CPU
 z80_1:=cpu_z80.create(14000000 div 4,286);
 z80_1.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
 z80_1.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
 z80_1.init_sound(wardner_sound_update);
-//TMS MCU
-tms32010_0:=cpu_tms32010.create(14000000,286);
-tms32010_0.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,14000000 div 4);
-ym3812_0.change_irq_calls(snd_irq);
-//cargar roms
-if not(roms_load(@memoria_temp,wardner_rom)) then exit;
-//Mover las ROMS a su sitio
-copymemory(@memoria,@memoria_temp[0],$8000);
-for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
-copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
-//cargar ROMS sonido
 if not(roms_load(@mem_snd,wardner_snd_rom)) then exit;
-//cargar ROMS MCU y organizarlas
+//MCU CPU
+tms32010_0:=cpu_tms32010.create(14000000,286);
+tms32010_0.change_io_calls(wardner_bio_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
 if not(roms_load(@memoria_temp,wardner_mcu_rom)) then exit;
 for f:=0 to $3ff do
    rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
@@ -511,7 +501,10 @@ for f:=0 to $1ff do
    //1024-2047
    rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1200] and $f)) shl 8) or
                         (memoria_temp[f+$1400] and $f) shl 4+(memoria_temp[f+$1600] and $f);
-copymemory(tms32010_0.get_rom_addr,@rom[0],$1000);
+copymemory(tms32010_0.get_rom_addr,@rom,$1000);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,14000000 div 4);
+ym3812_0.change_irq_calls(snd_irq);
 //convertir chars
 if not(roms_load(@memoria_temp,wardner_char)) then exit;
 init_gfx(0,8,8,2048);

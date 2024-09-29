@@ -23,12 +23,12 @@ const
         (n:'c5';l:$2000;p:$c000;crc:$c03d8b1b));
         //Dip
         citycon_dip_a:array [0..3] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','Infinite')),
+        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','Infinite')),
         (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
         citycon_dip_b:array [0..2] of def_dip2=(
-        (mask:$7;name:'Coinage';number:8;val8:(7,6,5,4,0,1,2,3);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
-        (mask:$8;name:'Difficulty';number:2;val2:(0,8);name2:('Easy','Hard')),());
+        (mask:7;name:'Coinage';number:8;val8:(7,6,5,4,0,1,2,3);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:8;name:'Difficulty';number:2;val2:(0,8);name2:('Easy','Hard')),());
 
 var
  fondo,soundlatch,soundlatch2:byte;
@@ -38,8 +38,7 @@ var
  cambia_fondo:boolean;
 
 procedure update_video_citycon;
-
-procedure cambiar_fondo;
+procedure draw_bg;
 var
   f,x,y,nchar,color:word;
 begin
@@ -48,7 +47,7 @@ for f:=$fff downto 0 do begin
     x:=((f and $1f)+(y and $60)) shl 3;
     y:=(y and $1f) shl 3;
     nchar:=memoria_fondo[$1000*fondo+f]+(fondo shl 8);
-    color:=memoria_fondo[$c000+nchar];
+    color:=memoria_fondo[$c000+nchar] and $f;
     put_gfx(x,y,nchar,(color shl 4)+256,2,1);
 end;
 cambia_fondo:=false;
@@ -60,7 +59,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
-if cambia_fondo then cambiar_fondo;
+if cambia_fondo then draw_bg;
 scroll__x(2,3,scroll_x);
 for f:=$fff downto 0 do begin
  if gfx[0].buffer[f] then begin
@@ -102,19 +101,19 @@ procedure eventos_citycon;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYS
@@ -124,24 +123,21 @@ end;
 
 procedure citycon_principal;
 var
-  frame_m,frame_s:single;
-  f:byte;
+  f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=m6809_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    m6809_1.run(frame_s);
-    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
-    if f=239 then begin
+  for f:=0 to 261 do begin
+    if f=240 then begin
       m6809_0.change_irq(ASSERT_LINE);
       update_video_citycon;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    m6809_1.run(frame_snd);
+    frame_snd:=frame_snd+m6809_1.tframes-m6809_1.contador;
   end;
   eventos_citycon;
   video_sync;
@@ -195,11 +191,11 @@ case direccion of
             fondo:=valor shr 4;
             cambia_fondo:=true;
           end;
-          main_screen.flip_main_screen:=(valor and $1)<>0;
+          main_screen.flip_main_screen:=(valor and 1)<>0;
         end;
   $3001:soundlatch:=valor;
   $3002:soundlatch2:=valor;
-  $3004:scroll_x:=(scroll_x and $ff) or ((valor and $3) shl 8);
+  $3004:scroll_x:=(scroll_x and $ff) or ((valor and 3) shl 8);
   $3005:scroll_x:=(scroll_x and $300) or valor;
   $3800..$3cff:if buffer_paleta[direccion and $7ff]<>valor then begin
                   buffer_paleta[direccion and $7ff]:=valor;
@@ -213,9 +209,9 @@ function scitycon_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$fff,$8000..$ffff:scitycon_getbyte:=mem_snd[direccion];
-  $4000:scitycon_getbyte:=ay8910_0.Read;
+  $4000:scitycon_getbyte:=ay8910_0.read;
   $6000:scitycon_getbyte:=ym2203_0.status;
-  $6001:scitycon_getbyte:=ym2203_0.Read;
+  $6001:scitycon_getbyte:=ym2203_0.read;
 end;
 end;
 
@@ -223,10 +219,10 @@ procedure scitycon_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$fff:mem_snd[direccion]:=valor;
-  $4000:ay8910_0.Control(valor);
-  $4001:ay8910_0.Write(valor);
-  $6000:ym2203_0.Control(valor);
-  $6001:ym2203_0.Write(valor);
+  $4000:ay8910_0.control(valor);
+  $4001:ay8910_0.write(valor);
+  $6000:ym2203_0.control(valor);
+  $6001:ym2203_0.write(valor);
   $8000..$ffff:; //ROM
 end;
 end;
@@ -244,7 +240,7 @@ end;
 procedure citycon_sound_update;
 begin
   ay8910_0.update;
-  ym2203_0.Update;
+  ym2203_0.update;
 end;
 
 procedure citycon_qsave(nombre:string);
@@ -299,7 +295,7 @@ m6809_1.load_snapshot(data);
 loaddata_qsnapshot(data);
 ym2203_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-AY8910_0.load_snapshot(data);
+ay8910_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria);
 loaddata_qsnapshot(@mem_snd);
@@ -323,7 +319,9 @@ procedure reset_citycon;
 begin
  m6809_0.reset;
  m6809_1.reset;
- ym2203_0.Reset;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=m6809_1.tframes;
+ ym2203_0.reset;
  ay8910_0.reset;
  reset_audio;
  fillchar(lines_color_look[0],$100,0);
@@ -351,6 +349,7 @@ llamadas_maquina.bucle_general:=citycon_principal;
 llamadas_maquina.reset:=reset_citycon;
 llamadas_maquina.save_qsnap:=citycon_qsave;
 llamadas_maquina.load_qsnap:=citycon_qload;
+llamadas_maquina.fps_max:=59.637405;
 iniciar_citycon:=false;
 iniciar_audio(false);
 screen_init(1,1024,256,true);
@@ -360,20 +359,18 @@ screen_mod_scroll(2,1024,256,1023,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(8000000,$100,TCPU_MC6809);
+m6809_0:=cpu_m6809.create(8000000,262,TCPU_MC6809);
 m6809_0.change_ram_calls(citycon_getbyte,citycon_putbyte);
+if not(roms_load(@memoria,citycon_rom)) then exit;
 //Sound CPU
-m6809_1:=cpu_m6809.Create(8000000 div 12,$100,TCPU_MC6809E); //???
+m6809_1:=cpu_m6809.create(20000000 div 30,262,TCPU_MC6809E); //deberia ser 32...
 m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 m6809_1.init_sound(citycon_sound_update);
+if not(roms_load(@mem_snd,citycon_sonido)) then exit;
 //Sound Chip
 ym2203_0:=ym2203_chip.create(20000000 div 16,0.5,1);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
-ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910,1);
-//cargar roms
-if not(roms_load(@memoria,citycon_rom)) then exit;
-//Cargar Sound
-if not(roms_load(@mem_snd,citycon_sonido)) then exit;
+ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910);
 //convertir chars
 if not(roms_load(@memoria_temp,citycon_char)) then exit;
 init_gfx(0,8,8,256);
@@ -397,7 +394,7 @@ for f:=0 to 1 do begin
   convert_gfx(2,$80*16*8*f,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 //DIP
-marcade.dswa:=$0;
+marcade.dswa:=0;
 marcade.dswb:=$80;
 marcade.dswa_val2:=@citycon_dip_a;
 marcade.dswb_val2:=@citycon_dip_b;

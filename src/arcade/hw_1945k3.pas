@@ -46,7 +46,7 @@ var
  rom:array[0..$7ffff] of word;
  ram1,ram2:array[0..$7fff] of word;
  video,video_buffer:array[0..$7ff] of word;
- sprite,sprite_buffer:array[0..$fff] of word;
+ sprite:array[0..$fff] of word;
  oki1_rom,oki2_rom:array[0..3,0..$3ffff] of byte;
  y_size,oki1_bank,oki2_bank:byte;
  sprites_count,y_count,t1scroll_x,t1scroll_y:word;
@@ -92,10 +92,10 @@ for f:=0 to $3ff do begin
 end;
 scroll_x_y(1,2,t1scroll_x,t1scroll_y);
 for f:=0 to sprites_count do begin
-  x:=((sprite_buffer[f] and $ff00) shr 8) or ((sprite_buffer[f+$7ff] and $1) shl 8);
-  y:=sprite_buffer[f] and $ff;
-  nchar:=(sprite_buffer[$7ff+f] and $7ffe) shr 1;
-  put_gfx_sprite_1945(nchar,1,(sprite_buffer[f+$7ff] and $8000)<>0);
+  x:=((buffer_sprites_w[f] and $ff00) shr 8) or ((buffer_sprites_w[f+$7ff] and $1) shl 8);
+  y:=buffer_sprites_w[f] and $ff;
+  nchar:=(buffer_sprites_w[$7ff+f] and $7ffe) shr 1;
+  put_gfx_sprite_1945(nchar,1,(buffer_sprites_w[f+$7ff] and $8000)<>0);
   actualiza_gfx_sprite(x,y,2,1);
 end;
 actualiza_trozo_final(0,0,320,y_size,2);
@@ -166,7 +166,7 @@ var
 begin
   oldval:=vram_refresh;
 	if (not(oldval) and newval) then begin
-    copymemory(@sprite_buffer,@sprite,$1000*2);
+    copymemory(@buffer_sprites_w,@sprite,$1000*2);
     copymemory(@video_buffer,@video,$400*2);
     fillchar(gfx[0].buffer,$400,1);
   end;

@@ -34,74 +34,96 @@ var
   scan_line,last:byte;
   video_enable,nmi_enable:boolean;
 
-procedure update_video_timepilot;
+procedure draw_sprites(line:byte);
 var
-    x,y,atrib:byte;
-    f,nchar,color:word;
+  f,atrib,nchar,color,x,y:byte;
+  y_line:integer;
 begin
-if not(video_enable) then fill_full_screen(3,$100)
-  else begin
-    for f:=0 to $3ff do begin
-      if gfx[0].buffer[f] then begin
-        x:=31-(f div 32);
-        y:=f mod 32;
-        atrib:=memoria[$a000+f];
-        color:=(atrib and $1f) shl 2;
-        nchar:=memoria[$a400+f]+((atrib and $20) shl 3);
-        put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
-        if (atrib and $10)<>0 then put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $80)<>0,(atrib and $40)<>0)
-          else put_gfx_block_trans(x*8,y*8,2,8,8);
-        gfx[0].buffer[f]:=false;
-      end;
-    end;
-    actualiza_trozo(0,32,256,224,1,0,32,256,224,3);
-    for f:=$1f downto 8 do begin
-      atrib:=memoria[$b400+(f*2)];
-      nchar:=memoria[$b001+(f*2)];
-      color:=(atrib and $3f) shl 2;
-      x:=memoria[$b401+(f*2)]-1;
-      y:=memoria[$b000+(f*2)];
-      put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
-      actualiza_gfx_sprite(x,y,3,1);
-    end;
-    actualiza_trozo(0,32,256,224,2,0,32,256,224,3);
-    actualiza_trozo(0,0,256,32,1,0,0,256,32,3);
-    actualiza_trozo(0,248,256,8,1,0,248,256,8,3);
+for f:=$1f downto 8 do begin
+  y:=241-memoria[$b401+(f*2)];
+  y_line:=line-y;
+  if ((y_line>=0) and (y_line<16)) then begin
+    atrib:=memoria[$b400+(f*2)];
+    nchar:=memoria[$b001+(f*2)];
+    color:=(atrib and $3f) shl 2;
+    x:=memoria[$b000+(f*2)];
+    put_gfx_sprite(nchar,color,(atrib and $40)=0,(atrib and $80)<>0,1);
+    actualiza_gfx_sprite_line(x,y,3,1,y_line);
   end;
-actualiza_trozo_final(16,0,256,256,3);
+end;
+end;
+
+procedure update_video_timepilot_bg;
+var
+  color,x,y,atrib:byte;
+  f,nchar:word;
+  flipx,flipy:boolean;
+begin
+for f:=0 to $3ff do begin
+  if gfx[0].buffer[f] then begin
+    x:=f mod 32;
+    y:=f div 32;
+    atrib:=memoria[$a000+f];
+    color:=(atrib and $1f) shl 2;
+    nchar:=memoria[$a400+f]+((atrib and $20) shl 3);
+    flipx:=(atrib and $40)<>0;
+    flipy:=(atrib and $80)<>0;
+    put_gfx_flip(x*8,y*8,nchar,color,1,0,flipx,flipy);
+    if (atrib and $10)<>0 then put_gfx_flip(x*8,y*8,nchar,color,2,0,flipx,flipy)
+      else put_gfx_block_trans(x*8,y*8,2,8,8);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
 end;
 
 procedure eventos_timepilot;
 begin
 if event.arcade then begin
+  //Sys
   if arcade_input.coin[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
   if arcade_input.coin[1] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
   if arcade_input.start[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
   if arcade_input.start[1] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
+  //P1
   if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or 1;
   if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or 2;
   if arcade_input.up[0] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or 4;
   if arcade_input.down[0] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or 8;
   if arcade_input.but0[0] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
+  //P2
+  if arcade_input.left[1] then marcade.in2:=marcade.in2 and $fe else marcade.in2:=marcade.in2 or 1;
+  if arcade_input.right[1] then marcade.in2:=marcade.in2 and $fd else marcade.in2:=marcade.in2 or 2;
+  if arcade_input.up[1] then marcade.in2:=marcade.in2 and $fb else marcade.in2:=marcade.in2 or 4;
+  if arcade_input.down[1] then marcade.in2:=marcade.in2 and $f7 else marcade.in2:=marcade.in2 or 8;
+  if arcade_input.but0[1] then marcade.in2:=marcade.in2 and $ef else marcade.in2:=marcade.in2 or $10;
 end;
 end;
 
 procedure timepilot_principal;
-var
-  frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
-  for scan_line:=0 to $ff do begin
-    if ((scan_line=244) and nmi_enable) then z80_0.change_nmi(ASSERT_LINE);
+  for scan_line:=0 to 255 do begin
+    //Pinto linea a linea
+    if video_enable then begin
+      actualiza_trozo(0,scan_line,256,1,1,0,scan_line,256,1,3);
+      draw_sprites(scan_line);
+      actualiza_trozo(0,scan_line,256,1,2,0,scan_line,256,1,3);
+    end;
+    if (scan_line=240) then begin
+       if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
+       //Pongo la pantalla final
+       if not(video_enable) then fill_full_screen(3,$100)
+          else actualiza_trozo_final(0,16,256,224,3);
+       //Actualizo el fondo
+       update_video_timepilot_bg;
+    end;
     //Main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
     //Sound
     konamisnd_0.run;
   end;
-  update_video_timepilot;
   eventos_timepilot;
   video_sync;
 end;
@@ -142,17 +164,21 @@ case direccion of
                end;
     $c000..$cfff:case (direccion and $3ff) of
                 0..$ff:konamisnd_0.sound_latch:=valor;
-                $300..$3ff:case ((direccion and $f) shr 1) of
-                    0:begin
-                          nmi_enable:=(valor and 1)<>0;
+                $300..$3ff:begin
+                    valor:=valor and 1;
+                    case ((direccion and $f) shr 1) of
+                      0:begin
+                          nmi_enable:=(valor<>0);
 	                        if not(nmi_enable) then z80_0.change_nmi(CLEAR_LINE);
                         end;
-                    1:main_screen.flip_main_screen:=(valor and 1)=0;
-                    2:begin
-                        if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
-                        last:=valor;
-                     end;
-                    4:video_enable:=(valor and 1)<>0;
+                      1:main_screen.flip_main_screen:=(valor=0);
+                      2:begin
+                          if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
+                          last:=valor;
+                        end;
+                      3:konamisnd_0.enabled:=(valor=0);
+                      4:video_enable:=(valor<>0);
+                    end;
                 end;
                end;
 end;
@@ -162,6 +188,7 @@ end;
 procedure timepilot_reset;
 begin
 z80_0.reset;
+frame_main:=z80_0.tframes;
 konamisnd_0.reset;
 reset_audio;
 nmi_enable:=false;
@@ -187,9 +214,9 @@ timepilot_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
-iniciar_video(224,256);
+main_screen.rot90_screen:=true;
+iniciar_video(256,224);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,256);
 z80_0.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
@@ -203,13 +230,13 @@ if not(roms_load(@memoria_temp,timepilot_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,true,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //cargar sprites
 if not(roms_load(@memoria_temp,timepilot_sprt)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta de colores
 if not(roms_load(@memoria_temp,timepilot_pal)) then exit;
 for f:=0 to 31 do begin

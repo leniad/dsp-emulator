@@ -4,7 +4,7 @@ object ConfigCPC: TConfigCPC
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config CPC'
-  ClientHeight = 393
+  ClientHeight = 419
   ClientWidth = 568
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

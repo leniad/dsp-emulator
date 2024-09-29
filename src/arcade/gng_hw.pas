@@ -30,8 +30,8 @@ const
         (mask:$40;name:'Service Mode';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
         gng_dip_b:array [0..4] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
-        (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
+        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 70K+','30K 80K+','20K 80K','30K 80K')),
         (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),());
 
@@ -47,9 +47,9 @@ var
   flip_x,flip_y:boolean;
 begin
 //background y foreground
-for f:=$0 to $3ff do begin
+for f:=0 to $3ff do begin
     atrib:=memoria[$2c00+f];
-    color:=atrib and $7;
+    color:=atrib and 7;
     if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
       x:=(f shr 5) shl 4;
       y:=(f and $1f) shl 4;
@@ -79,8 +79,8 @@ for f:=$7f downto 0 do begin
     atrib:=buffer_sprites[(f shl 2)+1];
     nchar:=buffer_sprites[f shl 2]+((atrib shl 2) and $300);
     color:=(atrib and $30)+64;
-    x:=buffer_sprites[$3+(f shl 2)]+((atrib and $1) shl 8);
-    y:=buffer_sprites[$2+(f shl 2)];
+    x:=buffer_sprites[3+(f shl 2)]+((atrib and 1) shl 8);
+    y:=buffer_sprites[2+(f shl 2)];
     put_gfx_sprite(nchar,color,(atrib and 4)<>0,(atrib and 8)<>0,1);
     actualiza_gfx_sprite(x,y,4,1);
 end;
@@ -98,47 +98,44 @@ begin
 if main_vars.service1 then marcade.dswa:=(marcade.dswa and $bf) else marcade.dswa:=(marcade.dswa or $40);
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYS
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
 end;
 
 procedure gng_principal;
 var
   f:word;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=245 then begin
+    if f=246 then begin
         update_video_gng;
         m6809_0.change_irq(HOLD_LINE);
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
   eventos_gng;
   video_sync;
@@ -165,7 +162,7 @@ end;
 function gng_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$2fff,$6000..$ffff:gng_getbyte:=memoria[direccion];
+  0..$2fff,$6000..$ffff:gng_getbyte:=memoria[direccion];
   $3000:gng_getbyte:=marcade.in0;
   $3001:gng_getbyte:=marcade.in1;
   $3002:gng_getbyte:=marcade.in2;
@@ -216,10 +213,10 @@ begin
 case direccion of
   0..$7fff:; //ROM
   $c000..$c7ff:mem_snd[direccion]:=valor;
-  $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write(valor);
-  $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write(valor);
+  $e000:ym2203_0.control(valor);
+  $e001:ym2203_0.write(valor);
+  $e002:ym2203_1.control(valor);
+  $e003:ym2203_1.write(valor);
 end;
 end;
 
@@ -253,7 +250,7 @@ savedata_qsnapshot(data,size);
 size:=ym2203_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_qsnapshot(@memoria[$0],$4000);
+savedata_qsnapshot(@memoria[0],$4000);
 savedata_qsnapshot(@mem_snd[$8000],$8000);
 //MISC
 buffer[0]:=banco;
@@ -309,6 +306,8 @@ procedure reset_gng;
 begin
  m6809_0.reset;
  z80_0.reset;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=z80_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
@@ -349,8 +348,8 @@ screen_mod_scroll(1,512,256,511,512,256,511);
 //Foreground
 screen_init(2,512,512,true);
 screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,256,256,true); //Chars
-screen_init(4,512,256,false,true); //Final
+screen_init(3,256,256,true);
+screen_init(4,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
 m6809_0:=cpu_m6809.Create(6000000,262,TCPU_MC6809);
@@ -365,11 +364,10 @@ z80_0:=cpu_z80.create(3000000,262);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(gng_sound_update);
 if not(roms_load(@mem_snd,gng_sound)) then exit;
-//IRQ Sound CPU
 timers.init(z80_0.numero_cpu,3000000/(4*60),gng_snd_irq,nil,true);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1500000,0.3,2);
-ym2203_1:=ym2203_chip.create(1500000,0.3,2);
+ym2203_0:=ym2203_chip.create(1500000,0.5,2);
+ym2203_1:=ym2203_chip.create(1500000,0.5,2);
 //convertir chars
 if not(roms_load(@memoria_temp,gng_char)) then exit;
 init_gfx(0,8,8,1024);

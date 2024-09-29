@@ -818,13 +818,12 @@ z80_0.change_ram_calls(upl_getbyte,upl_putbyte);
 z80_1:=cpu_z80.create(5000000,256);
 z80_1.change_ram_calls(upl_snd_getbyte,upl_snd_putbyte);
 z80_1.change_io_calls(upl_snd_inbyte,upl_snd_outbyte);
-//Que no se me olvide!!! Primero la CPU de sonido y luego el chip de audio!!!!
 if main_vars.tipo_maquina=120 then z80_1.init_sound(ninjakid2_sound_update)
   else z80_1.init_sound(upl_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
+ym2203_0:=ym2203_chip.create(1500000,1,0.3);
 ym2203_0.change_irq_calls(upl_snd_irq);
-ym2203_1:=ym2203_chip.create(1500000,0.5,0.1);
+ym2203_1:=ym2203_chip.create(1500000,1,0.3);
 //Video
 update_video_upl:=update_video_ninjakid2;
 update_background:=bg_upl;

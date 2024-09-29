@@ -39,7 +39,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
   oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
   mugsmashers_hw,steelforce_hw,bankpanic_hw,appoooh_hw,hw_88games,dooyong_hw,
-  blueprint_hw,unico_hw,kikikaikai_hw,lasso_hw;
+  blueprint_hw,unico_hw,kikikaikai_hw,lasso_hw,finalstarforce_hw,wyvernf0_hw;
 
 type
   tgame_desc=record
@@ -67,7 +67,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=418;
+  GAMES_CONT=425;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -164,15 +164,15 @@ const
   (name:'MS. Pac-man';year:'1981';snd:1;hi:false;zip:'mspacman';grid:88;company:'Namco';rom:@mspacman;tipo:ARCADE or MAZE),
   (name:'Break Thru';year:'1986';snd:1;hi:false;zip:'brkthru';grid:89;company:'Data East';rom:@brkthru;tipo:ARCADE or RUN_GUN or DRIVE),
   (name:'Darwin 4078';year:'1986';snd:1;hi:false;zip:'darwin';grid:90;company:'Data East';rom:@darwin;tipo:ARCADE or SHOT),
-  (name:'Super Real Darwin';year:'1987';snd:1;hi:false;zip:'srdarwin';grid:91;company:'Data East';rom:@srdarwin;tipo:ARCADE or SHOT),
-  (name:'Double Dragon';year:'1987';snd:1;hi:false;zip:'ddragon';grid:92;company:'Taito';rom:@ddragon;tipo:ARCADE or FIGHT),
-  (name:'Mr. Do!';year:'1982';snd:1;hi:false;zip:'mrdo';grid:93;company:'Universal';rom:@mrdo;tipo:ARCADE or MAZE),
-  (name:'The Glob';year:'1983';snd:1;hi:false;zip:'theglob';grid:94;company:'Epos';rom:@theglob;tipo:ARCADE or MAZE),
-  (name:'Super Glob';year:'1983';snd:1;hi:false;zip:'suprglob';grid:95;company:'Epos';rom:@suprglob;tipo:ARCADE or MAZE),
-  (name:'Double Dragon II - The Revenge';year:'1988';snd:1;hi:false;zip:'ddragon2';grid:96;company:'Technos';rom:@ddragon2;tipo:ARCADE or FIGHT),
+  (name:'Super Real Darwin';year:'1987';snd:1;hi:false;zip:'srdarwin';grid:91;company:'Data East';rom:@srdarwin_roms;tipo:ARCADE or SHOT),
+  (name:'Double Dragon';year:'1987';snd:1;hi:false;zip:'ddragon';grid:92;company:'Taito';rom:@ddragon_roms;tipo:ARCADE or FIGHT),
+  (name:'Mr. Do!';year:'1982';snd:1;hi:false;zip:'mrdo';grid:93;company:'Universal';rom:@mrdo_roms;tipo:ARCADE or MAZE),
+  (name:'The Glob';year:'1983';snd:1;hi:false;zip:'theglob';grid:94;company:'Epos';rom:@theglob_roms;tipo:ARCADE or MAZE),
+  (name:'Super Glob';year:'1983';snd:1;hi:false;zip:'suprglob';grid:95;company:'Epos';rom:@suprglob_roms;tipo:ARCADE or MAZE),
+  (name:'Double Dragon II - The Revenge';year:'1988';snd:1;hi:false;zip:'ddragon2';grid:96;company:'Technos';rom:@ddragon2_roms;tipo:ARCADE or FIGHT),
   (name:'Silk Worm';year:'1988';snd:1;hi:false;zip:'silkworm';grid:97;company:'Tecmo';rom:@silkworm;tipo:ARCADE or RUN_GUN or SHOT or DRIVE),
-  (name:'Tiger Heli';year:'1985';snd:1;hi:false;zip:'tigerh';grid:98;company:'Taito';rom:@tigerh;tipo:ARCADE or SHOT),
-  (name:'Slap Fight';year:'1986';snd:1;hi:false;zip:'slapfigh';grid:99;company:'Taito';rom:@slapfigh;tipo:ARCADE or SHOT),
+  (name:'Tiger Heli';year:'1985';snd:1;hi:false;zip:'tigerh';grid:98;company:'Taito';rom:@tigerh_roms;tipo:ARCADE or SHOT),
+  (name:'Slap Fight';year:'1986';snd:1;hi:false;zip:'slapfigh';grid:99;company:'Taito';rom:@slapfigh_roms;tipo:ARCADE or SHOT),
   (name:'The Legend of Kage';year:'1984';snd:1;hi:false;zip:'lkage';grid:100;company:'Taito';rom:@lkage;tipo:ARCADE or RUN_GUN),
   (name:'Thunder Hoop';year:'1992';snd:1;hi:false;zip:'thoop';grid:101;company:'Gaelco';rom:@thoop;tipo:ARCADE or RUN_GUN),
   (name:'Cabal';year:'1988';snd:1;hi:false;zip:'cabal';grid:102;company:'TAD';rom:@cabal;tipo:ARCADE or RUN_GUN),
@@ -320,7 +320,7 @@ const
   (name:'Peter Pack Rat';year:'1984';snd:1;hi:false;zip:'peterpak';grid:244;company:'Atari';rom:@peterpak;tipo:ARCADE),
   (name:'Gauntlet II';year:'1986';snd:1;hi:false;zip:'gaunt2';grid:245;company:'Atari';rom:@gaunt2;tipo:ARCADE or RUN_GUN),
   (name:'Defender';year:'1980';snd:1;hi:false;zip:'defender';grid:246;company:'Williams';rom:@defender;tipo:ARCADE or SHOT),
-  (name:'Double Dragon (SpeedHack)';year:'1987';snd:1;hi:false;zip:'ddragon';grid:247;company:'Taito';rom:@ddragon;tipo:ARCADE or FIGHT),
+  (name:'Fire Ball';year:'1992';snd:1;hi:false;zip:'fball';grid:247;company:'FM Works';rom:@fball_roms;tipo:ARCADE or MAZE),
   (name:'Mayday';year:'1980';snd:1;hi:false;zip:'mayday';grid:248;company:'Williams';rom:@mayday;tipo:ARCADE or SHOT),
   (name:'Colony 7';year:'1981';snd:1;hi:false;zip:'colony7';grid:249;company:'Williams';rom:@colony7;tipo:ARCADE or SHOT),
   (name:'Bosconian';year:'1981';snd:3;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco;samples:@bosco_samples;tipo:ARCADE or SHOT),
@@ -474,6 +474,13 @@ const
   (name:'The Real Ghostbusters';year:'1987';snd:1;hi:false;zip:'ghostb';grid:398;company:'Data East';rom:@ghostb_roms;tipo:ARCADE or RUN_GUN),
   (name:'Psycho-Nics Oscar';year:'1987';snd:1;hi:false;zip:'oscar';grid:399;company:'Data East';rom:@oscar_roms;tipo:ARCADE or RUN_GUN),
   (name:'Road Fighter';year:'1984';snd:1;hi:false;zip:'roadf';grid:400;company:'Konami';rom:@roadf_roms;tipo:ARCADE or DRIVE),
+  (name:'Ponpoko';year:'1982';snd:1;hi:false;zip:'ponpoko';grid:401;company:'Sigma';rom:@ponpoko_roms;tipo:ARCADE or MAZE),
+  (name:'Woodpecker';year:'1981';snd:1;hi:false;zip:'woodpeck';grid:402;company:'Amenip';rom:@woodpeck_roms;tipo:ARCADE or MAZE),
+  (name:'Eyes';year:'1982';snd:1;hi:false;zip:'eyes';grid:403;company:'Techstar';rom:@eyes_roms;tipo:ARCADE or MAZE),
+  (name:'Ali Baba and 40 Thieves';year:'1982';snd:1;hi:false;zip:'alibaba';grid:404;company:'Sega';rom:@alibaba_roms;tipo:ARCADE or MAZE),
+  (name:'Piranha';year:'1981';snd:1;hi:false;zip:'piranha';grid:405;company:'GL';rom:@piranha_roms;tipo:ARCADE or MAZE),
+  (name:'Final Star Force';year:'1992';snd:1;hi:false;zip:'fstarfrc';grid:406;company:'Tecmo';rom:@finalstarforce_roms;tipo:ARCADE or SHOT),
+  (name:'Wyvern F-0';year:'1985';snd:1;hi:false;zip:'wyvernf0';grid:407;company:'Taito';rom:@wyvernf0_roms;tipo:ARCADE or SHOT),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -756,7 +763,7 @@ case numero of
   244:principal1.CambiarMaquina(principal1.peterpak1);
   245:principal1.CambiarMaquina(principal1.gaunt21);
   246:principal1.CambiarMaquina(principal1.defender1);
-  247:principal1.CambiarMaquina(principal1.ddragon_sh1);
+  247:principal1.CambiarMaquina(principal1.fireball1);
   248:principal1.CambiarMaquina(principal1.mayday1);
   249:principal1.CambiarMaquina(principal1.colony71);
   250:principal1.CambiarMaquina(principal1.bosconian1);
@@ -910,6 +917,13 @@ case numero of
   398:principal1.CambiarMaquina(principal1.ghostbusters1);
   399:principal1.CambiarMaquina(principal1.oscar1);
   400:principal1.CambiarMaquina(principal1.roadfighter1);
+  401:principal1.CambiarMaquina(principal1.ponpoko1);
+  402:principal1.CambiarMaquina(principal1.woodpecker1);
+  403:principal1.CambiarMaquina(principal1.eyes1);
+  404:principal1.CambiarMaquina(principal1.alibaba1);
+  405:principal1.CambiarMaquina(principal1.piranha1);
+  406:principal1.CambiarMaquina(principal1.finalstarforce1);
+  407:principal1.CambiarMaquina(principal1.WyvernF01);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1180,7 +1194,7 @@ principal1.tnk31.Checked:=false;
 principal1.peterpak1.Checked:=false;
 principal1.gaunt21.Checked:=false;
 principal1.defender1.Checked:=false;
-principal1.ddragon_sh1.Checked:=false;
+principal1.fireball1.Checked:=false;
 principal1.mayday1.Checked:=false;
 principal1.colony71.Checked:=false;
 principal1.bosconian1.Checked:=false;
@@ -1334,6 +1348,13 @@ principal1.cobracommand1.Checked:=false;
 principal1.ghostbusters1.Checked:=false;
 principal1.oscar1.Checked:=false;
 principal1.roadfighter1.Checked:=false;
+principal1.ponpoko1.Checked:=false;
+principal1.woodpecker1.Checked:=false;
+principal1.eyes1.Checked:=false;
+principal1.alibaba1.Checked:=false;
+principal1.piranha1.Checked:=false;
+principal1.finalstarforce1.Checked:=false;
+principal1.WyvernF01.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1442,7 +1463,7 @@ case tmaquina of
   3000:llamadas_maquina.iniciar:=iniciar_c64;
   3001,3002:llamadas_maquina.iniciar:=iniciar_oric;
   //arcade
-  10,88,234,305,353:llamadas_maquina.iniciar:=iniciar_pacman;
+  10,88,234,305,353,401,402,403,404,405:llamadas_maquina.iniciar:=iniciar_pacman;
   11,202:llamadas_maquina.iniciar:=iniciar_phoenix;
   12:llamadas_maquina.iniciar:=iniciar_ms;
   13,383:llamadas_maquina.iniciar:=iniciar_bombjack;
@@ -1483,7 +1504,7 @@ case tmaquina of
   56:llamadas_maquina.iniciar:=iniciar_contra;
   57,63,64,192,193,351,352:llamadas_maquina.iniciar:=iniciar_mappyhw;
   58:llamadas_maquina.iniciar:=iniciar_rastan;
-  59,60,61,368:llamadas_maquina.iniciar:=iniciar_lwings;
+  59,60,61,247,368:llamadas_maquina.iniciar:=iniciar_lwings;
   62:llamadas_maquina.iniciar:=iniciar_sfighter;
   65,167,231,250,350:llamadas_maquina.iniciar:=iniciar_galagahw;
   66:llamadas_maquina.iniciar:=iniciar_xain;
@@ -1501,7 +1522,7 @@ case tmaquina of
   87,190,191:llamadas_maquina.iniciar:=iniciar_irem_m72;
   89,90:llamadas_maquina.iniciar:=iniciar_brkthru;
   91,392,393,394,395,396,397,398,399:llamadas_maquina.iniciar:=iniciar_dec8;
-  92,96,247:llamadas_maquina.iniciar:=iniciar_ddragon;
+  92,96:llamadas_maquina.iniciar:=iniciar_ddragon;
   93:llamadas_maquina.iniciar:=iniciar_mrdo;
   94,95:llamadas_maquina.iniciar:=iniciar_epos_hw;
   98,99:llamadas_maquina.iniciar:=iniciar_sf_hw;
@@ -1626,6 +1647,8 @@ case tmaquina of
   380,381:llamadas_maquina.iniciar:=iniciar_unico;
   388,389:llamadas_maquina.iniciar:=iniciar_kikikaikai;
   390,391:llamadas_maquina.iniciar:=iniciar_lasso;
+  406:llamadas_maquina.iniciar:=iniciar_finalstarforce;
+  407:llamadas_maquina.iniciar:=iniciar_wyvernf0;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -2645,9 +2668,9 @@ if sender=principal1.defender1 then begin
   tipo:=246;
   principal1.defender1.Checked:=true;
 end;
-if sender=principal1.ddragon_sh1 then begin
+if sender=principal1.fireball1 then begin
   tipo:=247;
-  principal1.ddragon_sh1.Checked:=true;
+  principal1.fireball1.Checked:=true;
 end;
 if sender=principal1.mayday1 then begin
   tipo:=248;
@@ -3260,6 +3283,34 @@ end;
 if sender=principal1.roadfighter1 then begin
   tipo:=400;
   principal1.roadfighter1.Checked:=true;
+end;
+if sender=principal1.ponpoko1 then begin
+  tipo:=401;
+  principal1.ponpoko1.Checked:=true;
+end;
+if sender=principal1.woodpecker1 then begin
+  tipo:=402;
+  principal1.woodpecker1.Checked:=true;
+end;
+if sender=principal1.eyes1 then begin
+  tipo:=403;
+  principal1.eyes1.Checked:=true;
+end;
+if sender=principal1.alibaba1 then begin
+  tipo:=404;
+  principal1.alibaba1.Checked:=true;
+end;
+if sender=principal1.piranha1 then begin
+  tipo:=405;
+  principal1.piranha1.Checked:=true;
+end;
+if sender=principal1.finalstarforce1 then begin
+  tipo:=406;
+  principal1.finalstarforce1.Checked:=true;
+end;
+if sender=principal1.WyvernF01 then begin
+  tipo:=407;
+  principal1.WyvernF01.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

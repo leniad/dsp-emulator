@@ -10,7 +10,7 @@ function iniciar_terracre:boolean;
 implementation
 const
         terracre_rom:array[0..7] of tipo_roms=(
-        (n:'1a_4b.rom';l:$4000;p:1;crc:$76f17479),(n:'1a_4d.rom';l:$4000;p:$0;crc:$8119f06e),
+        (n:'1a_4b.rom';l:$4000;p:1;crc:$76f17479),(n:'1a_4d.rom';l:$4000;p:0;crc:$8119f06e),
         (n:'1a_6b.rom';l:$4000;p:$8001;crc:$ba4b5822),(n:'1a_6d.rom';l:$4000;p:$8000;crc:$ca4852f6),
         (n:'1a_7b.rom';l:$4000;p:$10001;crc:$d0771bba),(n:'1a_7d.rom';l:$4000;p:$10000;crc:$029d59d9),
         (n:'1a_9b.rom';l:$4000;p:$18001;crc:$69227b56),(n:'1a_9d.rom';l:$4000;p:$18000;crc:$5a672942));
@@ -27,7 +27,7 @@ const
         (n:'2a_6e.rom';l:$4000;p:0;crc:$bcf7740b),(n:'2a_7e.rom';l:$4000;p:$4000;crc:$a70b565c),
         (n:'2a_6g.rom';l:$4000;p:$8000;crc:$4a9ec3e6),(n:'2a_7g.rom';l:$4000;p:$c000;crc:$450749fc));
         terracre_dip:array [0..10] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:($c,8,4,0);name4:('20K 60K+','30K 70K+','40K 80K+','50K 90K+')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
         (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
@@ -39,7 +39,7 @@ const
         (mask:$8000;name:'Base Ship Invulnerability';number:2;val2:($8000,0);name2:('Off','On')),());
         //Amazon
         amazon_rom:array[0..3] of tipo_roms=(
-        (n:'11.4d';l:$8000;p:0;crc:$6c7f85c5),(n:'9.4b';l:$8000;p:$1;crc:$e1b7a989),
+        (n:'11.4d';l:$8000;p:0;crc:$6c7f85c5),(n:'9.4b';l:$8000;p:1;crc:$e1b7a989),
         (n:'12.6d';l:$8000;p:$10000;crc:$4de8a3ee),(n:'10.6b';l:$8000;p:$10001;crc:$d86bad81));
         amazon_sound:array[0..2] of tipo_roms=(
         (n:'1.15b';l:$4000;p:0;crc:$55a8b5e7),(n:'2.17b';l:$4000;p:$4000;crc:$427a7cca),
@@ -57,7 +57,7 @@ const
         (n:'4e';l:$100;p:$400;crc:$035f2c7b));
         amazon_prot:tipo_roms=(n:'16.18g';l:$2000;p:0;crc:$1d8d592b);
         amazon_dip:array [0..10] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:($c,8,4,0);name4:('20K 40K+','50K 40K+','20K 70K+','50K 70K+')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
         (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
@@ -85,7 +85,7 @@ begin
 if (scroll_y and $2000)<>0 then begin
   fill_full_screen(3,$100);
 end else begin
-  for f:=$0 to $7ff do begin
+  for f:=0 to $7ff do begin
     if gfx[1].buffer[f] then begin
       x:=f and $1f;
       y:=63-(f shr 5);
@@ -100,16 +100,16 @@ end;
 //sprites
 for f:=0 to $3f do begin
     atrib:=buffer_sprites_w[(f*4)+2];
-		nchar:=(buffer_sprites_w[(f*4)+1] and $ff)+((atrib and $2) shl 7);
+		nchar:=(buffer_sprites_w[(f*4)+1] and $ff)+((atrib and 2) shl 7);
 	  y:=240-((buffer_sprites_w[(f*4)+3] and $ff)-$80+((atrib and 1) shl 8));
 	  x:=240-(buffer_sprites_w[f*4] and $ff);
-    color:=((atrib and $f0) shr 4)+16*(spritebank[(nchar shr 1) and $ff] and $0f);
+    color:=((atrib and $f0) shr 4)+16*(spritebank[(nchar shr 1) and $ff] and $f);
     put_gfx_sprite(nchar,color shl 4,(atrib and 8)<>0,(atrib and 4)<>0,2);
     actualiza_gfx_sprite(x,y,3,2);
 end;
 //foreground
 if (scroll_y and $1000)=0 then begin
-  for f:=$0 to $3ff do begin
+  for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
       x:=f and $1f;
       y:=31-(f shr 5);
@@ -150,25 +150,22 @@ end;
 
 procedure terracre_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-  //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //sound
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-  if f=239 then begin
+  if f=240 then begin
     update_video_terracre;
     copymemory(@buffer_sprites_w,@ram,$100*2);
     m68000_0.irq[1]:=HOLD_LINE;
   end;
+  //main
+  m68000_0.run(frame_main);
+  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+  //sound
+  z80_0.run(frame_snd);
+  frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
  eventos_terracre;
  video_sync;
@@ -197,7 +194,7 @@ case direccion of
                     gfx[1].buffer[(direccion and $fff) shr 1]:=true;
                     ram[(direccion and $3fff) shr 1]:=valor;
                    end;
-    $26000:main_screen.flip_main_screen:=(valor and $4)<>0;
+    $26000:main_screen.flip_main_screen:=(valor and 4)<>0;
     $26002:scroll_y:=valor;
     $26004:scroll_x:=valor and $1ff;
     $2600c:sound_latch:=((valor and $7f) shl 1) or 1;
@@ -235,10 +232,10 @@ end;
 procedure terracre_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:ym2203_0.Control(valor);
-  $1:ym2203_0.Write(valor);
-  $2:dac_0.signed_data8_w(valor);
-  $3:dac_1.signed_data8_w(valor);
+  0:ym2203_0.Control(valor);
+  1:ym2203_0.Write(valor);
+  2:dac_0.signed_data8_w(valor);
+  3:dac_1.signed_data8_w(valor);
 end;
 end;
 
@@ -277,7 +274,7 @@ case direccion of
                     gfx[1].buffer[(direccion and $fff) shr 1]:=true;
                     ram[(direccion and $3fff) shr 1]:=valor;
                    end;
-    $46000:main_screen.flip_main_screen:=(valor and $4)<>0;
+    $46000:main_screen.flip_main_screen:=(valor and 4)<>0;
     $46002:scroll_y:=valor;
     $46004:scroll_x:=valor and $1ff;
     $4600c:sound_latch:=((valor and $7f) shl 1) or 1;
@@ -293,10 +290,10 @@ end;
 procedure amazon_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:ym3812_0.control(valor);
-  $1:ym3812_0.write(valor);
-  $2:dac_0.signed_data8_w(valor);
-  $3:dac_1.signed_data8_w(valor);
+  0:ym3812_0.control(valor);
+  1:ym3812_0.write(valor);
+  2:dac_0.signed_data8_w(valor);
+  3:dac_1.signed_data8_w(valor);
 end;
 end;
 
@@ -383,6 +380,8 @@ procedure reset_terracre;
 begin
  m68000_0.reset;
  z80_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  if main_vars.tipo_maquina=41 then YM2203_0.reset
   else ym3812_0.reset;
  dac_0.reset;
@@ -513,12 +512,12 @@ for f:=0 to $ff do begin
   colores[f].g:=pal4bit(memoria_temp[f+$100]);
   colores[f].b:=pal4bit(memoria_temp[f+$200]);
   //color lookup de fondo
-  if (f and 8)<>0 then gfx[1].colores[f]:=192+(f and $0f)+((f and $c0) shr 2)
-		  else gfx[1].colores[f]:=192+(f and $0f)+((f and $30) shr 0);
+  if (f and 8)<>0 then gfx[1].colores[f]:=192+(f and $f)+((f and $c0) shr 2)
+		  else gfx[1].colores[f]:=192+(f and $f)+((f and $30) shr 0);
   //color lookup de sprites
   for j:=0 to $f do begin
-			if (f and $8)<>0 then gfx[2].colores[f+j*$100]:=$80+((j and $0c) shl 2)+(memoria_temp[$300+f] and $0f)
-			  else gfx[2].colores[f+j*$100]:=$80+((j and $03) shl 4)+(memoria_temp[$300+f] and $0f);
+			if (f and 8)<>0 then gfx[2].colores[f+j*$100]:=$80+((j and $c) shl 2)+(memoria_temp[$300+f] and $f)
+			  else gfx[2].colores[f+j*$100]:=$80+((j and 3) shl 4)+(memoria_temp[$300+f] and $f);
     end;
 end;
 set_pal(colores,$100);

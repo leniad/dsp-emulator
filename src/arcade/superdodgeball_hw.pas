@@ -9,65 +9,69 @@ function iniciar_sdodgeball:boolean;
 
 implementation
 const
-        sdodgeball_rom:tipo_roms=(n:'22a-04.139';l:$10000;p:$0;crc:$66071fda);
+        sdodgeball_rom:tipo_roms=(n:'22a-04.139';l:$10000;p:0;crc:$66071fda);
         sdodgeball_snd:tipo_roms=(n:'22j5-0.33';l:$8000;p:$8000;crc:$c31e264e);
         sdodgeball_mcu:tipo_roms=(n:'22ja-0.162';l:$4000;p:0;crc:$7162a97b);
         sdodgeball_char:array[0..1] of tipo_roms=(
-        (n:'22a-4.121';l:$20000;p:$0;crc:$acc26051),(n:'22a-3.107';l:$20000;p:$20000;crc:$10bb800d));
+        (n:'22a-4.121';l:$20000;p:0;crc:$acc26051),(n:'22a-3.107';l:$20000;p:$20000;crc:$10bb800d));
         sdodgeball_sprites:array[0..1] of tipo_roms=(
-        (n:'22a-1.2';l:$20000;p:$0;crc:$3bd1c3ec),(n:'22a-2.35';l:$20000;p:$20000;crc:$409e1be1));
+        (n:'22a-1.2';l:$20000;p:0;crc:$3bd1c3ec),(n:'22a-2.35';l:$20000;p:$20000;crc:$409e1be1));
         sdodgeball_adpcm:array[0..1] of tipo_roms=(
-        (n:'22j6-0.83';l:$10000;p:$0;crc:$744a26e3),(n:'22j7-0.82';l:$10000;p:$10000;crc:$2fa1de21));
+        (n:'22j6-0.83';l:$10000;p:0;crc:$744a26e3),(n:'22j7-0.82';l:$10000;p:$10000;crc:$2fa1de21));
         sdodgeball_proms:array[0..1] of tipo_roms=(
-        (n:'mb7132e.158';l:$400;p:$0;crc:$7e623722),(n:'mb7122e.159';l:$400;p:$400;crc:$69706e8d));
-        sdodgeball_dip_a:array [0..1] of def_dip=(
-        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$c0;dip_name:'Normal'),(dip_val:$40;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        sdodgeball_dip_b:array [0..4] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        sdodgeball_dip_c:array [0..1] of def_dip=(
-        (mask:$4;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$4;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        (n:'mb7132e.158';l:$400;p:0;crc:$7e623722),(n:'mb7122e.159';l:$400;p:$400;crc:$69706e8d));
+        sdodgeball_dip_a:array [0..1] of def_dip2=(
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Very Hard')),());
+        sdodgeball_dip_b:array [0..4] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$10);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
+        sdodgeball_dip_c:array [0..1] of def_dip2=(
+        (mask:4;name:'Allow Continue';number:2;val2:(0,4);name2:('No','Yes')),());
 
 var
   rom_bank:array[0..1,0..$3fff] of byte;
   nrom_bank,sound_latch,tile_pal,sprite_pal,mcu_latch:byte;
   inputs:array[0..4] of byte;
-  scroll_x:array[0..271] of word;
+  scroll_x:array[0..32] of word;
   scroll_x_temp:word;
 
 procedure update_video_sdodgeball;
 var
   f,nchar,color,pos:word;
   x,y,atrib:byte;
+  flipx:boolean;
 begin
 //Background
-for f:=$0 to $7ff do begin
+for f:=0 to $7ff do begin
     x:=f div 32;
     y:=f mod 32;
     pos:=(x and $1f)+((y and $1f) shl 5)+((x and $20) shl 5);
-    atrib:=memoria[$2800+pos];
-    color:=((atrib and $e0) shr 5)+8*tile_pal;
     if gfx[0].buffer[pos] then begin
+      atrib:=memoria[$2800+pos];
+      color:=(((atrib and $e0) shr 5)+8*tile_pal) shl 4;
       nchar:=memoria[$2000+pos]+((atrib and $1f) shl 8);
-      put_gfx(x*8,y*8,nchar,color shl 4,1,0);
+      put_gfx(x*8,y*8,nchar,color,1,0);
       gfx[0].buffer[pos]:=false;
     end;
 end;
 scroll__x_part2(1,2,8,@scroll_x[0]);
 for f:=0 to $3f do begin
   atrib:=memoria[$1001+(f*4)];
-	nchar:=memoria[$1002+(f*4)]+((atrib and $07) shl 8);
+	nchar:=memoria[$1002+(f*4)]+((atrib and 7) shl 8);
+  //Tiene muchos fallos con el recorte de los sprites, pero parece que es asi...
   x:=memoria[$1003+(f*4)];
+  if x>248 then x:=not(x);
 	y:=240-memoria[$1000+(f*4)];
-	color:=((atrib and $38) shr 3)+8*sprite_pal;
+	color:=((((atrib and $38) shr 3)+8*sprite_pal) shl 4)+$200;
+  flipx:=(atrib and $40)=0;
   if (atrib and $80)<>0 then begin //doble
-    put_gfx_sprite_diff(nchar and $fffe,(color shl 4)+$200,(atrib and $40)=0,false,1,0,0);
-    put_gfx_sprite_diff(nchar or 1,(color shl 4)+$200,(atrib and $40)=0,false,1,0,16);
+    put_gfx_sprite_diff(nchar and $fffe,color,flipx,false,1,0,0);
+    put_gfx_sprite_diff(nchar or 1,color,flipx,false,1,0,16);
     actualiza_gfx_sprite_size(x,y-16,2,16,32);
-  end else begin //normol
-    put_gfx_sprite(nchar,(color shl 4)+$200,(atrib and $40)=0,false,1);
+  end else begin //normal
+    put_gfx_sprite(nchar,color,flipx,false,1);
     actualiza_gfx_sprite(x,y,2,1);
   end;
 end;
@@ -101,41 +105,37 @@ end;
 
 procedure principal_sdodgeball;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6502_0.tframes;
-frame_s:=m6809_0.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
-    m6502_0.run(frame_m);
-    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
-    //Sound
-    m6809_0.run(frame_s);
-    frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
-    //MCU CPU
-    m6800_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
     case f of
-      0:begin
-          m6502_0.change_irq(HOLD_LINE);
-          marcade.dswa:=marcade.dswa and $fe;
-        end;
-      8..239,241..255:if ((f mod 8)=0) then m6502_0.change_irq(HOLD_LINE);
+      0:marcade.dswa:=marcade.dswa and $fe;
       240:begin
-            m6502_0.change_irq(HOLD_LINE);
             marcade.dswa:=marcade.dswa or 1;
             update_video_sdodgeball;
           end;
       256:m6502_0.change_nmi(PULSE_LINE);
     end;
-    //Haaaack!
+    //Haaaack! Escribe el scroll para cada bloque de 8 lineas
+    //De las lineas 264 a la 271 escribe el scroll para el bloque 0
+    //De las lineas 0 a la 255 escribe el scroll del bloque 1 al 31
     case f of
-      0..255:if (f mod 8)=4 then scroll_x[(f div 8)+1]:=scroll_x_temp;
-      256..271:if (f mod 8)=4 then scroll_x[(f and $ff) div 8]:=scroll_x_temp;
+      0..255:begin
+                if (f mod 8)=4 then scroll_x[(f div 8)+1]:=scroll_x_temp+5;
+                if ((f mod 8)=0) then m6502_0.change_irq(HOLD_LINE);
+             end;
+      264..271:if (f mod 8)=4 then scroll_x[((f and $ff) div 8)-1]:=scroll_x_temp+5;
     end;
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
+    //Sound
+    m6809_0.run(frame_snd);
+    frame_snd:=frame_snd+m6809_0.tframes-m6809_0.contador;
+    //MCU CPU
+    m6800_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
   end;
   eventos_sdodgeball;
   video_sync;
@@ -168,7 +168,7 @@ case direccion of
   $3004:scroll_x_temp:=(scroll_x_temp and $100) or valor;
   $3005:m6800_0.change_nmi(PULSE_LINE);
   $3006:begin
-            main_screen.flip_main_screen:=(valor and $1)<>0;
+            main_screen.flip_main_screen:=(valor and 1)<>0;
             nrom_bank:=(not(valor) and 2) shr 1;
             scroll_x_temp:=(scroll_x_temp and $ff) or ((valor and 4) shl 6);
             if tile_pal<>(valor and $30) shr 4 then begin
@@ -262,6 +262,9 @@ begin
 m6502_0.reset;
 m6809_0.reset;
 m6800_0.reset;
+frame_main:=m6502_0.tframes;
+frame_snd:=m6809_0.tframes;
+frame_mcu:=m6800_0.tframes;
 ym3812_0.reset;
 msm5205_0.reset;
 msm5205_1.reset;
@@ -269,11 +272,12 @@ marcade.in0:=$ff;
 marcade.in1:=$ff;
 nrom_bank:=0;
 fillchar(inputs[0],5,0);
+fillword(@scroll_x[0],33,0);
 scroll_x_temp:=0;
 tile_pal:=0;
 sprite_pal:=0;
 mcu_latch:=0;
-fillword(@scroll_x[0],272,0);
+sound_latch:=0;
 end;
 
 function iniciar_sdodgeball:boolean;
@@ -295,7 +299,7 @@ llamadas_maquina.fps_max:=12000000/2/384/272;
 iniciar_sdodgeball:=false;
 iniciar_audio(true); //Stereo!
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,512,256,511);
+screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 iniciar_video(256,240);
 //Main CPU
@@ -317,7 +321,7 @@ m6800_0.change_io_calls(nil,sdodgeball_r2,nil,nil,nil,nil,nil,nil);
 m6800_0.change_iox_calls(sdodgeball_r5,sdodgeball_r6,sdodgeball_w5,nil);
 if not(roms_load(m6800_0.get_rom_addr,sdodgeball_mcu)) then exit;
 //Sound Chip
-ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.6);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,$10000);
 msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,$10000);
@@ -343,26 +347,26 @@ for f:=0 to $3ff do begin
   bit1:=(memoria_temp[f] shr 1) and 1;
   bit2:=(memoria_temp[f] shr 2) and 1;
   bit3:=(memoria_temp[f] shr 3) and 1;
-  colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  colores[f].r:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
   bit0:=(memoria_temp[f] shr 4) and 1;
   bit1:=(memoria_temp[f] shr 5) and 1;
   bit2:=(memoria_temp[f] shr 6) and 1;
   bit3:=(memoria_temp[f] shr 7) and 1;
-  colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  colores[f].g:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
   bit0:=(memoria_temp[f+$400] shr 0) and 1;
   bit1:=(memoria_temp[f+$400] shr 1) and 1;
   bit2:=(memoria_temp[f+$400] shr 2) and 1;
   bit3:=(memoria_temp[f+$400] shr 3) and 1;
-  colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  colores[f].b:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 end;
 set_pal(colores,$400);
 //DIP
 marcade.dswa:=$fc;
-marcade.dswa_val:=@sdodgeball_dip_a;
+marcade.dswa_val2:=@sdodgeball_dip_a;
 marcade.dswb:=$ff;
-marcade.dswb_val:=@sdodgeball_dip_b;
+marcade.dswb_val2:=@sdodgeball_dip_b;
 marcade.dswc:=$ff;
-marcade.dswc_val:=@sdodgeball_dip_c;
+marcade.dswc_val2:=@sdodgeball_dip_c;
 //final
 reset_sdodgeball;
 iniciar_sdodgeball:=true;

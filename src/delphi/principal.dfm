@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 235
+  ClientHeight = 225
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 174
+    Height = 164
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 174
+    Height = 164
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 165
+    ExplicitHeight = 160
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 216
+    Top = 206
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 207
+    ExplicitTop = 202
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -2187,6 +2187,26 @@ object principal1: Tprincipal1
             end
             object Birdiy1: TMenuItem
               Caption = 'Birdiy'
+              OnClick = CambiarMaquina
+            end
+            object Ponpoko1: TMenuItem
+              Caption = 'Ponpoko'
+              OnClick = CambiarMaquina
+            end
+            object Woodpecker1: TMenuItem
+              Caption = 'Woodpecker'
+              OnClick = CambiarMaquina
+            end
+            object Eyes1: TMenuItem
+              Caption = 'Eyes'
+              OnClick = CambiarMaquina
+            end
+            object alibaba1: TMenuItem
+              Caption = 'Ali Baba and 40 Thieves'
+              OnClick = CambiarMaquina
+            end
+            object Piranha1: TMenuItem
+              Caption = 'Piranha'
               OnClick = CambiarMaquina
             end
           end
@@ -2511,6 +2531,10 @@ object principal1: Tprincipal1
             end
             object Avengers1: TMenuItem
               Caption = 'Avengers'
+              OnClick = CambiarMaquina
+            end
+            object FireBall1: TMenuItem
+              Caption = 'Fire Ball'
               OnClick = CambiarMaquina
             end
           end
@@ -3059,6 +3083,11 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object WyvernF01: TMenuItem
+            Caption = 'Wyvern F-0'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -3455,10 +3484,6 @@ object principal1: Tprincipal1
             Caption = 'Double Dragon HW'
             object ddragon1: TMenuItem
               Caption = 'Double Dragon'
-              OnClick = CambiarMaquina
-            end
-            object ddragon_sh1: TMenuItem
-              Caption = 'Double Dragon (Speed Hack)'
               OnClick = CambiarMaquina
             end
             object ddragon21: TMenuItem
@@ -4104,6 +4129,13 @@ object principal1: Tprincipal1
             end
             object ZeroPoint1: TMenuItem
               Caption = 'Zero Point'
+              OnClick = CambiarMaquina
+            end
+          end
+          object Tecmo16HW1: TMenuItem
+            Caption = 'Tecmo 16 HW'
+            object FinalStarforce1: TMenuItem
+              Caption = 'Final Starforce'
               OnClick = CambiarMaquina
             end
           end

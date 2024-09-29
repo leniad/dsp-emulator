@@ -24,13 +24,13 @@ const
         exedexes_tilesbg_pos:array[0..1] of tipo_roms=(
         (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907));
         exedexes_dip_a:array [0..5] of def_dip2=(
-        (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$c;name:'Lives';number:4;val4:(8,4,$c,0);name4:('1','2','3','5')),
         (mask:$10;name:'2 Players Game';number:2;val2:(0,$10);name2:('1 Credit','2 Credit')),
         (mask:$20;name:'Languaje';number:2;val2:(0,$20);name2:('English','Japanese')),
         (mask:$40;name:'Freeze';number:2;val2:($40,0);name2:('Off','On')),());
         exedexes_dip_b:array [0..4] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
         (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
@@ -53,7 +53,7 @@ begin
 		if ((atrib and $40)=pri) then begin
 			nchar:=buffer_sprites[f*32];
       atrib:=buffer_sprites[(f*32)+1];
-			color:=(atrib and $0f) shl 4;
+			color:=(atrib and $f) shl 4;
 			y:=240-(buffer_sprites[(f*32)+3]-((atrib and $80) shl 1));
 			x:=buffer_sprites[(f*32)+2];
       put_gfx_sprite(nchar,color,(atrib and $20)<>0,(atrib and $10)<>0,3);
@@ -74,7 +74,7 @@ if chon then begin //chars activos
       x:=f div 32;
       y:=31-(f mod 32);
       attr:=memoria[f+$d400];
-      color:=(attr and $3F) shl 2;
+      color:=(attr and $3f) shl 2;
       nchar:=memoria[f+$d000]+((attr and $80) shl 1);
       put_gfx_mask(x*8,y*8,nchar,color,3,0,$cf,$ff);
       gfx[0].buffer[f]:=false;
@@ -89,20 +89,23 @@ end;
 procedure eventos_exedexes;
 begin
 if event.arcade then begin
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  //P1
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  //P2
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  //SYS
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
@@ -111,30 +114,27 @@ end;
 procedure exedexes_hw_principal;
 var
   f:byte;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //sonido
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     case f of
-      239:begin
+      0:begin
+          z80_0.im0:=$cf;  //rst 8
+          z80_0.change_irq(HOLD_LINE);
+        end;
+      240:begin
           z80_0.im0:=$d7;  //rst 10
           z80_0.change_irq(HOLD_LINE);
           update_video_exedexes;
         end;
-      255:begin
-          z80_0.im0:=$cf;  //rst 8
-          z80_0.change_irq(HOLD_LINE);
-        end;
     end;
+    //main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //sonido
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
   eventos_exedexes;
   video_sync;
@@ -144,7 +144,7 @@ end;
 function exedexes_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$bfff,$d000..$d7ff,$e000..$ffff:exedexes_getbyte:=memoria[direccion];
+  0..$bfff,$d000..$d7ff,$e000..$ffff:exedexes_getbyte:=memoria[direccion];
   $c000:exedexes_getbyte:=marcade.in0;
   $c001:exedexes_getbyte:=marcade.in1;
   $c002:exedexes_getbyte:=marcade.in2;
@@ -167,11 +167,11 @@ case direccion of
                   memoria[direccion]:=valor;
                end;
   $d800:scroll_y:=(scroll_y and $700) or valor;
-  $d801:scroll_y:=(scroll_y and $ff) or ((valor and $7) shl 8);
+  $d801:scroll_y:=(scroll_y and $ff) or ((valor and 7) shl 8);
   $d802:scroll_x:=(scroll_x and $700) or valor;
-  $d803:scroll_x:=(scroll_x and $ff) or ((valor and $7) shl 8);
+  $d803:scroll_x:=(scroll_x and $ff) or ((valor and 7) shl 8);
   $d804:scroll_bg:=(scroll_bg and $700) or valor;
-  $d805:scroll_bg:=(scroll_bg and $ff) or ((valor and $7) shl 8);
+  $d805:scroll_bg:=(scroll_bg and $ff) or ((valor and 7) shl 8);
   $d807:begin
           sc2on:=(valor and $10)<>0;
           sc1on:=(valor and $20)<>0;
@@ -194,10 +194,10 @@ begin
 case direccion of
   0..$3fff:; //ROM
   $4000..$47ff:mem_snd[direccion]:=valor;
-  $8000:ay8910_0.Control(valor);
-  $8001:ay8910_0.Write(valor);
-  $8002:sn_76496_0.Write(valor);
-  $8003:sn_76496_1.Write(valor);
+  $8000:ay8910_0.control(valor);
+  $8001:ay8910_0.write(valor);
+  $8002:sn_76496_0.write(valor);
+  $8003:sn_76496_1.write(valor);
 end;
 end;
 
@@ -209,8 +209,8 @@ end;
 procedure exedexes_sound;
 begin
   ay8910_0.update;
-  sn_76496_0.Update;
-  sn_76496_1.Update;
+  sn_76496_0.update;
+  sn_76496_1.update;
 end;
 
 //Main
@@ -218,7 +218,9 @@ procedure reset_exedexes_hw;
 begin
  z80_0.reset;
  z80_1.reset;
- AY8910_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ ay8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;

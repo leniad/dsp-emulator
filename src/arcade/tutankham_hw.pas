@@ -2,8 +2,8 @@ unit tutankham_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6809,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,konami_snd,sound_engine;
+     m6809,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
+     konami_snd,sound_engine,galaxian_stars;
 
 function iniciar_tutankham:boolean;
 
@@ -42,6 +42,8 @@ var
   x,y,effx,effy,vrambyte,shifted:byte;
   punt:array[0..$ffff] of word;
 begin
+fill_full_screen(1,$100);
+stars_scramble(1);
 for y:=0 to 255 do begin
 		for x:=0 to 255 do begin
 			effy:=y xor xory;
@@ -50,7 +52,8 @@ for y:=0 to 255 do begin
         else effx:=(x xor xorx);
 			vrambyte:=memoria[effx*128+effy shr 1];
 			shifted:=vrambyte shr (4*(effy and 1));
-      punt[y*256+x]:=paleta[shifted and $f];
+      if (shifted and $f)<>0 then punt[y*256+x]:=paleta[shifted and $f]
+        else punt[y*256+x]:=getpixel(x,y,1);
 		end;
 end;
 putpixel(0,0,$10000,@punt,1);
@@ -86,24 +89,22 @@ end;
 
 procedure tutankham_principal;
 var
-  frame_m:single;
   f:byte;
   irq_req:boolean;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
 irq_req:=false;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    konamisnd_0.run;
-    if f=239 then begin
+    if f=240 then begin
       if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_tutankham;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    konamisnd_0.run;
   end;
   irq_req:=not(irq_req);
   eventos_tutankham;
@@ -139,13 +140,18 @@ case direccion of
                 buffer_paleta[direccion and $f]:=valor;
                end;
   $8100..$810f:scroll_y:=valor;
-  $8200..$82ff:case (direccion and 7) of
-                  0:begin
-                      irq_enable:=(valor and 1)<>0;
-                      if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
-                    end;
-                  6:xory:=255*(valor and 1);
-                  7:xorx:=255*(not(valor) and 1); //La x esta invertida...
+  $8200..$82ff:begin
+                  valor:=valor and 1;
+                  case (direccion and 7) of
+                    0:begin
+                        irq_enable:=(valor<>0);
+                        if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
+                      end;
+                    4:galaxian_stars_0.enable_w(valor<>0);
+                    5:konamisnd_0.enabled:=(valor=0);
+                    6:xory:=255*valor;
+                    7:xorx:=255*(not(valor) and 1); //La x esta invertida...
+                  end;
                end;
   $8300..$83ff:rom_nbank:=valor and $f;
   $8600..$86ff:konamisnd_0.pedir_irq:=HOLD_LINE;
@@ -158,8 +164,10 @@ end;
 procedure reset_tutankham;
 begin
  m6809_0.reset;
+ frame_main:=m6809_0.tframes;
  reset_audio;
  konamisnd_0.reset;
+ galaxian_stars_0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -176,18 +184,20 @@ llamadas_maquina.reset:=reset_tutankham;
 iniciar_tutankham:=false;
 iniciar_audio(false);
 //Pantallas
-screen_init(1,256,256);
+screen_init(1,256,256,true);
 iniciar_video(224,256);
 //Main CPU
 m6809_0:=cpu_m6809.Create(1536000,$100,TCPU_M6809);
 m6809_0.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
-//Sound Chip
-konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
-if not(roms_load(@konamisnd_0.memoria,tutan_sound)) then exit;
-//cargar roms
 if not(roms_load(@memoria_temp,tutan_rom)) then exit;
 copymemory(@memoria[$a000],@memoria_temp[0],$6000);
 for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
+//Sound Chip
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+if not(roms_load(@konamisnd_0.memoria,tutan_sound)) then exit;
+//Stars
+galaxian_stars_0:=gal_stars.create(m6809_0.numero_cpu,m6809_0.clock,SCRAMBLE);
+galaxian_stars_0.create_pal($10);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7b;

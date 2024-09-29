@@ -444,6 +444,7 @@ begin
  nmi_enable:=false;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
+ reset_analog;
  rom_index:=0;
 end;
 

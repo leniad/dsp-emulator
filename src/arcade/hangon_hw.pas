@@ -1113,6 +1113,7 @@ begin
         i8751_addr:=0;
       end;
  end;
+ reset_analog;
  sega_pcm_0.reset;
  pia8255_0.reset;
  pia8255_1.reset;

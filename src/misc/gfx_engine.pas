@@ -21,7 +21,6 @@ type
     trans_alt:array[0..4,0..$1f] of boolean;
     buffer:array[0..$7fff] of boolean;
     elements:dword;
-    mask:dword;
   end;
   pgfx=^gfx_tipo;
 var
@@ -30,7 +29,7 @@ var
   buffer_sprites_w:array[0..$fff] of word;
 
 //GFX
-procedure init_gfx(num,x_size,y_size:byte;num_elements:dword;mask:dword=0);
+procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;invert:boolean=false);
 procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
@@ -55,11 +54,12 @@ procedure put_gfx_sprite_shadow(nchar:dword;color:word;flipx,flipy:boolean;ngfx:
 procedure put_gfx_sprite_zoom_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
 procedure put_gfx_sprite_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte);
 //Sprites Update
-procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite(pos_x,pos_y:word;dest,ngfx:byte);
+procedure actualiza_gfx_sprite_line(pos_x,pos_y:word;dest,ngfx,line:byte);
 procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word;ipos_x:word=0;ipos_y:word=0);
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite_alpha(pos_x,pos_y:word;dest,ngfx:byte);
+procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 //Scroll
 procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0;adj_x:word=0;adj_y:word=0);
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
@@ -99,7 +99,7 @@ begin
   des_gfx.banks:=banks;
 end;
 
-procedure init_gfx(num,x_size,y_size:byte;num_elements:dword;mask:dword=0);
+procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 var
   f:word;
 begin
@@ -113,8 +113,6 @@ begin
   for f:=0 to 4 do fillchar(gfx[num].trans_alt[f],$20,0);
   for f:=0 to MAX_COLORES-1 do gfx[num].colores[f]:=f;
   getmem(gfx[num].datos,num_elements*x_size*y_size);
-  if mask=0 then gfx[num].mask:=num_elements-1
-    else gfx[num].mask:=mask;
 end;
 
 function GetBit(bit_nbr:dword;buffer:pbyte):byte;
@@ -426,7 +424,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -446,7 +444,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -467,7 +465,7 @@ var
   temp:pword;
   pos:pbyte;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -535,7 +533,7 @@ var
   pos:pbyte;
   punto:word;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 for y:=0 to (gfx[ngfx].y-1) do begin
@@ -558,7 +556,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -596,7 +594,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -632,7 +630,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -669,7 +667,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
@@ -706,7 +704,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y-1;
@@ -743,7 +741,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -780,7 +778,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -818,7 +816,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -859,7 +857,7 @@ var
   pos_y,cant_x:word;
 begin
 if ((zx<=0) or (zy<=0)) then exit;
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 cant_x:=round(gfx[ngfx].x*zx);
@@ -908,7 +906,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -946,7 +944,7 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
@@ -988,7 +986,7 @@ var
   pos_y,cant_x:word;
 begin
 if ((zx<=0) or (zy<=0)) then exit;
-nchar:=nchar and gfx[ngfx].mask;
+nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 zoom_y:=0;
@@ -1064,6 +1062,28 @@ origen.w:=gfx[ngfx].x;
 origen.h:=gfx[ngfx].y;
 pos_x:=pos_x and p_final[dest].sprite_mask_x;
 pos_y:=pos_y and p_final[dest].sprite_mask_y;
+destino.w:=origen.w;
+destino.h:=origen.h;
+destino.x:=pos_x+ADD_SPRITE;
+destino.y:=pos_y+ADD_SPRITE;
+SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
+if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
+  if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
+  if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
+  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
+end;
+end;
+
+procedure actualiza_gfx_sprite_line(pos_x,pos_y:word;dest,ngfx,line:byte);
+var
+  origen,destino:libsdl_rect;
+begin
+origen.x:=0;
+origen.y:=line;
+origen.w:=gfx[ngfx].x;
+origen.h:=1;
+pos_x:=pos_x and p_final[dest].sprite_mask_x;
+pos_y:=(pos_y+line) and p_final[dest].sprite_mask_y;
 destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;

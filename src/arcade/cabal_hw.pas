@@ -121,24 +121,20 @@ end;
 
 procedure cabal_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRunning do begin
    for f:=0 to $ff do begin
-      //Main CPU
-      m68000_0.run(frame_m);
-      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-      //Sound CPU
-      seibu_snd_0.z80.run(frame_s);
-      frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
-      if f=239 then begin
+      if f=240 then begin
           update_video_cabal;
           m68000_0.irq[1]:=HOLD_LINE;
       end;
+      //Main CPU
+      m68000_0.run(frame_main);
+      frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+      //Sound CPU
+      seibu_snd_0.run;
    end;
    eventos_cabal;
    video_sync;
@@ -202,6 +198,7 @@ end;
 procedure reset_cabal;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  seibu_snd_0.reset;
  reset_audio;
  marcade.in0:=$ffff;

@@ -104,12 +104,12 @@ begin
 h6280_0:=cpu_h6280.create(cpu_clock,lines);
 h6280_0.change_ram_calls(deco16_double_snd_getbyte,deco16_double_snd_putbyte);
 h6280_0.init_sound(deco16_double_sound);
-ym2203_0:=ym2203_chip.create(sound_clock div 8);
-ym2151_0:=ym2151_chip.create(sound_clock div 9);
+ym2203_0:=ym2203_chip.create(sound_clock div 8,0.7);
+ym2151_0:=ym2151_chip.create(sound_clock div 9,0.7);
 ym2151_0.change_port_func(sound_bank);
 ym2151_0.change_irq_func(deco16_snd_irq);
-oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,2);
-oki_6295_1:=snd_okim6295.Create(sound_clock div 16,OKIM6295_PIN7_HIGH,2);
+oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH);
+oki_6295_1:=snd_okim6295.Create(sound_clock div 16,OKIM6295_PIN7_HIGH);
 end;
 
 procedure deco16_snd_double_reset;
@@ -165,10 +165,10 @@ begin
   h6280_0:=cpu_h6280.create(cpu_clock,lines);
   h6280_0.change_ram_calls(deco16_simple_snd_getbyte,deco16_simple_snd_putbyte);
   h6280_0.init_sound(deco16_simple_sound);
-  ym2151_0:=ym2151_chip.create(sound_clock div 9);
+  ym2151_0:=ym2151_chip.create(sound_clock div 9,0.7);
   ym2151_0.change_port_func(sound_bank);
   ym2151_0.change_irq_func(deco16_snd_irq);
-  oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,1);
+  oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH);
 end;
 
 procedure deco16_snd_simple_reset;

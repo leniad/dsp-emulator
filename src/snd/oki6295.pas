@@ -217,7 +217,7 @@ begin
   self.voice[num_voice].sample:=sample;
   // output to the buffer, scaling by the volume
   //signal in range -2048..2047, volume in range 2..32 => signal * volume / 2 in range -32768..32767
-  generate_adpcm:=round(((self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1)))*self.amp);
+  generate_adpcm:=self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1);
 end;
 
 procedure snd_okim6295.reset;
@@ -326,8 +326,8 @@ end;
 
 procedure snd_okim6295.update;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=self.out_;
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.out_;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.out_*self.amp);
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.out_*self.amp);
 end;
 
 end.

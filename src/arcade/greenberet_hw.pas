@@ -30,24 +30,24 @@ const
         mrgoemon_sprites:array[0..1] of tipo_roms=(
         (n:'621d03.4d';l:$8000;p:0;crc:$66f2b973),(n:'621d04.5d';l:$8000;p:$8000;crc:$47df6301));
         //Dip
-        gberet_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Invalid'))),());
-        gberet_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 70K+'),(dip_val:$10;dip_name:'40K 80K+'),(dip_val:$8;dip_name:'50K 100K+'),(dip_val:$0;dip_name:'50K 200K+'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        gberet_dip_c:array [0..2] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        mrgoemon_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'20K 60K+'),(dip_val:$10;dip_name:'30K 70K+'),(dip_val:$8;dip_name:'40K 80K+'),(dip_val:$0;dip_name:'50K 90K+'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        gberet_dip_a:array [0..2] of def_dip2=(
+        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$99,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
+        gberet_dip_b:array [0..5] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
+        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+        (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 70K+','40K 80K+','50K 100K+','50K 200K+')),
+        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        gberet_dip_c:array [0..2] of def_dip2=(
+        (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
+        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')),());
+        mrgoemon_dip_b:array [0..5] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
+        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+        (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 60K+','30K 70K+','40K 80K+','50K 90K+')),
+        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
 
 var
  scroll_lineas:array[0..$1f] of word;
@@ -85,11 +85,11 @@ scroll__x_part2(1,2,8,@scroll_lineas);
 //sprites
 for f:=0 to $2f do begin
   atrib2:=$d000+banco_sprites+(f*4);
-  atrib:=memoria[$1+atrib2];
+  atrib:=memoria[1+atrib2];
   nchar:=memoria[atrib2]+(atrib and $40) shl 2;
   color:=(atrib and $f) shl 4;
-  x:=memoria[$2+atrib2]+(atrib and $80) shl 1;
-  y:=memoria[$3+atrib2];
+  x:=memoria[2+atrib2]+(atrib and $80) shl 1;
+  y:=memoria[3+atrib2];
   put_gfx_sprite_mask(nchar,color,(atrib and $10)<>0,(atrib and $20)<>0,1,0,$f);
   actualiza_gfx_sprite(x,y,2,1);
 end;
@@ -100,31 +100,27 @@ end;
 procedure eventos_gberet;
 begin
 if event.arcade then begin
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
 end;
 end;
 
 procedure gberet_principal;
 var
   f,ticks_mask:byte;
-  frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    if f=239 then update_video_gberet;
+    if f=240 then update_video_gberet;
     if (f and $f)=0 then begin //every 16 scanlines
        ticks_mask:=not(interrupt_ticks) and (interrupt_ticks+1); // 0->1
 	     interrupt_ticks:=interrupt_ticks+1;
@@ -134,6 +130,8 @@ while EmuStatus=EsRunning do begin
        if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then z80_0.change_irq(ASSERT_LINE);
 	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then z80_0.change_irq(ASSERT_LINE);
     end;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
   eventos_gberet;
   video_sync;
@@ -143,13 +141,13 @@ end;
 function gberet_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0000..$e03f:gberet_getbyte:=memoria[direccion];
+  0..$e03f:gberet_getbyte:=memoria[direccion];
   $f200:gberet_getbyte:=marcade.dswb;
   $f400:gberet_getbyte:=marcade.dswc;
   $f600:gberet_getbyte:=marcade.dswa;
-  $f601:gberet_getbyte:=marcade.in1;
+  $f601:gberet_getbyte:=$ff;
   $f602:gberet_getbyte:=marcade.in0;
-  $f603:gberet_getbyte:=marcade.in2;
+  $f603:gberet_getbyte:=marcade.in1;
   $f800..$ffff:gberet_getbyte:=memoria_rom[rom_bank,direccion and $7ff];
 end;
 end;
@@ -271,11 +269,11 @@ end;
 procedure reset_gberet;
 begin
  z80_0.reset;
+ frame_main:=z80_0.tframes;
  sn_76496_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
- marcade.in2:=$ff;
  banco_sprites:=0;
  interrupt_mask:=0;
  interrupt_ticks:=0;
@@ -347,7 +345,7 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //poner la paleta
         if not(roms_load(@memoria_temp,gberet_pal)) then exit;
-        marcade.dswb_val:=@gberet_dip_b;
+        marcade.dswb_val2:=@gberet_dip_b;
   end;
   203:begin //Mr. Goemon
         if not(roms_load(@memoria_temp,mrgoemon_rom)) then exit;
@@ -361,7 +359,7 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //poner la paleta
         if not(roms_load(@memoria_temp,mrgoemon_pal)) then exit;
-        marcade.dswb_val:=@mrgoemon_dip_b;
+        marcade.dswb_val2:=@mrgoemon_dip_b;
   end;
 end;
 for f:=0 to 31 do begin
@@ -380,8 +378,8 @@ end;
 marcade.dswa:=$ff;
 marcade.dswb:=$4a;
 marcade.dswc:=$ff;
-marcade.dswa_val:=@gberet_dip_a;
-marcade.dswc_val:=@gberet_dip_c;
+marcade.dswa_val2:=@gberet_dip_a;
+marcade.dswc_val2:=@gberet_dip_c;
 //final
 reset_gberet;
 iniciar_gberet:=true;

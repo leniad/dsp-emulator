@@ -2,8 +2,8 @@ unit legendarywings_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,main_engine,controls_engine,ym_2203,gfx_engine,msm5205,
-     rom_engine,pal_engine,sound_engine,timer_engine,mcs51;
+     nz80,main_engine,controls_engine,ym_2203,gfx_engine,msm5205,rom_engine,
+     pal_engine,sound_engine,timer_engine,mcs51,oki6295;
 
 function iniciar_lwings:boolean;
 
@@ -78,7 +78,19 @@ const
         avengers_tiles2:array[0..1] of tipo_roms=(
         (n:'avu_25.15n';l:$8000;p:0;crc:$230d9e30),(n:'avu_24.13n';l:$8000;p:$8000;crc:$a6354024));
         avengers_tile_map:tipo_roms=(n:'av_23.9n';l:$8000;p:0;crc:$c0a93ef6);
-        //DIP LW
+        //Fire Ball
+        fball_rom:tipo_roms=(n:'d4.bin';l:$20000;p:0;crc:$6122b3dc);
+        fball_snd_rom:tipo_roms=(n:'a05.bin';l:$10000;p:0;crc:$474dd19e);
+        fball_char:tipo_roms=(n:'j03.bin';l:$10000;p:0;crc:$be11627f);
+        fball_tiles:array[0..3] of tipo_roms=(
+        (n:'e15.bin';l:$20000;p:0;crc:$89a761d2),(n:'c15.bin';l:$20000;p:$10000;crc:$0f77b03e),
+        (n:'b15.bin';l:$20000;p:$20000;crc:$2169ad3e),(n:'f15.bin';l:$20000;p:$30000;crc:$34b3f9a2));
+        fball_sprites:array[0..1] of tipo_roms=(
+        (n:'j15.bin';l:$20000;p:0;crc:$ed7be8e7),(n:'h15.bin';l:$20000;p:$20000;crc:$6ffb5433));
+        fball_oki:array[0..2] of tipo_roms=(
+        (n:'a03.bin';l:$40000;p:0;crc:$22b0d089),(n:'a02.bin';l:$40000;p:$40000;crc:$951d6579),
+        (n:'a01.bin';l:$40000;p:$80000;crc:$020b5261));
+        //DIPs
         lwings_dip_a:array [0..4] of def_dip2=(
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$c;name:'Lives';number:4;val4:($c,4,8,0);name4:('3','4','5','6')),
@@ -118,6 +130,11 @@ const
         (mask:$c;name:'Difficulty';number:4;val4:(4,$c,8,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$30;name:'Bonus Life';number:4;val4:($30,$10,$20,0);name4:('20K 60K','20K 70K','20K 80K','30K 80K')),
         (mask:$c0;name:'Lives';number:4;val4:($c0,$40,$80,0);name4:('3','4','5','6')),());
+        fball_dip_a:array [0..4] of def_dip2=(
+        (mask:1;name:'Difficulty';number:2;val2:(1,0);name2:('Easy','Hard')),
+        (mask:6;name:'Lives';number:4;val4:(0,2,4,6);name4:('1','2','3','4')),
+        (mask:$18;name:'Coinage';number:4;val4:(0,8,$10,$18);name4:('1C 1C','1C 1C','1C 2C','1C 4C')),
+        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),());
         CPU_SYNC=4;
 
 var
@@ -134,6 +151,9 @@ var
  mcu_latch:array[0..2] of byte;
  soundstate,avengers_linea,mcu_control,adpcm_command:byte;
  sprt_avenger:boolean;
+ //Fire ball
+ sprite_bank,oki_bank:byte;
+ oki_roms:array[0..7,0..$1ffff] of byte;
 
 procedure eventos_lwings;
 begin
@@ -193,7 +213,7 @@ for f:=$7f downto 0 do begin
     y:=buffer_sprites[2+(f*4)];
     if ((x or y)<>0) then begin
       attr:=buffer_sprites[1+(f*4)];
-      nchar:=buffer_sprites[(f*4)]+((attr and $c0) shl 2);
+      nchar:=buffer_sprites[(f*4)]+((attr and $c0) shl 2)+(sprite_bank*$400);
       color:=(attr and $38) shl 1;
       put_gfx_sprite(nchar,color+384,(attr and 2)<>0,(attr and 4)<>0,1);
       actualiza_gfx_sprite(x,y,1,1);
@@ -207,24 +227,21 @@ end;
 procedure lwings_principal;
 var
   f:byte;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=247 then begin
+  for f:=0 to 255 do begin
+    if f=248 then begin
       if irq_ena then z80_0.change_irq(HOLD_LINE);
       update_video_lw;
       copymemory(@buffer_sprites[0],@memoria[$de00],$200);
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
   eventos_lwings;
   video_sync;
@@ -243,6 +260,7 @@ case direccion of
   $f80a:lwings_getbyte:=marcade.in2;
   $f80b:lwings_getbyte:=marcade.dswa;
   $f80c:lwings_getbyte:=marcade.dswb;
+  $f80d,$f80e:lwings_getbyte:=$ff; //P3 y P4
 end;
 end;
 
@@ -288,6 +306,9 @@ case direccion of
             bank:=(valor and 6) shr 1;
             irq_ena:=(valor and 8)<>0;
             main_screen.flip_main_screen:=(valor and 1)=0;
+            if (valor and $20)<>0 then z80_1.change_reset(ASSERT_LINE)
+              else z80_1.change_reset(CLEAR_LINE);
+            sprite_bank:=(valor and $10) shr 4;
           end;
 end;
 end;
@@ -325,8 +346,8 @@ end;
 
 procedure lwings_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 //trojan
@@ -412,28 +433,24 @@ end;
 procedure trojan_principal;
 var
   f:byte;
-  frame_m,frame_s,frame_ms:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_ms:=z80_2.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main Z80
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound Z80
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    //ADPCM Z80
-    z80_2.run(frame_ms);
-    frame_ms:=frame_ms+z80_2.tframes-z80_2.contador;
-    if f=247 then begin
+  for f:=0 to 255 do begin
+    if f=248 then begin
       if irq_ena then z80_0.change_irq(HOLD_LINE);
       update_video_trojan;
       copymemory(@buffer_sprites[0],@memoria[$de00],$200);
     end;
+    //Main Z80
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound Z80
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+    //ADPCM Z80
+    z80_2.run(frame_snd2);
+    frame_snd2:=frame_snd2+z80_2.tframes-z80_2.contador;
   end;
   eventos_lwings;
   video_sync;
@@ -490,6 +507,8 @@ case direccion of
             bank:=(valor and 6) shr 1;
             irq_ena:=(valor and 8)<>0;
             main_screen.flip_main_screen:=(valor and 1)=0;
+            if (valor and $20)<>0 then z80_1.change_reset(ASSERT_LINE)
+              else z80_1.change_reset(CLEAR_LINE);
           end;
 end;
 end;
@@ -526,24 +545,19 @@ end;
 
 procedure trojan_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
   msm5205_0.update;
 end;
 
 //Avengers
 procedure avengers_principal;
 var
-  frame_m,frame_s,frame_ms,frame_mcu:single;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_ms:=z80_2.tframes;
-frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
-  for avengers_linea:=0 to $ff do begin
+  for avengers_linea:=0 to 255 do begin
     if avengers_linea=248 then begin
       if irq_ena then z80_0.change_nmi(PULSE_LINE);
       update_video_trojan;
@@ -551,14 +565,14 @@ while EmuStatus=EsRunning do begin
     end;
     for h:=1 to CPU_SYNC do begin
       //Main Z80
-      z80_0.run(frame_m);
-      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
       //Sound Z80
-      z80_1.run(frame_s);
-      frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+      z80_1.run(frame_snd);
+      frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
       //ADPCM Z80
-      z80_2.run(frame_ms);
-      frame_ms:=frame_ms+z80_2.tframes-z80_2.contador;
+      z80_2.run(frame_snd2);
+      frame_snd2:=frame_snd2+z80_2.tframes-z80_2.contador;
       //MCU
       mcs51_0.run(frame_mcu);
       frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
@@ -620,6 +634,8 @@ case direccion of
             bank:=(valor and 6) shr 1;
             irq_ena:=(valor and 8)<>0;
             main_screen.flip_main_screen:=(valor and 1)=0;
+            if (valor and $20)<>0 then z80_1.change_reset(ASSERT_LINE)
+              else z80_1.change_reset(CLEAR_LINE);
           end;
 end;
 end;
@@ -673,19 +689,84 @@ begin
   z80_0.contador:=z80_0.contador+2;
 end;
 
+//Fire Ball
+procedure fball_principal;
+var
+  f:byte;
+begin
+init_controls(false,false,false,true);
+while EmuStatus=EsRunning do begin
+  for f:=0 to $ff do begin
+    if f=248 then begin
+      if irq_ena then z80_0.change_nmi(PULSE_LINE);
+      update_video_lw;
+      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
+    end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+  end;
+  eventos_lwings;
+  video_sync;
+end;
+end;
+
+function fball_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$fff,$c000..$c7ff:fball_snd_getbyte:=mem_snd[direccion];
+  $8000:fball_snd_getbyte:=sound_command;
+  $e000:fball_snd_getbyte:=oki_6295_0.read;
+end;
+end;
+
+procedure fball_snd_putbyte(direccion:word;valor:byte);
+var
+  ptemp:pbyte;
+begin
+case direccion of
+  0..$fff:;
+  $a000:begin
+          oki_bank:=(valor shr 1) and 7;
+          ptemp:=oki_6295_0.get_rom_addr;
+          copymemory(@ptemp[$20000],@oki_roms[oki_bank,0],$20000);
+        end;
+  $c000..$c7ff:mem_snd[direccion]:=valor;
+  $e000:oki_6295_0.write(valor);
+end;
+end;
+
+procedure fball_sound_update;
+begin
+  oki_6295_0.update;
+end;
+
 //Main
 procedure reset_lwings;
 begin
  z80_0.reset;
  z80_0.im0:=$d7;  //rst 10
  z80_1.reset;
- ym2203_0.reset;
- ym2203_1.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ if main_vars.tipo_maquina<>247 then begin
+    ym2203_0.reset;
+    ym2203_1.reset;
+ end else begin
+    oki_6295_0.reset;
+ end;
  if ((main_vars.tipo_maquina=61) or (main_vars.tipo_maquina=368)) then begin
     z80_2.reset;
     msm5205_0.reset;
+    frame_snd2:=z80_2.tframes;
  end;
- if main_vars.tipo_maquina=368 then mcs51_0.reset;
+ if main_vars.tipo_maquina=368 then begin
+    mcs51_0.reset;
+    frame_mcu:=mcs51_0.tframes;
+ end;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -706,12 +787,16 @@ begin
  mcu_latch[2]:=0;
  soundstate:=0;
  mcu_control:=0;
+ //Fire Ball
+ oki_bank:=0;
+ sprite_bank:=0;
 end;
 
 function iniciar_lwings:boolean;
 var
     f:word;
-    memoria_temp:array[0..$3ffff] of byte;
+    memoria_temp:array[0..$bffff] of byte;
+    ptemp:pbyte;
 const
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
@@ -784,16 +869,25 @@ case main_vars.tipo_maquina of
         z80_1:=cpu_z80.create(3000000,256);
         z80_1.init_sound(trojan_sound_update);
      end;
+  247:begin
+        z80_1:=cpu_z80.create(3000000,256);
+        z80_1.init_sound(fball_sound_update);
+      end;
   368:begin
         z80_1:=cpu_z80.create(3000000,256*CPU_SYNC);
         z80_1.init_sound(trojan_sound_update);
       end;
 end;
-z80_1.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
-timers.init(z80_1.numero_cpu,3000000/222,lwings_snd_irq,nil,true);
-//Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.10,0.20);
-ym2203_1:=ym2203_chip.create(1500000,0.10,0.20);
+if main_vars.tipo_maquina<>247 then begin
+  z80_1.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
+  timers.init(z80_1.numero_cpu,3000000/222,lwings_snd_irq,nil,true);
+  //Sound Chips
+  ym2203_0:=ym2203_chip.create(1500000,0.50,1);
+  ym2203_1:=ym2203_chip.create(1500000,0.50,1);
+end else begin
+  z80_1.change_ram_calls(fball_snd_getbyte,fball_snd_putbyte);
+  oki_6295_0:=snd_okim6295.create(1000000,OKIM6295_PIN7_HIGH);
+end;
 sprt_avenger:=false;
 case main_vars.tipo_maquina of
   59:begin //Legendary Wings
@@ -806,6 +900,7 @@ case main_vars.tipo_maquina of
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //cargar ROMS sonido
         if not(roms_load(@mem_snd,lwings_snd_rom)) then exit;
+
         //convertir chars
         if not(roms_load(@memoria_temp,lwings_char)) then exit;
         convert_chars_lw($400);
@@ -888,6 +983,40 @@ case main_vars.tipo_maquina of
         marcade.dswa_val2:=@trojan_dip_a;
         marcade.dswb_val2:=@trojan_dip_b;
       end;
+  247:begin //Fire ball
+        llamadas_maquina.bucle_general:=fball_principal;
+        //Main CPU
+        z80_0:=cpu_z80.create(6000000,256);
+        z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
+        if not(roms_load(@memoria_temp,fball_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
+        for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
+        //cargar ROMS sonido
+        if not(roms_load(@memoria_temp,fball_snd_rom)) then exit;
+        copymemory(@mem_snd,@memoria_temp,$1000);
+        if not(roms_load(@memoria_temp,fball_oki)) then exit;
+        ptemp:=oki_6295_0.get_rom_addr;
+        copymemory(ptemp,@memoria_temp[0],$40000);
+        copymemory(@oki_roms[0,0],@memoria_temp[0],$20000);
+        copymemory(@oki_roms[1,0],@memoria_temp[$20000],$20000);
+        copymemory(@oki_roms[2,0],@memoria_temp[0],$20000);
+        copymemory(@oki_roms[3,0],@memoria_temp[$20000],$20000);
+        for f:=4 to 7 do copymemory(@oki_roms[f,0],@memoria_temp[$40000+((f-4)*$20000)],$20000);
+        //convertir chars
+        if not(roms_load(@memoria_temp,fball_char)) then exit;
+        fillchar(memoria_temp[$4000],$c000,$ff);
+        convert_chars_lw($400);
+        //convertir sprites
+        if not(roms_load(@memoria_temp,fball_sprites)) then exit;
+        convert_sprites_lw($800);
+        //tiles
+        if not(roms_load(@memoria_temp,fball_tiles)) then exit;
+        convert_tiles_lw;  //$800
+        //DIP
+        marcade.dswa:=$6d;
+        marcade.dswb:=0;
+        marcade.dswa_val2:=@fball_dip_a;
+      end;
   368:begin
         llamadas_maquina.bucle_general:=avengers_principal;
         //Main CPU
@@ -902,10 +1031,6 @@ case main_vars.tipo_maquina of
         mcs51_0.change_io_calls(avengers_in_port0,avengers_in_port1,avengers_in_port2,nil,avengers_out_port0,nil,avengers_out_port2,avengers_out_port3);
         if not(roms_load(@memoria_temp,avengers_mcu)) then exit;
         memoria_temp[$b84]:=2;
-        memoria_temp[$481]:=0;
-	      memoria_temp[$4e0]:=0;
-	      memoria_temp[$483]:=$a0;
-	      memoria_temp[$4c3]:=$30;
         copymemory(mcs51_0.get_rom_addr,@memoria_temp,$1000);
         //ADPCM Z80
         z80_2:=cpu_z80.create(3000000,256*CPU_SYNC);

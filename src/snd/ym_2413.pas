@@ -461,7 +461,7 @@ var
 
 constructor ym2413_chip.create(clock:dword;amp:single=1);
 var
-  rate,n:integer;
+  n:integer;
   m,o:double;
   x:byte;
   i:word;
@@ -470,7 +470,6 @@ begin
   chips_total:=chips_total+1;
   self.tsample_num:=init_channel;
   self.amp:=amp;
-  rate:=clock div 72;
   copymemory(@self.inst_tab,@table,sizeof(table));
 	for x:=0 to (TL_RES_LEN-1) do begin
 		m:=(1 shl 16)/power(2,(x+1)*(ENV_STEP/4.0)/8.0);
@@ -491,8 +490,8 @@ begin
 	end;
 	for i:=0 to (SIN_LEN-1) do begin
 		// non-standard sinus 
-		m:=sin(((i*2)+1)*M_PI/SIN_LEN); // checked against the real chip 
-		// we never reach zero here due to ((i*2)+1) 
+		m:=sin(((i*2)+1)*M_PI/SIN_LEN); // checked against the real chip
+		// we never reach zero here due to ((i*2)+1)
 		//o:=8*ln(1.0/abs(m))/ln(2.0);  // convert to 'decibels' 
     if (m>0.0) then o:= 8*ln(1.0/m)/ln(2)	// convert to 'decibels' */
 		  else o:=8*ln(-1.0/m)/ln(2);	// convert to 'decibels' */
@@ -536,14 +535,14 @@ var
 begin
 	self.eg_timer:=0;
 	self.eg_cnt:=0;
-	self.noise_rng:=1;    // noise shift register 
-	// reset with register write 
+	self.noise_rng:=1;    // noise shift register
+	// reset with register write
 	self.write_int($f,0); //test reg
 	for i:=$3f downto $10 do self.write_int(i,0);
-	// reset operator parameters 
+	// reset operator parameters
 	for c:=0 to 8 do begin
 		for s:=0 to 1 do begin
-			// wave table 
+			// wave table
 			self.ch[c].slot[s].wavetable:=0;
 			self.ch[c].slot[s].state:=EG_OFF;
 			self.ch[c].slot[s].volume:=MAX_ATT_INDEX;
@@ -551,14 +550,17 @@ begin
 	end;
 end;
 
-// advance LFO to next sample 
+// advance LFO to next sample
 procedure ym2413_chip.advance_lfo;
+var
+  tempdw:dword;
 begin
-	// LFO 
+	// LFO
 	self.lfo_am_cnt:=self.lfo_am_cnt+self.lfo_am_inc;
-	if (self.lfo_am_cnt>=(LFO_AM_TAB_ELEMENTS shl LFO_SH)) then // lfo_am_table is 210 elements long 
-		self.lfo_am_cnt:=self.lfo_am_cnt-(LFO_AM_TAB_ELEMENTS shl LFO_SH);
-	self.LFO_AM:=lfo_am_table[self.lfo_am_cnt shr LFO_SH ] shr 1;
+  //Whaaaaaaaat????? Si hago el shl 24, delphi falla...
+  tempdw:=$d2000000; //LFO_AM_TAB_ELEMENTS shl LFO_SH;
+	if (self.lfo_am_cnt>=tempdw) then self.lfo_am_cnt:=self.lfo_am_cnt-tempdw;
+	self.LFO_AM:=lfo_am_table[self.lfo_am_cnt shr LFO_SH] shr 1;
 	self.lfo_pm_cnt:=self.lfo_pm_cnt+self.lfo_pm_inc;
 	self.LFO_PM:=(self.lfo_pm_cnt shr LFO_SH) and 7;
 end;
