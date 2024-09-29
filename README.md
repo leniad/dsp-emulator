@@ -36,7 +36,7 @@
     +Some video optimizations, removed fake scroll
     +Fixed IRQ
 -Galaxian
-    +Removed start generation
+    +Removed stars generation
     +Better background color handling
 -Legend of Kage
     +Removed MCU, used general Taito 68705
