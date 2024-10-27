@@ -438,6 +438,7 @@ begin
     pia8255_0.reset;
     pia8255_1.reset;
  end;
+ reset_video;
  reset_audio;
  snd_rom_addr:=0;
  spinner:=false;

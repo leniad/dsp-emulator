@@ -283,6 +283,7 @@ begin
  tc0140syt_0.reset;
  ym2151_0.reset;
  {$IFDEF MCU}cchip_0.reset;{$ENDIF}
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=0;//$fc;

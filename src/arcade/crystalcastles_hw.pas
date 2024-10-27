@@ -311,6 +311,7 @@ begin
   m6502_0.reset;
   pokey_0.reset;
   pokey_1.reset;
+  reset_video;
   reset_audio;
   num_bank:=0;
   bitmode_addr[0]:=0;

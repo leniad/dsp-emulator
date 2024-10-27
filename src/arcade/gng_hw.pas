@@ -310,6 +310,7 @@ begin
  frame_snd:=z80_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
+ reset_video;
  reset_audio;
  banco:=0;
  marcade.in0:=$ff;

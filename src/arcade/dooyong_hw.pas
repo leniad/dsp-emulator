@@ -800,6 +800,7 @@ begin
           else marcade.in2:=$ef;
       end;
  end;
+ reset_video;
  reset_audio;
  banco_rom:=0;
  sound_latch:=0;

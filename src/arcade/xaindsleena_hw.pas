@@ -463,6 +463,7 @@ begin
  m6805_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
+ reset_video;
  reset_audio;
  banco_main:=0;
  banco_sub:=0;

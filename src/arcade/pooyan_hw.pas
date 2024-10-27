@@ -168,6 +168,7 @@ procedure reset_pooyan;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
+ reset_video;
  reset_audio;
  konamisnd_0.reset;
  nmi_vblank:=false;

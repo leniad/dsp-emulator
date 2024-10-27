@@ -507,6 +507,7 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -575,7 +576,7 @@ z80_0:=cpu_z80.create(4000000,$100);
 z80_0.change_ram_calls(starforce_getbyte,starforce_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(2000000,$100);
-z80_1.daisy:=true;
+z80_1.enable_daisy;
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(starforce_sound_update);

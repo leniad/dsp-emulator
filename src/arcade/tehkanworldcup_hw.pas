@@ -313,6 +313,7 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  msm5205_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$20;
  marcade.in1:=$20;

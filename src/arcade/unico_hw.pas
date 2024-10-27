@@ -296,6 +296,7 @@ begin
  m68000_0.reset;
  ym3812_0.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  scr_frame:=0;
  marcade.in0:=$ffff;

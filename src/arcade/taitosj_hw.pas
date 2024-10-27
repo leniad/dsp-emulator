@@ -569,6 +569,7 @@ ay8910_1.reset;
 ay8910_2.reset;
 ay8910_3.reset;
 dac_0.reset;
+reset_video;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;

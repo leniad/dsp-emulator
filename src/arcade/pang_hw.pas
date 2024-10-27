@@ -209,8 +209,9 @@ end;
 procedure reset_pang;
 begin
  z80_0.reset;
- reset_audio;
  ym2413_0.reset;
+ reset_video;
+ reset_audio;
  oki_6295_0.reset;
  eepromser_0.reset;
  marcade.in0:=$ff;

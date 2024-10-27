@@ -369,6 +369,7 @@ begin
         marcade.in3:=$ff;
       end;
  end;
+ reset_video;
  reset_audio;
 end;
 

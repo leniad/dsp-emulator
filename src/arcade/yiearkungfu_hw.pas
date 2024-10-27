@@ -219,6 +219,7 @@ begin
  frame_main:=m6809_0.tframes;
  sn_76496_0.reset;
  vlm5030_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

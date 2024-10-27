@@ -165,6 +165,7 @@ procedure reset_tutankham;
 begin
  m6809_0.reset;
  frame_main:=m6809_0.tframes;
+ reset_video;
  reset_audio;
  konamisnd_0.reset;
  galaxian_stars_0.reset;

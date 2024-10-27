@@ -287,6 +287,7 @@ ay8910_2.reset;
 ay8910_3.reset;
 ay8910_4.reset;
 dac_0.reset;
+reset_video;
 reset_audio;
 main_nmi:=false;
 sub_irq:=false;

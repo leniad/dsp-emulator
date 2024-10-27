@@ -190,6 +190,7 @@ begin
 z80_0.reset;
 frame_main:=z80_0.tframes;
 konamisnd_0.reset;
+reset_video;
 reset_audio;
 nmi_enable:=false;
 marcade.in0:=$ff;

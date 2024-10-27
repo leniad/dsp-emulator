@@ -175,6 +175,7 @@ var
  sprite_ram:array[0..1,0..$f] of byte;
  x_hack,y_hack:integer;
  alibaba_mystery:word;
+ irq_vector:byte;
 
 procedure update_video_pacman;
 var
@@ -303,7 +304,7 @@ while EmuStatus=EsRunning do begin
     //Si no pinto la pantalla aqui, Ms Pac Man Twin no hace el efecto de la pantalla...
     //Los timings del Z80 estan bien, supongo que es correcto (parece que no hay daños colaterales!)
     if f=96 then update_video_pacman;
-    if ((f=224) and irq_vblank) then z80_0.change_irq(ASSERT_LINE);
+    if ((f=224) and irq_vblank) then z80_0.change_irq_vector(ASSERT_LINE,irq_vector);
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
@@ -365,7 +366,7 @@ end;
 
 procedure pacman_outbyte(puerto:word;valor:byte);
 begin
-if (puerto and $ff)=0 then z80_0.im2_lo:=valor;
+if (puerto and $ff)=0 then irq_vector:=valor;
 end;
 
 procedure pacman_sound_update;
@@ -595,8 +596,8 @@ end;
 procedure piranha_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $ff)=0 then begin
-  if valor=$fa then z80_0.im2_lo:=$78
-    else z80_0.im2_lo:=valor;
+  if valor=$fa then irq_vector:=$78
+    else irq_vector:=valor;
 end;
 end;
 
@@ -688,8 +689,10 @@ begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
  namco_snd_0.reset;
+ reset_video;
  reset_audio;
  irq_vblank:=false;
+ irq_vector:=$ff;
  dec_enable:=false;
  marcade.in0:=$ef;
  marcade.in1:=$7f;

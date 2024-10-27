@@ -67,7 +67,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=425;
+  GAMES_CONT=428;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -264,7 +264,7 @@ const
   (name:'Zaxxon';year:'1982';snd:2;hi:false;zip:'zaxxon';grid:188;company:'Sega';rom:@zaxxon;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
   (name:'Jungle King';year:'1982';snd:1;hi:false;zip:'junglek';grid:189;company:'Taito';rom:@junglek;tipo:ARCADE or RUN_GUN),
   (name:'Hammerin'' Harry';year:'1990';snd:1;hi:false;zip:'hharry';grid:190;company:'Irem';rom:@hharry;tipo:ARCADE or RUN_GUN),
-  (name:'R-Type 2';year:'1989';snd:1;hi:false;zip:'rtype2';grid:191;company:'Irem';rom:@rtype2;tipo:ARCADE or SHOT),
+  (name:'R-Type II';year:'1989';snd:1;hi:false;zip:'rtype2';grid:191;company:'Irem';rom:@rtype2;tipo:ARCADE or SHOT),
   (name:'The Tower of Druaga';year:'1984';snd:1;hi:false;zip:'todruaga';grid:192;company:'Namco';rom:@todruaga;tipo:ARCADE or MAZE),
   (name:'Motos';year:'1985';snd:1;hi:false;zip:'motos';grid:193;company:'Namco';rom:@motos;tipo:ARCADE or MAZE),
   (name:'Dragon Buster';year:'1984';snd:1;hi:false;zip:'drgnbstr';grid:194;company:'Namco';rom:@drgnbstr;tipo:ARCADE or MAZE or RUN_GUN),
@@ -416,7 +416,7 @@ const
   (name:'Raiden';year:'1990';snd:1;hi:false;zip:'raiden';grid:340;company:'Seibu Kaihatsu';rom:@raiden_roms;tipo:ARCADE or SHOT),
   (name:'Twins';year:'1993';snd:1;hi:false;zip:'twins';grid:341;company:'Ecogames';rom:@twins_roms;tipo:ARCADE or MAZE),
   (name:'Twins (Electronic Devices)';year:'1994';snd:1;hi:false;zip:'twinsed1';grid:342;company:'Ecogames';rom:@twinsed1_roms;tipo:ARCADE or MAZE),
-  (name:'Hot Blocks - Tetirx II';year:'1993';snd:1;hi:false;zip:'hotblock';grid:343;company:'NIX?';rom:@hotblock_roms;tipo:ARCADE or MAZE),
+  (name:'Hot Blocks - Tetrix II';year:'1993';snd:1;hi:false;zip:'hotblock';grid:343;company:'NIX?';rom:@hotblock_roms;tipo:ARCADE or MAZE),
   (name:'Missile Command';year:'1980';snd:1;hi:false;zip:'missile';grid:344;company:'Atari';rom:@missile_roms;tipo:ARCADE or SHOT),
   (name:'Super Missile Attack';year:'1981';snd:1;hi:false;zip:'suprmatk';grid:345;company:'Atari';rom:@suprmatk_roms;tipo:ARCADE or SHOT),
   (name:'Super Zaxxon';year:'1982';snd:3;hi:false;zip:'szaxxon';grid:346;company:'Sega';rom:@szaxxon_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
@@ -481,6 +481,9 @@ const
   (name:'Piranha';year:'1981';snd:1;hi:false;zip:'piranha';grid:405;company:'GL';rom:@piranha_roms;tipo:ARCADE or MAZE),
   (name:'Final Star Force';year:'1992';snd:1;hi:false;zip:'fstarfrc';grid:406;company:'Tecmo';rom:@finalstarforce_roms;tipo:ARCADE or SHOT),
   (name:'Wyvern F-0';year:'1985';snd:1;hi:false;zip:'wyvernf0';grid:407;company:'Taito';rom:@wyvernf0_roms;tipo:ARCADE or SHOT),
+  (name:'Riot City';year:'1991';snd:1;hi:false;zip:'riotcity';grid:408;company:'Sega/Westone';rom:@riotcity_roms;tipo:ARCADE or FIGHT),
+  (name:'SDI - Strategic Defense Initiative';year:'1987';snd:1;hi:false;zip:'sdib';grid:409;company:'Sega';rom:@sdi_roms;tipo:ARCADE or SHOT),
+  (name:'Cotton';year:'1991';snd:1;hi:false;zip:'cotton';grid:410;company:'Sega';rom:@cotton_roms;tipo:ARCADE or SHOT),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -859,7 +862,7 @@ case numero of
   340:principal1.CambiarMaquina(principal1.raiden1);
   341:principal1.CambiarMaquina(principal1.twins1);
   342:principal1.CambiarMaquina(principal1.twinsed1);
-  343:principal1.CambiarMaquina(principal1.hotblock1);
+  343:principal1.CambiarMaquina(principal1.hotblocks1);
   344:principal1.CambiarMaquina(principal1.missilecommand1);
   345:principal1.CambiarMaquina(principal1.supermissileattack1);
   346:principal1.CambiarMaquina(principal1.superzaxxon1);
@@ -924,6 +927,9 @@ case numero of
   405:principal1.CambiarMaquina(principal1.piranha1);
   406:principal1.CambiarMaquina(principal1.finalstarforce1);
   407:principal1.CambiarMaquina(principal1.WyvernF01);
+  408:principal1.CambiarMaquina(principal1.RiotCity1);
+  409:principal1.CambiarMaquina(principal1.sdi1);
+  410:principal1.CambiarMaquina(principal1.cotton1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1290,7 +1296,7 @@ principal1.wildfang1.Checked:=false;
 principal1.raiden1.Checked:=false;
 principal1.twins1.Checked:=false;
 principal1.twinsed1.Checked:=false;
-principal1.hotblock1.Checked:=false;
+principal1.hotblocks1.Checked:=false;
 principal1.missilecommand1.Checked:=false;
 principal1.supermissileattack1.Checked:=false;
 principal1.superzaxxon1.Checked:=false;
@@ -1355,6 +1361,9 @@ principal1.alibaba1.Checked:=false;
 principal1.piranha1.Checked:=false;
 principal1.finalstarforce1.Checked:=false;
 principal1.WyvernF01.Checked:=false;
+principal1.riotcity1.Checked:=false;
+principal1.sdi1.Checked:=false;
+principal1.cotton1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1613,7 +1622,7 @@ case tmaquina of
   283,284:llamadas_maquina.iniciar:=iniciar_k31945;
   285,286:llamadas_maquina.iniciar:=iniciar_bloodbros;
   287,288:llamadas_maquina.iniciar:=iniciar_baraduke;
-  292,293,294,295,296,297:llamadas_maquina.iniciar:=iniciar_system16b;
+  292,293,294,295,296,297,408,409,410:llamadas_maquina.iniciar:=iniciar_system16b;
   298:llamadas_maquina.iniciar:=iniciar_toaplan1;
   301:llamadas_maquina.iniciar:=karatechamp_iniciar;
   302,303,304:llamadas_maquina.iniciar:=iniciar_seta;
@@ -3052,9 +3061,9 @@ if sender=principal1.twinsed1 then begin
   tipo:=342;
   principal1.twinsed1.Checked:=true;
 end;
-if sender=principal1.hotblock1 then begin
+if sender=principal1.hotblocks1 then begin
   tipo:=343;
-  principal1.hotblock1.Checked:=true;
+  principal1.hotblocks1.Checked:=true;
 end;
 if sender=principal1.missilecommand1 then begin
   tipo:=344;
@@ -3311,6 +3320,18 @@ end;
 if sender=principal1.WyvernF01 then begin
   tipo:=407;
   principal1.WyvernF01.Checked:=true;
+end;
+if sender=principal1.riotcity1 then begin
+  tipo:=408;
+  principal1.riotcity1.Checked:=true;
+end;
+if sender=principal1.sdi1 then begin
+  tipo:=409;
+  principal1.sdi1.Checked:=true;
+end;
+if sender=principal1.cotton1 then begin
+  tipo:=410;
+  principal1.cotton1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

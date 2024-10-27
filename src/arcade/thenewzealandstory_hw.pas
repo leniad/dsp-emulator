@@ -504,6 +504,7 @@ begin
       end;
  end;
  ym2203_0.reset;
+ reset_video;
  reset_audio;
  seta_sprite0.reset;
  main_bank:=0;

@@ -348,6 +348,7 @@ procedure reset_irem_m63;
 begin
  z80_0.reset;
  mcs48_0.reset;
+ reset_video;
  reset_audio;
  ay8910_0.reset;
  if main_vars.tipo_maquina=354 then ay8910_1.reset

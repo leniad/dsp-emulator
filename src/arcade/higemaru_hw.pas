@@ -102,14 +102,10 @@ while EmuStatus=EsRunning do begin
     //snd
     case f of
       239:begin
-            z80_0.im0:=$cf;  //rst 8
-            z80_0.change_irq(HOLD_LINE);
+            z80_0.change_irq_vector(HOLD_LINE,$cf);
             update_video_higemaru;
           end;
-      255:begin
-           z80_0.im0:=$d7;  //rst 10
-           z80_0.change_irq(HOLD_LINE);
-        end;
+      255:z80_0.change_irq_vector(HOLD_LINE,$d7);
     end;
   end;
   eventos_higemaru;
@@ -156,8 +152,9 @@ end;
 procedure reset_higemaru;
 begin
  z80_0.reset;
- AY8910_0.reset;
- AY8910_1.reset;
+ ay8910_0.reset;
+ ay8910_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

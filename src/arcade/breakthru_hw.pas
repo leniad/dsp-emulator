@@ -313,6 +313,7 @@ begin
  m6809_1.reset;
  ym2203_0.reset;
  ym3812_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

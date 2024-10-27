@@ -37,6 +37,7 @@ uses snapshot,principal;
 
 const
   coleco_bios:tipo_roms=(n:'coleco.rom';l:$2000;p:0;crc:$3aa93ef3);
+  MAX_CARTRIDGE=$80000;  //Hasta 512Kb! (Wizard of Wor)
 
 var
   rom:array[0..$1fff] of byte;
@@ -156,10 +157,10 @@ begin
   puerto:=puerto and $ff;
   case (puerto and $e0) of
     $40:if puerto=$52 then coleco_inbyte:=ay8910_0.read;
-    $a0:if (puerto and $01)<>0 then coleco_inbyte:=tms_0.register_r
+    $a0:if (puerto and 1)<>0 then coleco_inbyte:=tms_0.register_r
              else coleco_inbyte:=tms_0.vram_r;
     $e0:begin
-             player:=(puerto shr 1) and $01;
+             player:=(puerto shr 1) and 1;
              if coleco_0.joymode then begin //leer joystick
                 coleco_inbyte:=coleco_0.joystick[player] and $7f;
              end else begin //leer keypad
@@ -167,16 +168,16 @@ begin
                 input:=coleco_0.keypad[player];
                 if (input and 1)=0 then data:=data and $a; //0
                 if (input and 2)=0 then data:=data and $d; //1
-                if (input and 4)=0 then data:=data and $7; //2
+                if (input and 4)=0 then data:=data and 7; //2
                 if (input and 8)=0 then data:=data and $c; //2
-                if (input and $10)=0 then data:=data and $2; //4
-                if (input and $20)=0 then data:=data and $3; //5
+                if (input and $10)=0 then data:=data and 2; //4
+                if (input and $20)=0 then data:=data and 3; //5
                 if (input and $40)=0 then data:=data and $e; //6
-                if (input and $80)=0 then data:=data and $5; //7
-                if (input and $100)=0 then data:=data and $1; //8
+                if (input and $80)=0 then data:=data and 5; //7
+                if (input and $100)=0 then data:=data and 1; //8
                 if (input and $200)=0 then data:=data and $b; //9
-                if (input and $400)=0 then data:=data and $6; //#
-                if (input and $800)=0 then data:=data and $9; //*
+                if (input and $400)=0 then data:=data and 6; //#
+                if (input and $800)=0 then data:=data and 9; //*
                 //Segundo boton
                 coleco_inbyte:=((input and $4000) shr 8) or $30 or data;
              end;
@@ -195,7 +196,7 @@ begin
         end;
     $60:coleco_0.rom_enabled:=(valor and 2)<>0; //Super Game Module
     $80,$c0:coleco_0.joymode:=(puerto and $40)<>0;
-    $a0:if (puerto and $01)<>0 then tms_0.register_w(valor)
+    $a0:if (puerto and 1)<>0 then tms_0.register_w(valor)
                 else tms_0.vram_w(valor);
     $e0:sn_76496_0.Write(valor);
   end;
@@ -298,7 +299,7 @@ var
   longitud:integer;
 begin
   if not(openrom(romfile,SCOLECO)) then exit;
-  getmem(datos,$50000);  //Hasta 256Kb!
+  getmem(datos,MAX_CARTRIDGE);
   if not(extract_data(romfile,datos,longitud,nombre_file,SCOLECO)) then begin
     freemem(datos);
     exit;

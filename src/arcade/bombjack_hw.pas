@@ -509,6 +509,7 @@ z80_1.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 ay8910_2.reset;
+reset_video;
 reset_audio;
 nmi_vblank:=false;
 fondo_activo:=false;

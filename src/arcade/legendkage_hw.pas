@@ -323,6 +323,7 @@ begin
  taito_68705_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
+ reset_video;
  reset_audio;
  fillchar(scroll_val[0],5,0);
  marcade.in0:=$b;

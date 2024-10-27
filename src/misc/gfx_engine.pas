@@ -79,6 +79,7 @@ procedure fill_full_screen(screen:byte;color:word);
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
 //Misc
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
+procedure reset_video;
 
 implementation
 uses main_engine;
@@ -1259,6 +1260,16 @@ end;
 procedure fill_full_screen(screen:byte;color:word);
 begin
 fillword(pantalla[screen].pixels,pantalla[screen].w*pantalla[screen].h,paleta[color]);
+end;
+
+procedure reset_video;
+var
+  f:byte;
+begin
+  for f:=0 to MAX_GFX-1 do fillchar(gfx[f].buffer,$8000,1);
+  fillchar(buffer_sprites,$2000,0);
+  fillchar(buffer_sprites_w,$2000,0);
+  fillchar(buffer_color,MAX_COLOR_BUFFER,1);
 end;
 
 end.

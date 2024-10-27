@@ -456,6 +456,7 @@ begin
  frame_mcu:=mcs51_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
+ reset_video;
  reset_audio;
  banco_rom:=0;
  soundlatch:=0;

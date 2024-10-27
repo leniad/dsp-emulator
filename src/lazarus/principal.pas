@@ -211,7 +211,6 @@ type
     gaunt21: TMenuItem;
     MenuItem37: TMenuItem;
     defender1: TMenuItem;
-    ddragon_sh1: TMenuItem;
     mayday1: TMenuItem;
     colony71: TMenuItem;
     Bosconian1: TMenuItem;
@@ -278,7 +277,7 @@ type
     enduroracer1: TMenuItem;
     MenuItem47: TMenuItem;
     MenuItem48: TMenuItem;
-    hotblock1: TMenuItem;
+    hotblocks1: TMenuItem;
     MenuItem49: TMenuItem;
     MenuItem50: TMenuItem;
     centipede1: TMenuItem;
@@ -330,6 +329,10 @@ type
     alibaba1: TMenuItem;
     MenuItem60: TMenuItem;
     finalstarforce1: TMenuItem;
+    fireball1: TMenuItem;
+    cotton1: TMenuItem;
+    sdi1: TMenuItem;
+    RiotCity1: TMenuItem;
     WyvernF01: TMenuItem;
     piranha1: TMenuItem;
     woodpecker1: TMenuItem;

@@ -101,12 +101,10 @@ while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
  case f of
     64:begin
-         z80_0.im2_lo:=$ff;
-         z80_0.change_irq(HOLD_LINE);
+         z80_0.change_irq_vector(HOLD_LINE,$ff);
        end;
     240:begin
-         z80_0.im2_lo:=$fd;
-         z80_0.change_irq(HOLD_LINE);
+         z80_0.change_irq_vector(HOLD_LINE,$fd);
          z80_1.change_irq(HOLD_LINE);
          update_video_hvyunit;
         end;
@@ -350,7 +348,6 @@ end;
 procedure reset_hvyunit;
 begin
  z80_0.reset;
- z80_0.im2_lo:=$ff;
  z80_1.reset;
  z80_2.reset;
  mcs51_0.reset;
@@ -360,6 +357,7 @@ begin
  frame_mcu:=mcs51_0.tframes;
  pandora_0.reset;
  ym2203_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

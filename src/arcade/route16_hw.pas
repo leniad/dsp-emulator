@@ -259,6 +259,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  if main_vars.tipo_maquina=259 then dac_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

@@ -330,6 +330,7 @@ begin
  k053246_0.reset;
  k053260_0.reset;
  ym2151_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

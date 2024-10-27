@@ -272,6 +272,7 @@ begin
  frame_main:=m6809_0.tframes;
  frame_snd:=m6809_1.tframes;
  ym2151_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$1f;
  marcade.in1:=$ff;

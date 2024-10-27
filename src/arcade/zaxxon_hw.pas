@@ -608,6 +608,7 @@ begin
  end;
  reset_samples;
  pia8255_0.reset;
+ reset_video;
  reset_audio;
  irq_vblank:=false;
  marcade.in0:=0;

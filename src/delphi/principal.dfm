@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 225
+  ClientHeight = 293
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 164
+    Height = 232
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -666,7 +666,7 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 391
+    ExplicitWidth = 395
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 164
+    Height = 232
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitLeft = 342
-    ExplicitHeight = 160
+    ExplicitLeft = 346
+    ExplicitHeight = 229
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,13 +1870,13 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 206
+    Top = 274
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 202
-    ExplicitWidth = 391
+    ExplicitTop = 271
+    ExplicitWidth = 395
     DesignSize = (
       397
       19)
@@ -3735,6 +3735,18 @@ object principal1: Tprincipal1
               Caption = 'Aurail'
               OnClick = CambiarMaquina
             end
+            object RiotCity1: TMenuItem
+              Caption = 'Riot City'
+              OnClick = CambiarMaquina
+            end
+            object sdi1: TMenuItem
+              Caption = 'SDI - Strategic Defense Initiative'
+              OnClick = CambiarMaquina
+            end
+            object Cotton1: TMenuItem
+              Caption = 'Cotton'
+              OnClick = CambiarMaquina
+            end
           end
           object SNK68kHW1: TMenuItem
             Caption = 'SNK 68k HW'
@@ -4154,7 +4166,7 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
             object RType21: TMenuItem
-              Caption = 'R-Type2'
+              Caption = 'R-Type II'
               OnClick = CambiarMaquina
             end
           end
@@ -4173,8 +4185,8 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object HotBlock1: TMenuItem
-            Caption = 'Hot Block'
+          object HotBlocks1: TMenuItem
+            Caption = 'Hot Blocks -Tetrix II'
             OnClick = CambiarMaquina
           end
         end

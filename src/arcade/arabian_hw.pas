@@ -238,7 +238,7 @@ if (port=0) then begin
 		if (not(valor) and 2)<>0 then memoria[$d000+ram_addr]:=$f0 or mcu_port_r[3];
 		main_screen.flip_main_screen:=(valor and 8)<>0;
 end;
-mcu_port_r[port]:=valor and $0f;
+mcu_port_r[port]:=valor and $f;
 end;
 
 function mcu_port_k_r:byte;
@@ -273,14 +273,14 @@ procedure mcu_port_o_w(valor:byte);
 var
   res:byte;
 begin
-res:=valor and $0f;
-if (valor and $10)<>0 then mcu_port_o:=(mcu_port_o and $0f) or (res shl 4)
+res:=valor and $f;
+if (valor and $10)<>0 then mcu_port_o:=(mcu_port_o and $f) or (res shl 4)
 	else mcu_port_o:=(mcu_port_o and $f0) or res;
 end;
 
 procedure mcu_port_p_w(valor:byte);
 begin
-mcu_port_p:=valor and $0f;
+mcu_port_p:=valor and $f;
 end;
 
 //Main
@@ -289,6 +289,7 @@ begin
  z80_0.reset;
  mb88xx_0.reset;
  ay8910_0.reset;
+ reset_video;
  reset_audio;
  video_control:=0;
  mcu_port_p:=0;

@@ -533,6 +533,7 @@ begin
  dac_0.reset;
  dac_1.reset;
  if main_vars.tipo_maquina=276 then nb1414m4_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

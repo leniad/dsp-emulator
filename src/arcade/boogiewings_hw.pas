@@ -221,6 +221,7 @@ begin
  deco104_0.reset;
  copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
  deco16_snd_simple_reset;
+ reset_video;
  reset_audio;
  deco_sprites_0.reset;
  deco_sprites_1.reset;

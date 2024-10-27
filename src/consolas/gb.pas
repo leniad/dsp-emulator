@@ -1127,7 +1127,7 @@ end;
 
 procedure reset_gb;
 var
-  lr_reg:reg_lr;
+  lr_reg:preg_lr;
   f:byte;
 begin
  lr35902_0.reset;
@@ -1177,6 +1177,7 @@ begin
  gb_0.window_y:=0;
  if not(gb_0.rom_exist) then begin
    gb_0.enable_bios:=false;
+   lr_reg:=lr35902_0.get_internal_r;
    lr_reg.pc:=$100;
    lr_reg.sp:=$fffe;
    lr_reg.f.z:=true;
@@ -1229,7 +1230,6 @@ begin
      for f:=0 to $1f do gb_0.bgc_pal[f]:=$7fff;
      for f:=0 to $1f do gb_0.spc_pal[f]:=0;
    end;
-   lr35902_0.set_internal_r(lr_reg);
   end else gb_0.enable_bios:=true;
   gb_mapper_0.reset;
 end;

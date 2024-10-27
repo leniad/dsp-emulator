@@ -1,4 +1,55 @@
 # DSP Emulator status #
+<b>27/10/24 - DSP Emulator 0.23Final. Updated Windows binary, Ubuntu binary and full source. For full release info, please read 'Whats New 0.23.txt' file.<br>
+<pre>
+-General
+    +Video
+        -Fixed video freeze in Delphi 12
+        -Added general video reset
+        -Enhanced a bit full screen mode
+    +DIPs switches engine
+        -Still migrating DIPs to new data structure
+    +Sound
+        -Seibu Sound:
+            +Enhanced IRQs functions, uses new Z80 IRQ M0 functions
+            +General cleaning 
+    +CPUs
+        -MB88xx
+            +Added serial functions
+            +Fixed opcode $20
+            +Added opcode $2d
+        -NEC v20-v30
+            +Fixed prefetch
+            +Rewrited IRQ/NMI functions
+            +Fixed BITOP opcodes
+        -Z80
+            +Rewrited IRQ M0 and M2 callback functions
+            +New function to call IRQ with vector (removed im0 variable)
+            +Converted daisy chain functions to new IRQ M2 functions
+     +Devices
+        -SEGA 315-5195: added open bus function
+-Coleco
+    +Fixed support for cartridges up to 512Kb (Wizard of Wor)
+-Outrun
+    +Fixed end of sprite mark, fixes sprites left on screen
+    +Added clean memory when reset
+-Raiden
+    +Fixed sprites
+    +Fixed sound memory decryption, sound works now
+-Sega System 16A
+    +Fixed end of sprite mark, fixes sprites left on screen
+-Sega System 16B
+    +Fixed end of sprite mark, fixes sprites left on screen
+    +Added FD1089 functions
+    +Added IO and open bus functions
+    +Added clean memory when reset
+    +Riot City: added driver with sound
+    +SDI: added driver with sound
+    +Cotton: added driver with sound
+
+New Games
+<img src="https://i.ibb.co/jwyB66z/Cotton.png"> <img src="https://i.ibb.co/4Rw2sC6/RiotCity.png">
+<img src="https://i.ibb.co/JrWrzzR/sdi.png">
+</pre><br>
 <b>29/09/24 - DSP Emulator 0.23WIP4. Updated Windows binary and source<br>
 <pre>
 -General

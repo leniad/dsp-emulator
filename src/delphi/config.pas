@@ -202,7 +202,7 @@ with ConfigSP do begin
     pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
     z80daisy_init(Z80_PIO0_TYPE);
     pio_0.reset;
-    spec_z80.daisy:=true;
+    spec_z80.enable_daisy;
   end;
   lenslok.activo:=radiobutton12.Checked;
   if lenslok.activo then lenslock1.Show;

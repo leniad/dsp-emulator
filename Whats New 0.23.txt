@@ -1,0 +1,382 @@
+What's New!!! DSP Emulator
+
+DSP 0.23 27/10/24
+********
+-General
+    +Graphics engine
+        -Added general video reset
+        -Fixed video freeze in Delphi 12
+        -Added mask to all functions, no need to mask the graphic number before call any function, removed graphic number mask from all drivers
+        -DECO BAC06
+            +Removed chars/tiles masks
+            +Added general color mask
+            +Added read/write 8bits functions
+        -Rewrited full screen mode
+            +Screen now it's scaled
+            +Hide mouse, except if needed (Spectrum mouse, Operation Wolf and Zero Point)
+            +Fixed mouse position click
+        -Added invert option when convert GFX
+    +DIPs switches engine
+        -Rewrited engine
+        -New data structure, easy to maintain and easy to add
+        -Start migrate all DIPs to new structure
+    +Snapshot engine
+        -Simplified snapshot system functions 
+    +Sound Engine
+        -Added close functions to clean variables
+        -Added some functions to ensure a sound chip have a CPU associated before it's created
+        -Seibu Sound:
+            +Enhanced IRQs functions, uses new Z80 IRQ M0 functions
+            +General cleaning 
+        -Konami: added mute, added to all drivers
+        -MSM5232: added sound chip, but sounds too fast (WIP)
+        -YM2203: fixed sound amplification
+        -OKI6295: fixed sound amplification
+        -YM2413: added new sound chip
+        -SN76496: fixed snapshot
+        -VLM5030: changed to new tables values, rewrited some code
+        -MSM5205
+            +Rewrited all sound playing functions
+            +Make all variables, adpcm ROMS, and timing internal, removed all variables from drivers
+            +Make standard adpcm play functions by default, removed all repeated functions from drivers
+    +Controls Engine
+        -Added analog controls reset
+        -Joystick
+            +Removed calibrate functions, just press a button to calibrate
+            +Rewrited all functions, now responds faster
+    +Timer engine
+        -One shot timers: added a new kind of timers, when called it's executed once, and then stops
+        -Add timer lapse, before call timer function
+    +CPUs
+        -M68000
+            +Fixed some timings
+            +Fixed 'divs' opcode (Now 'Space Harrier' works fine!)
+            +Fixed privilege exception in 'stop', 'move to sr' and 'move from sr' opcodes
+        -MB88xx
+            +Rewrited internal flags functions
+            +Added serial functions
+            +Fixed opcode $20
+            +Added opcode $2d
+        -NEC v20-v30
+            +Fixed prefetch
+            +Rewrited IRQ/NMI functions
+            +Fixed BITOP opcodes
+        -Z80
+            +Rewrited IRQ M0 and M2 callback functions
+            +New function to call IRQ with vector (removed im0 variable)
+            +Daisy chain
+                -Clean all functions
+                -Converted functions to new IRQ M2 functions
+            +Z80 CTC: Clean daisy chain functions
+            +Z80 PIO: Converted to clases
+            +Added some more WZ
+        -M6809
+            +Added opcode $28
+        -HD6309
+            +Added opcodes $1,$28,$29 and $1X2e
+        -MCS51
+            +Added forced input function
+            +Added 8X52 and CMOS CPU types
+            +Enhanced internal RAM read/write
+            +Fixed IRQ generation
+            +Fixed parity calculation
+            +Fixed push/pop
+            +Fixed timer0 and timer1
+            +Fixed many opcodes
+            +Added opcodes $84
+        -UPD781X
+            +UPD7801: Fixed CALT opcode
+            +Added opcode $a9 (makes SCV - 'Elevator Fight' playable)
+        -M6502
+            +Fixed 'brk' opcode (fixes Oric's 'SkoolDaze' and many others)
+        -M680X
+            +Added opcodes $2c, $2f and $85
+            +Rewrited get/put byte functions
+            +Make RAM and ROM internal
+    +Misc
+        -Fixed preview screen generation
+        -Fixed CRC show info when a ROM file is not found
+        -Split ROMs and samples DAT info in two export buttons
+        -New preview images
+        -Updated SDL2 library for windows 2.30.8
+    +Devices
+        -AVG/DVG: Added new vector draw system (WIP)
+        -VIA6522: Implemented VIA timers with the timer engine
+        -TAP/TZX Engine
+            +Fixed blocks $10,$11 and $14, misses one pulse
+            +Remove last block pause, and change pause functions
+            +Added T64 files
+        -SEGA 315-5195: added open bus function
+        -Added Taito 68705 protection device, unified from all drivers
+        -Split Galaxian stars from driver, converted into a device
+        -Deco 104/146: converted to clases
+        -Sega deCript: Added another SEGA ROMs decript type
+
+-Spectrum
+    +Removed minimum border draw when fast speed, now draws full border lines (thanks to Neville)
+    +Added quick save/load (F7-F8/F9-F10)
+    +Spectrum 128/+3 some code cleaning
+-Amstrad CPC
+    +Added quick save/load (F7-F8/F9-F10)
+    +Fixed lenslock protection, added 'Moon Cresta' protection
+    +Fixed tape/wav opening error
+-Commodore 64
+    +Some memory functions clean
+    +Some tape control changes
+    +Added quick save/load (F7-F8/F9-F10)
+    +Enhanced PRG loading
+    +Changed T64 to tape system (still not working)
+-Casio PV1000
+    +Fixed IRQ generation
+    +Fixed screen size and border
+-Oric HW
+    +Changed screen draw to line by line
+    +Fixed tape/wav opening error
+    +Changed sound chip to AY8912
+-Coleco
+    +Fixed support for cartridges up to 512Kb (Wizard of Wor)
+-NES
+    +Fixed screen flicker in mapper 4 (Fixes Kings Quest V)
+-Sega Master System
+    +Fixed sound chip order creation (Thanks to Neville)
+    +Removed big borders video in PAL version, NTSC and PAL have the same video size
+    +Added YM2413 sound
+    +Fixed pause (Fixes 'Bart Simpsons and the Space Mutants')
+    +Fixed BIOS loading
+-Super Cassette Vision
+    +Fixed vsync length (Fixes 'Mappy' sound speed)
+
+
+-88 Games
+    +Added driver, screen draw problems... Maybe CPU bugs?
+-Ajax
+    +Fixed CPU clock
+-Aliens
+    +CPU map cleaning
+    +Fixed CPU clock
+-Appoooh HW
+    +Appohhh: Added driver with sound
+    +Robo Wres 2001: Added driver with sound
+-Arkanoid
+    +Removed MCU, used general Taito 68705
+-Armed Formation HW
+    +Added DIPs
+    +Removed sprite masks
+-Asteroids HW
+    +Added new vector system
+    +Lunar lander: added AVG-DVG prom
+-Bank Panic HW
+    +Bank Panic: added driver with sound
+    +Combat Hawk: added driver with sound
+-Baraduke HW
+    +Changed to new M680X CPU engine
+-Bionic Commando
+    +Fixed background wrong colors
+-Blue Print HW
+    +Blue Print: added driver with sound
+    +Saturn: added driver with sound
+    +Grasspin: added driver with sound
+-BombJack HW
+    +Calorie Kun vs Moguranian: added driver with sound
+    +Fixed background layer
+    +Changed memory map to a generalized one
+    +Added rotated screen
+    +Changed screen parameters
+    +Enhanced NMI
+-Breakthru HW
+    +Changed memory map to a generalized one
+    +Fixed DIPs
+-Bubblebobble
+    +Changed to new M680X CPU engine
+    +Changed to new Z80 IRQ mode 2 vector function
+    +Remove manual GFX invert
+-Boogie Wings
+    +Still WIP driver, but enhanced the driver, still wrong colors and screen draw
+    +Fixed read/write maps
+    +Added screen parameters
+    +Added screen tiles and tiles bank calls
+    +Fixed ROMs loading
+-Centipede
+    +Enhanced IRQ generation
+-China Gate
+    +Removed scan lines conversion
+    +Fixed FIRQs
+-City Connection
+    +Enhanced video parameters
+-Deco 8 HW
+    +Super Real Darwin
+        -Fixed screen parameters and rotation
+        -Fixed sprites
+    +Last Mission: added driver with sound
+    +Shackled: added driver with sound
+    +Gondomania: added driver with sound
+    +Garyo Retsuden: added driver with sound
+    +Captain Silver: added driver with sound
+    +Cobra Command: added driver with sound
+    +The Real Ghostbusters: added driver with sound
+    +Psycho-Nics Oscar: added driver with sound
+-Dooyong HW
+    +Blue Hawk: added driver with sound
+    +The Last Day: added driver with sound
+    +Gulf Storm: added driver with sound
+    +Pollux: added driver with sound
+    +Flying Tiger: added driver with sound
+-Double Dragon HW
+    +Double Dragon
+        -Change ROMs to world version
+        -Changed to new M680X CPU engine
+    +Removed scan lines conversion
+    +Removed video masks
+    +Fixed FIQRs
+-Firetrap
+    +Added MSM5205 reset
+-Food Fight
+    +Some video optimizations, removed fake scroll
+    +Fixed IRQ
+-Galaxian
+    +Removed stars generation functions
+    +Better background color handling
+    +Fixed background
+    +Fixed NMI clear
+    +Fixed sprite calculation procedures
+    +Fixed bullet draw
+    +Fixed scramble protection
+    +Ant Eater: added driver with sound
+    +Armored Car: added driver with sound
+    +The End: added driver with sound
+    +Battle of Atlantis: added driver with sound
+    +Calipso: added driver with sound
+    +Cavelon: added driver with sound
+-Gaplus
+    +Fixed corrupted sprites
+-Hyper Sports HW
+    +Fixed screen rotation
+    +Hyper Sports: Fixed speech sounds
+    +Road Fighter: added driver with sound
+-Irem M62
+    +Changed to new M680X CPU engine
+-KiKi KaiKai HW
+    +KiKi KaiKai: Added driver with sound
+    +Kick and Run: Added driver with sound
+-Knuckle Joe
+    +Changed to new M680X CPU engine
+-Karnov HW
+    +Added IRQ assert/clean
+-Lasso HW
+    +Lasso: added driver with sound
+    +Chameleon: added driver with sound
+-Legend of Kage
+    +Removed MCU, used general Taito 68705
+-Legendary Wings HW
+    +Added sound CPU reset
+    +Legendary Wings: Update ROMs names
+    +Trojan: Fixed palette
+    +Avengers: added driver with sound
+    +Fire Ball: added driver with sound
+-Mysterious Stones
+    +Removed scan lines conversion
+    +Fixed IRQs
+-Outrun
+    +Fixed end of sprite mark, fixes sprites left on screen
+    +Added clean memory when reset
+-Pacman HW
+    +Enhanced Z80 map
+    +Removed video hack, converted to rotated screen
+    +Ponpoko: added driver with sound
+    +Wood Pecker: added driver with sound
+    +Eyes: added driver with sound
+    +Ali Baba and 40 Thieves: added driver with sound
+    +Piranha added driver with sound
++Pacland
+    +Changed to new M680X CPU engine
+-Pang HW
+    +Added YM2413 sound
+-Pirate Hihemaru
+    +Added screen priorities
+-Prehistoric Isle in 1930
+    +Enhanced video parameters
+    +Fixed IRQ
++Pooyan
+    +Enhance palette conversión
+-Popeye HW
+    +Fixed DMA
+    +Popeye: Fixed screen draw
+    +Sky Skipper: adder driver with sound
+-Raiden
+    +Fixed sprites
+    +Fixed sound memory decryption, sound works now
+-Rally X
+    +Optimized video functions
+    +Fixed video buffer
+    +Fixed screen rotation
+-Renegade
+    +Removed MCU, used general Taito 68705
+    +Enhanced video parameters
+    +Fixed screen size
+    +Fixed IRQs
+    +Fixed sound IRQs
+-Return of Invaders
+    +Removed MCU, used general Taito 68705
+-Sega System 1/2 HW
+    +Changed to new Z80 PIO engine
+    +Removed Z80 special timings, added adjust cycle function, remove all CPU clock hacks (fixes Pitfall II initial screen)
+    +Fixed palette
+    +Wonder Boy: removed decript procedures, now using new SEGA deCript
+    +Gardia: added driver with sound
+-Sega System 16A
+    +Fixed end of sprite mark, fixes sprites left on screen
+-Sega System 16B
+    +Fixed end of sprite mark, fixes sprites left on screen
+    +Added FD1089 functions
+    +Added IO and open bus functions
+    +Added clean memory when reset
+    +Riot City: added driver with sound
+    +SDI: added driver with sound
+    +Cotton: added driver with sound
++Senjyo HW
+    +Baluba: Added DIP switches
+    +Fixed slow inputs
+    +Changed to new Z80 PIO engine
++Shaolins Road
+    +Fixed Sprites
++Skykid
+    +Changed to new M680X CPU engine
+-Slap Fight
+    +Removed MCU, used general Taito 68705
+    +Removed chars and tiles masks
+-Snowbros HW
+    +Come Back Toto: added driver with sound
+    +Hyper Pacman: added driver with sound
+-Steel Force HW
+    +Mortal Race: added driver with sound
++System Namco86
+    +Changed to new M680X CPU engine
+-Super Dodge Ball
+    +Changed to new M680X CPU engine
+    +Enhanced video scroll
+-Tehkan World Cup
+    +Added missing DIPs
+-Tecmo 16
+    +Final Star Force: Added driver with sound
+-ThunderX
+    +Better collisions functions
+    +Some CPU map cleaning
+    +Fixed CPU clock
+-Time Pilot
+    +Changed screen render to line by line, fixed sprite render
+    +Fixed screen orientation
+-The Simpsons
+    +Fixed CPU clock
+-Toki
+    +Added missing DIPs
+-Track and Field
+    +Fixed speech sounds
+-Tutankhan
+    +Added background stars
+-Unico HW
+    +BurglarX: added driver with sound
+    +ZeroPoint: added driver with sound
++Williams HW
+    +Changed to new M680X CPU engine
+-Wyvern F-0
+    +Added driver with sound

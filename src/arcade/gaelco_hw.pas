@@ -612,6 +612,7 @@ begin
     ym3812_0.reset;
  end;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

@@ -232,6 +232,7 @@ procedure reset_puzz3x3;
 begin
  m68000_0.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  oki_bank:=0;
  vblank:=$ffff;

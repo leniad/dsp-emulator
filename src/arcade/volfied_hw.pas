@@ -272,6 +272,7 @@ begin
  frame_main:=m68000_0.tframes;
  frame_snd:=tc0140syt_0.z80.tframes;
  {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$fc;

@@ -57,7 +57,7 @@ const
         (mask:$38;name:'Difficulty';number:8;val8:($10,$28,$18,$30,0,$20,$38,8);name8:('1 Car, Medium','1 Car, Hard','2 Car, Medium','2 Car, Hard','3 Car, Easy','3 Car, Medium','3 Car, Hard','4 Car, Easy')),());
 
 var
- last,scroll_x,scroll_y:byte;
+ irq_vector,last,scroll_x,scroll_y:byte;
  hacer_int:boolean;
 
 procedure update_bg;
@@ -253,7 +253,7 @@ init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
       if f=240 then begin
-        if hacer_int then z80_0.change_irq(ASSERT_LINE);
+        if hacer_int then z80_0.change_irq_vector(ASSERT_LINE,irq_vector);
         update_video_rallyx;
       end;
       z80_0.run(frame_main);
@@ -356,7 +356,7 @@ end;
 procedure rallyx_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $ff)=0 then begin
-  z80_0.im0:=valor;
+  irq_vector:=valor;
   z80_0.change_irq(CLEAR_LINE);
 end;
 end;
@@ -373,6 +373,7 @@ begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
  marcade.in0:=$ff;
+ irq_vector:=$ff;
  case main_vars.tipo_maquina of
   29:begin
         marcade.in1:=$ff;
@@ -385,6 +386,7 @@ begin
         reset_samples;
   end;
  end;
+ reset_video;
  reset_audio;
  last:=0;
  hacer_int:=false;

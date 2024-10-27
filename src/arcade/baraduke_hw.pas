@@ -305,6 +305,7 @@ begin
  m6809_0.reset;
  m6800_0.reset;
  namco_snd_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$1f;
  marcade.in1:=$1f;

@@ -283,6 +283,7 @@ procedure reset_contra;
 begin
  hd6309_0.reset;
  m6809_0.reset;
+ reset_video;
  reset_audio;
  K007121_reset(0);
  K007121_reset(1);

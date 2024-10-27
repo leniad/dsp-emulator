@@ -84,6 +84,7 @@ var
   SDL_Init:function(flags:Cardinal):LongInt; cdecl;
   SDL_WasInit:function(flags:Cardinal):Cardinal;cdecl;
   SDL_Quit:procedure;cdecl;
+  SDL_GetError:function:PAnsiChar;cdecl;
   SDL_LoadBMP_RW:function(src:libsdlp_RWops;freesrc:LongInt):libsdlp_Surface;cdecl;
   SDL_CreateRGBSurface:function(flags:Cardinal;width:LongInt;height:LongInt;depth:LongInt;Rmask:Cardinal;Gmask:Cardinal;Bmask:Cardinal;Amask:Cardinal):libsdlp_Surface;cdecl;
   SDL_UpperBlit:function(src:libsdlp_Surface;const srcrect:libsdlp_rect;dst:libsdlp_Surface;dstrect:libsdlp_rect):LongInt;cdecl;
@@ -128,7 +129,6 @@ var
   SDL_SetWindowFullscreen:function(window:libsdlP_Window;flags:LongInt):LongInt;cdecl;
   {$ifdef fpc}
   SDL_SetError:function(const fmt:PAnsiChar):LongInt;cdecl;
-  SDL_GetError:function:PAnsiChar;cdecl;
   SDL_SetWindowTitle:procedure(window:libsdlP_Window;const title:PAnsiChar);cdecl;
   //Audio
   //SDL_OpenAudio:function(desired:libsdlp_AudioSpec;obtained:libsdlp_AudioSpec):Integer;cdecl;
@@ -166,6 +166,7 @@ end;
 @SDL_WasInit:=GetProcAddress(sdl_dll_Handle,'SDL_WasInit');
 @SDL_Quit:=GetProcAddress(sdl_dll_Handle,'SDL_Quit');
 @SDL_SetHint:=GetProcAddress(sdl_dll_Handle,'SDL_SetHint');
+@SDL_GetError:=GetProcAddress(sdl_dll_Handle,'SDL_GetError');
 //surface
 @SDL_LoadBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_LoadBMP_RW');
 @SDL_CreateRGBSurface:=GetProcAddress(sdl_dll_Handle,'SDL_CreateRGBSurface');

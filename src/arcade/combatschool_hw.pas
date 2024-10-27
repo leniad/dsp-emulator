@@ -306,6 +306,7 @@ procedure reset_combatsc;
 begin
  hd6309_0.reset;
  z80_0.reset;
+ reset_video;
  reset_audio;
  ym2203_0.reset;
  upd7759_0.reset;

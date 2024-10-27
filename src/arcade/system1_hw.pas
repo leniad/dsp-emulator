@@ -369,6 +369,7 @@ sn_76496_0.reset;
 sn_76496_1.reset;
 z80_0.reset;
 z80_1.reset;
+reset_video;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;

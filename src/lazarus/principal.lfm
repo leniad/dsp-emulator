@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 340
+  Left = 676
   Height = 389
-  Top = 292
+  Top = 233
   Width = 400
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -13190,6 +13190,10 @@ object principal1: Tprincipal1
               Caption = 'Avengers'
               OnClick = CambiarMaquina
             end
+            object fireball1: TMenuItem
+              Caption = 'Fire Ball'
+              OnClick = CambiarMaquina
+            end
           end
           object galagahw1: TMenuItem
             Caption = 'Galaga HW'
@@ -14037,9 +14041,6 @@ object principal1: Tprincipal1
               Caption = 'Double Dragon'
               OnClick = CambiarMaquina
             end
-            object ddragon_sh1: TMenuItem
-              Caption = 'Double Dragon (Speed Hack)'
-            end
             object ddragon21: TMenuItem
               Caption = 'Double Dragon II'
               OnClick = CambiarMaquina
@@ -14283,6 +14284,18 @@ object principal1: Tprincipal1
             end
             object aurail1: TMenuItem
               Caption = 'Aurail'
+              OnClick = CambiarMaquina
+            end
+            object RiotCity1: TMenuItem
+              Caption = 'Riot City'
+              OnClick = CambiarMaquina
+            end
+            object sdi1: TMenuItem
+              Caption = 'SDI - Strategic Defense Initiative'
+              OnClick = CambiarMaquina
+            end
+            object cotton1: TMenuItem
+              Caption = 'Cotton'
               OnClick = CambiarMaquina
             end
           end
@@ -14703,7 +14716,7 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
             object rtype21: TMenuItem
-              Caption = 'R-Type 2'
+              Caption = 'R-Type II'
               OnClick = CambiarMaquina
             end
           end
@@ -14722,8 +14735,8 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object hotblock1: TMenuItem
-            Caption = 'Hot Block'
+          object hotblocks1: TMenuItem
+            Caption = 'Hot Blocks - Tetrix II'
             OnClick = CambiarMaquina
           end
         end

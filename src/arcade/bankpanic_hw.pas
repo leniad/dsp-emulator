@@ -209,6 +209,7 @@ end;
 procedure bankpanic_reset;
 begin
 z80_0.reset;
+reset_video;
 reset_audio;
 sn_76496_0.reset;
 sn_76496_1.reset;

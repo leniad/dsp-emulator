@@ -185,12 +185,10 @@ while EmuStatus=EsRunning do begin
     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     case f of
       $0:begin //rst 8
-         z80_0.im0:=$cf;
-         z80_0.change_irq(HOLD_LINE);
+         z80_0.change_irq_vector(HOLD_LINE,$cf);
         end;
       239:begin //rst 10
-          z80_0.im0:=$d7 ;
-          z80_0.change_irq(HOLD_LINE);
+          z80_0.change_irq_vector(HOLD_LINE,$d7);
           update_video_psychic5;
         end;
     end;
@@ -433,8 +431,9 @@ procedure reset_psychic5;
 begin
  z80_0.reset;
  z80_1.reset;
- YM2203_0.reset;
- YM2203_1.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

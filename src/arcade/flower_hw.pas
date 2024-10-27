@@ -277,6 +277,7 @@ frame_main:=z80_0.tframes;
 frame_sub:=z80_1.tframes;
 frame_snd:=z80_1.tframes;
 flower_0.reset;
+reset_video;
 reset_audio;
 nmi_audio:=false;
 sound_latch:=0;

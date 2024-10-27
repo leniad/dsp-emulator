@@ -386,6 +386,7 @@ begin
  upd7810_0.reset;
  frame_main:=upd7810_0.tframes;
  upd1771_0.reset;
+ reset_video;
  reset_audio;
  scv_0.porta_val:=$ff;
  scv_0.portc_val:=$ff;

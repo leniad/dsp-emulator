@@ -839,6 +839,7 @@ begin
         marcade.in2:=0;
       end;
  end;
+ reset_video;
  reset_audio;
  irq_on:=false;
  irq2_on:=false;

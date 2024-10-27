@@ -194,6 +194,7 @@ begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
  reset_samples;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

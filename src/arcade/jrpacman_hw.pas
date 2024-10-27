@@ -34,7 +34,7 @@ const
 
 var
  irq_vblank,bg_prio:boolean;
- gfx_bank,colortable_bank,pal_bank,scroll_x,sprite_bank:byte;
+ gfx_bank,colortable_bank,pal_bank,scroll_x,sprite_bank,irq_vector:byte;
 
 procedure update_video_jrpacman;
 var
@@ -137,7 +137,7 @@ while EmuStatus=EsRunning do begin
     frame:=frame+z80_0.tframes-z80_0.contador;
     if f=223 then begin
       update_video_jrpacman;
-      if irq_vblank then z80_0.change_irq(HOLD_LINE);
+      if irq_vblank then z80_0.change_irq_vector(HOLD_LINE,irq_vector);
     end;
   end;
   eventos_jrpacman;
@@ -204,7 +204,7 @@ end;
 
 procedure jrpacman_outbyte(puerto:word;valor:byte);
 begin
-if (puerto and $ff)=0 then z80_0.im2_lo:=valor;
+if (puerto and $ff)=0 then irq_vector:=valor;
 end;
 
 //Main
@@ -212,6 +212,7 @@ procedure reset_jrpacman;
 begin
  z80_0.reset;
  namco_snd_0.reset;
+ reset_video;
  reset_audio;
  irq_vblank:=false;
  marcade.in0:=$ef;

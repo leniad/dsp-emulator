@@ -323,6 +323,7 @@ begin
  frame_snd:=m6809_1.tframes;
  ym2203_0.reset;
  ay8910_0.reset;
+ reset_video;
  reset_audio;
  fillchar(lines_color_look[0],$100,0);
  marcade.in0:=$ff;

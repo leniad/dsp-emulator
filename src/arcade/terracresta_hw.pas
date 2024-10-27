@@ -386,6 +386,7 @@ begin
   else ym3812_0.reset;
  dac_0.reset;
  dac_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff00;
  marcade.in1:=$ffff;

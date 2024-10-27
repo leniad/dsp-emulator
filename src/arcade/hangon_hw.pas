@@ -1117,6 +1117,7 @@ begin
  sega_pcm_0.reset;
  pia8255_0.reset;
  pia8255_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  s16_info.screen_enabled:=true;

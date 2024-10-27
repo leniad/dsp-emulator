@@ -29,6 +29,7 @@ unit m68000;
 15/07/20   Añadido move.w opcode $32 direccionamiento $3b
 13/03/22   Añadido ror.w
 17/01/23   Mejorados los timings
+25/03/24   Corregido divs (corrige Space Harrier), mejorados timings, corregidos excepciones de privilegios en 'stop', 'move to sr' y 'move from sr'
 }
 interface
 
@@ -1110,7 +1111,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 $1:begin // # movep.w re
                       self.contador:=self.contador+16;
                       tempw:=self.getword(r.pc.l);
-                      if (tempw and $8000)<>0 then MessageDlg('Mierda! movep bclr>$8000', mtInformation,[mbOk], 0);
+                      //SDI usa esto, y todo OK
+                      //if (tempw and $8000)<>0 then MessageDlg('Mierda! movep bclr>$8000 PC'+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
                       templ:=r.a[orig].l+tempw;
                       r.pc.l:=r.pc.l+2;
                       self.putbyte(templ,r.d[dest].h0);

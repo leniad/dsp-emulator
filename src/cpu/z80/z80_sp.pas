@@ -73,8 +73,8 @@ r.r:=((r.r+1) and $7f) or (r.r and $80);
 dec(r.sp,2);
 self.spec_putbyte(r.sp+1,r.pc shr 8);
 self.spec_putbyte(r.sp,r.pc and $ff);
-r.IFF2:= false;
-r.IFF1:= False;
+r.iff2:= false;
+r.iff1:= False;
 Case r.im of
         0:begin //12t
               r.pc:= $38;
@@ -86,7 +86,7 @@ Case r.im of
             end;
         2:begin //19t
                 if self.daisy then posicion:=z80daisy_ack
-                    else posicion:=self.im2_lo;
+                    else posicion:=self.irq_vector;
                 posicion:=posicion or (r.i shl 8);
                 r.pc:=self.spec_getbyte(posicion)+(self.spec_getbyte(posicion+1) shl 8);
                 self.contador:=self.contador+7; //19 en total -12 de guardar SP y coger PC

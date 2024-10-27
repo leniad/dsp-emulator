@@ -505,6 +505,7 @@ begin
         n2a03_1.reset;
        end;
  end;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

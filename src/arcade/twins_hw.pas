@@ -82,7 +82,7 @@ init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to 311 do begin
     if f=204 then begin
-      nec_0.change_nmi(HOLD_LINE);
+      nec_0.set_input(NMI_IRQ,HOLD_LINE);
       video_render;
     end;
     //Main CPU
@@ -270,6 +270,7 @@ begin
  nec_0.reset;
  frame_main:=nec_0.tframes;
  ay8910_0.reset;
+ reset_video;
  reset_audio;
  i2cmem_0.reset;
  marcade.in0:=$ff;

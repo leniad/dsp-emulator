@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.23WIP4';
+        DSP_VERSION='0.23F';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -206,6 +206,7 @@ begin
        if cadena[f]<>main_vars.cadena_dir then break;
     test_dir:=system.copy(cadena,1,f);
 end;
+
 procedure split_dirs(dir:string);
 var
    f,long,old_pos:word;
@@ -380,7 +381,7 @@ end else begin
     p_final[0].y:=y;
 end;
 {$ifndef fpc}
-handle_:=child.Handle;
+handle_:=child.handle;
 if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 {$else}
 if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,x,y,0);
@@ -444,20 +445,10 @@ begin
 end;
 
 procedure pasar_pantalla_completa;
-{$ifndef fpc}
-var
-  handle_:integer;
-{$endif}
 begin
 if not(main_screen.pantalla_completa) then begin
   main_screen.mouse_x:=dest.w/p_final[0].x;
   main_screen.mouse_y:=FULL_SCREEN_Y/p_final[0].y;
-  {$ifndef fpc}
-  if child<>nil then begin
-    child.Free;
-    child:=nil;
-  end;
-  {$endif}
   main_screen.old_video_mode:=main_screen.video_mode;
   main_screen.video_mode:=6;
   principal1.n1x1.Checked:=false;
@@ -467,6 +458,7 @@ if not(main_screen.pantalla_completa) then begin
   principal1.n3x1.Checked:=false;
   principal1.FullScreen1.Checked:=true;
   SDL_FreeSurface(pantalla[0]);
+  pantalla[0]:=nil;
   SDL_DestroyWindow(window_render);
   window_render:=nil;
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,FULL_SCREEN_X,FULL_SCREEN_Y,libSDL_WINDOW_FULLSCREEN);
@@ -480,18 +472,13 @@ if not(main_screen.pantalla_completa) then begin
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
   SDL_FreeSurface(pantalla[0]);
+  pantalla[0]:=nil;
   SDL_DestroyWindow(window_render);
   window_render:=nil;
   {$ifndef fpc}
-  if child<>nil then begin
-    child.Free;
-    child:=nil;
-  end;
-  Child:=TfrChild.Create(application);
   child.Left:=0;
   child.Top:=0;
-  handle_:=child.Handle;
-  window_render:=SDL_CreateWindowFrom(pointer(handle_));
+  window_render:=SDL_CreateWindowFrom(pointer(child.handle));
   cambiar_video;
   {$else}
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x*mul_video,p_final[0].y*mul_video,0);
@@ -683,6 +670,7 @@ var
   punt,punt2,punt3,punt4:pword;
   f,i,h:word;
   origen:libsdl_rect;
+  r:longint;
 begin
 origen.x:=0;
 origen.y:=0;
@@ -818,7 +806,13 @@ case main_screen.video_mode of
   6://dest se calcula cuando se cambia la pantalla
     SDL_UpperBlitScaled(pantalla[PANT_TEMP],@origen,pantalla[0],@dest);
   end;
-SDL_UpdateWindowSurface(window_render);
+//En Delphi 12, tengo que comprobar esto cuando pierdo el foco de la ventana...
+//O la pantalla se queda congelada... ¿?¿?¿?¿?
+r:=SDL_UpdateWindowSurface(window_render);
+if r<>0 then begin
+    if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
+    pantalla[0]:=SDL_GetWindowSurface(window_render);
+  end;
 end;
 
 procedure change_caption(nombre:string);
@@ -833,6 +827,7 @@ child.Caption:=cadena;
 SDL_SetWindowTitle(window_render,pointer(cadena));
 {$endif}
 end;
+
 procedure video_sync;
 var
 {$ifndef fpc}
@@ -869,6 +864,7 @@ begin
 move(source^,dest^,size);
 end;
 {$endif}
+
 procedure reset_dsp;
 begin
 fillchar(paleta[0],MAX_COLORES*2,0);
@@ -923,4 +919,5 @@ cont_sincroniza:=sdl_getticks();
 close_audio;
 close_video;
 end;
+
 end.

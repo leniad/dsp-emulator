@@ -307,6 +307,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$e;
  marcade.in1:=$ff;

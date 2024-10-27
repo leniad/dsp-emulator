@@ -249,6 +249,7 @@ begin
  frame_snd:=m6809_1.tframes;
  ay8910_0.reset;
  ay8910_1.reset;
+ reset_video;
  reset_audio;
  soundlatch:=0;
  last:=0;

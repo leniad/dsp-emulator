@@ -223,6 +223,7 @@ begin
  frame_main:=z80_0.tframes;
  frame_snd:=z80_1.tframes;
  ym3812_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

@@ -30,13 +30,13 @@ const
         (n:'opr-10193.66';l:$8000;p:$0000;crc:$bcd10dde),(n:'opr-10192.67';l:$8000;p:$10000;crc:$770f1270),
         (n:'opr-10191.68';l:$8000;p:$20000;crc:$20a284ab),(n:'opr-10190.69';l:$8000;p:$30000;crc:$7cab70e2),
         (n:'opr-10189.70';l:$8000;p:$40000;crc:$01366b54),(n:'opr-10188.71';l:$8000;p:$50000;crc:$bad30ad9));
-        outrun_dip_a:array [0..2] of def_dip=(
-        (mask:$f;name:'Coin A';number:16;dip:((dip_val:$7;dip_name:'4C/1C'),(dip_val:$8;dip_name:'3C/1C'),(dip_val:$9;dip_name:'2C/1C'),(dip_val:$5;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$4;dip_name:'2C/1C 4C/3C'),(dip_val:$f;dip_name:'1C/1C'),(dip_val:$3;dip_name:'1C/1C 5C/6C'),(dip_val:$2;dip_name:'1C/1C 4C/5C'),(dip_val:$1;dip_name:'1C/1C 2C/3C'),(dip_val:$6;dip_name:'2C/3C'),(dip_val:$e;dip_name:'1C/2C'),(dip_val:$d;dip_name:'1C/3C'),(dip_val:$c;dip_name:'1C/4C'),(dip_val:$b;dip_name:'1C/5C'),(dip_val:$a;dip_name:'1C/6C'),(dip_val:$0;dip_name:'Free Play (if Coin B too) or 1C/1C'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$70;dip_name:'4C/1C'),(dip_val:$80;dip_name:'3C/1C'),(dip_val:$90;dip_name:'2C/1C'),(dip_val:$50;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$40;dip_name:'2C/1C 4C/3C'),(dip_val:$f0;dip_name:'1C/1C'),(dip_val:$30;dip_name:'1C/1C 5C/6C'),(dip_val:$20;dip_name:'1C/1C 4C/5C'),(dip_val:$10;dip_name:'1C/1C 2C/3C'),(dip_val:$60;dip_name:'2C/3C'),(dip_val:$e0;dip_name:'1C/2C'),(dip_val:$d0;dip_name:'1C/3C'),(dip_val:$c0;dip_name:'1C/4C'),(dip_val:$b0;dip_name:'1C/5C'),(dip_val:$a0;dip_name:'1C/6C'),(dip_val:$00;dip_name:'Free Play (if Coin A too) or 1C/1C'))),());
-        outrun_dip_b:array [0..3] of def_dip=(
-        (mask:4;name:'Demo Sounds';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Time Adjust';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$c0;dip_name:'Normal'),(dip_val:$40;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        outrun_dip_a:array [0..2] of def_dip2=(
+        (mask:$f;name:'Coin A';number:16;val16:(7,8,9,5,4,$f,3,2,1,6,$e,$d,$c,$b,$a,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin B too) or 1C 1C')),
+        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C - 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin A too) or 1C 1C')),());
+        outrun_dip_b:array [0..3] of def_dip2=(
+        (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:$30;name:'Time Adjust';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
         CPU_SYNC=4;
 
 type
@@ -95,11 +95,11 @@ begin
 end;
 begin
   for f:=0 to $ff do begin
+    if (sprite_ram[f*8] and $8000)<>0 then exit;
     sprpri:=(sprite_ram[(f*8)+3] shr 12) and 3;
     if sprpri<>pri then continue;
     addr:=sprite_ram[(f*8)+1];
     sprite_ram[(f*8)+7]:=addr;
-    if (sprite_ram[f*8] and $8000)<>0 then exit;
     hide:=(sprite_ram[f*8] and $5000)<>0;
     if hide then continue;
     top:=(sprite_ram[f*8] and $1ff)-$100;
@@ -402,27 +402,12 @@ end;
 
 procedure outrun_principal;
 var
-  frame_m,frame_sub,frame_s:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_sub:=m68000_1.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-     for h:=1 to CPU_SYNC do begin
-        //main
-        m68000_0.run(frame_m);
-        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-        //main
-        m68000_1.run(frame_sub);
-        frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
-        //sound
-        z80_0.run(frame_s);
-        frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-     end;
      case f of
         65,129,193:begin
              m68000_0.irq[2]:=ASSERT_LINE;
@@ -439,6 +424,17 @@ while EmuStatus=EsRunning do begin
               m68000_0.irq[4]:=CLEAR_LINE;
               m68000_1.irq[4]:=CLEAR_LINE;
             end;
+     end;
+     for h:=1 to CPU_SYNC do begin
+        //main
+        m68000_0.run(frame_main);
+        frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+        //main
+        m68000_1.run(frame_sub);
+        frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
+        //sound
+        z80_0.run(frame_snd);
+        frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
      end;
   end;
   eventos_outrun;
@@ -806,15 +802,19 @@ begin
  m68000_0.reset;
  m68000_1.reset;
  z80_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_sub:=m68000_1.tframes;
+ frame_snd:=z80_0.tframes;
  ym2151_0.reset;
  sega_pcm_0.reset;
  pia8255_0.reset;
+ reset_video;
  reset_audio;
- marcade.in0:=$ef;
  reset_analog;
+ marcade.in0:=$ef;
  s16_info.screen_enabled:=false;
  fillchar(s16_info.tile_buffer,$4000,1);
- fillchar(char_ram,$1000,0);  //Si no limpio esto, aparecen cosas raras en pantalla
+ fillchar(road_info.buffer,$1000,1);
  adc_select:=0;
  sound_latch:=0;
  gear_hi:=false;
@@ -891,7 +891,7 @@ z80_0.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
 z80_0.init_sound(outrun_sound_act);
 if not(roms_load(@mem_snd,outrun_sound)) then exit;
 //Memory Mapper
-s315_5195_0:=t315_5195.create(m68000_0,z80_0,outrun_snd_irq);
+s315_5195_0:=t315_5195.create(m68000_0,outrun_snd_irq);
 //PPI 825
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,nil,nil,ppi8255_wportc);
@@ -924,9 +924,9 @@ road_info.colorbase3:=$780;
 road_info.xoff:=0;
 //dip
 marcade.dswa:=$ff;
-marcade.dswa_val:=@outrun_dip_a;
+marcade.dswa_val2:=@outrun_dip_a;
 marcade.dswb:=$fb;
-marcade.dswb_val:=@outrun_dip_b;
+marcade.dswb_val2:=@outrun_dip_b;
 //poner la paleta
 compute_resistor_weights(0,255,-1.0,
   6,addr(resistances_normal[0]),addr(weights[0]),0,0,

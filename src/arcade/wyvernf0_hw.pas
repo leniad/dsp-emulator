@@ -295,6 +295,7 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  dac_0.reset;
+ reset_video;
  reset_audio;
  banco_rom:=0;
  banco_ram:=0;

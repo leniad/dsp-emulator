@@ -191,6 +191,7 @@ begin
  deco104_0.reset;
  copymemory(oki_6295_0.get_rom_addr,@oki_rom[0],$40000);
  deco16_snd_simple_reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$7;

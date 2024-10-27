@@ -512,7 +512,7 @@ type
     winsHW1: TMenuItem;
     twins1: TMenuItem;
     twinsed1: TMenuItem;
-    HotBlock1: TMenuItem;
+    HotBlocks1: TMenuItem;
     angerine1: TMenuItem;
     Oric1_1: TMenuItem;
     OricAtmos1: TMenuItem;
@@ -599,6 +599,9 @@ type
     FinalStarforce1: TMenuItem;
     WyvernF01: TMenuItem;
     FireBall1: TMenuItem;
+    RiotCity1: TMenuItem;
+    sdi1: TMenuItem;
+    Cotton1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

@@ -823,7 +823,6 @@ procedure reset_cps1;
 begin
  m68000_0.reset;
  z80_0.reset;
- reset_audio;
  case main_vars.tipo_maquina of
   103..111:begin
              ym2151_0.reset;
@@ -834,6 +833,8 @@ begin
              eepromser_0.reset;
           end;
  end;
+ reset_video;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;

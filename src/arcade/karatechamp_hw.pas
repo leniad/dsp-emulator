@@ -219,6 +219,7 @@ z80_1.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 dac_0.reset;
+reset_video;
 reset_audio;
 nmi_enable:=false;
 nmi_enable_sound:=false;

@@ -1017,6 +1017,7 @@ var
   indice:byte;
 begin
 if SaveRom(nombre,indice,SAMSTRADCPC) then begin
+        correcto:=false;
         case indice of
           1:nombre:=changefileext(nombre,'.sna');
         end;

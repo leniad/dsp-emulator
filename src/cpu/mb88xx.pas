@@ -8,14 +8,14 @@ type
      type_mb88xx_inport_r=function (port:byte):byte;
      type_mb88xx_outport_r=procedure (port,valor:byte);
      reg_mb88xx=record
-        pc:byte; 	    // Program Counter: 6 bits
-        pa:byte; 	    // Page Address: 4 bits
+        pc:byte; 	// Program Counter: 6 bits
+        pa:byte; 	// Page Address: 4 bits
         sp:array[0..4-1] of word;	// Stack is 4*10 bit addresses deep, but we also use 3 top bits per address to store flags during irq
-        si:byte;		  // Stack index: 2 bits
-        a:byte;		    // Accumulator: 4 bits
-        x:byte;		    // Index X: 4 bits
-        y:byte;		    // Index Y: 4 bits
-        st:boolean;		  // State flag: 1 bit
+        si:byte;		// Stack index: 2 bits
+        a:byte;		// Accumulator: 4 bits
+        x:byte;		// Index X: 4 bits
+        y:byte;		// Index Y: 4 bits
+        st:boolean;		// State flag: 1 bit
         zf:boolean;		// Zero flag: 1 bit
         cf:boolean;		// Carry flag: 1 bit
         vf:boolean;		// Timer overflow flag: 1 bit
@@ -24,7 +24,7 @@ type
      end;
      preg_mb88xx=^reg_mb88xx;
      cpu_mb88xx=class(cpu_class)
-          constructor Create(clock:dword;frames_div:word);
+          constructor create(clock:dword;frames_div:word;serial_cb:exec_type_simple=nil);
           destructor free;
         public
           port_k,port_p_r:cpu_inport_call;
@@ -36,6 +36,7 @@ type
           procedure set_irq_line(state:byte);
           procedure change_io_calls(port_k:cpu_inport_call;port_o:cpu_outport_call;port_p_r:cpu_inport_call;port_p_w:cpu_outport_call;port_r_r:type_mb88xx_inport_r;port_r_w:type_mb88xx_outport_r);
           function get_rom_addr:pbyte;
+          procedure clock_w(state:byte);
         private
           r:preg_mb88xx;
           // Peripheral Control
@@ -47,10 +48,10 @@ type
           ctr:byte; // current external counter value
           // Serial registers
           sb:byte;	// Serial buffer: 4 bits
+          timer_serial:byte;
           sbcount:word;	// number of bits received
-          in_irq:boolean;
           // PLA configuration
-          PLA_m:pbyte;
+          in_irq:boolean;
           // IRQ handling
           pending_interrupt:byte;
           //    cpu_irq_callback irqcallback;
@@ -62,6 +63,8 @@ type
           function update_pio(cycles:byte):byte;
      end;
 
+procedure mb88_serial_advance(cpu:cpu_mb88xx);
+
 var
   mb88xx_0:cpu_mb88xx;
 
@@ -70,23 +73,43 @@ const
   INT_CAUSE_SERIAL=01;
   INT_CAUSE_TIMER =02;
   INT_CAUSE_EXTERNAL=04;
+  SERIAL_PRESCALE=16;
   TIMER_PRESCALE=32;
-  MB88_PORTK=0;     // input only, 4 bits
+  SERIAL_DISABLE_THRESH=1000;
+  MB88_PORTK=0; // input only, 4 bits
 	MB88_PORTO=1;     // output only, PLA function output
 	MB88_PORTP=2;     // 4 bits
 	MB88_PORTR0=3;    // R0-R3, 4 bits
 	MB88_PORTR1=4;    // R4-R7, 4 bits
 	MB88_PORTR2=5;    // R8-R11, 4 bits
 	MB88_PORTR3=6;    // R12-R15, 4 bits
-	MB88_PORTSI=7;    // SI, 1 bit
+	MB88_PORTSI=7;     // SI, 1 bit
 
-constructor cpu_mb88xx.create(clock:dword;frames_div:word);
+procedure mb88_serial_advance(cpu:cpu_mb88xx);
+begin
+  cpu.sbcount:=cpu.sbcount+1;
+	// if we get too many interrupts with no servicing, disable the timer
+	// until somebody does something
+	if (cpu.sbcount>=SERIAL_DISABLE_THRESH) then timers.enabled(cpu.timer_serial,false);
+	// only read if not full; this is needed by the Namco 52xx to ensure that
+	// the program can write to S and recover the value even if serial is enabled
+	if not(cpu.r.sf) then begin
+		cpu.sb:=(cpu.sb shr 1) or 1;//(m_read_si() ? 8 : 0);
+		if (cpu.sbcount>=4) then begin
+			cpu.r.sf:=true;
+			cpu.pending_interrupt:=cpu.pending_interrupt or INT_CAUSE_SERIAL;
+    end;
+	end;
+end;
+
+constructor cpu_mb88xx.create(clock:dword;frames_div:word;serial_cb:exec_type_simple=nil);
 begin
 getmem(self.r,sizeof(reg_mb88xx));
 fillchar(self.r^,sizeof(reg_mb88xx),0);
 self.numero_cpu:=cpu_main_init(clock div 6);
 self.clock:=clock div 6;
 self.tframes:=(clock/6/frames_div)/llamadas_maquina.fps_max;
+if @serial_cb<>nil then self.timer_serial:=timers.init(self.numero_cpu,self.clock/SERIAL_PRESCALE,serial_cb,nil,false);
 self.port_k:=nil;
 self.port_p_r:=nil;
 self.port_o:=nil;
@@ -118,10 +141,20 @@ end;
 procedure cpu_mb88xx.set_irq_line(state:byte);
 begin
 	// on falling edge trigger interrupt
-	if (((self.pio and $04)<>0) and not(r.nf) and (state<>CLEAR_LINE)) then begin
+	if (((self.pio and 4)<>0) and not(r.nf) and (state<>CLEAR_LINE)) then begin
 		self.pending_interrupt:=self.pending_interrupt or INT_CAUSE_EXTERNAL;
 	end;
-  r.nf:=(state<>CLEAR_LINE);
+  if state<>CLEAR_LINE then r.nf:=true
+    else r.nf:=false;
+end;
+
+procedure cpu_mb88xx.clock_w(state:byte);
+begin
+if (state<>self.ctr) then begin
+		self.ctr:=state;
+		// on a falling clock, increment the timer, but only if enabled
+		if ((self.ctr=0) and ((self.pio and $40)<>0)) then self.increment_timer;
+	end;
 end;
 
 procedure cpu_mb88xx.reset;
@@ -136,30 +169,22 @@ begin
 	r.a:=0;
 	r.x:=0;
 	r.y:=0;
-	r.st:=true;	// start off with st=1
+	r.st:=true;
 	r.zf:=false;
 	r.cf:=false;
 	r.vf:=false;
 	r.sf:=false;
 	r.nf:=false;
+  self.in_irq:=false;
 	self.pio:=0;
+  self.ctr:=0;
 	self.th:=0;
 	self.tl:=0;
 	self.tp:=0;
 	self.sb:=0;
 	self.sbcount:=0;
 	self.pending_interrupt:=0;
-  self.in_irq:=false;
   self.change_reset(CLEAR_LINE);
-end;
-
-procedure inc_pc(r:preg_mb88xx);
-begin
-r.pc:=r.pc+1;
-if r.pc=$40 then begin
-  r.pc:=0;
-  r.pa:=r.pa+1;
-end;
 end;
 
 function get_pc(r:preg_mb88xx):word;
@@ -167,26 +192,12 @@ begin
   get_pc:=(r.PA shl 6)+r.pc;
 end;
 
-function get_ea(r:preg_mb88xx):word;
-begin
-  get_ea:=(r.x shl 4)+r.y;
-end;
-
-function pla(r:preg_mb88xx;inA,inB:byte):byte;
-var
-  index:byte;
-begin
-	index:=((inB and 1) shl 4) or (inA and $0f);
-//	if @r.PLA<>nil then return cpustate->PLA[index];
-  pla:=index;
-end;
-
 procedure cpu_mb88xx.update_pio_enable(newpio:byte);
 begin
 	// if the serial state has changed, configure the timer
 	if ((self.pio xor newpio) and $30)<>0 then begin
-		if ((newpio and $30)=0) then //cpustate->serial->adjust(attotime::never);
-		  else if ((newpio and $30)=$20) then //pustate->serial->adjust(attotime::from_hz(cpustate->device->clock() / SERIAL_PRESCALE), 0, attotime::from_hz(cpustate->device->clock() / SERIAL_PRESCALE));
+		if ((newpio and $30)=0) then timers.enabled(self.timer_serial,false)
+		  else if ((newpio and $30)=$20) then timers.enabled(self.timer_serial,true)
 		    else; //fatalerror("mb88xx: update_pio_enable set serial enable to unsupported value %02X\n", newpio & 0x30);
 	end;
 	self.pio:=newpio;
@@ -194,9 +205,9 @@ end;
 
 procedure cpu_mb88xx.increment_timer;
 begin
-	self.tl:=(self.tl+1) and $0f;
+	self.tl:=(self.tl+1) and $f;
 	if (self.tl=0) then begin
-		self.th:=(self.th+1) and $0f;
+		self.th:=(self.th+1) and $f;
 		if (self.th=0) then begin
 			r.vf:=true;
 			self.pending_interrupt:=self.pending_interrupt or INT_CAUSE_TIMER;
@@ -225,18 +236,18 @@ estados:=0;
 		r.sp[r.si]:=r.sp[r.si] or (byte(r.zf) shl 14);
 		r.sp[r.si]:=r.sp[r.si] or (byte(r.st) shl 13);
 		r.si:=(r.si+1) and 3;
-		{the datasheet doesn't mention interrupt vectors but
-     the Arabian MCU program expects the following }
-		if (self.pending_interrupt and self.pio and INT_CAUSE_EXTERNAL)<>0 then begin
+		// the datasheet doesn't mention interrupt vectors but
+    //  the Arabian MCU program expects the following
+    if (self.pending_interrupt and self.pio and INT_CAUSE_EXTERNAL)<>0 then begin
 			// if we have a live external source, call the irqcallback
 			//(*cpustate->irqcallback)(cpustate->device, 0);
-			r.pc:=$02;
+			r.pc:=2;
 		end else if (self.pending_interrupt and self.pio and INT_CAUSE_TIMER)<>0 then begin
-			r.pc:=$04;
-		end else if (self.pending_interrupt and self.pio and INT_CAUSE_SERIAL)<>0 then begin
-			r.pc:=$06;
-		end;
-		r.pa:=$00;
+			          r.pc:=4;
+             end else if (self.pending_interrupt and self.pio and INT_CAUSE_SERIAL)<>0 then begin
+			                  r.pc:=6;
+		                  end;
+		r.pa:=0;
 		r.st:=true;
 		self.pending_interrupt:=0;
     estados:=3;
@@ -245,6 +256,29 @@ estados:=0;
 end;
 
 procedure cpu_mb88xx.run(maximo:single);
+procedure inc_pc(r:preg_mb88xx);
+begin
+r.pc:=r.pc+1;
+if r.pc=$40 then begin
+  r.pc:=0;
+  r.pa:=r.pa+1;
+end;
+end;
+
+function get_ea(r:preg_mb88xx):word;
+begin
+  get_ea:=(r.x shl 4)+r.y;
+end;
+
+function pla(r:preg_mb88xx;inA,inB:byte):byte;
+var
+  index:byte;
+begin
+	index:=((inB and 1) shl 4) or (inA and $f);
+//	if @r.PLA<>nil then return cpustate->PLA[index];
+  pla:=index;
+end;
+
 var
   instruccion,timming,arg,tempb:byte;
 begin
@@ -260,99 +294,113 @@ end;
 self.contador:=0;
 while self.contador<maximo do begin
   timming:=1;
+  {if ((r.pa shl 6)+r.pc)=$97 then begin
+    r.pa:=0;
+    r.pa:=2;
+  end;
+  if self.ram[9]=$f then begin
+    self.ram[9]:=0;
+    self.ram[9]:=$f;
+  end;}
   instruccion:=self.rom[get_pc(r)];
   inc_pc(r);
   //Comprobar irq
   case instruccion of
-    $00:r.st:=true; //nop
-    $01:begin //outO
+    0:r.st:=true; //nop
+    1:begin //outO
            if @self.port_o<>nil then self.port_o(pla(r,r.a,byte(r.cf)));
            r.st:=true;
         end;
-    $02:begin //outP
+    2:begin //outP
            if @self.port_p_w<>nil then self.port_p_w(r.a);
            r.st:=true;
         end;
-    $03:begin //outR
+    3:begin //outR
            arg:=r.y;
            if @self.port_r_w<>nil then self.port_r_w(arg and 3,r.a);
 				   r.st:=true;
         end;
-    $04:begin //tay
+    4:begin //tay
            r.y:=r.a;
            r.st:=true;
         end;
-    $05:begin  //tath
+    5:begin  //tath
            self.th:=r.a;
            r.st:=true;
         end;
-    $06:begin  //tatl
+    6:begin  //tatl
            self.tl:=r.a;
            r.st:=true;
         end;
-    $07:begin  //tas
+    7:begin  //tas
            self.sb:=r.a;
            r.st:=true;
         end;
-    $08:begin //icy
+    8:begin //icy
            r.y:=r.y+1;
-           r.st:=((r.y and $10)=0);
-				   r.y:=r.y and $0f;
+           r.st:=(r.y and $10)=0;
+				   r.y:=r.y and $f;
 				   r.zf:=(r.y=0);
         end;
-    $09:begin //icm
-           arg:=self.ram[get_ea(r)];
+    9:begin //icm
+           arg:=self.ram[get_ea(r)] and $f;
            arg:=arg+1;
-           r.st:=((arg and $10)=0);
-				   arg:=arg and $0f;
+           r.st:=(arg and $10)=0;
+				   arg:=arg and $f;
 				   r.zf:=(arg=0);
            self.ram[get_ea(r)]:=arg;
         end;
-    $0a:begin //stic
-           self.ram[get_ea(r)]:=r.a;
+    $a:begin //stic
+           self.ram[get_ea(r)]:=r.a and $f;
 				   r.y:=r.y+1;
-           r.st:=((r.y and $10)=0);
-				   r.y:=r.y and $0f;
+           r.st:=(r.y and $10)=0;
+				   r.y:=r.y and $f;
 				   r.zf:=(r.y=0);
         end;
-    $0b:begin //x
+    $b:begin //x
            arg:=self.ram[get_ea(r)];
 				   self.ram[get_ea(r)]:=r.a;
 				   r.a:=arg;
            r.zf:=(r.a=0);
            r.st:=true;
         end;
-    $0c:begin  // rol
+    $c:begin  // rol
 				   r.a:=r.a shl 1;
            r.a:=r.a or byte(r.cf);
-				   r.st:=((r.a and $10)=0);
+				   r.st:=(r.a and $10)=0;
 				   r.cf:=not(r.st);
 				   r.a:=r.a and $f;
 				   r.zf:=(r.a=0);
         end;
-    $0d:begin  //l
+    $d:begin  //l
            r.a:=self.ram[get_ea(r)];
            r.zf:=(r.a=0);
            r.st:=true;
         end;
-    $0e:begin //adc
+    $e:begin //adc
            arg:=self.ram[get_ea(r)];
            arg:=arg+r.a+byte(r.cf);
-           r.st:=((arg and $10)=0);
+           r.st:=(arg and $10)=0;
 				   r.cf:=not(r.st);
-				   r.a:=arg and $0f;
+				   r.a:=arg and $f;
            r.zf:=(r.a=0);
         end;
-    $0f:begin // and ZCS:x.x
+    $f:begin // and ZCS:x.x
 				  r.a:=r.a and self.ram[get_ea(r)];
 				  r.zf:=(r.a=0);
           r.st:=not(r.zf);
 				end;
     $10:begin // daa ZCS:.xx
-				  if (not(r.cf) or (r.a>9)) then r.a:=r.a+6;
-				  r.st:=((r.a and $10)=0);
+				  if (r.cf or (r.a>9)) then r.a:=r.a+6;
+				  r.st:=(r.a and $10)=0;
 				  r.cf:=not(r.st);
-				  r.a:=r.a and $0f;
+				  r.a:=r.a and $f;
+				end;
+    $11:begin // das ZCS:.xx
+				  if (r.cf or (r.a>9)) then r.a:=r.a+10;
+				  r.st:=(r.a and $10)=0;
+				  r.cf:=not(r.st);
+				  r.a:=r.a and $f;
 				end;
     $12:begin //inK
            if @self.port_k<>nil then r.a:=self.port_k and $f;
@@ -386,21 +434,21 @@ while self.contador<maximo do begin
         end;
     $18:begin //dcy
           r.y:=r.y-1;
-          r.st:=((r.y and $10)=0);
+          r.st:=(r.y and $10)=0;
           r.y:=r.y and $f;
         end;
     $19:begin //dcm
           arg:=self.ram[get_ea(r)];
           arg:=arg-1;
-          r.st:=((arg and $10)=0);
+          r.st:=(arg and $10)=0;
           arg:=arg and $f;
           r.zf:=(arg=0);
           self.ram[get_ea(r)]:=arg;
         end;
     $1a:begin  //stdc ZCS:x.x
-          self.ram[get_ea(r)]:=r.a;
+          self.ram[get_ea(r)]:=r.a and $f;
 				  r.y:=r.y-1;
-				  r.st:=((r.y and $10)=0);
+				  r.st:=(r.y and $10)=0;
 				  r.y:=r.y and $f;
 				  r.zf:=(r.y=0);
         end;
@@ -413,21 +461,21 @@ while self.contador<maximo do begin
         end;
     $1c:begin  // ror
            r.a:=r.a or (byte(r.cf) shl 4);
-           r.st:=(((r.a shl 4) and $10)=0);
+           r.st:=(r.a and 1)=0;
            r.cf:=not(r.st);
            r.a:=(r.a shr 1) and $f;
            r.zf:=(r.a=0);
         end;
     $1d:begin //st
-           self.ram[get_ea(r)]:=r.a;
+           self.ram[get_ea(r)]:=r.a and $f;
 				   r.st:=true;
         end;
     $1e:begin //sbc
            arg:=self.ram[get_ea(r)];
            arg:=arg-r.a-byte(r.cf);
-           r.st:=((arg and $10)=0);
+           r.st:=(arg and $10)=0;
            r.cf:=not(r.st);
-           r.a:=arg and $0f;
+           r.a:=arg and $f;
            r.zf:=(r.a=0);
         end;
     $1f:begin   //or
@@ -436,8 +484,8 @@ while self.contador<maximo do begin
            r.st:=not(r.zf);
         end;
     $20:begin // setR ZCS:...
-          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4);
-          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg or not(1 shl (r.y mod 4)));
+          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4) and $f;
+          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg or (1 shl (r.y mod 4)));
 				  r.st:=true;
 				end;
     $21:begin  //setc
@@ -460,16 +508,21 @@ while self.contador<maximo do begin
     $25:r.st:=not(r.nf); // tsti
     $28:r.st:=not(r.cf); //tstc
     $2c:begin  //rts
-           r.si:=(r.si-1) and $3;
+           r.si:=(r.si-1) and 3;
            r.pc:=r.sp[r.si] and $3f;
            r.pa:=(r.sp[r.si] shr 6) and $1f;
            r.st:=true;
+        end;
+    $2d:begin // neg ZCS: ..x
+				   r.a:=not(r.a)+1;
+				   r.a:=r.a and $f;
+				   r.st:=(r.a<>0);
         end;
     $2e:begin //c
            arg:=self.ram[get_ea(r)];
            arg:=arg-r.a;
            r.cf:=(arg and $10)<>0;
-				   arg:=arg and $0f;
+				   arg:=arg and $f;
            r.st:=(arg<>0);
            r.zf:=not(r.st);
         end;
@@ -490,7 +543,8 @@ while self.contador<maximo do begin
         end;
     $38..$3b:begin //tbit
            arg:=self.ram[get_ea(r)];
-           r.st:=(arg and (1 shl (instruccion and $3)))=0;
+           if (arg and (1 shl (instruccion and 3)))<>0 then r.st:=false
+            else r.st:=true;
         end;
     $3c:begin //rti
            self.in_irq:=false;
@@ -527,31 +581,33 @@ while self.contador<maximo do begin
         end;
     $44..$47:begin  //rstD
            if @self.port_r_r<>nil then arg:=self.port_r_r(0) and $f;
-           arg:=arg and (not (1 shl (instruccion and 3)));
+           arg:=arg and not(1 shl (instruccion and 3));
            if @self.port_r_w<>nil then self.port_r_w(0,arg);
            r.st:=true;
         end;
-    $48,$49,$4a,$4b:begin // tstD ZCS:..x
+    $48..$4b:begin // tstD ZCS:..x
             if @self.port_r_r<>nil then arg:=self.port_r_r(2);
-				    r.st:=(arg and (1 shl (instruccion and 3)))=0;
+				    if (arg and (1 shl (instruccion and 3)))<>0 then r.st:=false
+              else r.st:=true;
 				end;
-    $4c..$4f:r.st:=(r.a and (1 shl (instruccion and 3)))=0; //tba
+    $4c..$4f:if (r.a and (1 shl (instruccion and 3)))<>0 then r.st:=false
+                else r.st:=true; //tba
     $50..$53:begin  //xd
-           arg:=self.ram[instruccion and $3];
-           self.ram[instruccion and $3]:=r.a;
+           arg:=self.ram[instruccion and 3];
+           self.ram[instruccion and 3]:=r.a and $f;
 				   r.a:=arg;
 				   r.zf:=(r.a=0);
 				   r.st:=true;
         end;
     $54..$57:begin //xyd
            arg:=self.ram[(instruccion and 3)+4];
-           self.ram[(instruccion and 3)+4]:=r.y;
+           self.ram[(instruccion and 3)+4]:=r.y and $f;
            r.y:=arg;
            r.zf:=(r.y=0);
            r.st:=true;
         end;
     $58..$5f:begin //lxi
-           r.x:=instruccion and $7;
+           r.x:=instruccion and 7;
            r.zf:=(r.x=0);
 				   r.st:=true;
         end;
@@ -561,7 +617,7 @@ while self.contador<maximo do begin
 				   timming:=2;
            if r.st then begin
               r.sp[r.si]:=get_pc(r);
-              r.si:=(r.si+1) and $3;
+              r.si:=(r.si+1) and 3;
               r.pc:=arg and $3f;
               r.pa:=((instruccion and 7) shl 2) or (arg shr 6);
 				   end;
@@ -578,7 +634,7 @@ while self.contador<maximo do begin
 				   r.st:=true;
         end;
     $70..$7f:begin //ai
-           arg:=instruccion and $0f;
+           arg:=instruccion and $f;
 				   arg:=arg+r.a;
            r.st:=(arg and $10)=0;
            r.cf:=not(r.st);
@@ -586,26 +642,26 @@ while self.contador<maximo do begin
            r.zf:=(r.a=0);
         end;
     $80..$8f:begin //lyi
-           r.y:=instruccion and $0f;
+           r.y:=instruccion and $f;
            r.zf:=(r.y=0);
 				   r.st:=true;
         end;
     $90..$9f:begin //li
-           r.a:=instruccion and $0f;
+           r.a:=instruccion and $f;
            r.zf:=(r.a=0);
 				   r.st:=true;
         end;
     $a0..$af:begin //cyi
-           arg:=(instruccion and $0f)-r.y;
-           r.cf:=((arg and $10)<>0);
+           arg:=(instruccion and $f)-r.y;
+           r.cf:=(arg and $10)<>0;
            arg:=arg and $f;
            r.st:=(arg<>0);
            r.zf:=not(r.st);
         end;
     $b0..$bf:begin //ci
-           arg:=(instruccion and $0f)-r.a;
-           r.cf:=((arg and $10)<>0);
-				   arg:=arg and $0f;
+           arg:=(instruccion and $f)-r.a;
+           r.cf:=(arg and $10)<>0;
+				   arg:=arg and $f;
            r.st:=(arg<>0);
 				   r.zf:=not(r.st);
         end;

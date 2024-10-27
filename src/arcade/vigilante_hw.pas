@@ -25,7 +25,7 @@ const
 
 var
  rom_bank:array[0..3,0..$3fff] of byte;
- banco_rom,sound_latch,rear_color:byte;
+ irq_vector,banco_rom,sound_latch,rear_color:byte;
  rear_scroll,scroll_x,sample_addr:word;
  rear_disable,rear_ch_color:boolean;
  mem_dac:array[0..$ffff] of byte;
@@ -188,12 +188,12 @@ end;
 procedure snd_irq_set(tipo:byte);
 begin
   case tipo of
-    0:z80_1.im0:=z80_1.im0 or $20; //Clear Z80
-    1:z80_1.im0:=z80_1.im0 and $df; //Set Z80
-    2:z80_1.im0:=z80_1.im0 or $10; //Clear YM2151
-    3:z80_1.im0:=z80_1.im0 and $ef; //Set YM2151
+    0:irq_vector:=irq_vector or $20; //Clear Z80
+    1:irq_vector:=irq_vector and $df; //Set Z80
+    2:irq_vector:=irq_vector or $10; //Clear YM2151
+    3:irq_vector:=irq_vector and $ef; //Set YM2151
   end;
-  if (z80_1.im0<>$ff) then z80_1.change_irq(ASSERT_LINE)
+  if (irq_vector<>$ff) then z80_1.change_irq_vector(ASSERT_LINE,irq_vector)
     else z80_1.change_irq(CLEAR_LINE);
 end;
 
@@ -284,10 +284,12 @@ begin
  z80_0.reset;
  z80_1.reset;
  ym2151_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
+ irq_vector:=$ff;
  banco_rom:=0;
  rear_ch_color:=true;
  sample_addr:=0;

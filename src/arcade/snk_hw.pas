@@ -1041,6 +1041,7 @@ begin
  z80_0.reset;
  z80_1.reset;
  z80_2.reset;
+ reset_video;
  reset_audio;
  YM3812_0.reset;
  txt_offset:=0;

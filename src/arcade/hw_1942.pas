@@ -143,14 +143,12 @@ while EmuStatus=EsRunning do begin
     case f of
       $2c:z80_1.change_irq(HOLD_LINE);
       $6d:begin
-            z80_0.im0:=$cf;
-            z80_0.change_irq(HOLD_LINE);
+            z80_0.change_irq_vector(HOLD_LINE,$cf);
             z80_1.change_irq(HOLD_LINE);
           end;
       $af:z80_1.change_irq(HOLD_LINE);
       $f0:begin
-            z80_0.im0:=$d7;
-            z80_0.change_irq(HOLD_LINE);
+            z80_0.change_irq_vector(HOLD_LINE,$d7);
             z80_1.change_irq(HOLD_LINE);
             update_video_hw1942;
           end;
@@ -295,6 +293,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

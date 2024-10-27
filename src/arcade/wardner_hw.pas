@@ -428,6 +428,7 @@ begin
  frame_snd:=z80_1.tframes;
  frame_mcu:=tms32010_0.tframes;
  ym3812_0.reset;
+ reset_video;
  reset_audio;
  txt_scroll_x:=0;
  txt_scroll_y:=0;

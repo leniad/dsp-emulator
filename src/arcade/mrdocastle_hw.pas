@@ -498,6 +498,7 @@ begin
  sn_76496_2.reset;
  sn_76496_3.reset;
  if (main_vars.tipo_maquina=313) then msm5205_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

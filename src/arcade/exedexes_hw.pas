@@ -119,13 +119,9 @@ init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     case f of
-      0:begin
-          z80_0.im0:=$cf;  //rst 8
-          z80_0.change_irq(HOLD_LINE);
-        end;
+      0:z80_0.change_irq_vector(HOLD_LINE,$cf);
       240:begin
-          z80_0.im0:=$d7;  //rst 10
-          z80_0.change_irq(HOLD_LINE);
+          z80_0.change_irq_vector(HOLD_LINE,$d7);
           update_video_exedexes;
         end;
     end;
@@ -223,6 +219,7 @@ begin
  ay8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

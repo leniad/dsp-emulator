@@ -343,6 +343,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$3fff;
  scroll_x_txt:=0;

@@ -300,7 +300,8 @@ procedure reset_badlands;
 begin
  m68000_0.reset;
  m6502_0.reset;
- YM2151_0.reset;
+ ym2151_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=$ffbf;

@@ -425,6 +425,7 @@ begin
  pia6821_2.reset;
  if (main_vars.tipo_maquina=321) or (main_vars.tipo_maquina=322) or (main_vars.tipo_maquina=323) then blitter_0.reset;
  dac_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

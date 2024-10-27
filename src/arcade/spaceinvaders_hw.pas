@@ -81,13 +81,9 @@ init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     case f of
-    96:begin
-          z80_0.im0:=$cf;
-          z80_0.change_irq(HOLD_LINE);
-       end;
+    96:z80_0.change_irq_vector(HOLD_LINE,$cf);
     224:begin
-          z80_0.im0:=$d7;
-          z80_0.change_irq(HOLD_LINE);
+          z80_0.change_irq_vector(HOLD_LINE,$d7);
           update_video_spaceinv;
         end;
     end;
@@ -208,6 +204,7 @@ procedure reset_spaceinv;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
+ reset_video;
  reset_audio;
  shift_data:=0;
  shift_count:=0;

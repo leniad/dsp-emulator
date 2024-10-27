@@ -386,6 +386,7 @@ begin
  z80_0.reset;
  ym3812_0.reset;
  upd7759_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

@@ -401,6 +401,7 @@ begin
  frame_main:=m6809_0.tframes;
  frame_snd:=z80_0.tframes;
  dac_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  if (main_vars.tipo_maquina=400) then marcade.in1:=$bf

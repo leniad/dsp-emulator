@@ -323,6 +323,15 @@ frame_sub:=z80_2.tframes;
 frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 263 do begin
+    case f of
+      16:update_video_kickrun;
+      240:begin
+            z80_0.change_irq(ASSERT_LINE);
+            z80_1.change_irq(HOLD_LINE);
+            z80_2.change_irq(HOLD_LINE);
+            m6800_0.change_irq(HOLD_LINE);
+          end;
+    end;
     //main
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -335,15 +344,6 @@ while EmuStatus=EsRunning do begin
     //mcu
     m6800_0.run(frame_mcu);
     frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
-    case f of
-      15:update_video_kickrun;
-      239:begin
-            z80_0.change_irq(ASSERT_LINE);
-            z80_1.change_irq(HOLD_LINE);
-            z80_2.change_irq(HOLD_LINE);
-            m6800_0.change_irq(HOLD_LINE);
-          end;
-    end;
  end;
  eventos_kikikaikai;
  video_sync;
@@ -386,6 +386,7 @@ begin
  if main_vars.tipo_maquina=389 then z80_2.change_reset(ASSERT_LINE);
  m6800_0.reset;
  ym2203_0.reset;
+ reset_video;
  reset_audio;
  banco_rom:=0;
  banco_char:=0;

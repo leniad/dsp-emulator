@@ -576,6 +576,7 @@ begin
    dac_2.reset;
    dac_3.reset;
  end;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

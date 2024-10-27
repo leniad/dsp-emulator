@@ -309,6 +309,7 @@ begin
  frame_mcu:=m6800_0.tframes;
  ym2203_0.reset;
  ym3812_0.reset;
+ reset_video;
  reset_audio;
  banco_rom:=0;
  sound_nmi:=false;

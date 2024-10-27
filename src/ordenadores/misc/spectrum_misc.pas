@@ -639,7 +639,6 @@ var_spectrum.irq_pos:=0;
 var_spectrum.altavoz:=0;
 var_spectrum.ay_select:=0;
 cinta_tzx.value:=0;
-spec_z80.im2_lo:=$ff;
 fillchar(borde.buffer[0],78000,$80);
 //ULA+
 ulaplus.activa:=false;
@@ -671,7 +670,7 @@ if mouse.tipo=MAMX then begin
   pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb);
   z80daisy_init(Z80_PIO0_TYPE);
   pio_0.reset;
-  spec_z80.daisy:=true;
+  spec_z80.enable_daisy;
 end;
 mouse.x:=0;
 mouse.y:=0;

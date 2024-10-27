@@ -558,6 +558,7 @@ procedure reset_irem_m62;
 begin
  z80_0.reset;
  m6800_0.reset;
+ reset_video;
  reset_audio;
  ay8910_0.reset;
  ay8910_1.reset;
