@@ -30,8 +30,8 @@ uses principal;
 
 procedure spectrum_load_init;
 begin
-load_spec.Button2.Caption:=leng[main_vars.idioma].mensajes[7];
-load_spec.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
+load_spec.Button2.Caption:=leng.mensajes[7];
+load_spec.Button1.Caption:=leng.mensajes[8];
 load_spec.FileListBox1.Mask:='*.zip;*.sp;*.zx;*.sna;*.z80;*.tzx;*.tap;*.csw;*.dsp;*.wav;*.szx;*.pzx';
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then load_spec.FileListBox1.Mask:=load_spec.FileListBox1.Mask+';*.rom';
 {$ifdef fpc}
@@ -385,7 +385,7 @@ if ((extension='Z80') or (extension='DSP')) then begin
         inc(temp,z80_ram.longitud+3);inc(g,z80_ram.longitud+3);
         getmem(temp2,$5000);
         t1:=z80_ram.longitud;
-        if extension='DSP' then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(temp2),t1)
+        if extension='DSP' then Decompress_zlib(pointer(@z80_ram.datos[0]),t1,pointer(temp2),t2)
           else descomprimir_z80(temp2,@z80_ram.datos[0],t1);
       end else begin //Sin comprimir
         copymemory(z80_ram,datos,$4000+3);

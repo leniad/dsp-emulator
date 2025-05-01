@@ -180,6 +180,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+      eventos_call;
       if f=240 then begin
           if irq_ena then m6809_0.change_irq(ASSERT_LINE);
           update_video_call;
@@ -191,7 +192,6 @@ while EmuStatus=EsRunning do begin
       z80_0.run(frame_snd);
       frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
-  eventos_call;
   video_sync;
 end;
 end;
@@ -401,8 +401,6 @@ begin
  frame_main:=m6809_0.tframes;
  frame_snd:=z80_0.tframes;
  dac_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  if (main_vars.tipo_maquina=400) then marcade.in1:=$bf
   else begin
@@ -544,7 +542,6 @@ for f:=0 to $ff do begin
     gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
 end;
 //final
-reset_hypersports;
 iniciar_hypersports:=true;
 end;
 

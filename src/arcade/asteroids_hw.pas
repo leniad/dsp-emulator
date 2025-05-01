@@ -260,7 +260,7 @@ end;
 procedure reset_as;
 begin
 m6502_0.reset;
-reset_samples;
+reset_game_general;
 marcade.in0:=0;
 marcade.in1:=0;
 x_actual:=0;

@@ -85,25 +85,22 @@ end;
 procedure system2_principal;
 var
   f:word;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=223 then begin
+    eventos_system1;
+    if f=224 then begin
       z80_0.change_irq(HOLD_LINE);
       if type_row_scroll then update_video_row_scroll
         else update_video;
-      eventos_system1;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
   video_sync;
 end;
@@ -188,8 +185,8 @@ timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_s
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(2000000,0.5);
-sn_76496_1:=sn76496_chip.Create(4000000);
+sn_76496_0:=sn76496_chip.create(2000000,system1_ready_cb,0.5);
+sn_76496_1:=sn76496_chip.create(4000000,system1_ready_cb,1);
 //Timers
 case main_vars.tipo_maquina of
   37:begin

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes,SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons,lenguaje,controls_engine,main_engine;
+  StdCtrls, Buttons,lenguaje,controls_engine;
 
 type
 
@@ -452,7 +452,7 @@ begin
    redefine1.Button1.Enabled:=false;
    redefine1.SetFocus;
    redefine1.Button1.Enabled:=true;
-   redefine1.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
+   redefine1.Button1.Caption:=leng.mensajes[8];
 end;
 
 procedure Tredefine1.SpeedButton1Click(Sender: TObject);

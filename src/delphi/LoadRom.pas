@@ -119,8 +119,15 @@ procedure TFLoadRom.FormShow(Sender: TObject);
 var
   f,h,pos:word;
   png:TPngImage;
+  j:integer;
 begin
-BitBtn1.Caption:=leng[main_vars.idioma].mensajes[8];
+j:=(principal1.left+(principal1.width div 2))-(FLoadRom.Width div 2);
+if j<0 then FLoadRom.Left:=0
+  else FLoadRom.Left:=j;
+j:=(principal1.top+(principal1.Height div 2))-(FLoadRom.Height div 2);
+if j<0 then FLoadRom.Top:=0
+  else FLoadRom.Top:=j;
+BitBtn1.Caption:=leng.mensajes[8];
 romlist.ColWidths[0]:=romlist.Width-65;
 romlist.ColWidths[1]:=40;
 romlist.ColWidths[2]:=-1;
@@ -168,6 +175,7 @@ case main_vars.sort of
       radiobutton5.checked:=true;
     end;
 end;
+init_game_desc(main_vars.sort);
 show_picture;
 end;
 
@@ -232,7 +240,7 @@ if not(main_vars.driver_ok) then begin
     principal1.BitBtn6.Enabled:=false;
     principal1.BitBtn19.Enabled:=false;
     principal1.BitBtn8.Enabled:=false;
-    principal1.enabled:=true;
+    //principal1.enabled:=true;
     if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 end;

@@ -120,6 +120,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for linea:=0 to 255 do begin
+    eventos_tp84;
     if linea=240 then begin
         if irq_enable then begin
           m6809_0.change_irq(HOLD_LINE);
@@ -137,7 +138,6 @@ while EmuStatus=EsRunning do begin
     z80_0.run(frame_snd);
     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
-  eventos_tp84;
   video_sync;
 end;
 end;
@@ -239,8 +239,6 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -340,7 +338,6 @@ marcade.dswb:=$32;
 marcade.dswa_val2:=@tp84_dip_a;
 marcade.dswb_val2:=@tp84_dip_b;
 //final
-reset_tp84;
 iniciar_tp84:=true;
 end;
 

@@ -93,18 +93,18 @@ var
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-   m68000_0.run(frame_main);
-   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-   z80_0.run(frame_snd);
-   frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
-   if f=255 then begin
+ for f:=0 to 255 do begin
+   eventos_diverboy;
+   if f=0 then begin
       m68000_0.irq[6]:=HOLD_LINE;
       update_video_diverboy;
       frame:=not(frame);
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   z80_0.run(frame_snd);
+   frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_diverboy;
  video_sync;
 end;
 end;
@@ -180,8 +180,6 @@ begin
  frame_main:=m68000_0.tframes;
  frame_snd:=z80_0.tframes;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
  sound_latch:=0;
@@ -241,7 +239,6 @@ marcade.dswa:=$b8;
 marcade.dswa_val2:=@diverboy_dip;
 //final
 freemem(memoria_temp);
-reset_diverboy;
 iniciar_diverboy:=true;
 end;
 

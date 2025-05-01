@@ -2,8 +2,8 @@ unit rastan_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m68000,main_engine,controls_engine,gfx_engine,ym_2151,
-     msm5205,taitosnd,rom_engine,pal_engine,sound_engine;
+     m68000,main_engine,controls_engine,gfx_engine,taito_sound,rom_engine,
+     pal_engine,sound_engine,msm5205;
 
 function iniciar_rastan:boolean;
 
@@ -24,10 +24,9 @@ const
 
 var
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
- bank_sound:array[0..3,$0..$3fff] of byte;
  rom:array[0..$2ffff] of word;
  ram1,ram3:array[0..$1fff] of word;
- spritebank,sound_bank:byte;
+ spritebank:byte;
  ram2:array [0..$7fff] of word;
 
 procedure update_video_rastan;
@@ -82,39 +81,39 @@ end;
 procedure eventos_rastan;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  //P1
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  //Sys
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
 procedure rastan_principal;
 var
-  frame_m,frame_s:single;
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-frame_s:=tc0140syt_0.z80.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+  if f=248 then begin
+    update_video_rastan;
+    m68000_0.irq[5]:=HOLD_LINE;
+  end;
   //Main CPU
   m68000_0.run(frame_m);
   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //Sound CPU
-  tc0140syt_0.z80.run(frame_s);
-  frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-  if f=247 then begin
-    update_video_rastan;
-    m68000_0.irq[5]:=HOLD_LINE;
-  end;
+  tc0140syt_0.run;
  end;
  eventos_rastan;
  video_sync;
@@ -140,7 +139,6 @@ end;
 end;
 
 procedure rastan_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
@@ -151,7 +149,6 @@ begin
   set_pal_color(color,numero);
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
-
 begin
 case direccion of
       0..$5ffff:; //ROM
@@ -182,74 +179,14 @@ case direccion of
 end;
 end;
 
-function rastan_snd_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$3fff,$8000..$8fff:rastan_snd_getbyte:=mem_snd[direccion];
-  $4000..$7fff:rastan_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
-  $9001:rastan_snd_getbyte:=ym2151_0.status;
-  $a001:rastan_snd_getbyte:=tc0140syt_0.slave_comm_r;
-end;
-end;
-
-procedure rastan_snd_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-  0..$7fff:; //ROM
-  $8000..$8fff:mem_snd[direccion]:=valor;
-  $9000:ym2151_0.reg(valor);
-  $9001:ym2151_0.write(valor);
-  $a000:tc0140syt_0.slave_port_w(valor);
-  $a001:tc0140syt_0.slave_comm_w(valor);
-  $b000:msm5205_0.pos:=(msm5205_0.pos and $ff) or (valor shl 8);
-  $c000:msm5205_0.reset_w(false);
-  $d000:begin
-           msm5205_0.reset_w(true);
-           msm5205_0.pos:=msm5205_0.pos and $ff00;
-        end;
-end;
-end;
-
-procedure snd_adpcm;
-begin
-if msm5205_0.data_val<>-1 then begin
-		msm5205_0.data_w(msm5205_0.data_val and $f);
-		msm5205_0.data_val:=-1;
-    msm5205_0.pos:=(msm5205_0.pos+1) and $ffff;
-end else begin
-		msm5205_0.data_val:=msm5205_0.rom_data[msm5205_0.pos];
-		msm5205_0.data_w(msm5205_0.data_val shr 4);
-end;
-end;
-
-procedure sound_bank_rom(valor:byte);
-begin
-  sound_bank:=valor and 3;
-end;
-
-procedure sound_instruccion;
-begin
-  ym2151_0.update;
-  msm5205_0.update;
-end;
-
-procedure ym2151_snd_irq(irqstate:byte);
-begin
-  tc0140syt_0.z80.change_irq(irqstate);
-end;
-
 //Main
 procedure reset_rastan;
 begin
  m68000_0.reset;
  tc0140syt_0.reset;
- YM2151_0.reset;
- msm5205_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$1f;
  marcade.in1:=$ff;
- sound_bank:=0;
  scroll_x1:=0;
  scroll_y1:=0;
  scroll_x2:=0;
@@ -279,27 +216,18 @@ iniciar_video(320,240);
 //Main CPU
 m68000_0:=cpu_m68000.create(8000000,256);
 m68000_0.change_ram16_calls(rastan_getword,rastan_putword);
-//Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256);
-tc0140syt_0.z80.change_ram_calls(rastan_snd_getbyte,rastan_snd_putbyte);
-tc0140syt_0.z80.init_sound(sound_instruccion);
-//Sound Chips
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,$10000);
-msm5205_0.change_advance(snd_adpcm);
-if not(roms_load(msm5205_0.rom_data,rastan_adpcm)) then exit;
-ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_port_func(sound_bank_rom);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-//cargar roms
 if not(roms_load16w(@rom,rastan_rom)) then exit;
-//rom[$05FF9F]:=$fa;  //Cheeeeeeeeat
+//rom[$05FF9F shr 1]:=$fa;  //Cheeeeeeeeat
+//Sound CPU
+tc0140syt_0:=tc0140syt_chip.create(4000000,256,SOUND_RASTAN);
+if not(roms_load(msm5205_0.rom_data,rastan_adpcm)) then exit;
 //cargar sonido+ponerlas en su banco
 if not(roms_load(@memoria_temp,rastan_sound)) then exit;
-copymemory(@mem_snd[0],@memoria_temp[0],$4000);
-copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
-copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
-copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
-copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
+copymemory(@tc0140syt_0.snd_rom[0],@memoria_temp[0],$4000);
+copymemory(@tc0140syt_0.snd_bank_rom[0,0],@memoria_temp[$0],$4000);
+copymemory(@tc0140syt_0.snd_bank_rom[1,0],@memoria_temp[$4000],$4000);
+copymemory(@tc0140syt_0.snd_bank_rom[2,0],@memoria_temp[$8000],$4000);
+copymemory(@tc0140syt_0.snd_bank_rom[3,0],@memoria_temp[$c000],$4000);
 //convertir chars
 if not(roms_load(@memoria_temp,rastan_char)) then exit;
 init_gfx(0,8,8,$4000);

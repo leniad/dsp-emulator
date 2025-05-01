@@ -95,7 +95,8 @@ begin
 init_controls(false,false,false,true);
 irq_req:=false;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 255 do begin
+    eventos_tutankham;
     if f=240 then begin
       if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_tutankham;
@@ -107,7 +108,6 @@ while EmuStatus=EsRunning do begin
     konamisnd_0.run;
   end;
   irq_req:=not(irq_req);
-  eventos_tutankham;
   video_sync;
 end;
 end;
@@ -165,8 +165,6 @@ procedure reset_tutankham;
 begin
  m6809_0.reset;
  frame_main:=m6809_0.tframes;
- reset_video;
- reset_audio;
  konamisnd_0.reset;
  galaxian_stars_0.reset;
  marcade.in0:=$ff;
@@ -194,7 +192,7 @@ if not(roms_load(@memoria_temp,tutan_rom)) then exit;
 copymemory(@memoria[$a000],@memoria_temp[0],$6000);
 for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
 //Sound Chip
-konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,$100);
 if not(roms_load(@konamisnd_0.memoria,tutan_sound)) then exit;
 //Stars
 galaxian_stars_0:=gal_stars.create(m6809_0.numero_cpu,m6809_0.clock,SCRAMBLE);
@@ -205,7 +203,6 @@ marcade.dswb:=$7b;
 marcade.dswa_val2:=@tutan_dip_a;
 marcade.dswb_val2:=@tutan_dip_b;
 //final
-reset_tutankham;
 iniciar_tutankham:=true;
 end;
 

@@ -155,6 +155,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+  eventos_terracre;
   if f=240 then begin
     update_video_terracre;
     copymemory(@buffer_sprites_w,@ram,$100*2);
@@ -167,7 +168,6 @@ while EmuStatus=EsRunning do begin
   z80_0.run(frame_snd);
   frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_terracre;
  video_sync;
 end;
 end;
@@ -382,12 +382,11 @@ begin
  z80_0.reset;
  frame_main:=m68000_0.tframes;
  frame_snd:=z80_0.tframes;
- if main_vars.tipo_maquina=41 then YM2203_0.reset
+ if main_vars.tipo_maquina=41 then ym2203_0.reset
   else ym3812_0.reset;
  dac_0.reset;
  dac_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff00;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;

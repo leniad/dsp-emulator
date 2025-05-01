@@ -29,16 +29,16 @@ const
         speedr_prom:array[0..1] of tipo_roms=(
         (n:'63s141.12a';l:$100;p:$0;crc:$8421786f),(n:'63s141.13a';l:$100;p:$100;crc:$6048583f));
         //Dip
-        speedr_dip_a:array [0..3] of def_dip=(
-        (mask:$7;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        speedr_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'20K 70K+'),(dip_val:$10;dip_name:'30K 80K+'),(dip_val:$8;dip_name:'20K 80K'),(dip_val:$0;dip_name:'30K 80K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$60;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$80;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        speedr_dip_a:array [0..3] of def_dip2=(
+        (mask:7;name:'Coin B';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin A';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
+        speedr_dip_b:array [0..5] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
+        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
+        (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 70K+','30K 80K+','20K 80K','30K 80K')),
+        (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')),());
 
 var
  memoria_rom:array[0..$3f,0..$fff] of byte;
@@ -127,19 +127,11 @@ end;
 procedure speedr_principal;
 var
   f:byte;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    eventos_speedr;
     case f of
       0:m6809_0.change_firq(HOLD_LINE);
       248:begin
@@ -147,8 +139,13 @@ while EmuStatus=EsRunning do begin
             m6809_0.change_irq(HOLD_LINE);
           end;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
-  eventos_speedr;
   video_sync;
 end;
 end;
@@ -263,8 +260,8 @@ begin
  z80_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -339,10 +336,9 @@ convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //Dip
 marcade.dswa:=$ff;
 marcade.dswb:=$73;
-marcade.dswa_val:=@speedr_dip_a;
-marcade.dswb_val:=@speedr_dip_b;
+marcade.dswa_val2:=@speedr_dip_a;
+marcade.dswb_val2:=@speedr_dip_b;
 //final
-reset_speedr;
 iniciar_speedr:=true;
 end;
 

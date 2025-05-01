@@ -17,26 +17,26 @@ const
         firetrap_mcu:tipo_roms=(n:'di-12.16h';l:$1000;p:0;crc:$6340a4d7);
         firetrap_char:tipo_roms=(n:'di-03.17c';l:$2000;p:0;crc:$46721930);
         firetrap_tiles:array[0..3] of tipo_roms=(
-        (n:'di-06.3e';l:$8000;p:$0;crc:$441d9154),(n:'di-04.2e';l:$8000;p:$8000;crc:$8e6e7eec),
+        (n:'di-06.3e';l:$8000;p:0;crc:$441d9154),(n:'di-04.2e';l:$8000;p:$8000;crc:$8e6e7eec),
         (n:'di-07.6e';l:$8000;p:$10000;crc:$ef0a7e23),(n:'di-05.4e';l:$8000;p:$18000;crc:$ec080082));
         firetrap_tiles2:array[0..3] of tipo_roms=(
-        (n:'di-09.3j';l:$8000;p:$0;crc:$d11e28e8),(n:'di-08.2j';l:$8000;p:$8000;crc:$c32a21d8),
+        (n:'di-09.3j';l:$8000;p:0;crc:$d11e28e8),(n:'di-08.2j';l:$8000;p:$8000;crc:$c32a21d8),
         (n:'di-11.6j';l:$8000;p:$10000;crc:$6424d5c3),(n:'di-10.4j';l:$8000;p:$18000;crc:$9b89300a));
         firetrap_sprites:array[0..3] of tipo_roms=(
-        (n:'di-16.17h';l:$8000;p:$0;crc:$0de055d7),(n:'di-13.13h';l:$8000;p:$8000;crc:$869219da),
+        (n:'di-16.17h';l:$8000;p:0;crc:$0de055d7),(n:'di-13.13h';l:$8000;p:$8000;crc:$869219da),
         (n:'di-14.14h';l:$8000;p:$10000;crc:$6b65812e),(n:'di-15.15h';l:$8000;p:$18000;crc:$3e27f77d));
         firetrap_pal:array[0..2] of tipo_roms=(
-        (n:'firetrap.3b';l:$100;p:$0;crc:$8bb45337),(n:'firetrap.4b';l:$100;p:$100;crc:$d5abfc64),
+        (n:'firetrap.3b';l:$100;p:0;crc:$8bb45337),(n:'firetrap.4b';l:$100;p:$100;crc:$d5abfc64),
         (n:'firetrap.1a';l:$100;p:$200;crc:$d67f3514));
         //DIP
         firetrap_dip_a:array [0..5] of def_dip=(
-        (mask:$7;name:'Coin A';number:5;dip:((dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 4C'),(dip_val:$4;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$18;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Demo Sound';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        (mask:7;name:'Coin A';number:5;dip:((dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 4C'),(dip_val:$4;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Coin B';number:4;dip:((dip_val:0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$18;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Demo Sound';number:2;dip:((dip_val:0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         firetrap_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$4;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$10;dip_name:'30K 70K'),(dip_val:$0;dip_name:'50K 100K'),(dip_val:$30;dip_name:'30K'),(dip_val:$20;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -60,13 +60,13 @@ var
   f,x,y,nchar,attr,attr2,color:byte;
   flipx,flipy:boolean;
 begin
-for f:=$7 downto 0 do begin
+for f:=7 downto 0 do begin
     x:=memoria[$9883+(f*4)]+1;
     y:=240-memoria[$9882+(f*4)];
     attr:=memoria[(f*4)+$9881];
     attr2:=memoria[(f*4)+$9880];
     nchar:=((attr and $10) shl 3) or ((attr and $20) shl 1) or (attr2 and $3f);
-    color:=(attr and $0f) shl 2;
+    color:=(attr and $f) shl 2;
 		flipx:=(attr2 and $40)<>0;
 		flipy:=(attr2 and $80)<>0;
     put_gfx_sprite_mask(nchar,color,flipx,flipy,1,0,3);
@@ -87,7 +87,7 @@ for f:=0 to $3ff do begin
     put_gfx_trans(x*8,y*8,nchar,color,1,0);
     gfx[0].buffer[pos]:=false;
   end;
-  pos:=((y and $0f) xor $0f) or ((x and $0f) shl 4) or ((y and $10) shl 5) or ((x and $10) shl 6);
+  pos:=((y and $f) xor $f) or ((x and $f) shl 4) or ((y and $10) shl 5) or ((x and $10) shl 6);
   if gfx[1].buffer[pos] then begin
     attr:=memoria[pos+$d100];
     color:=attr and $30;
@@ -110,9 +110,9 @@ for f:=0 to $5f do begin
     y:=memoria[$e800+(f*4)];
     attr:=memoria[(f*4)+$e801];
     nchar:=memoria[(f*4)+$e803]+((attr and $c0) shl 2);
-    color:=(((attr and $08) shr 2) or (attr and $01)) shl 4;
-		flipx:=(attr and $04)<>0;
-		flipy:=(attr and $02)<>0;
+    color:=(((attr and 8) shr 2) or (attr and 1)) shl 4;
+		flipx:=(attr and 4)<>0;
+		flipy:=(attr and 2)<>0;
     if (attr and $10)<>0 then begin //doble
       if flipy then begin
         put_gfx_sprite_diff(nchar and $ffe,$40+color,flipx,flipy,3,0,0);
@@ -135,71 +135,67 @@ procedure eventos_firetrap;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
   //SYSTEM
-  if arcade_input.but0[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   //COIN
-  if arcade_input.coin[0] then coins:=(coins and $fb) else coins:=(coins or $4);
-  if arcade_input.coin[1] then coins:=(coins and $f7) else coins:=(coins or $8);
+  if arcade_input.coin[0] then coins:=(coins and $fb) else coins:=(coins or 4);
+  if arcade_input.coin[1] then coins:=(coins and $f7) else coins:=(coins or 8);
 end;
 end;
 
 procedure firetrap_principal;
 var
   f:word;
-  frame_m,frame_s,frame_mcu:single;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=m6502_0.tframes;
-frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
-    for h:=1 to CPU_SYNC do begin
-      //main
-      z80_0.run(frame_m);
-      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-     //Sound
-      m6502_0.run(frame_s);
-      frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-      //MCU
-      mcs51_0.run(frame_mcu);
-      frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
-    end;
+    eventos_firetrap;
     case f of
       8:begin
           mcs51_0.change_irq1(CLEAR_LINE);
           vblank:=0;
         end;
-      247:begin
+      248:begin
             update_video_firetrap;
             vblank:=$80;
             if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
             mcs51_0.change_irq1(ASSERT_LINE);
           end;
     end;
+    for h:=1 to CPU_SYNC do begin
+      //main
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+     //Sound
+      m6502_0.run(frame_snd);
+      frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
+      //MCU
+      mcs51_0.run(frame_mcu);
+      frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
+    end;
   end;
-  eventos_firetrap;
   video_sync;
 end;
 end;
@@ -207,7 +203,7 @@ end;
 function firetrap_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$7fff,$c000..$e97f:firetrap_getbyte:=memoria[direccion];
+  0..$7fff,$c000..$e97f:firetrap_getbyte:=memoria[direccion];
   $8000..$bfff:firetrap_getbyte:=main_rom[main_bank,direccion and $3fff];
   $f010:firetrap_getbyte:=marcade.in0; //in0
   $f011:firetrap_getbyte:=marcade.in1; //in1
@@ -225,11 +221,11 @@ case direccion of
    $c000..$cfff,$e800..$e97f:memoria[direccion]:=valor;
    $d000..$d7ff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
-                  gfx[1].buffer[direccion and $6ff]:=true;
+                  gfx[1].buffer[direccion and $7ff]:=true;
                end;
    $d800..$dfff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
-                  gfx[2].buffer[direccion and $6ff]:=true;
+                  gfx[2].buffer[direccion and $7ff]:=true;
                end;
    $e000..$e7ff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
@@ -273,7 +269,7 @@ end;
 procedure firetrap_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$7ff:mem_snd[direccion]:=valor;
+  0..$7ff:mem_snd[direccion]:=valor;
   $1000:ym3812_0.control(valor);
   $1001:ym3812_0.write(valor);
   $2000:begin //adpcm_data_w
@@ -337,8 +333,9 @@ begin
  mcs51_0.reset;
  msm5205_0.reset;
  ym3812_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=m6502_0.tframes;
+ frame_mcu:=mcs51_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$7f;
@@ -450,23 +447,23 @@ convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 if not(roms_load(@memoria_temp,firetrap_pal)) then exit;
 for f:=0 to $ff do begin
 		// red component
-		bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-    bit3:=(memoria_temp[f] shr 3) and $01;
-		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f] shr 0) and 1;
+		bit1:=(memoria_temp[f] shr 1) and 1;
+		bit2:=(memoria_temp[f] shr 2) and 1;
+    bit3:=(memoria_temp[f] shr 3) and 1;
+		colores[f].r:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 		// green component
-		bit0:=(memoria_temp[f] shr 4) and $01;
-		bit1:=(memoria_temp[f] shr 5) and $01;
-		bit2:=(memoria_temp[f] shr 6) and $01;
-    bit3:=(memoria_temp[f] shr 7) and $01;
-		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f] shr 4) and 1;
+		bit1:=(memoria_temp[f] shr 5) and 1;
+		bit2:=(memoria_temp[f] shr 6) and 1;
+    bit3:=(memoria_temp[f] shr 7) and 1;
+		colores[f].g:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 		// blue component
-		bit0:=(memoria_temp[f+$100] shr 0) and $01;
-		bit1:=(memoria_temp[f+$100] shr 1) and $01;
-		bit2:=(memoria_temp[f+$100] shr 2) and $01;
-    bit3:=(memoria_temp[f+$100] shr 3) and $01;
-		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f+$100] shr 0) and 1;
+		bit1:=(memoria_temp[f+$100] shr 1) and 1;
+		bit2:=(memoria_temp[f+$100] shr 2) and 1;
+    bit3:=(memoria_temp[f+$100] shr 3) and 1;
+		colores[f].b:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 end;
 set_pal(colores,$100);
 //DIP
@@ -475,7 +472,6 @@ marcade.dswb:=$ff;
 marcade.dswa_val:=@firetrap_dip_a;
 marcade.dswb_val:=@firetrap_dip_b;
 //final
-reset_firetrap;
 iniciar_firetrap:=true;
 end;
 

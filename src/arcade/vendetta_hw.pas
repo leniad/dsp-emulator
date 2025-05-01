@@ -101,49 +101,46 @@ procedure eventos_vendetta;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
   //Service
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
 end;
 end;
 
 procedure vendetta_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=konami_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
-    for f:=0 to $ff do begin
-      //main
-      konami_0.run(frame_m);
-      frame_m:=frame_m+konami_0.tframes-konami_0.contador;
-      //sound
-      z80_0.run(frame_s);
-      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-      if f=239 then begin
+    for f:=0 to 255 do begin
+      eventos_vendetta;
+      if f=240 then begin
         if irq_enabled then konami_0.change_irq(HOLD_LINE);
         update_video_vendetta;
       end;
+      //main
+      konami_0.run(frame_main);
+      frame_main:=frame_main+konami_0.tframes-konami_0.contador;
+      //sound
+      z80_0.run(frame_snd);
+      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
     end;
-    eventos_vendetta;
     video_sync;
 end;
 end;
@@ -282,8 +279,8 @@ begin
  k054000_0.reset;
  k053246_0.reset;
  ym2151_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=konami_0.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -323,20 +320,18 @@ screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(true);
-//cargar roms y ponerlas en su sitio...
-if not(roms_load(@memoria_temp,vendetta_rom)) then exit;
-copymemory(@memoria[$8000],@memoria_temp[$38000],$8000);
-for f:=0 to 27 do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
-//cargar sonido
-if not(roms_load(@mem_snd,vendetta_sound)) then exit;
 //Main CPU
 konami_0:=cpu_konami.create(12000000,256);
 konami_0.change_ram_calls(vendetta_getbyte,vendetta_putbyte);
 konami_0.change_set_lines(vendetta_bank);
+if not(roms_load(@memoria_temp,vendetta_rom)) then exit;
+copymemory(@memoria[$8000],@memoria_temp[$38000],$8000);
+for f:=0 to 27 do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(vendetta_snd_getbyte,vendetta_snd_putbyte);
 z80_0.init_sound(vendetta_sound_update);
+if not(roms_load(@mem_snd,vendetta_sound)) then exit;
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k053260_rom,$100000);
@@ -379,7 +374,6 @@ marcade.dswb_val:=@vendetta_dip_b;
 marcade.dswc:=$ff;
 marcade.dswc_val:=@vendetta_dip_c;
 //final
-reset_vendetta;
 iniciar_vendetta:=true;
 end;
 

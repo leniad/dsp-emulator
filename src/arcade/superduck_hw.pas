@@ -137,31 +137,28 @@ end;
 
 procedure superduck_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
-    //main
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    eventos_superduck;
     case f of
-    245:begin
-          marcade.in1:=marcade.in1 and $fbff;
-          m68000_0.irq[2]:=HOLD_LINE;
-          update_video_superduck;
-          copymemory(@buffer_sprites_w,@sprite_ram,$1000*2);
-        end;
-    261:marcade.in1:=marcade.in1 or $400;
+      0:marcade.in1:=marcade.in1 or $400;
+      246:begin
+            marcade.in1:=marcade.in1 and $fbff;
+            m68000_0.irq[2]:=HOLD_LINE;
+            update_video_superduck;
+            copymemory(@buffer_sprites_w,@sprite_ram,$1000*2);
+          end;
     end;
+    //main
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_superduck;
  video_sync;
 end;
 end;
@@ -297,8 +294,8 @@ begin
  m68000_0.reset;
  z80_0.reset;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_fg_x:=0;
@@ -384,7 +381,6 @@ freemem(memoria_temp);
 marcade.dswa:=$ffbf;
 marcade.dswa_val2:=@superduck_dip;
 //final
-reset_superduck;
 iniciar_superduck:=true;
 end;
 

@@ -331,6 +331,17 @@ type
     finalstarforce1: TMenuItem;
     fireball1: TMenuItem;
     cotton1: TMenuItem;
+    dotron1: TMenuItem;
+    Auto1: TMenuItem;
+    Pausa1: TMenuItem;
+    tron1: TMenuItem;
+    timber1: TMenuItem;
+    shollow1: TMenuItem;
+    domino1: TMenuItem;
+    wacko1: TMenuItem;
+    MenuItem67: TMenuItem;
+    nastar1: TMenuItem;
+    masterw1: TMenuItem;
     sdi1: TMenuItem;
     RiotCity1: TMenuItem;
     WyvernF01: TMenuItem;
@@ -606,7 +617,6 @@ type
     N1X1: TMenuItem;
     SinSonido1: TMenuItem;
     consonido1: TMenuItem;
-    Pausa1: TMenuItem;
     Reset1: TMenuItem;
     StringGrid1: TStringGrid;
     StringGrid2: TStringGrid;
@@ -621,6 +631,7 @@ type
     procedure Acercade1Click(Sender: TObject);
     procedure BitBtn12Click(Sender: TObject);
     procedure BitBtn14Click(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
     procedure BitBtn8Click(Sender: TObject);
     procedure fLoadCinta(Sender: TObject);
     procedure fSaveSnapShot(Sender: TObject);
@@ -631,7 +642,8 @@ type
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
-    procedure Panel1Click(Sender: TObject);
+    procedure Pausa1Click(Sender: TObject);
+    procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure CambiarMaquina(Sender: TObject);
@@ -658,12 +670,13 @@ var
   principal1: Tprincipal1;
 
 implementation
-uses tap_tzx,spectrum_misc,acercade,lenslock,file_engine;
+uses tap_tzx,spectrum_misc,acercade,lenslock,file_engine,arcade_config,
+     config,config_cpc,config_sms,config_gb;
+
 var
   //Misc Vars
   tipo_new:word;
-  //Status bitmap
-  status_bitmap:tbitmap;
+  estado_actual:TEmuStatus;
 
 { Tprincipal1 }
 procedure sync_all;
@@ -674,17 +687,17 @@ if window_render<>nil then begin
    valor_sync:=1000/llamadas_maquina.fps_max;
    cont_micro:=valor_sync;
    SDL_ClearQueuedAudio(sound_device);
+   SDL_RaiseWindow(window_render);
 end;
+if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
 end;
 
 //Continuar con la emulacion...
 procedure restart_emu;
 begin
-principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then sync_all;
 if main_vars.driver_ok then begin
-  EmuStatus:=EsRunning;
-  principal1.timer1.Enabled:=true;
+  EmuStatus:=estado_actual;
   llamadas_maquina.bucle_general;
 end;
 end;
@@ -702,8 +715,7 @@ var
   JPG:TJPEGImage;
   imagen1:tbitmap;
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
+estado_actual:=EmuStatus;
 EmuStatus:=EsPause;
 if saverom(nombre,indice,SBITMAP) then begin
   case indice of
@@ -712,10 +724,9 @@ if saverom(nombre,indice,SBITMAP) then begin
     3:nombre:=ChangeFileExt(nombre,'.gif');
   end;
   if FileExists(nombre) then begin
-    r:=application.messagebox(pansichar(leng[main_vars.idioma].mensajes[3]),pansichar(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
+    r:=application.messagebox(pansichar(leng.mensajes[3]),pansichar(leng.mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
-       principal1.Enabled:=true;
-       sync_all;
+       restart_emu;
        exit;
     end;
     deletefile(nombre);
@@ -774,14 +785,10 @@ procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
 begin
-if sender<>nil then tmp_idioma:=Tmenuitem(sender).Tag
-  else begin
-    tmp_idioma:=main_vars.idioma;
-    main_vars.idioma:=255;
-  end;
+tmp_idioma:=Tmenuitem(sender).Tag;
 if main_vars.idioma<>tmp_idioma then begin
   main_vars.idioma:=tmp_idioma;
-  cambiar_idioma(main_vars.idioma);
+  cambiar_idioma(tmp_idioma);
 end;
 sync_all;
 end;
@@ -790,11 +797,13 @@ procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
   velocidad:integer;
 begin
-statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
-velocidad:=round((main_vars.frames_sec*100)/llamadas_maquina.fps_max);
-statusbar1.Panels[0].Text:='FPS: '+inttostr(main_vars.frames_sec);
-statusbar1.panels[1].text:=leng[main_vars.idioma].mensajes[0]+': '+inttostr(velocidad)+'%';
-main_vars.frames_sec:=0;
+if EmuStatus=EsRunning then begin
+   statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
+   velocidad:=round((main_vars.frames_sec*100)/llamadas_maquina.fps_max);
+   statusbar1.Panels[0].Text:='FPS: '+inttostr(main_vars.frames_sec);
+   statusbar1.panels[1].text:=leng.mensajes[0]+': '+inttostr(velocidad)+'%';
+   main_vars.frames_sec:=0;
+end;
 end;
 
 procedure Tprincipal1.CambiarMaquina(Sender:TObject);
@@ -830,7 +839,6 @@ main_vars.cadena_dir:='/';
 {$endif}
 Init_sdl_lib;
 timers:=timer_eng.create;
-status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;
 directory.Base:=ExtractFilePath(application.ExeName);
 {$ifdef darwin}
@@ -844,11 +852,21 @@ end;
 directory.Base:=copy(cadena,1,f);
 {$endif}
 file_ini_load;
+cambiar_idioma(main_vars.idioma);
 if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
 if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
 if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
-leer_idioma;
-cambiar_idioma(main_vars.idioma);
+case main_screen.video_mode of
+  1,3,5:begin
+        principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
+        principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
+      end;
+  2,4:begin
+        principal1.Left:=(screen.Width div 2)-principal1.Width;
+        principal1.Top:=(screen.Height div 2)-principal1.Height;
+      end;
+end;
+//No puedo evitar este timer... Hasta que no está creada la ventana de la aplicacion no puedo crear la ventana interior
 principal1.timer2.Enabled:=true;
 end;
 
@@ -864,7 +882,6 @@ file_ini_save;
 close_joystick;
 sdl_videoquit;
 sdl_quit;
-status_bitmap.Destroy;
 close_sdl_lib;
 halt(0);
 end;
@@ -890,6 +907,7 @@ end;
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
 aboutbox.showmodal;
+sync_all;
 end;
 
 procedure Tprincipal1.BitBtn12Click(Sender: TObject);
@@ -912,23 +930,27 @@ end;
 sync_all;
 end;
 
+procedure Tprincipal1.BitBtn3Click(Sender: TObject);
+begin
+if EmuStatus=EsPause then ejecutar1click(nil)
+   else pausa1click(nil);
+end;
+
 procedure Tprincipal1.BitBtn8Click(Sender: TObject);
 begin
-if @llamadas_maquina.configurar=nil then begin
-   sync_all;
-   exit;
+case main_vars.tipo_maquina of
+  0..5:ConfigSP.showmodal;
+  7..9:configcpc.showmodal;
+  10..999:config_arcade.showmodal;
+  1002:configgb.showmodal;
+  1004:SMSConfig.Showmodal;
 end;
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-llamadas_maquina.configurar;
-restart_emu;
+sync_all;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
+estado_actual:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.cintas)<>nil then llamadas_maquina.cintas;
 restart_emu;
@@ -936,8 +958,7 @@ end;
 
 procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
+estado_actual:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.grabar_snapshot)<>nil then llamadas_maquina.grabar_snapshot;
 restart_emu;
@@ -945,31 +966,22 @@ end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-principal1.BitBtn3.Glyph:=nil;
-if emustatus=EsRunning then begin
-   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
-   timer1.Enabled:=false;
-   EmuStatus:=EsPause;
-   SDL_ClearQueuedAudio(sound_device);
-   SDL_PauseAudioDevice(sound_device,1);
-end else begin
+if EmuStatus<>EsRunning then begin
+   principal1.BitBtn3.Glyph:=nil;
    principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
    EmuStatus:=EsRunning;
-   timer1.Enabled:=true;
    SDL_PauseAudioDevice(sound_device,0);
    sync_all;
-   if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
+   if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
 end;
 end;
 
 procedure Tprincipal1.fSlow(Sender: TObject);
 begin
+sync_all;
 main_vars.vactual:=(main_vars.vactual+1) and 3;
 valor_sync:=1000/(llamadas_maquina.fps_max/(main_vars.vactual+1));
-//if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
-cont_sincroniza:=sdl_getticks();
 cont_micro:=valor_sync;
-SDL_ClearQueuedAudio(sound_device);
 end;
 
 procedure Tprincipal1.fFast(Sender: TObject);
@@ -981,37 +993,26 @@ end;
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_vars.mensaje_principal:='';
-if addr(llamadas_maquina.reset)<>nil then llamadas_maquina.reset;
+if addr(llamadas_maquina.reset)<>nil then begin
+   reset_game_general;
+   llamadas_maquina.reset;
+end;
 sync_all;
 end;
 
 procedure Tprincipal1.CambiaAudio(Sender: TObject);
-var
-  tmp_audio:byte;
 begin
 if sound_status.hay_tsonido then begin
-  if sender<>nil then tmp_audio:=Tmenuitem(sender).Tag
-    else tmp_audio:=byte(sound_status.hay_sonido);
-  case tmp_audio of
-    0:if sound_status.hay_sonido then begin ////No sound
-        SinSonido1.Checked:=true;
-        ConSonido1.Checked:=false;
-        sound_status.hay_sonido:=false;
-      end;
-    1:if not(sound_status.hay_sonido) then begin //Sound
-        SinSonido1.Checked:=false;
-        ConSonido1.Checked:=true;
-        sound_status.hay_sonido:=true;
-      end;
-  end;
+  sound_status.sonido_activo:=(Tmenuitem(sender).Tag)<>0;
+  sinSonido1.Checked:=not(sound_status.sonido_activo);
+  conSonido1.Checked:=sound_status.sonido_activo;
 end;
 sync_all;
 end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
+estado_actual:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.cartuchos)<>nil then llamadas_maquina.cartuchos;
 restart_emu;
@@ -1020,11 +1021,21 @@ end;
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
 FLoadRom.Showmodal;
+sync_all;
 end;
 
-procedure Tprincipal1.Panel1Click(Sender: TObject);
+procedure Tprincipal1.Pausa1Click(Sender: TObject);
 begin
-  SDL_RaiseWindow(window_render);
+principal1.BitBtn3.Glyph:=nil;
+principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
+EmuStatus:=EsPause;
+SDL_ClearQueuedAudio(sound_device);
+SDL_PauseAudioDevice(sound_device,1);
+end;
+
+procedure Tprincipal1.Salir1Click(Sender: TObject);
+begin
+  principal1.close;
 end;
 
 procedure Tprincipal1.Timer2Timer(Sender: TObject);
@@ -1033,6 +1044,7 @@ var
   sdl_res:integer;
 begin
 timer2.Enabled:=false;
+sdl_res:=-1;
 if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
   SDL_SetHint(libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,'1');
   sdl_res:=SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO);
@@ -1045,16 +1057,14 @@ end;
 principal1.Caption:=principal1.Caption+dsp_version;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;
-if not(main_vars.auto_exec) then begin
-  principal1.LstRomsClick(nil);
-  exit;
-end;
-load_game(tipo);
+if not(main_vars.auto_exec) then principal1.LstRomsClick(nil)
+   else load_game(tipo);
 end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
 MConfig.Showmodal;
+sync_all;
 end;
 
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
@@ -1083,13 +1093,18 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
+  if ((marcade.dswa_val=nil) and (marcade.dswa_val2=nil)) then bitbtn8.Enabled:=false
+    else bitbtn8.Enabled:=true;
   timers.autofire_init;
-  sync_all;
   principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
-  principal1.Enabled:=true;
   EmuStatus:=EsRunning;
+  sync_all;
+  if @llamadas_maquina.reset<>nil then begin
+     reset_game_general;
+     llamadas_maquina.reset;
+  end;
   llamadas_maquina.bucle_general;
 end;
 end;
@@ -1100,14 +1115,12 @@ procedure Tprincipal1.WindowMove(var Msg:TWMMove);
 procedure Tprincipal1.WindowMove(var Msg:TLMMove);
 {$endif}
 begin
-if Msg.Result=0 then
-  begin
-    if window_render<>nil then begin
-       SDL_SetWindowPosition(window_render,Msg.xpos+5,msg.ypos+principal1.Height+panel1.Height+statusbar1.Height+FORM_POS_LAZARUS);
-       SDL_RaiseWindow(window_render);
-       sync_all;
-    end;
-  end;
+if Msg.Result=0 then begin
+   if window_render<>nil then begin
+      SDL_SetWindowPosition(window_render,Msg.xpos+5,msg.ypos+principal1.Height+panel1.Height+statusbar1.Height+LAZARUS_SCR_POS);
+      sync_all;
+   end;
+end;
 end;
 
 initialization

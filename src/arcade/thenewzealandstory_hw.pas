@@ -73,7 +73,7 @@ const
         arknoid2_pal:array[0..1] of tipo_roms=(
         (n:'b08-08.15f';l:$200;p:0;crc:$a4f7ebd9),(n:'b08-07.16f';l:$200;p:$200;crc:$ea34d9f7));}
         //Madre mia!!
-        CPU_SYNC=16;
+        CPU_SYNC=24;
 
 var
  main_bank,misc_bank,sound_latch:byte;
@@ -122,6 +122,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_tnzs;
     if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
@@ -140,7 +141,6 @@ while EmuStatus=EsRunning do begin
       frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
     end;
   end;
-  eventos_tnzs;
   video_sync;
 end;
 end;
@@ -292,6 +292,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_insectorx;
     if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
@@ -307,7 +308,6 @@ while EmuStatus=EsRunning do begin
       frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     end;
   end;
-  eventos_insectorx;
   video_sync;
 end;
 end;
@@ -401,6 +401,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_extrmatn;
     if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
@@ -419,7 +420,6 @@ while EmuStatus=EsRunning do begin
       frame_mcu:=frame_mcu+mcs48_0.tframes-mcs48_0.contador;
     end;
   end;
-  eventos_extrmatn;
   video_sync;
 end;
 end;
@@ -487,7 +487,6 @@ begin
  z80_0.reset;
  z80_1.reset;
  frame_main:=z80_0.tframes;
- frame_snd:=z80_1.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -497,15 +496,15 @@ begin
         z80_2.reset;
         frame_snd:=z80_2.tframes;
       end;
+  130:frame_snd:=z80_1.tframes;
   306:begin
+        frame_snd:=z80_1.tframes;
         frame_mcu:=mcs48_0.tframes;
         mcs48_0.reset;
         marcade.in2:=0;
       end;
  end;
  ym2203_0.reset;
- reset_video;
- reset_audio;
  seta_sprite0.reset;
  main_bank:=0;
  misc_bank:=0;
@@ -613,7 +612,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,extrmatn_rom)) then exit;
         copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
-        //Misc CPU
+        //SND CPU
         z80_1.init_sound(tnzs_sound_update);
         z80_1.change_ram_calls(extrmatn_snd_getbyte,extrmatn_snd_putbyte);
         if not(roms_load(@memoria_temp,extrmatn_sub)) then exit;
@@ -649,7 +648,6 @@ case main_vars.tipo_maquina of
   end;
 end;
 //final
-reset_tnzs;
 iniciar_tnzs:=true;
 end;
 

@@ -170,25 +170,23 @@ end;
 
 procedure steelforce_principal;
 var
-  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+ for f:=0 to 255 do begin
+   eventos_steelforce;
    case f of
       0:marcade.in1:=marcade.in1 and $ffef;
-      239:begin
+      240:begin
             m68000_0.irq[4]:=HOLD_LINE;
             update_video_steelforce;
             marcade.in1:=marcade.in1 or $10;
           end;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
  end;
- eventos_steelforce;
  video_sync;
 end;
 end;
@@ -290,8 +288,7 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  eepromser_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
  marcade.in0:=$ffff;
  marcade.in1:=$ffaf;
  which:=false;
@@ -449,7 +446,6 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
-reset_steelforce;
 iniciar_steelforce:=true;
 end;
 

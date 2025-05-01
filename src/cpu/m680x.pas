@@ -828,6 +828,16 @@ var
 begin
 self.contador:=0;
 while self.contador<maximo do begin
+if (self.pedir_halt<>CLEAR_LINE) then begin
+  tempw:=trunc(maximo);
+  for tempw2:=1 to tempw do begin
+    self.contador:=self.contador+1;
+    //if @self.despues_instruccion<>nil then self.despues_instruccion(1);
+    timers.update(1,self.numero_cpu);
+    if self.pedir_halt=CLEAR_LINE then break;
+  end;
+  if self.pedir_halt<>CLEAR_LINE then exit;
+end;
 if self.pedir_reset<>CLEAR_LINE then begin
   tempb:=self.pedir_reset;
   self.reset;
@@ -836,10 +846,6 @@ if self.pedir_reset<>CLEAR_LINE then begin
     self.contador:=trunc(maximo);
     exit;
   end;
-end;
-if (self.pedir_halt<>CLEAR_LINE) then begin
-  self.contador:=trunc(maximo);
-  exit;
 end;
 self.estados_demas:=0;
 self.r.oldpc:=self.r.pc;

@@ -21,7 +21,6 @@ object principal1: Tprincipal1
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '3.4.0.0'
   object Panel1: TPanel
     Left = 0
     Height = 42
@@ -38,7 +37,6 @@ object principal1: Tprincipal1
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 0
-    OnClick = Panel1Click
     object BitBtn2: TBitBtn
       Left = 6
       Height = 40
@@ -116,12 +114,12 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       Layout = blGlyphTop
-      OnClick = Reset1Click
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
       TabStop = False
+      OnClick = Reset1Click
     end
     object BitBtn3: TBitBtn
       Left = 50
@@ -136,12 +134,12 @@ object principal1: Tprincipal1
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
       Layout = blGlyphTop
-      OnClick = Ejecutar1Click
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
       TabStop = False
+      OnClick = BitBtn3Click
     end
     object BitBtn5: TBitBtn
       Left = 95
@@ -221,12 +219,12 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       Layout = blGlyphTop
-      OnClick = fSlow
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
       TabStop = False
+      OnClick = fSlow
     end
     object BitBtn6: TBitBtn
       Left = 139
@@ -305,15 +303,15 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       Layout = blGlyphTop
-      OnClick = fFast
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
       TabStop = False
+      OnClick = fFast
     end
     object btncfg: TBitBtn
-      Left = 183
+      Left = 182
       Height = 40
       Hint = 'Config DSP'
       Top = 1
@@ -397,12 +395,12 @@ object principal1: Tprincipal1
         F8F8F8F8F8F8F8F8F8F8F8F80000
       }
       Layout = blGlyphTop
-      OnClick = fConfigurar_general
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
       TabStop = False
+      OnClick = fConfigurar_general
     end
     object BitBtn19: TBitBtn
       Left = 316
@@ -483,15 +481,15 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00
       }
       Layout = blGlyphTop
-      OnClick = fSaveGIF
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
       TabStop = False
+      OnClick = fSaveGIF
     end
     object BitBtn8: TBitBtn
-      Left = 227
+      Left = 228
       Height = 40
       Hint = 'Config Dip Switch'
       Top = 1
@@ -560,12 +558,12 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFF0000
       }
       Layout = blGlyphTop
-      OnClick = BitBtn8Click
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
       TabStop = False
+      OnClick = BitBtn8Click
     end
     object BitBtn13: TBitBtn
       Left = 271
@@ -649,12 +647,12 @@ object principal1: Tprincipal1
         F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F60000
       }
       Layout = blGlyphTop
-      OnClick = LstRomsClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
       TabStop = False
+      OnClick = LstRomsClick
     end
   end
   object GroupBox1: TGroupBox
@@ -1064,7 +1062,7 @@ object principal1: Tprincipal1
     object Image1: TImage
       Left = 369
       Height = 24
-      Top = 0
+      Top = -5
       Width = 31
       Anchors = [akRight, akBottom]
       Center = True
@@ -1116,7 +1114,7 @@ object principal1: Tprincipal1
     object StatusBar1: TStatusBar
       Left = 0
       Height = 26
-      Top = -2
+      Top = -7
       Width = 391
       Align = alNone
       Anchors = [akLeft, akBottom]
@@ -1148,11 +1146,11 @@ object principal1: Tprincipal1
     Left = 0
     Height = 323
     Top = 42
-    Width = 374
+    Width = 294
     Align = alLeft
     Anchors = [akTop, akLeft, akRight]
     ClientHeight = 323
-    ClientWidth = 374
+    ClientWidth = 294
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -1166,7 +1164,7 @@ object principal1: Tprincipal1
       Left = 1
       Height = 321
       Top = 1
-      Width = 372
+      Width = 292
       Align = alClient
       AutoSize = True
       Enabled = False
@@ -12088,12 +12086,12 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
       Layout = blGlyphTop
-      OnClick = fLoadCinta
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
       TabStop = False
+      OnClick = fLoadCinta
     end
     object BitBtn10: TBitBtn
       Left = 152
@@ -12208,12 +12206,12 @@ object principal1: Tprincipal1
         FFFFFFFFFF2F302F2F302F2F302F2F302F2F302FFFFFFFFFFFFF
       }
       Layout = blGlyphTop
-      OnClick = fLoadCartucho
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
       TabStop = False
+      OnClick = fLoadCartucho
     end
     object BitBtn11: TBitBtn
       Left = 202
@@ -12328,12 +12326,12 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
       Layout = blGlyphTop
-      OnClick = fSaveSnapShot
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
       TabStop = False
+      OnClick = fSaveSnapShot
     end
     object BitBtn12: TBitBtn
       Left = 252
@@ -12448,12 +12446,12 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
       Layout = blGlyphTop
-      OnClick = BitBtn12Click
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
       TabStop = False
+      OnClick = BitBtn12Click
     end
     object BitBtn14: TBitBtn
       Left = 302
@@ -12568,12 +12566,12 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
       Layout = blGlyphTop
-      OnClick = BitBtn14Click
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
       TabStop = False
+      OnClick = BitBtn14Click
     end
     object BitBtn1: TBitBtn
       Left = 55
@@ -12667,12 +12665,12 @@ object principal1: Tprincipal1
         F500
       }
       Layout = blGlyphTop
-      OnClick = BitBtn8Click
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
       TabStop = False
+      OnClick = BitBtn8Click
     end
   end
   object MainMenu1: TMainMenu
@@ -12686,6 +12684,11 @@ object principal1: Tprincipal1
       end
       object Idioma1: TMenuItem
         Caption = 'Idioma'
+        object Auto1: TMenuItem
+          Tag = 200
+          Caption = 'Auto'
+          OnClick = IdiomaClick
+        end
         object Castellano1: TMenuItem
           Caption = 'Castellano'
           Checked = True
@@ -12724,6 +12727,7 @@ object principal1: Tprincipal1
       end
       object Salir1: TMenuItem
         Caption = 'Salir'
+        OnClick = Salir1Click
       end
       object N1: TMenuItem
         Caption = '-'
@@ -12789,7 +12793,7 @@ object principal1: Tprincipal1
       end
     end
     object Emulacion1: TMenuItem
-      Caption = 'Maquina'
+      Caption = 'Máquina'
       object Ordenadores8bits1: TMenuItem
         Caption = 'Ordenadores 8 bits'
         object MenuItem1: TMenuItem
@@ -13597,6 +13601,30 @@ object principal1: Tprincipal1
             Caption = 'MCR'
             object tapper1: TMenuItem
               Caption = 'Tapper'
+              OnClick = CambiarMaquina
+            end
+            object dotron1: TMenuItem
+              Caption = 'Discs of Tron'
+              OnClick = CambiarMaquina
+            end
+            object tron1: TMenuItem
+              Caption = 'Tron'
+              OnClick = CambiarMaquina
+            end
+            object timber1: TMenuItem
+              Caption = 'Timber'
+              OnClick = CambiarMaquina
+            end
+            object shollow1: TMenuItem
+              Caption = 'Satan''s Hollow'
+              OnClick = CambiarMaquina
+            end
+            object domino1: TMenuItem
+              Caption = 'Domino Man'
+              OnClick = CambiarMaquina
+            end
+            object wacko1: TMenuItem
+              Caption = 'Wacko'
               OnClick = CambiarMaquina
             end
           end
@@ -14702,6 +14730,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object MenuItem67: TMenuItem
+            Caption = 'Taito B HW'
+            object nastar1: TMenuItem
+              Caption = 'Nastar'
+              OnClick = CambiarMaquina
+            end
+            object masterw1: TMenuItem
+              Caption = 'Master of Weapon'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object MenuItem11: TMenuItem
           Caption = '80x86'
@@ -14817,13 +14856,13 @@ object principal1: Tprincipal1
         Caption = 'Ejecutar'
         OnClick = Ejecutar1Click
       end
+      object Pausa1: TMenuItem
+        Caption = 'Pausa'
+        OnClick = Pausa1Click
+      end
       object Reset1: TMenuItem
         Caption = 'Reset'
         OnClick = Reset1Click
-      end
-      object Pausa1: TMenuItem
-        Caption = 'Pausa'
-        OnClick = Ejecutar1Click
       end
     end
   end
@@ -14905,7 +14944,7 @@ object principal1: Tprincipal1
     Enabled = False
     Interval = 300
     OnTimer = Timer3Timer
-    Left = 152
+    Left = 153
     Top = 208
   end
 end

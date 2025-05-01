@@ -223,34 +223,30 @@ end;
 
 procedure mrdocastle_principal;
 var
-  frame_main,frame_slave,frame_misc:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_main:=z80_0.tframes;
-frame_slave:=z80_1.tframes;
-frame_misc:=z80_2.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    for h:=1 to CPU_SYNC do begin
-      z80_0.run(frame_main);
-      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-      z80_1.run(frame_slave);
-      frame_slave:=frame_slave+z80_1.tframes-z80_1.contador;
-      z80_2.run(frame_misc);
-      frame_misc:=frame_misc+z80_2.tframes-z80_2.contador;
-    end;
-      case f of
-        13,39,71,103,135,167,199,231:z80_1.change_irq(HOLD_LINE);
-        223:begin
+    eventos_mrdocastle;
+    case f of
+        14,40,72,104,136,168,200,232:z80_1.change_irq(HOLD_LINE);
+        224:begin
               z80_0.change_irq(HOLD_LINE);
               z80_2.change_nmi(PULSE_LINE);
               update_video_mrdocastle;
             end;
-      end;
+    end;
+    for h:=1 to CPU_SYNC do begin
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+      z80_1.run(frame_snd);
+      frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+      z80_2.run(frame_sub);
+      frame_sub:=frame_sub+z80_2.tframes-z80_2.contador;
+    end;
   end;
-  eventos_mrdocastle;
   video_sync;
 end;
 end;
@@ -498,8 +494,9 @@ begin
  sn_76496_2.reset;
  sn_76496_3.reset;
  if (main_vars.tipo_maquina=313) then msm5205_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ frame_sub:=z80_2.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -715,7 +712,6 @@ for f:=0 to 255 do begin
 end;
 set_pal(colores,512);
 //final
-reset_mrdocastle;
 iniciar_mrdocastle:=true;
 end;
 

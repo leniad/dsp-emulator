@@ -162,6 +162,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
+   eventos_flower;
    if f=240 then begin
       z80_0.change_irq(ASSERT_LINE);
       z80_1.change_irq(ASSERT_LINE);
@@ -179,7 +180,6 @@ while EmuStatus=EsRunning do begin
     frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
    end;
   end;
-  eventos_flower;
   video_sync;
 end;
 end;
@@ -277,8 +277,6 @@ frame_main:=z80_0.tframes;
 frame_sub:=z80_1.tframes;
 frame_snd:=z80_1.tframes;
 flower_0.reset;
-reset_video;
-reset_audio;
 nmi_audio:=false;
 sound_latch:=0;
 scrollfg:=0;
@@ -364,7 +362,6 @@ marcade.dswa_val2:=@flower_dipa;
 marcade.dswb:=$9d;
 marcade.dswb_val2:=@flower_dipb;
 //final
-flower_reset;
 iniciar_flower:=true;
 end;
 

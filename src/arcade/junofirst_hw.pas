@@ -23,10 +23,10 @@ const
         (n:'jfs5_e7.bin';l:$2000;p:$4000;crc:$1eb87a6e));
         //Dip
         junofrst_dip_a:array [0..1] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
+        (mask:$f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
         junofrst_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'256'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'256'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'1 (Easiest)'),(dip_val:$60;dip_name:'2'),(dip_val:$50;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$30;dip_name:'5'),(dip_val:$20;dip_name:'6'),(dip_val:$10;dip_name:'7'),(dip_val:$0;dip_name:'8 (Hardest)'),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
@@ -62,58 +62,54 @@ procedure eventos_junofrst;
 begin
 if event.arcade then begin
   //marcade.in1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //marcade.in2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   //service
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
 procedure junofrst_principal;
 var
-  frame_m,frame_s,frame_s_sub:single;
   irq_req:boolean;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=z80_0.tframes;
-frame_s_sub:=mcs48_0.tframes;
 irq_req:=false;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    //snd sub
-    mcs48_0.run(frame_s_sub);
-    frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
-    if f=239 then begin
+  for f:=0 to 255 do begin
+    eventos_junofrst;
+    if f=240 then begin
       if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_junofrst;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+    //snd sub
+    mcs48_0.run(frame_snd2);
+    frame_snd2:=frame_snd2+mcs48_0.tframes-mcs48_0.contador;
   end;
   irq_req:=not(irq_req);
-  eventos_junofrst;
   video_sync;
 end;
 end;
@@ -199,7 +195,7 @@ begin
 case direccion of
   0..$fff,$2000..$23ff:junofrst_snd_getbyte:=mem_snd[direccion];
   $3000:junofrst_snd_getbyte:=sound_latch;
-  $4001:junofrst_snd_getbyte:=ay8910_0.Read;
+  $4001:junofrst_snd_getbyte:=ay8910_0.read;
 end;
 end;
 
@@ -208,8 +204,8 @@ begin
 case direccion of
   0..$fff:;
   $2000..$23ff:mem_snd[direccion]:=valor;
-  $4000:ay8910_0.Control(valor);
-  $4002:ay8910_0.Write(valor);
+  $4000:ay8910_0.control(valor);
+  $4002:ay8910_0.write(valor);
   $5000:sound_latch2:=valor;
   $6000:mcs48_0.change_irq(ASSERT_LINE);
 end;
@@ -262,8 +258,9 @@ begin
  mcs48_0.reset;
  ay8910_0.reset;
  dac_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=z80_0.tframes;
+ frame_snd2:=mcs48_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -293,19 +290,6 @@ iniciar_video(224,256);
 //Main CPU
 m6809_0:=cpu_m6809.Create(1500000,$100,TCPU_M6809);
 m6809_0.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
-//Sound CPU
-z80_0:=cpu_z80.create(1789750,$100);
-z80_0.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
-z80_0.init_sound(junofrst_sound_update);
-//Sound CPU 2
-mcs48_0:=cpu_mcs48.create(8000000,$100,I8039);
-mcs48_0.change_ram_calls(junofrst_sound2_getbyte,nil);
-mcs48_0.change_io_calls(nil,junofrst_sound2_outport,junofrst_sound2_inport,nil);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1789750,AY8910,0.3);
-ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
-dac_0:=dac_chip.Create(0.5);
-//cargar roms
 if not(roms_load(@memoria,junofrst_rom)) then exit;
 konami1_decode(@memoria[$a000],@mem_opcodes,$6000);
 if not(roms_load(@memoria_temp,junofrst_bank_rom)) then exit;
@@ -315,16 +299,26 @@ for f:=0 to $f do begin
   copymemory(@rom_bank_dec[f,0],@memoria_temp_bank[f*$1000],$1000);
 end;
 if not(roms_load(@blit_mem,junofrst_blit)) then exit;
-//Cargar roms sound
+//Sound CPU
+z80_0:=cpu_z80.create(1789750,$100);
+z80_0.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
+z80_0.init_sound(junofrst_sound_update);
 if not(roms_load(@mem_snd,junofrst_sound)) then exit;
+//Sound CPU 2
+mcs48_0:=cpu_mcs48.create(8000000,$100,I8039);
+mcs48_0.change_ram_calls(junofrst_sound2_getbyte,nil);
+mcs48_0.change_io_calls(nil,junofrst_sound2_outport,junofrst_sound2_inport,nil);
 if not(roms_load(@mem_snd_sub,junofrst_sound_sub)) then exit;
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1789750,AY8910);
+ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
+dac_0:=dac_chip.Create(1);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7b;
 marcade.dswa_val:=@junofrst_dip_a;
 marcade.dswb_val:=@junofrst_dip_b;
 //final
-reset_junofrst;
 iniciar_junofrst:=true;
 end;
 

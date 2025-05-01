@@ -82,14 +82,16 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
     for f:=0 to 263 do begin
-        if f=240 then z80_0.change_irq(HOLD_LINE);
+        eventos_arkanoid;
+        if f=240 then begin
+          z80_0.change_irq(HOLD_LINE);
+          update_video_arkanoid;
+        end;
         z80_0.run(frame_main);
         frame_main:=frame_main+z80_0.tframes-z80_0.contador;
         //mcu
         taito_68705_0.run;
     end;
-    update_video_arkanoid;
-    eventos_arkanoid;
     video_sync;
 end;
 end;
@@ -168,7 +170,6 @@ z80_0.reset;
 frame_main:=z80_0.tframes;
 taito_68705_0.reset;
 ay8910_0.reset;
-reset_analog;
 marcade.in0:=$f;
 marcade.in1:=$ff;
 palettebank:=0;
@@ -203,7 +204,7 @@ taito_68705_0:=taito_68705p.create(3000000,264,ARKANOID);
 taito_68705_0.arkanoid_call:=arkanoid_read_prot;
 if not(roms_load(taito_68705_0.get_rom_addr,arkanoid_mcu)) then exit;
 //Sound Chip
-ay8910_0:=ay8910_chip.create(3000000,AY8910,0.5);
+ay8910_0:=ay8910_chip.create(3000000,AY8910);
 ay8910_0.change_io_calls(arkanoid_porta_r,arkanoid_portb_r,nil,nil);
 //analog
 init_analog(z80_0.numero_cpu,z80_0.clock);
@@ -226,7 +227,6 @@ set_pal(colores,$200);
 marcade.dswa:=$fe;
 marcade.dswa_val2:=@arkanoid_dip_a;
 //final
-reset_arkanoid;
 iniciar_arkanoid:=true;
 end;
 

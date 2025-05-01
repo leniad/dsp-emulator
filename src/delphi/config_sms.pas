@@ -29,7 +29,7 @@ var
   SMSConfig: TSMSConfig;
 
 implementation
-uses sega_vdp,sms,nz80;
+uses sega_vdp,sms,nz80,principal;
 
 {$R *.dfm}
 
@@ -43,7 +43,15 @@ end;
 end;
 
 procedure TSMSConfig.FormShow(Sender: TObject);
+var
+  f:integer;
 begin
+f:=(principal1.left+(principal1.width div 2))-(SMSConfig.Width div 2);
+if f<0 then SMSConfig.Left:=0
+  else SMSConfig.Left:=f;
+f:=(principal1.top+(principal1.Height div 2))-(SMSConfig.Height div 2);
+if f<0 then SMSConfig.Top:=0
+  else SMSConfig.Top:=f;
 case sms_0.model of
   0:begin //pal
       radiobutton2.Checked:=true;

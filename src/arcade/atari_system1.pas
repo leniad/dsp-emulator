@@ -346,19 +346,17 @@ end;
 //Main
 procedure reset_atari_sys1;
 begin
+ slapstic_0.reset;
+ rom_bank:=slapstic_0.current_bank;
  m68000_0.reset;
  m6502_0.reset;
- YM2151_0.reset;
+ ym2151_0.reset;
  pokey_0.reset;
- slapstic_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff6f;
  marcade.in1:=$ff;
  marcade.in2:=$87;
  scroll_x:=0;
  scroll_y:=0;
- rom_bank:=slapstic_0.current_bank;
  vblank:=$10;
  bankselect:=0;
  playfield_tile_bank:=0;
@@ -596,7 +594,6 @@ for f:=0 to $ff do begin
   inc(ptemp);
 end;
 //final
-reset_atari_sys1;
 iniciar_atari_sys1:=true;
 end;
 

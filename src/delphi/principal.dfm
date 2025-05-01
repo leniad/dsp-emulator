@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 293
+  ClientHeight = 318
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 232
+    Height = 257
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1136,7 +1136,7 @@ object principal1: Tprincipal1
       OnClick = fSaveGIF
     end
     object BitBtn13: TBitBtn
-      Left = 221
+      Left = 216
       Top = 1
       Width = 38
       Height = 38
@@ -1221,19 +1221,19 @@ object principal1: Tprincipal1
       Hint = 'Play/Pause'
       TabOrder = 7
       TabStop = False
-      OnClick = Ejecutar1Click
+      OnClick = BitBtn3Click
     end
   end
   object Panel2: TPanel
     Left = 348
     Top = 42
     Width = 49
-    Height = 232
+    Height = 257
     Align = alRight
     TabOrder = 1
     Visible = False
     ExplicitLeft = 346
-    ExplicitHeight = 229
+    ExplicitHeight = 249
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,12 +1870,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 274
+    Top = 299
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 271
+    ExplicitTop = 291
     ExplicitWidth = 395
     DesignSize = (
       397
@@ -1960,6 +1960,11 @@ object principal1: Tprincipal1
       Caption = 'Archivo'
       object Idioma1: TMenuItem
         Caption = 'Idioma'
+        object Auto1: TMenuItem
+          Tag = 200
+          Caption = 'Auto'
+          OnClick = IdiomaClick
+        end
         object Castellano1: TMenuItem
           Caption = 'Castellano'
           OnClick = IdiomaClick
@@ -2989,6 +2994,30 @@ object principal1: Tprincipal1
             GroupIndex = 1
             object tapper1: TMenuItem
               Caption = 'Tapper'
+              OnClick = CambiarMaquina
+            end
+            object dotron1: TMenuItem
+              Caption = 'Discs of Tron'
+              OnClick = CambiarMaquina
+            end
+            object tron1: TMenuItem
+              Caption = 'Tron'
+              OnClick = CambiarMaquina
+            end
+            object timber1: TMenuItem
+              Caption = 'Timber'
+              OnClick = CambiarMaquina
+            end
+            object shollow1: TMenuItem
+              Caption = 'Satan'#39's Hollow'
+              OnClick = CambiarMaquina
+            end
+            object domino1: TMenuItem
+              Caption = 'Domino Man'
+              OnClick = CambiarMaquina
+            end
+            object wacko1: TMenuItem
+              Caption = 'Wacko'
               OnClick = CambiarMaquina
             end
           end
@@ -4151,6 +4180,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object aitoBHW1: TMenuItem
+            Caption = 'Taito B HW'
+            object Nastar1: TMenuItem
+              Caption = 'Nastar'
+              OnClick = CambiarMaquina
+            end
+            object masterw1: TMenuItem
+              Caption = 'Master of Weapon'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -4268,13 +4308,13 @@ object principal1: Tprincipal1
         Caption = 'Ejecutar'
         OnClick = Ejecutar1Click
       end
+      object Pausa1: TMenuItem
+        Caption = 'Pausa'
+        OnClick = Pausa1Click
+      end
       object Reset1: TMenuItem
         Caption = 'Reset'
         OnClick = Reset1Click
-      end
-      object Pausa1: TMenuItem
-        Caption = 'Pausa'
-        OnClick = Ejecutar1Click
       end
     end
   end

@@ -126,6 +126,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
    for f:=0 to $ff do begin
+      eventos_cabal;
       if f=240 then begin
           update_video_cabal;
           m68000_0.irq[1]:=HOLD_LINE;
@@ -136,7 +137,6 @@ while EmuStatus=EsRunning do begin
       //Sound CPU
       seibu_snd_0.run;
    end;
-   eventos_cabal;
    video_sync;
 end;
 end;
@@ -200,8 +200,6 @@ begin
  m68000_0.reset;
  frame_main:=m68000_0.tframes;
  seibu_snd_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  seibu_snd_0.input:=$fc;
@@ -263,7 +261,6 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 marcade.dswa:=$efff;
 marcade.dswa_val2:=@cabal_dip_a;
 //final
-reset_cabal;
 iniciar_cabal:=true;
 end;
 

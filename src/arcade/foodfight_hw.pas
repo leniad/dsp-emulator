@@ -98,6 +98,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to 258 do begin
+    eventos_foodf;
     case f of
     0,64,128,192:m68000_0.irq[1]:=ASSERT_LINE;
     224:begin
@@ -111,7 +112,6 @@ while EmuStatus=EsRunning do begin
  end;
  analog_data[1]:=analog.c[0].y[0];
  analog_data[5]:=analog.c[0].x[0];
- eventos_foodf;
  video_sync;
 end;
 end;
@@ -205,12 +205,9 @@ procedure reset_foodf;
 begin
  m68000_0.reset;
  frame_main:=m68000_0.tframes;
- reset_analog;
  pokey_0.reset;
  pokey_1.reset;
  pokey_2.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  analog_select:=0;
  fillchar(analog_data[0],8,$ff);
@@ -279,7 +276,6 @@ marcade.dswa_val2:=@foodf_dip;
 if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram,longitud)
   else if not(roms_load(@nvram,foodf_nvram)) then exit;
 //final
-reset_foodf;
 iniciar_foodf:=true;
 end;
 

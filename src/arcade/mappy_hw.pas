@@ -573,8 +573,7 @@ begin
  namco_snd_0.reset;
  namco_5x_0.reset;
  namco_5x_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$3;

@@ -226,26 +226,23 @@ end;
 procedure pacland_principal;
 var
   f:word;
-  frame_m,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    m6800_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
-    if f=239 then begin
+    eventos_pacland;
+    if f=240 then begin
       if irq_enable then m6809_0.change_irq(ASSERT_LINE);
       if irq_enable_mcu then m6800_0.change_irq(ASSERT_LINE);
       update_video_pacland;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    m6800_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
   end;
-  eventos_pacland;
   video_sync;
 end;
 end;
@@ -366,8 +363,8 @@ begin
  m6809_0.reset;
  m6800_0.reset;
  namco_snd_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_mcu:=m6800_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$7f;
  rom_nbank:=0;
@@ -455,7 +452,6 @@ marcade.dswb_val2:=@pacland_dip_b;
 marcade.dswc:=$80;
 marcade.dswc_val2:=@pacland_dip_c;
 //final
-reset_pacland;
 iniciar_pacland:=true;
 end;
 end.

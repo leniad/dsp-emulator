@@ -16,18 +16,18 @@ object redefine1: Tredefine1
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   KeyPreview = True
+  LCLVersion = '4.0.0.1'
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
   object Button1: TButton
     Left = 185
     Height = 31
     Top = 220
     Width = 101
     Caption = 'CANCEL'
-    OnClick = Button1Click
     TabOrder = 0
     TabStop = False
+    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 69
@@ -35,8 +35,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '1'
-    OnClick = Button2Click
     TabOrder = 1
+    OnClick = Button2Click
   end
   object Button3: TButton
     Left = 108
@@ -44,8 +44,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '2'
-    OnClick = Button3Click
     TabOrder = 2
+    OnClick = Button3Click
   end
   object Button4: TButton
     Left = 146
@@ -53,8 +53,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '3'
-    OnClick = Button4Click
     TabOrder = 3
+    OnClick = Button4Click
   end
   object Button5: TButton
     Left = 185
@@ -62,8 +62,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '4'
-    OnClick = Button5Click
     TabOrder = 4
+    OnClick = Button5Click
   end
   object Button6: TButton
     Left = 224
@@ -71,8 +71,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '5'
-    OnClick = Button6Click
     TabOrder = 5
+    OnClick = Button6Click
   end
   object Button7: TButton
     Left = 262
@@ -80,8 +80,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '6'
-    OnClick = Button7Click
     TabOrder = 6
+    OnClick = Button7Click
   end
   object Button8: TButton
     Left = 299
@@ -89,8 +89,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '7'
-    OnClick = Button8Click
     TabOrder = 7
+    OnClick = Button8Click
   end
   object Button9: TButton
     Left = 338
@@ -98,8 +98,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '8'
-    OnClick = Button9Click
     TabOrder = 8
+    OnClick = Button9Click
   end
   object Button10: TButton
     Left = 376
@@ -107,8 +107,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '9'
-    OnClick = Button10Click
     TabOrder = 9
+    OnClick = Button10Click
   end
   object Button11: TButton
     Left = 415
@@ -116,8 +116,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 31
     Caption = '0'
-    OnClick = Button11Click
     TabOrder = 10
+    OnClick = Button11Click
   end
   object Button12: TButton
     Left = 79
@@ -125,8 +125,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'Q'
-    OnClick = Button12Click
     TabOrder = 11
+    OnClick = Button12Click
   end
   object Button13: TButton
     Left = 118
@@ -134,8 +134,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'W'
-    OnClick = Button13Click
     TabOrder = 12
+    OnClick = Button13Click
   end
   object Button14: TButton
     Left = 156
@@ -143,8 +143,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'E'
-    OnClick = Button14Click
     TabOrder = 13
+    OnClick = Button14Click
   end
   object Button15: TButton
     Left = 195
@@ -152,8 +152,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'R'
-    OnClick = Button15Click
     TabOrder = 14
+    OnClick = Button15Click
   end
   object Button16: TButton
     Left = 234
@@ -161,8 +161,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'T'
-    OnClick = Button16Click
     TabOrder = 15
+    OnClick = Button16Click
   end
   object Button17: TButton
     Left = 272
@@ -170,8 +170,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'Y'
-    OnClick = Button17Click
     TabOrder = 16
+    OnClick = Button17Click
   end
   object Button18: TButton
     Left = 309
@@ -179,8 +179,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'U'
-    OnClick = Button18Click
     TabOrder = 17
+    OnClick = Button18Click
   end
   object Button19: TButton
     Left = 348
@@ -188,8 +188,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'I'
-    OnClick = Button19Click
     TabOrder = 18
+    OnClick = Button19Click
   end
   object Button20: TButton
     Left = 386
@@ -197,8 +197,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'O'
-    OnClick = Button20Click
     TabOrder = 19
+    OnClick = Button20Click
   end
   object Button21: TButton
     Left = 425
@@ -206,8 +206,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 31
     Caption = 'P'
-    OnClick = Button21Click
     TabOrder = 20
+    OnClick = Button21Click
   end
   object Button22: TButton
     Left = 21
@@ -215,8 +215,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 50
     Caption = 'TAB'
-    OnClick = Button22Click
     TabOrder = 21
+    OnClick = Button22Click
   end
   object Button23: TButton
     Left = 89
@@ -224,8 +224,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'A'
-    OnClick = Button23Click
     TabOrder = 22
+    OnClick = Button23Click
   end
   object Button24: TButton
     Left = 128
@@ -233,8 +233,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'S'
-    OnClick = Button24Click
     TabOrder = 23
+    OnClick = Button24Click
   end
   object Button25: TButton
     Left = 166
@@ -242,8 +242,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'D'
-    OnClick = Button25Click
     TabOrder = 24
+    OnClick = Button25Click
   end
   object Button26: TButton
     Left = 205
@@ -251,8 +251,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'F'
-    OnClick = Button26Click
     TabOrder = 25
+    OnClick = Button26Click
   end
   object Button27: TButton
     Left = 244
@@ -260,8 +260,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'G'
-    OnClick = Button27Click
     TabOrder = 26
+    OnClick = Button27Click
   end
   object Button28: TButton
     Left = 282
@@ -269,8 +269,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'H'
-    OnClick = Button28Click
     TabOrder = 27
+    OnClick = Button28Click
   end
   object Button29: TButton
     Left = 319
@@ -278,8 +278,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'J'
-    OnClick = Button29Click
     TabOrder = 28
+    OnClick = Button29Click
   end
   object Button30: TButton
     Left = 358
@@ -287,8 +287,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'K'
-    OnClick = Button30Click
     TabOrder = 29
+    OnClick = Button30Click
   end
   object Button31: TButton
     Left = 396
@@ -296,8 +296,8 @@ object redefine1: Tredefine1
     Top = 88
     Width = 31
     Caption = 'L'
-    OnClick = Button31Click
     TabOrder = 30
+    OnClick = Button31Click
   end
   object Button32: TButton
     Left = 40
@@ -305,8 +305,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 60
     Caption = 'L SHFT'
-    OnClick = Button32Click
     TabOrder = 31
+    OnClick = Button32Click
   end
   object Button33: TButton
     Left = 108
@@ -314,8 +314,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'Z'
-    OnClick = Button33Click
     TabOrder = 32
+    OnClick = Button33Click
   end
   object Button34: TButton
     Left = 146
@@ -323,8 +323,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'X'
-    OnClick = Button34Click
     TabOrder = 33
+    OnClick = Button34Click
   end
   object Button35: TButton
     Left = 185
@@ -332,8 +332,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'C'
-    OnClick = Button35Click
     TabOrder = 34
+    OnClick = Button35Click
   end
   object Button36: TButton
     Left = 224
@@ -341,8 +341,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'V'
-    OnClick = Button36Click
     TabOrder = 35
+    OnClick = Button36Click
   end
   object Button37: TButton
     Left = 262
@@ -350,8 +350,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'B'
-    OnClick = Button37Click
     TabOrder = 36
+    OnClick = Button37Click
   end
   object Button38: TButton
     Left = 299
@@ -359,8 +359,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'N'
-    OnClick = Button38Click
     TabOrder = 37
+    OnClick = Button38Click
   end
   object Button39: TButton
     Left = 338
@@ -368,8 +368,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 31
     Caption = 'M'
-    OnClick = Button39Click
     TabOrder = 38
+    OnClick = Button39Click
   end
   object Button40: TButton
     Left = 376
@@ -377,8 +377,8 @@ object redefine1: Tredefine1
     Top = 126
     Width = 60
     Caption = 'R SHFT'
-    OnClick = Button40Click
     TabOrder = 39
+    OnClick = Button40Click
   end
   object Button41: TButton
     Left = 40
@@ -386,8 +386,8 @@ object redefine1: Tredefine1
     Top = 165
     Width = 60
     Caption = 'L CTRL'
-    OnClick = Button41Click
     TabOrder = 40
+    OnClick = Button41Click
   end
   object Button42: TButton
     Left = 108
@@ -395,8 +395,8 @@ object redefine1: Tredefine1
     Top = 165
     Width = 60
     Caption = 'L ALT'
-    OnClick = Button42Click
     TabOrder = 41
+    OnClick = Button42Click
   end
   object Button43: TButton
     Left = 175
@@ -404,8 +404,8 @@ object redefine1: Tredefine1
     Top = 165
     Width = 136
     Caption = 'SPACE'
-    OnClick = Button43Click
     TabOrder = 42
+    OnClick = Button43Click
   end
   object Button44: TButton
     Left = 319
@@ -413,8 +413,8 @@ object redefine1: Tredefine1
     Top = 165
     Width = 60
     Caption = 'R ALT'
-    OnClick = Button44Click
     TabOrder = 43
+    OnClick = Button44Click
   end
   object Button45: TButton
     Left = 386
@@ -422,8 +422,8 @@ object redefine1: Tredefine1
     Top = 165
     Width = 60
     Caption = 'R CTRL'
-    OnClick = Button45Click
     TabOrder = 44
+    OnClick = Button45Click
   end
   object Button46: TButton
     Left = 534
@@ -431,8 +431,8 @@ object redefine1: Tredefine1
     Top = 189
     Width = 50
     Caption = 'DOWN'
-    OnClick = Button46Click
     TabOrder = 45
+    OnClick = Button46Click
   end
   object Button47: TButton
     Left = 534
@@ -440,8 +440,8 @@ object redefine1: Tredefine1
     Top = 150
     Width = 50
     Caption = 'UP'
-    OnClick = Button47Click
     TabOrder = 46
+    OnClick = Button47Click
   end
   object Button48: TButton
     Left = 476
@@ -449,8 +449,8 @@ object redefine1: Tredefine1
     Top = 189
     Width = 50
     Caption = 'LEFT'
-    OnClick = Button48Click
     TabOrder = 47
+    OnClick = Button48Click
   end
   object Button49: TButton
     Left = 591
@@ -458,8 +458,8 @@ object redefine1: Tredefine1
     Top = 189
     Width = 50
     Caption = 'RIGHT'
-    OnClick = Button49Click
     TabOrder = 48
+    OnClick = Button49Click
   end
   object Button50: TButton
     Left = 464
@@ -467,8 +467,8 @@ object redefine1: Tredefine1
     Top = 49
     Width = 48
     Caption = 'RET'
-    OnClick = Button50Click
     TabOrder = 49
+    OnClick = Button50Click
   end
   object Button51: TButton
     Left = 10
@@ -476,8 +476,8 @@ object redefine1: Tredefine1
     Top = 10
     Width = 50
     Caption = 'ESC'
-    OnClick = Button51Click
     TabOrder = 50
+    OnClick = Button51Click
   end
   object SpeedButton1: TSpeedButton
     Left = 570

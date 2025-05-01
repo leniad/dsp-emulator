@@ -10,7 +10,7 @@ function iniciar_badlands:boolean;
 implementation
 const
         badlands_rom:array[0..3] of tipo_roms=(
-        (n:'136074-1008.20f';l:$10000;p:0;crc:$a3da5774),(n:'136074-1006.27f';l:$10000;p:$1;crc:$aa03b4f3),
+        (n:'136074-1008.20f';l:$10000;p:0;crc:$a3da5774),(n:'136074-1006.27f';l:$10000;p:1;crc:$aa03b4f3),
         (n:'136074-1009.17f';l:$10000;p:$20000;crc:$0e2e807f),(n:'136074-1007.24f';l:$10000;p:$20001;crc:$99a20c2c));
         badlands_sound:tipo_roms=(n:'136074-1018.9c';l:$10000;p:$0;crc:$a05fd146);
         badlands_back:array[0..5] of tipo_roms=(
@@ -150,25 +150,28 @@ frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
+    eventos_badlands;
+    case f of
+      0:begin
+          marcade.in1:=marcade.in1 and $bf;
+          m6502_0.change_irq(ASSERT_LINE);
+        end;
+      64,128,192:m6502_0.change_irq(ASSERT_LINE);
+      240:begin  //VBLANK
+          update_video_badlands;
+          m68000_0.irq[1]:=ASSERT_LINE;
+          marcade.in1:=marcade.in1 or $40;
+        end;
+    end;
     //main
     m68000_0.run(frame_m);
     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
     m6502_0.run(frame_s);
     frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-    case f of
-      0,64,128,192:m6502_0.change_irq(ASSERT_LINE);
-      239:begin  //VBLANK
-          update_video_badlands;
-          m68000_0.irq[1]:=ASSERT_LINE;
-          marcade.in1:=marcade.in1 or $40;
-        end;
-      261:marcade.in1:=marcade.in1 and $bf;
-    end;
  end;
  if (marcade.in2 and 1)=0 then pedal1:=pedal1-1;
  if (marcade.in2 and 2)=0 then pedal2:=pedal2-1;
- eventos_badlands;
  video_sync;
 end;
 end;
@@ -301,12 +304,9 @@ begin
  m68000_0.reset;
  m6502_0.reset;
  ym2151_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=0;
  marcade.in1:=$ffbf;
  marcade.in2:=0;
- reset_analog;
  write_eeprom:=false;
  sound_pending:=false;
  main_pending:=false;
@@ -385,7 +385,6 @@ atari_mo_0:=tatari_mo.create(nil,@ram[$1000 shr 1],badlands_mo_config,3,336+8,24
 init_analog(m68000_0.numero_cpu,m68000_0.clock);
 analog_0(50,10,$0,$ff,$0,false,true,true,true);
 //final
-reset_badlands;
 iniciar_badlands:=true;
 end;
 

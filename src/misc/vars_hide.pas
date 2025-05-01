@@ -23,30 +23,30 @@ type
     long_sprites:dword;
     banks:byte;
   end;
-  parejas = record
+  parejas=record
           case byte of
-             0: (l, h: byte);
-             1: (w: word);
+             0:(l,h:byte);
+             1:(w:word);
           end;
   pparejas=^parejas;
   parejas680X = record
           case byte of
-             0: (b, a: byte);
-             1: (w: word);
+             0:(b,a:byte);
+             1:(w:word);
         end;
   DParejas = record
           case byte of
-             0: (l0,h0,l1,h1: byte);
-             1: (wl,wh: word);
-             2: (l:dword);
+             0:(l0,h0,l1,h1:byte);
+             1:(wl,wh:word);
+             2:(l:dword);
           end;
   pdparejas=^dparejas;
 
 const
-  max_pantalla=24;
+  MAX_PANTALLA=24;
 
 var
-  p_final:array[0..max_pantalla] of tpantalla;
+  p_final:array[0..MAX_PANTALLA] of tpantalla;
   des_gfx:tipo_sprites;
 
 implementation

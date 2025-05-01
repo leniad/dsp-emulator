@@ -69,7 +69,7 @@ end;
 
 procedure Tpoke_spec.FormShow(Sender: TObject);
 begin
-poke_spec.Button2.Caption:=leng[main_vars.idioma].mensajes[8];
+poke_spec.Button2.Caption:=leng.mensajes[8];
 poke_spec.ActiveControl:=nil;
 cadena:='';
 posicion:=0;

@@ -91,16 +91,16 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //marcade.in2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   //service
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
@@ -117,6 +117,12 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_megazone;
+    if f=240 then begin
+      if irq_enable then m6809_0.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
+      update_video_megazone;
+    end;
     //Main CPU
     m6809_0.run(frame_main);
     frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
@@ -126,13 +132,7 @@ while EmuStatus=EsRunning do begin
     //snd sub
     mcs48_0.run(frame_snd2);
     frame_snd2:=frame_snd2+mcs48_0.tframes-mcs48_0.contador;
-    if f=239 then begin
-      if irq_enable then m6809_0.change_irq(HOLD_LINE);
-      z80_0.change_irq(HOLD_LINE);
-      update_video_megazone;
-    end;
   end;
-  eventos_megazone;
   video_sync;
 end;
 end;
@@ -256,8 +256,6 @@ begin
  frame_snd2:=mcs48_0.tframes;
  ay8910_0.reset;
  dac_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -315,7 +313,7 @@ mcs48_0.change_ram_calls(megazone_sound2_getbyte,nil);
 mcs48_0.change_io_calls(nil,megazone_sound2_outport,megazone_sound2_inport,nil);
 if not(roms_load(@mem_snd_sub,megazone_snd_sub)) then exit;
 //Sound Chip
-ay8910_0:=ay8910_chip.create(14318000 div 8,AY8910,0.5);
+ay8910_0:=ay8910_chip.create(14318000 div 8,AY8910);
 ay8910_0.change_io_calls(megazone_portar,nil,nil,megazone_portbw);
 dac_0:=dac_chip.create(1);
 //convertir chars
@@ -363,7 +361,6 @@ marcade.dswb:=$5b;
 marcade.dswa_val2:=@megazone_dip_a;
 marcade.dswb_val2:=@megazone_dip_b;
 //final
-reset_megazone;
 iniciar_megazone:=true;
 end;
 

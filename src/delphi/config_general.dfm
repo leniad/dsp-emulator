@@ -5,7 +5,7 @@ object MConfig: TMConfig
   BorderStyle = bsSingle
   Caption = 'Config DSP'
   ClientHeight = 509
-  ClientWidth = 467
+  ClientWidth = 512
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -38,9 +38,9 @@ object MConfig: TMConfig
     OnKeyUp = FormKeyUp
   end
   object other: TPageControl
-    Left = 2
+    Left = 8
     Top = 8
-    Width = 455
+    Width = 495
     Height = 439
     ActivePage = TabSheet1
     TabOrder = 2
@@ -50,7 +50,7 @@ object MConfig: TMConfig
         Left = 23
         Top = 13
         Width = 169
-        Height = 147
+        Height = 159
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -60,7 +60,7 @@ object MConfig: TMConfig
         TabOrder = 0
         object RadioButton6: TRadioButton
           Left = 35
-          Top = 33
+          Top = 51
           Width = 105
           Height = 17
           Caption = 'English'
@@ -75,7 +75,7 @@ object MConfig: TMConfig
         end
         object RadioButton5: TRadioButton
           Left = 35
-          Top = 14
+          Top = 34
           Width = 105
           Height = 17
           Caption = 'Castellano'
@@ -90,7 +90,7 @@ object MConfig: TMConfig
         end
         object RadioButton7: TRadioButton
           Left = 35
-          Top = 51
+          Top = 68
           Width = 105
           Height = 17
           Caption = 'Catal'#224
@@ -105,7 +105,7 @@ object MConfig: TMConfig
         end
         object RadioButton8: TRadioButton
           Left = 35
-          Top = 69
+          Top = 85
           Width = 105
           Height = 17
           Caption = 'Francais'
@@ -120,7 +120,7 @@ object MConfig: TMConfig
         end
         object RadioButton9: TRadioButton
           Left = 35
-          Top = 87
+          Top = 102
           Width = 105
           Height = 17
           Caption = 'German'
@@ -135,7 +135,7 @@ object MConfig: TMConfig
         end
         object RadioButton10: TRadioButton
           Left = 35
-          Top = 105
+          Top = 119
           Width = 105
           Height = 17
           Caption = 'Brazil'
@@ -150,7 +150,7 @@ object MConfig: TMConfig
         end
         object RadioButton11: TRadioButton
           Left = 35
-          Top = 123
+          Top = 136
           Width = 105
           Height = 17
           Caption = 'Italian'
@@ -162,6 +162,21 @@ object MConfig: TMConfig
           ParentFont = False
           TabOrder = 6
           OnClick = RadioButton11Click
+        end
+        object RadioButton12: TRadioButton
+          Left = 35
+          Top = 16
+          Width = 105
+          Height = 17
+          Caption = 'Auto'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 7
+          OnClick = RadioButton12Click
         end
       end
       object GroupBox4: TGroupBox
@@ -332,9 +347,9 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton1: TSpeedButton
-        Left = 363
+        Left = 423
         Top = 124
-        Width = 23
+        Width = 54
         Height = 22
         Caption = '...'
         OnClick = SpeedButton1Click
@@ -366,9 +381,9 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton5: TSpeedButton
-        Left = 363
+        Left = 423
         Top = 76
-        Width = 23
+        Width = 54
         Height = 22
         Caption = '...'
         OnClick = SpeedButton5Click
@@ -387,10 +402,10 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton2: TSpeedButton
-        Left = 362
+        Left = 423
         Top = 170
-        Width = 24
-        Height = 22
+        Width = 55
+        Height = 21
         Caption = '...'
         OnClick = SpeedButton2Click
       end
@@ -408,9 +423,9 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton6: TSpeedButton
-        Left = 363
-        Top = 266
-        Width = 23
+        Left = 423
+        Top = 265
+        Width = 54
         Height = 22
         Caption = '...'
         OnClick = SpeedButton6Click
@@ -429,60 +444,60 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton8: TSpeedButton
-        Left = 363
+        Left = 423
         Top = 213
-        Width = 23
+        Width = 54
         Height = 22
         Caption = '...'
         OnClick = SpeedButton8Click
       end
       object SpeedButton4: TSpeedButton
-        Left = 363
-        Top = 28
-        Width = 23
+        Left = 423
+        Top = 27
+        Width = 54
         Height = 22
         Caption = '...'
         OnClick = SpeedButton4Click
       end
       object d1: TEdit
         Left = 3
-        Top = 124
-        Width = 354
+        Top = 127
+        Width = 398
         Height = 21
         TabOrder = 2
       end
       object d4: TEdit
         Left = 3
-        Top = 28
-        Width = 354
+        Top = 31
+        Width = 398
         Height = 21
         TabOrder = 0
       end
       object d5: TEdit
         Left = 3
-        Top = 76
-        Width = 354
+        Top = 79
+        Width = 398
         Height = 21
         TabOrder = 1
       end
       object d2: TEdit
         Left = 3
-        Top = 170
-        Width = 354
+        Top = 173
+        Width = 398
         Height = 21
         TabOrder = 3
       end
       object d3: TEdit
         Left = 3
-        Top = 266
-        Width = 354
+        Top = 269
+        Width = 398
         Height = 21
         TabOrder = 5
       end
       object D6: TEdit
         Left = 3
-        Top = 213
-        Width = 354
+        Top = 216
+        Width = 398
         Height = 21
         TabOrder = 4
       end

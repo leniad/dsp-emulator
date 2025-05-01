@@ -182,8 +182,7 @@ begin
  deco16ic_0.reset;
  deco_sprites_0.reset;
  deco16_snd_simple_reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$fff7;
 end;

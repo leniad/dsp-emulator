@@ -949,8 +949,14 @@ if self.pedir_reset<>CLEAR_LINE then begin
   exit;
 end;
 if self.pedir_halt<>CLEAR_LINE then begin
-  self.contador:=trunc(maximo);
-  exit;
+  tempw:=trunc(maximo) shr 2;
+  for tempw2:=1 to tempw do begin
+    self.contador:=self.contador+4;
+    //if @self.despues_instruccion<>nil then self.despues_instruccion(4);
+    timers.update(4,self.numero_cpu);
+    if self.pedir_halt=CLEAR_LINE then break;
+  end;
+  if self.pedir_halt<>CLEAR_LINE then exit;
 end;
 pcontador:=self.contador;
 for f:=7 downto 1 do begin
@@ -978,8 +984,14 @@ for f:=7 downto 1 do begin
     end;
 end;
 if self.halt then begin
-  self.contador:=trunc(maximo);
-  exit;
+  tempw:=trunc(maximo) shr 2;
+  for tempw2:=1 to tempw do begin
+    self.contador:=self.contador+4;
+    //if @self.despues_instruccion<>nil then self.despues_instruccion(4);
+    timers.update(4,self.numero_cpu);
+    if not(self.halt) then break;
+  end;
+  if self.halt then exit;
 end;
 self.opcode:=true;
 r.ppc:=r.pc;

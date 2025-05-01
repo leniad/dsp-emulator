@@ -395,8 +395,7 @@ begin
   mcs51_0.reset;
   frame_mcu:=mcs51_0.tframes;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x:=0;

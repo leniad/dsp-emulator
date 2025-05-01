@@ -185,31 +185,28 @@ end;
 
 procedure dooyong_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    update_eventos;
     case f of
-      30:vblank:=false;
-      247:begin
+      31:vblank:=false;
+      248:begin
             z80_0.change_irq(HOLD_LINE);
             copymemory(@buffer_sprites,@sprite_ram,$1000);
             update_video;
             vblank:=true;
           end;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  update_eventos;
   video_sync;
 end;
 end;
@@ -787,6 +784,8 @@ procedure reset_dooyong;
 begin
  z80_0.reset;
  z80_1.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  case main_vars.tipo_maquina of
   371,375:begin
         ym2151_0.reset;
@@ -800,8 +799,6 @@ begin
           else marcade.in2:=$ef;
       end;
  end;
- reset_video;
- reset_audio;
  banco_rom:=0;
  sound_latch:=0;
  marcade.in0:=$ff;
@@ -1146,7 +1143,6 @@ case main_vars.tipo_maquina of
       end;
 end;
 //final
-reset_dooyong;
 iniciar_dooyong:=true;
 end;
 

@@ -248,8 +248,7 @@ begin
  m6809_0.reset;
  z80_0.reset;
  ym2203_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;

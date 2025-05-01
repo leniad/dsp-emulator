@@ -87,7 +87,6 @@ type
   end;
   tvar_spectrum=record
     //Video
-    buffer_video:array[0..6143] of boolean;
     flash,pantalla_128k,old_7ffd:byte;
     haz_flash:boolean;
     atrib_scr:array[0..191] of word;
@@ -98,7 +97,7 @@ type
     key_spec:array [0..255] of boolean;
     tipo_joy,joy_val:byte;
     //Audio
-    posicion_beeper:word;
+    valor_beeper:word;
     speaker_oversample,audio_load,turbo_sound:boolean;
     altavoz,audio_128k,ear_channel,speaker_timer,ay_select:byte;
     //Memoria
@@ -116,7 +115,6 @@ var
       mouse:tmouse_spectrum;
       borde:tborde_spectrum;
 
-procedure spectrum_config;
 function spectrum_mensaje:string;
 procedure borde_normal(linea:word);
 procedure eventos_spectrum;
@@ -128,7 +126,6 @@ procedure reset_misc;
 procedure spectrum_despues_instruccion(estados_t:byte);
 procedure evalua_gunstick;
 procedure spec_a_pantalla(posicion_memoria:pbyte;imagen1:Tbitmap);
-procedure spectrum_reset_video;
 //AMX Mouse
 procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
@@ -158,12 +155,6 @@ if ((gs_temp=63) or (gs_temp=127)) then begin
   var_spectrum.joy_val:=(var_spectrum.joy_val or 4);
   mouse.lg_val:=mouse.lg_val or $10;
 end;
-end;
-
-procedure spectrum_reset_video;
-begin
-fillchar(var_spectrum.buffer_video,6144,1);
-fillchar(borde.buffer,78000,$80);
 end;
 
 procedure borde_normal(linea:word);
@@ -410,16 +401,16 @@ procedure spectrum_beeper_sound;
 var
   res:smallint;
 begin
-  res:=(var_spectrum.posicion_beeper+(cinta_tzx.value*byte(var_spectrum.audio_load)*byte(cinta_tzx.play_tape))) shl (4+(3*byte(not(var_spectrum.speaker_oversample))));
+  res:=(var_spectrum.valor_beeper+(cinta_tzx.value*byte(var_spectrum.audio_load)*byte(cinta_tzx.play_tape))) shl (4+(3*byte(not(var_spectrum.speaker_oversample))));
   tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=res;
   //Copio el contenido del speaker para emular el stereo
   if sound_status.stereo then tsample[var_spectrum.ear_channel,sound_status.posicion_sonido+1]:=res;
-  var_spectrum.posicion_beeper:=0;
+  var_spectrum.valor_beeper:=0;
 end;
 
 procedure beeper_get;
 begin
-  var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+var_spectrum.altavoz;
+  var_spectrum.valor_beeper:=var_spectrum.valor_beeper+var_spectrum.altavoz;
 end;
 
 procedure spectrum_ay8912_sound;
@@ -499,7 +490,6 @@ loaddata_qsnapshot(@interface2);
 loaddata_qsnapshot(@mouse);
 loaddata_qsnapshot(@borde);
 borde.borde_spectrum:=borde_normal;
-spectrum_reset_video;
 close_qsnapshot;
 end;
 
@@ -564,7 +554,6 @@ begin
 spec_comun:=false;
 llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.save_qsnap:=spec_qsave;
 llamadas_maquina.load_qsnap:=spec_qload;
@@ -579,9 +568,7 @@ end else borde.borde_spectrum:=borde_normal;
 spec_z80.init_sound(spectrum_beeper_sound);
 var_spectrum.speaker_timer:=timers.init(spec_z80.numero_cpu,spec_z80.clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample)))),beeper_get,nil,true);
 //AY8912
-case main_vars.tipo_maquina of
-  1,2,3,4:timers.init(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,nil,true);
-end;
+if main_vars.tipo_maquina<>0 then timers.init(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,nil,true);
 principal1.BitBtn10.Glyph:=nil;
 principal1.BitBtn12.Enabled:=false;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
@@ -626,8 +613,7 @@ procedure reset_misc;
 begin
 spec_z80.reset;
 spec_z80.contador:=0;
-reset_audio;
-var_spectrum.posicion_beeper:=0;
+var_spectrum.valor_beeper:=0;
 if cinta_tzx.cargada then begin
   cinta_tzx.play_once:=false;
   change_caption(cinta_tzx.name);
@@ -639,7 +625,6 @@ var_spectrum.irq_pos:=0;
 var_spectrum.altavoz:=0;
 var_spectrum.ay_select:=0;
 cinta_tzx.value:=0;
-fillchar(borde.buffer[0],78000,$80);
 //ULA+
 ulaplus.activa:=false;
 fillchar(ulaplus.paleta[0],64,0);
@@ -684,7 +669,8 @@ if interface2.hay_if2 then begin
   interface2.retraso:=0;
   copymemory(@memoria[0],@interface2.rom[0],$4000);
 end;
-spectrum_reset_video;
+reset_game_general;
+fillchar(borde.buffer,78000,$80);
 end;
 
 procedure spec_cerrar_comun;
@@ -698,8 +684,7 @@ end;
 
 procedure spectrum_tapes;
 begin
-load_spec.show;
-while load_spec.showing do application.HandleMessage;
+load_spec.showmodal;
 end;
 
 procedure grabar_spec;
@@ -716,7 +701,7 @@ if saverom(nombre,indice,SSPECTRUM) then begin
           4:nombre:=changefileext(nombre,'.sna');
         end;
         if FileExists(nombre) then begin
-            if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+            if MessageDlg(leng.mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
         case indice of
           1:correcto:=grabar_szx(nombre);
@@ -762,13 +747,7 @@ end;
 function spectrum_mensaje:string;
 begin
 if cinta_tzx.play_tape then
-  spectrum_mensaje:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales_tzx);
-end;
-
-procedure spectrum_config;
-begin
-ConfigSP.show;
-while ConfigSP.Showing do application.ProcessMessages;
+  spectrum_mensaje:='    '+leng.mensajes[1]+': '+inttostr(datos_totales_tzx);
 end;
 
 procedure spec_a_pantalla(posicion_memoria:pbyte;imagen1:tbitmap);

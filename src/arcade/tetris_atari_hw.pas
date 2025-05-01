@@ -172,13 +172,13 @@ end;
 //Main
 procedure reset_tetris;
 begin
-  m6502_0.reset;
   slapstic_0.reset;
+  rom_bank:=slapstic_0.current_bank and 1;
+  m6502_0.reset;
   pokey_0.reset;
   pokey_1.reset;
   marcade.in0:=$40;
   marcade.in1:=0;
-  rom_bank:=slapstic_0.current_bank and 1;
   copymemory(@memoria[$4000],@rom_mem[1,0],$4000);
   nvram_write_enable:=false;
 end;

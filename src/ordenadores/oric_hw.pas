@@ -188,13 +188,13 @@ var
 begin
 init_controls(false,true,true,false);
 while EmuStatus=EsRunning do begin
+  eventos_oric;
   for f:=0 to 311 do begin
     m6502_0.run(frame_main);
     frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
     update_video_oric(f);
   end;
   blink_counter:=(blink_counter+1) and $3f;
-  eventos_oric;
   video_sync;
   actualiza_trozo(0,0,240,224,1,0,0,240,224,PANT_TEMP);
 end;
@@ -347,8 +347,7 @@ end;
 //Main
 procedure oric_loaddisk;
 begin
-load_dsk.show;
-while load_dsk.Showing do application.ProcessMessages;
+load_dsk.showmodal;
 end;
 
 procedure reset_oric;
@@ -359,7 +358,6 @@ begin
  frame_main:=m6502_0.tframes;
  ay8910_0.reset;
  via6522_0.reset;
- reset_audio;
  via_a:=$ff;
  via_b:=$ff;
  psg_a:=0;
@@ -427,7 +425,7 @@ tape_timer:=timers.init(m6502_0.numero_cpu,1000000/45454.5454545454,oric_tape_pl
 via6522_0:=via6522_chip.create(m6502_0.numero_cpu,1000000);
 via6522_0.change_calls(nil,nil,via_a_w,via_b_w,oric_irq,via_ca2_w,via_cb2_w);
 //sound chips
-ay8910_0:=ay8910_chip.create(1000000,AY8912,1);
+ay8910_0:=ay8910_chip.create(1000000,AY8912);
 ay8910_0.change_io_calls(nil,nil,psg_a_w,nil);
 tape_sound_channel:=init_channel;
 //cargar roms
@@ -449,7 +447,6 @@ for f:=0 to 7 do begin
 end;
 set_pal(colores,8);
 //final
-reset_oric;
 iniciar_oric:=true;
 end;
 

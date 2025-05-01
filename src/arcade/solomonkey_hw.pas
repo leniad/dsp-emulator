@@ -113,6 +113,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_solomon;
     if f=240 then begin
         if nmi_enable then z80_0.change_nmi(PULSE_LINE);
         update_video_solomon;
@@ -124,7 +125,6 @@ while EmuStatus=EsRunning do begin
     z80_1.run(frame_snd);
     frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_solomon;
   video_sync;
 end;
 end;
@@ -248,8 +248,6 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  ay8910_2.reset;
- reset_video;
- reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -317,7 +315,6 @@ marcade.dswa_val2:=@solomon_dip_a;
 marcade.dswb:=0;
 marcade.dswb_val2:=@solomon_dip_b;
 //final
-reset_solomon;
 iniciar_solomon:=true;
 end;
 

@@ -84,7 +84,7 @@ var
   ConfigCPC: TConfigCPC;
 
 implementation
-uses amstrad_cpc,lenslock;
+uses amstrad_cpc,lenslock,principal;
 {$R *.dfm}
 
 procedure TConfigCPC.Button13Click(Sender: TObject);
@@ -218,7 +218,35 @@ end;
 end;
 
 procedure TConfigCPC.FormShow(Sender: TObject);
+var
+  f:integer;
 begin
+f:=(principal1.left+(principal1.width div 2))-(ConfigCPC.Width div 2);
+if f<0 then ConfigCPC.Left:=0
+  else ConfigCPC.Left:=f;
+f:=(principal1.top+(principal1.Height div 2))-(ConfigCPC.Height div 2);
+if f<0 then ConfigCPC.Top:=0
+  else ConfigCPC.Top:=f;
+case main_vars.tipo_maquina of
+  7,8:begin
+        groupbox3.enabled:=false;
+        radiobutton5.Enabled:=false;
+        radiobutton6.Enabled:=false;
+        radiobutton7.Enabled:=false;
+        radiobutton5.Checked:=true;
+      end;
+  9:begin
+        groupbox3.enabled:=true;
+        radiobutton5.Enabled:=true;
+        radiobutton6.Enabled:=true;
+        radiobutton7.Enabled:=true;
+        case cpc_ga.ram_exp of
+          0:radiobutton5.Checked:=true;
+          1:radiobutton6.Checked:=true;
+          2:radiobutton7.Checked:=true;
+        end;
+    end;
+end;
 case main_vars.tipo_maquina of
   8:begin //CPC 664
       radiobutton2.Enabled:=false;
@@ -252,11 +280,6 @@ Edit6.Text:=cpc_rom[6].name;
 //Lenslock
 if lenslok.activo then radiobutton12.Checked:=true
   else radiobutton13.Checked:=true;
-case cpc_ga.ram_exp of
-  0:radiobutton5.Checked:=true;
-  1:radiobutton6.Checked:=true;
-  2:radiobutton7.Checked:=true;
-end;
 trackbar1.Position:=cpc_crt.bright;
 if cpc_crt.color_monitor then begin
   radiobutton9.Checked:=true;

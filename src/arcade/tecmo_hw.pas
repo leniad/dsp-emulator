@@ -172,15 +172,15 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
   //P2
   if arcade_input.left[1] then marcade.in3:=(marcade.in3 or 1) else marcade.in3:=(marcade.in3 and $fe);
   if arcade_input.right[1] then marcade.in3:=(marcade.in3 or 2) else marcade.in3:=(marcade.in3 and $fd);
   if arcade_input.down[1] then marcade.in3:=(marcade.in3 or 4) else marcade.in3:=(marcade.in3 and $fb);
   if arcade_input.up[1] then marcade.in3:=(marcade.in3 or 8) else marcade.in3:=(marcade.in3 and $f7);
-  if arcade_input.but1[1] then marcade.in4:=(marcade.in4 or 1) else marcade.in4:=(marcade.in4 and $fe);
-  if arcade_input.but0[1] then marcade.in4:=(marcade.in4 or 2) else marcade.in4:=(marcade.in4 and $fd);
+  if arcade_input.but0[1] then marcade.in4:=(marcade.in4 or 1) else marcade.in4:=(marcade.in4 and $fe);
+  if arcade_input.but1[1] then marcade.in4:=(marcade.in4 or 2) else marcade.in4:=(marcade.in4 and $fd);
   //SYSTEM
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
   if arcade_input.start[0] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
@@ -196,6 +196,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_tecmo;
     if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_tecmo;
@@ -207,7 +208,6 @@ while EmuStatus=EsRunning do begin
     z80_1.run(frame_snd);
     frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_tecmo;
   video_sync;
 end;
 end;
@@ -418,8 +418,6 @@ begin
  frame_snd:=z80_1.tframes;
  ym3812_0.reset;
  msm5205_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -554,7 +552,6 @@ case main_vars.tipo_maquina of
       marcade.dswb_val2:=@sw_dip_b;
      end;
 end;
-reset_tecmo;
 iniciar_tecmo:=true;
 end;
 

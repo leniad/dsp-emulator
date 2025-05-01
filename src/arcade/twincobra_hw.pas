@@ -410,8 +410,7 @@ begin
  frame_snd:=z80_0.tframes;
  frame_mcu:=tms32010_0.tframes;
  ym3812_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  txt_scroll_y:=457;
  txt_scroll_x:=226;
  bg_scroll_x:=40;

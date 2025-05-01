@@ -362,62 +362,55 @@ end;
 
 procedure system16a_principal_adpcm;
 var
-  frame_m,frame_s,frame_s_sub:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
-frame_s_sub:=mcs48_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-     for h:=1 to CPU_SYNC do begin
-        //main
-        m68000_0.run(frame_m);
-        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-        //sound
-        z80_0.run(frame_s);
-        frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-        //sound sub cpu
-        mcs48_0.run(frame_s_sub);
-        frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
-     end;
-     if f=223 then begin
+     eventos_system16a;
+     if f=224 then begin
        m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16a;
      end;
+     for h:=1 to CPU_SYNC do begin
+        //main
+        m68000_0.run(frame_main);
+        frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+        //sound
+        z80_0.run(frame_snd);
+        frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+        //sound sub cpu
+        mcs48_0.run(frame_sub);
+        frame_sub:=frame_sub+mcs48_0.tframes-mcs48_0.contador;
+     end;
   end;
-  eventos_system16a;
   video_sync;
 end;
 end;
 
 procedure system16a_principal;
 var
-  frame_m,frame_s:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-    for h:=1 to CPU_SYNC do begin
-     //main
-     m68000_0.run(frame_m);
-     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-     //sound
-     z80_0.run(frame_s);
-     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    end;
-    if f=223 then begin
+    eventos_system16a;
+    if f=224 then begin
        m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16a;
     end;
+    for h:=1 to CPU_SYNC do begin
+     //main
+     m68000_0.run(frame_main);
+     frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+     //sound
+     z80_0.run(frame_snd);
+     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+    end;
   end;
-  eventos_system16a;
   video_sync;
 end;
 end;
@@ -757,9 +750,12 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  pia8255_0.reset;
- if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.tipo_maquina=186)) then mcs48_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
+ if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.tipo_maquina=186)) then begin
+  mcs48_0.reset;
+  frame_sub:=mcs48_0.tframes;
+ end;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;
@@ -1000,7 +996,6 @@ for f:=0 to 31 do begin
   s16_info.hilight[f]:=combine_6_weights(@weights[1],i0,i1,i2,i3,i4,1);
 end;
 //final
-reset_system16a;
 iniciar_system16a:=true;
 end;
 

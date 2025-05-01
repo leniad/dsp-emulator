@@ -183,8 +183,10 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
+    eventos_ddragon;
     case f of
       8:marcade.in2:=marcade.in2 and $f7;
+      16,32,48,64,80,96,112,128,144,160,176,192,208,224,240:hd6309_0.change_firq(ASSERT_LINE);
       248:begin
             marcade.in2:=marcade.in2 or 8;
             hd6309_0.change_nmi(ASSERT_LINE);
@@ -192,7 +194,6 @@ while EmuStatus=EsRunning do begin
           end;
       264:hd6309_0.change_firq(ASSERT_LINE);
     end;
-    if (((f mod 16)=0) and (f<255) and (f<>0)) then hd6309_0.change_firq(ASSERT_LINE);
     for h:=1 to CPU_SYNC do begin
       //main
       hd6309_0.run(frame_main);
@@ -205,7 +206,6 @@ while EmuStatus=EsRunning do begin
       frame_snd:=frame_snd+m6809_0.tframes-m6809_0.contador;
     end;
   end;
-  eventos_ddragon;
   video_sync;
 end;
 end;
@@ -381,6 +381,7 @@ while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     case f of
       8:marcade.in2:=marcade.in2 and $f7;
+      16,32,48,64,80,96,112,128,144,160,176,192,208,224,240:hd6309_0.change_firq(ASSERT_LINE);
       248:begin
             marcade.in2:=marcade.in2 or 8;
             hd6309_0.change_nmi(ASSERT_LINE);
@@ -388,7 +389,6 @@ while EmuStatus=EsRunning do begin
           end;
       264:hd6309_0.change_firq(ASSERT_LINE);
     end;
-    if (((f mod 16)=0) and (f<255) and (f<>0)) then hd6309_0.change_firq(ASSERT_LINE);
     for h:=1 to CPU_SYNC do begin
       //main
       hd6309_0.run(frame_main);
@@ -556,8 +556,7 @@ begin
         oki_6295_0.reset;
        end;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$e7;

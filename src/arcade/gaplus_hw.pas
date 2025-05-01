@@ -208,23 +208,11 @@ end;
 procedure gaplus_principal;
 var
   f:byte;
-  frame_m,frame_sub,frame_sound:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_sub:=m6809_1.tframes;
-frame_sound:=m6809_2.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 223 do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sub CPU
-    m6809_1.run(frame_sub);
-    frame_sub:=frame_sub+m6809_1.tframes-m6809_1.contador;
-    //Sound CPU
-    m6809_2.run(frame_sound);
-    frame_sound:=frame_sound+m6809_2.tframes-m6809_2.contador;
+    eventos_gaplus;
     if f=0 then begin
       if irq_enable then m6809_0.change_irq(ASSERT_LINE);
       if sub_irq_mask then m6809_1.change_irq(ASSERT_LINE);
@@ -233,8 +221,16 @@ while EmuStatus=EsRunning do begin
       if not(namco_5x_1.reset_status) then namco_5x_1.run;
       update_video_gaplus;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sub CPU
+    m6809_1.run(frame_sub);
+    frame_sub:=frame_sub+m6809_1.tframes-m6809_1.contador;
+    //Sound CPU
+    m6809_2.run(frame_snd);
+    frame_snd:=frame_snd+m6809_2.tframes-m6809_2.contador;
   end;
-  eventos_gaplus;
   video_sync;
 end;
 end;
@@ -402,12 +398,12 @@ begin
  m6809_0.reset;
  m6809_1.reset;
  m6809_2.reset;
+ frame_main:=m6809_0.tframes;
+ frame_sub:=m6809_1.tframes;
+ frame_snd:=m6809_2.tframes;
  namco_5x_0.reset;
  namco_5x_1.reset;
  namco_snd_0.reset;
- reset_samples;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  irq_enable:=false;
@@ -543,7 +539,6 @@ for f:=0 to $ff do gfx[0].colores[f]:=$f0+(memoria_temp[$300+f] and $0f);
 for f:=0 to $1ff do gfx[1].colores[f]:=(memoria_temp[$400+f] and $0f)+((memoria_temp[$600+f] and $0f) shl 4);
 starfield_init;
 //final
-reset_gaplus;
 iniciar_gaplus:=true;
 end;
 

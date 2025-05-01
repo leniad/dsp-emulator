@@ -2,7 +2,7 @@ unit qsnapshot;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
-     main_engine,file_engine,sysutils;
+     main_engine,file_engine,sysutils,gfx_engine;
 
 procedure open_qsnapshot_save(name:string);
 procedure close_qsnapshot;
@@ -39,6 +39,7 @@ begin
 {$I-}
 closefile(qsnap_fichero);
 {$I+}
+reset_gfx;
 end;
 
 procedure savedata_qsnapshot(data:pbyte;size:dword);

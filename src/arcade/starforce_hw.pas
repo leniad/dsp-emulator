@@ -335,11 +335,11 @@ var
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 255 do begin
+      eventos_starforce;
       if f=240 then begin
         z80_0.change_irq(ASSERT_LINE);
         draw_video;
-        eventos_starforce;
       end;
       //Main CPU
       z80_0.run(frame_main);
@@ -372,14 +372,14 @@ var
   color:tcolor;
 begin
   data:=buffer_paleta[numero];
-  i:= (data shr 6) and 3;
+  i:=(data shr 6) and 3;
 	c:=(data shl 2) and $c;
 	if (c<>0) then color.r:=pal4bit(c or i)
     else color.r:=0;
 	c:=(data shr 0) and $c;
 	if (c<>0) then color.g:=pal4bit(c or i)
     else color.g:=0;
-	c:= (data shr 2) and $c;
+	c:=(data shr 2) and $c;
 	if (c<>0) then color.b:=pal4bit(c or i)
 	  else color.b:=0;
   set_pal_color(color,numero);
@@ -507,8 +507,7 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -572,10 +571,10 @@ end;
 screen_init(5,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,$100);
+z80_0:=cpu_z80.create(4000000,256);
 z80_0.change_ram_calls(starforce_getbyte,starforce_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(2000000,$100);
+z80_1:=cpu_z80.create(2000000,256);
 z80_1.enable_daisy;
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);

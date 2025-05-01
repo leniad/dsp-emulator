@@ -37,7 +37,7 @@ var
 {$R *.dfm}
 
 implementation
-uses spectrum_load;
+uses spectrum_load,principal;
 
 procedure Tload_spec.Button1Click(Sender: TObject);
 begin
@@ -69,7 +69,15 @@ end;
 end;
 
 procedure Tload_spec.FormShow(Sender: TObject);
+var
+  f:integer;
 begin
+f:=(principal1.left+(principal1.width div 2))-(load_spec.Width div 2);
+if f<0 then load_spec.Left:=0
+  else load_spec.Left:=f;
+f:=(principal1.top+(principal1.Height div 2))-(load_spec.Height div 2);
+if f<0 then load_spec.Top:=0
+  else load_spec.Top:=f;
 spectrum_load_init;
 filelistbox1.setfocus;
 FileListBox1Click(nil);

@@ -1,4 +1,4 @@
-unit Rom_engine;
+unit rom_engine;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
@@ -60,6 +60,18 @@ end;
 carga_rom_zip_crc:=true;
 end;
 
+function rom_zip_name:string;
+var
+  f:integer;
+begin
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    rom_zip_name:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+end;
+
 function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms;warning:boolean=true;parent:boolean=false;nombre:string=''):boolean;
 var
   ptemp:pbyte;
@@ -67,12 +79,7 @@ var
   nombre_zip,dir:string;
 begin
 if parent then nombre_zip:=nombre
-  else for f:=1 to GAMES_CONT do begin
-          if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-            nombre_zip:=GAMES_DESC[f].zip+'.zip';
-            break;
-          end;
-        end;
+  else nombre_zip:=rom_zip_name;
 roms_load:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -92,12 +99,7 @@ var
   nombre_zip,dir:string;
   f,roms_size:word;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load16b:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -130,12 +132,7 @@ var
   f,roms_size,valor:word;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load16w:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -168,12 +165,7 @@ var
   nombre_zip,dir:string;
   roms_size:word;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load32b:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -204,12 +196,7 @@ var
   h:dword;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load32b_b:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -238,12 +225,7 @@ var
   f,roms_size:word;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load32dw:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -279,12 +261,7 @@ var
   h:dword;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load64b:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -315,12 +292,7 @@ var
   roms_size,f,h:dword;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load_swap_word:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -347,12 +319,7 @@ var
   h:dword;
   nombre_zip,dir:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
-  end;
-end;
+nombre_zip:=rom_zip_name;
 roms_load64b_b:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin

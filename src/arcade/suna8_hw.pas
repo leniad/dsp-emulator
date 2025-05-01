@@ -576,8 +576,7 @@ begin
    dac_2.reset;
    dac_3.reset;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -639,7 +638,7 @@ case main_vars.tipo_maquina of
         timers.init(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,nil,true);
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(1500000,AY8910,0.8);
+        ay8910_0:=ay8910_chip.create(1500000,AY8910);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
         //Y para el DAC 8Khz
         dac_timer:=timers.init(z80_1.numero_cpu,3000000/8000,dac_sound,nil,false);
@@ -692,7 +691,7 @@ case main_vars.tipo_maquina of
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
         ym3812_0.change_irq_calls(hardhead2_snd);
-        ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
+        ay8910_0:=ay8910_chip.create(1500000,AY8910);
         dac_0:=dac_chip.create(1);
         dac_1:=dac_chip.create(1);
         dac_2:=dac_chip.create(1);

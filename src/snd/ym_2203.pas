@@ -101,7 +101,7 @@ begin
 //Cierro el OPN
 opn_close(self.OPN);
 self.OPN:=nil;
-self.ay8910_int.Free;
+self.ay8910_int.free;
 chips_total:=chips_total-1;
 end;
 
@@ -325,8 +325,7 @@ begin
     chan_calc(OPN,cch[0]);
     chan_calc(OPN,cch[1]);
     chan_calc(OPN,cch[2]);
-    lt:=self.ay8910_int.update_internal^;
-    lt:=lt+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
+    lt:=self.ay8910_int.update_internal^+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
     if lt>$7fff then lt:=$7fff
       else if lt<-$7fff then lt:=-$7fff;
     tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;

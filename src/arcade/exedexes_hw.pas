@@ -219,8 +219,7 @@ begin
  ay8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -301,9 +300,9 @@ z80_1:=cpu_z80.create(3000000,256);
 z80_1.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
 z80_1.init_sound(exedexes_sound);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,AY8910,0.4);
-sn_76496_0:=sn76496_chip.Create(3000000,1);
-sn_76496_1:=sn76496_chip.Create(3000000,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910);
+sn_76496_0:=sn76496_chip.Create(3000000);
+sn_76496_1:=sn76496_chip.Create(3000000);
 timers.init(z80_1.numero_cpu,3000000/(4*60),exedexes_snd_irq,nil,true);
 //cargar roms
 if not(roms_load(@memoria,exedexes_rom)) then exit;

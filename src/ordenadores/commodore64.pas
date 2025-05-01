@@ -351,7 +351,6 @@ procedure c64_reset;
 var
   f:byte;
 begin
-fillchar(memoria[0],$10000,0);
 //SIEMPRE ESTO PRIMERO PARA PONER LOS VALORES DE RESET DE LA CPU!!!
 port_bits:=$ef;
 port_val:=$ef;
@@ -363,7 +362,7 @@ mos6526_1.reset;
 {$ENDIF}
 mos6566_0.reset;
 sid_0.reset;
-reset_audio;
+reset_game_general;
 for f:=0 to 7 do begin
   c64_keyboard[f]:=$ff;
   c64_keyboard_i[f]:=$ff;
@@ -402,8 +401,7 @@ end;
 
 procedure c64_loaddisk;
 begin
-load_dsk.show;
-while load_dsk.Showing do application.ProcessMessages;
+load_dsk.showmodal;
 end;
 
 procedure c64_tapes;
@@ -502,7 +500,6 @@ begin
   mos6566_0:=mos6566_chip.create(985248);
   mos6566_0.change_calls(c64_vic_irq);
   sid_0:=sid_chip.create(985248,TYPE_6581);
-  c64_reset;
   iniciar_c64:=true;
   cinta_tzx.tape_start:=c64_tape_start;
   cinta_tzx.tape_stop:=c64_tape_stop;

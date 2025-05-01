@@ -4,8 +4,8 @@ object lenslock1: Tlenslock1
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'LensLock'
-  ClientHeight = 184
-  ClientWidth = 160
+  ClientHeight = 176
+  ClientWidth = 158
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

@@ -15,7 +15,7 @@ const
         (n:'rt1_17.f1';l:$10000;p:0;crc:$766af455),(n:'rt1_18.h1';l:$10000;p:$10000;crc:$3f9f2f5d),
         (n:'rt3_19.k1';l:$10000;p:$20000;crc:$c16675e9),(n:'rt3_20.m1';l:$10000;p:$30000;crc:$c470681b));
         rthunder_sub_rom:array[0..1] of tipo_roms=(
-        (n:'rt3_2b.12c';l:$8000;p:$0;crc:$a7ea46ee),(n:'rt3_3.12d';l:$8000;p:$8000;crc:$a13f601c));
+        (n:'rt3_2b.12c';l:$8000;p:0;crc:$a7ea46ee),(n:'rt3_3.12d';l:$8000;p:$8000;crc:$a13f601c));
         rthunder_chars:array[0..1] of tipo_roms=(
         (n:'rt1_7.7r';l:$10000;p:0;crc:$a85efa39),(n:'rt1_8.7s';l:$8000;p:$10000;crc:$f7a95820));
         rthunder_tiles:array[0..1] of tipo_roms=(
@@ -26,15 +26,15 @@ const
         (n:'rt1_13.12p';l:$10000;p:$40000;crc:$489686d7),(n:'rt1_14.12r';l:$10000;p:$50000;crc:$689e56a8),
         (n:'rt1_15.12t';l:$10000;p:$60000;crc:$1d8bf2ca),(n:'rt1_16.12u';l:$10000;p:$70000;crc:$1bbcf37b));
         rthunder_mcu:array[0..1] of tipo_roms=(
-        (n:'rt3_4.6b';l:$8000;p:$1000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:$0;crc:$076ea82a));
+        (n:'rt3_4.6b';l:$8000;p:$1000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         rthunder_prom:array[0..4] of tipo_roms=(
-        (n:'rt1-1.3r';l:$200;p:$0;crc:$8ef3bb9d),(n:'rt1-2.3s';l:$200;p:$200;crc:$6510a8f2),
+        (n:'rt1-1.3r';l:$200;p:0;crc:$8ef3bb9d),(n:'rt1-2.3s';l:$200;p:$200;crc:$6510a8f2),
         (n:'rt1-3.4v';l:$800;p:$400;crc:$95c7d944),(n:'rt1-4.5v';l:$800;p:$c00;crc:$1391fec9),
         (n:'rt1-5.6u';l:$20;p:$1400;crc:$e4130804));
         rthunder_adpcm:array[0..1] of tipo_roms=(
-        (n:'rt1_21.f3';l:$10000;p:$0;crc:$454968f3),(n:'rt2_22.h3';l:$10000;p:$20000;crc:$fe963e72));
+        (n:'rt1_21.f3';l:$10000;p:0;crc:$454968f3),(n:'rt2_22.h3';l:$10000;p:$20000;crc:$fe963e72));
         rthunder_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3;name:'Coin B';number:4;dip:((dip_val:0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$4;name:'Freeze';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Invulnerability';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$10;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -50,13 +50,13 @@ const
         //Hopping Mappy
         hopmappy_rom:tipo_roms=(n:'hm1_1.9c';l:$8000;p:$8000;crc:$1a83914e);
         hopmappy_sub_rom:tipo_roms=(n:'hm1_2.12c';l:$4000;p:$c000;crc:$c46cda65);
-        hopmappy_chars:tipo_roms=(n:'hm1_6.7r';l:$4000;p:$0;crc:$fd0e8887);
-        hopmappy_tiles:tipo_roms=(n:'hm1_5.4r';l:$4000;p:$0;crc:$9c4f31ae);
-        hopmappy_sprites:tipo_roms=(n:'hm1_4.12h';l:$8000;p:$0;crc:$78719c52);
+        hopmappy_chars:tipo_roms=(n:'hm1_6.7r';l:$4000;p:0;crc:$fd0e8887);
+        hopmappy_tiles:tipo_roms=(n:'hm1_5.4r';l:$4000;p:0;crc:$9c4f31ae);
+        hopmappy_sprites:tipo_roms=(n:'hm1_4.12h';l:$8000;p:0;crc:$78719c52);
         hopmappy_mcu:array[0..1] of tipo_roms=(
         (n:'hm1_3.6b';l:$2000;p:$1000;crc:$6496e1db),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         hopmappy_prom:array[0..4] of tipo_roms=(
-        (n:'hm1-1.3r';l:$200;p:$0;crc:$cc801088),(n:'hm1-2.3s';l:$200;p:$200;crc:$a1cb71c5),
+        (n:'hm1-1.3r';l:$200;p:0;crc:$cc801088),(n:'hm1-2.3s';l:$200;p:$200;crc:$a1cb71c5),
         (n:'hm1-3.4v';l:$800;p:$400;crc:$e362d613),(n:'hm1-4.5v';l:$800;p:$c00;crc:$678252b4),
         (n:'hm1-5.6u';l:$20;p:$1400;crc:$475bf500));
         hopmappy_dip_a:array [0..4] of def_dip=(
@@ -72,18 +72,18 @@ const
         (mask:$80;name:'Difficulty';number:2;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Sky Kid Deluxe
         skykiddx_rom:array[0..1] of tipo_roms=(
-        (n:'sk3_2.9d';l:$8000;p:$0;crc:$74b8f8e2),(n:'sk3_1b.9c';l:$8000;p:$8000;crc:$767b3514));
+        (n:'sk3_2.9d';l:$8000;p:0;crc:$74b8f8e2),(n:'sk3_1b.9c';l:$8000;p:$8000;crc:$767b3514));
         skykiddx_sub_rom:tipo_roms=(n:'sk3_3.12c';l:$8000;p:$8000;crc:$6d1084c4);
         skykiddx_chars:array[0..1] of tipo_roms=(
-        (n:'sk3_9.7r';l:$8000;p:$0;crc:$48675b17),(n:'sk3_10.7s';l:$4000;p:$8000;crc:$7418465a));
+        (n:'sk3_9.7r';l:$8000;p:0;crc:$48675b17),(n:'sk3_10.7s';l:$4000;p:$8000;crc:$7418465a));
         skykiddx_tiles:array[0..1] of tipo_roms=(
-        (n:'sk3_7.4r';l:$8000;p:$0;crc:$4036b735),(n:'sk3_8.4s';l:$4000;p:$8000;crc:$044bfd21));
+        (n:'sk3_7.4r';l:$8000;p:0;crc:$4036b735),(n:'sk3_8.4s';l:$4000;p:$8000;crc:$044bfd21));
         skykiddx_sprites:array[0..1] of tipo_roms=(
-        (n:'sk3_5.12h';l:$8000;p:$0;crc:$5c7d4399),(n:'sk3_6.12k';l:$8000;p:$8000;crc:$c908a3b2));
+        (n:'sk3_5.12h';l:$8000;p:0;crc:$5c7d4399),(n:'sk3_6.12k';l:$8000;p:$8000;crc:$c908a3b2));
         skykiddx_mcu:array[0..1] of tipo_roms=(
         (n:'sk3_4.6b';l:$4000;p:$1000;crc:$e6cae2d6),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         skykiddx_prom:array[0..4] of tipo_roms=(
-        (n:'sk3-1.3r';l:$200;p:$0;crc:$9e81dedd),(n:'sk3-2.3s';l:$200;p:$200;crc:$cbfec4dd),
+        (n:'sk3-1.3r';l:$200;p:0;crc:$9e81dedd),(n:'sk3-2.3s';l:$200;p:$200;crc:$cbfec4dd),
         (n:'sk3-3.4v';l:$800;p:$400;crc:$81714109),(n:'sk3-4.5v';l:$800;p:$c00;crc:$1bf25acc),
         (n:'sk3-5.6u';l:$20;p:$1400;crc:$e4130804));
         skykiddx_dip_a:array [0..5] of def_dip=(
@@ -101,18 +101,18 @@ const
         (n:'ri1_2.9d';l:$2000;p:$4000;crc:$fcd58d91),(n:'ri1_1c.9c';l:$8000;p:$8000;crc:$14acbacb));
         roishtar_sub_rom:tipo_roms=(n:'ri1_3.12c';l:$8000;p:$8000;crc:$a39829f7);
         roishtar_chars:array[0..1] of tipo_roms=(
-        (n:'ri1_14.7r';l:$4000;p:$0;crc:$de8154b4),(n:'ri1_15.7s';l:$2000;p:$4000;crc:$4298822b));
+        (n:'ri1_14.7r';l:$4000;p:0;crc:$de8154b4),(n:'ri1_15.7s';l:$2000;p:$4000;crc:$4298822b));
         roishtar_tiles:array[0..1] of tipo_roms=(
-        (n:'ri1_12.4r';l:$4000;p:$0;crc:$557e54d3),(n:'ri1_13.4s';l:$2000;p:$4000;crc:$9ebe8e32));
+        (n:'ri1_12.4r';l:$4000;p:0;crc:$557e54d3),(n:'ri1_13.4s';l:$2000;p:$4000;crc:$9ebe8e32));
         roishtar_sprites:array[0..6] of tipo_roms=(
-        (n:'ri1_5.12h';l:$8000;p:$0;crc:$46b59239),(n:'ri1_6.12k';l:$8000;p:$8000;crc:$94d9ef48),
+        (n:'ri1_5.12h';l:$8000;p:0;crc:$46b59239),(n:'ri1_6.12k';l:$8000;p:$8000;crc:$94d9ef48),
         (n:'ri1_7.12l';l:$8000;p:$10000;crc:$da802b59),(n:'ri1_8.12m';l:$8000;p:$18000;crc:$16b88b74),
         (n:'ri1_9.12p';l:$8000;p:$20000;crc:$f3de3c2a),(n:'ri1_10.12r';l:$8000;p:$28000;crc:$6dacc70d),
         (n:'ri1_11.12t';l:$8000;p:$30000;crc:$fb6bc533));
         roishtar_mcu:array[0..1] of tipo_roms=(
         (n:'ri1_4.6b';l:$8000;p:$1000;crc:$552172b8),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         roishtar_prom:array[0..4] of tipo_roms=(
-        (n:'ri1-1.3r';l:$200;p:$0;crc:$29cd0400),(n:'ri1-2.3s';l:$200;p:$200;crc:$02fd278d),
+        (n:'ri1-1.3r';l:$200;p:0;crc:$29cd0400),(n:'ri1-2.3s';l:$200;p:$200;crc:$02fd278d),
         (n:'ri1-3.4v';l:$800;p:$400;crc:$cbd7e53f),(n:'ri1-4.5v';l:$800;p:$c00;crc:$22921617),
         (n:'ri1-5.6u';l:$20;p:$1400;crc:$e2188075));
         roishtar_dip_a:array [0..2] of def_dip=(
@@ -124,7 +124,7 @@ const
         (mask:$80;name:'Freeze';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Genpei ToumaDen
         genpeitd_rom:tipo_roms=(n:'gt1_1b.9c';l:$8000;p:$8000;crc:$75396194);
-        genpeitd_rom_bank:tipo_roms=(n:'gt1_10b.f1';l:$10000;p:$0;crc:$5721ad0d);
+        genpeitd_rom_bank:tipo_roms=(n:'gt1_10b.f1';l:$10000;p:0;crc:$5721ad0d);
         genpeitd_sub_rom:tipo_roms=(n:'gt1_2.12c';l:$4000;p:$c000;crc:$302f2cb6);
         genpeitd_chars:array[0..1] of tipo_roms=(
         (n:'gt1_7.7r';l:$10000;p:0;crc:$ea77a211),(n:'gt1_4.4s';l:$8000;p:$10000;crc:$1b128a2e));
@@ -138,11 +138,11 @@ const
         genpeitd_mcu:array[0..1] of tipo_roms=(
         (n:'gt1_3.6b';l:$8000;p:$1000;crc:$315cd988),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         genpeitd_prom:array[0..4] of tipo_roms=(
-        (n:'gt1-1.3r';l:$200;p:$0;crc:$2f0ddddb),(n:'gt1-2.3s';l:$200;p:$200;crc:$87d27025),
+        (n:'gt1-1.3r';l:$200;p:0;crc:$2f0ddddb),(n:'gt1-2.3s';l:$200;p:$200;crc:$87d27025),
         (n:'gt1-3.4v';l:$800;p:$400;crc:$c178de99),(n:'gt1-4.5v';l:$800;p:$c00;crc:$9f48ef17),
         (n:'gt1-5.6u';l:$20;p:$1400;crc:$e4130804));
         genpeitd_adpcm:array[0..2] of tipo_roms=(
-        (n:'gt1_17.f3';l:$20000;p:$0;crc:$26181ff8),(n:'gt1_18.h3';l:$20000;p:$20000;crc:$7ef9e5ea),
+        (n:'gt1_17.f3';l:$20000;p:0;crc:$26181ff8),(n:'gt1_18.h3';l:$20000;p:$20000;crc:$7ef9e5ea),
         (n:'gt1_19.k3';l:$20000;p:$40000;crc:$38e11f6c));
         genpeitd_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -157,7 +157,7 @@ const
         (mask:$c0;name:'Candle';number:4;dip:((dip_val:$80;dip_name:'40'),(dip_val:$c0;dip_name:'50'),(dip_val:$40;dip_name:'60'),(dip_val:$0;dip_name:'70'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Wonder Momo
         wndrmomo_rom:tipo_roms=(n:'wm1_1.9c';l:$8000;p:$8000;crc:$34b50bf0);
-        wndrmomo_rom_bank:tipo_roms=(n:'wm1_16.f1';l:$10000;p:$0;crc:$e565f8f3);
+        wndrmomo_rom_bank:tipo_roms=(n:'wm1_16.f1';l:$10000;p:0;crc:$e565f8f3);
         wndrmomo_sub_rom:tipo_roms=(n:'wm1_2.12c';l:$8000;p:$8000;crc:$3181efd0);
         wndrmomo_chars:array[0..1] of tipo_roms=(
         (n:'wm1_6.7r';l:$8000;p:0;crc:$93955fbb),(n:'wm1_7.7s';l:$4000;p:$8000;crc:$7d662527));
@@ -171,11 +171,11 @@ const
         wndrmomo_mcu:array[0..1] of tipo_roms=(
         (n:'wm1_3.6b';l:$8000;p:$1000;crc:$55f01df7),(n:'cus60-60a1.mcu';l:$1000;p:0;crc:$076ea82a));
         wndrmomo_prom:array[0..4] of tipo_roms=(
-        (n:'wm1-1.3r';l:$200;p:$0;crc:$1af8ade8),(n:'wm1-2.3s';l:$200;p:$200;crc:$8694e213),
+        (n:'wm1-1.3r';l:$200;p:0;crc:$1af8ade8),(n:'wm1-2.3s';l:$200;p:$200;crc:$8694e213),
         (n:'wm1-3.4v';l:$800;p:$400;crc:$2ffaf9a4),(n:'wm1-4.5v';l:$800;p:$c00;crc:$f4e83e0b),
         (n:'wm1-5.6u';l:$20;p:$1400;crc:$e4130804));
         wndrmomo_adpcm:array[0..3] of tipo_roms=(
-        (n:'wm1_17.f3';l:$10000;p:$0;crc:$bea3c318),(n:'wm1_18.h3';l:$10000;p:$20000;crc:$6d73bcc5),
+        (n:'wm1_17.f3';l:$10000;p:0;crc:$bea3c318),(n:'wm1_18.h3';l:$10000;p:$20000;crc:$6d73bcc5),
         (n:'wm1_19.k3';l:$10000;p:$40000;crc:$d288e912),(n:'wm1_20.m3';l:$10000;p:$60000;crc:$076a72cb));
         wndrmomo_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -186,11 +186,11 @@ const
         wndrmomo_dip_b:array [0..2] of def_dip=(
         (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$6;name:'Cabinet';number:4;dip:((dip_val:$2;dip_name:'Upright 1 Player'),(dip_val:$4;dip_name:'Upright 2 Players'),(dip_val:$6;dip_name:'Cocktail'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        MAIN_DIV=4;
+        CPU_SYNC=4;
 
 var
  rom_bank:array[0..$1f,0..$1fff] of byte;
- rom_sub_bank:array[0..$3,0..$1fff] of byte;
+ rom_sub_bank:array[0..3,0..$1fff] of byte;
  nchar_prom:array[0..$1f] of byte;
  rom_nbank,rom_sub_nbank,tile_bank,back_color:byte;
  scroll_y,prior:array[0..3] of byte;
@@ -206,7 +206,7 @@ var
 const
   sprite_size:array[0..3] of byte=(16,8,32,4);
 begin
-  sprite_xoffs:=memoria[$5800+$7f5]+((memoria[$5800+$7f4] and $1) shl 8);
+  sprite_xoffs:=memoria[$5800+$7f5]+((memoria[$5800+$7f4] and 1) shl 8);
   sprite_yoffs:=memoria[$5800+$7f7];
   for f:=0 to $7e do begin
     atrib2:=memoria[$580e+(f*$10)];
@@ -214,14 +214,14 @@ begin
     atrib1:=memoria[$580a+(f*$10)];
     color:=memoria[$580c+(f*$10)];
     flipx:=(atrib1 and $20)<>0;
-    flipy:=(atrib2 and $01)<>0;
+    flipy:=(atrib2 and 1)<>0;
     sizex:=sprite_size[(atrib1 and $c0) shr 6];
-    sizey:=sprite_size[(atrib2 and $06) shr 1];
+    sizey:=sprite_size[(atrib2 and 6) shr 1];
     tx:=(atrib1 and $18) and (not(sizex-1));
     ty:=(atrib2 and $18) and (not(sizey-1));
     if flipx then tx:=(tx-sizex) and $1f;
     if flipy then ty:=(ty-sizey) and $1f;
-    sx:=(memoria[$580d+(f*$10)]+((color and $01) shl 8))+sprite_xoffs;
+    sx:=(memoria[$580d+(f*$10)]+((color and 1) shl 8))+sprite_xoffs;
     sy:=(256-(memoria[$580f+(f*$10)])-sizey)-(sprite_yoffs+1);
     nchar:=memoria[$580b+(f*$10)] and (bank_sprites-1);
     nchar:=nchar+((atrib1 and $7)*bank_sprites);
@@ -242,16 +242,16 @@ for f:=0 to $7ff do begin
     y:=f div 64;
     //Screen 0
     if gfx[0].buffer[f] then begin
-      color:=memoria[$1+(f*2)];
-      offs:=((nchar_prom[((0 and 1) shl 4)+((color and $03) shl 2)] and $0e) shr 1)*$100+tile_bank*$800;
-      nchar:=memoria[$0+(f*2)]+offs;
+      color:=memoria[1+(f*2)];
+      offs:=((nchar_prom[((0 and 1) shl 4)+((color and 3) shl 2)] and $e) shr 1)*$100+tile_bank*$800;
+      nchar:=memoria[0+(f*2)]+offs;
       put_gfx_trans(x*8,y*8,nchar,color shl 3,1,0);
       gfx[0].buffer[f]:=false;
     end;
     //Screen 1
     if gfx[0].buffer[$800+f] then begin
       color:=memoria[$1001+(f*2)];
-      offs:=((nchar_prom[((1 and 1) shl 4)+((color and $03) shl 2)] and $0e) shr 1)*$100+tile_bank*$800;
+      offs:=((nchar_prom[((1 and 1) shl 4)+((color and 3) shl 2)] and $e) shr 1)*$100+tile_bank*$800;
       nchar:=memoria[$1000+(f*2)]+offs;
       put_gfx_trans(x*8,y*8,nchar,color shl 3,2,0);
       gfx[0].buffer[$800+f]:=false;
@@ -259,7 +259,7 @@ for f:=0 to $7ff do begin
     //Screen 2
     if gfx[1].buffer[f] then begin
       color:=memoria[$2001+(f*2)];
-      offs:=((nchar_prom[((2 and 1) shl 4)+(color and $03)] and $e0) shr 5)*$100;
+      offs:=((nchar_prom[((2 and 1) shl 4)+(color and 3)] and $e0) shr 5)*$100;
       nchar:=memoria[$2000+(f*2)]+offs;
       put_gfx_trans(x*8,y*8,nchar,color shl 3,3,1);
       gfx[1].buffer[f]:=false;
@@ -267,7 +267,7 @@ for f:=0 to $7ff do begin
     //Screen 3
     if gfx[1].buffer[$800+f] then begin
       color:=memoria[$3001+(f*2)];
-      offs:=((nchar_prom[((3 and 1) shl 4)+(color and $03)] and $e0) shr 5)*$100;
+      offs:=((nchar_prom[((3 and 1) shl 4)+(color and 3)] and $e0) shr 5)*$100;
       nchar:=memoria[$3000+(f*2)]+offs;
       put_gfx_trans(x*8,y*8,nchar,color shl 3,4,1);
       gfx[1].buffer[$800+f]:=false;
@@ -294,20 +294,20 @@ procedure eventos_system86;
 begin
 if event.arcade then begin
   //marcade.in0
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   //marcade.in1
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //marcade.in2
-  if arcade_input.but0[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
@@ -329,34 +329,30 @@ procedure system86_principal;
 var
   f:word;
   h:byte;
-  frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=m6809_1.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    for h:=1 to MAIN_DIV do begin
-      //Main CPU
-      m6809_0.run(frame_m);
-      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-      //Sub CPU
-      m6809_1.run(frame_s);
-      frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
-      //Sound CPU
-      m6800_0.run(frame_mcu);
-      frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
-    end;
-    if f=239 then begin
+    eventos_system86;
+    if f=240 then begin
         update_video_system86;
         m6809_0.change_irq(ASSERT_LINE);
         m6809_1.change_irq(ASSERT_LINE);
         m6800_0.change_irq(HOLD_LINE);
         if copy_sprites then copy_sprites_hw;
     end;
+    for h:=1 to CPU_SYNC do begin
+      //Main CPU
+      m6809_0.run(frame_main);
+      frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+      //Sub CPU
+      m6809_1.run(frame_snd);
+      frame_snd:=frame_snd+m6809_1.tframes-m6809_1.contador;
+      //Sound CPU
+      m6800_0.run(frame_mcu);
+      frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
+    end;
   end;
-  eventos_system86;
   video_sync;
 end;
 end;
@@ -398,7 +394,7 @@ case direccion of
         end;
   $9001:scroll_x[0]:=(scroll_x[0] and $ff00) or valor;
   $9002:scroll_y[0]:=valor;
-  $9003:rom_nbank:=valor and $3;
+  $9003:rom_nbank:=valor and 3;
   $9004:begin
           prior[1]:=(valor and $e) shr 1;
           scroll_x[1]:=(scroll_x[1] and $ff) or ((valor and 1) shl 8);
@@ -505,7 +501,7 @@ function rthunder_sub_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$1fff:rthunder_sub_getbyte:=memoria[$4000+direccion]; //sprite ram
-  $2000..$3fff:rthunder_sub_getbyte:=memoria[$0+(direccion and $1fff)];  //video 1 ram
+  $2000..$3fff:rthunder_sub_getbyte:=memoria[0+(direccion and $1fff)];  //video 1 ram
   $4000..$5fff:rthunder_sub_getbyte:=memoria[$2000+(direccion and $1fff)]; //video 2 ram
   $6000..$7fff:rthunder_sub_getbyte:=rom_sub_bank[rom_sub_nbank,direccion and $1fff];
   $8000..$ffff:rthunder_sub_getbyte:=mem_misc[direccion];
@@ -519,8 +515,8 @@ case direccion of
               memoria[$4000+direccion]:=valor;
               if direccion=$1ff2 then copy_sprites:=true;
            end;
-  $2000..$3fff:if memoria[$0+(direccion and $1fff)]<>valor then begin  //video 1 ram
-                  memoria[$0+(direccion and $1fff)]:=valor;
+  $2000..$3fff:if memoria[0+(direccion and $1fff)]<>valor then begin  //video 1 ram
+                  memoria[0+(direccion and $1fff)]:=valor;
                   gfx[0].buffer[(direccion and $1fff) shr 1]:=true;
                end;
   $4000..$5fff:if memoria[$2000+(direccion and $1fff)]<>valor then begin //video 2 ram
@@ -528,7 +524,7 @@ case direccion of
                   gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
                end;
   $8800:m6809_1.change_irq(CLEAR_LINE);
-  $d803:rom_sub_nbank:=valor and $3;
+  $d803:rom_sub_nbank:=valor and 3;
   $8000..$87ff,$8801..$d802,$d804..$ffff:;
 end;
 end;
@@ -546,7 +542,7 @@ begin
 case direccion of
   0..$1fff:roishtar_sub_getbyte:=memoria[$4000+direccion]; //sprite ram
   $4000..$5fff:roishtar_sub_getbyte:=memoria[$2000+(direccion and $1fff)]; //video 2 ram
-  $6000..$7fff:roishtar_sub_getbyte:=memoria[$0+(direccion and $1fff)];  //video 1 ram
+  $6000..$7fff:roishtar_sub_getbyte:=memoria[0+(direccion and $1fff)];  //video 1 ram
   $8000..$ffff:roishtar_sub_getbyte:=mem_misc[direccion];
 end;
 end;
@@ -562,8 +558,8 @@ case direccion of
                   memoria[$2000+(direccion and $1fff)]:=valor;
                   gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
                end;
-  $6000..$7fff:if memoria[$0+(direccion and $1fff)]<>valor then begin  //video 1 ram
-                  memoria[$0+(direccion and $1fff)]:=valor;
+  $6000..$7fff:if memoria[0+(direccion and $1fff)]<>valor then begin  //video 1 ram
+                  memoria[0+(direccion and $1fff)]:=valor;
                   gfx[0].buffer[(direccion and $1fff) shr 1]:=true;
                end;
   $b000:m6809_1.change_irq(CLEAR_LINE);
@@ -599,7 +595,7 @@ end;
 function genpeitd_sub_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$5fff:genpeitd_sub_getbyte:=memoria[direccion];  //video 1 + video 2 ram + sprite ram
+  0..$5fff:genpeitd_sub_getbyte:=memoria[direccion];  //video 1 + video 2 ram + sprite ram
   $8000..$ffff:genpeitd_sub_getbyte:=mem_misc[direccion];
 end;
 end;
@@ -607,7 +603,7 @@ end;
 procedure genpeitd_sub_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1fff:if memoria[direccion]<>valor then begin  //video 1 ram
+  0..$1fff:if memoria[direccion]<>valor then begin  //video 1 ram
                   memoria[direccion]:=valor;
                   gfx[0].buffer[direccion shr 1]:=true;
                end;
@@ -629,7 +625,7 @@ function wndrmomo_sub_getbyte(direccion:word):byte;
 begin
 case direccion of
   $2000..$3fff:wndrmomo_sub_getbyte:=memoria[$4000+(direccion and $1fff)]; //sprite ram
-  $4000..$5fff:wndrmomo_sub_getbyte:=memoria[$0+(direccion and $1fff)];  //video 1 ram
+  $4000..$5fff:wndrmomo_sub_getbyte:=memoria[0+(direccion and $1fff)];  //video 1 ram
   $6000..$7fff:wndrmomo_sub_getbyte:=memoria[$2000+(direccion and $1fff)]; //video 2 ram
   $8000..$ffff:wndrmomo_sub_getbyte:=mem_misc[direccion];
 end;
@@ -642,8 +638,8 @@ case direccion of
                   memoria[$4000+(direccion and $1fff)]:=valor;
                   if direccion=$3ff2 then copy_sprites:=true;
                end;
-  $4000..$5fff:if memoria[$0+(direccion and $1fff)]<>valor then begin  //video 1 ram
-                  memoria[$0+(direccion and $1fff)]:=valor;
+  $4000..$5fff:if memoria[0+(direccion and $1fff)]<>valor then begin  //video 1 ram
+                  memoria[0+(direccion and $1fff)]:=valor;
                   gfx[0].buffer[(direccion and $1fff) shr 1]:=true;
                end;
   $6000..$7fff:if memoria[$2000+(direccion and $1fff)]<>valor then begin //video 2 ram
@@ -666,8 +662,9 @@ begin
  namco_snd_0.reset;
  ym2151_0.reset;
  if ((main_vars.tipo_maquina=124) or (main_vars.tipo_maquina=290) or (main_vars.tipo_maquina=291)) then namco_63701x_reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=m6809_1.tframes;
+ frame_mcu:=m6800_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$f;
@@ -767,11 +764,11 @@ screen_init(5,512,256,false,true);
 iniciar_video(288,224);
 getmem(memoria_temp,$100000);
 //Main CPU
-m6809_0:=cpu_m6809.Create(49152000 div 32,264*MAIN_DIV,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(49152000 div 32,264*CPU_SYNC,TCPU_M6809);
 //Sub CPU
-m6809_1:=cpu_m6809.Create(49152000 div 32,264*MAIN_DIV,TCPU_M6809);
+m6809_1:=cpu_m6809.Create(49152000 div 32,264*CPU_SYNC,TCPU_M6809);
 //MCU CPU
-m6800_0:=cpu_m6800.create(49152000 div 8,264*MAIN_DIV,TCPU_HD63701V);
+m6800_0:=cpu_m6800.create(49152000 div 8,264*CPU_SYNC,TCPU_HD63701V);
 m6800_0.change_io_calls(system86_in_port1,system86_in_port2,nil,nil,nil,nil,nil,nil);
 if ((main_vars.tipo_maquina=124) or (main_vars.tipo_maquina=290) or (main_vars.tipo_maquina=291)) then m6800_0.init_sound(sound_update_rthunder)
   else m6800_0.init_sound(sound_update_system86);
@@ -790,8 +787,8 @@ case main_vars.tipo_maquina of
             if not(roms_load(memoria_temp,rthunder_sub_rom)) then exit;
             m6809_1.change_ram_calls(rthunder_sub_getbyte,rthunder_sub_putbyte);
             //Pongo las ROMs en su banco
-            copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
-            for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
+            copymemory(@mem_misc[$8000],@memoria_temp[0],$8000);
+            for f:=0 to 3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
             //Cargar MCU
             if not(roms_load(memoria_temp,rthunder_mcu)) then exit;
             ptemp:=m6800_0.get_rom_addr;
@@ -999,13 +996,13 @@ case main_vars.tipo_maquina of
     end;
 end;
 for f:=0 to $1ff do begin
-  colores[f].r:=((memoria_temp[f] shr 0) and $01)*$0e+((memoria_temp[f] shr 1) and $01)*$1f+((memoria_temp[f] shr 2) and $01)*$43+((memoria_temp[f] shr 3) and $01)*$8f;
-  colores[f].g:=((memoria_temp[f] shr 4) and $01)*$0e+((memoria_temp[f] shr 5) and $01)*$1f+((memoria_temp[f] shr 6) and $01)*$43+((memoria_temp[f] shr 7) and $01)*$8f;
-  colores[f].b:=((memoria_temp[f+$200] shr 0) and $01)*$0e+((memoria_temp[f+$200] shr 1) and $01)*$1f+((memoria_temp[f+$200] shr 2) and $01)*$43+((memoria_temp[f+$200] shr 3) and $01)*$8f;
+  colores[f].r:=((memoria_temp[f] shr 0) and 1)*$e+((memoria_temp[f] shr 1) and 1)*$1f+((memoria_temp[f] shr 2) and 1)*$43+((memoria_temp[f] shr 3) and 1)*$8f;
+  colores[f].g:=((memoria_temp[f] shr 4) and 1)*$e+((memoria_temp[f] shr 5) and 1)*$1f+((memoria_temp[f] shr 6) and 1)*$43+((memoria_temp[f] shr 7) and 1)*$8f;
+  colores[f].b:=((memoria_temp[f+$200] shr 0) and 1)*$e+((memoria_temp[f+$200] shr 1) and 1)*$1f+((memoria_temp[f+$200] shr 2) and 1)*$43+((memoria_temp[f+$200] shr 3) and 1)*$8f;
 end;
 set_pal(colores,$200);
 // tiles/sprites color table
-for f:=$0 to $7ff do begin
+for f:=0 to $7ff do begin
   gfx[0].colores[f]:=memoria_temp[$400+f];
   gfx[1].colores[f]:=memoria_temp[$400+f];
   gfx[2].colores[f]:=memoria_temp[$400+$800+f];
@@ -1014,7 +1011,6 @@ end;
 copymemory(@nchar_prom[0],@memoria_temp[$1400],$20);
 //final
 freemem(memoria_temp);
-reset_system86;
 iniciar_system86:=true;
 end;
 

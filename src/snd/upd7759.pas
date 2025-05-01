@@ -437,10 +437,11 @@ begin
 	// flush the state back */
 	self.clocks_left:= clocks_left;
 	self.pos:=pos;
-  if out_>32767 then out_:=32767
-    else if out_<-32768 then out_:=-32768;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(out_*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(out_*self.amp);
+  out_:=trunc(out_*self.amp);
+  if out_>$7fff then out_:=$7fff
+    else if out_<-$7fff then out_:=-$7fff;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=out_;
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=out_;
 end;
 
 end.

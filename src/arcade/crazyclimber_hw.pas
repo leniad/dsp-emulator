@@ -20,11 +20,11 @@ const
         (n:'cc06';l:$800;p:0;crc:$481b64cc),(n:'cc05';l:$800;p:$1000;crc:$2c33b760),
         (n:'cc04';l:$800;p:$2000;crc:$332347cb),(n:'cc03';l:$800;p:$3000;crc:$4e4b3658));
         cclimber_bigsprites:array[0..1] of tipo_roms=(
-        (n:'cc02';l:$800;p:$0;crc:$14f3ecc9),(n:'cc01';l:$800;p:$800;crc:$21c0f9fb));
+        (n:'cc02';l:$800;p:0;crc:$14f3ecc9),(n:'cc01';l:$800;p:$800;crc:$21c0f9fb));
         cclimber_samples:array[0..1] of tipo_roms=(
-        (n:'cc13';l:$1000;p:$0;crc:$e0042f75),(n:'cc12';l:$1000;p:$1000;crc:$5da13aaa));
+        (n:'cc13';l:$1000;p:0;crc:$e0042f75),(n:'cc12';l:$1000;p:$1000;crc:$5da13aaa));
         cclimber_dip_a:array [0..3] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
+        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 1C','1C 2C','1C 3C','Free Play')),());
         cclimber_dip_b:array [0..1] of def_dip2=(
@@ -41,13 +41,13 @@ var
   f,x,y,nchar,attr,attr2,color:byte;
   flipx,flipy:boolean;
 begin
-for f:=$7 downto 0 do begin
+for f:=7 downto 0 do begin
     x:=memoria[$9883+(f*4)]+1;
     y:=240-memoria[$9882+(f*4)];
     attr:=memoria[(f*4)+$9881];
     attr2:=memoria[(f*4)+$9880];
     nchar:=((attr and $10) shl 3) or ((attr and $20) shl 1) or (attr2 and $3f);
-    color:=(attr and $0f) shl 2;
+    color:=(attr and $f) shl 2;
 		flipx:=(attr2 and $40)<>0;
 		flipy:=(attr2 and $80)<>0;
     put_gfx_sprite_mask(nchar,color,flipx,flipy,1,0,3);
@@ -84,9 +84,9 @@ for f:=0 to $3ff do begin
     y:=f div 32;
     if (f and $210)=$210 then begin
       attr:=memoria[$98dd];
-      color:=(attr and $7) shl 2;
-      nchar:=((attr and $08) shl 5) or memoria[$8800+tile_index];
-      put_gfx_mask(x*8,y*8,nchar,color+64,2,2,0,$3);
+      color:=(attr and 7) shl 2;
+      nchar:=((attr and 8) shl 5) or memoria[$8800+tile_index];
+      put_gfx_mask(x*8,y*8,nchar,color+64,2,2,0,3);
       gfx[2].buffer[tile_index]:=false;
       bs_changed:=true;
     end else put_gfx_block_trans(x*8,y*8,2,8,8);
@@ -96,7 +96,7 @@ end;
 flipx:=(memoria[$98dd] and $10)<>0;
 flipy:=(memoria[$98dd] and $20)<>0;
 if bs_changed then flip_surface(2,flipx,flipy);
-x:=memoria[$98df]-$8-(byte(flipx)*$80)-(byte(main_screen.flip_main_screen)*$27);
+x:=memoria[$98df]-8-(byte(flipx)*$80)-(byte(main_screen.flip_main_screen)*$27);
 y:=memoria[$98de]-(byte(flipy)*$80);
 //Poner todo en su sitio
 scroll__y_part2(1,3,8,@scroll_y);
@@ -115,49 +115,47 @@ procedure eventos_cclimber;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.up[1] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.down[1] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.left[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
   //P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $bf);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $80) else marcade.in1:=(marcade.in1 and $7f);
   //SYSTEM
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
 end;
 end;
 
 procedure cclimber_principal;
 var
   f:byte;
-  frame:single;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //main
-    z80_0.run(frame);
-    frame:=frame+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    eventos_cclimber;
+    if f=240 then begin
       if nmi_mask then z80_0.change_nmi(PULSE_LINE);
       update_video_cclimber;
     end;
+    //main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  eventos_cclimber;
   video_sync;
 end;
 end;
@@ -165,7 +163,7 @@ end;
 function cclimber_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$5fff:if z80_0.opcode then cclimber_getbyte:=mem_decode[direccion]
+  0..$5fff:if z80_0.opcode then cclimber_getbyte:=mem_decode[direccion]
               else cclimber_getbyte:=memoria[direccion];
   $6000..$6bff,$8000..$83ff,$8800..$8bff,$9820..$9fff:cclimber_getbyte:=memoria[direccion];
   $9000..$97ff:cclimber_getbyte:=memoria[$9000+(direccion and $3ff)];
@@ -201,7 +199,7 @@ case direccion of
                   memoria[$9c00+((direccion and $3ff) or $20)]:=valor;
                   gfx[0].buffer[(direccion and $3ff) or $20]:=true;
                 end;
-   $a000,$a003:nmi_mask:=(valor and $1)<>0;
+   $a000,$a003:nmi_mask:=(valor and 1)<>0;
    $a001..$a002:main_screen.flip_main_screen:=(valor and 1)<>0;
    $a004:if valor<>0 then cclimber_audio.trigger_w;
    $a800:cclimber_audio.change_freq(valor);
@@ -217,8 +215,8 @@ end;
 procedure cclimber_outbyte(port:word;valor:byte);
 begin
 case (port and $ff) of
-     $8:ay8910_0.control(valor);
-     $9:ay8910_0.write(valor);
+     8:ay8910_0.control(valor);
+     9:ay8910_0.write(valor);
 end;
 end;
 
@@ -239,8 +237,7 @@ begin
  z80_0.reset;
  ay8910_0.reset;
  cclimber_audio.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -253,7 +250,7 @@ var
   i,j,src:byte;
 const
   convtable:array[0..7,0..15] of byte=(
-		// 0xff marks spots which are unused and therefore unknown */
+		// 0xff marks spots which are unused and therefore unknown
 		( $44,$14,$54,$10,$11,$41,$05,$50,$51,$00,$40,$55,$45,$04,$01,$15 ),
 		( $44,$10,$15,$55,$00,$41,$40,$51,$14,$45,$11,$50,$01,$54,$04,$05 ),
 		( $45,$10,$11,$44,$05,$50,$51,$04,$41,$14,$15,$40,$01,$54,$55,$00 ),
@@ -265,11 +262,11 @@ const
 begin
 	for f:=0 to $5fff do begin
 		src:=memoria[f];
-		// pick the translation table from bit 0 of the address */
-		// and from bits 1 7 of the source data */
-		i:=(f and 1) or (src and $2) or ((src and $80) shr 5);
-		// pick the offset in the table from bits 0 2 4 6 of the source data */
-		j:=(src and $01) or ((src and $04) shr 1) or ((src and $10) shr 2) or ((src and $40) shr 3);
+		// pick the translation table from bit 0 of the address
+		// and from bits 1 7 of the source data
+		i:=(f and 1) or (src and 2) or ((src and $80) shr 5);
+		// pick the offset in the table from bits 0 2 4 6 of the source data
+		j:=(src and 1) or ((src and 4) shr 1) or ((src and $10) shr 2) or ((src and $40) shr 3);
 		// decode the opcodes */
  		mem_decode[f]:=(src and $aa) or convtable[i,j];
   end;
@@ -306,13 +303,12 @@ z80_0:=cpu_z80.create(18432000 div 3 div 2,256);
 z80_0.change_ram_calls(cclimber_getbyte,cclimber_putbyte);
 z80_0.change_io_calls(cclimber_inbyte,cclimber_outbyte);
 z80_0.init_sound(cclimber_sound_update);
-//Sound Chips
-ay8910_0:=ay8910_chip.create(3072000 div 2,AY8910,1);
-ay8910_0.change_io_calls(nil,nil,cclimber_porta_write,nil);
-cclimber_audio:=tcclimber_audio.create;
-//cargar y desencriptar las ROMS
 if not(roms_load(@memoria,cclimber_rom)) then exit;
 cclimber_decode;
+//Sound Chips
+ay8910_0:=ay8910_chip.create(3072000 div 2,AY8910);
+ay8910_0.change_io_calls(nil,nil,cclimber_porta_write,nil);
+cclimber_audio:=tcclimber_audio.create;
 //samples
 if not(roms_load(cclimber_audio.get_rom_addr,cclimber_samples)) then exit;
 //convertir chars
@@ -337,18 +333,18 @@ compute_resistor_weights(0,	255, -1.0,
 			0,nil,nil,0,0);
 for f:=0 to $5f do begin
 		// red component */
-		bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
+		bit0:=(memoria_temp[f] shr 0) and 1;
+		bit1:=(memoria_temp[f] shr 1) and 1;
+		bit2:=(memoria_temp[f] shr 2) and 1;
 		colores[f].r:=combine_3_weights(@rg_weights, bit0, bit1, bit2);
 		// green component */
-		bit0:=(memoria_temp[f] shr 3) and $01;
-		bit1:=(memoria_temp[f] shr 4) and $01;
-		bit2:=(memoria_temp[f] shr 5) and $01;
+		bit0:=(memoria_temp[f] shr 3) and 1;
+		bit1:=(memoria_temp[f] shr 4) and 1;
+		bit2:=(memoria_temp[f] shr 5) and 1;
 		colores[f].g:=combine_3_weights(@rg_weights, bit0, bit1, bit2);
 		// blue component */
-		bit0:=(memoria_temp[f] shr 6) and $01;
-		bit1:=(memoria_temp[f] shr 7) and $01;
+		bit0:=(memoria_temp[f] shr 6) and 1;
+		bit1:=(memoria_temp[f] shr 7) and 1;
 		colores[f].b:=combine_2_weights(@b_weights, bit0, bit1);
 end;
 set_pal(colores,$60);
@@ -358,7 +354,6 @@ marcade.dswb:=$10;
 marcade.dswa_val2:=@cclimber_dip_a;
 marcade.dswb_val2:=@cclimber_dip_b;
 //final
-reset_cclimber;
 iniciar_cclimber:=true;
 end;
 

@@ -344,8 +344,7 @@ begin
     marcade.in1:=$7f00;
     marcade.in2:=$7f00;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  sound_latch:=0;
 end;
 

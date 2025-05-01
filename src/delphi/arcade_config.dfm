@@ -16,6 +16,7 @@ object config_arcade: Tconfig_arcade
   Position = poDesktopCenter
   OnClose = FormClose
   OnKeyUp = FormKeyUp
+  OnShow = FormShow
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8

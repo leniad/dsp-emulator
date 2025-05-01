@@ -49,7 +49,6 @@ var
  main_rom,sub_rom:array[0..1,0..$3fff] of byte;
  banco_main,banco_sub,soundlatch,xain_pri,vblank:byte;
  scroll_x_p1,scroll_y_p1,scroll_x_p0,scroll_y_p0:word;
- xain_scanline:array[0..271] of word;
  //mcu
  mcu_mem:array[0..$7ff] of byte;
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
@@ -220,24 +219,30 @@ end;
 
 procedure xain_principal;
 var
-  f,l:word;
-  frame_m,frame_s,frame_snd,frame_mcu:single;
+  f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=m6809_1.tframes;
-frame_snd:=m6809_2.tframes;
-frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
+    eventos_xain;
+    case f of
+        0:vblank:=0;
+        16,32,48,64,80,96,112,128,144,160,176,192,208,224,264:m6809_0.change_firq(ASSERT_LINE);
+        239:vblank:=$20;
+        240:begin
+              m6809_0.change_nmi(ASSERT_LINE);
+              update_video_xain;
+              m6809_0.change_firq(ASSERT_LINE);
+            end;
+    end;
     for h:=1 to CPU_SYNC do begin
       //main
-      m6809_0.run(frame_m);
-      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
+      m6809_0.run(frame_main);
+      frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
       //sub
-      m6809_1.run(frame_s);
-      frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
+      m6809_1.run(frame_sub);
+      frame_sub:=frame_sub+m6809_1.tframes-m6809_1.contador;
       //snd
       m6809_2.run(frame_snd);
       frame_snd:=frame_snd+m6809_2.tframes-m6809_2.contador;
@@ -245,19 +250,7 @@ while EmuStatus=EsRunning do begin
       m6805_0.run(frame_mcu);
       frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
     end;
-    //video
-    case xain_scanline[f] of
-        8:vblank:=0;
-        $f7:vblank:=$20;
-        $f8:begin
-              m6809_0.change_nmi(ASSERT_LINE);
-              update_video_xain;
-            end;
-    end;
-    if f<>0 then l:=f-1 else l:=271;
-    if (((xain_scanline[l] and 8)=0) and ((xain_scanline[f] and 8)<>0)) then m6809_0.change_firq(ASSERT_LINE);
   end;
-  eventos_xain;
   video_sync;
 end;
 end;
@@ -435,10 +428,10 @@ procedure xain_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$7ff:mem_snd[direccion]:=valor;
-  $2800:ym2203_0.Control(valor);
-  $2801:ym2203_0.Write(valor);
-  $3000:ym2203_1.Control(valor);
-  $3001:ym2203_1.Write(valor);
+  $2800:ym2203_0.control(valor);
+  $2801:ym2203_0.write(valor);
+  $3000:ym2203_1.control(valor);
+  $3001:ym2203_1.write(valor);
   $4000..$ffff:; //ROM
 end;
 end;
@@ -463,8 +456,10 @@ begin
  m6805_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_sub:=m6809_1.tframes;
+ frame_snd:=m6809_2.tframes;
+ frame_mcu:=m6805_0.tframes;
  banco_main:=0;
  banco_sub:=0;
  marcade.in0:=$ff;
@@ -517,68 +512,58 @@ screen_init(4,512,512,false,true);
 screen_mod_sprites(4,256,256,$ff,$ff);
 iniciar_video(256,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_0:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_M6809);
 m6809_0.change_ram_calls(xain_getbyte,xain_putbyte);
+if not(roms_load(@memoria_temp,xain_rom)) then exit;
+copymemory(@memoria[$8000],@memoria_temp,$8000);
+for f:=0 to 1 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sub CPU
-m6809_1:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_1:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_M6809);
 m6809_1.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
+if not(roms_load(@memoria_temp,xain_sub)) then exit;
+copymemory(@mem_misc[$8000],@memoria_temp,$8000);
+for f:=0 to 1 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sound CPU
-m6809_2:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_2:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_M6809);
 m6809_2.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
 m6809_2.init_sound(xain_sound_update);
+if not(roms_load(@mem_snd,xain_snd)) then exit;
 //MCU CPU
 m6805_0:=cpu_m6805.create(3000000,272*CPU_SYNC,tipo_m68705);
 m6805_0.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
+if not(roms_load(@mcu_mem,xain_mcu)) then exit;
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000);
 ym2203_0.change_irq_calls(snd_irq);
 ym2203_1:=ym2203_chip.create(3000000);
-//Main roms
-if not(roms_load(@memoria_temp,xain_rom)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp,$8000);
-for f:=0 to 1 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//Sub roms
-if not(roms_load(@memoria_temp,xain_sub)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@mem_misc[$8000],@memoria_temp,$8000);
-for f:=0 to 1 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//Cargar Sound
-if not(roms_load(@mem_snd,xain_snd)) then exit;
-//Cargar MCU
-if not(roms_load(@mcu_mem,xain_mcu)) then exit;
-//convertir chars
+//chars
 if not(roms_load(@memoria_temp,xain_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,2,4,6);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
-//convertir sprites
+//sprites
 if not(roms_load(@memoria_temp,xain_sprites)) then exit;
 init_gfx(1,16,16,$800);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$8000*4*8+0,$8000*4*8+4,0,4);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//convertir tiles1
+//tiles1
 if not(roms_load(@memoria_temp,xain_tiles1)) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//convertir tiles2
+//tiles2
 if not(roms_load(@memoria_temp,xain_tiles2)) then exit;
 init_gfx(3,16,16,$800);
 gfx[3].trans[0]:=true;
 convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//iniciar scanlines
-for f:=8 to $ff do xain_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
-for f:=$e8 to $ff do xain_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
 //DIP
 marcade.dswa:=$3f;
 marcade.dswb:=$ff;
 marcade.dswa_val2:=@xain_dip_a;
 marcade.dswb_val2:=@xain_dip_b;
 //final
-reset_xain;
 iniciar_xain:=true;
 end;
 

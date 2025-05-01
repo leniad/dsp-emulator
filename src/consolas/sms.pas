@@ -263,12 +263,12 @@ begin
                       sms_0.io_enabled:=(valor and 4)=0;
                       sms_0.cart_enabled:=(valor and $e0)<>$e0;
                    end;
-    $40..$7f:sn_76496_0.Write(valor);
+    $40..$7f:sn_76496_0.write(valor);
     $80..$bf:if (puerto and 1)<>0 then vdp_0.register_w(valor)
                 else vdp_0.vram_w(valor);
     $c0..$ff:case (puerto and $ff) of
                 $f0:ym2413_0.address(valor);
-                $f1:ym2413_0.Write(valor);
+                $f1:ym2413_0.write(valor);
                 $f2:sms_0.old_f2:=valor;
              end;
   end;
@@ -309,7 +309,7 @@ begin
  sn_76496_0.reset;
  vdp_0.reset;
  ym2413_0.reset;
- reset_audio;
+ reset_game_general;
  sms_0.keys[0]:=$ff;
  sms_0.keys[1]:=$ff;
  sms_0.mapper.slot2_ram:=false;
@@ -375,12 +375,6 @@ case model of
       sn_76496_0.change_clock(CLOCK_NTSC);
   end;
 end;
-end;
-
-procedure sms_configurar;
-begin
-  SMSConfig.Show;
-  while SMSConfig.Showing do application.ProcessMessages;
 end;
 
 procedure abrir_sms;
@@ -495,7 +489,6 @@ llamadas_maquina.bucle_general:=sms_principal;
 llamadas_maquina.reset:=reset_sms;
 llamadas_maquina.cartuchos:=abrir_sms;
 llamadas_maquina.grabar_snapshot:=sms_grabar_snapshot;
-llamadas_maquina.configurar:=sms_configurar;
 if sms_0.model=0 then llamadas_maquina.fps_max:=FPS_PAL
   else llamadas_maquina.fps_max:=FPS_NTSC;
 iniciar_audio(false);
@@ -525,7 +518,6 @@ sms_0.mapper.max:=1;
 sms_0.mapper.max_bios:=1;
 //Bios
 change_sms_model(sms_0.model,true);
-reset_sms;
 if main_vars.console_init then abrir_sms;
 iniciar_sms:=true;
 end;

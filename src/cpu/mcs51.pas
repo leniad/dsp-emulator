@@ -781,13 +781,19 @@ end;
 procedure cpu_mcs51.run(maximo:single);
 var
   f,instruccion,pos,tempb,tempb2,estados_demas:byte;
-  tempw:word;
+  h,tempw:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
 if self.pedir_halt<>CLEAR_LINE then begin
-  self.contador:=trunc(maximo);
-  exit;
+  tempw:=trunc(maximo);
+  for h:=1 to tempw do begin
+    self.contador:=self.contador+1;
+    //if @self.despues_instruccion<>nil then self.despues_instruccion(1);
+    timers.update(1,self.numero_cpu);
+    if self.pedir_halt=CLEAR_LINE then break;
+  end;
+  if self.pedir_halt<>CLEAR_LINE then exit;
 end;
 //Calcular la paridad si cambia r.a
 if self.calc_parity then begin

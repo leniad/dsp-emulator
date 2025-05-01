@@ -95,6 +95,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+      eventos_trackfield;
       if f=240 then begin
           if irq_ena then m6809_0.change_irq(HOLD_LINE);
           update_video_trackfield;
@@ -107,7 +108,6 @@ while EmuStatus=EsRunning do begin
       frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
   //General
-  eventos_trackfield;
   video_sync;
 end;
 end;
@@ -280,8 +280,6 @@ begin
  frame_snd:=z80_0.tframes;
  vlm5030_0.reset;
  dac_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -381,7 +379,6 @@ marcade.dswb:=$59;
 marcade.dswa_val2:=@trackfield_dip_a;
 marcade.dswb_val2:=@trackfield_dip_b;
 //final
-reset_trackfield;
 iniciar_trackfield:=true;
 end;
 

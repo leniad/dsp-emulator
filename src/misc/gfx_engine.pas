@@ -1,5 +1,5 @@
 ﻿unit gfx_engine;
-{$ifdef fpc}{$asmmode intel}{$endif}
+{$ifdef fpc}{$ifdef CPU386}{$asmmode intel}{$endif}{$endif}
 
 interface
 
@@ -79,10 +79,10 @@ procedure fill_full_screen(screen:byte;color:word);
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
 //Misc
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
-procedure reset_video;
+procedure reset_gfx;
 
 implementation
-uses main_engine;
+uses main_engine,spectrum_misc;
 
 //GFX
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
@@ -482,17 +482,7 @@ end;
 end;
 
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
-{$IFDEF CPU64}
-var
-  f:cardinal;
-begin
-  if cantidad=0 then exit;
-  for f:=1 to cantidad do begin
-      dest^:=valor;
-      inc(dest);
-  end;
-end;
-{$ELSE}
+{$ifdef CPU386}
 asm
     cmp cantidad,0
     je @salir
@@ -508,6 +498,16 @@ asm
     pop eax
     pop edi
   @salir:
+end;
+{$ELSE}
+var
+  f:cardinal;
+begin
+  if cantidad=0 then exit;
+  for f:=1 to cantidad do begin
+      dest^:=valor;
+      inc(dest);
+  end;
 end;
 {$ENDIF}
 
@@ -1262,7 +1262,7 @@ begin
 fillword(pantalla[screen].pixels,pantalla[screen].w*pantalla[screen].h,paleta[color]);
 end;
 
-procedure reset_video;
+procedure reset_gfx;
 var
   f:byte;
 begin
@@ -1270,6 +1270,8 @@ begin
   fillchar(buffer_sprites,$2000,0);
   fillchar(buffer_sprites_w,$2000,0);
   fillchar(buffer_color,MAX_COLOR_BUFFER,1);
+  //Spectrum
+  fillchar(borde.buffer,78000,$80);
 end;
 
 end.

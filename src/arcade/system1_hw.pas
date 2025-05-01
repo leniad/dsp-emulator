@@ -20,10 +20,12 @@ function system1_snd_getbyte_ppi(direccion:word):byte;
 procedure system1_snd_putbyte(direccion:word;valor:byte);
 procedure system1_port_a_write(valor:byte);
 procedure system1_port_b_write(valor:byte);
+procedure system1_port_gardia_write(valor:byte);
 procedure system1_port_c_write(valor:byte);
 //Sound
 procedure system1_sound_update;
 procedure system1_sound_irq;
+procedure system1_ready_cb(state:byte);
 //Misc
 procedure system1_adjust_cycle(instruccion:byte);
 
@@ -133,19 +135,19 @@ for f:=0 to 31 do begin
 			srcaddr:=srcaddr+stride;
 			// skip if outside of our clipping area
 			if (y<0) or (y>256) then continue;
-			// iterate over X */
+			// iterate over X
       if (srcaddr and $8000)<>0 then addrdelta:=-1
         else addrdelta:=1;
       curaddr:=srcaddr;
       x:=xstart;
       while True do begin
 				data:=memoria_sprites[gfxbankbase+(curaddr and $7fff)];
-				// non-flipped case */
+				// non-flipped case
 				if (curaddr and $8000)=0 then begin
 					color1:=data shr 4;
 					color2:=data and $f;
 				end else begin
-					color1:=data and $0f;
+					color1:=data and $f;
 					color2:=data shr 4;
 				end;
 				// stop when we see color 0x0f
@@ -154,7 +156,7 @@ for f:=0 to 31 do begin
 				if (color1<>0) then begin
 					if ((x>=0) and (x<=255)) then begin
 						prevpix:=sprites_final_screen[destbase+x];
-						if ((prevpix and $0f)<>0) then begin
+						if ((prevpix and $f)<>0) then begin
               sprite_collide[((prevpix shr 4) and $1f)+32*f]:=1;
               sprite_collide_summary:=1;
             end;
@@ -167,7 +169,7 @@ for f:=0 to 31 do begin
 				if (color2<>0) then begin
 					if (((x+1)>=0) and ((x+1)<=255)) then begin
 						prevpix:=sprites_final_screen[destbase+x+1];
-						if ((prevpix and $0f)<>0) then begin
+						if ((prevpix and $f)<>0) then begin
               sprite_collide[((prevpix shr 4) and $1f)+32*f]:=1;
               sprite_collide_summary:=1;
             end;
@@ -199,7 +201,7 @@ for y:=0 to 255 do begin
 		// get the base of the left and right pixmaps for the effective background Y
 		bgbase[0]:=bgpixmaps[(bgy shr 8)*2+0];
 		bgbase[1]:=bgpixmaps[(bgy shr 8)*2+1];
-		// iterate over pixels */
+		// iterate over pixels
 		for x:=0 to 255 do begin
 			bgx:=(x-bgxscroll) and $1ff;
 			fgpix:=final_screen[char_screen,fgbase+x];
@@ -311,8 +313,8 @@ procedure eventos_system1;
 begin
 if event.arcade then begin
   //System
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //P1
@@ -341,8 +343,14 @@ begin //soundport_w
 end;
 
 procedure system1_port_b_write(valor:byte);
-begin //videoport_w
+begin
   rom_bank:=(valor and $c) shr 2;
+  system1_videomode:=valor;
+end;
+
+procedure system1_port_gardia_write(valor:byte);
+begin
+  rom_bank:=(((valor and $40) shr 5) or ((valor and 4) shr 2));
   system1_videomode:=valor;
 end;
 
@@ -350,12 +358,18 @@ procedure system1_port_c_write(valor:byte);
 begin //sound_controlw
   if (valor and $80)<>0 then z80_1.change_nmi(CLEAR_LINE)
     else z80_1.change_nmi(ASSERT_LINE);
-  bg_ram_bank:=(valor shr 1) and $3;
+  bg_ram_bank:=(valor shr 1) and 3;
 end;
 
 procedure system1_adjust_cycle(instruccion:byte);
 begin
   z80_0.contador:=z80_0.contador+1;
+end;
+
+procedure system1_ready_cb(state:byte);
+begin
+  if state=CLEAR_LINE then z80_1.change_halt(ASSERT_LINE)
+    else z80_1.change_halt(CLEAR_LINE);
 end;
 
 //Main
@@ -365,12 +379,13 @@ case main_vars.tipo_maquina of
   27,35,36,153,155,384:pio_0.reset;
   37,151,152,154:pia8255_0.reset;
 end;
-sn_76496_0.reset;
-sn_76496_1.reset;
 z80_0.reset;
 z80_1.reset;
-reset_video;
-reset_audio;
+frame_main:=z80_0.tframes;
+frame_snd:=z80_1.tframes;
+sn_76496_0.reset;
+sn_76496_1.reset;
+reset_game_general;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;

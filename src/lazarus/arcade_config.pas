@@ -26,12 +26,12 @@ type
     procedure Button2Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
     { public declarations }
   end;
-  procedure activate_arcade_config;
 
 var
   config_arcade: Tconfig_arcade;
@@ -121,15 +121,15 @@ begin
       end;
     end;
   end;
-  close;
+config_arcade.close;
 end;
 
 procedure Tconfig_arcade.Button2Click(Sender: TObject);
 begin
-  close;
+config_arcade.close;
 end;
 
-procedure Tconfig_arcade.FormClose(Sender: TObject;var CloseAction: TCloseAction);
+procedure Tconfig_arcade.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   f,h:byte;
 begin
@@ -153,7 +153,7 @@ begin
     end;
 end;
 
-procedure activate_arcade_config;
+procedure Tconfig_arcade.FormShow(Sender: TObject);
 procedure montar_paneles(pos,dip_pos:byte);
 begin
   Combobox_dip[pos,dip_pos]:=TComboBox.create(config_arcade);
@@ -237,8 +237,6 @@ while dip_tmp2.name<>'' do begin
 end;
 end;
 begin
-  //Si no hay Dip Switch me salgo ya
-  if ((marcade.dswa_val=nil) and (marcade.dswa_val2=nil)) then exit;
   config_arcade.GroupBox2.Visible:=false;
   config_arcade.GroupBox3.Visible:=false;
   config_arcade.Width:=279;
@@ -262,12 +260,7 @@ begin
     if marcade.dswc_val2<>nil then put_dip2(2,marcade.dswc_val2,marcade.dswc)
       else put_dip(2,marcade.dswc_val,marcade.dswc);
   end;
-  //Mostrar ventana
-  config_arcade.Show;
-  config_arcade.SetFocus;
-  while config_arcade.Showing do application.ProcessMessages;
 end;
-
 
 initialization
   {$I arcade_config.lrs}

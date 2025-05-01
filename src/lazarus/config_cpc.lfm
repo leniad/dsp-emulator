@@ -10,9 +10,9 @@ object configcpc: Tconfigcpc
   ClientWidth = 776
   DesignTimePPI = 120
   KeyPreview = True
+  LCLVersion = '4.0.0.1'
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
     Left = 25
     Height = 204
@@ -75,8 +75,8 @@ object configcpc: Tconfigcpc
       Top = 140
       Width = 41
       Caption = 'Open'
-      OnClick = Button15Click
       TabOrder = 6
+      OnClick = Button15Click
     end
   end
   object GroupBox2: TGroupBox
@@ -136,8 +136,8 @@ object configcpc: Tconfigcpc
       Top = 10
       Width = 41
       Caption = 'Open'
-      OnClick = Button1Click
       TabOrder = 6
+      OnClick = Button1Click
     end
     object Button2: TButton
       Left = 669
@@ -145,8 +145,8 @@ object configcpc: Tconfigcpc
       Top = 10
       Width = 41
       Caption = 'Clear'
-      OnClick = Button2Click
       TabOrder = 7
+      OnClick = Button2Click
     end
     object Button3: TButton
       Left = 620
@@ -154,8 +154,8 @@ object configcpc: Tconfigcpc
       Top = 44
       Width = 41
       Caption = 'Open'
-      OnClick = Button3Click
       TabOrder = 8
+      OnClick = Button3Click
     end
     object Button4: TButton
       Left = 669
@@ -163,8 +163,8 @@ object configcpc: Tconfigcpc
       Top = 44
       Width = 41
       Caption = 'Clear'
-      OnClick = Button4Click
       TabOrder = 9
+      OnClick = Button4Click
     end
     object Button5: TButton
       Left = 620
@@ -172,8 +172,8 @@ object configcpc: Tconfigcpc
       Top = 78
       Width = 41
       Caption = 'Open'
-      OnClick = Button5Click
       TabOrder = 10
+      OnClick = Button5Click
     end
     object Button6: TButton
       Left = 669
@@ -181,8 +181,8 @@ object configcpc: Tconfigcpc
       Top = 78
       Width = 41
       Caption = 'Clear'
-      OnClick = Button6Click
       TabOrder = 11
+      OnClick = Button6Click
     end
     object Button8: TButton
       Left = 669
@@ -190,8 +190,8 @@ object configcpc: Tconfigcpc
       Top = 111
       Width = 41
       Caption = 'Clear'
-      OnClick = Button8Click
       TabOrder = 12
+      OnClick = Button8Click
     end
     object Button7: TButton
       Left = 620
@@ -199,8 +199,8 @@ object configcpc: Tconfigcpc
       Top = 111
       Width = 41
       Caption = 'Open'
-      OnClick = Button7Click
       TabOrder = 13
+      OnClick = Button7Click
     end
     object Button9: TButton
       Left = 620
@@ -208,8 +208,8 @@ object configcpc: Tconfigcpc
       Top = 145
       Width = 41
       Caption = 'Open'
-      OnClick = Button9Click
       TabOrder = 14
+      OnClick = Button9Click
     end
     object Button10: TButton
       Left = 669
@@ -217,8 +217,8 @@ object configcpc: Tconfigcpc
       Top = 145
       Width = 41
       Caption = 'Clear'
-      OnClick = Button10Click
       TabOrder = 15
+      OnClick = Button10Click
     end
     object Button12: TButton
       Left = 669
@@ -226,8 +226,8 @@ object configcpc: Tconfigcpc
       Top = 179
       Width = 41
       Caption = 'Clear'
-      OnClick = Button12Click
       TabOrder = 16
+      OnClick = Button12Click
     end
     object Button11: TButton
       Left = 620
@@ -235,8 +235,8 @@ object configcpc: Tconfigcpc
       Top = 179
       Width = 41
       Caption = 'Open'
-      OnClick = Button11Click
       TabOrder = 17
+      OnClick = Button11Click
     end
     object Label1: TLabel
       Left = 16
@@ -293,8 +293,8 @@ object configcpc: Tconfigcpc
     Top = 490
     Width = 131
     Caption = 'OK'
-    OnClick = Button13Click
     TabOrder = 2
+    OnClick = Button13Click
   end
   object Button14: TButton
     Left = 470
@@ -302,8 +302,8 @@ object configcpc: Tconfigcpc
     Top = 490
     Width = 131
     Caption = 'CANCEL'
-    OnClick = Button14Click
     TabOrder = 3
+    OnClick = Button14Click
   end
   object GroupBox7: TGroupBox
     Left = 464
@@ -380,8 +380,8 @@ object configcpc: Tconfigcpc
       Top = 15
       Width = 60
       Caption = 'Color'
-      OnChange = RadioButton9Change
       TabOrder = 0
+      OnChange = RadioButton9Change
     end
     object RadioButton10: TRadioButton
       Left = 13
@@ -389,8 +389,8 @@ object configcpc: Tconfigcpc
       Top = 35
       Width = 63
       Caption = 'Green'
-      OnChange = RadioButton10Change
       TabOrder = 1
+      OnChange = RadioButton10Change
     end
     object GroupBox5: TGroupBox
       Left = 2

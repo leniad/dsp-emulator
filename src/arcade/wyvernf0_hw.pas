@@ -144,11 +144,10 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to 255 do begin
-  case f of
-    240:begin
-          z80_0.change_irq(HOLD_LINE);
-          update_video_wyvernf0;
-        end;
+  eventos_wyvernf0;
+  if f=240 then begin
+    z80_0.change_irq(HOLD_LINE);
+    update_video_wyvernf0;
   end;
   //main
   z80_0.run(frame_main);
@@ -159,7 +158,6 @@ while EmuStatus=EsRunning do begin
   //mcu
   taito_68705_0.run;
  end;
- eventos_wyvernf0;
  video_sync;
 end;
 end;
@@ -295,8 +293,6 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  dac_0.reset;
- reset_video;
- reset_audio;
  banco_rom:=0;
  banco_ram:=0;
  sound_nmi_ena:=false;
@@ -374,7 +370,6 @@ marcade.dswb_val2:=@wyvernf0_dip_b;
 marcade.dswc:=$d4;
 marcade.dswc_val2:=@wyvernf0_dip_c;
 //final
-reset_wyvernf0;
 iniciar_wyvernf0:=true;
 end;
 

@@ -113,6 +113,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_rocnrope;
     if f=240 then begin
       update_video_rocnrope;
       if irq_ena then m6809_0.change_irq(ASSERT_LINE);
@@ -123,7 +124,6 @@ while EmuStatus=EsRunning do begin
     //snd
     konamisnd_0.run;
   end;
-  eventos_rocnrope;
   video_sync;
 end;
 end;
@@ -175,8 +175,6 @@ begin
  m6809_0.reset;
  frame_main:=m6809_0.tframes;
  konamisnd_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -212,7 +210,7 @@ if not(roms_load(@memoria,rocnrope_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
 mem_opcodes[$703d-$6000]:=$98;  //Patch
 //Sound Chip
-konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,$100);
 if not(roms_load(@konamisnd_0.memoria,rocnrope_snd)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,rocnrope_chars)) then exit;
@@ -259,7 +257,6 @@ marcade.dswa_val2:=@rocnrope_dip_a;
 marcade.dswb_val2:=@rocnrope_dip_b;
 marcade.dswc_val2:=@rocnrope_dip_c;
 //final
-reset_rocnrope;
 iniciar_rocnrope:=true;
 end;
 

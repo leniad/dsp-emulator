@@ -97,12 +97,12 @@ begin
 init_controls(false,true,true,false);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+      eventos_coleco;
       z80_0.run(frame_main);
       frame_main:=frame_main+z80_0.tframes-z80_0.contador;
       tms_0.refresh(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
-  eventos_coleco;
   video_sync;
 end;
 end;
@@ -225,7 +225,6 @@ begin
  ay8910_0.reset;
  tms_0.reset;
  if coleco_0.eprom_type<>0 then i2cmem_0.reset;
- reset_audio;
  //Importante o el juego 'The Yolk's on You' se para
  for f:=0 to $3ff do memoria[$6000+f]:=random(256);
  coleco_0.joymode:=false;
@@ -331,7 +330,7 @@ case indice of
     2:nombre:=changefileext(nombre,'.csn');
 end;
 if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
-    if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+    if MessageDlg(leng.mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 end;
 snapshot_w(nombre,SCOLECO);
 Directory.coleco:=ExtractFilePath(nombre);
@@ -368,13 +367,12 @@ z80_0.init_sound(coleco_sound_update);
 //TMS
 tms_0:=tms99xx_chip.create(1,coleco_interrupt);
 //Chip Sonido
-ay8910_0:=ay8910_chip.create(3579545 div 2,AY8910,1);
+ay8910_0:=ay8910_chip.create(3579545 div 2,AY8910);
 sn_76496_0:=sn76496_chip.Create(3579545);
 //cargar roms
 if not(roms_load(@rom,coleco_bios)) then exit;
 //Importante!!!
 coleco_0.eprom_type:=0;
-reset_coleco;
 if main_vars.console_init then abrir_coleco;
 iniciar_coleco:=true;
 end;

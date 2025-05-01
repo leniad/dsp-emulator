@@ -16,9 +16,9 @@ object load_dsk: Tload_dsk
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   KeyPreview = True
+  LCLVersion = '4.0.0.1'
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
     Left = 10
     Height = 240
@@ -60,10 +60,10 @@ object load_dsk: Tload_dsk
     Directory = 'C:\Users\Dani\Desktop'
     ItemHeight = 0
     Mask = '*.zip;*.dsk;*.ipf'
-    OnClick = FileListBox1Click
-    OnDblClick = FileListBox1DblClick
     TabOrder = 1
     TabStop = False
+    OnClick = FileListBox1Click
+    OnDblClick = FileListBox1DblClick
   end
   object Button1: TButton
     Left = 609
@@ -71,8 +71,8 @@ object load_dsk: Tload_dsk
     Top = 170
     Width = 121
     Caption = 'CANCELAR'
-    OnClick = Button1Click
     TabOrder = 2
+    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 609
@@ -80,8 +80,8 @@ object load_dsk: Tload_dsk
     Top = 80
     Width = 121
     Caption = 'CARGAR'
-    OnClick = Button2Click
     TabOrder = 3
+    OnClick = Button2Click
   end
   object DirectoryEdit1: TDirectoryEdit
     Left = 10

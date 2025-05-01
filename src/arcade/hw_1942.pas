@@ -293,8 +293,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -338,8 +337,8 @@ z80_1:=cpu_z80.create(3000000,$100);
 z80_1.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
 z80_1.init_sound(hw1942_sound_update);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
-AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910);
+AY8910_1:=ay8910_chip.create(1500000,AY8910);
 //cargar roms y ponerlas en su sitio
 if not(roms_load(@memoria_temp,hw1942_rom)) then exit;
 copymemory(@memoria,@memoria_temp,$8000);

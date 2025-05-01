@@ -181,7 +181,7 @@ begin
  z80_r.a:=$14;
  sn_76496_0.reset;
  vdp_0.reset;
- reset_audio;
+ reset_game_general;
  gg_0.mapper.slot2_ram:=false;
  gg_0.keys[0]:=$ff;
  gg_0.keys[1]:=$80;
@@ -197,6 +197,7 @@ begin
  gg_0.io[4]:=$ff;
  gg_0.io[5]:=0;
  gg_0.io[6]:=$ff;
+ sms_0.push_pause:=false;
 end;
 
 procedure abrir_gg;
@@ -306,7 +307,6 @@ sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
 fillchar(sms_0.mapper.bios[0],sizeof(sms_0.mapper.bios),0);
 fillchar(sms_0.mapper.rom[0],sizeof(sms_0.mapper.rom),0);
 gg_0.mapper.max:=1;
-reset_gg;
 if main_vars.console_init then abrir_gg;
 iniciar_gg:=true;
 end;

@@ -201,21 +201,21 @@ procedure eventos_freekick;
 begin
 if event.arcade then begin
   //IN0
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //IN1
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
@@ -224,20 +224,18 @@ end;
 procedure freekick_principal;
 var
   f:word;
-  frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 262 do begin
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    eventos_freekick;
+    if f=240 then begin
       update_video_freekick;
       if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
     end;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  eventos_freekick;
   video_sync;
 end;
 end;
@@ -438,14 +436,12 @@ begin
     pia8255_0.reset;
     pia8255_1.reset;
  end;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
  snd_rom_addr:=0;
  spinner:=false;
  nmi_enable:=false;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
- reset_analog;
  rom_index:=0;
 end;
 
@@ -662,7 +658,6 @@ for f:=0 to $1ff do begin
 end;
 set_pal(colores,$200);
 //final
-reset_freekick;
 iniciar_freekick:=true;
 end;
 

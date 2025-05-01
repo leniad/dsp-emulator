@@ -146,7 +146,7 @@ procedure timer_eng.autofire_init;
 begin
   //Siempre contra la primera CPU!!!
   self.autofire_timer:=self.init(0,1,auto_fire,nil,timers.autofire_on);
-  self.timer[self.autofire_timer].time_final:=cpu_0_clock/1000;
+  self.timer[self.autofire_timer].time_final:=350;//cpu_0_clock/10000;
 end;
 
 function timer_eng.init(cpu:byte;time:single;exec_simple:exec_type_simple;exec_param:exec_type_param;ena:boolean;param0:byte=0):byte;

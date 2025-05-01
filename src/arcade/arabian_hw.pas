@@ -289,8 +289,7 @@ begin
  z80_0.reset;
  mb88xx_0.reset;
  ay8910_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  video_control:=0;
  mcu_port_p:=0;
  mcu_port_o:=0;
@@ -397,7 +396,7 @@ z80_0.init_sound(arabian_sound_update);
 mb88xx_0:=cpu_mb88xx.Create(2000000,256);
 mb88xx_0.change_io_calls(mcu_port_k_r,mcu_port_o_w,nil,mcu_port_p_w,mcu_port_r_r,mcu_port_r_w);
 //Audio chips
-ay8910_0:=ay8910_chip.create(1500000,AY8910,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910);
 ay8910_0.change_io_calls(nil,nil,arabian_portaw,arabian_portbw);
 //cargar roms
 if not(roms_load(@memoria,arabian_rom)) then exit;

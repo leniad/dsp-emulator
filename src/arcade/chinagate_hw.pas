@@ -144,32 +144,28 @@ end;
 procedure chinagate_principal;
 var
   f:word;
-  frame_m,frame_s,frame_snd:single;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=hd6309_0.tframes;
-frame_s:=hd6309_1.tframes;
-frame_snd:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     //video
     case f of
       8:marcade.in0:=marcade.in0 and $fe;
+      16,32,48,64,80,96,112,128,144,160,176,192,208,224:hd6309_0.change_firq(ASSERT_LINE);
       248:begin
             hd6309_0.change_nmi(ASSERT_LINE);
             update_video_chinagate;
             marcade.in0:=marcade.in0 or 1;
           end;
     end;
-    if (((f mod 16)=0) and (f<240)) then hd6309_0.change_firq(ASSERT_LINE);
     for h:=1 to CPU_SYNC do begin
       //main
-      hd6309_0.run(frame_m);
-      frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
+      hd6309_0.run(frame_main);
+      frame_main:=frame_main+hd6309_0.tframes-hd6309_0.contador;
       //sub
-      hd6309_1.run(frame_s);
-      frame_s:=frame_s+hd6309_1.tframes-hd6309_1.contador;
+      hd6309_1.run(frame_sub);
+      frame_sub:=frame_sub+hd6309_1.tframes-hd6309_1.contador;
       //snd
       z80_0.run(frame_snd);
       frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
@@ -307,8 +303,9 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=hd6309_0.tframes;
+ frame_sub:=hd6309_1.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$e;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -385,7 +382,6 @@ marcade.dswb:=$e7;
 marcade.dswa_val2:=@chinagate_dip_a;
 marcade.dswb_val2:=@chinagate_dip_b;
 //final
-reset_chinagate;
 iniciar_chinagate:=true;
 end;
 

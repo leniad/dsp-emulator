@@ -202,14 +202,12 @@ end;
 
 procedure finalstarforce_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+  eventos_finalstarforce;
   case f of
     0:m68000_0.irq[5]:=CLEAR_LINE;
     240:begin
@@ -219,13 +217,12 @@ while EmuStatus=EsRunning do begin
         end;
   end;
   //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+  m68000_0.run(frame_main);
+  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
   //sound
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+  z80_0.run(frame_snd);
+  frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_finalstarforce;
  video_sync;
 end;
 end;
@@ -343,8 +340,8 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$3fff;
  scroll_x_txt:=0;
  scroll_y_txt:=0;
@@ -429,7 +426,6 @@ case main_vars.tipo_maquina of
 end;
 freemem(ptemp);
 //final
-reset_finalstarforce;
 iniciar_finalstarforce:=true;
 end;
 

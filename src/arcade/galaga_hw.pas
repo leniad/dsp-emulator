@@ -1026,14 +1026,11 @@ begin
  z80_2.reset;
  z80_1.reset;
  namco_snd_0.reset;
- reset_video;
- reset_audio;
  namcoio_06xx_reset(0);
  case main_vars.tipo_maquina of
     65:begin
           namcoio_51xx_reset(false);
           namcoio_54xx_reset;
-          reset_samples;
           fillchar(galaga_starcontrol,6,0);
           scrollx_bg:=0;
           scrolly_bg:=0;
@@ -1064,13 +1061,13 @@ begin
           namcoio_50xx_reset(1);
           namcoio_51xx_reset(false);
           namcoio_54xx_reset;
-          reset_samples;
           fillchar(galaga_starcontrol,6,0);
           scrollx_bg:=0;
           scrolly_bg:=0;
           namcoio_06xx_reset(1);
        end;
  end;
+ reset_game_general;
  main_irq:=false;
  sub_irq:=false;
  sub2_nmi:=false;

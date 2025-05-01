@@ -239,8 +239,7 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;

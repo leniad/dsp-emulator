@@ -1234,8 +1234,7 @@ procedure reset_galaxian;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
- reset_video;
- reset_audio;
+ reset_game_general;
  haz_nmi:=false;
  if main_vars.tipo_maquina<>14 then galaxian_stars_0.reset;
  scramble_background:=false;
@@ -1263,7 +1262,6 @@ begin
   47,49:begin
        marcade.in0:=0;
        marcade.in1:=0;
-       reset_samples;
   end;
   48:begin
        marcade.in0:=0;

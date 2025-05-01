@@ -100,13 +100,13 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to 255 do begin
-    m6502_0.run(frame_main);
-    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
+    eventos_missilec;
     case f of
       0:begin
           marcade.in1:=marcade.in1 or $80;
           m6502_0.change_irq(ASSERT_LINE);
           irq_state:=true;
+          update_video_missilec;
         end;
       24:marcade.in1:=marcade.in1 and $7f;
       32,96,160,224:begin
@@ -119,9 +119,9 @@ while EmuStatus=EsRunning do begin
          end;
       225..255:frame_main:=frame_main-(m6502_0.tframes/2);
     end;
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
  end;
- update_video_missilec;
- eventos_missilec;
  video_sync;
 end;
 end;
@@ -252,7 +252,6 @@ begin
 m6502_0.reset;
 frame_main:=m6502_0.tframes;
 pokey_0.reset;
-reset_analog;
 marcade.in0:=$ff;
 marcade.in1:=$67;
 madsel_lastcycles:=0;
@@ -312,7 +311,6 @@ end;
 marcade.dswb:=$73;
 marcade.dswb_val2:=@missilec_dip_b;
 //final
-reset_missilec;
 iniciar_missilec:=true;
 end;
 

@@ -606,10 +606,8 @@ begin
     sn_76496_0.reset;
     sn_76496_1.reset;
  end;
- reset_samples;
  pia8255_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  irq_vblank:=false;
  marcade.in0:=0;
  marcade.in1:=0;

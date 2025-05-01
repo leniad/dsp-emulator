@@ -429,8 +429,7 @@ procedure reset_popeye;
 begin
  z80_0.reset;
  ay8910_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -481,7 +480,7 @@ z80_0.change_misc_calls(nil,nil,popeye_nmi_clear);
 z80_0.change_io_calls(popeye_inbyte,popeye_outbyte);
 z80_0.init_sound(popeye_sound_update);
 //Audio chips
-ay8910_0:=ay8910_chip.create(8000000 div 4,AY8910,1);
+ay8910_0:=ay8910_chip.create(8000000 div 4,AY8910);
 ay8910_0.change_io_calls(popeye_portar,nil,nil,popeye_portbw);
 case main_vars.tipo_maquina of
   39:begin //Popeye

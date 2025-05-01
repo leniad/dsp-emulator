@@ -139,51 +139,47 @@ begin
 if main_vars.service1 then marcade.dswc:=(marcade.dswc and $fb) else marcade.dswc:=(marcade.dswc or $4);
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   //P2
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //System
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
 end;
 
 procedure ajax_principal;
 var
-  frame_m,frame_sub,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=konami_0.tframes;
-frame_sub:=hd6309_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
     for f:=0 to $ff do begin
+      if f=240 then update_video_ajax;
       //main
-      konami_0.run(frame_m);
-      frame_m:=frame_m+konami_0.tframes-konami_0.contador;
+      konami_0.run(frame_main);
+      frame_main:=frame_main+konami_0.tframes-konami_0.contador;
       //sub
       hd6309_0.run(frame_sub);
       frame_sub:=frame_sub+hd6309_0.tframes-hd6309_0.contador;
       //sound
-      z80_0.run(frame_s);
-      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_snd);
+      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
       k051960_0.update_line(f);
-      if f=239 then update_video_ajax;
     end;
     eventos_ajax;
     video_sync;
@@ -336,7 +332,9 @@ begin
  ym2151_0.reset;
  k051960_0.reset;
  k051316_0.reset;
- reset_audio;
+ frame_main:=konami_0.tframes;
+ frame_sub:=hd6309_0.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -382,28 +380,25 @@ screen_mod_scroll(4,512,512,511,512,512,511);
 screen_init(5,1024,1024,false,true);
 iniciar_video(304,224,true);
 iniciar_audio(true);
-//cargar roms y ponerlas en su sitio...
+//Main CPU
+konami_0:=cpu_konami.create(12000000,256);
+konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
 if not(roms_load(@temp_mem,ajax_rom)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
 for f:=0 to 3 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 for f:=0 to 7 do copymemory(@rom_bank[4+f,0],@temp_mem[$10000+(f*$2000)],$2000);
-//cargar roms de la sub cpu y ponerlas en su sitio...
+//Sub CPU
+hd6309_0:=cpu_hd6309.create(3000000,256,TCPU_HD6309E);
+hd6309_0.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
 if not(roms_load(@temp_mem,ajax_sub)) then exit;
 copymemory(@mem_misc[$a000],@temp_mem[$2000],$6000);
 copymemory(@rom_sub_bank[8,0],@temp_mem[0],$2000);
 for f:=0 to 7 do copymemory(@rom_sub_bank[f,0],@temp_mem[$8000+(f*$2000)],$2000);
-//cargar sonido
-if not(roms_load(@mem_snd,ajax_sound)) then exit;
-//Main CPU
-konami_0:=cpu_konami.create(12000000,256);
-konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
-//Sub CPU
-hd6309_0:=cpu_hd6309.create(3000000,256,TCPU_HD6309E);
-hd6309_0.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(ajax_snd_getbyte,ajax_snd_putbyte);
 z80_0.init_sound(ajax_sound_update);
+if not(roms_load(@mem_snd,ajax_sound)) then exit;
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k007232_1_rom,$40000);
@@ -431,7 +426,6 @@ marcade.dswb_val2:=@ajax_dip_b;
 marcade.dswc:=$ff;
 marcade.dswc_val2:=@ajax_dip_c;
 //final
-reset_ajax;
 iniciar_ajax:=true;
 end;
 

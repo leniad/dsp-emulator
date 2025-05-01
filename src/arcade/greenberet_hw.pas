@@ -271,8 +271,7 @@ begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
  sn_76496_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  banco_sprites:=0;
