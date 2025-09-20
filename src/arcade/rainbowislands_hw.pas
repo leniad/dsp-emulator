@@ -120,7 +120,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=tc0140syt_0.z80.tframes;
 {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
     for h:=1 to CPU_SYNC do begin
       //Main CPU
@@ -283,6 +283,7 @@ begin
  tc0140syt_0.reset;
  ym2151_0.reset;
  {$IFDEF MCU}cchip_0.reset;{$ENDIF}
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=0;//$fc;

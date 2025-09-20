@@ -30,17 +30,17 @@ const
         (n:'gp2-2.2n';l:$100;p:$200;crc:$8dabc20b),(n:'gp2-7.6s';l:$100;p:$300;crc:$2faa3e09),
         (n:'gp2-6.6p';l:$200;p:$400;crc:$6f99c2da),(n:'gp2-5.6n';l:$200;p:$600;crc:$c7d31657),
         (n:'gp2-4.3f';l:$100;p:$800;crc:$2d9fbdd8));
-        gaplus_dip_a:array [0..4] of def_dip=(
-        (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$80;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        gaplus_dip_b:array [0..3] of def_dip=(
-        (mask:$7;name:'Bonus Life';number:8;dip:((dip_val:$0;dip_name:'30K 70K 70K+'),(dip_val:$1;dip_name:'30K 100K 100K+'),(dip_val:$2;dip_name:'30K 100K 200K+'),(dip_val:$3;dip_name:'50K 100K 100K+'),(dip_val:$4;dip_name:'50K 100K 200K+'),(dip_val:$7;dip_name:'50K 150K 150K+'),(dip_val:$5;dip_name:'50K 150K 300K+'),(dip_val:$6;dip_name:'50K 150K'),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Round Advance';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'0 - Standard'),(dip_val:$60;dip_name:'1 - Easiest'),(dip_val:$50;dip_name:'2'),(dip_val:$40;dip_name:'3'),(dip_val:$30;dip_name:'4'),(dip_val:$20;dip_name:'5'),(dip_val:$10;dip_name:'6'),(dip_val:$0;dip_name:'7 - Hardest'),(),(),(),(),(),(),(),())),());
-        gaplus_dip_c:array [0..1] of def_dip=(
-        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$4;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        gaplus_dip_a:array [0..4] of def_dip2=(
+        (mask:$3;name:'Coin B';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
+        (mask:$30;name:'Coin A';number:4;val4:(0,$10,$30,$20);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$c0;name:'Lives';number:4;val4:($80,$c0,$40,0);name4:('2','3','4','5')),());
+        gaplus_dip_b:array [0..3] of def_dip2=(
+        (mask:$7;name:'Bonus Life';number:8;val8:(0,1,2,3,4,7,5,6);name8:('30K 70K 70K+','30K 100K 100K+','30K 100K 200K+','50K 100K 100K+','50K 100K 200K+','50K 150K 150K+','50K 150K 300K+','50K 150K')),
+        (mask:$8;name:'Round Advance';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('0 - Standard','1 - Easiest','2','3','4','5','6','7 - Hardest')),());
+        gaplus_dip_c:array [0..1] of def_dip2=(
+        (mask:$4;name:'Cabinet';number:2;val2:(4,0);name2:('Upright','Cocktail')),());
         gaplus_samples:tipo_nombre_samples=(nombre:'bang.wav');
         STARFIELD_CLIPPING_X=16;
         MAX_STARS=100-1;
@@ -117,7 +117,7 @@ for f:=0 to $3f do begin
   // is it on?
   if (memoria[$1f81+(f*2)] and 2)=0 then begin
       atrib:=memoria[$1f80+(f*2)];
-      nchar:=memoria[$f80+(f*2)] or ((atrib and $40) shl 2);
+      nchar:=(memoria[$f80+(f*2)] or ((atrib and $40) shl 2)) mod $180;
 			color:=(memoria[$f81+(f*2)] and $3f) shl 3;
 			sy:=memoria[$1781+(f*2)]+$100*(memoria[$1f81+(f*2)] and 1)-71;
 			sx:=memoria[$1780+(f*2)]-8;
@@ -214,7 +214,7 @@ init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_sub:=m6809_1.tframes;
 frame_sound:=m6809_2.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 223 do begin
     //Main CPU
     m6809_0.run(frame_m);
@@ -406,6 +406,7 @@ begin
  namco_5x_1.reset;
  namco_snd_0.reset;
  reset_samples;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -417,7 +418,7 @@ end;
 function iniciar_gaplus:boolean;
 var
   f:word;
-  memoria_temp:array[0..$1ffff] of byte;
+  memoria_temp:array[0..$ffff] of byte;
   ctemp0,ctemp1,ctemp2,ctemp3:byte;
   colores:tpaleta;
 const
@@ -495,9 +496,6 @@ namco_5x_0:=namco_5x_chip.create(m6809_0.numero_cpu,NAMCO_56XX);
 namco_5x_0.change_io(inport0_0,inport0_1,inport0_2,inport0_3,nil,nil);
 namco_5x_1:=namco_5x_chip.create(m6809_0.numero_cpu,NAMCO_58XX);
 namco_5x_1.change_io(inport1_0,inport1_1,inport1_2,inport1_3,nil,nil);
-//Ojo, lee mas halla de la posicion $10000... Por eso lo pongo todo en $ff, para que salga blanco y
-//se vea bien la pantalla de inicio (sprites)
-fillchar(memoria_temp,$ff,$20000);
 //chars
 if not(roms_load(@memoria_temp,gaplus_char)) then exit;
 for f:=0 to $1fff do memoria_temp[f+$2000]:=memoria_temp[f] shr 4;
@@ -507,6 +505,7 @@ convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //sprites
 if not(roms_load(@memoria_temp,gaplus_sprites)) then exit;
 for f:=$6000 to $7fff do memoria_temp[f+$2000]:=memoria_temp[f] shl 4;
+fillchar(memoria_temp[$a000],$2000,0);
 init_gfx(1,16,16,$180);
 gfx_set_desc_data(3,0,64*8,$180*64*8,0,4);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
@@ -533,11 +532,11 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,$100);
 marcade.dswa:=$ff;
-marcade.dswa_val:=@gaplus_dip_a;
+marcade.dswa_val2:=@gaplus_dip_a;
 marcade.dswb:=$ff;
-marcade.dswb_val:=@gaplus_dip_b;
+marcade.dswb_val2:=@gaplus_dip_b;
 marcade.dswc:=$f;
-marcade.dswc_val:=@gaplus_dip_c;
+marcade.dswc_val2:=@gaplus_dip_c;
 //CLUT chars
 for f:=0 to $ff do gfx[0].colores[f]:=$f0+(memoria_temp[$300+f] and $0f);
 //CLUT sprites

@@ -90,7 +90,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -156,6 +156,7 @@ procedure reset_pengo;
 begin
  z80_0.reset;
  namco_snd_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

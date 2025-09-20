@@ -3,7 +3,7 @@ unit pv1000;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sysutils,gfx_engine,timer_engine,
-     sound_engine,file_engine,pal_engine,misc_functions,dialogs,lenguaje;
+     sound_engine,pal_engine,misc_functions;
 
 function iniciar_pv1000:boolean;
 
@@ -111,25 +111,28 @@ end;
 procedure pv1000_principal;
 var
   frame:single;
-  f:byte;
+  f:word;
 begin
 init_controls(false,true,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 255 do begin
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
+while EmuStatus=EsRunning do begin
+  for f:=0 to 261 do begin
       case f of
-        0,196,200,204,208,212,216,220,224,228,232,236,240,244,248,252:z80_0.change_irq(CLEAR_LINE);
-        195:begin
+        20:begin
               pv1000_0.fd_buffer_flag:=true;
               z80_0.change_irq(ASSERT_LINE);
-              update_video_pv1000;
             end;
-        199,203,207,211,215,219,223,227,231,235,239,243,247,251,255:z80_0.change_irq(ASSERT_LINE);
+        221,225,229,233,239,243,247,251,253,259,1,5,9,13,17,21:z80_0.change_irq(CLEAR_LINE);
+        220:begin
+              update_video_pv1000;
+              z80_0.change_irq(ASSERT_LINE);
+            end;
+        224,228,232,238,242,246,250,252,258,0,4,8,12,16:z80_0.change_irq(ASSERT_LINE);
       end;
+      z80_0.run(frame);
+      frame:=frame+z80_0.tframes-z80_0.contador;
   end;
-  actualiza_trozo_simple(0,0,256,192,1);
+  actualiza_trozo(16,0,256,192,1,0,26,224,192,PANT_TEMP);
   eventos_pv1000;
   video_sync;
 end;
@@ -189,7 +192,7 @@ end;
 
 procedure pv1000_out(puerto:word;valor:byte);
 var
-  per:byte;
+  per,f:byte;
 begin
 case (puerto and $ff) of
   $f8..$fb:begin //Sound
@@ -216,7 +219,10 @@ case (puerto and $ff) of
 		    pv1000_0.force_pattern:=(valor and $10)<>0; // Dig Dug relies on this
 		    if (pv1000_0.border_col<>(valor and 7)) then begin
           pv1000_0.border_col:=valor and 7;
-          fill_full_screen(1,pv1000_0.border_col);
+          for f:=0 to 25 do begin
+            single_line(0,f,paleta[valor and 7],224,PANT_TEMP);
+            single_line(0,f+192+26,paleta[valor and 7],224,PANT_TEMP);
+          end;
         end;
       end;
 end;
@@ -291,7 +297,7 @@ procedure pv1000_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SPV1000);
 Directory.pv1000:=ExtractFilePath(nombre);
 end;
 
@@ -301,14 +307,14 @@ var
   longitud:integer;
   datos:pbyte;
 begin
-  if not(openrom(romfile)) then exit;
-  getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(openrom(romfile,SPV1000)) then exit;
+  getmem(datos,$10000);
+  if not(extract_data(romfile,datos,longitud,nombre_file,SPV1000)) then begin
     freemem(datos);
     exit;
   end;
   extension:=extension_fichero(nombre_file);
-  if (extension='DSP') then snapshot_r(datos,longitud)
+  if (extension='DSP') then snapshot_r(datos,longitud,SPV1000)
     else begin
           copymemory(@memoria[$0],datos,longitud);
           reset_pv1000;
@@ -335,7 +341,7 @@ llamadas_maquina.fps_max:=59.92274;
 iniciar_pv1000:=false;
 iniciar_audio(false);
 screen_init(1,256,192,false,true);
-iniciar_video(256,192);
+iniciar_video(224,244);
 //Main CPU
 z80_0:=cpu_z80.create(17897725 div 5,256);
 z80_0.change_ram_calls(pv1000_getbyte,pv1000_putbyte);

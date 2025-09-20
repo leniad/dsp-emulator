@@ -203,7 +203,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_1.tframes;
 frame_a:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
    //Main CPU
    m68000_0.run(frame_m);
@@ -336,16 +336,16 @@ procedure sf_misc_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:begin
-        msm5205_0.reset_w((valor shr 7) and 1);
+        msm5205_0.reset_w((valor and $80)<>0);
         msm5205_0.data_w(valor);
-	      msm5205_0.vclk_w(1);
-	      msm5205_0.vclk_w(0);
+	      msm5205_0.vclk_w(true);
+	      msm5205_0.vclk_w(false);
      end;
   1:begin
-        msm5205_1.reset_w((valor shr 7) and 1);
+        msm5205_1.reset_w((valor and $80)<>0);
         msm5205_1.data_w(valor);
-	      msm5205_1.vclk_w(1);
-	      msm5205_1.vclk_w(0);
+	      msm5205_1.vclk_w(true);
+	      msm5205_1.vclk_w(false);
     end;
   2:misc_bank:=valor+1;
 end;
@@ -359,6 +359,8 @@ end;
 procedure sound_instruccion;
 begin
   ym2151_0.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 procedure sf_adpcm_timer;
@@ -375,6 +377,7 @@ begin
  ym2151_0.reset;
  msm5205_0.reset;
  msm5205_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
@@ -424,8 +427,10 @@ timers.init(z80_0.numero_cpu,3579545/8000,sf_adpcm_timer,nil,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,0);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,0);
+msm5205_0.change_advance(nil);
+msm5205_1.change_advance(nil);
 //cargar roms
 if not(roms_load16w(@rom,sfighter_rom)) then exit;
 //Sound CPUs

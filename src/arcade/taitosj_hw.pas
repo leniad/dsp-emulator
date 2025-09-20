@@ -235,7 +235,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -371,7 +371,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=m6805_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -569,6 +569,7 @@ ay8910_1.reset;
 ay8910_2.reset;
 ay8910_3.reset;
 dac_0.reset;
+reset_video;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;

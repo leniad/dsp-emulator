@@ -2,8 +2,8 @@ unit acercade;
 
 interface
 
-uses Classes,Graphics,Forms,Controls,StdCtrls,Buttons,ExtCtrls,lenguaje,
-     main_engine, Vcl.Imaging.GIFImg;
+uses Forms,StdCtrls,ExtCtrls,lenguaje,main_engine, Vcl.Imaging.GIFImg,
+  Vcl.Graphics, Vcl.Controls, System.Classes;
 
 type
   TAboutBox = class(TForm)

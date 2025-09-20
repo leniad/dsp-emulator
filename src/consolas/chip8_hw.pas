@@ -349,7 +349,7 @@ var
   f:byte;
 begin
 init_controls(false,true,false,false);
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 11 do begin
     chip8_cpu;
     if chip8_0.sound_timer<>0 then tsample[chip8_0.sound_channel,sound_status.posicion_sonido]:=$7fff;
@@ -362,7 +362,7 @@ while EmuStatus=EsRuning do begin
   if chip8_0.sound_timer<>0 then chip8_0.sound_timer:=chip8_0.sound_timer-1;
   eventos_chip8;
   update_video_chip8;
-  actualiza_trozo_simple(0,0,64*4,32*4,1);
+  actualiza_trozo(0,0,64*4,32*4,1,0,0,64*4,32*4,PANT_TEMP);
   video_sync;
 end;
 end;
@@ -374,15 +374,15 @@ var
   longitud:integer;
   datos:pbyte;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SCHIP8)) then exit;
   getmem(datos,$f000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SCHIP8)) then begin
     freemem(datos);
     exit;
   end;
   extension:=extension_fichero(nombre_file);
   reset_chip8;
-  if extension='DSP' then snapshot_r(datos,longitud)
+  if extension='DSP' then snapshot_r(datos,longitud,SCHIP8)
     else copymemory(@memoria[$200],datos,longitud);
   freemem(datos);
   change_caption(nombre_file);
@@ -393,7 +393,7 @@ procedure chip8_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SCHIP8);
 Directory.chip8:=ExtractFilePath(nombre);
 end;
 

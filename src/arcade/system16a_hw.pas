@@ -180,12 +180,12 @@ begin
 end;
 begin
   for f:=0 to $7f do begin
+    bottom:=(sprite_ram[f*8] shr 8)+1;
+    if bottom>$f0 then exit;
     sprpri:=(sprite_ram[(f*8)+4] and $ff) and $3;
     if sprpri<>pri then continue;
     addr:=sprite_ram[(f*8)+3];
     sprite_ram[(f*8)+7]:=addr;
-    bottom:=(sprite_ram[f*8] shr 8)+1;
-    if bottom>$f0 then break;
     bank:=sprite_bank[(sprite_ram[(f*8)+4] shr 4) and $7];
     top:=(sprite_ram[f*8] and $ff)+1;
     // if hidden, or top greater than/equal to bottom, or invalid bank
@@ -370,7 +370,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 frame_s_sub:=mcs48_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
      for h:=1 to CPU_SYNC do begin
         //main
@@ -402,7 +402,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     for h:=1 to CPU_SYNC do begin
      //main
@@ -758,6 +758,7 @@ begin
  ym2151_0.reset;
  pia8255_0.reset;
  if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.tipo_maquina=186)) then mcs48_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

@@ -9,13 +9,13 @@ function iniciar_tetris:boolean;
 
 implementation
 const
-        tetris_rom:tipo_roms=(n:'136066-1100.45f';l:$10000;p:$0;crc:$2acbdb09);
-        tetris_gfx:tipo_roms=(n:'136066-1101.35a';l:$10000;p:$0;crc:$84a1939f);
+        tetris_rom:tipo_roms=(n:'136066-1100.45f';l:$10000;p:0;crc:$2acbdb09);
+        tetris_gfx:tipo_roms=(n:'136066-1101.35a';l:$10000;p:0;crc:$84a1939f);
         //Dip
-        tetris_dip_a:array [0..3] of def_dip=(
-        (mask:$4;name:'Freeze';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Freeze Step';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Service';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        tetris_dip_a:array [0..3] of def_dip2=(
+        (mask:4;name:'Freeze';number:2;val2:(0,4);name2:('Off','On')),
+        (mask:8;name:'Freeze Step';number:2;val2:(0,8);name2:('Off','On')),
+        (mask:$80;name:'Service';number:2;val2:(0,$80);name2:('Off','On')),());
 
 var
   rom_mem:array[0..1,0..$3fff] of byte;
@@ -34,7 +34,7 @@ for f:=0 to $7ff do begin
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
     x:=f mod 64;
     y:=f div 64;
-    nchar:=memoria[$1000+(f*2)]+((atrib and $7) shl 8);
+    nchar:=memoria[$1000+(f*2)]+((atrib and 7) shl 8);
     put_gfx(x*8,y*8,nchar,color shl 4,1,0);
     gfx[0].buffer[f]:=false;
   end;
@@ -48,8 +48,8 @@ procedure eventos_tetris;
 begin
 if event.arcade then begin
   //Coin
-  if arcade_input.coin[0] then marcade.in0:=marcade.in0 or $2 else marcade.in0:=marcade.in0 and $fd;
-  if arcade_input.coin[1] then marcade.in0:=marcade.in0 or $1 else marcade.in0:=marcade.in0 and $fe;
+  if arcade_input.coin[0] then marcade.in0:=marcade.in0 or 2 else marcade.in0:=marcade.in0 and $fd;
+  if arcade_input.coin[1] then marcade.in0:=marcade.in0 or 1 else marcade.in0:=marcade.in0 and $fe;
   //Players
   if arcade_input.but0[0] then marcade.in1:=marcade.in1 or 1 else marcade.in1:=marcade.in1 and $fe;
   if arcade_input.down[0] then marcade.in1:=marcade.in1 or 2 else marcade.in1:=marcade.in1 and $fd;
@@ -69,7 +69,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
    m6502_0.run(frame);
    frame:=frame+m6502_0.tframes-m6502_0.contador;
@@ -121,8 +121,8 @@ var
 begin
   tmp_color:=buffer_paleta[dir];
   color.r:=pal3bit(tmp_color shr 5);
-  color.g:=pal3bit((tmp_color shr 2) and $7);
-  color.b:=pal2bit(tmp_color and $3);
+  color.g:=pal3bit((tmp_color shr 2) and 7);
+  color.b:=pal2bit(tmp_color and 3);
   set_pal_color(color,dir);
   buffer_color[dir shr 4]:=true;
 end;
@@ -220,7 +220,7 @@ if read_file_size(Directory.Arcade_nvram+'tetrisa.nv',longitud) then read_file(D
   else for longitud:=0 to $1ff do nv_ram[longitud]:=$ff;
 //cargar roms
 if not(roms_load(@memoria_temp,tetris_rom)) then exit;
-copymemory(@rom_mem[0,0],@memoria_temp[$0],$4000);
+copymemory(@rom_mem[0,0],@memoria_temp[0],$4000);
 copymemory(@rom_mem[1,0],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 //Cargar chars
@@ -229,8 +229,8 @@ init_gfx(0,8,8,$800);
 gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //Dip
-marcade.dswa:=$0;
-marcade.dswa_val:=@tetris_dip_a;
+marcade.dswa:=0;
+marcade.dswa_val2:=@tetris_dip_a;
 //final
 reset_tetris;
 iniciar_tetris:=true;

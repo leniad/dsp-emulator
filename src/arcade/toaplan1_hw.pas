@@ -102,7 +102,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 269 do begin
     //main
     m68000_0.run(frame_m);
@@ -275,7 +275,8 @@ procedure reset_toaplan1;
 begin
  m68000_0.reset;
  z80_0.reset;
- YM3812_0.reset;
+ ym3812_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

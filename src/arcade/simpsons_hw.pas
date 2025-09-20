@@ -35,12 +35,12 @@ procedure simpsons_sprite_cb(var code:dword;var color:word;var priority_mask:wor
 var
   pri:integer;
 begin
-	pri:=(color and $0f80) shr 6;   // ???????
+	pri:=(color and $f80) shr 6;   // ???????
 	if (pri<=layerpri[2]) then priority_mask:=0
 	  else if ((pri>layerpri[2]) and (pri<=layerpri[1])) then priority_mask:=1
 	    else if ((pri>layerpri[1]) and (pri<=layerpri[0])) then priority_mask:=2
 	      else priority_mask:=3;
-	color:=sprite_colorbase+(color and $001f);
+	color:=sprite_colorbase+(color and $1f);
 end;
 
 procedure simpsons_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
@@ -108,24 +108,24 @@ procedure eventos_simpsons;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
   //System
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
 end;
 end;
 
@@ -156,21 +156,12 @@ end;
 
 procedure simpsons_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=konami_0.tframes;
-frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to 263 do begin
-      //main
-      konami_0.run(frame_m);
-      frame_m:=frame_m+konami_0.tframes-konami_0.contador;
-      //sound
-      z80_0.run(frame_s);
-      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-      if f=223 then begin
+      if f=224 then begin
         if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
         if k053246_0.is_irq_enabled then begin
           simpsons_objdma;
@@ -178,6 +169,12 @@ while EmuStatus=EsRuning do begin
         end;
         update_video_simpsons;
       end;
+      //main
+      konami_0.run(frame_main);
+      frame_main:=frame_main+konami_0.tframes-konami_0.contador;
+      //sound
+      z80_0.run(frame_snd);
+      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
     end;
 eventos_simpsons;
 video_sync;
@@ -193,17 +190,17 @@ case direccion of
     0..$fff:if bank0_bank=1 then simpsons_getbyte:=buffer_paleta[direccion]
                 else simpsons_getbyte:=k052109_0.read(direccion);
     $1000..$1fff:case direccion of
-                   $1f80:simpsons_getbyte:=marcade.in2; //coin
+                   $1f80:simpsons_getbyte:=marcade.in2;
                    $1f81:simpsons_getbyte:=$cf+(eepromser_0.do_read shl 4)+(eepromser_0.ready_read shl 5);
-                   $1f90:simpsons_getbyte:=marcade.in0; //p1
-                   $1f91:simpsons_getbyte:=marcade.in1; //p2
-                   $1f92:simpsons_getbyte:=$ff; //p3
-                   $1f93:simpsons_getbyte:=$ff; //p4
+                   $1f90:simpsons_getbyte:=marcade.in0;
+                   $1f91:simpsons_getbyte:=marcade.in1;
+                   $1f92:simpsons_getbyte:=$ff;
+                   $1f93:simpsons_getbyte:=$ff;
                    $1fc4:begin
                             simpsons_getbyte:=0;
                             z80_0.change_irq(HOLD_LINE);
                          end;
-                   $1fc6..$1fc7:simpsons_getbyte:=k053260_0.main_read(direccion and $1);
+                   $1fc6..$1fc7:simpsons_getbyte:=k053260_0.main_read(direccion and 1);
                    $1fc8..$1fc9:simpsons_getbyte:=k053246_0.read(direccion and 1);
                    $1fca:; //Watchdog
                       else simpsons_getbyte:=k052109_0.read(direccion)
@@ -245,7 +242,7 @@ case direccion of
                 end;
             end else k052109_0.write(direccion,valor);
     $1000..$1fff:case direccion of
-                  $1fa0..$1fa7:k053246_0.write(direccion and $7,valor);
+                  $1fa0..$1fa7:k053246_0.write(direccion and 7,valor);
                   $1fb0..$1fbf:k053251_0.write(direccion and $f,valor);
                   $1fc0:begin
                              if (valor and 8)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
@@ -259,7 +256,7 @@ case direccion of
                            eepromser_0.clk_write((valor shr 4) and 1);
                            bank0_bank:=valor and 1;
                            bank2000_bank:=(valor shr 1) and 1;
-                           firq_enabled:=(valor and $4)<>0;
+                           firq_enabled:=(valor and 4)<>0;
                         end;
                   $1fc6..$1fc7:k053260_0.main_write(direccion and 1,valor);
                   else k052109_0.write(direccion,valor);
@@ -278,7 +275,7 @@ end;
 
 procedure simpsons_bank(valor:byte);
 begin
-     rom_bank1:=valor and $3f;
+  rom_bank1:=valor and $3f;
 end;
 
 //Audio CPU
@@ -310,7 +307,7 @@ case direccion of
              timers.enabled(snd_timer,true);
         end;
   $fc00..$fc2f:k053260_0.write(direccion and $3f,valor);
-  $fe00:sound_bank:=valor and $7;
+  $fe00:sound_bank:=valor and 7;
 end;
 end;
 
@@ -325,12 +322,15 @@ procedure reset_simpsons;
 begin
  konami_0.reset;
  z80_0.reset;
+ frame_main:=konami_0.tframes;
+ frame_snd:=z80_0.tframes;
  eepromser_0.reset;
  k052109_0.reset;
  k053251_0.reset;
  k053246_0.reset;
  k053260_0.reset;
  ym2151_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -381,7 +381,7 @@ if not(roms_load(@memoria_temp,simpsons_sound)) then exit;
 copymemory(@mem_snd,@memoria_temp,$8000);
 for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@memoria_temp[f*$4000],$4000);
 //Main CPU
-konami_0:=cpu_konami.create(3000000,264);
+konami_0:=cpu_konami.create(12000000,264);
 konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
 konami_0.change_set_lines(simpsons_bank);
 //Sound CPU

@@ -204,7 +204,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=nec_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 283 do begin
     //Main CPU
     nec_0.run(frame_m);
@@ -213,20 +213,18 @@ while EmuStatus=EsRuning do begin
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if ((f<255) and (f=(m72_raster_irq_position-1))) then begin
-      nec_0.vect_req:=irq_base[1]+2;
-      nec_0.change_irq(HOLD_LINE);
+      nec_0.set_input(INT_IRQ,HOLD_LINE,irq_base[1]+2);
       if not(video_off) then paint_video_irem_m72(0,f);
     end;
     if f=255 then begin
-      nec_0.vect_req:=irq_base[1];
-      nec_0.change_irq(HOLD_LINE);
+      nec_0.set_input(INT_IRQ,HOLD_LINE,irq_base[1]);
       if not(video_off) then begin
         paint_video_irem_m72(m72_raster_irq_position and $ff,f);
         update_video_irem_m72;
       end else fill_full_screen(0,0);
     end;
  end;
- actualiza_trozo_simple(0,0,384,256,6);
+ actualiza_trozo(0,0,384,256,6,0,0,384,256,PANT_TEMP);
  eventos_irem_m72;
  video_sync;
 end;
@@ -625,9 +623,8 @@ end;
 //Sound
 procedure sound_irq_ack;
 begin
-z80_0.im0:=snd_irq_vector;
 if snd_irq_vector=$ff then z80_0.change_irq(CLEAR_LINE)
-  else z80_0.change_irq(ASSERT_LINE);
+  else z80_0.change_irq_vector(ASSERT_LINE,snd_irq_vector);
 timers.enabled(timer_sound,false);
 end;
 
@@ -728,6 +725,7 @@ begin
  case main_vars.tipo_maquina of
   190,191:dac_0.reset;
  end;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

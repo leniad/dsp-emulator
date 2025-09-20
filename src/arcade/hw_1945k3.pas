@@ -46,10 +46,10 @@ var
  rom:array[0..$7ffff] of word;
  ram1,ram2:array[0..$7fff] of word;
  video,video_buffer:array[0..$7ff] of word;
- sprite,sprite_buffer:array[0..$fff] of word;
+ sprite:array[0..$fff] of word;
  oki1_rom,oki2_rom:array[0..3,0..$3ffff] of byte;
  y_size,oki1_bank,oki2_bank:byte;
- sprites_count,y_count,char_mask,sprite_mask,t1scroll_x,t1scroll_y:word;
+ sprites_count,y_count,t1scroll_x,t1scroll_y:word;
  vram_refresh:boolean;
 
 procedure update_video_k31945;
@@ -85,17 +85,17 @@ for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=video_buffer[f] and char_mask;
+    nchar:=video_buffer[f];
     put_gfx(x*16,y*16,nchar,0,1,0);
     gfx[0].buffer[f]:=false;
   end;
 end;
 scroll_x_y(1,2,t1scroll_x,t1scroll_y);
 for f:=0 to sprites_count do begin
-  x:=((sprite_buffer[f] and $ff00) shr 8) or ((sprite_buffer[f+$7ff] and $1) shl 8);
-  y:=sprite_buffer[f] and $ff;
-  nchar:=(sprite_buffer[$7ff+f] and $7ffe) shr 1;
-  put_gfx_sprite_1945(nchar and sprite_mask,1,(sprite_buffer[f+$7ff] and $8000)<>0);
+  x:=((buffer_sprites_w[f] and $ff00) shr 8) or ((buffer_sprites_w[f+$7ff] and $1) shl 8);
+  y:=buffer_sprites_w[f] and $ff;
+  nchar:=(buffer_sprites_w[$7ff+f] and $7ffe) shr 1;
+  put_gfx_sprite_1945(nchar,1,(buffer_sprites_w[f+$7ff] and $8000)<>0);
   actualiza_gfx_sprite(x,y,2,1);
 end;
 actualiza_trozo_final(0,0,320,y_size,2);
@@ -136,7 +136,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=m68000_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to y_count do begin
    m68000_0.run(frame);
    frame:=frame+m68000_0.tframes-m68000_0.contador;
@@ -166,7 +166,7 @@ var
 begin
   oldval:=vram_refresh;
 	if (not(oldval) and newval) then begin
-    copymemory(@sprite_buffer,@sprite,$1000*2);
+    copymemory(@buffer_sprites_w,@sprite,$1000*2);
     copymemory(@video_buffer,@video,$400*2);
     fillchar(gfx[0].buffer,$400,1);
   end;
@@ -286,6 +286,7 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  if main_vars.tipo_maquina=283 then oki_6295_1.reset;
+ reset_video;
  reset_audio;
  oki1_bank:=0;
  oki2_bank:=0;
@@ -350,8 +351,6 @@ case main_vars.tipo_maquina of
         copymemory(oki_6295_1.get_rom_addr,memoria_temp,$40000);
         copymemory(@oki2_rom[0,0],memoria_temp,$40000);
         copymemory(@oki2_rom[1,0],@memoria_temp[$40000],$40000);
-        char_mask:=$1fff;
-        sprite_mask:=$3fff;
         //x_size=432 y_size=262, total sprites=432*262/(4+128)
         y_count:=262-1;
         sprites_count:=round((432*262)/(4+128))-1;
@@ -380,8 +379,6 @@ case main_vars.tipo_maquina of
         copymemory(@oki1_rom[0,0],memoria_temp,$40000);
         copymemory(@oki1_rom[1,0],@memoria_temp[$40000],$40000);
         copymemory(@oki1_rom[2,0],@memoria_temp[$80000],$40000);
-        char_mask:=$fff;
-        sprite_mask:=$3fff;
         //x_size=432 y_size=315
         y_count:=315-1;
         sprites_count:=round((432*315)/(4+128))-1;

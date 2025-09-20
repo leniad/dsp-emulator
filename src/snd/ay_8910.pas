@@ -1,16 +1,16 @@
 unit ay_8910;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc,dialogs;
 
 type
   ay8910_chip=class(snd_chip_class)
         constructor create(clock:integer;type_:byte;amp:single=1;internal:boolean=false);
         destructor free;
       public
-        procedure Write(v:byte);
-        procedure Control(v:byte);
-        function Read:byte;
+        procedure write(v:byte);
+        procedure control(v:byte);
+        function read:byte;
         procedure reset;
         procedure update;
         function update_internal:pinteger;
@@ -23,21 +23,21 @@ type
         procedure change_clock(clock:dword);
         procedure change_gain(gain0,gain1,gain2:single);
       private
-        Regs:array[0..15] of byte;
-        PeriodA,PeriodB,PeriodC,PeriodN,PeriodE:integer;
-        CountA,CountB,CountC,CountN,CountE:integer;
-        VolA,VolB,VolC,VolE:integer;
-        EnvelopeA,EnvelopeB,EnvelopeC:integer;
-        OutputA,OutputB,OutputC,OutputN:integer;
+        regs:array[0..15] of byte;
+        perioda,periodb,periodc,periodn,periode:integer;
+        counta,countb,countc,countn,counte:integer;
+        vola,volb,volc,vole:integer;
+        envelopea,envelopeb,envelopec:integer;
+        outputa,outputb,outputc,outputn:integer;
         latch,type_:byte;
-        CountEnv:shortint;
-        Hold,Alternate,Attack,Holding,RNG,UpdateStep:integer;
+        countenv:shortint;
+        hold,alternate,attack,holding,rng,updatestep:integer;
         lastenable:smallint;
         porta_read,portb_read:cpu_inport_call;
         porta_write,portb_write:cpu_outport_call;
         gain0,gain1,gain2:single;
-        procedure AYWriteReg(r,v:byte);
-        function AYReadReg(r:byte):byte;
+        procedure aywritereg(r,v:byte);
+        function ayreadreg(r:byte):byte;
   end;
 
 var
@@ -80,7 +80,7 @@ var
 begin
   l_out:=MAX_OUTPUT/4;
   for i:=31 downto 1 do begin
-    Vol_Table[i]:=trunc(l_out+0.5);	// roun to nearest */
+    vol_table[i]:=trunc(l_out+0.5);	// roun to nearest */
     l_out:=l_out/1.188502227;	// = 10 ^ (1.5/20) = 1.5dB */
   end;
   Vol_Table[0]:=0;
@@ -96,23 +96,24 @@ end;
 procedure ay8910_chip.change_clock(clock:dword);
 begin
   self.clock:=clock;
-  self.UpdateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
+  self.updatestep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
 end;
 
 constructor ay8910_chip.create(clock:integer;type_:byte;amp:single=1;internal:boolean=false);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   init_table;
   self.clock:=clock;
-  self.UpdateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
+  self.updateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
   self.porta_read:=nil;
   self.portb_read:=nil;
   self.porta_write:=nil;
   self.portb_write:=nil;
-  self.PeriodA:=self.UpdateStep;
-  self.PeriodB:=self.UpdateStep;
-  self.PeriodC:=self.UpdateStep;
-  self.PeriodE:=self.UpdateStep;
-  self.PeriodN:=self.UpdateStep;
+  self.perioda:=self.updateStep;
+  self.periodb:=self.updateStep;
+  self.periodc:=self.updateStep;
+  self.periode:=self.updateStep;
+  self.periodn:=self.updateStep;
   if not(internal) then self.tsample_num:=init_channel;
   self.amp:=amp;
   self.reset;
@@ -127,13 +128,13 @@ procedure ay8910_chip.reset;
     i:byte;
 begin
     self.latch:=0;
-    self.OutputA:= 0;
-    self.OutputB:= 0;
-    self.OutputC:= 0;
-    self.OutputN:= $FF;
-    self.RNG:=1;
+    self.outputa:= 0;
+    self.outputb:= 0;
+    self.outputc:= 0;
+    self.outputn:= $FF;
+    self.rng:=1;
     self.lastenable:=-1;
-  For i := 0 To 13 do self.AYWriteReg(i,0);
+  For i := 0 To 13 do self.aywritereg(i,0);
 end;
 
 destructor ay8910_chip.free;
@@ -147,36 +148,36 @@ var
 begin
   temp:=data;
   copymemory(temp,@self.regs[0],16);inc(temp,16);size:=16;
-  copymemory(temp,@self.PeriodA,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.PeriodB,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.PeriodC,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.PeriodN,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.PeriodE,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.CountA,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.CountB,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.CountC,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.CountN,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.CountE,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.VolA,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.VolB,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.VolC,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.VolE,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.EnvelopeA,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.EnvelopeB,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.EnvelopeC,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.OutputA,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.OutputB,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.OutputC,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.OutputN,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.perioda,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.periodb,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.periodc,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.periodn,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.periode,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.counta,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.countb,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.countc,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.countn,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.counte,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.vola,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.volb,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.volc,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.vole,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.envelopea,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.envelopeb,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.envelopec,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.outputa,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.outputb,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.outputc,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.outputn,4);inc(temp,4);size:=size+4;
   temp^:=self.latch;inc(temp);size:=size+1;
   temp^:=self.type_;inc(temp);size:=size+1;
-  copymemory(temp,@self.CountEnv,sizeof(shortint));inc(temp,sizeof(shortint));size:=size+sizeof(shortint);
-  copymemory(temp,@self.Hold,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.Alternate,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.Attack,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.Holding,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.RNG,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.UpdateStep,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.countenv,sizeof(shortint));inc(temp,sizeof(shortint));size:=size+sizeof(shortint);
+  copymemory(temp,@self.hold,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.alternate,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.attack,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.holding,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.rng,4);inc(temp,4);size:=size+4;
+  copymemory(temp,@self.updatestep,4);inc(temp,4);size:=size+4;
   copymemory(temp,@self.lastenable,sizeof(smallint));size:=size+sizeof(smallint);
   save_snapshot:=size;
 end;
@@ -230,27 +231,27 @@ begin
     else self.portb_write:=portb_write;
 end;
 
-procedure ay8910_chip.AYWriteReg(r,v:byte);
+procedure ay8910_chip.aywritereg(r,v:byte);
 var
     old:integer;
 begin
   self.Regs[r]:=v;
   case r of
-    AY_AFINE, AY_ACOARSE:begin
-        self.Regs[AY_ACOARSE] := self.Regs[AY_ACOARSE] and $F;
-        old := self.PeriodA;
-        self.PeriodA:=cardinal((self.Regs[AY_AFINE] + (256 * self.Regs[AY_ACOARSE]))*self.UpdateStep);
-        if (self.PeriodA = 0) then self.PeriodA:=cardinal(self.UpdateStep);
-        self.CountA := self.CountA + (self.PeriodA - old);
-        if (self.CountA <= 0) then self.CountA := 1;
+    AY_AFINE,AY_ACOARSE:begin
+        self.regs[AY_ACOARSE]:=self.regs[AY_ACOARSE] and $f;
+        old:=self.perioda;
+        self.perioda:=cardinal((self.Regs[AY_AFINE]+(256*self.regs[AY_ACOARSE]))*self.updatestep);
+        if (self.perioda=0) then self.perioda:=cardinal(self.updatestep);
+        self.counta:=self.counta+(self.perioda-old);
+        if (self.counta<=0) then self.counta:=1;
       end;
-    AY_BFINE, AY_BCOARSE:begin
-        self.Regs[AY_BCOARSE] := self.Regs[AY_BCOARSE] and $F;
-        old := self.PeriodB;
-        self.PeriodB := trunc((self.Regs[AY_BFINE] + (256 * self.Regs[AY_BCOARSE]))* self.UpdateStep);
-        if (self.PeriodB = 0) then self.PeriodB := trunc(self.UpdateStep);
-        self.CountB := self.CountB + self.PeriodB - old;
-        if (self.CountB <= 0) then self.CountB := 1
+    AY_BFINE,AY_BCOARSE:begin
+        self.regs[AY_BCOARSE]:=self.regs[AY_BCOARSE] and $f;
+        old:=self.periodb;
+        self.periodb:=trunc((self.regs[AY_BFINE]+(256*self.regs[AY_BCOARSE]))*self.updatestep);
+        if (self.periodb=0) then self.periodb:=trunc(self.updatestep);
+        self.countb:=self.countb+self.periodb-old;
+        if (self.countb<=0) then self.countb:=1;
       end;
     AY_CFINE, AY_CCOARSE:begin
         self.Regs[AY_CCOARSE] := self.Regs[AY_CCOARSE] and $F;

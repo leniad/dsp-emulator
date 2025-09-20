@@ -14,13 +14,13 @@ const
         blockout_sound:tipo_roms=(n:'bo29e3-0.bin';l:$8000;p:0;crc:$3ea01f78);
         blockout_oki:tipo_roms=(n:'bo29e2-0.bin';l:$20000;p:0;crc:$15c5a99d);
         //DIP
-        blockout_dipa:array [0..3] of def_dip=(
-        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'1 Coint to Continue';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        blockout_dipb:array [0..2] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Rotate Buttons';number:2;dip:((dip_val:$0;dip_name:'2'),(dip_val:$4;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        blockout_dipa:array [0..3] of def_dip2=(
+        (mask:$3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$10;name:'1 Coint to Continue';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),());
+        blockout_dipb:array [0..2] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$4;name:'Rotate Buttons';number:2;val2:(0,4);name2:('2','3')),());
 
 var
  rom:array[0..$1ffff] of word;
@@ -111,7 +111,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
     //main
     m68000_0.run(frame_m);
@@ -152,25 +152,24 @@ end;
 end;
 
 procedure blockout_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(pos,data:word);
 var
   bit0,bit1,bit2,bit3:byte;
   color:tcolor;
 begin
-  // red component */
+  // red component
 	bit0:=(data shr 0) and $01;
 	bit1:=(data shr 1) and $01;
 	bit2:=(data shr 2) and $01;
 	bit3:=(data shr 3) and $01;
 	color.r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-	// green component */
+	// green component
 	bit0:=(data shr 4) and $01;
 	bit1:=(data shr 5) and $01;
 	bit2:=(data shr 6) and $01;
 	bit3:=(data shr 7) and $01;
 	color.g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-	// blue component */
+	// blue component
 	bit0:=(data shr 8) and $01;
 	bit1:=(data shr 9) and $01;
 	bit2:=(data shr 10) and $01;
@@ -189,7 +188,7 @@ case direccion of
               sound_latch:=valor and $ff;
               z80_0.change_nmi(PULSE_LINE);
             end;
-    $180000..$1bffff:begin
+    $180000..$1bffff:if video_ram[(direccion and $3ffff) shr 1]<>valor then begin
                         video_ram[(direccion and $3ffff) shr 1]:=valor;
                         video_ram_buff[(direccion and $3ffff) shr 1]:=true;
                       end;
@@ -247,6 +246,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
@@ -284,9 +284,9 @@ if not(roms_load16w(@rom,blockout_rom)) then exit;
 if not(roms_load(@mem_snd,blockout_sound)) then exit;
 //DIP
 marcade.dswa:=$ffff;
-marcade.dswa_val:=@blockout_dipa;
+marcade.dswa_val2:=@blockout_dipa;
 marcade.dswb:=$ffff;
-marcade.dswb_val:=@blockout_dipb;
+marcade.dswb_val2:=@blockout_dipb;
 //final
 reset_blockout;
 iniciar_blockout:=true;

@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 223
+  ClientHeight = 293
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 162
+    Height = 232
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -666,7 +666,7 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 391
+    ExplicitWidth = 395
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 162
+    Height = 232
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitLeft = 342
-    ExplicitHeight = 153
+    ExplicitLeft = 346
+    ExplicitHeight = 229
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,13 +1870,13 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 204
+    Top = 274
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 195
-    ExplicitWidth = 391
+    ExplicitTop = 271
+    ExplicitWidth = 395
     DesignSize = (
       397
       19)
@@ -2154,10 +2154,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object BombJack1: TMenuItem
-            Caption = 'Bomb Jack'
+          object BombJackHW: TMenuItem
+            Caption = 'Bomb Jack HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object BombJack1: TMenuItem
+              Caption = 'Bomb Jack'
+              OnClick = CambiarMaquina
+            end
+            object CalorieKun1: TMenuItem
+              Caption = 'Calorie Kun vs Moguranian'
+              OnClick = CambiarMaquina
+            end
           end
           object PacmanHW1: TMenuItem
             Caption = 'Pacman HW'
@@ -2180,6 +2187,26 @@ object principal1: Tprincipal1
             end
             object Birdiy1: TMenuItem
               Caption = 'Birdiy'
+              OnClick = CambiarMaquina
+            end
+            object Ponpoko1: TMenuItem
+              Caption = 'Ponpoko'
+              OnClick = CambiarMaquina
+            end
+            object Woodpecker1: TMenuItem
+              Caption = 'Woodpecker'
+              OnClick = CambiarMaquina
+            end
+            object Eyes1: TMenuItem
+              Caption = 'Eyes'
+              OnClick = CambiarMaquina
+            end
+            object alibaba1: TMenuItem
+              Caption = 'Ali Baba and 40 Thieves'
+              OnClick = CambiarMaquina
+            end
+            object Piranha1: TMenuItem
+              Caption = 'Piranha'
               OnClick = CambiarMaquina
             end
           end
@@ -2218,6 +2245,36 @@ object principal1: Tprincipal1
             end
             object Amidar1: TMenuItem
               Caption = 'Amidar'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+            object AntEater1: TMenuItem
+              Caption = 'Ant Eater'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+            object ArmoredCar1: TMenuItem
+              Caption = 'Armored Car'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+            object TheEnd1: TMenuItem
+              Caption = 'The End'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+            object BattleofAtlantis1: TMenuItem
+              Caption = 'Battle of Atlantis'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+            object Calipso1: TMenuItem
+              Caption = 'Calipso'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
+            object Cavelon1: TMenuItem
+              Caption = 'Cavelon'
               GroupIndex = 1
               OnClick = CambiarMaquina
             end
@@ -2338,6 +2395,11 @@ object principal1: Tprincipal1
               GroupIndex = 1
               OnClick = CambiarMaquina
             end
+            object Gardia1: TMenuItem
+              Caption = 'Gardia'
+              GroupIndex = 1
+              OnClick = CambiarMaquina
+            end
           end
           object Pooyan1: TMenuItem
             Caption = 'Pooyan'
@@ -2365,10 +2427,17 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
-          object Popeye1: TMenuItem
-            Caption = 'Popeye'
+          object PopeyeHW1: TMenuItem
+            Caption = 'Popeye HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object Popeye1: TMenuItem
+              Caption = 'Popeye'
+              OnClick = CambiarMaquina
+            end
+            object SkySkipper1: TMenuItem
+              Caption = 'Sky Skipper'
+              OnClick = CambiarMaquina
+            end
           end
           object Psychic51: TMenuItem
             Caption = 'Psychic 5'
@@ -2405,7 +2474,7 @@ object principal1: Tprincipal1
             end
           end
           object M63HW1: TMenuItem
-            Caption = 'M63 HW'
+            Caption = 'Irem M63 HW'
             GroupIndex = 1
             object WilyTower1: TMenuItem
               Caption = 'Wily Tower'
@@ -2458,6 +2527,14 @@ object principal1: Tprincipal1
             end
             object Trojan1: TMenuItem
               Caption = 'Trojan'
+              OnClick = CambiarMaquina
+            end
+            object Avengers1: TMenuItem
+              Caption = 'Avengers'
+              OnClick = CambiarMaquina
+            end
+            object FireBall1: TMenuItem
+              Caption = 'Fire Ball'
               OnClick = CambiarMaquina
             end
           end
@@ -2930,6 +3007,87 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object BankPanicHW1: TMenuItem
+            Caption = 'Bank Panic HW'
+            GroupIndex = 1
+            object BankPanic1: TMenuItem
+              Caption = 'Bank Panic'
+              OnClick = CambiarMaquina
+            end
+            object CombatHawk1: TMenuItem
+              Caption = 'Combat Hawk'
+              OnClick = CambiarMaquina
+            end
+          end
+          object AppooohHW1: TMenuItem
+            Caption = 'Appoooh HW'
+            GroupIndex = 1
+            object Appoooh1: TMenuItem
+              Caption = 'Appoooh'
+              OnClick = CambiarMaquina
+            end
+            object RoboWres1: TMenuItem
+              Caption = 'Robo Wres 2001'
+              OnClick = CambiarMaquina
+            end
+          end
+          object DooyongHW1: TMenuItem
+            Caption = 'Dooyong HW'
+            GroupIndex = 1
+            object BlueHawk1: TMenuItem
+              Caption = 'Blue Hawk'
+              OnClick = CambiarMaquina
+            end
+            object LastDay1: TMenuItem
+              Caption = 'The Last Day'
+              OnClick = CambiarMaquina
+            end
+            object GulfStorm1: TMenuItem
+              Caption = 'Gulf Storm'
+              OnClick = CambiarMaquina
+            end
+            object Pollux1: TMenuItem
+              Caption = 'Pollux'
+              OnClick = CambiarMaquina
+            end
+            object FlyingTiger1: TMenuItem
+              Caption = 'Flying Tiger'
+              OnClick = CambiarMaquina
+            end
+          end
+          object BluePrintHW1: TMenuItem
+            Caption = 'Blue Print HW'
+            GroupIndex = 1
+            object BLuePrint1: TMenuItem
+              Caption = 'Blue Print'
+              OnClick = CambiarMaquina
+            end
+            object Saturn1: TMenuItem
+              Caption = 'Saturn'
+              OnClick = CambiarMaquina
+            end
+            object Grasspin1: TMenuItem
+              Caption = 'Grasspin'
+              OnClick = CambiarMaquina
+            end
+          end
+          object KiKiKaiKaiHW1: TMenuItem
+            Caption = 'KiKi KaiKai HW'
+            GroupIndex = 1
+            object KiKiKaiKai1: TMenuItem
+              Caption = 'KiKi KaiKai'
+              OnClick = CambiarMaquina
+            end
+            object KickandRun1: TMenuItem
+              Caption = 'Kick and Run'
+              OnClick = CambiarMaquina
+            end
+          end
+          object WyvernF01: TMenuItem
+            Caption = 'Wyvern F-0'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -3018,6 +3176,18 @@ object principal1: Tprincipal1
             end
             object SuperMissileAttack1: TMenuItem
               Caption = 'Super Missile Attack'
+              OnClick = CambiarMaquina
+            end
+          end
+          object LassoHW1: TMenuItem
+            Caption = 'Lasso HW'
+            GroupIndex = 1
+            object Lasso1: TMenuItem
+              Caption = 'Lasso'
+              OnClick = CambiarMaquina
+            end
+            object Chameleon1: TMenuItem
+              Caption = 'Chameleon'
               OnClick = CambiarMaquina
             end
           end
@@ -3129,10 +3299,45 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object SRD1: TMenuItem
-            Caption = 'Super Real Darwin'
+          object Dec8HW1: TMenuItem
+            Caption = 'Deco 8 HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object SRD1: TMenuItem
+              Caption = 'Super Real Darwin'
+              OnClick = CambiarMaquina
+            end
+            object LastMission1: TMenuItem
+              Caption = 'Last Mission'
+              OnClick = CambiarMaquina
+            end
+            object Shackled1: TMenuItem
+              Caption = 'Shackled'
+              OnClick = CambiarMaquina
+            end
+            object Gondomania1: TMenuItem
+              Caption = 'Gondomania'
+              OnClick = CambiarMaquina
+            end
+            object GaryoRetsuden1: TMenuItem
+              Caption = 'Garyo Retsuden'
+              OnClick = CambiarMaquina
+            end
+            object CaptainSilver1: TMenuItem
+              Caption = 'Captain Silver'
+              OnClick = CambiarMaquina
+            end
+            object CobraCommand1: TMenuItem
+              Caption = 'Cobra-Command'
+              OnClick = CambiarMaquina
+            end
+            object Ghostbusters1: TMenuItem
+              Caption = 'The Real Ghostbusters'
+              OnClick = CambiarMaquina
+            end
+            object oscar1: TMenuItem
+              Caption = 'Psycho-Nics Oscar'
+              OnClick = CambiarMaquina
+            end
           end
           object tp841: TMenuItem
             Caption = 'Time Pilot '#39'84'
@@ -3211,6 +3416,10 @@ object principal1: Tprincipal1
               Caption = 'Hyper Sports'
               OnClick = CambiarMaquina
             end
+            object RoadFighter1: TMenuItem
+              Caption = 'Road Fighter'
+              OnClick = CambiarMaquina
+            end
           end
           object Megazone1: TMenuItem
             Caption = 'Megazone'
@@ -3277,10 +3486,6 @@ object principal1: Tprincipal1
               Caption = 'Double Dragon'
               OnClick = CambiarMaquina
             end
-            object ddragon_sh1: TMenuItem
-              Caption = 'Double Dragon (Speed Hack)'
-              OnClick = CambiarMaquina
-            end
             object ddragon21: TMenuItem
               Caption = 'Double Dragon II'
               OnClick = CambiarMaquina
@@ -3335,6 +3540,10 @@ object principal1: Tprincipal1
             Caption = 'Vendetta'
             OnClick = CambiarMaquina
           end
+          object N88Games1: TMenuItem
+            Caption = '88 Games'
+            OnClick = CambiarMaquina
+          end
         end
         object M680001: TMenuItem
           Caption = 'M68000'
@@ -3365,9 +3574,20 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object SnowBros1: TMenuItem
-            Caption = 'Snow Bros'
-            OnClick = CambiarMaquina
+          object SnowBrosHW1: TMenuItem
+            Caption = 'Snow Bros HW'
+            object SnowBros1: TMenuItem
+              Caption = 'Snow Bros'
+              OnClick = CambiarMaquina
+            end
+            object ComeBackToto1: TMenuItem
+              Caption = 'Come Back Toto'
+              OnClick = CambiarMaquina
+            end
+            object HyperPacman1: TMenuItem
+              Caption = 'Hyper Pacman'
+              OnClick = CambiarMaquina
+            end
           end
           object Toki1: TMenuItem
             Caption = 'Toki'
@@ -3513,6 +3733,18 @@ object principal1: Tprincipal1
             end
             object Aurail1: TMenuItem
               Caption = 'Aurail'
+              OnClick = CambiarMaquina
+            end
+            object RiotCity1: TMenuItem
+              Caption = 'Riot City'
+              OnClick = CambiarMaquina
+            end
+            object sdi1: TMenuItem
+              Caption = 'SDI - Strategic Defense Initiative'
+              OnClick = CambiarMaquina
+            end
+            object Cotton1: TMenuItem
+              Caption = 'Cotton'
               OnClick = CambiarMaquina
             end
           end
@@ -3896,6 +4128,28 @@ object principal1: Tprincipal1
               Caption = 'Twin Brats'
               OnClick = CambiarMaquina
             end
+            object MortalRace1: TMenuItem
+              Caption = 'Mortal Race'
+              OnClick = CambiarMaquina
+            end
+          end
+          object UnicoHW1: TMenuItem
+            Caption = 'Unico HW'
+            object BurglarX1: TMenuItem
+              Caption = 'BurglarX'
+              OnClick = CambiarMaquina
+            end
+            object ZeroPoint1: TMenuItem
+              Caption = 'Zero Point'
+              OnClick = CambiarMaquina
+            end
+          end
+          object Tecmo16HW1: TMenuItem
+            Caption = 'Tecmo 16 HW'
+            object FinalStarforce1: TMenuItem
+              Caption = 'Final Starforce'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem
@@ -3912,7 +4166,7 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
             object RType21: TMenuItem
-              Caption = 'R-Type2'
+              Caption = 'R-Type II'
               OnClick = CambiarMaquina
             end
           end
@@ -3931,8 +4185,8 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object HotBlock1: TMenuItem
-            Caption = 'Hot Block'
+          object HotBlocks1: TMenuItem
+            Caption = 'Hot Blocks -Tetrix II'
             OnClick = CambiarMaquina
           end
         end

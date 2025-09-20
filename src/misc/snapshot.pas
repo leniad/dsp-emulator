@@ -2,7 +2,7 @@ unit snapshot;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
-     sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
+     sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,file_engine,
      init_games,ppi8255,tms99xx,pal_engine,sn_76496,m6502,misc_functions,
      i2cmem,lenguaje,sg1000,sms,sega_gg,sega_vdp,super_cassette_vision,upd1771,
      upd7810,chip8_hw,n2a03,nes_ppu,nes_mappers,gb,gb_mappers,gb_sound,lr35902;
@@ -80,12 +80,11 @@ function grabar_amstrad_sna(nombre:string):boolean;
 function abrir_coleco_snapshot(data:pbyte;long:dword):boolean;
 //C64
 function abrir_prg(data:pbyte;long:dword):boolean;
-function abrir_t64(data:pbyte;long:dword):boolean;
 function abrir_vsf(data:pbyte;long:dword):boolean;
 //Snaphot master
-function snapshot_w(nombre:string):boolean;
-function snapshot_r(data:pbyte;long:dword):boolean;
-function snapshot_main_write:string;
+function snapshot_w(nombre:string;system_type:byte):boolean;
+function snapshot_r(data:pbyte;long:dword;system_type:byte):boolean;
+function snapshot_main_write(system_type:byte):string;
 
 implementation
 uses spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,coleco,principal,main_engine,
@@ -1614,6 +1613,18 @@ type
     	RNG:cardinal;
     	NoiseFB:integer;
   end;
+  tsn76496_v2=packed record
+      UpdateStep:dword;
+      VolTable:array[0..15] of single;
+      Registers:array[0..7] of word;
+      LastRegister:byte;
+      Volume:array [0..3] of single;
+      Period,Count:array [0..3] of integer;
+      Output:array [0..3] of byte;
+      RNG:cardinal;
+      NoiseFB:integer;
+  end;
+
 var
   ptemp,ptemp2,ptemp3:pbyte;
   longitud,descomprimido:integer;
@@ -1623,6 +1634,7 @@ var
   z80_v2:^tz80_v2;
   z80_v2_ext:^tz80_v2_ext;
   sn76496_v1:^tsn76496_v1;
+  sn76496_v2:^tsn76496_v2;
   coleco_header:^tmain_header;
   coleco_block:^tmain_block;
   tempb:byte;
@@ -1697,8 +1709,8 @@ while longitud<long do begin
           main_z80_reg.f2.c:=z80_v1.f2[0];
           z80_0.contador:=z80_v1.contador;
           main_z80_reg.im:=z80_v1.im;
-          z80_0.im2_lo:=z80_v1.im2_lo;
-          z80_0.im0:=z80_v1.im0;
+          //z80_0.irq_vector:=z80_v1.im2_lo;
+          //z80_0.im0:=z80_v1.im0;
           freemem(z80_v1);
       end;
       $2:begin //Version 2.00
@@ -1714,8 +1726,8 @@ while longitud<long do begin
           z80_0.change_irq(z80_v2_ext.pedir_irq);
           z80_0.change_nmi(z80_v2_ext.pedir_nmi);
           z80_0.contador:=z80_v2_ext.contador;
-          z80_0.im2_lo:=z80_v2_ext.im2_lo;
-          z80_0.im0:=z80_v2_ext.im0;
+          //z80_0.irq_vector:=z80_v2_ext.im2_lo;
+          //z80_0.im0:=z80_v2_ext.im0;
           freemem(z80_v2_ext);
           freemem(z80_v2);
         end;
@@ -1775,17 +1787,20 @@ while longitud<long do begin
         else begin
             getmem(sn76496_v1,sizeof(tsn76496_v1));
             copymemory(sn76496_v1,data,sizeof(tsn76496_v1));
-            sn_76496_0.UpdateStep:=sn76496_v1.UpdateStep;
-            for tempb:=0 to 15 do sn_76496_0.VolTable[tempb]:=sn76496_v1.VolTable[tempb];
-            for tempb:=0 to 7 do sn_76496_0.Registers[tempb]:=sn76496_v1.Registers[tempb];
-            sn_76496_0.LastRegister:=sn76496_v1.LastRegister;
-            for tempb:=0 to 3 do sn_76496_0.Volume[tempb]:=sn76496_v1.Volume[tempb];
-            for tempb:=0 to 3 do sn_76496_0.Count[tempb]:=sn76496_v1.Count[tempb];
-            for tempb:=0 to 3 do sn_76496_0.Period[tempb]:=sn76496_v1.Period[tempb];
-            for tempb:=0 to 3 do sn_76496_0.Output[tempb]:=sn76496_v1.Output[tempb];
-            sn_76496_0.RNG:=sn76496_v1.RNG;
-            sn_76496_0.NoiseFB:=sn76496_v1.NoiseFB;
+            getmem(sn76496_v2,sizeof(tsn76496_v2));
+            sn76496_v2.UpdateStep:=sn76496_v1.UpdateStep;
+            for tempb:=0 to 15 do sn76496_v2.VolTable[tempb]:=sn76496_v1.VolTable[tempb];
+            for tempb:=0 to 7 do sn76496_v2.Registers[tempb]:=sn76496_v1.Registers[tempb];
+            sn76496_v2.LastRegister:=sn76496_v1.LastRegister;
+            for tempb:=0 to 3 do sn76496_v2.Volume[tempb]:=sn76496_v1.Volume[tempb];
+            for tempb:=0 to 3 do sn76496_v2.Count[tempb]:=sn76496_v1.Count[tempb];
+            for tempb:=0 to 3 do sn76496_v2.Period[tempb]:=sn76496_v1.Period[tempb];
+            for tempb:=0 to 3 do sn76496_v2.Output[tempb]:=sn76496_v1.Output[tempb];
+            sn76496_v2.RNG:=sn76496_v1.RNG;
+            sn76496_v2.NoiseFB:=sn76496_v1.NoiseFB;
+            sn_76496_0.load_snapshot(pbyte(sn76496_v2));
             freemem(sn76496_v1);
+            freemem(sn76496_v2);
         end;
     end;
   end;
@@ -1809,60 +1824,21 @@ end;
 //PRG
 function abrir_prg(data:pbyte;long:dword):boolean;
 var
-   posi,hi,lo:integer;
-   punt:integer;
+   hi,lo:byte;
+   dest,f:word;
 begin
+  //Los dos primeros bytes es la direccion de destino, el resto son los datos
 	abrir_prg:=false;
-	//lo:=(self.reg2.tod_sec and $0f)+1;
-	//hi:= self.reg2.tod_sec shr 4;
-	lo:=data[0];
-	hi:=data[1];
-	punt:=$801;
-	punt:=(hi shl 8) or (lo);
-  //MessageDlg('HI: '+inttostr(hi), mtInformation,[mbOk], 0);
-  //MessageDlg('LO: '+inttostr(lo), mtInformation,[mbOk], 0);
-  //MessageDlg('PUNT: '+inttostr(punt), mtInformation,[mbOk], 0);
-  inc(data,2);
-  for posi:=0 to (long-2) do begin
-    c64_putbyte(punt+posi, data[0]);
-    //copymemory(@memoria,data,);
-    inc(data,1);
-    //freemem(ptemp);
+	lo:=data^;
+  inc(data);
+	hi:=data^;
+  inc(data);
+	dest:=(hi shl 8) or (lo);;
+  for f:=0 to (long-2) do begin
+    c64_putbyte(dest+f,data^);
+    inc(data);
   end;
 	abrir_prg:=true;
-end;
-
-//T64
-function abrir_t64(data:pbyte;long:dword):boolean;
-var
-   posi,hi,lo:integer;
-   punt,posFiche:integer;
-begin
-	abrir_t64:=false;
-  inc(data,32+32+2);
-  lo:=data[0];
-	hi:=data[1];
-	punt:=(hi shl 8) or lo;
-  inc(data,2);
-  //MessageDlg('HI: '+inttostr(hi), mtInformation,[mbOk], 0);
-  //MessageDlg('LO: '+inttostr(lo), mtInformation,[mbOk], 0);
-  //MessageDlg('PUNT: '+inttostr(punt), mtInformation,[mbOk], 0);
-  inc(data,4);
-  lo:=data[0];
-	hi:=data[1];
-  inc(data,2);
-  posFiche:=(hi shl 8) or lo;
-  posFiche:=posFiche-(32+32+2+2+4+2);
-  //MessageDlg('posFiche: '+inttostr(posFiche), mtInformation,[mbOk], 0);
-  inc(data,posFiche);
-  //punt:= data[0] shl 1;
-  for posi:=0 to (long) do begin
-    c64_putbyte(punt+posi,data[0]);
-    //copymemory(@memoria,data,);
-    inc(data,1);
-    //freemem(ptemp);
-  end;
-	abrir_t64:=true;
 end;
 
 //VSF
@@ -1960,7 +1936,7 @@ freemem(vsf_block_head);
 abrir_vsf:=true;
 end;
 
-function snapshot_w(nombre:string):boolean;
+function snapshot_w(nombre:string;system_type:byte):boolean;
 var
   longitud:integer;
   snapshot_header:^tmain_header;
@@ -2264,7 +2240,7 @@ getmem(snapshot_block,SIZE_BLK);
 fillchar(snapshot_block^,SIZE_BLK,0);
 getmem(pdata,$1000000);
 ptemp:=pdata;
-case main_vars.system_type of
+case system_type of
   SNES:begin
             write_main_header('NES0',$1);
             write_ram(@memoria[0],$10000);
@@ -2346,7 +2322,7 @@ snapshot_w:=write_file(nombre,pdata,longitud);
 freemem(pdata);
 end;
 
-function snapshot_r(data:pbyte;long:dword):boolean;
+function snapshot_r(data:pbyte;long:dword;system_type:byte):boolean;
 var
   snapshot_header:^tmain_header;
   snapshot_block:^tmain_block;
@@ -2455,7 +2431,7 @@ if snapshot_header.magic='SGG0' then system:=SGG;
 if snapshot_header.magic='SCVI' then system:=SSUPERCASSETTE;
 if snapshot_header.magic='CHP8' then system:=SCHIP8;
 if snapshot_header.magic='GBC0' then system:=SGB;
-if ((system=$ff) or (system<>main_vars.system_type)) then begin
+if ((system=$ff) or (system<>system_type)) then begin
   MessageDlg('Snapshot no válido para este sistema.'+chr(10)+chr(13)+'Snapshot not valid for this system.', mtInformation,[mbOk], 0);
   freemem(snapshot_header);
   exit;
@@ -2467,7 +2443,7 @@ while longitud<long do begin
   copymemory(snapshot_block,data,SIZE_BLK);
   inc(data,SIZE_BLK);
   inc(longitud,SIZE_BLK);
-  case main_vars.system_type of
+  case system_type of
     SNES:begin
               if snapshot_block.nombre='CRAM' then load_ram(@memoria[0]);
               if snapshot_block.nombre='MISC' then load_misc(@nes_0);
@@ -2542,18 +2518,18 @@ end;
 snapshot_r:=true;
 end;
 
-function snapshot_main_write:string;
+function snapshot_main_write(system_type:byte):string;
 var
   nombre:string;
   correcto:boolean;
   indice:byte;
 begin
-if saverom(nombre,indice) then begin
+if saverom(nombre,indice,system_type) then begin
     nombre:=changefileext(nombre,'.dsp');
     if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
         if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
     end;
-    correcto:=snapshot_w(nombre);
+    correcto:=snapshot_w(nombre,system_type);
     if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end else exit;
 snapshot_main_write:=nombre;

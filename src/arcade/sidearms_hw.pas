@@ -27,7 +27,7 @@ const
         (n:'b_12a.rom';l:$8000;p:$30000;crc:$ce107f3c),(n:'b_14a.rom';l:$8000;p:$38000;crc:$dba06076));
         sidearms_back_tiles:tipo_roms=(n:'b_03d.rom';l:$8000;p:0;crc:$6f348008);
         sidearms_dip_a:array [0..4] of def_dip=(
-        (mask:$07;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'0 (Easiest)'),(dip_val:$6;dip_name:'1'),(dip_val:$5;dip_name:'2'),(dip_val:$4;dip_name:'3 (Normal)'),(dip_val:$3;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$1;dip_name:'6'),(dip_val:$0;dip_name:'7 (Hardest)'),(),(),(),(),(),(),(),())),
+        (mask:$7;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'0 (Easiest)'),(dip_val:$6;dip_name:'1'),(dip_val:$5;dip_name:'2'),(dip_val:$4;dip_name:'3 (Normal)'),(dip_val:$3;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$1;dip_name:'6'),(dip_val:$0;dip_name:'7 (Hardest)'),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Lives';number:2;dip:((dip_val:$8;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'100K'),(dip_val:$20;dip_name:'100K 100K'),(dip_val:$10;dip_name:'150K 150K'),(dip_val:$0;dip_name:'200K 200K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -46,6 +46,8 @@ var
  //Stars
  vcount_191,latch_374,hflop_74a_n:byte;
  hcount_191:word;
+
+procedure update_video_sidearms;
 
 procedure draw_sprites;
 procedure draw_sprites_def(total:byte;pos:word);
@@ -71,7 +73,6 @@ draw_sprites_def($38,$800);
 draw_sprites_def($38,0);
 end;
 
-procedure update_video_sidearms;
 procedure draw_back;
 var
   pos,offset,f,color,nchar:word;
@@ -182,7 +183,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main
     z80_0.run(frame_m);
@@ -219,6 +220,7 @@ case direccion of
 end;
 end;
 
+procedure sidearms_putbyte(direccion:word;valor:byte);
 procedure cambiar_color(numero:word);
 var
   color:tcolor;
@@ -235,7 +237,6 @@ begin
   end;
 end;
 
-procedure sidearms_putbyte(direccion:word;valor:byte);
 var
   last_state:word;
 begin
@@ -323,6 +324,7 @@ begin
  z80_1.reset;
  ym2203_0.reset;
  ym2203_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

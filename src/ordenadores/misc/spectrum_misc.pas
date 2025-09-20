@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
-     z80pio,z80daisy,disk_file_format,timer_engine,misc_functions;
+     z80pio,z80daisy,disk_file_format,timer_engine,misc_functions,qsnapshot;
 
 const
         tabla_scr:array[0..191] of word=(
@@ -34,25 +34,21 @@ const
         4256,4512,4768,5024,5280,5536,5792,6048,
         4288,4544,4800,5056,5312,5568,5824,6080,
         4320,4576,4832,5088,5344,5600,5856,6112);
-
         spec_paleta:array[0..15] of integer=(
         $000000,$C00000,$0000C0,$C000C0,
         $00C000,$C0C000,$00C0C0,$C0C0C0,
         $000000,$FF0000,$0000FF,$FF00FF,
         $00FF00,$FFFF00,$00FFFF,$FFFFFF);
-
         gif_paleta:array[0..15] of integer=(
         $000000,$E70000,$0000E7,$E700E7,
         $00E700,$E7E700,$00E7E7,$E7E7E7,
         $000000,$FF0000,$0000FF,$FF00FF,
         $00FF00,$FFFF00,$00FFFF,$FFFFFF);
-
         cmemory:array[0..127] of byte=(
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0);
-
         JKEMPSTON=1;
         JCURSOR=2;
         JSINCLAIR1=3;
@@ -62,7 +58,6 @@ const
         MGUNSTICK=1;
         MKEMPSTON=2;
         MAMX=3;
-        BORDE_HIGH=40;
 
 type
   tmouse_spectrum=record
@@ -173,23 +168,22 @@ end;
 
 procedure borde_normal(linea:word);
 var
-        linea_actual:word;
+  linea_actual:word;
 begin
-if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<16) or (linea>295)) then exit;
-if borde.buffer[linea]=borde.color then exit;
-//poner_linea:=true;
+//if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<16) or (linea>295)) then exit;
+if ((borde.tipo=0) or (linea<16) or (linea>295) or (borde.buffer[linea]=borde.color)) then exit;
 borde.buffer[linea]:=borde.color;
 linea_actual:=linea-16;
 case linea of
         16..63,256..295:begin
                           single_line(0,linea_actual,paleta[borde.color],352,1);
-                          actualiza_trozo_simple(0,linea_actual,352,1,1);
+                          actualiza_trozo(0,linea_actual,352,1,1,0,linea_actual,352,1,PANT_TEMP);
                         end;
         64..255:begin
                     single_line(0,linea_actual,paleta[borde.color],48,1);
-                    actualiza_trozo_simple(0,linea_actual,48,1,1);
+                    actualiza_trozo(0,linea_actual,48,1,1,0,linea_actual,48,1,PANT_TEMP);
                     single_line(304,linea_actual,paleta[borde.color],48,1);
-                    actualiza_trozo_simple(304,linea_actual,48,1,1);
+                    actualiza_trozo(304,linea_actual,48,1,1,304,linea_actual,48,1,PANT_TEMP);
                 end;
 end;
 end;
@@ -243,12 +237,12 @@ if (event.mouse and (mouse.tipo<>MNONE)) then begin
         if raton.button2 then mouse.botones:=mouse.botones and $df // $bf
           else mouse.botones:=mouse.botones or $20;
         if mouse.x<>mouse.x_act then begin
-          z80pio_astb_w(0,false);
-          z80pio_astb_w(0,true);
+          pio_0.astb_w(false);
+          pio_0.astb_w(true);
         end;
         if mouse.y<>mouse.y_act then begin
-          z80pio_bstb_w(0,false);
-          z80pio_bstb_w(0,true);
+          pio_0.bstb_w(false);
+          pio_0.bstb_w(true);
         end;
     end;
   end;
@@ -264,94 +258,94 @@ if event.keyboard then begin
   end;
   if false then teclado_matriz
     else copymemory(@var_spectrum.key_spec[0],@keyboard[0],256);
-  if var_spectrum.key_spec[KEYBOARD_1] then var_spectrum.key1_5:=(var_spectrum.key1_5 And $FE) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 1);
-  if var_spectrum.key_spec[KEYBOARD_2] then var_spectrum.key1_5:=(var_spectrum.key1_5 And $FD) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 2);
-  if var_spectrum.key_spec[KEYBOARD_3] then var_spectrum.key1_5:=var_spectrum.key1_5 And $FB else var_spectrum.key1_5:=var_spectrum.key1_5 or 4;
-  if var_spectrum.key_spec[KEYBOARD_4] then var_spectrum.key1_5:=var_spectrum.key1_5 And $F7 else var_spectrum.key1_5:=var_spectrum.key1_5 or 8;
-  if var_spectrum.key_spec[KEYBOARD_5] then var_spectrum.key1_5:=var_spectrum.key1_5 And $EF else var_spectrum.key1_5:=var_spectrum.key1_5 or $10;
-  if var_spectrum.key_spec[KEYBOARD_0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FE else var_spectrum.key6_0:=var_spectrum.key6_0 or 1;
-  if var_spectrum.key_spec[KEYBOARD_9] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FD else var_spectrum.key6_0:=var_spectrum.key6_0 or 2;
-  if var_spectrum.key_spec[KEYBOARD_8] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FB else var_spectrum.key6_0:=var_spectrum.key6_0 or 4;
-  if var_spectrum.key_spec[KEYBOARD_7] then var_spectrum.key6_0:=var_spectrum.key6_0 And $F7 else var_spectrum.key6_0:=var_spectrum.key6_0 or 8;
-  if var_spectrum.key_spec[KEYBOARD_6] then var_spectrum.key6_0:=var_spectrum.key6_0 And $EF else var_spectrum.key6_0:=var_spectrum.key6_0 or $10;
-  if var_spectrum.key_spec[KEYBOARD_Q] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T And $FE else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 1;
-  if var_spectrum.key_spec[KEYBOARD_W] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T And $FD else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 2;
-  if var_spectrum.key_spec[KEYBOARD_E] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T And $FB else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 4;
-  if var_spectrum.key_spec[KEYBOARD_R] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T And $F7 else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 8;
-  if var_spectrum.key_spec[KEYBOARD_T] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T And $EF else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or $10;
-  if var_spectrum.key_spec[KEYBOARD_P] then var_spectrum.keyY_P:=var_spectrum.keyY_P And $FE else var_spectrum.keyY_P:=var_spectrum.keyY_P or 1;
-  if var_spectrum.key_spec[KEYBOARD_O] then var_spectrum.keyY_P:=var_spectrum.keyY_P And $FD else var_spectrum.keyY_P:=var_spectrum.keyY_P or 2;
-  if var_spectrum.key_spec[KEYBOARD_I] then var_spectrum.keyY_P:=var_spectrum.keyY_P And $FB else var_spectrum.keyY_P:=var_spectrum.keyY_P or 4;
-  if var_spectrum.key_spec[KEYBOARD_U] then var_spectrum.keyY_P:=var_spectrum.keyY_P And $F7 else var_spectrum.keyY_P:=var_spectrum.keyY_P or 8;
-  if var_spectrum.key_spec[KEYBOARD_Y] then var_spectrum.keyY_P:=var_spectrum.keyY_P And $EF else var_spectrum.keyY_P:=var_spectrum.keyY_P or $10;
-  if var_spectrum.key_spec[KEYBOARD_RETURN] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT And $FE else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 1;
-  if var_spectrum.key_spec[KEYBOARD_L] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT And $FD else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 2;
-  if var_spectrum.key_spec[KEYBOARD_K] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT And $FB else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 4;
-  if var_spectrum.key_spec[KEYBOARD_J] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT And $F7 else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 8;
-  if var_spectrum.key_spec[KEYBOARD_H] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT And $EF else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or $10;
-  if var_spectrum.key_spec[KEYBOARD_A] then var_spectrum.keyA_G:=var_spectrum.keyA_G And $FE else var_spectrum.keyA_G:=var_spectrum.keyA_G or 1;
-  if var_spectrum.key_spec[KEYBOARD_S] then var_spectrum.keyA_G:=var_spectrum.keyA_G And $FD else var_spectrum.keyA_G:=var_spectrum.keyA_G or 2;
-  if var_spectrum.key_spec[KEYBOARD_D] then var_spectrum.keyA_G:=var_spectrum.keyA_G And $FB else var_spectrum.keyA_G:=var_spectrum.keyA_G or 4;
-  if var_spectrum.key_spec[KEYBOARD_F] then var_spectrum.keyA_G:=var_spectrum.keyA_G And $F7 else var_spectrum.keyA_G:=var_spectrum.keyA_G or 8;
-  if var_spectrum.key_spec[KEYBOARD_G] then var_spectrum.keyA_G:=var_spectrum.keyA_G And $EF else var_spectrum.keyA_G:=var_spectrum.keyA_G or $10;
-  if (var_spectrum.key_spec[KEYBOARD_LCTRL] or var_spectrum.key_spec[KEYBOARD_RCTRL]) then var_spectrum.keyCAPS_V:=(var_spectrum.keyCAPS_V And $FE) else var_spectrum.keyCAPS_V:=(var_spectrum.keyCAPS_V or 1);
-  if var_spectrum.key_spec[KEYBOARD_Z] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V And $FD else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or 2;
-  if var_spectrum.key_spec[KEYBOARD_X] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V And $FB else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or 4;
-  if var_spectrum.key_spec[KEYBOARD_C] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V And $F7 else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or 8;
-  if var_spectrum.key_spec[KEYBOARD_V] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V And $EF else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or $10;
-  if var_spectrum.key_spec[KEYBOARD_SPACE] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FE else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 1;
-  if (var_spectrum.key_spec[KEYBOARD_LSHIFT] or var_spectrum.key_spec[KEYBOARD_RSHIFT]) then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FD else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 2;
-  if var_spectrum.key_spec[KEYBOARD_M] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FB else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 4;
-  if var_spectrum.key_spec[KEYBOARD_N] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $F7 else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 8;
-  if var_spectrum.key_spec[KEYBOARD_B] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $EF else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or $10;
+  if var_spectrum.key_spec[KEYBOARD_1] then var_spectrum.key1_5:=(var_spectrum.key1_5 and $fe) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 1);
+  if var_spectrum.key_spec[KEYBOARD_2] then var_spectrum.key1_5:=(var_spectrum.key1_5 and $fd) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 2);
+  if var_spectrum.key_spec[KEYBOARD_3] then var_spectrum.key1_5:=var_spectrum.key1_5 and $fb else var_spectrum.key1_5:=var_spectrum.key1_5 or 4;
+  if var_spectrum.key_spec[KEYBOARD_4] then var_spectrum.key1_5:=var_spectrum.key1_5 and $f7 else var_spectrum.key1_5:=var_spectrum.key1_5 or 8;
+  if var_spectrum.key_spec[KEYBOARD_5] then var_spectrum.key1_5:=var_spectrum.key1_5 and $ef else var_spectrum.key1_5:=var_spectrum.key1_5 or $10;
+  if var_spectrum.key_spec[KEYBOARD_0] then var_spectrum.key6_0:=var_spectrum.key6_0 and $fe else var_spectrum.key6_0:=var_spectrum.key6_0 or 1;
+  if var_spectrum.key_spec[KEYBOARD_9] then var_spectrum.key6_0:=var_spectrum.key6_0 and $fd else var_spectrum.key6_0:=var_spectrum.key6_0 or 2;
+  if var_spectrum.key_spec[KEYBOARD_8] then var_spectrum.key6_0:=var_spectrum.key6_0 and $fb else var_spectrum.key6_0:=var_spectrum.key6_0 or 4;
+  if var_spectrum.key_spec[KEYBOARD_7] then var_spectrum.key6_0:=var_spectrum.key6_0 and $f7 else var_spectrum.key6_0:=var_spectrum.key6_0 or 8;
+  if var_spectrum.key_spec[KEYBOARD_6] then var_spectrum.key6_0:=var_spectrum.key6_0 and $ef else var_spectrum.key6_0:=var_spectrum.key6_0 or $10;
+  if var_spectrum.key_spec[KEYBOARD_Q] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T and $fe else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 1;
+  if var_spectrum.key_spec[KEYBOARD_W] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T and $fd else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 2;
+  if var_spectrum.key_spec[KEYBOARD_E] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T and $fb else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 4;
+  if var_spectrum.key_spec[KEYBOARD_R] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T and $f7 else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or 8;
+  if var_spectrum.key_spec[KEYBOARD_T] then var_spectrum.keyQ_T:=var_spectrum.keyQ_T and $ef else var_spectrum.keyQ_T:=var_spectrum.keyQ_T or $10;
+  if var_spectrum.key_spec[KEYBOARD_P] then var_spectrum.keyY_P:=var_spectrum.keyY_P and $fe else var_spectrum.keyY_P:=var_spectrum.keyY_P or 1;
+  if var_spectrum.key_spec[KEYBOARD_O] then var_spectrum.keyY_P:=var_spectrum.keyY_P and $fd else var_spectrum.keyY_P:=var_spectrum.keyY_P or 2;
+  if var_spectrum.key_spec[KEYBOARD_I] then var_spectrum.keyY_P:=var_spectrum.keyY_P and $fb else var_spectrum.keyY_P:=var_spectrum.keyY_P or 4;
+  if var_spectrum.key_spec[KEYBOARD_U] then var_spectrum.keyY_P:=var_spectrum.keyY_P and $f7 else var_spectrum.keyY_P:=var_spectrum.keyY_P or 8;
+  if var_spectrum.key_spec[KEYBOARD_Y] then var_spectrum.keyY_P:=var_spectrum.keyY_P and $ef else var_spectrum.keyY_P:=var_spectrum.keyY_P or $10;
+  if var_spectrum.key_spec[KEYBOARD_RETURN] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT and $fe else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 1;
+  if var_spectrum.key_spec[KEYBOARD_L] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT and $fd else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 2;
+  if var_spectrum.key_spec[KEYBOARD_K] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT and $fb else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 4;
+  if var_spectrum.key_spec[KEYBOARD_J] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT and $f7 else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or 8;
+  if var_spectrum.key_spec[KEYBOARD_H] then var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT and $ef else var_spectrum.keyH_ENT:=var_spectrum.keyH_ENT or $10;
+  if var_spectrum.key_spec[KEYBOARD_A] then var_spectrum.keyA_G:=var_spectrum.keyA_G and $fe else var_spectrum.keyA_G:=var_spectrum.keyA_G or 1;
+  if var_spectrum.key_spec[KEYBOARD_S] then var_spectrum.keyA_G:=var_spectrum.keyA_G and $fd else var_spectrum.keyA_G:=var_spectrum.keyA_G or 2;
+  if var_spectrum.key_spec[KEYBOARD_D] then var_spectrum.keyA_G:=var_spectrum.keyA_G and $fb else var_spectrum.keyA_G:=var_spectrum.keyA_G or 4;
+  if var_spectrum.key_spec[KEYBOARD_F] then var_spectrum.keyA_G:=var_spectrum.keyA_G and $f7 else var_spectrum.keyA_G:=var_spectrum.keyA_G or 8;
+  if var_spectrum.key_spec[KEYBOARD_G] then var_spectrum.keyA_G:=var_spectrum.keyA_G and $ef else var_spectrum.keyA_G:=var_spectrum.keyA_G or $10;
+  if (var_spectrum.key_spec[KEYBOARD_LCTRL] or var_spectrum.key_spec[KEYBOARD_RCTRL]) then var_spectrum.keyCAPS_V:=(var_spectrum.keyCAPS_V and $fe) else var_spectrum.keyCAPS_V:=(var_spectrum.keyCAPS_V or 1);
+  if var_spectrum.key_spec[KEYBOARD_Z] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fd else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or 2;
+  if var_spectrum.key_spec[KEYBOARD_X] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fb else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or 4;
+  if var_spectrum.key_spec[KEYBOARD_C] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $f7 else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or 8;
+  if var_spectrum.key_spec[KEYBOARD_V] then var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $ef else var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V or $10;
+  if var_spectrum.key_spec[KEYBOARD_SPACE] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fe else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 1;
+  if (var_spectrum.key_spec[KEYBOARD_LSHIFT] or var_spectrum.key_spec[KEYBOARD_RSHIFT]) then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fd else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 2;
+  if var_spectrum.key_spec[KEYBOARD_M] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fb else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 4;
+  if var_spectrum.key_spec[KEYBOARD_N] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $f7 else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or 8;
+  if var_spectrum.key_spec[KEYBOARD_B] then var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $ef else var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC or $10;
   //Teclas del Spectrum +  y siguientes
   if var_spectrum.key_spec[KEYBOARD_FILA2_T2] then begin //CAPS+1 Edit
-    var_spectrum.key1_5:=(var_spectrum.key1_5 And $FE);
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.key1_5:=(var_spectrum.key1_5 and $fe);
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_capslock] then begin //CAPS+2
-    var_spectrum.key1_5:=var_spectrum.key1_5 And $FD;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.key1_5:=var_spectrum.key1_5 and $fd;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA0_T1] then begin //CAPS+3 True Video
-    var_spectrum.key1_5:=var_spectrum.key1_5 And $FB;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.key1_5:=var_spectrum.key1_5 and $fb;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA0_T2] then begin //CAPS+4 Inv Video
-    var_spectrum.key1_5:=var_spectrum.key1_5 And $F7;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.key1_5:=var_spectrum.key1_5 and $f7;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA0_T0] then begin //CAPS+9 Graphics
-    var_spectrum.key6_0:=var_spectrum.key6_0 And $FD;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.key6_0:=var_spectrum.key6_0 and $fd;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_BACKSPACE] then begin //CAPS+0
-    var_spectrum.key6_0:=var_spectrum.key6_0 and $FE;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.key6_0:=var_spectrum.key6_0 and $fe;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_escape] then begin //CAPS+SPACE Break
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FE;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fe;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_tab] then begin //CAPS+SHIFT Extended Mode
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FD;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fd;
+    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA3_T0] then begin // "
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FD;
-    var_spectrum.keyY_P:=var_spectrum.keyY_P And $FE;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fd;
+    var_spectrum.keyY_P:=var_spectrum.keyY_P and $fe;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA3_T3] then begin // ;
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FD;
-    var_spectrum.keyY_P:=var_spectrum.keyY_P And $FD;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fd;
+    var_spectrum.keyY_P:=var_spectrum.keyY_P and $fd;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA3_T2] then begin // .
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FD;
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FB;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fd;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fb;
   end;
   if var_spectrum.key_spec[KEYBOARD_FILA3_T1] then begin // ,
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $FD;
-    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC And $F7;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $fd;
+    var_spectrum.keyB_SPC:=var_spectrum.keyB_SPC and $f7;
   end;
 end;
 if event.arcade then begin
@@ -361,11 +355,11 @@ if event.arcade then begin
   end;
   case var_spectrum.tipo_joy of
     JKEMPSTON:begin
-                if arcade_input.up[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 8) else var_spectrum.joy_val:=(var_spectrum.joy_val and $F7);
-                if arcade_input.down[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 4) else var_spectrum.joy_val:=(var_spectrum.joy_val and $FB);
-                if arcade_input.left[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 2) else var_spectrum.joy_val:=(var_spectrum.joy_val and $FD);
-                if arcade_input.right[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 1) else var_spectrum.joy_val:=(var_spectrum.joy_val and $FE);
-                if arcade_input.but0[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or $10) else var_spectrum.joy_val:=(var_spectrum.joy_val and $EF);
+                if arcade_input.up[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 8) else var_spectrum.joy_val:=(var_spectrum.joy_val and $f7);
+                if arcade_input.down[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 4) else var_spectrum.joy_val:=(var_spectrum.joy_val and $fb);
+                if arcade_input.left[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 2) else var_spectrum.joy_val:=(var_spectrum.joy_val and $fd);
+                if arcade_input.right[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 1) else var_spectrum.joy_val:=(var_spectrum.joy_val and $fe);
+                if arcade_input.but0[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or $10) else var_spectrum.joy_val:=(var_spectrum.joy_val and $ef);
               end;
     JFULLER:begin
                 if arcade_input.but0[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $7f) else var_spectrum.joy_val:=(var_spectrum.joy_val or $80);
@@ -375,37 +369,37 @@ if event.arcade then begin
                 if arcade_input.up[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $fe) else var_spectrum.joy_val:=(var_spectrum.joy_val or 1);
               end;
     JCURSOR:begin
-                 if arcade_input.but0[0] then var_spectrum.key6_0:=(var_spectrum.key6_0 And $FE) else var_spectrum.key6_0:=(var_spectrum.key6_0 or 1);
+                 if arcade_input.but0[0] then var_spectrum.key6_0:=(var_spectrum.key6_0 and $fe) else var_spectrum.key6_0:=(var_spectrum.key6_0 or 1);
                  if arcade_input.left[0] then begin //CAPS+5
-                    var_spectrum.key1_5:=var_spectrum.key1_5 And $EF;
-                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                    var_spectrum.key1_5:=var_spectrum.key1_5 and $ef;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
                  end;
                  if arcade_input.down[0] then begin //CAPS+6
-                    var_spectrum.key6_0:=var_spectrum.key6_0 And $EF;
-                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                    var_spectrum.key6_0:=var_spectrum.key6_0 and $ef;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
                  end;
                  if arcade_input.up[0] then begin //CAPS+7
-                    var_spectrum.key6_0:=var_spectrum.key6_0 And $F7;
-                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                    var_spectrum.key6_0:=var_spectrum.key6_0 and $f7;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
                  end;
                  if arcade_input.right[0] then begin //CAPS+8
-                    var_spectrum.key6_0:=var_spectrum.key6_0 And $FB;
-                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                    var_spectrum.key6_0:=var_spectrum.key6_0 and $fb;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $fe;
                  end;
             end;
     JSINCLAIR1:begin
-                 if arcade_input.but0[0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FE else var_spectrum.key6_0:=var_spectrum.key6_0 or 1;
-                 if arcade_input.up[0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FD else var_spectrum.key6_0:=var_spectrum.key6_0 or 2;
-                 if arcade_input.down[0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FB else var_spectrum.key6_0:=var_spectrum.key6_0 or 4;
-                 if arcade_input.right[0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $F7 else var_spectrum.key6_0:=var_spectrum.key6_0 or 8;
-                 if arcade_input.left[0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $EF else var_spectrum.key6_0:=var_spectrum.key6_0 or $10;
+                 if arcade_input.but0[0] then var_spectrum.key6_0:=var_spectrum.key6_0 and $fe else var_spectrum.key6_0:=var_spectrum.key6_0 or 1;
+                 if arcade_input.up[0] then var_spectrum.key6_0:=var_spectrum.key6_0 and $fd else var_spectrum.key6_0:=var_spectrum.key6_0 or 2;
+                 if arcade_input.down[0] then var_spectrum.key6_0:=var_spectrum.key6_0 and $fb else var_spectrum.key6_0:=var_spectrum.key6_0 or 4;
+                 if arcade_input.right[0] then var_spectrum.key6_0:=var_spectrum.key6_0 and $f7 else var_spectrum.key6_0:=var_spectrum.key6_0 or 8;
+                 if arcade_input.left[0] then var_spectrum.key6_0:=var_spectrum.key6_0 and $ef else var_spectrum.key6_0:=var_spectrum.key6_0 or $10;
                end;
     JSINCLAIR2:begin
-                 if arcade_input.left[0] then var_spectrum.key1_5:=(var_spectrum.key1_5 And $FE) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 1);
-                 if arcade_input.right[0] then var_spectrum.key1_5:=(var_spectrum.key1_5 And $FD) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 2);
-                 if arcade_input.down[0] then var_spectrum.key1_5:=var_spectrum.key1_5 And $FB else var_spectrum.key1_5:=var_spectrum.key1_5 or 4;
-                 if arcade_input.up[0] then var_spectrum.key1_5:=var_spectrum.key1_5 And $F7 else var_spectrum.key1_5:=var_spectrum.key1_5 or 8;
-                 if arcade_input.but0[0] then var_spectrum.key1_5:=var_spectrum.key1_5 And $EF else var_spectrum.key1_5:=var_spectrum.key1_5 or $10;
+                 if arcade_input.left[0] then var_spectrum.key1_5:=(var_spectrum.key1_5 and $fe) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 1);
+                 if arcade_input.right[0] then var_spectrum.key1_5:=(var_spectrum.key1_5 and $fd) else var_spectrum.key1_5:=(var_spectrum.key1_5 or 2);
+                 if arcade_input.down[0] then var_spectrum.key1_5:=var_spectrum.key1_5 and $fb else var_spectrum.key1_5:=var_spectrum.key1_5 or 4;
+                 if arcade_input.up[0] then var_spectrum.key1_5:=var_spectrum.key1_5 and $f7 else var_spectrum.key1_5:=var_spectrum.key1_5 or 8;
+                 if arcade_input.but0[0] then var_spectrum.key1_5:=var_spectrum.key1_5 and $ef else var_spectrum.key1_5:=var_spectrum.key1_5 or $10;
                end;
   end;
 end;
@@ -463,6 +457,105 @@ if var_spectrum.turbo_sound then begin
   end;
 end;
 
+//Quick save/load
+procedure spec_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..11] of byte;
+  f:byte;
+begin
+if not(open_qsnapshot_load('spec'+inttostr(main_vars.tipo_maquina)+nombre)) then exit;
+getmem(data,200);
+//MISC
+loaddata_qsnapshot(@buffer);
+linea_48:=buffer[0] or (buffer[1] shl 8);
+rom_cambiada_48:=buffer[2]<>0;
+spec_16k:=buffer[3]<>0;
+linea_128:=buffer[4] or (buffer[5] shl 8);
+paginacion_activa:=buffer[6]<>0;
+linea_3:=buffer[7] or (buffer[8] shl 8);
+old_1ffd:=buffer[9];
+paginacion_especial:=buffer[10]<>0;
+disk_present:=buffer[11]<>0;
+//CPU
+loaddata_qsnapshot(data);
+spec_z80.load_snapshot(data);
+//SND+MEM
+case main_vars.tipo_maquina of
+  0,5:loaddata_qsnapshot(@memoria[0]);
+  1,2,3,4:begin
+            loaddata_qsnapshot(data);
+            ay8910_0.load_snapshot(data);
+            loaddata_qsnapshot(data);
+            ay8910_1.load_snapshot(data);
+            if main_vars.tipo_maquina=1 then for f:=0 to 9 do loaddata_qsnapshot(@memoria_128k[f,0])
+              else for f:=0 to 11 do loaddata_qsnapshot(@memoria_3[f,0]);
+          end;
+end;
+//Vars
+loaddata_qsnapshot(@ulaplus);
+loaddata_qsnapshot(@var_spectrum);
+loaddata_qsnapshot(@interface2);
+loaddata_qsnapshot(@mouse);
+loaddata_qsnapshot(@borde);
+borde.borde_spectrum:=borde_normal;
+spectrum_reset_video;
+close_qsnapshot;
+end;
+
+procedure spec_qsave(nombre:string);
+var
+  data:pbyte;
+  size:dword;
+  buffer:array[0..11] of byte;
+  f:byte;
+begin
+open_qsnapshot_save('spec'+inttostr(main_vars.tipo_maquina)+nombre);
+getmem(data,200);
+//MISC
+buffer[0]:=linea_48 and $ff;
+buffer[1]:=linea_48 shr 8;
+buffer[2]:=byte(rom_cambiada_48);
+buffer[3]:=byte(spec_16k);
+buffer[4]:=linea_128 and $ff;
+buffer[5]:=linea_128 shr 8;
+buffer[6]:=byte(paginacion_activa);
+buffer[7]:=linea_3 and $ff;
+buffer[8]:=linea_3 shr 8;
+buffer[9]:=old_1ffd;
+buffer[10]:=byte(paginacion_especial);
+buffer[11]:=byte(disk_present);
+savedata_qsnapshot(@buffer,12);
+//CPU
+size:=spec_z80.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND+MEM
+case main_vars.tipo_maquina of
+  0,5:savedata_qsnapshot(@memoria[0],$10000);
+  1,2,3,4:begin
+            size:=ay8910_0.save_snapshot(data);
+            savedata_qsnapshot(data,size);
+            size:=ay8910_1.save_snapshot(data);
+            savedata_qsnapshot(data,size);
+            if main_vars.tipo_maquina=1 then for f:=0 to 9 do savedata_qsnapshot(@memoria_128k[f,0],$4000)
+              else for f:=0 to 11 do savedata_qsnapshot(@memoria_3[f,0],$4000);
+          end;
+end;
+//Vars
+size:=sizeof(tulaplus_spectrum);
+savedata_qsnapshot(@ulaplus,size);
+size:=sizeof(tvar_spectrum);
+savedata_qsnapshot(@var_spectrum,size);
+size:=sizeof(tinterface2_spectrum);
+savedata_qsnapshot(@interface2,size);
+size:=sizeof(tmouse_spectrum);
+savedata_qsnapshot(@mouse,size);
+size:=sizeof(tborde_spectrum);
+savedata_qsnapshot(@borde,size);
+freemem(data);
+close_qsnapshot;
+end;
+
 function spec_comun(clock:dword):boolean;
 var
   colores:tpaleta;
@@ -473,6 +566,8 @@ llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.close:=spec_cerrar_comun;
 llamadas_maquina.configurar:=spectrum_config;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
+llamadas_maquina.save_qsnap:=spec_qsave;
+llamadas_maquina.load_qsnap:=spec_qload;
 spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
@@ -524,13 +619,13 @@ if mouse.tipo<>MNONE then show_mouse_cursor
 //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;
-
-if cinta_tzx.cargada then tape_window1.Show;
+if cinta_tzx.cargada then tape_window1.show;
 end;
 
 procedure reset_misc;
 begin
 spec_z80.reset;
+spec_z80.contador:=0;
 reset_audio;
 var_spectrum.posicion_beeper:=0;
 if cinta_tzx.cargada then begin
@@ -544,7 +639,6 @@ var_spectrum.irq_pos:=0;
 var_spectrum.altavoz:=0;
 var_spectrum.ay_select:=0;
 cinta_tzx.value:=0;
-spec_z80.im2_lo:=$ff;
 fillchar(borde.buffer[0],78000,$80);
 //ULA+
 ulaplus.activa:=false;
@@ -572,10 +666,11 @@ var_spectrum.adr_13:=false;
 var_spectrum.adr_14:=false;
 var_spectrum.adr_15:=false;
 if mouse.tipo=MAMX then begin
-  z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb);
-  z80daisy_init(Z80_PIO_TYPE);
-  z80pio_reset(0);
-  spec_z80.daisy:=true;
+  pio_0:=tz80pio.create;
+  pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb);
+  z80daisy_init(Z80_PIO0_TYPE);
+  pio_0.reset;
+  spec_z80.enable_daisy;
 end;
 mouse.x:=0;
 mouse.y:=0;
@@ -613,7 +708,7 @@ var
   correcto:boolean;
   indice:byte;
 begin
-if saverom(nombre,indice) then begin
+if saverom(nombre,indice,SSPECTRUM) then begin
         case indice of
           1:nombre:=changefileext(nombre,'.szx');
           2:nombre:=changefileext(nombre,'.z80');
@@ -649,7 +744,7 @@ if cinta_tzx.cargada then begin
     end else begin
       if ((spec_z80.get_safe_pc=$0556) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
-       if not(cinta_tzx.es_tap) then main_screen.rapido:=true;
+       main_screen.rapido:=true;
        tape_window1.fPlayCinta(nil);
       end;
     end;
@@ -678,7 +773,7 @@ end;
 
 procedure spec_a_pantalla(posicion_memoria:pbyte;imagen1:tbitmap);
 var
-  x,y,f,atrib,video_col,color,color2:byte;
+  bit,x,y,f,atrib,video_col,color,color2:byte;
   pos_video:word;
   pvideo:pbyte;
 begin
@@ -697,14 +792,20 @@ for y:=0 to 191 do begin
     color2:=(atrib shr 3) and 7;
     color:=atrib and 7;
     if (atrib and 64)<>0 then begin inc(color,8);inc(color2,8);end;
-    if (video_col and 128)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
+    for bit:=0 to 7 do begin
+      if (video_col and $80)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color]
+        else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];
+      inc(x);
+      video_col:=video_col shl 1;
+    end;
+    {if (video_col and 128)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
     if (video_col and 64)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
     if (video_col and 32)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
     if (video_col and 16)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
     if (video_col and 8)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
     if (video_col and 4)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
     if (video_col and 2)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
-    if (video_col and 1)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);
+    if (video_col and 1)<>0 then imagen1.Canvas.Pixels[x,y]:=gif_paleta[color] else imagen1.Canvas.Pixels[x,y]:=gif_paleta[color2];inc(x);}
     inc(pos_video);
   end;
 end;
@@ -720,7 +821,7 @@ if mouse.x<>mouse.x_act then begin
     mouse.data_a:=1;
     mouse.x_act:=mouse.x_act-1;
   end;
-  z80_pio[0].m_port[PORT_A].m_ip:=true;
+  pio_0.pio_port[PIO_PORT_A].ip:=true;
 end;
 if mouse.y<>mouse.y_act then begin
   if mouse.y_act<mouse.y then begin
@@ -730,7 +831,7 @@ if mouse.y<>mouse.y_act then begin
     mouse.data_b:=0;
     mouse.y_act:=mouse.y_act-1;
   end;
-  z80_pio[0].m_port[PORT_B].m_ip:=true;
+  pio_0.pio_port[PIO_PORT_B].ip:=true;
 end;
 end;
 

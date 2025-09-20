@@ -11,8 +11,8 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      mb88xx,hu6280,tms32010,hd6309,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
      deco_common,deco_16ic,sm510,slapstic,upd7810,upd1771,blitter_williams,
-     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc,seibu_sound,
-     namcoio_56xx_58xx,gb_sound,eepromser;
+     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526_old,z80ctc,seibu_sound,
+     namcoio_56xx_58xx,gb_sound,eepromser,z80pio,galaxian_stars;
 
 procedure close_all_devices;
 begin
@@ -59,6 +59,10 @@ end;
 if m6502_1<>nil then begin
   m6502_1.free;
   m6502_1:=nil;
+end;
+if m6502_2<>nil then begin
+  m6502_2.free;
+  m6502_2:=nil;
 end;
 //Konami
 if konami_0<>nil then begin
@@ -133,6 +137,10 @@ end;
 if upd7759_0<>nil then begin
   upd7759_0.free;
   upd7759_0:=nil;
+end;
+if upd7759_1<>nil then begin
+  upd7759_1.free;
+  upd7759_1:=nil;
 end;
 if sn_76496_0<>nil then begin
   sn_76496_0.free;
@@ -306,13 +314,17 @@ if vdp_1<>nil then begin
   vdp_1.free;
   vdp_1:=nil;
 end;
-if main_deco104<>nil then begin
-  main_deco104.free;
-  main_deco104:=nil;
+if galaxian_stars_0<>nil then begin
+  galaxian_stars_0.free;
+  galaxian_stars_0:=nil;
 end;
-if main_deco146<>nil then begin
-  main_deco146.free;
-  main_deco146:=nil;
+if deco104_0<>nil then begin
+  deco104_0.free;
+  deco104_0:=nil;
+end;
+if deco146_0<>nil then begin
+  deco146_0.free;
+  deco146_0:=nil;
 end;
 if bac06_0<>nil then begin
   bac06_0.free;
@@ -381,6 +393,10 @@ end;
 if ctc_0<>nil then begin
   ctc_0.free;
   ctc_0:=nil;
+end;
+if pio_0<>nil then begin
+  pio_0.free;
+  pio_0:=nil;
 end;
 if namco_5x_0<>nil then begin
   namco_5x_0.free;

@@ -295,7 +295,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     z80_0.run(frame_m);
@@ -478,7 +478,6 @@ end;
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$ff:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $4000..$ffff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -486,7 +485,6 @@ end;
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $800..$8ff:case direccion and $3 of
                   0:m6800_0.change_irq(CLEAR_LINE);
                   1:msm5205_0.data_w(valor);
@@ -504,29 +502,25 @@ end;
 procedure out_port2(valor:byte);
 begin
   if (((val_port2 and $01)<>0) and ((not(valor and $01))<>0)) then begin
-		// control or data port? */
+		// control or data port?
 		if (val_port2 and $04)<>0 then begin
-			// PSG 0 or 1? control */
+			// PSG 0 or 1? control
 			if (val_port2 and $08)<>0 then ay8910_0.control(val_port1);
 			if (val_port2 and $10)<>0 then ay8910_1.control(val_port1);
 		end else begin
-			// PSG 0 or 1? data */
-			if (val_port2 and $08)<>0 then AY8910_0.Write(val_port1);
-			if (val_port2 and $10)<>0 then AY8910_1.Write(val_port1);
+			// PSG 0 or 1? data
+			if (val_port2 and $08)<>0 then ay8910_0.write(val_port1);
+			if (val_port2 and $10)<>0 then ay8910_1.write(val_port1);
 		end;
 	end;
   val_port2:=valor;
 end;
 
 function in_port1:byte;
-var
-  ret:byte;
 begin
- ret:=$ff;
- // PSG 0 or 1? */
-	if (val_port2 and $08)<>0 then ret:=AY8910_0.Read
-    else if (val_port2 and $10)<>0 then ret:=AY8910_1.Read;
-	in_port1:=ret;
+ // PSG 0 or 1?
+	if (val_port2 and $08)<>0 then in_port1:=ay8910_0.read
+    else if (val_port2 and $10)<>0 then in_port1:=ay8910_1.read;
 end;
 
 function in_port2:byte;
@@ -542,8 +536,8 @@ end;
 procedure ay0_portb_w(valor:byte);
 begin
   // bits 0 and 1 reset the two chips
-	msm5205_0.reset_w(valor and 1);
-  msm5205_1.reset_w(valor and 2);
+	msm5205_0.reset_w((valor and 1)<>0);
+  msm5205_1.reset_w((valor and 2)<>0);
 end;
 
 procedure adpcm_int;
@@ -555,6 +549,8 @@ procedure irem_m62_play_sound;
 begin
   ay8910_0.update;
   ay8910_1.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 //Main
@@ -562,6 +558,7 @@ procedure reset_irem_m62;
 begin
  z80_0.reset;
  m6800_0.reset;
+ reset_video;
  reset_audio;
  ay8910_0.reset;
  ay8910_1.reset;
@@ -707,8 +704,10 @@ m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(irem_m62_play_sound);
 //sound chips
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,0);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,0);
+msm5205_0.change_advance(adpcm_int);
+msm5205_1.change_advance(nil);
 ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
 ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910,1);

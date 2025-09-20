@@ -938,7 +938,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=lr35902_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   while gb_0.linea_actual<>154 do begin
     lr35902_0.run(frame_m);
     frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;
@@ -1127,7 +1127,7 @@ end;
 
 procedure reset_gb;
 var
-  lr_reg:reg_lr;
+  lr_reg:preg_lr;
   f:byte;
 begin
  lr35902_0.reset;
@@ -1177,6 +1177,7 @@ begin
  gb_0.window_y:=0;
  if not(gb_0.rom_exist) then begin
    gb_0.enable_bios:=false;
+   lr_reg:=lr35902_0.get_internal_r;
    lr_reg.pc:=$100;
    lr_reg.sp:=$fffe;
    lr_reg.f.z:=true;
@@ -1229,7 +1230,6 @@ begin
      for f:=0 to $1f do gb_0.bgc_pal[f]:=$7fff;
      for f:=0 to $1f do gb_0.spc_pal[f]:=0;
    end;
-   lr35902_0.set_internal_r(lr_reg);
   end else gb_0.enable_bios:=true;
   gb_mapper_0.reset;
 end;
@@ -1340,9 +1340,9 @@ var
   f,rom_size_t:word;
   gb_head:tgb_head;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SGB)) then exit;
   getmem(datos,$1000000); //8Gb??
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SGB)) then begin
     freemem(datos);
     exit;
   end;
@@ -1350,7 +1350,7 @@ begin
   //Guardar NVRAM si la hay...
   if (gb_0.hay_nvram and (nv_ram_name<>'')) then write_file(nv_ram_name,@gb_mapper_0.ram_bank[0,0],$2000);
   gb_0.hay_nvram:=false;
-  if extension='DSP' then snapshot_r(datos,longitud)
+  if extension='DSP' then snapshot_r(datos,longitud,SGB)
   else begin //Cartucho
       ptemp:=datos;
       //Copiar datos del cartucho
@@ -1409,7 +1409,7 @@ procedure grabar_gb;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SGB);
 Directory.gameboy:=ExtractFilePath(nombre);
 end;
 

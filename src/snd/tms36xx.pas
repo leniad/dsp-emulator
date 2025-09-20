@@ -1,6 +1,7 @@
 unit tms36xx;
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine,dialogs;
+
 type
   TMS36XX_type=record
 	  samplerate:integer; 	// from Machine->sample_rate
@@ -25,14 +26,17 @@ type
     tsample:byte;
   end;
   ptms36xx=^tms36xx_type;
+
 var
   tms_chip:ptms36xx;
   tunes:array[1..4,0..(96*6)-1] of integer;
+
 procedure tms36xx_sound_update;
 procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 procedure mm6221aa_tune_w(tune:integer);
 procedure tms36xx_note_w(octave,note:integer);
 procedure tms36xx_close;
+
 implementation
 const
    VMIN=$0000;
@@ -461,6 +465,7 @@ var
   p:psingle;
   temp:single;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   //Primero las tablas
   for f:=0 to 3 do
       for j:=0 to ((96*6)-1) do tunes[f,j]:=0;

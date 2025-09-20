@@ -7,12 +7,14 @@ uses {$IFDEF windows}windows,{$ENDIF}
 procedure open_qsnapshot_save(name:string);
 procedure close_qsnapshot;
 procedure savedata_qsnapshot(data:pbyte;size:dword);
-procedure savedata_com_qsnapshot(data:pbyte;size:dword);
 function open_qsnapshot_load(name:string):boolean;
 procedure loaddata_qsnapshot(data:pbyte);
 
 var
   qsnap_fichero:file of byte;
+
+const
+  MIN_COMPRESS_SIZE=50;
 
 implementation
 
@@ -41,37 +43,34 @@ end;
 
 procedure savedata_qsnapshot(data:pbyte;size:dword);
 var
-  buffer:array[0..4] of byte;
-begin
-buffer[0]:=size and $ff;
-buffer[1]:=(size shr 8) and $ff;
-buffer[2]:=(size shr 16) and $ff;
-buffer[3]:=(size shr 24) and $ff;
-buffer[4]:=0; //Not copressed
-{$I-}
-blockwrite(qsnap_fichero,buffer[0],5);
-blockwrite(qsnap_fichero,data^,size);
-{$I+}
-end;
-
-procedure savedata_com_qsnapshot(data:pbyte;size:dword);
-var
   puntero:pbyte;
   comprimido:dword;
   buffer:array[0..4] of byte;
 begin
-getmem(puntero,size);
-compress_zlib(pointer(data),integer(size),pointer(puntero),integer(comprimido));
-buffer[0]:=comprimido and $ff;
-buffer[1]:=(comprimido shr 8) and $ff;
-buffer[2]:=(comprimido shr 16) and $ff;
-buffer[3]:=(comprimido shr 24) and $ff;
-buffer[4]:=1; //Copressed
-{$I-}
-blockwrite(qsnap_fichero,buffer[0],5);
-blockwrite(qsnap_fichero,puntero^,comprimido);
-{$I+}
-freemem(puntero);
+if size<MIN_COMPRESS_SIZE then begin
+  buffer[0]:=size and $ff;
+  buffer[1]:=(size shr 8) and $ff;
+  buffer[2]:=(size shr 16) and $ff;
+  buffer[3]:=(size shr 24) and $ff;
+  buffer[4]:=0; //Not compressed
+  {$I-}
+  blockwrite(qsnap_fichero,buffer[0],5);
+  blockwrite(qsnap_fichero,data^,size);
+  {$I+}
+end else begin
+  getmem(puntero,size);
+  compress_zlib(pointer(data),integer(size),pointer(puntero),integer(comprimido));
+  buffer[0]:=comprimido and $ff;
+  buffer[1]:=(comprimido shr 8) and $ff;
+  buffer[2]:=(comprimido shr 16) and $ff;
+  buffer[3]:=(comprimido shr 24) and $ff;
+  buffer[4]:=1; //Compressed
+  {$I-}
+  blockwrite(qsnap_fichero,buffer[0],5);
+  blockwrite(qsnap_fichero,puntero^,comprimido);
+  {$I+}
+  freemem(puntero);
+end;
 end;
 
 function open_qsnapshot_load(name:string):boolean;
@@ -100,11 +99,11 @@ begin
 {$I-}
 blockread(qsnap_fichero,buffer[0],5);
 comprimido:=buffer[0]+(buffer[1] shl 8)+(buffer[2] shl 16)+(buffer[3] shl 24);
-if buffer[4]=0 then begin //No compressed
+if buffer[4]=0 then begin //Not compressed
   blockread(qsnap_fichero,data^,comprimido);
 end else begin //Compressed
   getmem(puntero,comprimido);
-  getmem(ptemp,$30000);
+  getmem(ptemp,$100000);
   blockread(qsnap_fichero,puntero^,comprimido);
   decompress_zlib(pointer(puntero),comprimido,pointer(ptemp),descomprimido);
   copymemory(data,ptemp,descomprimido);

@@ -70,21 +70,18 @@ On the Arcade option, you can add extra folders, splitted by semicolons, for exa
 
 <img src="dsp_config3.jpg" width="50%" height="50%">
 
-Here you can select the controls for all systems. If you have joystick(s) connected, you can select the device from the joystick list.<br>
+Here you can select the controls for all systems. If you have joystick(s) connected, you can select the device from the joystick list and calibrate it pressing the 'Get Center' button.<br>
 If keyboard is selected and you want to change a control, just press the button and a new window will be show. Select the key from the virtual keyboard.
 
 <img src="dsp_config_key.jpg" width="50%" height="50%">
 
 If you use a joystick, just press the button you want to change, and then press the button in the joystick to select it.<br>
-There is another option with the joystick, 'calibrate'. If your directional control on the joystick don't work, select this option, and move in all directions the controls for calibrate.
-
-<img src="dsp_config_joy.jpg" width="25%" height="25%">
 
 **1.1.4 ROMs export**
 
 <img src="dsp_config4.jpg" width="50%" height="50%">
 
-This section it's for export the ROMs info in a format for using a ROM manager, like 'ROM Center'.<br>
+This section it's for export the ROMs and the samples info in a format for using a ROM manager, like 'ROM Center'.<br>
 It's useful to check missing ROM files, missing samples, broken files, etc.
 
 **1.1.5 Autofire**
@@ -286,4 +283,4 @@ There are no options, just press 'start P1' for Game-A or 'start-P2' for Game-B.
 
 If you have any question or suggestion, please contact me at leniad2[@]hotmail.com!
 
-v1.0.2
+v1.0.3

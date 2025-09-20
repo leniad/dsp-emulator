@@ -1,8 +1,7 @@
 unit fm_2151;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     math,timer_engine,sound_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}math,timer_engine,sound_engine,dialogs;
 
 type
   YM2151Operator=record
@@ -137,7 +136,6 @@ implementation
 const
   CLEAR_LINE=0;
   ASSERT_LINE=1;
-  M_PI=3.1415926535;
 	MAXOUT=32767;
 	MINOUT=-32768;
   FREQ_SH=16;  // 16.16 fixed point (frequency calculations) */
@@ -893,6 +891,7 @@ procedure YM_2151Init(num:byte;clock:dword);
 var
   f:byte;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
 	getmem(FM2151[num],sizeof(YM2151));
   fillchar(FM2151[num]^,sizeof(YM2151),0);
   for f:=0 to 31 do begin
@@ -1356,7 +1355,7 @@ begin
 			else if (outl<MINOUT) then outl:=MINOUT;
 		if (outr>MAXOUT) then outr:=MAXOUT
 			else if (outr<MINOUT) then outr:=MINOUT;
-    salida_fm[0]:=(outl+outr) div 2;
+    salida_fm[0]:=outl+outr;
     salida_fm[1]:=outl;
     salida_fm[2]:=outr;
     advance(num);

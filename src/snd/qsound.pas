@@ -2,7 +2,7 @@ unit qsound;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     timer_engine,sound_engine;
+     timer_engine,sound_engine,dialogs;
 
 const
   QSOUND_CLOCKDIV=166;			 // Clock divider
@@ -211,6 +211,7 @@ procedure qsound_init(sample_size:dword);
 var
   f:byte;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   getmem(qsound_state,sizeof(qsound_state_def));
   for f:=0 to QSOUND_CHANNELS do getmem(qsound_state.channel[f],sizeof(QSOUND_CHANNEL_def));
   getmem(qsound_state.sample_rom,sample_size);

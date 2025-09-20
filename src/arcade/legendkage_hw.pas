@@ -2,8 +2,8 @@ unit legendkage_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,m6805,main_engine,controls_engine,gfx_engine,ym_2203,
-     rom_engine,pal_engine,sound_engine;
+     nz80,main_engine,controls_engine,gfx_engine,ym_2203,rom_engine,
+     pal_engine,sound_engine,taito_68705;
 
 function iniciar_lk_hw:boolean;
 
@@ -18,41 +18,31 @@ const
         (n:'a54-05-1.84';l:$4000;p:0;crc:$0033c06a),(n:'a54-06-1.85';l:$4000;p:$4000;crc:$9f04d9ad),
         (n:'a54-07-1.86';l:$4000;p:$8000;crc:$b20561a4),(n:'a54-08-1.87';l:$4000;p:$c000;crc:$3ff3b230));
         //Dip
-        lk_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'200k 700k 500k+'),(dip_val:$2;dip_name:'200k 900k 700k+'),(dip_val:$1;dip_name:'300k 1000k 700k+'),(dip_val:$0;dip_name:'300k 1300k 1000k+'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Free Play';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Lives';number:4;dip:((dip_val:$18;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$8;dip_name:'5'),(dip_val:$0;dip_name:'255 (Cheat)'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        lk_dip_b:array [0..2] of def_dip=(
-        (mask:$f;name:'Coin A';number:16;dip:((dip_val:$f;dip_name:'9C 1C'),(dip_val:$e;dip_name:'8C 1C'),(dip_val:$d;dip_name:'7C 1C'),(dip_val:$c;dip_name:'6C 1C'),(dip_val:$b;dip_name:'5C 1C'),(dip_val:$a;dip_name:'4C 1C'),(dip_val:$9;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 4C'),(dip_val:$4;dip_name:'1C 5C'),(dip_val:$5;dip_name:'1C 6C'),(dip_val:$6;dip_name:'1C 7C'),(dip_val:$7;dip_name:'1C 8C'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$f0;dip_name:'9C 1C'),(dip_val:$e0;dip_name:'8C 1C'),(dip_val:$d0;dip_name:'7C 1C'),(dip_val:$c0;dip_name:'6C 1C'),(dip_val:$b0;dip_name:'5C 1C'),(dip_val:$a0;dip_name:'4C 1C'),(dip_val:$90;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$20;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'),(dip_val:$40;dip_name:'1C 5C'),(dip_val:$50;dip_name:'1C 6C'),(dip_val:$60;dip_name:'1C 7C'),(dip_val:$70;dip_name:'1C 8C'))),());
-        lk_dip_c:array [0..6] of def_dip=(
-        (mask:$2;name:'Initial Season';number:2;dip:((dip_val:$2;dip_name:'Spring'),(dip_val:$0;dip_name:'Winter'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Difficulty';number:2;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Coinage Display';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$10;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Year Display';number:2;dip:((dip_val:$0;dip_name:'1985'),(dip_val:$20;dip_name:'MCMLXXXIV'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Invulnerability (Cheat)';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Coin Slots';number:2;dip:((dip_val:$0;dip_name:'1'),(dip_val:$80;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        lk_dip_a:array [0..5] of def_dip2=(
+        (mask:3;name:'Bonus Life';number:4;val4:(3,2,1,0);name4:('200K 700K 500K+','200K 900K 700K+','300K 1000K 700K+','300K 1300K 1000K+')),
+        (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:$18;name:'Lives';number:4;val4:($18,$10,8,0);name4:('3','4','5','255')),
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
+        lk_dip_b:array [0..2] of def_dip2=(
+        (mask:$f;name:'Coin A';number:16;val16:($f,$e,$d,$c,$b,$a,9,8,0,1,2,3,4,5,6,7);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),
+        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),());
+        lk_dip_c:array [0..6] of def_dip2=(
+        (mask:2;name:'Initial Season';number:2;val2:(2,0);name2:('Spring','Winter')),
+        (mask:8;name:'Difficulty';number:2;val2:(8,0);name2:('Easy','Normal')),
+        (mask:$10;name:'Coinage Display';number:2;val2:(0,$10);name2:('No','Yes')),
+        (mask:$20;name:'Year Display';number:2;val2:(0,$20);name2:('1985','MCMLXXXIV')),
+        (mask:$40;name:'Invulnerability (Cheat)';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Coin Slots';number:2;val2:(0,$80);name2:('1','2')),());
 
 var
  scroll_val:array[0..5] of byte;
  mem_data:array[0..$3fff] of byte;
- sound_cmd,color_bnk:byte;
+ sound_latch,color_bnk:byte;
  bg_bank,fg_bank:word;
  snd_nmi,pant_enable,prioridad_fg:boolean;
- //mcu
- mcu_mem:array[0..$7ff] of byte;
- port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
- ddr_a,ddr_b,ddr_c:byte;
- from_main,from_mcu:byte;
- main_sent,mcu_sent:boolean;
 
 procedure update_video_lk_hw;
-var
-  x,y:byte;
-  f,nchar:word;
-
 procedure draw_sprites(prio:byte);
 var
   f,x,y,nchar:word;
@@ -69,12 +59,12 @@ begin
       // 0x70: color
       // 0x80: priority
   		color:=atrib and $70;
-  		flipx:=(atrib and $1)<>0;
-  		flipy:=(atrib and $2)<>0;
+  		flipx:=(atrib and 1)<>0;
+  		flipy:=(atrib and 2)<>0;
   		x:=memoria[$f100+(f*4)]-15;
   		y:=240-memoria[$f101+(f*4)];
-  		nchar:=memoria[$f103+(f*4)]+((atrib and $04) shl 6);
-      if (atrib and $08)<>0 then begin  //x2
+  		nchar:=memoria[$f103+(f*4)]+((atrib and 4) shl 6);
+      if (atrib and 8)<>0 then begin  //x2
         if not(flipy) then nchar:=nchar xor 1;
         put_gfx_sprite_diff(nchar xor 0,color,flipx,flipy,1,0,0);
         put_gfx_sprite_diff(nchar xor 1,color,flipx,flipy,1,0,16);
@@ -86,7 +76,9 @@ begin
     end;
 	end;
 end;
-
+var
+  x,y:byte;
+  f,nchar:word;
 begin
 for f:=0 to $3ff do begin
   x:=f mod 32;
@@ -131,22 +123,22 @@ procedure eventos_lk_hw;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $Fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYS
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
 end;
@@ -154,28 +146,23 @@ end;
 
 procedure lk_hw_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_mcu:=m6805_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    //MCU CPU
-    m6805_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
-    if f=239 then begin
+    if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_lk_hw;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+    //MCU CPU
+    taito_68705_0.run;
   end;
   eventos_lk_hw;
   video_sync;
@@ -183,32 +170,20 @@ end;
 end;
 
 function lk_getbyte(direccion:word):byte;
-var
-  res:byte;
 begin
 case direccion of
   0..$e7ff,$f000..$f003,$f0a0..$f0a3,$f400..$ffff:lk_getbyte:=memoria[direccion];
   $e800..$efff:lk_getbyte:=buffer_paleta[direccion and $7ff];
   $f061:lk_getbyte:=$ff;
-  $f062:begin
-          mcu_sent:=false;
-	        lk_getbyte:=from_mcu;
-        end;
+  $f062:lk_getbyte:=taito_68705_0.read;
   $f080:lk_getbyte:=marcade.dswa;
   $f081:lk_getbyte:=marcade.dswb;
   $f082:lk_getbyte:=marcade.dswc;
   $f083:lk_getbyte:=marcade.in0;
   $f084:lk_getbyte:=marcade.in1;
   $f086:lk_getbyte:=marcade.in2;
-  $f087:begin
-            res:=0;
-          	// bit 0 = when 1, mcu is ready to receive data from main cpu
-          	// bit 1 = when 1, mcu has sent data to the main cpu
-          	if not(main_sent) then res:=res or $01;
-          	if mcu_sent then res:=res or $02;
-            lk_getbyte:=res;
-        end;
-  $f0c0..$f0c5:lk_getbyte:=scroll_val[direccion and $7];
+  $f087:lk_getbyte:=byte(not(taito_68705_0.main_sent)) or (byte(taito_68705_0.mcu_sent) shl 1);
+  $f0c0..$f0c5:lk_getbyte:=scroll_val[direccion and 7];
 end;
 end;
 
@@ -245,17 +220,17 @@ case direccion of
                end;
   $f000..$f003:begin
                   memoria[direccion]:=valor;
-                  case (direccion and $3) of
+                  case (direccion and 3) of
                     0:begin
-                        bank:=(valor and $4) shl 6;
+                        bank:=(valor and 4) shl 6;
                         if fg_bank<>bank then begin
                           fg_bank:=bank;
                           fillchar(gfx[0].buffer[$800],$400,1);
                         end;
                       end;
                     1:begin
-                        prioridad_fg:=(valor and $2)<>0;
-                        if (valor and $8)<>0 then bank:=$100*5
+                        prioridad_fg:=(valor and 2)<>0;
+                        if (valor and 8)<>0 then bank:=$100*5
                           else bank:=$100*1;
                         if bg_bank<>bank then begin
                           bg_bank:=bank;
@@ -270,16 +245,12 @@ case direccion of
                   end;
                end;
   $f060:if not(snd_nmi) then begin
-          sound_cmd:=valor;
+          sound_latch:=valor;
           z80_1.change_nmi(ASSERT_LINE);
           snd_nmi:=true;
         end;
-  $f062:begin
-          from_main:=valor;
-	        main_sent:=true;
-          m6805_0.irq_request(0,ASSERT_LINE);
-        end;
-  $f0c0..$f0c5:scroll_val[direccion and $7]:=valor;
+  $f062:taito_68705_0.write(valor);
+  $f0c0..$f0c5:scroll_val[direccion and 7]:=valor;
   $f400..$f7ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
@@ -311,7 +282,7 @@ case direccion of
   $9001:snd_lk_hw_getbyte:=ym2203_0.read;
   $a000:snd_lk_hw_getbyte:=ym2203_1.status;
   $a001:snd_lk_hw_getbyte:=ym2203_1.read;
-  $b000:snd_lk_hw_getbyte:=sound_cmd;
+  $b000:snd_lk_hw_getbyte:=sound_latch;
 end;
 end;
 
@@ -331,48 +302,6 @@ case direccion of
 end;
 end;
 
-function mcu_lk_hw_getbyte(direccion:word):byte;
-begin
-direccion:=direccion and $7ff;
-case direccion of
-  0:mcu_lk_hw_getbyte:=(port_a_out and ddr_a) or (port_a_in and not(ddr_a));
-	1:mcu_lk_hw_getbyte:=(port_b_out and ddr_b) or (port_b_in and not(ddr_b));
-	2:begin
-      port_c_in:=0;
-    	if main_sent then port_c_in:=port_c_in or $01;
-    	if not(mcu_sent) then port_c_in:=port_c_in or $02;
-    	mcu_lk_hw_getbyte:=(port_c_out and ddr_c) or (port_c_in and not(ddr_c));
-    end;
-  3..$7ff:mcu_lk_hw_getbyte:=mcu_mem[direccion];
-end;
-end;
-
-procedure mcu_lk_hw_putbyte(direccion:word;valor:byte);
-begin
-direccion:=direccion and $7ff;
-case direccion of
-  0:port_a_out:=valor;
-	1:begin
-      if (((ddr_b and $02)<>0) and ((not(valor) and $02)<>0) and ((port_b_out and $02)<>0)) then begin
-    		port_a_in:=from_main;
-    		if main_sent then m6805_0.irq_request(0,CLEAR_LINE);
-    		main_sent:=false;
-    	end;
-    	if (((ddr_b and $04)<>0) and ((valor and $04)<>0) and ((not(port_b_out) and $04)<>0)) then begin
-    		from_mcu:=port_a_out;
-    		mcu_sent:=true;
-    	end;
-    	port_b_out:=valor;
-    end;
-	2:port_c_out:=valor;
-	4:ddr_a:=valor;
-	5:ddr_b:=valor;
-	6:ddr_c:=valor;
-  3,7..$7f:mcu_mem[direccion]:=valor;
-  $80..$7ff:;
-end;
-end;
-
 procedure snd_irq(irqstate:byte);
 begin
   z80_1.change_irq(irqstate);
@@ -389,35 +318,24 @@ procedure reset_lk_hw;
 begin
  z80_0.reset;
  z80_1.reset;
- m6805_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ taito_68705_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
+ reset_video;
  reset_audio;
  fillchar(scroll_val[0],5,0);
- marcade.in0:=$0b;
+ marcade.in0:=$b;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
- sound_cmd:=0;
+ sound_latch:=0;
  color_bnk:=0;
  pant_enable:=false;
  bg_bank:=0;
  fg_bank:=0;
  snd_nmi:=false;
  prioridad_fg:=false;
- //mcu
- port_a_in:=0;
- port_a_out:=0;
- ddr_a:=0;
- port_b_in:=0;
- port_b_out:=0;
- ddr_b:=0;
- port_c_in:=0;
- port_c_out:=0;
- ddr_c:=0;
- mcu_sent:=false;
- main_sent:=false;
- from_main:=0;
- from_mcu:=0;
 end;
 
 function iniciar_lk_hw:boolean;
@@ -445,23 +363,19 @@ iniciar_video(240,224);
 z80_0:=cpu_z80.create(6000000,$100);
 z80_0.change_ram_calls(lk_getbyte,lk_putbyte);
 z80_0.change_io_calls(lk_inbyte,nil);
+if not(roms_load(@memoria,lk_rom)) then exit;
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,$100);
 z80_1.change_ram_calls(snd_lk_hw_getbyte,snd_lk_hw_putbyte);
 z80_1.init_sound(lk_hw_sound_update);
+if not(roms_load(@mem_snd,lk_snd)) then exit;
 //MCU CPU
-m6805_0:=cpu_m6805.create(3000000,$100,tipo_m68705);
-m6805_0.change_ram_calls(mcu_lk_hw_getbyte,mcu_lk_hw_putbyte);
+taito_68705_0:=taito_68705p.create(3000000,$100);
+if not(roms_load(taito_68705_0.get_rom_addr,lk_mcu)) then exit;
 //Sound Chips
 ym2203_0:=ym2203_chip.create(4000000);
 ym2203_0.change_irq_calls(snd_irq);
 ym2203_1:=ym2203_chip.create(4000000);
-//cargar roms
-if not(roms_load(@memoria,lk_rom)) then exit;
-//cargar roms snd
-if not(roms_load(@mem_snd,lk_snd)) then exit;
-//cargar roms mcu
-if not(roms_load(@mcu_mem,lk_mcu)) then exit;
 //cargar data
 if not(roms_load(@mem_data,lk_data)) then exit;
 //convertir chars
@@ -477,11 +391,11 @@ gfx_set_desc_data(4,0,32*8,$200*32*8*1,$200*32*8*0,$200*32*8*3,$200*32*8*2);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$7f;
-marcade.dswb:=$0;
+marcade.dswb:=0;
 marcade.dswc:=$ff;
-marcade.dswa_val:=@lk_dip_a;
-marcade.dswb_val:=@lk_dip_b;
-marcade.dswc_val:=@lk_dip_c;
+marcade.dswa_val2:=@lk_dip_a;
+marcade.dswb_val2:=@lk_dip_b;
+marcade.dswc_val2:=@lk_dip_c;
 reset_lk_hw;
 iniciar_lk_hw:=true;
 end;

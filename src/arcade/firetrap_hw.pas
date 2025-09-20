@@ -43,7 +43,7 @@ const
         CPU_SYNC=8;
 
 var
- main_bank,snd_bank,sound_latch,mcu_to_maincpu,maincpu_to_mcu,mcu_p3,vblank,coins,msm5205_data,msm5205_toggle:byte;
+ main_bank,snd_bank,sound_latch,mcu_to_maincpu,maincpu_to_mcu,mcu_p3,vblank,coins,msm5205_toggle:byte;
  main_rom:array[0..3,0..$3fff] of byte;
  snd_rom:array[0..1,0..$3fff] of byte;
  sound_irq_enable,nmi_enable:boolean;
@@ -173,7 +173,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -278,10 +278,10 @@ case direccion of
   $1001:ym3812_0.write(valor);
   $2000:begin //adpcm_data_w
           m6502_0.change_irq(CLEAR_LINE);
-          msm5205_data:=valor;
+          msm5205_0.data_val:=valor;
         end;
   $2400:begin //sound_flip_flop_w
-          msm5205_0.reset_w((not(valor) and 1));
+          msm5205_0.reset_w((valor and 1)=0);
 	        sound_irq_enable:=(valor and 2)<>0;
 	        if not(sound_irq_enable) then m6502_0.change_irq(CLEAR_LINE);
         end;
@@ -292,8 +292,8 @@ end;
 
 procedure snd_adpcm;
 begin
-  msm5205_0.data_w(msm5205_data shr 4);
-	msm5205_data:=msm5205_data shl 4;
+  msm5205_0.data_w(msm5205_0.data_val shr 4);
+	msm5205_0.data_val:=msm5205_0.data_val shl 4;
   msm5205_toggle:=msm5205_toggle xor 1;
 	if (sound_irq_enable and (msm5205_toggle=1)) then m6502_0.change_irq(ASSERT_LINE);
 end;
@@ -326,6 +326,7 @@ end;
 procedure firetrap_sound_update;
 begin
   ym3812_0.update;
+  msm5205_0.update;
 end;
 
 //Main
@@ -334,7 +335,9 @@ begin
  z80_0.reset;
  m6502_0.reset;
  mcs51_0.reset;
+ msm5205_0.reset;
  ym3812_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -419,12 +422,13 @@ if not(roms_load(@memoria_temp,firetrap_snd)) then exit;
 copymemory(@mem_snd[$8000],@memoria_temp[0],$8000);
 for f:=0 to 1 do copymemory(@snd_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //MCU
-mcs51_0:=cpu_mcs51.create(8000000,272*CPU_SYNC);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000,272*CPU_SYNC);
 mcs51_0.change_io_calls(in_port0,nil,in_port2,nil,nil,out_port1,nil,out_port3);
 if not(roms_load(mcs51_0.get_rom_addr,firetrap_mcu)) then exit;
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-msm5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.3,snd_adpcm);
+msm5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.3,0);
+msm5205_0.change_advance(snd_adpcm);
 //convertir chars
 if not(roms_load(@memoria_temp,firetrap_char)) then exit;
 init_gfx(0,8,8,$200);
@@ -445,19 +449,19 @@ convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
 if not(roms_load(@memoria_temp,firetrap_pal)) then exit;
 for f:=0 to $ff do begin
-		// red component */
+		// red component
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
     bit3:=(memoria_temp[f] shr 3) and $01;
 		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		// green component */
+		// green component
 		bit0:=(memoria_temp[f] shr 4) and $01;
 		bit1:=(memoria_temp[f] shr 5) and $01;
 		bit2:=(memoria_temp[f] shr 6) and $01;
     bit3:=(memoria_temp[f] shr 7) and $01;
 		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		// blue component */
+		// blue component
 		bit0:=(memoria_temp[f+$100] shr 0) and $01;
 		bit1:=(memoria_temp[f+$100] shr 1) and $01;
 		bit2:=(memoria_temp[f+$100] shr 2) and $01;

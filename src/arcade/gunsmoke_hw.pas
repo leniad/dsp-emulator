@@ -284,7 +284,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -388,7 +388,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for linea:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -551,8 +551,9 @@ begin
     mcu_to_cpu:=0;
     mcu_to_audiocpu:=0;
  end;
- YM2203_0.reset;
- YM2203_1.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -631,8 +632,8 @@ z80_1:=cpu_z80.create(3000000,262);
 timers.init(z80_1.numero_cpu,384*262/4/2,gunsmoke_snd_irq,nil,true);
 z80_1.init_sound(gunsmoke_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.14,0.22);
-ym2203_1:=ym2203_chip.create(1500000,0.14,0.22);
+ym2203_0:=ym2203_chip.create(1500000,0.5,1);
+ym2203_1:=ym2203_chip.create(1500000,0.5,1);
 case main_vars.tipo_maquina of
   80:begin
        //Main CPU
@@ -682,7 +683,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(3000000,262);
+       mcs51_0:=cpu_mcs51.create(I8X51,3000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars
@@ -729,7 +730,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943kai_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(3000000,262);
+       mcs51_0:=cpu_mcs51.create(I8X51,3000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars

@@ -125,6 +125,7 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
+    BitBtn22: TBitBtn;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -160,7 +161,6 @@ type
     procedure Button11Click(Sender: TObject);
     procedure Button10Click(Sender: TObject);
     procedure Button12Click(Sender: TObject);
-    procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure BitBtn21Click(Sender: TObject);
     procedure RadioButton22Click(Sender: TObject);
@@ -178,6 +178,8 @@ type
     procedure RadioButton9Click(Sender: TObject);
     procedure RadioButton10Click(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
+    procedure BitBtn22Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -189,7 +191,7 @@ var
   tecla_leida:word;
 
 implementation
-uses principal,redefine, joystick_calibrate;
+uses principal,redefine;
 {$R *.dfm}
 
 function BrowseForFolder(init_dir,title:string):string;
@@ -287,23 +289,19 @@ end;
 
 function get_button(player:byte):byte;
 var
-  sdl_event:libSDL_Event;
   f,res:byte;
-  tempb:boolean;
+  tempb,salir:boolean;
 begin
 salir:=false;
 while not(salir) do begin
-  while SDL_PollEvent(@sdl_event)=0 do begin
-    application.ProcessMessages;
-    if salir then break;
-  end;
-  if sdl_event.type_=libSDL_JOYBUTTONDOWN then begin
-    for f:=0 to joystick.buttons[player]-1 do begin
-      tempb:=SDL_JoystickGetButton(joystick_def[player],f)=1;
-      if tempb then begin
-        res:=f;
-        salir:=true;
-      end;
+  SDL_JoystickUpdate;
+  application.ProcessMessages;
+  if salir then break;
+  for f:=0 to joystick.buttons[player]-1 do begin
+    tempb:=SDL_JoystickGetButton(joystick_def[player],f)=1;
+    if tempb then begin
+      res:=f;
+      salir:=true;
     end;
   end;
 end;
@@ -795,6 +793,24 @@ begin
   close;
 end;
 
+procedure TMConfig.Button7Click(Sender: TObject);
+begin
+SDL_JoystickUpdate;
+arcade_input.joy_x[0]:=SDL_JoystickGetAxis(joystick_def[0],0);
+arcade_input.joy_y[0]:=SDL_JoystickGetAxis(joystick_def[0],1);
+//SDL_JoystickGetAxisInitialState(joystick_def[0],0,@arcade_input.joy_x[0]);
+//SDL_JoystickGetAxisInitialState(joystick_def[0],1,@arcade_input.joy_y[0]);
+end;
+
+procedure TMConfig.Button8Click(Sender: TObject);
+begin
+SDL_JoystickUpdate;
+arcade_input.joy_x[1]:=SDL_JoystickGetAxis(joystick_def[1],0);
+arcade_input.joy_y[1]:=SDL_JoystickGetAxis(joystick_def[1],1);
+//SDL_JoystickGetAxisInitialState(joystick_def[1],0,@arcade_input.joy_x[1]);
+//SDL_JoystickGetAxisInitialState(joystick_def[1],1,@arcade_input.joy_y[1]);
+end;
+
 procedure TMConfig.Button9Click(Sender: TObject);
 begin
   if arcade_input.use_key[0] then begin
@@ -853,24 +869,6 @@ begin
     arcade_input.jstart[1]:=get_button(arcade_input.num_joystick[1]);
     button12.Caption:=inttostr(arcade_input.jstart[1]);
   end;
-end;
-
-procedure TMConfig.Button7Click(Sender: TObject);
-begin
-Mconfig.Enabled:=false;
-joy_calibration.show;
-bucle_joystick(arcade_input.num_joystick[0]);
-while joy_calibration.Showing do application.ProcessMessages;
-Mconfig.Enabled:=true;
-end;
-
-procedure TMConfig.Button8Click(Sender: TObject);
-begin
-Mconfig.Enabled:=false;
-joy_calibration.show;
-bucle_joystick(arcade_input.num_joystick[1]);
-while joy_calibration.Showing do application.ProcessMessages;
-Mconfig.Enabled:=true;
 end;
 
 procedure TMConfig.ComboBox1Change(Sender: TObject);
@@ -1070,6 +1068,11 @@ end;
 procedure TMConfig.BitBtn21Click(Sender: TObject);
 begin
 export_roms;
+end;
+
+procedure TMConfig.BitBtn22Click(Sender: TObject);
+begin
+export_samples;
 end;
 
 procedure TMConfig.RadioButton5Click(Sender: TObject);

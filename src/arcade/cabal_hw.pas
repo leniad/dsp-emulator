@@ -10,16 +10,16 @@ function iniciar_cabal:boolean;
 implementation
 const
         cabal_rom:array[0..3] of tipo_roms=(
-        (n:'13.7h';l:$10000;p:0;crc:$00abbe0c),(n:'11.6h';l:$10000;p:$1;crc:$44736281),
+        (n:'13.7h';l:$10000;p:0;crc:$00abbe0c),(n:'11.6h';l:$10000;p:1;crc:$44736281),
         (n:'12.7j';l:$10000;p:$20000;crc:$d763a47c),(n:'10.6j';l:$10000;p:$20001;crc:$96d5e8af));
         cabal_char:tipo_roms=(n:'5-6s';l:$4000;p:0;crc:$6a76955a);
         cabal_sprites:array[0..7] of tipo_roms=(
-        (n:'sp_rom1.bin';l:$10000;p:0;crc:$34d3cac8),(n:'sp_rom2.bin';l:$10000;p:$1;crc:$4e49c28e),
+        (n:'sp_rom1.bin';l:$10000;p:0;crc:$34d3cac8),(n:'sp_rom2.bin';l:$10000;p:1;crc:$4e49c28e),
         (n:'sp_rom3.bin';l:$10000;p:$20000;crc:$7065e840),(n:'sp_rom4.bin';l:$10000;p:$20001;crc:$6a0e739d),
         (n:'sp_rom5.bin';l:$10000;p:$40000;crc:$0e1ec30e),(n:'sp_rom6.bin';l:$10000;p:$40001;crc:$581a50c1),
         (n:'sp_rom7.bin';l:$10000;p:$60000;crc:$55c44764),(n:'sp_rom8.bin';l:$10000;p:$60001;crc:$702735c9));
         cabal_tiles:array[0..7] of tipo_roms=(
-        (n:'bg_rom1.bin';l:$10000;p:0;crc:$1023319b),(n:'bg_rom2.bin';l:$10000;p:$1;crc:$3b6d2b09),
+        (n:'bg_rom1.bin';l:$10000;p:0;crc:$1023319b),(n:'bg_rom2.bin';l:$10000;p:1;crc:$3b6d2b09),
         (n:'bg_rom3.bin';l:$10000;p:$20000;crc:$420b0801),(n:'bg_rom4.bin';l:$10000;p:$20001;crc:$77bc7a60),
         (n:'bg_rom5.bin';l:$10000;p:$40000;crc:$543fcb37),(n:'bg_rom6.bin';l:$10000;p:$40001;crc:$0bc50075),
         (n:'bg_rom7.bin';l:$10000;p:$60000;crc:$d28d921e),(n:'bg_rom8.bin';l:$10000;p:$60001;crc:$67e4fe47));
@@ -27,19 +27,18 @@ const
         (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf));
         cabal_adpcm:array[0..1] of tipo_roms=(
         (n:'2-1s';l:$10000;p:0;crc:$850406b4),(n:'1-1u';l:$10000;p:$10000;crc:$8b3e0789));
-        //Dip
-        cabal_dip_a:array [0..11] of def_dip=(
-        (mask:$f;name:'Coinage';number:16;dip:((dip_val:$a;dip_name:'6C 1C'),(dip_val:$b;dip_name:'5C 1C'),(dip_val:$c;dip_name:'4C 1C'),(dip_val:$d;dip_name:'3C 1C'),(dip_val:$1;dip_name:'8C 3C'),(dip_val:$e;dip_name:'2C 1C'),(dip_val:$2;dip_name:'5C 3C'),(dip_val:$3;dip_name:'3C 2C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$4;dip_name:'2C 3C'),(dip_val:$9;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$7;dip_name:'1C 4C'),(dip_val:$6;dip_name:'1C 5C'),(dip_val:$5;dip_name:'1C 6C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$c;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 5C'),(dip_val:$0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Coin Mode';number:2;dip:((dip_val:$10;dip_name:'Mode 1'),(dip_val:$0;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Invert Buttons';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Track Ball';number:2;dip:((dip_val:$80;dip_name:'Small'),(dip_val:$0;dip_name:'Large'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Lives';number:4;dip:((dip_val:$200;dip_name:'2'),(dip_val:$300;dip_name:'3'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'121 (Cheat)'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Bonus Life';number:4;dip:((dip_val:$c00;dip_name:'150k 650k 500k+'),(dip_val:$800;dip_name:'200k 800k 600k+'),(dip_val:$400;dip_name:'300k 1000k 700k+'),(dip_val:$0;dip_name:'300k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$3000;dip_name:'Easy'),(dip_val:$2000;dip_name:'Normal'),(dip_val:$1000;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        cabal_dip_a:array [0..9] of def_dip2=(
+        (mask:$f;name:'Coinage';number:16;val16:($a,$b,$c,$d,1,$e,2,3,$f,4,9,8,7,6,5,0);name16:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play')),
+        //(mask:3;name:'Coin A';number:4;dip:((dip_val:0;dip_name:'5C 1C'),(dip_val:1;dip_name:'3C 1C'),(dip_val:2;dip_name:'2C 1C'),(dip_val:3;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        //(mask:$c;name:'Coin B';number:4;dip:((dip_val:$c;dip_name:'1C 2C'),(dip_val:8;dip_name:'1C 3C'),(dip_val:4;dip_name:'1C 5C'),(dip_val:0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coin Mode';number:2;val2:($10,0);name2:('Mode 1','Mode 2')),
+        (mask:$20;name:'Invert Buttons';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Track Ball';number:2;val2:($80,0);name2:('Small','Large')),
+        (mask:$300;name:'Lives';number:4;val4:($200,$300,$100,0);name4:('2','3','5','121')),
+        (mask:$c00;name:'Bonus Life';number:4;val4:($c00,$800,$400,0);name4:('150K 650K 500K+','200K 800K 600K+','300K 1000K 700K+','300K')),
+        (mask:$3000;name:'Difficulty';number:4;val4:($3000,$2000,$1000,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')),());
 
 var
  rom:array[0..$1ffff] of word;
@@ -96,7 +95,7 @@ end;
 procedure eventos_cabal;
 begin
 if event.arcade then begin
-  //CONTROL1
+  //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
@@ -105,41 +104,37 @@ if event.arcade then begin
   if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
-  //CONTROL2
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  //P2
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $efff) else marcade.in1:=(marcade.in1 or $1000);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7fff) else marcade.in1:=(marcade.in1 or $8000);
   //Coins
-  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or $1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
-  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or $2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or 1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or 2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
 end;
 end;
 
 procedure cabal_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=seibu_snd_0.z80.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
    for f:=0 to $ff do begin
-      //Main CPU
-      m68000_0.run(frame_m);
-      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-      //Sound CPU
-      seibu_snd_0.z80.run(frame_s);
-      frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
-      if f=239 then begin
+      if f=240 then begin
           update_video_cabal;
           m68000_0.irq[1]:=HOLD_LINE;
       end;
+      //Main CPU
+      m68000_0.run(frame_main);
+      frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+      //Sound CPU
+      seibu_snd_0.run;
    end;
    eventos_cabal;
    video_sync;
@@ -156,7 +151,7 @@ case direccion of
     $a0000:cabal_getword:=marcade.dswa;  //DSW
     $a0008:cabal_getword:=marcade.in0;
     $a000c:cabal_getword:=$ffff;  //track 0
-    $a000a,$a000e:cabal_getword:=$0;  //track 1
+    $a000a,$a000e:cabal_getword:=0;  //track 1
     $a0010:cabal_getword:=marcade.in1;  //input
     $e0000..$e07ff:cabal_getword:=buffer_paleta[(direccion and $7ff) shr 1];
     $e8000..$e800d:cabal_getword:=seibu_snd_0.get((direccion and $e) shr 1);
@@ -203,7 +198,9 @@ end;
 procedure reset_cabal;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  seibu_snd_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
@@ -264,7 +261,7 @@ gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //Dip
 marcade.dswa:=$efff;
-marcade.dswa_val:=@cabal_dip_a;
+marcade.dswa_val2:=@cabal_dip_a;
 //final
 reset_cabal;
 iniciar_cabal:=true;

@@ -4,7 +4,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,timer_engine,dialogs,sysutils,vars_hide,cpu_misc;
 
 type
-  band_lr = record
+  band_lr=record
      z,n,h,c:boolean;
   end;
   reg_lr = record
@@ -13,6 +13,7 @@ type
         bc,de,hl:parejas;
         f:band_lr;
   end;
+  preg_lr=^reg_lr;
   cpu_lr=class(cpu_class)
         constructor Create(clock:dword;frames_div:word);
         destructor free;
@@ -23,7 +24,7 @@ type
         vblank_req,lcdstat_req,timer_req,joystick_req,serial_req:boolean;
         procedure reset;
         procedure run(maximo:single);
-        procedure set_internal_r(reg:reg_lr);
+        function get_internal_r:preg_lr;
         function save_snapshot(datos:pbyte):word;
         procedure load_snapshot(datos:pbyte);
       private
@@ -195,9 +196,9 @@ begin
   self.serial_req:=buffer[15]<>0;
 end;
 
-procedure cpu_lr.set_internal_r(reg:reg_lr);
+function cpu_lr.get_internal_r:preg_lr;
 begin
-  copymemory(@self.r,@reg,sizeof(reg_lr));
+  get_internal_r:=@self.r;
 end;
 
 function cpu_lr.read_word(direccion:word):word;

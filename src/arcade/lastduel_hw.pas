@@ -251,7 +251,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
   //main
   m68000_0.run(frame_m);
@@ -467,6 +467,7 @@ begin
  ym2203_0.reset;
  ym2203_1.reset;
  if main_vars.tipo_maquina<>268 then oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

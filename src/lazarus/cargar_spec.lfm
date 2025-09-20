@@ -18,7 +18,7 @@ object load_spec: Tload_spec
   KeyPreview = True
   OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.4.0.0'
   object FileListBox1: TFileListBox
     Left = 30
     Height = 512
@@ -50,9 +50,9 @@ object load_spec: Tload_spec
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
-    OnClick = Button1Click
     ParentFont = False
     TabOrder = 1
+    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 410
@@ -66,9 +66,9 @@ object load_spec: Tload_spec
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
-    OnClick = Button2Click
     ParentFont = False
     TabOrder = 2
+    OnClick = Button2Click
   end
   object GroupBox1: TGroupBox
     Left = 391

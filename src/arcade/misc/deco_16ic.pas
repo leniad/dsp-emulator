@@ -9,9 +9,10 @@ type
           constructor create(pant:byte;col_bank:byte;call_bank:tipo_deco16ic_bank);
           destructor free;
        public
-          data,rowscroll:array[0..$7ff] of word;
+          data:array[0..$fff] of word;
+          rowscroll:array[0..$7ff] of word;
           buffer_color:array[0..$3f] of boolean;
-          buffer:array[0..$7ff] of boolean;
+          buffer:array[0..$fff] of boolean;
           procedure reset;
        private
           pant,color_bank:byte;
@@ -231,7 +232,7 @@ case ((self.control[6] shr 8) and $60) of
         end else atrib:=512 div rows;
         scroll__x_part2(self.pf2.pant,screen,atrib,@self.pf2.rowscroll[0],self.control[3],self.control[4]);
   end;
-  $60:halt(0); //col & row scroll
+  $60:; //col & row scroll
 end;
 end;
 

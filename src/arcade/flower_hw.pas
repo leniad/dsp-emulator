@@ -25,18 +25,18 @@ const
         (n:'82s129.k3';l:$100;p:0;crc:$5aab7b41),(n:'82s129.k2';l:$100;p:$100;crc:$ababb072),
         (n:'82s129.k1';l:$100;p:$200;crc:$d311ed0d));
         //DIP
-        flower_dipa:array [0..5] of def_dip=(
-        (mask:$8;name:'Energy Decrease';number:2;dip:((dip_val:$8;dip_name:'Slow'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Invulnerability';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Keep Weapons When Destroyed';number:2;dip:((dip_val:$20;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Shot Range';number:2;dip:((dip_val:$80;dip_name:'Short'),(dip_val:$0;dip_name:'Long'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        flower_dipb:array [0..5] of def_dip=(
-        (mask:$7;name:'Lives';number:8;dip:((dip_val:$7;dip_name:'1'),(dip_val:$6;dip_name:'2'),(dip_val:$5;dip_name:'3'),(dip_val:$4;dip_name:'4'),(dip_val:$3;dip_name:'5'),(dip_val:$6;dip_name:'2'),(dip_val:$1;dip_name:'7'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$18;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Bonus Life';number:2;dip:((dip_val:$80;dip_name:'30K 50K+'),(dip_val:$0;dip_name:'50K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        flower_dipa:array [0..5] of def_dip2=(
+        (mask:8;name:'Energy Decrease';number:2;val2:(8,0);name2:('Slow','Fast')),
+        (mask:$10;name:'Invulnerability';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Keep Weapons When Destroyed';number:2;val2:($20,0);name2:('No','Yes')),
+        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),
+        (mask:$80;name:'Shot Range';number:2;val2:($80,0);name2:('Short','Long')),());
+        flower_dipb:array [0..5] of def_dip2=(
+        (mask:7;name:'Lives';number:8;val8:(7,6,5,4,3,6,1,0);name8:('1','2','3','4','5','2','7','Infinite')),
+        (mask:$18;name:'Coinage';number:4;val4:(0,8,$18,$10);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
+        (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Bonus Life';number:2;val2:($80,0);name2:('30K 50K+','50K 80K+')),());
         CPU_SYNC=4;
         CPU_DIV=5;
 
@@ -65,7 +65,7 @@ for x:=0 to 35 do begin
      end;
   end;
 end;
-for f:=$0 to $ff do begin
+for f:=0 to $ff do begin
   x:=f mod 16;
   y:=f div 16;
   if gfx[1].buffer[f] then begin
@@ -96,13 +96,13 @@ for f:=$3f downto 0 do begin
 		flipy:=(atrib2 and $80)<>0;
 		flipx:=(atrib2 and $40)<>0;
 		y_size:=((atrib3 and $80) shr 7)+1;
-		x_size:=((atrib3 and $08) shr 3)+1;
+		x_size:=((atrib3 and 8) shr 3)+1;
 		if y_size=2 then y_div:=1
       else y_div:=2;
 		if x_size=2 then x_div:=1
       else x_div:=2;
 		y_zoom:=0.125*(((atrib3 and $70) shr 4)+1);
-		x_zoom:=0.125*(((atrib3 and $07) shr 0)+1);
+		x_zoom:=0.125*(((atrib3 and 7) shr 0)+1);
     ypixels:=trunc(y_zoom*16);
 		xpixels:=trunc(x_zoom*16);
     if (y_size=2) then y:=y-16;
@@ -156,31 +156,27 @@ end;
 
 procedure flower_principal;
 var
-  frame_m,frame_sub,frame_sound:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_sub:=z80_1.tframes;
-frame_sound:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
+   if f=240 then begin
+      z80_0.change_irq(ASSERT_LINE);
+      z80_1.change_irq(ASSERT_LINE);
+      update_video_flower;
+   end;
    for h:=1 to CPU_SYNC do begin
     //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
     //Sub CPU
     z80_1.run(frame_sub);
     frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
     //Sound CPU
-    z80_2.run(frame_sound);
-    frame_sound:=frame_sound+z80_2.tframes-z80_2.contador;
-   end;
-   if f=239 then begin
-      z80_0.change_irq(ASSERT_LINE);
-      z80_1.change_irq(ASSERT_LINE);
-      update_video_flower;
+    z80_2.run(frame_snd);
+    frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
    end;
   end;
   eventos_flower;
@@ -277,7 +273,11 @@ begin
 z80_0.reset;
 z80_1.reset;
 z80_2.reset;
+frame_main:=z80_0.tframes;
+frame_sub:=z80_1.tframes;
+frame_snd:=z80_1.tframes;
 flower_0.reset;
+reset_video;
 reset_audio;
 nmi_audio:=false;
 sound_latch:=0;
@@ -315,20 +315,16 @@ iniciar_video(288,224);
 //Si pongo 3Mhz, a veces en la demo la nave muere, pero no se da cuenta y entra en un bucle sin fin y ya no responde a nada
 z80_0:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_0.change_ram_calls(flower_getbyte,flower_putbyte);
+if not(roms_load(@memoria,flower_rom)) then exit;
 //Sub CPU
 z80_1:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_1.change_ram_calls(flower_getbyte_sub,flower_putbyte);
+if not(roms_load(@mem_misc,flower_rom2)) then exit;
 //Sound CPU
 z80_2:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.init_sound(flower_update_sound);
 timers.init(z80_2.numero_cpu,18432000/CPU_DIV/90,flower_snd_irq,nil,true);
-//Sound
-//cargar roms
-if not(roms_load(@memoria,flower_rom)) then exit;
-//cargar roms sub
-if not(roms_load(@mem_misc,flower_rom2)) then exit;
-//cargar roms sound
 if not(roms_load(@mem_snd,flower_rom_snd)) then exit;
 //Sound chip
 flower_0:=flower_chip.create(96000);
@@ -354,7 +350,7 @@ for f:=0 to $7fff do memoria_temp[f]:=not(memoria_temp[f]);
 init_gfx(2,16,16,$100);
 gfx[2].trans[15]:=true;
 convert_gfx(2,0,@memoria_temp,@pc_x,@pc_y,false,false);
-//Pal
+//pal
 if not(roms_load(@memoria_temp,flower_prom)) then exit;
 for f:=0 to $ff do begin
 		colores[f].r:=pal4bit(memoria_temp[f]);
@@ -364,9 +360,9 @@ end;
 set_pal(colores,$100);
 //DIP
 marcade.dswa:=$f8;
-marcade.dswa_val:=@flower_dipa;
+marcade.dswa_val2:=@flower_dipa;
 marcade.dswb:=$9d;
-marcade.dswb_val:=@flower_dipb;
+marcade.dswb_val2:=@flower_dipb;
 //final
 flower_reset;
 iniciar_flower:=true;

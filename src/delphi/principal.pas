@@ -32,7 +32,7 @@ type
     Timer1: TTimer;
     Spectrum128K1: TMenuItem;
     consonido1: TMenuItem;
-    BombJack1: TMenuItem;
+    BombJackHW: TMenuItem;
     PacmanHW1: TMenuItem;
     Emulacion1: TMenuItem;
     Ordenadores8bits1: TMenuItem;
@@ -92,7 +92,7 @@ type
     wboy1: TMenuItem;
     wbml1: TMenuItem;
     tehkanwc1: TMenuItem;
-    Popeye1: TMenuItem;
+    PopeyeHW1: TMenuItem;
     Psychic51: TMenuItem;
     Brazil1: TMenuItem;
     M680001: TMenuItem;
@@ -119,7 +119,7 @@ type
     TigerRoadHW1: TMenuItem;
     TigerRoad1: TMenuItem;
     F1Dream1: TMenuItem;
-    SnowBros1: TMenuItem;
+    SnowBrosHW1: TMenuItem;
     Toki1: TMenuItem;
     FullScreen1: TMenuItem;
     Timer2: TTimer;
@@ -170,7 +170,7 @@ type
     BreakThruHawrdware1: TMenuItem;
     BrkThru1: TMenuItem;
     Darwin1: TMenuItem;
-    SRD1: TMenuItem;
+    Dec8HW1: TMenuItem;
     HD63091: TMenuItem;
     ddragon_hw: TMenuItem;
     MrDo1: TMenuItem;
@@ -390,7 +390,6 @@ type
     Gaunt21: TMenuItem;
     WilliamsHW1: TMenuItem;
     Defender1: TMenuItem;
-    ddragon_sh1: TMenuItem;
     Mayday1: TMenuItem;
     Colony71: TMenuItem;
     Bosconian1: TMenuItem;
@@ -513,7 +512,7 @@ type
     winsHW1: TMenuItem;
     twins1: TMenuItem;
     twinsed1: TMenuItem;
-    HotBlock1: TMenuItem;
+    HotBlocks1: TMenuItem;
     angerine1: TMenuItem;
     Oric1_1: TMenuItem;
     OricAtmos1: TMenuItem;
@@ -539,6 +538,70 @@ type
     SteelForceHW1: TMenuItem;
     SteelForce1: TMenuItem;
     twinbrats1: TMenuItem;
+    MortalRace1: TMenuItem;
+    BankPanicHW1: TMenuItem;
+    BankPanic1: TMenuItem;
+    CombatHawk1: TMenuItem;
+    AntEater1: TMenuItem;
+    AppooohHW1: TMenuItem;
+    Appoooh1: TMenuItem;
+    RoboWres1: TMenuItem;
+    ArmoredCar1: TMenuItem;
+    N88Games1: TMenuItem;
+    Avengers1: TMenuItem;
+    TheEnd1: TMenuItem;
+    BattleofAtlantis1: TMenuItem;
+    DooyongHW1: TMenuItem;
+    BlueHawk1: TMenuItem;
+    LastDay1: TMenuItem;
+    GulfStorm1: TMenuItem;
+    Pollux1: TMenuItem;
+    FlyingTiger1: TMenuItem;
+    Popeye1: TMenuItem;
+    SkySkipper1: TMenuItem;
+    BluePrintHW1: TMenuItem;
+    BLuePrint1: TMenuItem;
+    Saturn1: TMenuItem;
+    Grasspin1: TMenuItem;
+    UnicoHW1: TMenuItem;
+    BurglarX1: TMenuItem;
+    ZeroPoint1: TMenuItem;
+    Calipso1: TMenuItem;
+    Gardia1: TMenuItem;
+    Cavelon1: TMenuItem;
+    SnowBros1: TMenuItem;
+    ComeBackToto1: TMenuItem;
+    HyperPacman1: TMenuItem;
+    BombJack1: TMenuItem;
+    CalorieKun1: TMenuItem;
+    KiKiKaiKaiHW1: TMenuItem;
+    KiKiKaiKai1: TMenuItem;
+    KickandRun1: TMenuItem;
+    LassoHW1: TMenuItem;
+    Lasso1: TMenuItem;
+    Chameleon1: TMenuItem;
+    SRD1: TMenuItem;
+    LastMission1: TMenuItem;
+    Shackled1: TMenuItem;
+    Gondomania1: TMenuItem;
+    GaryoRetsuden1: TMenuItem;
+    CaptainSilver1: TMenuItem;
+    CobraCommand1: TMenuItem;
+    Ghostbusters1: TMenuItem;
+    oscar1: TMenuItem;
+    RoadFighter1: TMenuItem;
+    Ponpoko1: TMenuItem;
+    Woodpecker1: TMenuItem;
+    Eyes1: TMenuItem;
+    alibaba1: TMenuItem;
+    Piranha1: TMenuItem;
+    Tecmo16HW1: TMenuItem;
+    FinalStarforce1: TMenuItem;
+    WyvernF01: TMenuItem;
+    FireBall1: TMenuItem;
+    RiotCity1: TMenuItem;
+    sdi1: TMenuItem;
+    Cotton1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -624,13 +687,13 @@ end;
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
 principal1.BitBtn3.Glyph:=nil;
-if EmuStatus=EsRuning then begin //Cambiar a pausa
+if EmuStatus=EsRunning then begin //Cambiar a pausa
   timer1.Enabled:=false;
   EmuStatus:=EsPause;
   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
   principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[1];
 end else begin //Cambiar a play
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   timer1.Enabled:=true;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[2];
@@ -704,6 +767,7 @@ procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
@@ -733,7 +797,7 @@ end else begin
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
   principal1.Enabled:=true;
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   llamadas_maquina.bucle_general;
 end;
@@ -745,7 +809,7 @@ begin
 principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 if main_vars.driver_ok then begin
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   principal1.timer1.Enabled:=true;
   llamadas_maquina.bucle_general;
 end;
@@ -818,6 +882,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 reset_dsp;
 file_ini_save;
 close_joystick;
@@ -847,7 +912,7 @@ procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice,tempb:byte;
+  indice:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;
@@ -859,9 +924,7 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-tempb:=main_vars.system_type;
-main_vars.system_type:=SBITMAP;
-if saverom(nombre,indice) then begin
+if saverom(nombre,indice,SBITMAP) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -870,7 +933,6 @@ if saverom(nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
-      main_vars.system_type:=tempb;
       restart_emu;
       exit;
     end;
@@ -924,7 +986,6 @@ if saverom(nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-main_vars.system_type:=tempb;
 restart_emu;
 end;
 
@@ -932,8 +993,13 @@ procedure Tprincipal1.ffastload(Sender: TObject);
 begin
 var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
-  else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+if var_spectrum.fastload then begin
+  principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=true;
+end else begin
+  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=false;
+end;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 

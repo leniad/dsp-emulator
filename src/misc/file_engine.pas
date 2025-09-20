@@ -30,7 +30,7 @@ function file_name_only(cadena:string):string;
 //Parte ZIP
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
 function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;var crc:dword;warning:boolean=true):boolean;
 function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
 //Parte ZLIB
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
@@ -206,10 +206,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
-    arcade_input.joy_left[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
-    arcade_input.joy_right[f]:=fich_ini.ReadInteger('keyboard','joy_right_'+inttostr(f),0);
-    arcade_input.joy_up[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
-    arcade_input.joy_down[f]:=fich_ini.ReadInteger('keyboard','joy_down_'+inttostr(f),0);
+    arcade_input.joy_x[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
+    arcade_input.joy_y[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
   end;
   //Cerrar fichero
   fich_ini.free;
@@ -331,10 +329,8 @@ end else begin
   timers.autofire_on:=false;
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
-    arcade_input.joy_left[f]:=0;
-    arcade_input.joy_right[f]:=0;
-    arcade_input.joy_up[f]:=0;
-    arcade_input.joy_down[f]:=0;
+    arcade_input.joy_x[f]:=0;
+    arcade_input.joy_y[f]:=0;
   end;
 end;
 if ((directory.Nes='') or (directory.Nes=main_vars.cadena_dir)) then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
@@ -511,10 +507,8 @@ fich_ini.WriteInteger('keyboard','num_joy_0',arcade_input.num_joystick[0]);
 fich_ini.WriteInteger('keyboard','num_joy_1',arcade_input.num_joystick[1]);
 //Joystick calibration
 for f:=0 to NUM_PLAYERS do begin
-  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_up[f]);
-  fich_ini.WriteInteger('keyboard','joy_down_'+inttostr(f),arcade_input.joy_down[f]);
-  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_left[f]);
-  fich_ini.WriteInteger('keyboard','joy_right_'+inttostr(f),arcade_input.joy_right[f]);
+  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_y[f]);
+  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_x[f]);
 end;
 //Cerrar
 fich_ini.Free;
@@ -751,7 +745,7 @@ find_next_file_zip:=false;
 {$endif}
 end;
 
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;var crc:dword;warning:boolean=true):boolean;
 var
   f:word;
   find:boolean;
@@ -787,6 +781,7 @@ begin
     exit;
   end;
   longitud:=ZipFile.FileInfos[f].UncompressedSize;
+  crc:=ZipFile.FileInfos[f].CRC32;
   SetLength(buffer,longitud);
   ZipFile.Read(f,buffer);
   copymemory(donde,@buffer[0],longitud);
@@ -813,6 +808,7 @@ begin
   end;
   zfile:=unzOpen(pchar(nombre_zip));
   longitud:=ZipFile.Entries[f].Size;
+  crc:=ZipFile.Entries[f].CRC32;
   unzLocateFile(zfile,pchar(ZipFile.Entries[f].ArchiveFileName),0);
   unzOpenCurrentFile(zfile);
   unzReadCurrentFile(zfile,pointer(donde),longitud);

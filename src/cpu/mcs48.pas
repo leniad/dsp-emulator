@@ -367,8 +367,6 @@ begin
 end;
 
 function cpu_mcs48.check_irqs:byte;
-var
-   tempb:byte;
 begin
   check_irqs:=0;
   // if something is in progress, we do nothing

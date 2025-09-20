@@ -112,7 +112,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
       z80_0.run(frame);
       frame:=frame+z80_0.tframes-z80_0.contador;
@@ -121,7 +121,7 @@ while EmuStatus=EsRuning do begin
   end;
   actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3);
   actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,2,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3);
-  actualiza_trozo_simple(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3);
+  actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,PANT_TEMP);
   eventos_systeme;
   video_sync;
 end;
@@ -340,6 +340,7 @@ begin
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
+ reset_analog;
 end;
 
 function iniciar_systeme:boolean;

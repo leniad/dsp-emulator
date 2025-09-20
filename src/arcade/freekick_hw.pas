@@ -228,7 +228,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 262 do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -438,12 +438,14 @@ begin
     pia8255_0.reset;
     pia8255_1.reset;
  end;
+ reset_video;
  reset_audio;
  snd_rom_addr:=0;
  spinner:=false;
  nmi_enable:=false;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
+ reset_analog;
  rom_index:=0;
 end;
 

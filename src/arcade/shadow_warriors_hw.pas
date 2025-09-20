@@ -11,7 +11,7 @@ implementation
 
 const
         shadoww_rom:array[0..1] of tipo_roms=(
-        (n:'shadowa_1.3s';l:$20000;p:0;crc:$8290d567),(n:'shadowa_2.4s';l:$20000;p:$1;crc:$f3f08921));
+        (n:'shadowa_1.3s';l:$20000;p:0;crc:$8290d567),(n:'shadowa_2.4s';l:$20000;p:1;crc:$f3f08921));
         shadoww_sound:tipo_roms=(n:'gaiden_3.4b';l:$10000;p:0;crc:$75fd3e6a);
         shadoww_char:tipo_roms=(n:'gaiden_5.7a';l:$10000;p:0;crc:$8d4035f7);
         shadoww_bg:array[0..3] of tipo_roms=(
@@ -21,21 +21,21 @@ const
         (n:'18.6a';l:$20000;p:0;crc:$3fadafd6),(n:'19.6b';l:$20000;p:$20000;crc:$ddae9d5b),
         (n:'20.4b';l:$20000;p:$40000;crc:$08cf7a93),(n:'21.4b';l:$20000;p:$60000;crc:$1ac892f5));
         shadoww_sprites:array[0..7] of tipo_roms=(
-        (n:'6.3m';l:$20000;p:0;crc:$e7ccdf9f),(n:'7.1m';l:$20000;p:$1;crc:$016bec95),
+        (n:'6.3m';l:$20000;p:0;crc:$e7ccdf9f),(n:'7.1m';l:$20000;p:1;crc:$016bec95),
         (n:'8.3n';l:$20000;p:$40000;crc:$7ef7f880),(n:'9.1n';l:$20000;p:$40001;crc:$6e9b7fd3),
         (n:'10.3r';l:$20000;p:$80000;crc:$a6451dec),(n:'11.1r';l:$20000;p:$80001;crc:$7fbfdf5e),
         (n:'12.3s';l:$20000;p:$c0000;crc:$94a836d8),(n:'13.1s';l:$20000;p:$c0001;crc:$e9caea3b));
         shadoww_oki:tipo_roms=(n:'4.4a';l:$20000;p:0;crc:$b0e0faf9);
-        shadoww_dip:array [0..7] of def_dip=(
-        (mask:$e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$80;dip_name:'4C 1C'),(dip_val:$40;dip_name:'3C 1C'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
-        (mask:$1c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$10;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$04;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$18;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$1;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c000;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$c000;dip_name:'2'),(dip_val:$4000;dip_name:'3'),(dip_val:$8000;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Energy';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$3000;dip_name:'3'),(dip_val:$1000;dip_name:'4'),(dip_val:$2000;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Difficulty';number:4;dip:((dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'TBL 1'),(dip_val:$800;dip_name:'TBL 2'),(dip_val:$0;dip_name:'TBL 3'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        shadoww_dip:array [0..7] of def_dip2=(
+        (mask:1;name:'Demo Sounds';number:2;val2:(0,1);name2:('Off','On')),
+        (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:$1c;name:'Coin B';number:8;val8:(0,$10,8,4,$1c,$c,$14,$18);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$e0;name:'Coin A';number:8;val8:(0,$80,$40,$20,$e0,$60,$a0,$c0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$c00;name:'Difficulty';number:4;val4:($c00,$400,$800,0);name4:('Normal','TBL 1','TBL 2','TBL 3')),
+        (mask:$3000;name:'Energy';number:4;val4:(0,$3000,$1000,$2000);name4:('2','3','4','5')),
+        (mask:$c000;name:'Lives';number:4;val4:(0,$c000,$4000,$8000);name4:('1','2','3','4')),());
         wildfang_rom:array[0..1] of tipo_roms=(
-        (n:'1.3st';l:$20000;p:0;crc:$ab876c9b),(n:'2.5st';l:$20000;p:$1;crc:$1dc74b3b));
+        (n:'1.3st';l:$20000;p:0;crc:$ab876c9b),(n:'2.5st';l:$20000;p:1;crc:$1dc74b3b));
         wildfang_sound:tipo_roms=(n:'tkni3.bin';l:$10000;p:0;crc:$15623ec7);
         wildfang_char:tipo_roms=(n:'tkni5.bin';l:$10000;p:0;crc:$5ed15896);
         wildfang_bg:array[0..3] of tipo_roms=(
@@ -43,17 +43,17 @@ const
         (n:'16.1a';l:$20000;p:$40000;crc:$0f31639e),(n:'17.1b';l:$20000;p:$60000;crc:$f32c158e));
         wildfang_fg:tipo_roms=(n:'tkni6.bin';l:$80000;p:0;crc:$f68fafb1);
         wildfang_sprites:array[0..1] of tipo_roms=(
-        (n:'tkni9.bin';l:$80000;p:0;crc:$d22f4239),(n:'tkni8.bin';l:$80000;p:$1;crc:$4931b184));
+        (n:'tkni9.bin';l:$80000;p:0;crc:$d22f4239),(n:'tkni8.bin';l:$80000;p:1;crc:$4931b184));
         wildfang_oki:tipo_roms=(n:'tkni4.bin';l:$20000;p:0;crc:$a7a1dbcf);
-        wildfang_dip:array [0..8] of def_dip=(
-        (mask:$e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$80;dip_name:'4C 1C'),(dip_val:$40;dip_name:'3C 1C'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
-        (mask:$1c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$10;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$04;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$18;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$1;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$100;name:'Title';number:2;dip:((dip_val:$100;dip_name:'Wild Fang'),(dip_val:$0;dip_name:'Tecmo Knight'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c000;name:'Lives';number:3;dip:((dip_val:$8000;dip_name:'1'),(dip_val:$c000;dip_name:'2'),(dip_val:$4000;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Difficulty (Tecmo Knight)';number:4;dip:((dip_val:$3000;dip_name:'Easy'),(dip_val:$1000;dip_name:'Normal'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Difficulty (Wild Fang)';number:4;dip:((dip_val:$c00;dip_name:'Easy'),(dip_val:$400;dip_name:'Normal'),(dip_val:$800;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        wildfang_dip:array [0..8] of def_dip2=(
+        (mask:1;name:'Demo Sounds';number:2;val2:(0,1);name2:('Off','On')),
+        (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:$1c;name:'Coin B';number:8;val8:(0,$10,8,4,$1c,$c,$14,$18);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$e0;name:'Coin A';number:8;val8:(0,$80,$40,$20,$e0,$60,$a0,$c0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$100;name:'Title';number:2;val2:($100,0);name2:('Wild Fang','Tecmo Knight')),
+        (mask:$c00;name:'Difficulty (Wild Fang)';number:4;val4:($c00,$400,$800,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$3000;name:'Difficulty (Tecmo Knight)';number:4;val4:($3000,$1000,$2000,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$c000;name:'Lives';number:4;val4:($8000,$c000,$4000,0);name4:('1','2','3','Invalid')),());
 
 var
  scroll_x_txt,scroll_y_txt,scroll_x_bg,scroll_y_bg,scroll_x_fg,scroll_y_fg:word;
@@ -132,7 +132,7 @@ begin
   for f:=0 to $ff do begin
     atrib:=sprite_ram[f*8];
     if ((atrib and $c0) shr 6)<>pri then continue;
-    if (atrib and $4)=0 then continue;
+    if (atrib and 4)=0 then continue;
     flipx:=(atrib and 1)<>0;
     flipy:=(atrib and 2)<>0;
     blend:=(atrib and $20)<>0;
@@ -163,7 +163,7 @@ begin
 end;
 
 begin
-for f:=$0 to $7ff do begin
+for f:=0 to $7ff do begin
   x:=f mod 64;
   y:=f div 64;
   color:=(video_ram3[f] and $f0) shr 4;
@@ -179,7 +179,7 @@ for f:=$0 to $7ff do begin
       gfx[2].buffer[f]:=false;
   end;
 end;
-for f:=$0 to $3ff do begin
+for f:=0 to $3ff do begin
   color:=(video_ram1[f] and $f0) shr 4;
   if (gfx[0].buffer[f] or buffer_color[color+$10])  then begin
       x:=f mod 32;
@@ -220,8 +220,8 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
   //SYSTEM
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $80);
 end;
@@ -229,24 +229,21 @@ end;
 
 procedure shadoww_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-  //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //sound
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-  if f=239 then begin
+  if f=240 then begin
     update_video_shadoww;
     m68000_0.irq[5]:=ASSERT_LINE;
   end;
+  //main
+  m68000_0.run(frame_main);
+  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+  //sound
+  z80_0.run(frame_snd);
+  frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
  eventos_shadoww;
  video_sync;
@@ -385,19 +382,19 @@ begin
     $7a804:begin
         valor:=valor shr 8;
 		    case (valor and $f0) of
-			    $00:wf_prot:=0;  // init
+			    0:wf_prot:=0;  // init
 			    $10:begin  // high 4 bits of jump code
-				        wf_jumpcode:=(valor and $0f) shl 4;
+				        wf_jumpcode:=(valor and $f) shl 4;
 				        wf_prot:=$10;
               end;
 			    $20:begin   // low 4 bits of jump code
-				        wf_jumpcode:=wf_jumpcode or (valor and $0f);
+				        wf_jumpcode:=wf_jumpcode or (valor and $f);
 				        wf_prot:=$20;
               end;
-			    $30:wf_prot:=$40 or ((jumppoints[wf_jumpcode] shr 12) and $0f);  // ask for bits 12-15 of function address
-			    $40:wf_prot:=$50 or ((jumppoints[wf_jumpcode] shr 8) and $0f);  // ask for bits 8-11 of function address
-			    $50:wf_prot:=$60 or ((jumppoints[wf_jumpcode] shr 4) and $0f);  // ask for bits 4-7 of function address
-			    $60:wf_prot:=$70 or ((jumppoints[wf_jumpcode] shr 0) and $0f);  // ask for bits 0-3 of function address
+			    $30:wf_prot:=$40 or ((jumppoints[wf_jumpcode] shr 12) and $f);  // ask for bits 12-15 of function address
+			    $40:wf_prot:=$50 or ((jumppoints[wf_jumpcode] shr 8) and $f);  // ask for bits 8-11 of function address
+			    $50:wf_prot:=$60 or ((jumppoints[wf_jumpcode] shr 4) and $f);  // ask for bits 4-7 of function address
+			    $60:wf_prot:=$70 or ((jumppoints[wf_jumpcode] shr 0) and $f);  // ask for bits 0-3 of function address
         end;
      end;
     else shadoww_putword(direccion,valor);
@@ -409,9 +406,12 @@ procedure reset_shadoww;
 begin
  m68000_0.reset;
  z80_0.reset;
- YM2203_0.reset;
- YM2203_1.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
+ ym2203_0.reset;
+ ym2203_1.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ffff;
@@ -496,7 +496,7 @@ case main_vars.tipo_maquina of
       convert_8($8000,3);
       //DIP
       marcade.dswa:=$ffff;
-      marcade.dswa_val:=@shadoww_dip;
+      marcade.dswa_val2:=@shadoww_dip;
   end;
   339:begin //Wild Fang/Tecmo Knight
       //cargar roms
@@ -518,7 +518,7 @@ case main_vars.tipo_maquina of
       convert_8($8000,3);
       //DIP
       marcade.dswa:=$ffff;
-      marcade.dswa_val:=@wildfang_dip;
+      marcade.dswa_val2:=@wildfang_dip;
   end;
 end;
 freemem(ptemp);

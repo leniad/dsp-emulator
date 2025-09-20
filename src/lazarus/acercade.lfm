@@ -1,7 +1,7 @@
 object Aboutbox: TAboutbox
-  Left = 284
+  Left = 749
   Height = 251
-  Top = 191
+  Top = 392
   Width = 291
   BorderIcons = []
   BorderStyle = bsSingle
@@ -16,7 +16,7 @@ object Aboutbox: TAboutbox
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.4.0.0'
   object Panel1: TPanel
     Left = 10
     Height = 188
@@ -34,6 +34,7 @@ object Aboutbox: TAboutbox
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     ParentShowHint = False
@@ -275,8 +276,8 @@ object Aboutbox: TAboutbox
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ModalResult = 1
-    OnClick = OKButtonClick
     ParentFont = False
     TabOrder = 1
+    OnClick = OKButtonClick
   end
 end

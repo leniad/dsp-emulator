@@ -10,7 +10,7 @@ function iniciar_diverboy:boolean;
 implementation
 const
         diverboy_rom:array[0..1] of tipo_roms=(
-        (n:'db_01.bin';l:$20000;p:0;crc:$6aa11366),(n:'db_02.bin';l:$20000;p:$1;crc:$45f8a673));
+        (n:'db_01.bin';l:$20000;p:0;crc:$6aa11366),(n:'db_02.bin';l:$20000;p:1;crc:$45f8a673));
         diverboy_sound:tipo_roms=(n:'db_05.bin';l:$10000;p:0;crc:$ffeb49ec);
         diverboy_obj1:array[0..1] of tipo_roms=(
         (n:'db_08.bin';l:$80000;p:0;crc:$7bb96220),(n:'db_09.bin';l:$80000;p:1;crc:$12b15476));
@@ -20,12 +20,12 @@ const
         diverboy_oki:array[0..1] of tipo_roms=(
         (n:'db_03.bin';l:$80000;p:0;crc:$50457505),(n:'db_04.bin';l:$20000;p:$80000;crc:$01b81da0));
         //Dip
-        diverboy_dip:array [0..5] of def_dip=(
-        (mask:$7;name:'Coinage';number:8;dip:((dip_val:$7;dip_name:'4C/1C'),(dip_val:$6;dip_name:'3C/1C'),(dip_val:$5;dip_name:'2C/1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 4C'),(dip_val:$4;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'2'),(dip_val:$8;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Display Copyright';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$10;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$20;dip_name:'Normal'),(dip_val:$40;dip_name:'Hard'),(dip_val:$60;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Free Play';number:2;dip:((dip_val:$80;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        diverboy_dip:array [0..5] of def_dip2=(
+        (mask:7;name:'Coinage';number:8;val8:(7,6,5,0,1,2,3,4);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:8;name:'Lives';number:2;val2:(0,8);name2:('2','3')),
+        (mask:$10;name:'Display Copyright';number:2;val2:(0,$10);name2:('No','Yes')),
+        (mask:$60;name:'Difficulty';number:4;val4:(0,$20,$40,$60);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$80;name:'Free Play';number:2;val2:($80,0);name2:('No','Yes')),());
 var
  rom:array[0..$1ffff] of word;
  ram:array[0..$7fff] of word;
@@ -67,10 +67,10 @@ procedure eventos_diverboy;
 begin
 if event.arcade then begin
   //P1+P2
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $80);
@@ -82,25 +82,22 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //COIN
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
 end;
 end;
 
 procedure diverboy_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   z80_0.run(frame_s);
-   frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   z80_0.run(frame_snd);
+   frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
    if f=255 then begin
       m68000_0.irq[6]:=HOLD_LINE;
       update_video_diverboy;
@@ -115,7 +112,7 @@ end;
 function diverboy_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$3ffff:diverboy_getword:=rom[direccion shr 1];
+  0..$3ffff:diverboy_getword:=rom[direccion shr 1];
   $40000..$4ffff:diverboy_getword:=ram[(direccion and $ffff) shr 1];
   $80000..$83fff:diverboy_getword:=obj_ram[(direccion and $3fff) shr 1];
   $140000..$1407ff:diverboy_getword:=buffer_paleta[(direccion and $7ff) shr 1];
@@ -165,7 +162,7 @@ begin
 case direccion of
   0..$7fff:;
   $8000..$87ff:mem_snd[direccion]:=valor;
-  $9000:copymemory(oki_6295_0.get_rom_addr,@oki_rom[valor and $3,0],$40000);
+  $9000:copymemory(oki_6295_0.get_rom_addr,@oki_rom[valor and 3,0],$40000);
   $9800:oki_6295_0.write(valor);
 end;
 end;
@@ -180,7 +177,10 @@ procedure reset_diverboy;
 begin
  m68000_0.reset;
  z80_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
@@ -238,7 +238,7 @@ gfx_set_desc_data(4,0,16*16*4,0,1,2,3);
 convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$b8;
-marcade.dswa_val:=@diverboy_dip;
+marcade.dswa_val2:=@diverboy_dip;
 //final
 freemem(memoria_temp);
 reset_diverboy;

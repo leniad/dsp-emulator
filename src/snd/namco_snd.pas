@@ -2,7 +2,7 @@ unit namco_snd;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine,timer_engine;
+     sound_engine,timer_engine,dialogs;
 
 const
   max_voices=8;
@@ -68,6 +68,7 @@ const
 
 constructor namco_snd_chip.create(num_voces:byte;wave_ram:boolean=false);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.num_voces:=num_voces;
   self.wave_on_ram:=wave_ram;
   self.tsample_num:=init_channel;
@@ -85,11 +86,11 @@ end;
 procedure namco_snd_chip.update_waveform(offset:word;data:byte);
 begin
 	if self.wave_on_ram then begin
-		// use full byte, first 4 high bits, then low 4 bits */
+		// use full byte, first 4 high bits, then low 4 bits
     self.namco_wave[offset*2]:=(data shr 4) and $0f;
     self.namco_wave[offset*2+1]:=data and $0f;
   end else begin
-		// use only low 4 bits */
+		// use only low 4 bits
     self.namco_wave[offset]:=data and $0f;
   end;
 end;

@@ -615,7 +615,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_sub:=m68000_1.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
      for h:=1 to CPU_SYNC do begin
         //main
@@ -859,7 +859,7 @@ frame_m:=m68000_0.tframes;
 frame_sub:=m68000_1.tframes;
 frame_s:=z80_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
      for h:=1 to CPU_SYNC do begin
         //main
@@ -1113,9 +1113,11 @@ begin
         i8751_addr:=0;
       end;
  end;
+ reset_analog;
  sega_pcm_0.reset;
  pia8255_0.reset;
  pia8255_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  s16_info.screen_enabled:=true;
@@ -1292,7 +1294,7 @@ case main_vars.tipo_maquina of
         z80_0.init_sound(hangon_sound_act);
         if not(roms_load(@mem_snd,sharrier_sound)) then exit;
         //MCU
-        mcs51_0:=cpu_mcs51.create(8000000,262*CPU_SYNC);
+        mcs51_0:=cpu_mcs51.create(I8X51,8000000,262*CPU_SYNC);
         mcs51_0.change_ram_calls(mcu_ext_ram_read,mcu_ext_ram_write);
         mcs51_0.change_io_calls(nil,nil,nil,nil,nil,sharrier_out_port1,nil,nil);
         if not(roms_load(mcs51_0.get_rom_addr,sharrier_mcu)) then exit;

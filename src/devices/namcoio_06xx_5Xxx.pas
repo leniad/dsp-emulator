@@ -10,7 +10,6 @@ const
   IO51XX=1;
   IO53XX=2;
   IO54XX=3;
-
 type
   read_chip=function:byte;
   write_chip=procedure(data:byte);
@@ -29,6 +28,10 @@ type
     remap_joy,kludge:boolean;
     read_port:array[0..1] of pbyte;
     write_port:array[0..1] of write_chip;
+    //new
+    //mb88:cpu_mb88xx;
+    //frame:single;
+    //timer,rw,porto:byte;
   end;
   tipo_53xx=record
     port_o:byte;
@@ -63,6 +66,11 @@ procedure run_namco_50xx(num:byte);
 procedure namcoio_50xx_reset(num:byte);
 procedure namco_50xx_close(num:byte);
 //51XX
+{function namcoio_51xx_init(in0,in1:pbyte;zip_name:string):boolean;
+procedure namcoio_51xx_reset(kludge:boolean);
+procedure run_namco_51xx;
+procedure namco_51xx_close;
+procedure namco_51xx_vblank(valor:byte);}
 procedure namcoio_51xx_init(in0,in1:pbyte);
 procedure namcoio_51xx_reset(kludge:boolean);
 //53XX
@@ -87,6 +95,7 @@ var
 implementation
 const
   namco_50xx_rom:tipo_roms=(n:'50xx.bin';l:$800;p:0;crc:$a0acbaf7);
+  namco_51xx_rom:tipo_roms=(n:'51xx.bin';l:$400;p:0;crc:$c2f57ef8);
   namco_53xx_rom:tipo_roms=(n:'53xx.bin';l:$400;p:0;crc:$b326fecb);
   namco_54xx_rom:tipo_roms=(n:'54xx.bin';l:$400;p:0;crc:$ee7357e0);
 
@@ -226,6 +235,101 @@ begin
 end;
 
 //Namco 51XX
+{function namco_51xx_r_r(port:byte):byte;
+begin
+case port of
+  0:namco_51xx_r_r:=namco_51xx.read_port[0]^ and $f;
+  1:namco_51xx_r_r:=namco_51xx.read_port[0]^ shr 4;
+  2:namco_51xx_r_r:=namco_51xx.read_port[1]^ and $f;
+  3:namco_51xx_r_r:=namco_51xx.read_port[1]^ shr 4;
+end;
+end;
+
+function namco_51xx_k_r:byte;
+begin
+  namco_51xx_k_r:=(namco_51xx.rw shl 3) or (namco_51xx.portO and 7);
+end;
+
+procedure namco_51xx_vblank(valor:byte);
+begin
+  namco_51xx.mb88.clock_w(valor);
+end;
+
+procedure namco_51xx_o_w(valor:byte);
+var
+  tempb:byte;
+begin
+  tempb:=valor and $f;
+	if (valor and $10)<>0 then namco_51xx.portO:=(namco_51xx.portO and $f) or (tempb shl 4)
+	  else namco_51xx.portO:=(namco_51xx.portO and $f0) or tempb;
+end;
+
+procedure namcoio_51xx_irq_clear;
+begin
+	namco_51xx.mb88.set_irq_line(CLEAR_LINE);
+  timers.enabled(namco_51xx.timer,false);
+end;
+
+procedure namco_51xx_serial_advance;
+begin
+  mb88_serial_advance(namco_51xx.mb88);
+end;
+
+function namcoio_51xx_init(in0,in1:pbyte;zip_name:string):boolean;
+begin
+  namco_51xx.read_port[0]:=in0;
+  namco_51xx.read_port[1]:=in1;
+  namco_51xx.mb88:=cpu_mb88xx.create(1536000,264,namco_51xx_serial_advance);
+  namco_51xx.mb88.change_io_calls(namco_51xx_k_r,namco_51xx_o_w,nil,nil,namco_51xx_r_r,nil);
+  namco_51xx.frame:=namco_51xx.mb88.tframes;
+  //namco 51XX clock 1536000*0.000021=32.256
+  namco_51xx.timer:=timers.init(namco_51xx.mb88.numero_cpu,32.256,namcoio_51xx_irq_clear,nil,false);
+  //rom
+  namcoio_51xx_init:=roms_load(namco_51xx.mb88.get_rom_addr,namco_51xx_rom,true,true,zip_name);
+end;
+
+procedure namcoio_51xx_reset(kludge:boolean);
+begin
+  namco_51xx.mb88.reset;
+  namco_51xx.rw:=0;
+  namco_51xx.porto:=0;
+  timers.enabled(namco_51xx.timer,false);
+end;
+
+procedure namcoio_51XX_write(data:byte);
+begin
+  namco_51XX.porto:=data;
+  namco_51xx.rw:=0;
+  namco_51xx.mb88.set_irq_line(ASSERT_LINE);
+  timers.enabled(namco_51xx.timer,true);
+end;
+
+function namcoio_51XX_read:byte;
+begin
+  namcoio_51XX_read:=namco_51XX.porto;
+  namco_51xx.rw:=1;
+  namco_51xx.mb88.set_irq_line(ASSERT_LINE);
+  timers.enabled(namco_51xx.timer,true);
+end;
+
+procedure namcoio_51xx_read_req;
+begin
+  namco_51xx.rw:=1;
+  namco_51xx.mb88.set_irq_line(ASSERT_LINE);
+  timers.enabled(namco_51xx.timer,true);
+end;
+
+procedure run_namco_51xx;
+begin
+  namco_51xx.mb88.run(namco_51xx.frame);
+  namco_51xx.frame:=namco_51xx.frame+namco_51xx.mb88.tframes-namco_51xx.mb88.contador;
+end;
+
+procedure namco_51xx_close;
+begin
+  namco_51xx.mb88.free;
+end; }
+
 procedure namcoio_51XX_write(data:byte);
 begin
   data:=data and $7;
@@ -389,7 +493,7 @@ begin
   namco_51xx.coincred_mode:=0;
   namco_51xx.credits:=0;
   namco_51xx.lastcoins:=0;
-  namco_51xx.lastbuttons:=$FF;
+  namco_51xx.lastbuttons:=$ff;
 end;
 
 //Namco 53XX
@@ -449,8 +553,8 @@ procedure namco_53xx_o_w(valor:byte);
 var
   res:byte;
 begin
-  res:=(valor and $0f);
-	if (valor and $10)<>0 then namco_53xx.port_o:=(namco_53xx.port_o and $0f) or (res shl 4)
+  res:=(valor and $f);
+	if (valor and $10)<>0 then namco_53xx.port_o:=(namco_53xx.port_o and $f) or (res shl 4)
 	  else namco_53xx.port_o:=(namco_53xx.port_o and $f0) or res;
 end;
 
@@ -507,7 +611,7 @@ begin
 namco_54xx.mb88:=cpu_mb88xx.Create(1536000,264);
 namco_54xx.mb88.change_io_calls(namco_54xx_k_r,namco_54xx_o_w,nil,nil,namco_54xx_r_r,namco_54xx_r_w);
 namco_54xx.frame:=namco_54xx.mb88.tframes;
-//namco 53XX clock 1536000*0.000021=32.256
+//namco 54XX clock 1536000*0.000021=32.256
 namco_54xx.timer:=timers.init(namco_54xx.mb88.numero_cpu,32.256,namcoio_54xx_irq_clear,nil,false);
 //rom
 namcoio_54xx_init:=roms_load(namco_54xx.mb88.get_rom_addr,namco_54xx_rom,true,true,zip_name);
@@ -562,18 +666,21 @@ begin
     end;
   end;
 end;
+
 procedure namco_51xx_chip(io,num:byte);
 begin
   namco_06xx[io].fread[num]:=namcoio_51XX_read;
   namco_06xx[io].fwrite[num]:=namcoio_51XX_write;
-  namco_06xx[io].fread_req[num]:=nil;
+  namco_06xx[io].fread_req[num]:=nil;//namcoio_51xx_read_req;
 end;
+
 procedure namco_53xx_chip(io,num:byte);
 begin
   namco_06xx[io].fread[num]:=namcoio_53xx_read;
   namco_06xx[io].fwrite[num]:=nil;
   namco_06xx[io].fread_req[num]:=namcoio_53xx_read_req;
 end;
+
 procedure namco_54xx_chip(io,num:byte);
 begin
   namco_06xx[io].fread[num]:=nil;
@@ -657,7 +764,7 @@ var
   f:byte;
 begin
 	namco_06xx[num].control:=data;
-	if ((data and $0f)=0) then begin
+	if ((data and $f)=0) then begin
     timers.enabled(namco_06xx[num].nmi_timer,false);
     exit;
   end;

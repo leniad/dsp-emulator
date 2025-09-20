@@ -66,13 +66,11 @@ end;
 
 procedure nes_principal;
 var
-  frame:single;
   even:boolean;
 begin
   init_controls(false,true,false,true);
-  frame:=n2a03_0.m6502.tframes;
   even:=true;
-  while EmuStatus=EsRuning do begin
+  while EmuStatus=EsRunning do begin
     while ppu_nes_0.linea<NTSC_lines do begin
       case ppu_nes_0.linea of
           0..239:begin  //render
@@ -82,46 +80,46 @@ begin
               //cargados antes, los sprites. Segun esta pintando evalua el sprite_hit_0, apartir del 257
               //La comprobacion de los sprites termina en PPUT 256 aqui pongo el sprite_over_flow
               n2a03_0.m6502.run(128*PPU_PIXEL_TIMING);
-              frame:=frame-n2a03_0.m6502.contador;
+              frame_main:=frame_main-n2a03_0.m6502.contador;
               ppu_nes_0.end_y_coarse;
               ppu_nes_0.draw_linea(ppu_nes_0.linea);
               //Consumo el resto...
-              n2a03_0.m6502.run(frame);
-              frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+              n2a03_0.m6502.run(frame_main);
+              frame_main:=frame_main+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
             end;
           240:begin //Post-render
-                n2a03_0.m6502.run(frame);
-                frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+                n2a03_0.m6502.run(frame_main);
+                frame_main:=frame_main+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
               end;
           241:begin //241
               //Pasar 1 PPUT
               n2a03_0.m6502.run(PPU_PIXEL_TIMING);
-              frame:=frame-n2a03_0.m6502.contador;
+              frame_main:=frame_main-n2a03_0.m6502.contador;
               //Poner VBL
               ppu_nes_0.status:=ppu_nes_0.status or $80;
               if (ppu_nes_0.control1 and $80)<>0 then begin
                  n2a03_0.m6502.change_nmi(PULSE_LINE);
                  n2a03_0.m6502.after_ei:=true;
               end;
-              n2a03_0.m6502.run(frame);
-              frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+              n2a03_0.m6502.run(frame_main);
+              frame_main:=frame_main+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
             end;
            242..260:begin //242..260
-                n2a03_0.m6502.run(frame);
-                frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+                n2a03_0.m6502.run(frame_main);
+                frame_main:=frame_main+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
               end;
            261:begin  //Pre-render
                 //Pasar 1 PPUT
                 n2a03_0.m6502.run(PPU_PIXEL_TIMING);
-                frame:=frame-n2a03_0.m6502.contador;
+                frame_main:=frame_main-n2a03_0.m6502.contador;
                 //Limpiar VBL, sprite 0 hit y sprite overflow
                 ppu_nes_0.status:=ppu_nes_0.status and $1f;
                 ppu_nes_0.sprite_over_flow:=false;
                 //Quitar un PPT
-                if even then frame:=frame-PPU_PIXEL_TIMING;
+                if even then frame_main:=frame_main-PPU_PIXEL_TIMING;
                 even:=not(even);
-                n2a03_0.m6502.run(frame);
-                frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+                n2a03_0.m6502.run(frame_main);
+                frame_main:=frame_main+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
                 if (ppu_nes_0.control2 and $18)<>0 then ppu_nes_0.address:=(ppu_nes_0.address and $41f) or (ppu_nes_0.address_temp and $7be0);
                 if (@nes_mapper_0.calls.line_ack<>nil) then nes_mapper_0.calls.line_ack(false);
               end;
@@ -130,7 +128,7 @@ begin
     end;
     ppu_nes_0.linea:=0;
     eventos_nes;
-    actualiza_trozo_simple(0,0,256,240,2);
+    actualiza_trozo(0,0,256,240,2,0,0,256,240,PANT_TEMP);
     video_sync;
   end;
 end;
@@ -252,6 +250,7 @@ begin
   reset_audio;
   n2a03_0.reset;
   ppu_nes_0.reset;
+  frame_main:=n2a03_0.m6502.tframes;
   nes_0.joy1:=0;
   nes_0.joy2:=0;
   nes_0.joy1_read:=0;
@@ -389,9 +388,9 @@ var
   datos:pbyte;
   longitud:integer;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SNES)) then exit;
   getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SNES)) then begin
     freemem(datos);
     exit;
   end;
@@ -399,7 +398,7 @@ begin
   //Guardar la SRAM
   if (nes_0.sram_present and (nv_ram_name<>'')) then write_file(nv_ram_name,@memoria[$6000],$2000);
   if @n2a03_0.additional_sound<>nil then n2a03_0.add_more_sound(nil);
-  if extension='DSP' then snapshot_r(datos,longitud);
+  if extension='DSP' then snapshot_r(datos,longitud,SNES);
   if extension='NES' then begin
     if abrir_cartucho(datos,longitud) then begin
       if nes_0.sram_present then nv_ram_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
@@ -415,7 +414,7 @@ procedure grabar_nes;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SNES);
 Directory.nes:=ExtractFilePath(nombre);
 end;
 

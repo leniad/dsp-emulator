@@ -33,12 +33,13 @@ const
         False,False,True);
 
 type
-  band_z80 = record
+  band_z80=record
      c,n,p_v,bit3,h,bit5,z,s:boolean;
   end;
-  tdespues_instruccion=procedure (estados_t:word);
+  tdespues_instruccion=procedure(estados_t:word);
   type_raised=procedure;
   type_m1_raise=procedure(opcode:byte);
+  type_external_vector=function:byte;
   nreg_z80=packed record
         ppc,pc,sp:word;
         bc,de,hl:parejas;
@@ -55,23 +56,23 @@ type
           constructor create(clock:dword;frames_div:single);
           destructor free;
         public
-          daisy:boolean;
-          im2_lo,im0:byte;
+          procedure change_irq_vector(estado:byte;irq_vector:byte);
           procedure reset;
           procedure run(maximo:single);
           procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
           procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
-          procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil);
+          procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil;irq_vector_cb:type_external_vector=nil);
           function get_safe_pc:word;
           function get_internal_r:npreg_z80;
-          procedure set_internal_r(r:npreg_z80);
           function save_snapshot(data:pbyte):word;
           procedure load_snapshot(data:pbyte);
+          procedure enable_daisy;
         protected
-          after_ei:boolean;
+          after_ei,daisy:boolean;
           r:npreg_z80;
           in_port:tgetbyte;
           out_port:tputbyte;
+          irq_vector:byte;
           //pila
           procedure push_sp(reg:word);
           function pop_sp:word;
@@ -103,6 +104,7 @@ type
           z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..255] of byte;
           raised_z80:type_raised;
           m1_raised:type_m1_raise;
+          irq_vector_cb:type_external_vector;
           function call_nmi:byte;
           function call_irq:byte;
           //resto de opcodes
@@ -225,6 +227,12 @@ const
       	6, 0, 0, 0, 7, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0,
       	6, 0, 0, 0, 7, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0,
       	6, 0, 0, 0, 7, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0);
+
+procedure cpu_z80.change_irq_vector(estado:byte;irq_vector:byte);
+begin
+  self.pedir_irq:=estado;
+  self.irq_vector:=irq_vector;
+end;
 
 procedure cpu_z80.and_a(valor:byte);
 begin
@@ -421,7 +429,7 @@ var
   temp:byte;
 begin
  temp:=r.a+valor;
- r.f.p_v:=(((r.a Xor (not valor)) and $ffff) and (r.a xor temp) and $80)<>0;
+ r.f.p_v:=(((r.a xor not(valor)) and $ffff) and (r.a xor temp) and $80)<>0;
  r.f.h :=(((r.a and $f)+(valor and $f)) and $10) <> 0;
  r.f.s:= (temp and $80)<>0;
  r.f.z:=(temp=0);
@@ -438,8 +446,8 @@ var
 begin
  carry:=byte(r.f.c);
  temp:=r.a+valor+carry;
- r.f.p_v:=(((r.a xor (not valor)) and $ffff) and ((r.a xor temp) and $80))<>0;
- r.f.h:=(((r.a and $f)+(valor And $f)+carry) and $10)<>0;
+ r.f.p_v:=(((r.a xor not(valor)) and $ffff) and ((r.a xor temp) and $80))<>0;
+ r.f.h:=(((r.a and $f)+(valor and $f)+carry) and $10)<>0;
  r.f.s:= (temp and $80)<>0;
  r.f.z:=(temp=0);
  r.f.bit5:=(temp and $20)<>0;
@@ -567,6 +575,12 @@ procedure out_ff(direccion:word;valor:byte);
 begin
 end;
 
+procedure cpu_z80.enable_daisy;
+begin
+  self.daisy:=true;
+  self.irq_vector_cb:=z80daisy_ack;
+end;
+
 constructor cpu_z80.create(clock:dword;frames_div:single);
 begin
 getmem(self.r,sizeof(nreg_z80));
@@ -578,6 +592,8 @@ self.in_port:=res_ff;
 self.out_port:=out_ff;
 self.despues_instruccion:=nil;
 self.raised_z80:=nil;
+self.m1_raised:=nil;
+self.daisy:=false;
 copymemory(@z80t,@z80t_m,$100);
 copymemory(@z80t_cb,@z80t_cb_m,$100);
 copymemory(@z80t_dd,@z80t_dd_m,$100);
@@ -588,7 +604,7 @@ end;
 
 destructor cpu_z80.free;
 begin
-freemem(self.r);
+  freemem(self.r);
 end;
 
 procedure cpu_z80.change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
@@ -605,8 +621,14 @@ procedure cpu_z80.reset;
 begin
   r.sp:=$ffff;
   r.pc:=0;
-  r.a:=0;r.bc.w:=0;r.de.w:=0;r.hl.w:=0;
-  r.a2:=0;r.bc2.w:=0;r.de2.w:=0;r.hl2.w:=0;
+  r.a:=0;
+  r.bc.w:=0;
+  r.de.w:=0;
+  r.hl.w:=0;
+  r.a2:=0;
+  r.bc2.w:=0;
+  r.de2.w:=0;
+  r.hl2.w:=0;
   r.wz:=0;
   r.ix.w:=$ffff;
   r.iy.w:=$ffff;
@@ -615,15 +637,27 @@ begin
   r.i:=0;
   r.r:=0;
   r.im:=0;
-  r.f.c:=false;r.f.n:=false;r.f.p_v:=false;r.f.bit3:=false;r.f.h:=false;r.f.bit5:=false;r.f.z:=true;r.f.s:=false;
-  r.f2.c:=false;r.f2.n:=false;r.f2.p_v:=false;r.f2.bit3:=false;r.f2.h:=false;r.f2.bit5:=false;r.f2.z:=false;r.f2.s:=false;
+  r.f.c:=false;
+  r.f.n:=false;
+  r.f.p_v:=false;
+  r.f.bit3:=false;
+  r.f.h:=false;
+  r.f.bit5:=false;
+  r.f.z:=true;
+  r.f.s:=false;
+  r.f2.c:=false;
+  r.f2.n:=false;
+  r.f2.p_v:=false;
+  r.f2.bit3:=false;
+  r.f2.h:=false;
+  r.f2.bit5:=false;
+  r.f2.z:=false;
+  r.f2.s:=false;
   self.change_nmi(CLEAR_LINE);
   self.pedir_irq:=CLEAR_LINE;
   self.change_reset(CLEAR_LINE);
   self.change_halt(CLEAR_LINE);
   self.r.halt_opcode:=false;
-  self.im2_lo:=$ff;
-  self.im0:=$ff;
   self.opcode:=false;
   self.after_ei:=false;
   self.totalt:=0;
@@ -637,11 +671,6 @@ end;
 function cpu_z80.get_internal_r:npreg_z80;
 begin
   get_internal_r:=self.r;
-end;
-
-procedure cpu_z80.set_internal_r(r:npreg_z80);
-begin
-  copymemory(self.r,r,sizeof(nreg_z80));
 end;
 
 function cpu_z80.save_snapshot(data:pbyte):word;
@@ -660,8 +689,8 @@ begin
   buffer[4]:=self.pedir_nmi;
   buffer[5]:=self.nmi_state;
   copymemory(@buffer[6],@self.contador,4);
-  buffer[10]:=self.im2_lo;
-  buffer[11]:=self.im0;
+  buffer[10]:=self.irq_vector;
+  buffer[11]:=0;
   copymemory(temp,@buffer[0],12);
   save_snapshot:=size+12;
 end;
@@ -680,8 +709,7 @@ begin
   self.pedir_nmi:=temp^;inc(temp);
   self.nmi_state:=temp^;inc(temp);
   copymemory(@self.contador,temp,4);inc(temp,4);
-  self.im2_lo:=temp^;inc(temp);
-  self.im0:=temp^;
+  self.irq_vector:=temp^;inc(temp);
 end;
 
 procedure cpu_z80.change_io_calls(in_port:tgetbyte;out_port:tputbyte);
@@ -690,11 +718,12 @@ begin
   if @out_port<>nil then self.out_port:=out_port;
 end;
 
-procedure cpu_z80.change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil);
+procedure cpu_z80.change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised=nil;m1_raised:type_m1_raise=nil;irq_vector_cb:type_external_vector=nil);
 begin
-  self.despues_instruccion:=despues_instruccion;
-  self.raised_z80:=raised_z80;
-  self.m1_raised:=m1_raised;
+  if @despues_instruccion<>nil then self.despues_instruccion:=despues_instruccion;
+  if @raised_z80<>nil then self.raised_z80:=raised_z80;
+  if @m1_raised<>nil then self.m1_raised:=m1_raised;
+  if @irq_vector_cb<>nil then self.irq_vector_cb:=irq_vector_cb;
 end;
 
 function cpu_z80.call_nmi:byte;
@@ -704,7 +733,7 @@ self.r.halt_opcode:=false;
 if self.nmi_state<>CLEAR_LINE then exit;
 r.r:=((r.r+1) and $7f) or (r.r and $80);
 self.push_sp(r.pc);
-r.IFF1:=false;
+r.iff1:=false;
 r.pc:=$66;
 r.wz:=$66;
 call_nmi:=11;
@@ -725,12 +754,13 @@ r.r:=((r.r+1) and $7f) or (r.r and $80);
 estados_t:=0;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
 push_sp(r.pc);
-r.IFF2:=false;
-r.IFF1:=false;
+r.iff2:=false;
+r.iff1:=false;
 case r.im of
         0:begin
-            if self.daisy then MessageDlg('Mierda!!! Daisy chain en IM0!!', mtInformation,[mbOk], 0);
-            r.pc:=self.im0 and $38;
+            if self.daisy then MessageDlg('Mierda!!! Daisy chain en IM0!!',mtInformation,[mbOk],0);
+            if @self.irq_vector_cb<>nil then self.irq_vector:=self.irq_vector_cb;
+            r.pc:=self.irq_vector and $38;
             estados_t:=estados_t+12;
           end;
         1:begin
@@ -738,9 +768,8 @@ case r.im of
             estados_t:=estados_t+13;
         end;
         2:begin
-            if self.daisy then posicion:=z80daisy_ack
-              else posicion:=self.im2_lo;
-            posicion:=posicion or (r.i shl 8);
+            if @self.irq_vector_cb<>nil then self.irq_vector:=self.irq_vector_cb;
+            posicion:=self.irq_vector or (r.i shl 8);
             r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);
             estados_t:=estados_t+19;
         end;
@@ -3191,9 +3220,9 @@ case instruccion of
         $40:begin {in B,(c)}
                 r.bc.h:=self.in_port(r.bc.w);
                 r.f.z:=(r.bc.h=0);
-                r.f.s:=(r.bc.h And $80) <> 0;
-                r.f.bit3:=(r.bc.h And 8) <> 0;
-                r.f.bit5:=(r.bc.h And $20) <> 0;
+                r.f.s:=(r.bc.h and $80) <> 0;
+                r.f.bit3:=(r.bc.h and 8) <> 0;
+                r.f.bit5:=(r.bc.h and $20) <> 0;
                 r.f.p_v:= paridad[r.bc.h];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3223,9 +3252,9 @@ case instruccion of
         $48:begin {in C,(C)}
                 r.bc.l:=self.in_port(r.bc.w);
                 r.f.z:=(r.bc.l=0);
-                r.f.s:=(r.bc.l And $80) <> 0;
-                r.f.bit3:=(r.bc.l And 8) <> 0;
-                r.f.bit5:=(r.bc.l And $20) <> 0;
+                r.f.s:=(r.bc.l and $80) <> 0;
+                r.f.bit3:=(r.bc.l and 8) <> 0;
+                r.f.bit5:=(r.bc.l and $20) <> 0;
                 r.f.p_v:=paridad[r.bc.l];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3252,9 +3281,9 @@ case instruccion of
         $50:begin {in D,(c)}
                 r.de.h:=self.in_port(r.bc.w);
                 r.f.z:=(r.de.h=0);
-                r.f.s:=(r.de.h And $80) <> 0;
-                r.f.bit3:=(r.de.h And 8) <> 0;
-                r.f.bit5:=(r.de.h And $20) <> 0;
+                r.f.s:=(r.de.h and $80) <> 0;
+                r.f.bit3:=(r.de.h and 8) <> 0;
+                r.f.bit5:=(r.de.h and $20) <> 0;
                 r.f.p_v:= paridad[r.de.h];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3285,9 +3314,9 @@ case instruccion of
         $58:begin  {in E,(C)}
                 r.de.l:=self.in_port(r.bc.w);
                 r.f.z:=(r.de.l=0);
-                r.f.s:=(r.de.l And $80) <> 0;
-                r.f.bit3:=(r.de.l And 8) <> 0;
-                r.f.bit5:=(r.de.l And $20) <> 0;
+                r.f.s:=(r.de.l and $80) <> 0;
+                r.f.bit3:=(r.de.l and 8) <> 0;
+                r.f.bit5:=(r.de.l and $20) <> 0;
                 r.f.p_v:= paridad[r.de.l];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3318,9 +3347,9 @@ case instruccion of
         $60:begin  {in H,(c)}
                 r.hl.h:=self.in_port(r.bc.w);
                 r.f.z:=(r.hl.h=0);
-                r.f.s:=(r.hl.h And $80) <> 0;
-                r.f.bit3:=(r.hl.h And 8) <> 0;
-                r.f.bit5:=(r.hl.h And $20) <> 0;
+                r.f.s:=(r.hl.h and $80) <> 0;
+                r.f.bit3:=(r.hl.h and 8) <> 0;
+                r.f.bit5:=(r.hl.h and $20) <> 0;
                 r.f.p_v:= paridad[r.hl.h];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3356,9 +3385,9 @@ case instruccion of
         $68:begin {in L,(c)}
                 r.hl.l:=self.in_port(r.bc.w);
                 r.f.z:=(r.hl.l=0);
-                r.f.s:=(r.hl.l And $80) <> 0;
-                r.f.bit3:=(r.hl.l And 8) <> 0;
-                r.f.bit5:=(r.hl.l And $20) <> 0;
+                r.f.s:=(r.hl.l and $80) <> 0;
+                r.f.bit3:=(r.hl.l and 8) <> 0;
+                r.f.bit5:=(r.hl.l and $20) <> 0;
                 r.f.p_v:= paridad[r.hl.l];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3394,9 +3423,9 @@ case instruccion of
         $70:begin  {in (C)}
                 temp:=self.in_port(r.bc.w);
                 r.f.z:=(temp=0);
-                r.f.s:=(temp And $80) <> 0;
-                r.f.bit3:=(temp And 8) <> 0;
-                r.f.bit5:=(temp And $20) <> 0;
+                r.f.s:=(temp and $80) <> 0;
+                r.f.bit3:=(temp and 8) <> 0;
+                r.f.bit5:=(temp and $20) <> 0;
                 r.f.p_v:= paridad[temp];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3418,9 +3447,9 @@ case instruccion of
         $78:begin  //in A,(C)
                 r.a:=self.in_port(r.bc.w);
                 r.f.z:=(r.a=0);
-                r.f.s:=(r.a And $80) <> 0;
-                r.f.bit3:=(r.a And 8) <> 0;
-                r.f.bit5:=(r.a And $20) <> 0;
+                r.f.s:=(r.a and $80) <> 0;
+                r.f.bit3:=(r.a and 8) <> 0;
+                r.f.bit5:=(r.a and $20) <> 0;
                 r.f.p_v:= paridad[r.a];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3622,6 +3651,7 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                   self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
            end;
@@ -3641,6 +3671,7 @@ case instruccion of
                 r.f.bit3:=(r.bc.h and 8)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                   self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
             end;
@@ -3697,8 +3728,9 @@ case instruccion of
                  r.f.bit3:=(r.bc.h and 8)<>0;
                  r.f.s:=(r.bc.h and $80)<>0;
                  if (r.bc.h<>0) then begin
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
-                        dec(r.pc,2);
+                  self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                  r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                  end;
                  r.hl.w:=r.hl.w-1;
             end;
@@ -3719,7 +3751,8 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if (r.bc.h<>0) then begin
                     self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
-                    dec(r.pc,2);
+                    r.pc:=r.pc-2;
+                    r.wz:=r.pc+1;
                 end;
             end;
 end;

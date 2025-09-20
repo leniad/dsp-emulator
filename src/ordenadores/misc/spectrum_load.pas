@@ -56,7 +56,7 @@ type
 procedure spectrum_load_click;
 var
   g:integer;
-  long_bloque:dword;
+  long_bloque,crc:dword;
   f,h,i:byte;
   t1,t2,t3,t4,t5:integer;
   hay_imagen,salida,hay_scr:boolean;
@@ -93,7 +93,7 @@ if extension='ZIP' then begin
       datos:=nil;
     end;
     getmem(datos_scr,t1);
-    load_file_from_zip(nombre,nombre_file,datos_scr,t1,t2,false);
+    load_file_from_zip(nombre,nombre_file,datos_scr,t1,crc,false);
   end;
   //Comprobar si hay ROM
   spec_rom.hay_rom:=search_file_from_zip(nombre,'*.rom',spec_rom.nombre_rom,t1,t2,false);
@@ -105,7 +105,7 @@ if extension='ZIP' then begin
         spec_rom.datos_rom:=nil;
       end;
       getmem(spec_rom.datos_rom,spec_rom.rom_size);
-      load_file_from_zip(nombre,spec_rom.nombre_rom,spec_rom.datos_rom,t1,t2,false);
+      load_file_from_zip(nombre,spec_rom.nombre_rom,spec_rom.datos_rom,t1,crc,false);
   end;
   search_file_from_zip(nombre,'*.*',nombre_file,file_size,t2,false);
   repeat
@@ -116,7 +116,7 @@ if extension='ZIP' then begin
     getmem(datos,file_size);
     extension:=extension_fichero(nombre_file);
     if ((extension='TAP') or (extension='TZX') or (extension='PZX') or (extension='CSW') or (extension='WAV') or (extension='DSP') or (extension='SZX') or (extension='ZX') or (extension='Z80') or (extension='SP') or (extension='SNA')) then begin
-      load_file_from_zip(nombre,nombre_file,datos,t1,t2,true);
+      load_file_from_zip(nombre,nombre_file,datos,t1,crc,true);
       nombre:=nombre_file;
       break;
     end;

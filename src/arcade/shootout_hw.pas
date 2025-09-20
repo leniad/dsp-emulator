@@ -57,8 +57,8 @@ begin
   -------x    enable}
 for f:=$7f downto 0 do begin
   atrib:=memoria[$19fd-(f*4)];
-  if (((atrib and $1)<>0) and ((atrib and 8)=prioridad)) then begin
-    if (bflicker or ((atrib and $2)=0)) then begin
+  if (((atrib and $1)=0) or ((atrib and 8)<>prioridad)) then continue;
+  if (bflicker or ((atrib and $2)=0)) then begin
       nchar:=memoria[$19ff-(f*4)]+((atrib shl 3) and $700);
       x:=240-memoria[$19fe-(f*4)];
       y:=240-memoria[$19fc-(f*4)];
@@ -71,13 +71,11 @@ for f:=$7f downto 0 do begin
          put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
          actualiza_gfx_sprite(x,y,3,1);
       end;
-    end;
   end;
 end;
 end;
 
 begin
-
 for f:=0 to $3ff do begin
   //tiles
   if gfx[2].buffer[f] then begin
@@ -148,7 +146,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6502_0.tframes;
 frame_s:=m6502_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
    m6502_0.run(frame_m);
    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
@@ -241,6 +239,7 @@ begin
 m6502_0.reset;
 m6502_1.reset;
 ym2203_0.reset;
+reset_video;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$3f;

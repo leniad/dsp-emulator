@@ -143,7 +143,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 255 do begin
     //main
     m68000_0.run(frame_m);
@@ -165,7 +165,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 255 do begin
     //main
     m68000_0.run(frame_m);
@@ -545,6 +545,7 @@ begin
       end;
   304:x1_010_0.reset;
  end;
+ reset_video;
  reset_audio;
  seta_sprite0.reset;
  marcade.in0:=$ff;
@@ -625,7 +626,7 @@ case main_vars.tipo_maquina of
         ym2203_0.change_io_calls(tndrcade_porta_read,tndrcade_portb_read,nil,nil);
         ym3812_0:=ym3812_chip.create(YM3812_FM,16000000 div 4);
         //Video chips (sin bancos de sprites)
-        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40,$3fff,nil);
+        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40);
         //convertir gfx
         if not(roms_load(ptemp,tndrcade_sprites)) then exit;
         convert_sprites($4000);
@@ -652,7 +653,7 @@ case main_vars.tipo_maquina of
         x1_010_0:=tx1_010.create(16000000);
         if not(roms_load(@x1_010_0.rom,twineagl_pcm)) then exit;
         //Video chips (Sin bancos de sprites)
-        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40,$1fff,nil);
+        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40);
         //convertir gfx
         if not(roms_load16w(pword(ptemp),twineagl_sprites)) then exit;
         convert_sprites($2000);
@@ -675,7 +676,7 @@ case main_vars.tipo_maquina of
         x1_010_0:=tx1_010.create(16000000);
         if not(roms_load(@x1_010_0.rom,thunderl_pcm)) then exit;
         //Video chips (sin bancos de sprites)
-        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40,$fff,nil);
+        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40);
         //convertir gfx
         if not(roms_load16w(pword(ptemp),thunderl_sprites)) then exit;
         convert_sprites($1000);

@@ -77,7 +77,7 @@ const
 	        special_entry:(0,0,0,0);  // mask for the special value
 	        specialvalue:0;           // resulting value to indicate "special"
         );
-        CPU_SYNC=2;
+        CPU_SYNC=4;
 
 var
  rom:array[0..$3ffff] of word;
@@ -172,7 +172,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -368,6 +368,7 @@ begin
  YM2151_0.reset;
  pokey_0.reset;
  slapstic_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;

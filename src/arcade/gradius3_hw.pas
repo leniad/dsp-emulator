@@ -150,7 +150,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_sub:=m68000_1.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
   //main
   m68000_0.run(frame_m);
@@ -314,6 +314,7 @@ begin
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

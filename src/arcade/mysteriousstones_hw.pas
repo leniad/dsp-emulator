@@ -14,31 +14,30 @@ const
         (n:'rom4.bin';l:$2000;p:$8000;crc:$46c73714),(n:'rom3.bin';l:$2000;p:$a000;crc:$34f8b8a3),
         (n:'rom2.bin';l:$2000;p:$c000;crc:$bfd22cfc),(n:'rom1.bin';l:$2000;p:$e000;crc:$fb163e38));
         ms_char:array[0..5] of tipo_roms=(
-        (n:'ms6';l:$2000;p:$0000;crc:$85c83806),(n:'ms9';l:$2000;p:$2000;crc:$b146c6ab),
+        (n:'ms6';l:$2000;p:0;crc:$85c83806),(n:'ms9';l:$2000;p:$2000;crc:$b146c6ab),
         (n:'ms7';l:$2000;p:$4000;crc:$d025f84d),(n:'ms10';l:$2000;p:$6000;crc:$d85015b5),
-        (n:'ms8';l:$2000;p:$8000;crc:$53765d89),(n:'ms11';l:$2000;p:$A000;crc:$919ee527));
+        (n:'ms8';l:$2000;p:$8000;crc:$53765d89),(n:'ms11';l:$2000;p:$a000;crc:$919ee527));
         ms_sprite:array[0..5] of tipo_roms=(
-        (n:'ms12';l:$2000;p:$0000;crc:$72d8331d),(n:'ms13';l:$2000;p:$2000;crc:$845a1f9b),
+        (n:'ms12';l:$2000;p:0;crc:$72d8331d),(n:'ms13';l:$2000;p:$2000;crc:$845a1f9b),
         (n:'ms14';l:$2000;p:$4000;crc:$822874b0),(n:'ms15';l:$2000;p:$6000;crc:$4594e53c),
-        (n:'ms16';l:$2000;p:$8000;crc:$2f470b0f),(n:'ms17';l:$2000;p:$A000;crc:$38966d1b));
+        (n:'ms16';l:$2000;p:$8000;crc:$2f470b0f),(n:'ms17';l:$2000;p:$a000;crc:$38966d1b));
         ms_pal:tipo_roms=(n:'ic61';l:$20;p:0;crc:$e802d6cf);
         //Dip
-        ms_dip_a:array [0..3] of def_dip=(
-        (mask:$1;name:'Lives';number:2;dip:((dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Difficulty';number:2;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        ms_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ms_dip_a:array [0..3] of def_dip2=(
+        (mask:1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
+        (mask:2;name:'Difficulty';number:2;val2:(2,0);name2:('Easy','Hard')),
+        (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),());
+        ms_dip_b:array [0..4] of def_dip2=(
+        (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$20;name:'Flip Screen';number:2;val2:(0,$20);name2:('Off','On')),
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
 
 var
   scroll,soundlatch,last,char_color:byte;
   video_page:word;
   weights_rg:array[0..2] of single;
   weights_b:array[0..1] of single;
-  ms_scanline:array[0..271] of word;
 
 procedure cambiar_color(pos:byte);
 var
@@ -47,18 +46,18 @@ var
 begin
   valor:=buffer_paleta[pos];
   //red
-  bit0:=(valor shr 0) and $01;
-  bit1:=(valor shr 1) and $01;
-  bit2:=(valor shr 2) and $01;
+  bit0:=(valor shr 0) and 1;
+  bit1:=(valor shr 1) and 1;
+  bit2:=(valor shr 2) and 1;
   color.r:=combine_3_weights(@weights_rg[0],bit0,bit1,bit2);
   // green
-  bit0:=(valor shr 3) and $01;
-  bit1:=(valor shr 4) and $01;
-  bit2:=(valor shr 5) and $01;
+  bit0:=(valor shr 3) and 1;
+  bit1:=(valor shr 4) and 1;
+  bit2:=(valor shr 5) and 1;
   color.g:=combine_3_weights(@weights_rg[0],bit0,bit1,bit2);
   // blue
-  bit0:=(valor shr 6) and $01;
-  bit1:=(valor shr 7) and $01;
+  bit0:=(valor shr 6) and 1;
+  bit1:=(valor shr 7) and 1;
   color.b:=combine_2_weights(@weights_b[0],bit0,bit1);
   set_pal_color(color,pos);
 end;
@@ -72,7 +71,7 @@ for f:=0 to $1ff do begin
   if gfx[2].buffer[f+video_page] then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=((memoria[$1a00+video_page+f] and $1) shl 8)+memoria[$1800+f+video_page];
+    nchar:=((memoria[$1a00+video_page+f] and 1) shl 8)+memoria[$1800+f+video_page];
     put_gfx_flip(x*16,y*16,nchar,16,1,2,(x and $10)<>0,false);
     gfx[2].buffer[f+video_page]:=false;
   end;
@@ -85,7 +84,7 @@ for f:=0 to $17 do begin
     x:=240-memoria[$782+(f*4)];
     y:=memoria[$783+(f*4)];
     nchar:=memoria[$781+(f*4)]+((atrib and $10) shl 4);
-    color:=(atrib and $8) shl 1;
+    color:=(atrib and 8) shl 1;
     put_gfx_sprite(nchar,color,(atrib and 2)<>0,(atrib and 4)<>0,1);
     actualiza_gfx_sprite(x and $ff,y,2,1);
   end;
@@ -94,7 +93,7 @@ for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=((memoria[$1400+f] and $07) shl 8)+memoria[$1000+f];
+    nchar:=((memoria[$1400+f] and 7) shl 8)+memoria[$1000+f];
     put_gfx_trans(x*8,y*8,nchar,24+(char_color shl 3),3,0);
     gfx[0].buffer[f]:=false;
   end;
@@ -141,23 +140,21 @@ end;
 procedure principal_ms;
 var
   f:word;
-  frame:single;
 begin
 init_controls(false,false,false,true);
-frame:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
-    m6502_0.run(frame);
-    frame:=frame+m6502_0.tframes-m6502_0.contador;
-    //video
-    case ms_scanline[f] of
-      $8:marcade.dswb:=marcade.dswb and $7f;
-      $f8:begin
+    case f of
+      8:marcade.dswb:=marcade.dswb and $7f;
+      248:begin
             update_video_ms;
             marcade.dswb:=marcade.dswb or $80;
           end;
     end;
-    if ((ms_scanline[f] and $f)=8) then m6502_0.change_irq(ASSERT_LINE);
+    //Empezando por la linea 8, cada 16
+    if (((f+8) mod 16)=0) then m6502_0.change_irq(ASSERT_LINE);
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
  end;
  eventos_ms;
  video_sync;
@@ -169,7 +166,7 @@ begin
 case direccion of
   0..$1fff,$4000..$ffff:getbyte_ms:=memoria[direccion];
   $2000..$3fff:case (direccion and $7f) of
-                  $0..$f:getbyte_ms:=marcade.in0;
+                  0..$f:getbyte_ms:=marcade.in0;
                   $10..$1f:getbyte_ms:=marcade.in1;
                   $20..$2f:getbyte_ms:=marcade.dswa;
                   $30..$3f:getbyte_ms:=marcade.dswb;
@@ -193,13 +190,13 @@ case direccion of
                   memoria[direccion]:=valor;
                end;
   $2000..$3fff:case (direccion and $7f) of
-                $0..$f:begin
-                      temp:=((valor and $1) shl 1)+((valor and $2) shr 1);
+                0..$f:begin
+                      temp:=((valor and 1) shl 1)+((valor and 2) shr 1);
                       if char_color<>temp then begin
                         fillchar(gfx[0].buffer[0],$400,1);
                         char_color:=temp;
                       end;
-                      video_page:=(valor and $4) shl 8;
+                      video_page:=(valor and 4) shl 8;
                     end;
                 $10..$1f:m6502_0.change_irq(CLEAR_LINE);
                 $20..$2f:scroll:=valor;
@@ -245,11 +242,11 @@ size:=m6502_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ay8910_0.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 size:=ay8910_1.save_snapshot(data);
-savedata_com_qsnapshot(data,size);
+savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria,$4000);
+savedata_qsnapshot(@memoria,$4000);
 //MISC
 buffer[0]:=scroll;
 buffer[1]:=soundlatch;
@@ -297,8 +294,10 @@ end;
 procedure reset_ms;
 begin
 m6502_0.reset;
+frame_main:=m6502_0.tframes;
 ay8910_0.reset;
 ay8910_1.reset;
+reset_video;
 reset_audio;
 scroll:=0;
 last:=0;
@@ -337,8 +336,8 @@ m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_ms,putbyte_ms);
 m6502_0.init_sound(ms_sound_update);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
-ay8910_1:=ay8910_chip.create(1500000,AY8910,0.3);
+ay8910_0:=ay8910_chip.create(1500000,AY8910);
+ay8910_1:=ay8910_chip.create(1500000,AY8910);
 //cargar roms
 if not(roms_load(@memoria,ms_rom)) then exit;
 //Cargar chars
@@ -366,14 +365,11 @@ for f:=24 to 63 do begin
   buffer_paleta[f]:=memoria_temp[f-24];
   cambiar_color(f);
 end;
-//init scanlines
-for f:=8 to $ff do ms_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
-for f:=$e8 to $ff do ms_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
 //DIP
 marcade.dswa:=$fb;
 marcade.dswb:=$1f;
-marcade.dswa_val:=@ms_dip_a;
-marcade.dswb_val:=@ms_dip_b;
+marcade.dswa_val2:=@ms_dip_a;
+marcade.dswb_val2:=@ms_dip_b;
 //final
 reset_ms;
 iniciar_ms:=true;

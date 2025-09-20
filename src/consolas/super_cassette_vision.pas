@@ -2,7 +2,7 @@ unit super_cassette_vision;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     upd7810,lenguaje,main_engine,controls_engine,sysutils,dialogs,gfx_engine,
+     upd7810,main_engine,controls_engine,sysutils,dialogs,gfx_engine,
      rom_engine,misc_functions,sound_engine,file_engine,pal_engine,upd1771;
 
 function iniciar_scv:boolean;
@@ -47,7 +47,7 @@ if event.keyboard then begin
    if keyboard[KEYBOARD_9] then scv_0.keys[6]:=(scv_0.keys[6] and $7f) else scv_0.keys[6]:=(scv_0.keys[6] or $80);
    if keyboard[KEYBOARD_Q] then scv_0.keys[7]:=(scv_0.keys[7] and $bf) else scv_0.keys[7]:=(scv_0.keys[7] or $40);
    if keyboard[KEYBOARD_W] then scv_0.keys[7]:=(scv_0.keys[7] and $7f) else scv_0.keys[7]:=(scv_0.keys[7] or $80);
-   if keyboard[KEYBOARD_P] then scv_0.keys[8]:=(scv_0.keys[8] and $fe) else scv_0.keys[8]:=(scv_0.keys[8] or $1);
+   if keyboard[KEYBOARD_P] then scv_0.keys[8]:=(scv_0.keys[8] and $fe) else scv_0.keys[8]:=(scv_0.keys[8] or 1);
 end;
 if event.arcade then begin
    //P1
@@ -70,27 +70,16 @@ end;
 procedure update_video_svc;
 procedure draw_text(x,y:byte;char_data:word;fg,bg:byte);
 var
-  f,d:byte;
+  h,f,d:byte;
   tempw:array[0..7] of word;
 begin
 	for f:=0 to 7 do begin
 		d:=scv_0.chars[char_data+f];
-    if (d and $80)<>0 then tempw[0]:=paleta[fg]
-      else tempw[0]:=paleta[bg];
-    if (d and $40)<>0 then tempw[1]:=paleta[fg]
-      else tempw[1]:=paleta[bg];
-    if (d and $20)<>0 then tempw[2]:=paleta[fg]
-      else tempw[2]:=paleta[bg];
-    if (d and $10)<>0 then tempw[3]:=paleta[fg]
-      else tempw[3]:=paleta[bg];
-    if (d and $8)<>0 then tempw[4]:=paleta[fg]
-      else tempw[4]:=paleta[bg];
-    if (d and $4)<>0 then tempw[5]:=paleta[fg]
-      else tempw[5]:=paleta[bg];
-    if (d and $2)<>0 then tempw[6]:=paleta[fg]
-      else tempw[6]:=paleta[bg];
-    if (d and $1)<>0 then tempw[7]:=paleta[fg]
-      else tempw[7]:=paleta[bg];
+    for h:=0 to 7 do begin
+      if (d and $80)<>0 then tempw[h]:=paleta[fg]
+        else tempw[h]:=paleta[bg];
+      d:=d shl 1;
+    end;
     putpixel(x,(y+f) and $ff,8,@tempw,1);
 	end;
   for f:=0 to 7 do tempw[f]:=paleta[bg];
@@ -123,10 +112,10 @@ begin
 	if ((x>=4) and ((y+2)>=screen_sprite_start_line)) then begin
 		x:=x-4;
     tempw:=paleta[col];
-		if (pat and $08)<>0 then putpixel(x,y+2,1,@tempw,1);
-		if (((pat and $04)<>0) and (x<255)) then putpixel(x+1,y+2,1,@tempw,1);
-		if (((pat and $02)<>0) and (x<254)) then putpixel(x+2,y+2,1,@tempw,1);
-		if (((pat and $01)<>0) and (x<253)) then putpixel(x+3,y+2,1,@tempw,1);
+		if (pat and 8)<>0 then putpixel(x,y+2,1,@tempw,1);
+		if (((pat and 4)<>0) and (x<255)) then putpixel(x+1,y+2,1,@tempw,1);
+		if (((pat and 2)<>0) and (x<254)) then putpixel(x+2,y+2,1,@tempw,1);
+		if (((pat and 1)<>0) and (x<253)) then putpixel(x+3,y+2,1,@tempw,1);
 	end;
 end;
 
@@ -150,12 +139,12 @@ begin
 				plot_sprite_part(x + 12, y, pat3 shr 4, col, screen_sprite_start_line);
 			end;
 			if left then begin
-				plot_sprite_part(x     , y + 1, pat0 and $0f, col, screen_sprite_start_line);
-				plot_sprite_part(x +  4, y + 1, pat1 and $0f, col, screen_sprite_start_line);
+				plot_sprite_part(x     , y + 1, pat0 and $f, col, screen_sprite_start_line);
+				plot_sprite_part(x +  4, y + 1, pat1 and $f, col, screen_sprite_start_line);
 			end;
 			if right then begin
-				plot_sprite_part(x +  8, y + 1, pat2 and $0f, col, screen_sprite_start_line);
-				plot_sprite_part(x + 12, y + 1, pat3 and $0f, col, screen_sprite_start_line);
+				plot_sprite_part(x +  8, y + 1, pat2 and $f, col, screen_sprite_start_line);
+				plot_sprite_part(x + 12, y + 1, pat3 and $f, col, screen_sprite_start_line);
 			end;
 		end;
     y:=y+2;
@@ -171,10 +160,10 @@ var
   spr_col,f,spr_y,clip,col,spr_x,tile_idx:byte;
 begin
 fg:=memoria[$3403] shr 4;
-bg:=memoria[$3403] and $0f;
+bg:=memoria[$3403] and $f;
 gr_fg:=memoria[$3401] shr 4;
 gr_bg:=memoria[$3401] and $f;
-clip_x:=(memoria[$3402] and $0f)*2;
+clip_x:=(memoria[$3402] and $f)*2;
 clip_y:=memoria[$3402] shr 4;
 fill_full_screen(1,gr_bg);
 // Draw background
@@ -194,14 +183,14 @@ for y:=0 to 15 do begin
               draw_semi_graph(x * 8 + 4, y * 16     , d and $40, gr_fg );
 					    draw_semi_graph(x * 8    , y * 16 +  4, d and $20, gr_fg );
 					    draw_semi_graph(x * 8 + 4, y * 16 +  4, d and $10, gr_fg );
-					    draw_semi_graph(x * 8    , y * 16 +  8, d and $08, gr_fg );
-					    draw_semi_graph(x * 8 + 4, y * 16 +  8, d and $04, gr_fg );
-					    draw_semi_graph(x * 8    , y * 16 + 12, d and $02, gr_fg );
-					    draw_semi_graph(x * 8 + 4, y * 16 + 12, d and $01, gr_fg );
+					    draw_semi_graph(x * 8    , y * 16 +  8, d and 8, gr_fg );
+					    draw_semi_graph(x * 8 + 4, y * 16 +  8, d and 4, gr_fg );
+					    draw_semi_graph(x * 8    , y * 16 + 12, d and 2, gr_fg );
+					    draw_semi_graph(x * 8 + 4, y * 16 + 12, d and 1, gr_fg );
              end;
 				  03:begin      // Block graphics mode
 					    draw_block_graph(x * 8, y * 16    , d shr 4);
-					    draw_block_graph(x * 8, y * 16 + 8, d and $0f);
+					    draw_block_graph(x * 8, y * 16 + 8, d and $f);
              end;
           end;
       end;
@@ -212,11 +201,11 @@ if (memoria[$3400] and $10)<>0 then begin
     else screen_start_sprite_line:=0;
   for f:=0 to 127 do begin
 			spr_y:=memoria[$3200+f*4] and $fe;
-			y_32:=(memoria[$3200+f*4] and $01)<>0;       // Xx32 sprite
+			y_32:=(memoria[$3200+f*4] and 1)<>0;       // Xx32 sprite
 			clip:=memoria[$3201+f*4] shr 4;
-			col:=memoria[$3201+f*4] and $0f;
+			col:=memoria[$3201+f*4] and $f;
 			spr_x:=memoria[$3202+f*4] and $fe;
-			x_32:=(memoria[$3202+f*4] and $01)<>0;       // 32xX sprite
+			x_32:=(memoria[$3202+f*4] and 1)<>0;       // 32xX sprite
 			tile_idx:=memoria[$3203+f*4] and $7f;
 			half:=(memoria[$3203+f*4] and $80)<>0;
 			left:=true;
@@ -262,7 +251,7 @@ if (memoria[$3400] and $10)<>0 then begin
 				if x_32 then
 					draw_sprite(spr_x+16,spr_y,tile_idx or 8,col,true,true,top,bottom,clip,screen_start_sprite_line);
 				if y_32 then begin
-          if (clip and $08)<>0 then clip:=(clip and $07)
+          if (clip and 8)<>0 then clip:=(clip and 7)
             else clip:=0;
 					draw_sprite(spr_x,spr_y+16,tile_idx or 1,col,left,right,true,true,clip,screen_start_sprite_line);
 					if x_32 then
@@ -275,22 +264,20 @@ end;
 
 procedure scv_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,true,true,false);
-frame:=upd7810_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-      upd7810_0.run(frame);
-      frame:=frame+upd7810_0.tframes-upd7810_0.contador;
       case f of
-        0:upd7810_0.set_input_line_7801(UPD7810_INTF2,CLEAR_LINE);
-        239:begin
+        7:upd7810_0.set_input_line_7801(UPD7810_INTF2,CLEAR_LINE);
+        240:begin
               update_video_svc;
               upd7810_0.set_input_line_7801(UPD7810_INTF2,ASSERT_LINE);
             end;
       end;
+      upd7810_0.run(frame_main);
+      frame_main:=frame_main+upd7810_0.tframes-upd7810_0.contador;
   end;
   actualiza_trozo(24,23,192,222,1,0,0,192,222,2);
   actualiza_trozo_final(0,0,192,222,2);
@@ -352,7 +339,7 @@ end;
 procedure scv_portc_out(valor:byte);
 begin
   scv_0.portc_val:=valor;
-	upd1771_0.pcm_write(scv_0.portc_val and $08);
+	upd1771_0.pcm_write(scv_0.portc_val and 8);
   case scv_0.rom_bank_type of
     0:;
     1:scv_0.rom_window:=(valor and $20) shr 5;
@@ -397,7 +384,9 @@ end;
 procedure reset_scv;
 begin
  upd7810_0.reset;
+ frame_main:=upd7810_0.tframes;
  upd1771_0.reset;
+ reset_video;
  reset_audio;
  scv_0.porta_val:=$ff;
  scv_0.portc_val:=$ff;
@@ -409,7 +398,7 @@ procedure scv_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SSUPERCASSETTE);
 directory.scv:=ExtractFilePath(nombre);
 end;
 
@@ -447,9 +436,9 @@ if longitud<=$2000 then begin
 reset_scv;
 end;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SSUPERCASSETTE)) then exit;
   getmem(datos,$20000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SSUPERCASSETTE)) then begin
     freemem(datos);
     exit;
   end;
@@ -466,7 +455,7 @@ begin
   end;
   fillchar(memoria[$1000],$f000,0); //Doreamon confia en esto!
   if extension='BIN' then load_rom;
-  if extension='DSP' then snapshot_r(datos,longitud);
+  if extension='DSP' then snapshot_r(datos,longitud,SSUPERCASSETTE);
   if (extension='0') then begin //Tiene dos partes el cartucho?
     getmem(datos2,$20000);
     copymemory(datos2,datos,longitud);

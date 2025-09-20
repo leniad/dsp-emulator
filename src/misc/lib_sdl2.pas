@@ -82,11 +82,13 @@ const
 var
   sdl_dll_handle:int64;
   SDL_Init:function(flags:Cardinal):LongInt; cdecl;
-  SDL_WasInit:function(flags:Cardinal):Cardinal; cdecl;
+  SDL_WasInit:function(flags:Cardinal):Cardinal;cdecl;
   SDL_Quit:procedure;cdecl;
+  SDL_GetError:function:PAnsiChar;cdecl;
   SDL_LoadBMP_RW:function(src:libsdlp_RWops;freesrc:LongInt):libsdlp_Surface;cdecl;
   SDL_CreateRGBSurface:function(flags:Cardinal;width:LongInt;height:LongInt;depth:LongInt;Rmask:Cardinal;Gmask:Cardinal;Bmask:Cardinal;Amask:Cardinal):libsdlp_Surface;cdecl;
   SDL_UpperBlit:function(src:libsdlp_Surface;const srcrect:libsdlp_rect;dst:libsdlp_Surface;dstrect:libsdlp_rect):LongInt;cdecl;
+  SDL_UpperBlitScaled:function(src:libsdlp_Surface;const srcrect:libsdlp_rect;dst:libsdlp_Surface;dstrect:libsdlp_rect):LongInt;cdecl;
   SDL_LockSurface:function(surface:libsdlp_Surface):LongInt;cdecl;
   SDL_UnlockSurface:function(surface:libsdlp_Surface):LongInt;cdecl;
   SDL_FreeSurface:procedure(surface:libsdlp_Surface);cdecl;
@@ -120,12 +122,13 @@ var
   SDL_SetHint:function(const title:PAnsiChar;const value:PAnsiChar):LongBool;cdecl;
   SDL_JoystickUpdate:procedure;cdecl;
   SDL_JoystickEventState:function(state:LongInt):LongInt;cdecl;
+  SDL_JoystickGetAxisInitialState:function(joystick:libsdlp_joystick;axis:LongInt;state:psmallint):LongBool;cdecl;
   SDL_GetClosestDisplayMode:function(displayIndex:LongInt;const mode:libsdlp_DisplayMode;closest:libsdlp_DisplayMode):libsdlp_DisplayMode;cdecl;
   SDL_SetWindowDisplayMode:function(window:libsdlP_Window;const mode:libsdlp_DisplayMode):LongInt; cdecl;
   SDL_GetTicks:function:Cardinal;cdecl;
+  SDL_SetWindowFullscreen:function(window:libsdlP_Window;flags:LongInt):LongInt;cdecl;
   {$ifdef fpc}
   SDL_SetError:function(const fmt:PAnsiChar):LongInt;cdecl;
-  SDL_GetError:function:PAnsiChar;cdecl;
   SDL_SetWindowTitle:procedure(window:libsdlP_Window;const title:PAnsiChar);cdecl;
   //Audio
   //SDL_OpenAudio:function(desired:libsdlp_AudioSpec;obtained:libsdlp_AudioSpec):Integer;cdecl;
@@ -163,10 +166,12 @@ end;
 @SDL_WasInit:=GetProcAddress(sdl_dll_Handle,'SDL_WasInit');
 @SDL_Quit:=GetProcAddress(sdl_dll_Handle,'SDL_Quit');
 @SDL_SetHint:=GetProcAddress(sdl_dll_Handle,'SDL_SetHint');
+@SDL_GetError:=GetProcAddress(sdl_dll_Handle,'SDL_GetError');
 //surface
 @SDL_LoadBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_LoadBMP_RW');
 @SDL_CreateRGBSurface:=GetProcAddress(sdl_dll_Handle,'SDL_CreateRGBSurface');
 @SDL_UpperBlit:=GetProcAddress(sdl_dll_Handle,'SDL_UpperBlit');
+@SDL_UpperBlitScaled:=GetProcAddress(sdl_dll_Handle,'SDL_UpperBlitScaled');
 @SDL_FreeSurface:=GetProcAddress(sdl_dll_Handle,'SDL_FreeSurface');
 @SDL_SaveBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_SaveBMP_RW');
 @SDL_SetColorKey:=GetProcAddress(sdl_dll_Handle,'SDL_SetColorKey');
@@ -183,6 +188,7 @@ end;
 @SDL_JoystickNumHats:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickNumHats');
 @SDL_JoystickUpdate:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickUpdate');
 @SDL_JoystickEventState:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickEventState');
+@SDL_JoystickGetAxisInitialState:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickGetAxisInitialState');
 //events
 @SDL_PollEvent:=GetProcAddress(sdl_dll_Handle,'SDL_PollEvent');
 //mouse
@@ -200,6 +206,7 @@ end;
 @SDL_UpdateWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UpdateWindowSurface');
 @SDL_GetClosestDisplayMode:=GetProcAddress(sdl_dll_Handle,'SDL_GetClosestDisplayMode');
 @SDL_SetWindowDisplayMode:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowDisplayMode');
+@SDL_SetWindowFullscreen:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowFullscreen');
 //rwops
 @SDL_RWFromFile:=GetProcAddress(sdl_dll_Handle,'SDL_RWFromFile');
 //pixels
@@ -232,7 +239,7 @@ end;
 procedure close_sdl_lib;
 begin
 if sdl_dll_handle<>0 then begin
-   FreeLibrary(sdl_dll_Handle);
+   FreeLibrary(sdl_dll_handle);
    sdl_dll_handle:=0;
 end;
 end;

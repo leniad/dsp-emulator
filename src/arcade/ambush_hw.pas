@@ -17,12 +17,12 @@ const
         ambush_proms:array[0..1] of tipo_roms=(
         (n:'a.bpr';l:$100;p:$0;crc:$5f27f511),(n:'b.bpr';l:$100;p:$100;crc:$1b03fd3b));
         //Dip
-        ambush_dip:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1c;name:'Coinage';number:8;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$14;dip_name:'2C 3C'),(dip_val:$4;dip_name:'1C 2C'),(dip_val:$18;dip_name:'2C 5C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$1c;dip_name:'Service Mode/Free Play'),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$20;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Bonus Life';number:2;dip:((dip_val:$40;dip_name:'80K'),(dip_val:$0;dip_name:'120K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ambush_dip:array [0..5] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
+        (mask:$1c;name:'Coinage';number:8;val8:($10,0,$14,4,$18,8,$c,$1c);name8:('2C 1C','1C 1C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','Service Mode/Free Play')),
+        (mask:$20;name:'Difficulty';number:2;val2:(0,$20);name2:('Easy','Hard')),
+        (mask:$40;name:'Bonus Life';number:2;val2:($40,0);name2:('80K','120K')),
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
 
 var
   color_bank:byte;
@@ -102,7 +102,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -189,6 +189,7 @@ begin
  z80_0.reset;
  ay8910_0.reset;
  ay8910_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -223,9 +224,9 @@ z80_0.change_ram_calls(ambush_getbyte,ambush_putbyte);
 z80_0.change_io_calls(ambush_inbyte,ambush_outbyte);
 z80_0.init_sound(ambush_sound_update);
 //Audio chips
-ay8910_0:=ay8910_chip.create(18432000 div 6 div 2,AY8912,1);
+ay8910_0:=ay8910_chip.create(18432000 div 6 div 2,AY8912);
 ay8910_0.change_io_calls(ambush_portar_0,nil,nil,nil);
-ay8910_1:=ay8910_chip.create(18432000 div 6 div 2,AY8912,1);
+ay8910_1:=ay8910_chip.create(18432000 div 6 div 2,AY8912);
 ay8910_1.change_io_calls(ambush_portar_1,nil,nil,nil);
 //cargar roms
 if not(roms_load(@memoria,ambush_rom)) then exit;
@@ -261,7 +262,7 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,$100);
 marcade.dswa:=$c4;
-marcade.dswa_val:=@ambush_dip;
+marcade.dswa_val2:=@ambush_dip;
 //final
 reset_ambush;
 iniciar_ambush:=true;

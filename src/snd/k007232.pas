@@ -1,7 +1,6 @@
 unit k007232;
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
-      sound_engine,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine,dialogs;
 
 const
    KDAC_A_PCM_MAX=2;
@@ -49,6 +48,7 @@ constructor k007232_chip.create(clock:dword;rom_adpcm:pbyte;size:dword;amplifi:s
 var
   f:word;
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
 	// Set up the chips */
 	self.pcmlimit:=size;

@@ -90,13 +90,21 @@ case main_vars.tipo_maquina of
   2,3:spec_a_pantalla(@memoria_3[var_spectrum.pantalla_128k,0],imagen1);
   7,8,9:begin
           cargar_bmp;
+          x:=192;
           x:=200;
           case lenslok.indice of
-            1:y:=135;
-            5:y:=110;
-            7:y:=120;
-          end;
+            1:begin
+                y:=135;
+                x:=199;
+              end;
+            5:y:=112;
+            7:y:=122;
+            8:begin
+                x:=208;
+                y:=98;
+            end;
         end;
+  end;
 end;
 for i:=0 to 15 do begin
   if decode_lenslok[lenslok.indice,i]<>0 then noffset:=round((57*decode_lenslok[lenslok.indice,i])/100)

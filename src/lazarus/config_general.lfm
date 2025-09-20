@@ -1,13 +1,13 @@
 object MConfig: TMConfig
-  Left = 1017
-  Height = 595
-  Top = 165
-  Width = 628
+  Left = 677
+  Height = 591
+  Top = 224
+  Width = 556
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config DSP'
-  ClientHeight = 595
-  ClientWidth = 628
+  ClientHeight = 591
+  ClientWidth = 556
   DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -19,11 +19,11 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.4.0.0'
   object Button1: TButton
-    Left = 120
+    Left = 80
     Height = 51
-    Top = 510
+    Top = 512
     Width = 141
     Caption = 'OK'
     Font.CharSet = ANSI_CHARSET
@@ -32,14 +32,14 @@ object MConfig: TMConfig
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
-    OnClick = Button1Click
     ParentFont = False
     TabOrder = 0
+    OnClick = Button1Click
   end
   object Button2: TButton
-    Left = 370
+    Left = 304
     Height = 51
-    Top = 510
+    Top = 512
     Width = 141
     Caption = 'CANCELAR'
     Font.CharSet = ANSI_CHARSET
@@ -48,15 +48,15 @@ object MConfig: TMConfig
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
-    OnClick = Button2Click
     ParentFont = False
     TabOrder = 1
+    OnClick = Button2Click
   end
   object other: TPageControl
     Left = 11
     Height = 491
     Top = 10
-    Width = 600
+    Width = 525
     ActivePage = TabSheet1
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
@@ -70,7 +70,7 @@ object MConfig: TMConfig
     object TabSheet1: TTabSheet
       Caption = 'Misc'
       ClientHeight = 461
-      ClientWidth = 592
+      ClientWidth = 517
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
       Font.Height = -14
@@ -102,10 +102,10 @@ object MConfig: TMConfig
         ParentFont = False
         TabOrder = 0
         object RadioButton16: TRadioButton
-          Left = 83
-          Height = 23
-          Top = -2
-          Width = 41
+          Left = 84
+          Height = 20
+          Top = -1
+          Width = 38
           Anchors = []
           Caption = '1X'
           Checked = True
@@ -118,10 +118,10 @@ object MConfig: TMConfig
           TabStop = True
         end
         object RadioButton17: TRadioButton
-          Left = 83
-          Height = 23
-          Top = 22
-          Width = 41
+          Left = 84
+          Height = 20
+          Top = 23
+          Width = 38
           Anchors = []
           Caption = '2X'
           Font.Color = clWindowText
@@ -132,10 +132,10 @@ object MConfig: TMConfig
           TabOrder = 1
         end
         object RadioButton18: TRadioButton
-          Left = 218
-          Height = 23
-          Top = -2
-          Width = 113
+          Left = 219
+          Height = 20
+          Top = -1
+          Width = 110
           Anchors = []
           Caption = 'Scanlines 1X'
           Font.Color = clWindowText
@@ -146,10 +146,10 @@ object MConfig: TMConfig
           TabOrder = 2
         end
         object RadioButton19: TRadioButton
-          Left = 218
-          Height = 23
-          Top = 22
-          Width = 113
+          Left = 219
+          Height = 20
+          Top = 23
+          Width = 110
           Anchors = []
           Caption = 'Scanlines 2X'
           Font.Color = clWindowText
@@ -160,10 +160,10 @@ object MConfig: TMConfig
           TabOrder = 3
         end
         object RadioButton20: TRadioButton
-          Left = 83
-          Height = 23
-          Top = 48
-          Width = 41
+          Left = 84
+          Height = 20
+          Top = 49
+          Width = 38
           Anchors = []
           Caption = '3X'
           Font.Color = clWindowText
@@ -190,58 +190,58 @@ object MConfig: TMConfig
         TabOrder = 1
         object CheckBox2: TCheckBox
           Left = 5
-          Height = 23
+          Height = 20
           Top = 0
-          Width = 189
+          Width = 186
           Caption = 'Arrancar driver en inicio'
           Font.Color = clWindowText
           Font.Height = -14
           Font.Name = 'MS Sans Serif'
           Font.Style = [fsBold]
-          OnKeyUp = FormKeyUp
           ParentFont = False
           TabOrder = 0
           TabStop = False
+          OnKeyUp = FormKeyUp
         end
         object CheckBox1: TCheckBox
           Left = 5
-          Height = 23
+          Height = 20
           Top = 25
-          Width = 237
+          Width = 234
           Caption = 'Mostar errores CRC de la ROM'
           Font.Color = clWindowText
           Font.Height = -14
           Font.Name = 'MS Sans Serif'
           Font.Style = [fsBold]
-          OnKeyUp = FormKeyUp
           ParentFont = False
           TabOrder = 2
           TabStop = False
+          OnKeyUp = FormKeyUp
         end
         object CheckBox3: TCheckBox
           Left = 5
-          Height = 23
+          Height = 20
           Top = 50
-          Width = 198
+          Width = 195
           Caption = 'Centrar pantalla principal'
           Font.Color = clWindowText
           Font.Height = -14
           Font.Name = 'MS Sans Serif'
           Font.Style = [fsBold]
-          OnKeyUp = FormKeyUp
           ParentFont = False
           TabOrder = 1
           TabStop = False
+          OnKeyUp = FormKeyUp
         end
         object CheckBox17: TCheckBox
           Left = 5
-          Height = 23
+          Height = 20
           Top = 72
-          Width = 274
+          Width = 271
           Caption = 'CONSOLA: Cargar juego al principio'
-          OnKeyUp = FormKeyUp
           TabOrder = 3
           TabStop = False
+          OnKeyUp = FormKeyUp
         end
       end
       object GroupBox3: TGroupBox
@@ -261,9 +261,9 @@ object MConfig: TMConfig
         TabOrder = 2
         object RadioButton6: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 24
-          Width = 75
+          Width = 72
           Caption = 'English'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -272,15 +272,15 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton6Click
           ParentFont = False
           TabOrder = 1
+          OnClick = RadioButton6Click
         end
         object RadioButton5: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 0
-          Width = 98
+          Width = 95
           Caption = 'Castellano'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -289,15 +289,15 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton5Click
           ParentFont = False
           TabOrder = 0
+          OnClick = RadioButton5Click
         end
         object RadioButton7: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 48
-          Width = 69
+          Width = 66
           Caption = 'Català'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -306,15 +306,15 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton7Click
           ParentFont = False
           TabOrder = 2
+          OnClick = RadioButton7Click
         end
         object RadioButton8: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 72
-          Width = 84
+          Width = 81
           Caption = 'Francais'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -323,15 +323,15 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton8Click
           ParentFont = False
           TabOrder = 3
+          OnClick = RadioButton8Click
         end
         object RadioButton9: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 96
-          Width = 78
+          Width = 75
           Caption = 'German'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -340,15 +340,15 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton9Click
           ParentFont = False
           TabOrder = 4
+          OnClick = RadioButton9Click
         end
         object RadioButton10: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 120
-          Width = 63
+          Width = 60
           Caption = 'Brazil'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -357,15 +357,15 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton10Click
           ParentFont = False
           TabOrder = 5
+          OnClick = RadioButton10Click
         end
         object RadioButton11: TRadioButton
           Left = 35
-          Height = 23
+          Height = 20
           Top = 144
-          Width = 66
+          Width = 63
           Caption = 'Italian'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -374,9 +374,9 @@ object MConfig: TMConfig
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
           Font.Style = [fsBold]
-          OnClick = RadioButton11Click
           ParentFont = False
           TabOrder = 6
+          OnClick = RadioButton11Click
         end
       end
       object GroupBox4: TGroupBox
@@ -395,9 +395,9 @@ object MConfig: TMConfig
         TabOrder = 3
         object RadioButton14: TRadioButton
           Left = 16
-          Height = 23
+          Height = 20
           Top = 8
-          Width = 82
+          Width = 79
           Caption = 'Enabled'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -411,9 +411,9 @@ object MConfig: TMConfig
         end
         object RadioButton15: TRadioButton
           Left = 16
-          Height = 23
+          Height = 20
           Top = 35
-          Width = 87
+          Width = 84
           Caption = 'Disabled'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -430,7 +430,7 @@ object MConfig: TMConfig
     object TabSheet2: TTabSheet
       Caption = 'Directory'
       ClientHeight = 461
-      ClientWidth = 592
+      ClientWidth = 517
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
       Font.Height = -14
@@ -625,7 +625,7 @@ object MConfig: TMConfig
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ClientHeight = 461
-      ClientWidth = 592
+      ClientWidth = 517
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
       Font.Height = -14
@@ -636,11 +636,11 @@ object MConfig: TMConfig
       ParentFont = False
       object GroupBox1: TGroupBox
         Left = 4
-        Height = 440
+        Height = 448
         Top = 10
         Width = 276
         Caption = 'Player 1'
-        ClientHeight = 418
+        ClientHeight = 426
         ClientWidth = 272
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
@@ -650,10 +650,11 @@ object MConfig: TMConfig
         Font.Quality = fqDraft
         ParentFont = False
         TabOrder = 0
+        OnClick = GroupBox1Click
         object Label6: TLabel
-          Left = 0
+          Left = 9
           Height = 17
-          Top = 314
+          Top = 291
           Width = 33
           Caption = 'But 0'
           Font.CharSet = ANSI_CHARSET
@@ -666,9 +667,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label7: TLabel
-          Left = 0
+          Left = 9
           Height = 17
-          Top = 344
+          Top = 321
           Width = 33
           Caption = 'But 1'
           Font.CharSet = ANSI_CHARSET
@@ -681,9 +682,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label8: TLabel
-          Left = 0
+          Left = 9
           Height = 17
-          Top = 372
+          Top = 349
           Width = 33
           Caption = 'But 2'
           Font.CharSet = ANSI_CHARSET
@@ -696,9 +697,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label15: TLabel
-          Left = 122
+          Left = 142
           Height = 17
-          Top = 314
+          Top = 291
           Width = 33
           Caption = 'But 3'
           Font.CharSet = ANSI_CHARSET
@@ -711,9 +712,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label16: TLabel
-          Left = 124
+          Left = 144
           Height = 17
-          Top = 344
+          Top = 321
           Width = 33
           Caption = 'But 4'
           Font.CharSet = ANSI_CHARSET
@@ -726,9 +727,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label17: TLabel
-          Left = 124
+          Left = 144
           Height = 17
-          Top = 372
+          Top = 349
           Width = 33
           Caption = 'But 5'
           Font.CharSet = ANSI_CHARSET
@@ -742,9 +743,9 @@ object MConfig: TMConfig
         end
         object RadioButton1: TRadioButton
           Left = 14
-          Height = 23
-          Top = 18
-          Width = 83
+          Height = 21
+          Top = 9
+          Width = 80
           Caption = 'Keyboard'
           Checked = True
           Font.CharSet = ANSI_CHARSET
@@ -753,16 +754,16 @@ object MConfig: TMConfig
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
-          OnClick = RadioButton1Click
           ParentFont = False
           TabOrder = 0
           TabStop = True
+          OnClick = RadioButton1Click
         end
         object RadioButton2: TRadioButton
           Left = 14
-          Height = 23
-          Top = 46
-          Width = 73
+          Height = 21
+          Top = 34
+          Width = 70
           Caption = 'Joystick'
           Enabled = False
           Font.CharSet = ANSI_CHARSET
@@ -771,14 +772,14 @@ object MConfig: TMConfig
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
-          OnClick = RadioButton2Click
           ParentFont = False
           TabOrder = 1
+          OnClick = RadioButton2Click
         end
         object BitBtn2: TBitBtn
-          Left = 181
+          Left = 159
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -788,9 +789,9 @@ object MConfig: TMConfig
           TabOrder = 2
         end
         object BitBtn3: TBitBtn
-          Left = 112
+          Left = 108
           Height = 41
-          Top = 241
+          Top = 231
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -800,9 +801,9 @@ object MConfig: TMConfig
           TabOrder = 3
         end
         object BitBtn1: TBitBtn
-          Left = 39
+          Left = 59
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -812,9 +813,9 @@ object MConfig: TMConfig
           TabOrder = 4
         end
         object BitBtn4: TBitBtn
-          Left = 112
+          Left = 108
           Height = 41
-          Top = 160
+          Top = 152
           Width = 51
           Font.Color = clWindowText
           Font.Height = -10
@@ -824,9 +825,9 @@ object MConfig: TMConfig
           TabOrder = 5
         end
         object BitBtn9: TBitBtn
-          Left = 44
+          Left = 49
           Height = 34
-          Top = 302
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -839,9 +840,9 @@ object MConfig: TMConfig
           TabOrder = 6
         end
         object BitBtn10: TBitBtn
-          Left = 44
+          Left = 49
           Height = 34
-          Top = 334
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -854,9 +855,9 @@ object MConfig: TMConfig
           TabOrder = 7
         end
         object BitBtn11: TBitBtn
-          Left = 44
+          Left = 49
           Height = 35
-          Top = 365
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -869,9 +870,9 @@ object MConfig: TMConfig
           TabOrder = 8
         end
         object BitBtn15: TBitBtn
-          Left = 166
+          Left = 184
           Height = 34
-          Top = 334
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -884,9 +885,9 @@ object MConfig: TMConfig
           TabOrder = 9
         end
         object BitBtn16: TBitBtn
-          Left = 166
+          Left = 184
           Height = 35
-          Top = 365
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -899,9 +900,9 @@ object MConfig: TMConfig
           TabOrder = 10
         end
         object BitBtn17: TBitBtn
-          Left = 166
+          Left = 184
           Height = 34
-          Top = 302
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -916,7 +917,7 @@ object MConfig: TMConfig
         object GroupBox7: TGroupBox
           Left = 8
           Height = 85
-          Top = 70
+          Top = 60
           Width = 221
           ClientHeight = 63
           ClientWidth = 217
@@ -935,8 +936,8 @@ object MConfig: TMConfig
             Left = 64
             Height = 30
             Top = 31
-            Width = 65
-            Caption = 'Calibrate'
+            Width = 80
+            Caption = 'Get Center'
             Enabled = False
             Font.CharSet = ANSI_CHARSET
             Font.Color = clBlack
@@ -944,9 +945,9 @@ object MConfig: TMConfig
             Font.Name = 'Tahoma'
             Font.Pitch = fpVariable
             Font.Quality = fqDraft
-            OnClick = Button7Click
             ParentFont = False
             TabOrder = 0
+            OnClick = Button7Click
           end
           object ComboBox1: TComboBox
             Left = 5
@@ -961,21 +962,53 @@ object MConfig: TMConfig
             Font.Pitch = fpVariable
             Font.Quality = fqDraft
             ItemHeight = 17
-            OnChange = ComboBox1Change
             ParentFont = False
             TabOrder = 1
             TabStop = False
             Text = 'ComboBox1'
+            OnChange = ComboBox1Change
           end
+        end
+        object Label13: TLabel
+          Left = 55
+          Height = 17
+          Top = 376
+          Width = 89
+          Caption = ' COIN/SELECT'
+          ParentColor = False
+        end
+        object Button10: TButton
+          Left = 53
+          Height = 30
+          Top = 395
+          Width = 75
+          TabOrder = 13
+          OnClick = Button10Click
+        end
+        object Label14: TLabel
+          Left = 169
+          Height = 17
+          Top = 376
+          Width = 62
+          Caption = 'P1/START'
+          ParentColor = False
+        end
+        object Button11: TButton
+          Left = 158
+          Height = 30
+          Top = 395
+          Width = 75
+          TabOrder = 14
+          OnClick = Button11Click
         end
       end
       object GroupBox2: TGroupBox
         Left = 290
-        Height = 440
+        Height = 448
         Top = 10
         Width = 280
         Caption = 'Player 2'
-        ClientHeight = 418
+        ClientHeight = 426
         ClientWidth = 276
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
@@ -988,7 +1021,7 @@ object MConfig: TMConfig
         object Label9: TLabel
           Left = 14
           Height = 17
-          Top = 314
+          Top = 291
           Width = 33
           Caption = 'But 0'
           Font.CharSet = ANSI_CHARSET
@@ -1003,7 +1036,7 @@ object MConfig: TMConfig
         object Label10: TLabel
           Left = 14
           Height = 17
-          Top = 344
+          Top = 321
           Width = 33
           Caption = 'But 1'
           Font.CharSet = ANSI_CHARSET
@@ -1018,7 +1051,7 @@ object MConfig: TMConfig
         object Label11: TLabel
           Left = 14
           Height = 17
-          Top = 372
+          Top = 349
           Width = 33
           Caption = 'But 2'
           Font.CharSet = ANSI_CHARSET
@@ -1031,9 +1064,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label18: TLabel
-          Left = 141
+          Left = 144
           Height = 17
-          Top = 312
+          Top = 291
           Width = 33
           Caption = 'But 3'
           Font.CharSet = ANSI_CHARSET
@@ -1046,9 +1079,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label19: TLabel
-          Left = 141
+          Left = 144
           Height = 17
-          Top = 342
+          Top = 321
           Width = 33
           Caption = 'But 4'
           Font.CharSet = ANSI_CHARSET
@@ -1061,9 +1094,9 @@ object MConfig: TMConfig
           ParentFont = False
         end
         object Label20: TLabel
-          Left = 141
+          Left = 144
           Height = 17
-          Top = 371
+          Top = 350
           Width = 33
           Caption = 'But 5'
           Font.CharSet = ANSI_CHARSET
@@ -1077,9 +1110,9 @@ object MConfig: TMConfig
         end
         object RadioButton3: TRadioButton
           Left = 20
-          Height = 23
-          Top = 18
-          Width = 83
+          Height = 21
+          Top = 9
+          Width = 80
           Caption = 'Keyboard'
           Checked = True
           Font.CharSet = ANSI_CHARSET
@@ -1088,16 +1121,16 @@ object MConfig: TMConfig
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
-          OnClick = RadioButton3Click
           ParentFont = False
           TabOrder = 0
           TabStop = True
+          OnClick = RadioButton3Click
         end
         object RadioButton4: TRadioButton
           Left = 20
-          Height = 23
-          Top = 46
-          Width = 73
+          Height = 21
+          Top = 34
+          Width = 70
           Caption = 'Joystick'
           Enabled = False
           Font.CharSet = ANSI_CHARSET
@@ -1106,14 +1139,14 @@ object MConfig: TMConfig
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
-          OnClick = RadioButton4Click
           ParentFont = False
           TabOrder = 1
+          OnClick = RadioButton4Click
         end
         object BitBtn5: TBitBtn
           Left = 112
           Height = 41
-          Top = 160
+          Top = 152
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1126,9 +1159,9 @@ object MConfig: TMConfig
           TabOrder = 2
         end
         object BitBtn6: TBitBtn
-          Left = 45
+          Left = 59
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1141,9 +1174,9 @@ object MConfig: TMConfig
           TabOrder = 3
         end
         object BitBtn7: TBitBtn
-          Left = 182
+          Left = 168
           Height = 41
-          Top = 200
+          Top = 192
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1158,7 +1191,7 @@ object MConfig: TMConfig
         object BitBtn8: TBitBtn
           Left = 112
           Height = 41
-          Top = 241
+          Top = 231
           Width = 51
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1173,7 +1206,7 @@ object MConfig: TMConfig
         object BitBtn12: TBitBtn
           Left = 52
           Height = 34
-          Top = 302
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1188,7 +1221,7 @@ object MConfig: TMConfig
         object BitBtn13: TBitBtn
           Left = 52
           Height = 34
-          Top = 334
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1203,7 +1236,7 @@ object MConfig: TMConfig
         object BitBtn14: TBitBtn
           Left = 52
           Height = 35
-          Top = 365
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1216,9 +1249,9 @@ object MConfig: TMConfig
           TabOrder = 8
         end
         object BitBtn18: TBitBtn
-          Left = 180
+          Left = 185
           Height = 34
-          Top = 304
+          Top = 278
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1231,9 +1264,9 @@ object MConfig: TMConfig
           TabOrder = 9
         end
         object BitBtn19: TBitBtn
-          Left = 180
+          Left = 185
           Height = 34
-          Top = 335
+          Top = 310
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1246,9 +1279,9 @@ object MConfig: TMConfig
           TabOrder = 10
         end
         object BitBtn20: TBitBtn
-          Left = 180
-          Height = 34
-          Top = 366
+          Left = 185
+          Height = 35
+          Top = 342
           Width = 74
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1262,10 +1295,10 @@ object MConfig: TMConfig
         end
         object GroupBox10: TGroupBox
           Left = 24
-          Height = 84
-          Top = 70
+          Height = 85
+          Top = 60
           Width = 221
-          ClientHeight = 62
+          ClientHeight = 63
           ClientWidth = 217
           Color = clWhite
           Font.CharSet = ANSI_CHARSET
@@ -1291,17 +1324,17 @@ object MConfig: TMConfig
             Font.Pitch = fpVariable
             Font.Quality = fqDraft
             ItemHeight = 17
-            OnChange = ComboBox2Change
             ParentFont = False
             TabOrder = 0
             Text = 'ComboBox2'
+            OnChange = ComboBox2Change
           end
           object Button8: TButton
-            Left = 69
+            Left = 56
             Height = 29
             Top = 31
-            Width = 71
-            Caption = 'Calibrate'
+            Width = 84
+            Caption = 'Get Center'
             Enabled = False
             Font.CharSet = ANSI_CHARSET
             Font.Color = clBlack
@@ -1309,153 +1342,49 @@ object MConfig: TMConfig
             Font.Name = 'Tahoma'
             Font.Pitch = fpVariable
             Font.Quality = fqDraft
-            OnClick = Button8Click
             ParentFont = False
             TabOrder = 1
+            OnClick = Button8Click
           end
         end
-      end
-    end
-    object TabSheet4: TTabSheet
-      Caption = 'Main Keys'
-      ClientHeight = 461
-      ClientWidth = 592
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -14
-      Font.Name = 'Tahoma'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      ParentFont = False
-      object Label21: TLabel
-        Left = 75
-        Height = 17
-        Top = 50
-        Width = 44
-        Caption = 'COIN 1'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
-      end
-      object Button3: TButton
-        Left = 50
-        Height = 31
-        Top = 70
-        Width = 91
-        Caption = '5'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button3Click
-        ParentFont = False
-        TabOrder = 0
-      end
-      object Label22: TLabel
-        Left = 185
-        Height = 17
-        Top = 50
-        Width = 44
-        Caption = 'COIN 2'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
-      end
-      object Button4: TButton
-        Left = 160
-        Height = 31
-        Top = 69
-        Width = 91
-        Caption = '6'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button4Click
-        ParentFont = False
-        TabOrder = 1
-      end
-      object Label24: TLabel
-        Left = 160
-        Height = 17
-        Top = 120
-        Width = 94
-        Caption = 'Player 2 START'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
-      end
-      object Button6: TButton
-        Left = 160
-        Height = 31
-        Top = 140
-        Width = 91
-        Caption = '2'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button6Click
-        ParentFont = False
-        TabOrder = 2
-      end
-      object Button5: TButton
-        Left = 50
-        Height = 31
-        Top = 140
-        Width = 91
-        Caption = '1'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        OnClick = Button5Click
-        ParentFont = False
-        TabOrder = 3
-      end
-      object Label23: TLabel
-        Left = 50
-        Height = 17
-        Top = 120
-        Width = 94
-        Caption = 'Player 1 START'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clBlack
-        Font.Height = -14
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        ParentColor = False
-        ParentFont = False
+        object Button12: TButton
+          Left = 47
+          Height = 30
+          Top = 395
+          Width = 75
+          TabOrder = 13
+          OnClick = Button12Click
+        end
+        object Label25: TLabel
+          Left = 48
+          Height = 17
+          Top = 376
+          Width = 85
+          Caption = 'COIN/SELECT'
+          ParentColor = False
+        end
+        object Label26: TLabel
+          Left = 169
+          Height = 17
+          Top = 376
+          Width = 62
+          Caption = 'P2/START'
+          ParentColor = False
+        end
+        object Button13: TButton
+          Left = 158
+          Height = 30
+          Top = 395
+          Width = 75
+          TabOrder = 14
+          OnClick = Button13Click
+        end
       end
     end
     object TabSheet5: TTabSheet
       Caption = 'ROM'
       ClientHeight = 461
-      ClientWidth = 592
+      ClientWidth = 517
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
       Font.Height = -14
@@ -1464,9 +1393,9 @@ object MConfig: TMConfig
       Font.Quality = fqDraft
       ParentFont = False
       object Button9: TButton
-        Left = 44
+        Left = 72
         Height = 49
-        Top = 41
+        Top = 40
         Width = 128
         Caption = 'Export ROM data'
         Font.CharSet = ANSI_CHARSET
@@ -1475,15 +1404,24 @@ object MConfig: TMConfig
         Font.Name = 'Tahoma'
         Font.Pitch = fpVariable
         Font.Quality = fqDraft
-        OnClick = Button9Click
         ParentFont = False
         TabOrder = 0
+        OnClick = Button9Click
+      end
+      object Button3: TButton
+        Left = 288
+        Height = 49
+        Top = 40
+        Width = 143
+        Caption = 'Export SAMPLE data'
+        TabOrder = 1
+        OnClick = Button3Click
       end
     end
     object TabSheet6: TTabSheet
       Caption = 'Autofire'
       ClientHeight = 461
-      ClientWidth = 592
+      ClientWidth = 517
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
       Font.Height = -14
@@ -1493,9 +1431,9 @@ object MConfig: TMConfig
       ParentFont = False
       object CheckBox16: TCheckBox
         Left = 45
-        Height = 23
+        Height = 21
         Top = 52
-        Width = 127
+        Width = 124
         Caption = 'Enabled/Disabled'
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
@@ -1503,9 +1441,9 @@ object MConfig: TMConfig
         Font.Name = 'Tahoma'
         Font.Pitch = fpVariable
         Font.Quality = fqDraft
-        OnClick = CheckBox16Click
         ParentFont = False
         TabOrder = 0
+        OnClick = CheckBox16Click
       end
       object GroupBox9: TGroupBox
         Left = 320
@@ -1525,9 +1463,9 @@ object MConfig: TMConfig
         TabOrder = 1
         object CheckBox10: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 42
-          Width = 78
+          Width = 75
           Caption = 'Button 0'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1540,9 +1478,9 @@ object MConfig: TMConfig
         end
         object CheckBox11: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 70
-          Width = 78
+          Width = 75
           Caption = 'Button 1'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1555,9 +1493,9 @@ object MConfig: TMConfig
         end
         object CheckBox12: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 100
-          Width = 78
+          Width = 75
           Caption = 'Button 2'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1570,9 +1508,9 @@ object MConfig: TMConfig
         end
         object CheckBox13: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 126
-          Width = 78
+          Width = 75
           Caption = 'Button 3'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1585,9 +1523,9 @@ object MConfig: TMConfig
         end
         object CheckBox14: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 154
-          Width = 78
+          Width = 75
           Caption = 'Button 4'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1600,9 +1538,9 @@ object MConfig: TMConfig
         end
         object CheckBox15: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 181
-          Width = 78
+          Width = 75
           Caption = 'Button 5'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1632,9 +1570,9 @@ object MConfig: TMConfig
         TabOrder = 2
         object CheckBox4: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 42
-          Width = 78
+          Width = 75
           Caption = 'Button 0'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1647,9 +1585,9 @@ object MConfig: TMConfig
         end
         object CheckBox5: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 70
-          Width = 78
+          Width = 75
           Caption = 'Button 1'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1662,9 +1600,9 @@ object MConfig: TMConfig
         end
         object CheckBox6: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 100
-          Width = 78
+          Width = 75
           Caption = 'Button 2'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1677,9 +1615,9 @@ object MConfig: TMConfig
         end
         object CheckBox7: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 126
-          Width = 78
+          Width = 75
           Caption = 'Button 3'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1692,9 +1630,9 @@ object MConfig: TMConfig
         end
         object CheckBox8: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 154
-          Width = 78
+          Width = 75
           Caption = 'Button 4'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack
@@ -1707,9 +1645,9 @@ object MConfig: TMConfig
         end
         object CheckBox9: TCheckBox
           Left = 35
-          Height = 23
+          Height = 21
           Top = 181
-          Width = 78
+          Width = 75
           Caption = 'Button 5'
           Font.CharSet = ANSI_CHARSET
           Font.Color = clBlack

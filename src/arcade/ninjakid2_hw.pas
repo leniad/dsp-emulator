@@ -394,7 +394,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     z80_0.run(frame_m);
@@ -403,7 +403,7 @@ while EmuStatus=EsRuning do begin
     z80_1.run(frame_s);
     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=223 then begin
-      z80_0.change_irq(HOLD_LINE);
+      z80_0.change_irq_vector(HOLD_LINE,$d7);
       update_video_upl;
     end;
   end;
@@ -721,11 +721,11 @@ var
   f:byte;
 begin
  z80_0.reset;
- z80_0.im0:=$d7;  //rst 10
  z80_1.reset;
  YM2203_0.reset;
  YM2203_1.reset;
  if main_vars.tipo_maquina=120 then dac_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -818,13 +818,12 @@ z80_0.change_ram_calls(upl_getbyte,upl_putbyte);
 z80_1:=cpu_z80.create(5000000,256);
 z80_1.change_ram_calls(upl_snd_getbyte,upl_snd_putbyte);
 z80_1.change_io_calls(upl_snd_inbyte,upl_snd_outbyte);
-//Que no se me olvide!!! Primero la CPU de sonido y luego el chip de audio!!!!
 if main_vars.tipo_maquina=120 then z80_1.init_sound(ninjakid2_sound_update)
   else z80_1.init_sound(upl_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
+ym2203_0:=ym2203_chip.create(1500000,1,0.3);
 ym2203_0.change_irq_calls(upl_snd_irq);
-ym2203_1:=ym2203_chip.create(1500000,0.5,0.1);
+ym2203_1:=ym2203_chip.create(1500000,1,0.3);
 //Video
 update_video_upl:=update_video_ninjakid2;
 update_background:=bg_upl;

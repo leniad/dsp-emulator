@@ -2,11 +2,11 @@ unit vlm_5030;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine,timer_engine;
+     sound_engine,timer_engine,dialogs;
 
 const
   FR_SIZE=4;
-  // samples per interpolator */
+  // samples per interpolator
   IP_SIZE_SLOWER=(240 div FR_SIZE);
   IP_SIZE_SLOW=(200 div FR_SIZE);
   IP_SIZE_NORMAL=(160 div FR_SIZE);
@@ -21,8 +21,8 @@ const
 	PH_STOP=5;
 	PH_END=6;
 
-// ROM Tables */
-VLM5030_speed_table:array[0..8-1] of integer=(
+// ROM Tables
+VLM5030_speed_table:array[0..8-1] of byte=(
  IP_SIZE_NORMAL,
  IP_SIZE_FAST,
  IP_SIZE_FASTER,
@@ -33,53 +33,51 @@ VLM5030_speed_table:array[0..8-1] of integer=(
  IP_SIZE_SLOW
 );
 
-// This is the energy lookup table */
-// sampled from real chip */
+// This is the energy lookup table
+// sampled from real chip
   energytable:array[0..$20-1] of byte=(
-	  0,  2,  4,  6, 10, 12, 14, 18, // 0-7
-	 22, 26, 30, 34, 38, 44, 48, 54, //  8-15
-	 62, 68, 76, 84, 94,102,114,124, // 16-23
-	136,150,164,178,196,214,232,254  // 24-31
+	  0,  1,  2,  3,  5,  6,  7,  9,
+		11, 13, 15, 17, 19, 22, 24, 27,
+		31, 34, 38, 42, 47, 51, 57, 62,
+		68, 75, 82, 89, 98,107,116,127
   );
-// This is the pitch lookup table */
+// This is the pitch lookup table
   pitchtable:array[0..$20-1] of byte=(
-   1,                               // 0     : random mode */
-   22,                              // 1     : start=22    */
-   23, 24, 25, 26, 27, 28, 29, 30,  //  2- 9 : 1step       */
-   32, 34, 36, 38, 40, 42, 44, 46,  // 10-17 : 2step       */
-   50, 54, 58, 62, 66, 70, 74, 78,  // 18-25 : 4step       */
-   86, 94, 102,110,118,126          // 26-31 : 8step       */
+   0,  21,  22,  23,  24,  25,  26,  27,
+		28,  29,  31,  33,  35,  37,  39,  41,
+		43,  45,  49,  53,  57,  61,  65,  69,
+		73,  77,  85,  93, 101, 109, 117, 125
    );
 
   K1_table:array[0..63] of integer= (
-  -24898,  -25672,  -26446,  -27091,  -27736,  -28252,  -28768,  -29155,
-  -29542,  -29929,  -30316,  -30574,  -30832,  -30961,  -31219,  -31348,
-  -31606,  -31735,  -31864,  -31864,  -31993,  -32122,  -32122,  -32251,
-  -32251,  -32380,  -32380,  -32380,  -32509,  -32509,  -32509,  -32509,
-   24898,   23995,   22963,   21931,   20770,   19480,   18061,   16642,
-   15093,   13416,   11610,    9804,    7998,    6063,    3999,    1935,
-       0,   -1935,   -3999,   -6063,   -7998,   -9804,  -11610,  -13416,
-  -15093,  -16642,  -18061,  -19480,  -20770,  -21931,  -22963,  -23995
+  390, 403, 414, 425, 434, 443, 450, 457,
+			463, 469, 474, 478, 482, 485, 488, 491,
+			494, 496, 498, 499, 501, 502, 503, 504,
+			505, 506, 507, 507, 508, 508, 509, 509,
+			-390,-376,-360,-344,-325,-305,-284,-261,
+			-237,-211,-183,-155,-125, -95, -64, -32,
+				0,  32,  64,  95, 125, 155, 183, 211,
+			237, 261, 284, 305, 325, 344, 360, 376
 );
 
   K2_table:array[0..31] of integer= (
-       0,   -3096,   -6321,   -9417,  -12513,  -15351,  -18061,  -20770,
-  -23092,  -25285,  -27220,  -28897,  -30187,  -31348,  -32122,  -32638,
-       0,   32638,   32122,   31348,   30187,   28897,   27220,   25285,
-   23092,   20770,   18061,   15351,   12513,    9417,    6321,    3096
+       0,  50, 100, 149, 196, 241, 284, 325,
+			362, 396, 426, 452, 473, 490, 502, 510,
+				0,-510,-502,-490,-473,-452,-426,-396,
+			-362,-325,-284,-241,-196,-149,-100, -50
 );
   K3_table:array[0..15] of integer= (
-       0,   -3999,   -8127,  -12255,  -16384,  -20383,  -24511,  -28639,
-   32638,   28639,   24511,   20383,   16254,   12255,    8127,    3999
+       0, 64, 128, 192, 256, 320, 384, 448,
+			-512,-448,-384,-320,-256,-192,-128, -64
 );
   K5_table:array[0..7] of integer= (
-       0,   -8127,  -16384,  -24511,   32638,   24511,   16254,    8127
+       0, 128, 256, 384,-512,-384,-256,-128
 );
 
 
 type
   vlm5030_chip=class(snd_chip_class)
-        constructor Create(clock:integer;rom_size:dword;amplificador:byte);
+        constructor create(clock:integer;rom_size:dword;amplificador:byte);
         destructor free;
       public
         procedure reset;
@@ -94,7 +92,7 @@ type
         procedure load_snapshot(data:pbyte);
       private
     	  rom:pbyte;
-    	  address_mask:integer;
+    	  address_mask:dword;
     	  address:word;
     	  pin_BSY:byte;
     	  pin_ST:byte;
@@ -104,14 +102,12 @@ type
     	  vcu_addr_h:word;
     	  parameter:byte;
     	  phase:byte;
-    	  // state of option paramter */
     	  frame_size:integer;
     	  pitch_offset:integer;
     	  interp_step:byte;
-    	  interp_count:byte;       // number of interp periods    */
-    	  sample_count:byte;       // sample number within interp */
+    	  interp_count:byte;       // number of interp periods
+    	  sample_count:byte;       // sample number within interp
     	  pitch_count:byte;
-    	// these contain data describing the current and previous voice frames */
     	  old_energy:word;
     	  old_pitch:byte;
     	  old_k:array[0..10-1] of integer;
@@ -121,13 +117,12 @@ type
     	  new_energy:word;
     	  new_pitch:byte;
     	  new_k:array[0..10-1] of integer;
-    	  // these are all used to contain the current state of the sound generation */
     	  current_energy:cardinal;
     	  current_pitch:cardinal;
     	  current_k:array[0..10-1] of integer;
     	  x:array[0..10-1] of integer;
         out_:integer;
-        function get_bits(sbit,bits:integer):integer;
+        function get_bits(sbit,bits:byte):word;
         function parse_frame:integer;
         procedure update_stream;
         procedure setup_parameter(param:byte);
@@ -139,20 +134,17 @@ procedure vlm5030_update_stream;
 
 implementation
 
-// start VLM5030 with sound rom              */
-constructor vlm5030_chip.Create(clock:integer;rom_size:dword;amplificador:byte);
+constructor vlm5030_chip.create(clock:integer;rom_size:dword;amplificador:byte);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   getmem(self.rom,rom_size);
-	//emulation_rate:= clock / 440;
-	// reset input pins */
 	self.pin_RST:=0;
   self.pin_ST:=0;
   self.pin_VCU:= 0;
 	self.latch_data:= 0;
 	self.reset;
-	self.phase:= PH_IDLE;
+	self.phase:=PH_IDLE;
   self.amp:=amplificador;
-	// memory size */
 	self.address_mask:=rom_size-1;
   self.tsample_num:=init_channel;
   //timer interno
@@ -179,7 +171,6 @@ begin
 	self.address:=0;
 	self.vcu_addr_h:=0;
 	self.pin_BSY:=0;
-
 	self.old_energy:=0;
   self.old_pitch:=0;
 	self.new_energy:=0;
@@ -188,17 +179,15 @@ begin
   self.current_pitch:= 0;
 	self.target_energy:=0;
   self.target_pitch:= 0;
-
 	fillchar(self.old_k[0],10*4,0);
 	fillchar(self.new_k[0],10*4,0);
 	fillchar(self.current_k,10*4,0);
 	fillchar(self.target_k,10*4,0);
 	self.interp_count:=0;
   self.sample_count:=0;
-  self.pitch_count:= 0;
+  self.pitch_count:=0;
 	fillchar(self.x[0],10*4,0);
-	// reset parameters */
-	self.setup_parameter($00);
+	self.setup_parameter(0);
 end;
 
 function vlm5030_chip.save_snapshot(data:pbyte):word;
@@ -277,181 +266,161 @@ begin
   copymemory(@self.out_,temp,4);
 end;
 
-function vlm5030_chip.get_bits(sbit,bits:integer):integer;
+function vlm5030_chip.get_bits(sbit,bits:byte):word;
 var
-  data:integer;
-  ptemp:pbyte;
+  address,data:word;
 begin
-  ptemp:=self.rom;
-  inc(ptemp,(self.address+(sbit shr 3)) and self.address_mask);
-  copymemory(@data,ptemp,2);
+  address:=self.address+(sbit shr 3);
+  data:=(self.rom[address]+(self.rom[address+1] shl 8)) and self.address_mask;
 	data:=data shr (sbit and 7);
 	data:=data and ($ff shr (8-bits));
 	get_bits:=data;
 end;
 
-// get next frame */
 function vlm5030_chip.parse_frame:integer;
 var
   cmd:byte;
 	i,nums:integer;
-  ptemp:pbyte;
 begin
-	// remember previous frame */
+	// remember previous frame
 	self.old_energy:=self.new_energy;
 	self.old_pitch:=self.new_pitch;
 	for i:=0 to 9 do self.old_k[i]:= self.new_k[i];
-  // command byte check */
-  ptemp:=self.rom;
-  inc(ptemp,self.address and self.address_mask);
-  cmd:=ptemp^;
-  if (cmd and $01)<>0 then begin
-	    // extend frame */
+  // command byte check
+  cmd:=self.rom[self.address] and self.address_mask;
+  if (cmd and 1)<>0 then begin
+	    // extend frame
 		  self.new_energy:=0;
       self.new_pitch:=0;
 		  for i:=0 to 9 do self.new_k[i]:=0;
 		  self.address:=self.address+1;
-      if (cmd and $02 )<>0 then begin
-			  // end of speech */
-			  // logerror("VLM5030 %04X end \n",chip->address ); */
+      if (cmd and 2 )<>0 then begin
+			  // end of speech
 			  parse_frame:=0;
         exit;
 		  end else begin
-			  // silent frame */
-			  nums:= ( (cmd shr 2)+1 )*2;
-			  // logerror("VLM5030 %04X silent %d frame\n",chip->address,nums ); */
-			  parse_frame:=nums * FR_SIZE;
+			  // silent frame
+			  nums:=((cmd shr 2)+1)*2;
+			  parse_frame:=nums*FR_SIZE;
         exit;
 		  end;
 	end;
-	// pitch */
-	self.new_pitch:=(pitchtable[get_bits(1,5)] + self.pitch_offset ) and $ff;
-	// energy */
-	self.new_energy:= energytable[get_bits(6,5)];
-	// 10 K's */
-	self.new_k[9]:= K5_table[get_bits(11,3)];
-	self.new_k[8]:= K5_table[get_bits(14,3)];
-	self.new_k[7]:= K5_table[get_bits(17,3)];
-	self.new_k[6]:= K5_table[get_bits(20,3)];
-	self.new_k[5]:= K5_table[get_bits(23,3)];
-	self.new_k[4]:= K5_table[get_bits(26,3)];
-	self.new_k[3]:= K3_table[get_bits(29,4)];
-	self.new_k[2]:= K3_table[get_bits(33,4)];
-	self.new_k[1]:= K2_table[get_bits(37,5)];
-	self.new_k[0]:= K1_table[get_bits(42,6)];
-
+	// pitch
+	self.new_pitch:=pitchtable[get_bits(1,5)];
+  if self.new_pitch>0 then self.new_pitch:=self.new_pitch++self.pitch_offset;
+	// energy
+	self.new_energy:=energytable[get_bits(6,5)];
+	// 10 K's
+	self.new_k[9]:=K5_table[get_bits(11,3)];
+	self.new_k[8]:=K5_table[get_bits(14,3)];
+	self.new_k[7]:=K5_table[get_bits(17,3)];
+	self.new_k[6]:=K5_table[get_bits(20,3)];
+	self.new_k[5]:=K5_table[get_bits(23,3)];
+	self.new_k[4]:=K5_table[get_bits(26,3)];
+	self.new_k[3]:=K3_table[get_bits(29,4)];
+	self.new_k[2]:=K3_table[get_bits(33,4)];
+	self.new_k[1]:=K2_table[get_bits(37,5)];
+	self.new_k[0]:=K1_table[get_bits(42,6)];
 	self.address:=self.address+6;
-	//logerror("VLM5030 %04X voice \n",chip->address );
 	parse_frame:=FR_SIZE;
 end;
 
-// decode and buffering data */
 procedure vlm5030_chip.update_stream;
 var
 	interp_effect,i,current_val:integer;
 	u:array[0..11-1] of integer;
-  val:integer;
 label
   phase_stop;
 begin
-	// running */
+	// running
 	if ((self.phase=PH_RUN) or (self.phase=PH_STOP)) then begin
 		// playing speech */
-		//while (length > 0) do begin
-			// check new interpolator or  new frame */
+			// check new interpolator or new frame
 			if (self.sample_count=0) then begin
 				if (self.phase=PH_STOP) then begin
 					self.phase:=PH_END;
-					self.sample_count:= 1;
-					goto phase_stop; // continue to end phase */
+					self.sample_count:=1;
+					goto phase_stop; // continue to end phase
 				end;
-				self.sample_count:= self.frame_size;
-				// interpolator changes */
+				self.sample_count:=self.frame_size;
+				// interpolator changes
 				if (self.interp_count=0) then begin
-					// change to new frame */
-					self.interp_count:=parse_frame; // with change phase */
+					// change to new frame
+					self.interp_count:=parse_frame; // with change phase
 					if (self.interp_count=0) then begin
-					 	// end mark found */
-						self.interp_count:= FR_SIZE;
-						self.sample_count:= self.frame_size; // end -> stop time */
-						self.phase:= PH_STOP;
+					 	// end mark found
+						self.interp_count:=FR_SIZE;
+						self.sample_count:=self.frame_size; // end -> stop time
+						self.phase:=PH_STOP;
 					end;
-					// Set old target as new start of frame */
-					self.current_energy:= self.old_energy;
-					self.current_pitch:= self.old_pitch;
+					// Set old target as new start of frame
+					self.current_energy:=self.old_energy;
+					self.current_pitch:=self.old_pitch;
 					for i:=0 to 9 do self.current_k[i]:=self.old_k[i];
-					// is this a zero energy frame? */
+					// is this a zero energy frame?
 					if (self.current_energy=0) then begin
-						//mame_printf_debug("processing frame: zero energy\n");*/
-						self.target_energy:= 0;
-						self.target_pitch:= self.current_pitch;
+						self.target_energy:=0;
+						self.target_pitch:=self.current_pitch;
 						for i:=0 to 9 do self.target_k[i]:=self.current_k[i];
 					end else begin
-						self.target_energy:= self.new_energy;
-						self.target_pitch:= self.new_pitch;
+						self.target_energy:=self.new_energy;
+						self.target_pitch:=self.new_pitch;
 						for i:=0 to 9 do self.target_k[i]:=self.new_k[i];
 					end;
 				end;
-				// next interpolator */
-				// Update values based on step values 25% , 50% , 75% , 100% */
+				// next interpolator
+				// Update values based on step values 25% , 50% , 75% , 100%
 				self.interp_count:=self.interp_count-self.interp_step;
-				// 3,2,1,0 -> 1,2,3,4 */
-				interp_effect:= FR_SIZE - (self.interp_count mod FR_SIZE);
-				self.current_energy:= self.old_energy + (self.target_energy - self.old_energy) * interp_effect div FR_SIZE;
-				if (self.old_pitch>1) then self.current_pitch:= self.old_pitch + (self.target_pitch - self.old_pitch) * interp_effect div FR_SIZE;
-				for i:=0 to 9 do self.current_k[i]:=self.old_k[i] + (self.target_k[i] - self.old_k[i]) * interp_effect div FR_SIZE;
+				// 3,2,1,0 -> 1,2,3,4
+				interp_effect:=FR_SIZE-(self.interp_count mod FR_SIZE);
+				self.current_energy:=self.old_energy+(self.target_energy-self.old_energy)*interp_effect div FR_SIZE;
+				if (self.old_pitch>1) then self.current_pitch:=self.old_pitch+(self.target_pitch-self.old_pitch)*interp_effect div FR_SIZE;
+				for i:=0 to 9 do self.current_k[i]:=self.old_k[i]+(self.target_k[i]-self.old_k[i])*interp_effect div FR_SIZE;
 			end;
-			// calcrate digital filter */
+			// calcrate digital filter
 			if (self.old_energy=0) then begin
-				// generate silent samples here */
+				// generate silent samples here
 				current_val:=0;
-			end else if (self.old_pitch <= 1) then begin
-				  // generate unvoiced samples here */
+			end else if (self.old_pitch<=1) then begin
+				  // generate unvoiced samples here
           if (random(256) and 1)<>0 then current_val:=self.current_energy
             else current_val:=-self.current_energy;
 			  end else begin
-				  // generate voiced samples here */
+				  // generate voiced samples here
 				  if (self.pitch_count=0) then current_val:=self.current_energy
             else current_val:=0;
 			  end;
-
-			// Lattice filter here */
+			// Lattice filter here
 			u[10]:=current_val;
-			for i:=9 downto 0 do u[i]:=u[i+1]-((self.current_k[i] * self.x[i]) div 32768);
-			for i:=9 downto 1 do self.x[i]:=self.x[i-1] + ((self.current_k[i-1] * u[i-1]) div 32768);
+			for i:=9 downto 0 do u[i]:=u[i+1]-((-self.current_k[i]*self.x[i]) div 512);
+			for i:=9 downto 1 do self.x[i]:=self.x[i-1]+((-self.current_k[i-1]*u[i-1]) div 512);
 			self.x[0]:=u[0];
-
-			// clipping, buffering */
-			if (u[0] > 511) then val:=511 shl 6
-			  else if (u[0] < -511) then val:=-511 shl 6
-			    else val:=u[0] shl 6;
-      self.out_:=trunc(val*self.amp);
-      if self.out_<-32767 then self.out_:=-32767
-        else if self.out_>32767 then self.out_:=32767;
-			// sample count */
+      self.out_:=u[0]*64;
+			// clipping, buffering
+			if (self.out_>32768) then self.out_:=32768
+			  else if (self.out_<-32767) then self.out_:=-32767;
+      self.out_:=trunc(self.out_*self.amp);
+			// sample count
 			self.sample_count:=self.sample_count-1;
-			// pitch */
+			// pitch
 			self.pitch_count:=self.pitch_count+1;
-			if (self.pitch_count >= self.current_pitch ) then self.pitch_count:=0;
-		//end; //del while
+			if (self.pitch_count>=self.current_pitch) then self.pitch_count:=0;
     exit;
 	end;
-	// stop phase */
+	// stop phase
 phase_stop:
 	case (self.phase) of
 	  PH_SETUP:if (self.sample_count<=1) then begin
 			        self.sample_count:=0;
-			        // logerror("VLM5030 BSY=H\n" ); */
-			        // pin_BSY = 1; */
+			        // pin_BSY = 1;
 			        self.phase:=PH_WAIT;
 		         end else begin
 			        self.sample_count:=self.sample_count-1;
 		         end;
 	  PH_END:if (self.sample_count<=1) then begin
-			      self.sample_count:= 0;
-			      // logerror("VLM5030 BSY=L\n" ); */
-			      self.pin_BSY:= 0;
-			      self.phase:= PH_IDLE;
+			      self.sample_count:=0;
+			      self.pin_BSY:=0;
+			      self.phase:=PH_IDLE;
 		      end	else begin
 			      self.sample_count:=self.sample_count-1;
 		      end;
@@ -460,116 +429,98 @@ phase_stop:
   self.out_:=0;
 end;
 
-// get BSY pin level */
+
 function vlm5030_chip.get_bsy:byte;
 begin
 	get_bsy:=self.pin_BSY;
 end;
 
-// latch contoll data */
 procedure vlm5030_chip.data_w(data:byte);
 begin
 	self.latch_data:=data;
 end;
 
-// setup parameteroption when RST=H */
 procedure vlm5030_chip.setup_parameter(param:byte);
 begin
-	// latch parameter value */
+	// latch parameter value
 	self.parameter:=param;
-
-	// bit 0,1 : 4800bps / 9600bps , interporator step */
-	if (param and 2)<>0 then // bit 1 = 1 , 9600bps */
-		self.interp_step:= 4 // 9600bps : no interporator */
-	else if(param and 1)<>0 then // bit1 = 0 & bit0 = 1 , 4800bps */
-		self.interp_step:= 2 // 4800bps : 2 interporator */
-	else	// bit1 = bit0 = 0 : 2400bps */
-		self.interp_step:= 1; // 2400bps : 4 interporator */
-
-	// bit 3,4,5 : speed (frame size) */
+	// bit 0,1 : 4800bps / 9600bps , interporator step
+	if (param and 2)<>0 then // bit 1 = 1 , 9600bps
+		self.interp_step:=4 // 9600bps : no interporator
+	else if(param and 1)<>0 then // bit1 = 0 & bit0 = 1 , 4800bps
+		self.interp_step:=2 // 4800bps : 2 interporator
+	else	// bit1 = bit0 = 0 : 2400bps
+		self.interp_step:=1; // 2400bps : 4 interporator
+	// bit 3,4,5 : speed (frame size)
 	self.frame_size:=VLM5030_speed_table[(param shr 3) and 7];
-
-	// bit 6,7 : low / high pitch */
-	if (param and $80)<>0 then	// bit7=1 , high pitch */
-		self.pitch_offset:= -8
-	else if (param and $40)<>0 then	// bit6=1 , low pitch */
-		self.pitch_offset:= 8
+	// bit 6,7 : low / high pitch
+	if (param and $80)<>0 then	// bit7=1 , high pitch
+		self.pitch_offset:=-8
+	else if (param and $40)<>0 then	// bit6=1 , low pitch
+		self.pitch_offset:=8
 	else
-		self.pitch_offset:= 0;
+		self.pitch_offset:=0;
 end;
 
-// set RST pin level : reset / set table address A8-A15 */
 procedure vlm5030_chip.set_rst(pin:byte);
 begin
-	if self.pin_RST<>0 then begin
+	if self.pin_RST<>pin then begin
 		if (pin=0) then begin
-			// H -> L : latch parameters */
-			self.pin_RST:= 0;
+			// H -> L : latch parameters
+			self.pin_RST:=0;
 			self.setup_parameter(self.latch_data);
-		end;
-	end else begin
-		if (pin<>0) then begin
-			// L -> H : reset chip */
-			self.pin_RST:= 1;
-			if self.pin_BSY<>0 then begin
-				self.reset;
-			end;
+		end else begin
+			// L -> H : reset chip
+			self.pin_RST:=1;
+			if self.pin_BSY<>0 then self.reset;
 		end;
 	end;
 end;
 
-// set VCU pin level : ?? unknown */
 procedure vlm5030_chip.update_vcu(pin:byte);
 begin
-	// direct mode / indirect mode */
-	self.pin_VCU:= pin;
+	// direct mode / indirect mode
+	self.pin_VCU:=pin;
 end;
 
-// set ST pin level  : set table address A0-A7 / start speech */
 procedure vlm5030_chip.set_st(pin:byte);
 var
-  table:integer;
-  ptemp:pbyte;
+  table:word;
 begin
 	if (self.pin_ST<>pin) then begin
-		// pin level is change */
+		// pin level is change
 		if (pin=0) then begin
-			// H -> L */
+			// H -> L
 			self.pin_ST:= 0;
-			if( self.pin_VCU<>0 ) then begin
-				// direct access mode & address High */
-				self.vcu_addr_h:=(self.latch_data shl 8) + $01;
+			if (self.pin_VCU<>0) then begin
+				// direct access mode & address High
+				self.vcu_addr_h:=(self.latch_data shl 8)+1;
 			end	else begin
-				// start speech */
-				// check access mode */
+				// start speech
+				// check access mode
 				if (self.vcu_addr_h<>0) then begin
-					// direct access mode */
-					self.address:= (self.vcu_addr_h and $ff00) + self.latch_data;
-					self.vcu_addr_h:= 0;
+					// direct access mode
+					self.address:=(self.vcu_addr_h and $ff00)+self.latch_data;
+					self.vcu_addr_h:=0;
 				end	else begin
-					// indirect accedd mode */
-					table:= (self.latch_data and $fe) + ((self.latch_data and 1) shl 8);
-          ptemp:=self.rom;
-          inc(ptemp,table and self.address_mask);
-          self.address:=(ptemp^ shl 8);
-          inc(ptemp);
-          self.address:=self.address or ptemp^;
+					// indirect accedd mode
+					table:=(self.latch_data and $fe)+((self.latch_data and 1) shl 8);
+          self.address:=((self.rom[table] shl 8) or self.rom[table+1]) and self.address_mask;
 				end;
-				// logerror("VLM5030 %02X start adr=%04X\n",table/2,chip->address ); */
-				// reset process status */
-				self.sample_count:= self.frame_size;
-				self.interp_count:= FR_SIZE;
-				// clear filter */
-				// start after 3 sampling cycle */
-				self.phase:= PH_RUN;
+				// reset process status
+				self.sample_count:=self.frame_size;
+				self.interp_count:=FR_SIZE;
+				// clear filter
+				// start after 3 sampling cycle
+				self.phase:=PH_RUN;
 			end;
 		end	else begin
-			// L -> H */
-			self.pin_ST:= 1;
-			// setup speech , BSY on after 30ms? */
-			self.phase:= PH_SETUP;
-			self.sample_count:= 1; // wait time for busy on */
-			self.pin_BSY:= 1;
+			// L -> H
+			self.pin_ST:=1;
+			// setup speech , BSY on after 30ms?
+			self.phase:=PH_SETUP;
+			self.sample_count:=1; // wait time for busy on
+			self.pin_BSY:=1;
 		end;
 	end;
 end;

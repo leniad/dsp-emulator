@@ -27,9 +27,7 @@ var
  ram3:array[0..$1fff] of word;
  spritebank,sound_bank:byte;
  ram2:array [0..$7fff] of word;
- adpcm:array[0..$7ffff] of byte;
  adpcm_b,adpcm_c:array[0..5] of byte;
- adpcm_pos,adpcm_end,adpcm_data:array[0..1] of dword;
 
 procedure update_video_opwolf;
 var
@@ -103,7 +101,7 @@ begin
 init_controls(true,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=tc0140syt_0.z80.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
   //Main CPU
   m68000_0.run(frame_m);
@@ -209,17 +207,17 @@ case direccion of
   $b000..$b006:begin
                   adpcm_b[direccion and $7]:=valor;
                 	if ((direccion and $7)=$04) then begin //trigger ?
-                		adpcm_pos[0]:=(adpcm_b[0]+(adpcm_b[1] shl 8))*16;
-                		adpcm_end[0]:=(adpcm_b[2]+(adpcm_b[3] shl 8))*16;
-                		msm5205_0.reset_w(0);
+                		msm5205_0.pos:=(adpcm_b[0]+(adpcm_b[1] shl 8))*16;
+                		msm5205_0.end_:=(adpcm_b[2]+(adpcm_b[3] shl 8))*16;
+                		msm5205_0.reset_w(false);
                   end;
 	             end;
   $c000..$c006:begin
                   adpcm_c[direccion and $7]:=valor;
                 	if ((direccion and $7)=$04) then begin //trigger ?
-                		adpcm_pos[1]:=(adpcm_c[0]+(adpcm_c[1] shl 8))*16;
-                		adpcm_end[1]:=(adpcm_c[2]+(adpcm_c[3] shl 8))*16;
-                		msm5205_1.reset_w(0);
+                		msm5205_1.pos:=(adpcm_c[0]+(adpcm_c[1] shl 8))*16;
+                		msm5205_1.end_:=(adpcm_c[2]+(adpcm_c[3] shl 8))*16;
+                		msm5205_1.reset_w(false);
 	                end;
                end;
   end;
@@ -233,37 +231,13 @@ end;
 procedure opwolf_sound_update;
 begin
   ym2151_0.update;
+  msm5205_0.update;
+  msm5205_1.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
   tc0140syt_0.z80.change_irq(irqstate);
-end;
-
-procedure snd_adpcm_0;
-begin
-if (adpcm_data[0] and $100)=0 then begin
-		msm5205_0.data_w(adpcm_data[0] and $0f);
-		adpcm_data[0]:=$100;
-    adpcm_pos[0]:=(adpcm_pos[0]+1) and $7ffff;
-		if (adpcm_pos[0]=adpcm_end[0]) then msm5205_0.reset_w(1);
-	end else begin
-		adpcm_data[0]:=adpcm[adpcm_pos[0]];
-		msm5205_0.data_w(adpcm_data[0] shr 4);
-	end;
-end;
-
-procedure snd_adpcm_1;
-begin
-if (adpcm_data[1] and $100)=0 then begin
-		msm5205_1.data_w(adpcm_data[1] and $0f);
-		adpcm_data[1]:=$100;
-    adpcm_pos[1]:=(adpcm_pos[1]+1) and $7ffff;
-		if (adpcm_pos[1]=adpcm_end[1]) then msm5205_1.reset_w(1);
-	end else begin
-		adpcm_data[1]:=adpcm[adpcm_pos[1]];
-		msm5205_1.data_w(adpcm_data[1] shr 4);
-	end;
 end;
 
 //Main
@@ -274,9 +248,8 @@ begin
  ym2151_0.reset;
  msm5205_0.reset;
  msm5205_1.reset;
- msm5205_0.reset_w(1);
- msm5205_1.reset_w(1);
  opwolf_cchip_reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$fc;
  marcade.in1:=$ff;
@@ -289,12 +262,6 @@ begin
  adpcm_c[0]:=0;
  adpcm_b[1]:=0;
  adpcm_c[1]:=0;
- adpcm_pos[0]:=0;
- adpcm_pos[1]:=0;
- adpcm_end[0]:=0;
- adpcm_end[1]:=0;
- adpcm_data[0]:=$100;
- adpcm_data[1]:=$100;
 end;
 
 function iniciar_opwolf:boolean;
@@ -328,8 +295,10 @@ opwolf_init_cchip(m68000_0.numero_cpu);
 ym2151_0:=ym2151_chip.create(4000000);
 ym2151_0.change_port_func(sound_bank_rom);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,$80000);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,$80000);
+if not(roms_load(msm5205_0.rom_data,opwolf_adpcm)) then exit;
+if not(roms_load(msm5205_1.rom_data,opwolf_adpcm)) then exit;
 //cargar roms
 if not(roms_load16w(@rom,opwolf_rom)) then exit;
 //cargar sonido+ponerlas en su banco+adpcm
@@ -339,7 +308,6 @@ copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
 copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
 copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
 copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
-if not(roms_load(@adpcm,opwolf_adpcm)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,opwolf_char)) then exit;
 init_gfx(0,8,8,$4000);

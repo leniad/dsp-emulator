@@ -3,7 +3,7 @@ unit ym_2203;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      {$ifndef windows}main_engine,{$endif}
-     fmopn,ay_8910,timer_engine,sound_engine,cpu_misc;
+     fmopn,ay_8910,timer_engine,sound_engine,cpu_misc,dialogs;
 
 type
   ym2203_chip=class(snd_chip_class)
@@ -56,6 +56,7 @@ end;
 
 constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   self.amp:=amp;
   self.ay8910_int:=ay8910_chip.create(clock,AY8910,ay_amp,true); //El PSG

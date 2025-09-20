@@ -214,7 +214,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6800_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for linea:=0 to 259 do begin
     for h:=1 to CPU_SYNC do begin
       //main
@@ -285,18 +285,15 @@ end;
 function williams_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7f:williams_snd_getbyte:=m6800_0.internal_ram[direccion];
-  $80..$ff:williams_snd_getbyte:=mem_snd[direccion];
+  $0..$ff,$b000..$ffff:williams_snd_getbyte:=mem_snd[direccion];
   $400..$403,$8400..$8403:williams_snd_getbyte:=pia6821_2.read(direccion and $3);
-  $b000..$ffff:williams_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure williams_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$7f:m6800_0.internal_ram[direccion]:=valor;
-  $80..$ff:mem_snd[direccion]:=valor;
+  $0..$ff:mem_snd[direccion]:=valor;
   $400..$403,$8400..$8403:pia6821_2.write(direccion and $3,valor);
   $b000..$ffff:;
 end;
@@ -428,6 +425,7 @@ begin
  pia6821_2.reset;
  if (main_vars.tipo_maquina=321) or (main_vars.tipo_maquina=322) or (main_vars.tipo_maquina=323) then blitter_0.reset;
  dac_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

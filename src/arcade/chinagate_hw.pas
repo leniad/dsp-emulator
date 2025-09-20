@@ -21,24 +21,22 @@ const
         (n:'23j9-0.101';l:$20000;p:$40000;crc:$8caf6097),(n:'23ja-0.100';l:$20000;p:$60000;crc:$f678594f));
         chinagate_adpcm:array[0..1] of tipo_roms=(
         (n:'23j1-0.53';l:$20000;p:0;crc:$f91f1001),(n:'23j2-0.52';l:$20000;p:$20000;crc:$8b6f26e9));
-        //Dip
-        chinagate_dip_a:array [0..4] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        chinagate_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Timer';number:4;dip:((dip_val:$0;dip_name:'50'),(dip_val:$20;dip_name:'55'),(dip_val:$30;dip_name:'60'),(dip_val:$10;dip_name:'70'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$c0;dip_name:'2'),(dip_val:$80;dip_name:'3'),(dip_val:$40;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        chinagate_dip_a:array [0..4] of def_dip2=(
+        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
+        chinagate_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Difficulty';number:4;val4:(1,3,2,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$4;name:'Demo Sounds';number:2;val2:(0,4);name2:('Off','On')),
+        (mask:$30;name:'Timer';number:4;val4:(0,$20,$30,$10);name4:('50','55','60','70')),
+        (mask:$c0;name:'Lives';number:4;val4:(0,$c0,$80,$40);name4:('1','2','3','4')),());
         CPU_SYNC=4;
 
 var
  rom,rom_sub:array[0..7,0..$3fff] of byte;
  banco_rom,banco_rom_sub,soundlatch:byte;
  scroll_x,scroll_y:word;
- chinagate_scanline:array[0..271] of word;
 
 procedure update_video_chinagate;
 procedure draw_sprites;
@@ -145,7 +143,7 @@ end;
 
 procedure chinagate_principal;
 var
-  f,l:word;
+  f:word;
   frame_m,frame_s,frame_snd:single;
   h:byte;
 begin
@@ -153,8 +151,18 @@ init_controls(false,false,false,true);
 frame_m:=hd6309_0.tframes;
 frame_s:=hd6309_1.tframes;
 frame_snd:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 271 do begin
+    //video
+    case f of
+      8:marcade.in0:=marcade.in0 and $fe;
+      248:begin
+            hd6309_0.change_nmi(ASSERT_LINE);
+            update_video_chinagate;
+            marcade.in0:=marcade.in0 or 1;
+          end;
+    end;
+    if (((f mod 16)=0) and (f<240)) then hd6309_0.change_firq(ASSERT_LINE);
     for h:=1 to CPU_SYNC do begin
       //main
       hd6309_0.run(frame_m);
@@ -166,17 +174,6 @@ while EmuStatus=EsRuning do begin
       z80_0.run(frame_snd);
       frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
     end;
-    //video
-    case chinagate_scanline[f] of
-      $8:marcade.in0:=marcade.in0 and $fe;
-      $f8:begin
-            hd6309_0.change_nmi(ASSERT_LINE);
-            update_video_chinagate;
-            marcade.in0:=marcade.in0 or 1;
-          end;
-    end;
-    if f<>0 then l:=f-1 else l:=271;
-    if (((chinagate_scanline[l] and $8)=0) and ((chinagate_scanline[f] and $8)<>0)) then hd6309_0.change_firq(ASSERT_LINE);
   end;
   eventos_chinagate;
   video_sync;
@@ -196,6 +193,7 @@ begin
     end;
 end;
 
+procedure chinagate_putbyte(direccion:word;valor:byte);
 procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
@@ -212,8 +210,6 @@ begin
     256..383:buffer_color[((pos shr 4) and $7)+8]:=true;
   end;
 end;
-
-procedure chinagate_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
         0..$1fff,$3800..$397f:memoria[direccion]:=valor;
@@ -262,7 +258,7 @@ procedure chinagate_sub_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
-  $2000:banco_rom_sub:=valor and $7;
+  $2000:banco_rom_sub:=valor and 7;
   $2800:hd6309_1.change_irq(CLEAR_LINE);
   $4000..$ffff:;
 end;
@@ -311,6 +307,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$e;
  marcade.in1:=$ff;
@@ -346,28 +343,25 @@ iniciar_video(256,240);
 //Main CPU
 hd6309_0:=cpu_hd6309.create(12000000 div 2,272*CPU_SYNC,TCPU_HD6309);
 hd6309_0.change_ram_calls(chinagate_getbyte,chinagate_putbyte);
+if not(roms_load(@memoria_temp,chinagate_rom)) then exit;
+copymemory(@memoria[$8000],@memoria_temp[$18000],$8000);
+for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[(f*$4000)],$4000);
 //Sub CPU
 hd6309_1:=cpu_hd6309.create(12000000 div 2,272*CPU_SYNC,TCPU_HD6309);
 hd6309_1.change_ram_calls(chinagate_sub_getbyte,chinagate_sub_putbyte);
+if not(roms_load(@memoria_temp,chinagate_sub)) then exit;
+copymemory(@mem_misc[$8000],@memoria_temp[$18000],$8000);
+for f:=0 to 5 do copymemory(@rom_sub[f,0],@memoria_temp[(f*$4000)],$4000);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,272*CPU_SYNC);
 z80_0.change_ram_calls(chinagate_snd_getbyte,chinagate_snd_putbyte);
 z80_0.init_sound(chinagate_sound_update);
+if not(roms_load(@mem_snd,chinagate_snd)) then exit;
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,0.5);
 if not(roms_load(oki_6295_0.get_rom_addr,chinagate_adpcm)) then exit;
-//Main roms
-if not(roms_load(@memoria_temp,chinagate_rom)) then exit;
-copymemory(@memoria[$8000],@memoria_temp[$18000],$8000);
-for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[(f*$4000)],$4000);
-//Sub roms
-if not(roms_load(@memoria_temp,chinagate_sub)) then exit;
-copymemory(@mem_misc[$8000],@memoria_temp[$18000],$8000);
-for f:=0 to 5 do copymemory(@rom_sub[f,0],@memoria_temp[(f*$4000)],$4000);
-//Sound roms
-if not(roms_load(@mem_snd,chinagate_snd)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,chinagate_char)) then exit;
 init_gfx(0,8,8,$1000);
@@ -388,11 +382,8 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //DIP
 marcade.dswa:=$bf;
 marcade.dswb:=$e7;
-marcade.dswa_val:=@chinagate_dip_a;
-marcade.dswb_val:=@chinagate_dip_b;
-//init scanlines
-for f:=8 to $ff do chinagate_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
-for f:=$e8 to $ff do chinagate_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
+marcade.dswa_val2:=@chinagate_dip_a;
+marcade.dswb_val2:=@chinagate_dip_b;
 //final
 reset_chinagate;
 iniciar_chinagate:=true;

@@ -21,15 +21,15 @@ const
         (n:'875b06.j08';l:$40000;p:$100000;crc:$081a0566),(n:'875b05.j02';l:$40000;p:$100002;crc:$19a261f2));
         aliens_k007232:tipo_roms=(n:'875b04.e05';l:$40000;p:0;crc:$4e209ac8);
         //DIP
-        aliens_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin'))),());
-        aliens_dip_b:array [0..3] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        aliens_dip_c:array [0..1] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        aliens_dip_a:array [0..2] of def_dip2=(
+        (mask:$0f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin')),());
+        aliens_dip_b:array [0..3] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
+        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Very Hard')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        aliens_dip_c:array [0..1] of def_dip2=(
+        (mask:$1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),());
         layer_colorbase:array[0..2] of byte=(0,4,8);
 
 var
@@ -120,7 +120,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
     for f:=0 to $ff do begin
       //main
       konami_0.run(frame_m);
@@ -143,19 +143,19 @@ case direccion of
     $400..$1fff,$8000..$ffff:aliens_getbyte:=memoria[direccion];
     $2000..$3fff:aliens_getbyte:=rom_bank[rom_bank1,direccion and $1fff];
     $4000..$7fff:case direccion of
-                           $5f80:aliens_getbyte:=marcade.dswc; //DSW3
-                           $5f81:aliens_getbyte:=marcade.in0; //p1
-                           $5f82:aliens_getbyte:=marcade.in1; //p2
-                           $5f83:aliens_getbyte:=marcade.dswb; //dsw2
-                           $5f84:aliens_getbyte:=marcade.dswa; //dsw1
-                           else begin
-                                direccion:=direccion and $3fff;
-                                if k052109_0.get_rmrd_line=CLEAR_LINE then begin
-                                   if ((direccion>=$3800) and (direccion<$3808)) then aliens_getbyte:=k051960_0.k051937_read(direccion-$3800)
-                                      else if (direccion<$3c00) then aliens_getbyte:=k052109_0.read(direccion)
-                                           else aliens_getbyte:=k051960_0.read(direccion-$3c00);
-                                end else aliens_getbyte:=k052109_0.read(direccion and $3fff);
-                           end;
+                    $5f80:aliens_getbyte:=marcade.dswc; //DSW3
+                    $5f81:aliens_getbyte:=marcade.in0; //p1
+                    $5f82:aliens_getbyte:=marcade.in1; //p2
+                    $5f83:aliens_getbyte:=marcade.dswb; //dsw2
+                    $5f84:aliens_getbyte:=marcade.dswa; //dsw1
+                    else if k052109_0.get_rmrd_line=CLEAR_LINE then begin
+                            direccion:=direccion and $3fff;
+                            case direccion of
+                              0..$37ff,$3808..$3bff:aliens_getbyte:=k052109_0.read(direccion);
+                              $3800..$3807:aliens_getbyte:=k051960_0.k051937_read(direccion-$3800);
+                              $3c00..$3fff:aliens_getbyte:=k051960_0.read(direccion-$3c00);
+                            end;
+                         end else aliens_getbyte:=k052109_0.read(direccion and $3fff);
                  end;
     end;
 end;
@@ -200,9 +200,11 @@ case direccion of
                                end;
                          else begin
                               direccion:=direccion and $3fff;
-                              if ((direccion>=$3800) and (direccion<$3808)) then k051960_0.k051937_write(direccion-$3800,valor)
-                                 else if (direccion<$3c00) then k052109_0.write(direccion,valor)
-                                      else k051960_0.write(direccion-$3c00,valor);
+                              case direccion of
+                                0..$37ff,$3808..$3bff:k052109_0.write(direccion,valor);
+                                $3800..$3807:k051960_0.k051937_write(direccion-$3800,valor);
+                                $3c00..$3fff:k051960_0.write(direccion-$3c00,valor);
+                              end;
                          end;
                  end;
     $8000..$ffff:; //ROM
@@ -256,6 +258,7 @@ begin
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -300,7 +303,7 @@ for f:=0 to 19 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
 if not(roms_load(@mem_snd,aliens_sound)) then exit;
 //Main CPU
-konami_0:=cpu_konami.create(3000000,256);
+konami_0:=cpu_konami.create(12000000,256);
 konami_0.change_ram_calls(aliens_getbyte,aliens_putbyte);
 konami_0.change_set_lines(aliens_bank);
 //Sound CPU
@@ -323,11 +326,11 @@ k051960_0:=k051960_chip.create(4,1,sprite_rom,$200000,aliens_sprite_cb,2);
 k051960_0.change_irqs(aliens_k051960_cb,nil,nil);
 //DIP
 marcade.dswa:=$ff;
-marcade.dswa_val:=@aliens_dip_a;
+marcade.dswa_val2:=@aliens_dip_a;
 marcade.dswb:=$5e;
-marcade.dswb_val:=@aliens_dip_b;
+marcade.dswb_val2:=@aliens_dip_b;
 marcade.dswc:=$ff;
-marcade.dswc_val:=@aliens_dip_c;
+marcade.dswc_val2:=@aliens_dip_c;
 //final
 reset_aliens;
 iniciar_aliens:=true;

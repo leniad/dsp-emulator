@@ -66,7 +66,7 @@ type
     M65021: TMenuItem;
     M680911: TMenuItem;
     M680001: TMenuItem;
-    BombJack1: TMenuItem;
+    BombJackHW1: TMenuItem;
     GalaxianHardware1: TMenuItem;
     dkonghw1: TMenuItem;
     BlackTiger1: TMenuItem;
@@ -211,7 +211,6 @@ type
     gaunt21: TMenuItem;
     MenuItem37: TMenuItem;
     defender1: TMenuItem;
-    ddragon_sh1: TMenuItem;
     mayday1: TMenuItem;
     colony71: TMenuItem;
     Bosconian1: TMenuItem;
@@ -278,7 +277,7 @@ type
     enduroracer1: TMenuItem;
     MenuItem47: TMenuItem;
     MenuItem48: TMenuItem;
-    hotblock1: TMenuItem;
+    hotblocks1: TMenuItem;
     MenuItem49: TMenuItem;
     MenuItem50: TMenuItem;
     centipede1: TMenuItem;
@@ -289,6 +288,70 @@ type
     FightingBasketball1: TMenuItem;
     diverboy1: TMenuItem;
     MenuItem52: TMenuItem;
+    MenuItem53: TMenuItem;
+    bankpanic1: TMenuItem;
+    combathawk1: TMenuItem;
+    anteater1: TMenuItem;
+    MenuItem54: TMenuItem;
+    appoooh1: TMenuItem;
+    armoredcar1: TMenuItem;
+    avengers1: TMenuItem;
+    battleofatlantis1: TMenuItem;
+    calipso1: TMenuItem;
+    cavelon1: TMenuItem;
+    MenuItem55: TMenuItem;
+    burglarx1: TMenuItem;
+    MenuItem56: TMenuItem;
+    bluehawk1: TMenuItem;
+    lastday1: TMenuItem;
+    gulfstorm1: TMenuItem;
+    flyingtiger1: TMenuItem;
+    MenuItem57: TMenuItem;
+    blueprint1: TMenuItem;
+    grasspin1: TMenuItem;
+    gardia1: TMenuItem;
+    hyperpacman1: TMenuItem;
+    BombJack1: TMenuItem;
+    caloriekun1: TMenuItem;
+    MenuItem58: TMenuItem;
+    kikikaikai1: TMenuItem;
+    kickandrun1: TMenuItem;
+    MenuItem59: TMenuItem;
+    Lasso1: TMenuItem;
+    chameleon1: TMenuItem;
+    lastmission1: TMenuItem;
+    gondomania1: TMenuItem;
+    garyoretsuden1: TMenuItem;
+    captainsilver1: TMenuItem;
+    cobracommand1: TMenuItem;
+    ghostbusters1: TMenuItem;
+    eyes1: TMenuItem;
+    alibaba1: TMenuItem;
+    MenuItem60: TMenuItem;
+    finalstarforce1: TMenuItem;
+    fireball1: TMenuItem;
+    cotton1: TMenuItem;
+    sdi1: TMenuItem;
+    RiotCity1: TMenuItem;
+    WyvernF01: TMenuItem;
+    piranha1: TMenuItem;
+    woodpecker1: TMenuItem;
+    ponpoko1: TMenuItem;
+    roadfighter1: TMenuItem;
+    oscar1: TMenuItem;
+    shackled1: TMenuItem;
+    SRD1: TMenuItem;
+    snowbros1: TMenuItem;
+    comebacktoto1: TMenuItem;
+    popeye1: TMenuItem;
+    skyskipper1: TMenuItem;
+    saturn1: TMenuItem;
+    pollux1: TMenuItem;
+    zeropoint1: TMenuItem;
+    theend1: TMenuItem;
+    n88games1: TMenuItem;
+    robowres1: TMenuItem;
+    MortalRace1: TMenuItem;
     twinbrats1: TMenuItem;
     steelforce1: TMenuItem;
     mugsmashers1: TMenuItem;
@@ -442,7 +505,7 @@ type
     tp841: TMenuItem;
     NES1: TMenuItem;
     RType1: TMenuItem;
-    SRD1: TMenuItem;
+    dec8_menu: TMenuItem;
     MenuItem9: TMenuItem;
     SlapFight1: TMenuItem;
     tigerh1: TMenuItem;
@@ -504,7 +567,7 @@ type
     SectionZ1: TMenuItem;
     Rastan1: TMenuItem;
     Toki1: TMenuItem;
-    SnowBros1: TMenuItem;
+    SnowBrosHW1: TMenuItem;
     F1Dream1: TMenuItem;
     TigerRoad1: TMenuItem;
     TigerRoadHW1: TMenuItem;
@@ -521,7 +584,7 @@ type
     RallyXHardware1: TMenuItem;
     Vigilante1: TMenuItem;
     Psychic51: TMenuItem;
-    Popeye1: TMenuItem;
+    PopeyeHW1: TMenuItem;
     tehkanwc1: TMenuItem;
     Pooyan1: TMenuItem;
     wbml1: TMenuItem;
@@ -620,7 +683,7 @@ begin
 principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then sync_all;
 if main_vars.driver_ok then begin
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   principal1.timer1.Enabled:=true;
   llamadas_maquina.bucle_general;
 end;
@@ -630,7 +693,7 @@ procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice,tempb:byte;
+  indice:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlp_Surface;
@@ -642,9 +705,7 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-tempb:=main_vars.system_type;
-main_vars.system_type:=SBITMAP;
-if saverom(nombre,indice) then begin
+if saverom(nombre,indice,SBITMAP) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -654,7 +715,6 @@ if saverom(nombre,indice) then begin
     r:=application.messagebox(pansichar(leng[main_vars.idioma].mensajes[3]),pansichar(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
        principal1.Enabled:=true;
-       main_vars.system_type:=tempb;
        sync_all;
        exit;
     end;
@@ -707,7 +767,6 @@ if saverom(nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-main_vars.system_type:=tempb;
 restart_emu;
 end;
 
@@ -799,6 +858,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.close)<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 reset_dsp;
 file_ini_save;
 close_joystick;
@@ -842,8 +902,13 @@ procedure Tprincipal1.BitBtn14Click(Sender: TObject);
 begin
 var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
-  else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+if var_spectrum.fastload then begin
+  principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=true;
+end else begin
+  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+  cinta_tzx.stop_tap:=false;
+end;
 sync_all;
 end;
 
@@ -881,7 +946,7 @@ end;
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
 principal1.BitBtn3.Glyph:=nil;
-if emustatus=EsRuning then begin
+if emustatus=EsRunning then begin
    principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
    timer1.Enabled:=false;
    EmuStatus:=EsPause;
@@ -889,7 +954,7 @@ if emustatus=EsRuning then begin
    SDL_PauseAudioDevice(sound_device,1);
 end else begin
    principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
-   EmuStatus:=EsRuning;
+   EmuStatus:=EsRunning;
    timer1.Enabled:=true;
    SDL_PauseAudioDevice(sound_device,0);
    sync_all;
@@ -996,6 +1061,7 @@ procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+sound_engine_close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
@@ -1023,7 +1089,7 @@ end else begin
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
   principal1.Enabled:=true;
-  EmuStatus:=EsRuning;
+  EmuStatus:=EsRunning;
   llamadas_maquina.bucle_general;
 end;
 end;

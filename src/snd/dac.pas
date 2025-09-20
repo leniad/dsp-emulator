@@ -1,7 +1,7 @@
 unit dac;
 
 interface
-uses {$ifdef windows}windows,{$else}main_engine,{$ENDIF}sound_engine;
+uses {$ifdef windows}windows,{$else}main_engine,{$ENDIF}sound_engine,dialogs;
 
 type
   dac_chip=class(snd_chip_class)
@@ -28,6 +28,7 @@ implementation
 
 constructor dac_chip.Create(amp:single=1;internal:boolean=false);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.amp:=amp;
   if not(internal) then self.tsample_num:=init_channel;
   self.reset;

@@ -153,7 +153,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 479 do begin
     for h:=1 to CPU_SYNC do begin
       //Main CPU
@@ -311,6 +311,7 @@ z80_1.reset;
 ctc_0.reset;
 ay8910_0.reset;
 ay8910_1.reset;
+reset_video;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
@@ -361,10 +362,10 @@ iniciar_video(512,480);
 z80_0:=cpu_z80.create(5000000,480*CPU_SYNC);
 z80_0.change_ram_calls(tapper_getbyte,tapper_putbyte);
 z80_0.change_io_calls(tapper_inbyte,tapper_outbyte);
-z80_0.daisy:=true;
+z80_0.enable_daisy;
 ctc_0:=tz80ctc.create(z80_0.numero_cpu,5000000,z80_0.clock,0,CTC0_TRG01);
 ctc_0.change_calls(z80ctc_int);
-z80daisy_init(Z80_CTC0_TYPE,Z80_DAISY_NONE);
+z80daisy_init(Z80_CTC0_TYPE);
 //Sound CPU
 z80_1:=cpu_z80.create(2000000,480*CPU_SYNC);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);

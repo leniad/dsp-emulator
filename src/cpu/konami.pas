@@ -70,6 +70,7 @@ constructor cpu_konami.create(clock:dword;frames_div:word);
 begin
   getmem(self.r,sizeof(reg_m6809));
   fillchar(self.r^,sizeof(reg_m6809),0);
+  clock:=clock div 4;
   self.numero_cpu:=cpu_main_init(clock);
   self.clock:=clock;
   self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;

@@ -44,33 +44,34 @@ const
         chelnov_proms:array[0..1] of tipo_roms=(
         (n:'ee21.k8';l:$400;p:$0;crc:$b1db6586),(n:'ee20.l6';l:$400;p:$400;crc:$41816132));
         //DIP
-        karnov_dip:array [0..9] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:0;dip_name:'2C 1C'),(dip_val:3;dip_name:'1C 1C'),(dip_val:2;dip_name:'1C 2C'),(dip_val:1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:0;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:8;dip_name:'1C 2C'),(dip_val:4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Lives';number:4;dip:((dip_val:$100;dip_name:'1'),(dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'5'),(dip_val:0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Bonus Life';number:4;dip:((dip_val:$c00;dip_name:'50 "K"'),(dip_val:$800;dip_name:'70 "K"'),(dip_val:$400;dip_name:'90 "K"'),(dip_val:0;dip_name:'100 "K"'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$2000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Normal'),(dip_val:$1000;dip_name:'Hard'),(dip_val:0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4000;name:'Demo Sounds';number:2;dip:((dip_val:0;dip_name:'Off'),(dip_val:$4000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Time Speed';number:2;dip:((dip_val:$8000;dip_name:'Normal'),(dip_val:0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        chelnov_dip:array [0..8] of def_dip=(
-        (mask:$3;name:'Coin A';number:4;dip:((dip_val:0;dip_name:'1C 6C'),(dip_val:3;dip_name:'1C 2C'),(dip_val:2;dip_name:'1C 3C'),(dip_val:1;dip_name:'1C 4C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coin B';number:4;dip:((dip_val:0;dip_name:'1C 4C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:8;dip_name:'2C 1C'),(dip_val:4;dip_name:'3C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$20;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:0;dip_name:'On'),(dip_val:$40;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cainet';number:2;dip:((dip_val:0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Lives';number:4;dip:((dip_val:$100;dip_name:'1'),(dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'5'),(dip_val:0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1000;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$1000;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        karnov_dip:array [0..9] of def_dip2=(
+        (mask:$3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
+        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
+        (mask:$300;name:'Lives';number:4;val4:($100,$300,$200,0);name4:('1','3','5','Infinite')),
+        (mask:$c00;name:'Bonus Life';number:4;val4:($c00,$800,$400,0);name4:('50 "K"','70 "K"','90 "K"','100 "K"')),
+        (mask:$3000;name:'Difficulty';number:4;val4:($2000,$3000,$1000,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$4000;name:'Demo Sounds';number:2;val2:(0,$4000);name2:('Off','On')),
+        (mask:$8000;name:'Time Speed';number:2;val2:($8000,0);name2:('Normal','Fast')),());
+        chelnov_dip:array [0..8] of def_dip2=(
+        (mask:$3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('1C 6C','1C 2C','1C 3C','1C 4C')),
+        (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('1C 4C','1C 1C','2C 1C','3C 1C')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('On','Off')),
+        (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('On','Off')),
+        (mask:$80;name:'Cainet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),
+        (mask:$300;name:'Lives';number:4;val4:($100,$300,$200,0);name4:('1','3','5','Infinite')),
+        (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$1000;name:'Allow Continue';number:2;val2:(0,$1000);name2:('No','Yes')),());
 
 var
  rom:array[0..$2ffff] of word;
  ram:array[0..$1fff] of word;
- sprite_ram,sprite_ram2:array[0..$7ff] of word;
+ sprite_ram:array[0..$7ff] of word;
  background_ram,video_ram:array[0..$3ff] of word;
  sound_latch,mcu_p0,mcu_p1,mcu_p2:byte;
  scroll_x,scroll_y,maincpu_to_mcu,mcu_to_maincpu:word;
+ irq_ena:boolean;
 
 procedure eventos_karnov;
 begin
@@ -134,15 +135,15 @@ end;
 scroll_x_y(2,3,scroll_x,scroll_y);
 //Sprites
 for f:=0 to $1ff do begin
-    y:=sprite_ram2[f*4];
+    y:=buffer_sprites_w[f*4];
     if ((y and $8000)=0) then continue;
-    atrib:=sprite_ram2[(f*4)+1];
+    atrib:=buffer_sprites_w[(f*4)+1];
     if ((atrib and $1)=0) then continue;
     y:=y and $1ff;
-    nchar:=sprite_ram2[(f*4)+3];
+    nchar:=buffer_sprites_w[(f*4)+3];
     color:=nchar shr 12;
     nchar:=nchar and $fff;
-    x:=sprite_ram2[(f*4)+2] and $1ff;
+    x:=buffer_sprites_w[(f*4)+2] and $1ff;
     extra:=(atrib and $10)<>0;
     fy:=(atrib and $2)<>0;
     fx:=(atrib and $4)<>0;
@@ -181,7 +182,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -193,7 +194,7 @@ while EmuStatus=EsRuning do begin
       30:marcade.in1:=marcade.in1 and $7f;
       247:begin
             marcade.in1:=marcade.in1 or $80;
-            m68000_0.irq[7]:=ASSERT_LINE;
+            if irq_ena then m68000_0.irq[7]:=ASSERT_LINE;
             update_video_karnov;
           end;
    end;
@@ -244,7 +245,7 @@ case direccion of
             sound_latch:=valor and $ff;
 	          m6502_0.change_nmi(PULSE_LINE);
          end;
-  $c0004:copymemory(@sprite_ram2,@sprite_ram,$800*2);
+  $c0004:copymemory(@buffer_sprites_w,@sprite_ram,$800*2);
   $c0006:begin
             maincpu_to_mcu:=valor;
 	          mcs51_0.change_irq1(ASSERT_LINE);
@@ -254,7 +255,10 @@ case direccion of
 	          main_screen.flip_main_screen:=(valor and $8000)<>0;
          end;
   $c000a:scroll_y:=valor and $1ff;
-  $c000e:m68000_0.irq[7]:=CLEAR_LINE;
+  $c000c,$c000e:begin
+            m68000_0.irq[7]:=CLEAR_LINE;
+            irq_ena:=(direccion and 2)<>0;
+         end;
 end;
 end;
 
@@ -335,6 +339,7 @@ begin
  m6502_0.reset;
  ym3812_0.reset;
  ym2203_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$7f;
@@ -345,6 +350,7 @@ begin
  mcu_p2:=0;
  mcu_to_maincpu:=0;
  maincpu_to_mcu:=0;
+ irq_ena:=false;
 end;
 
 function iniciar_karnov:boolean;
@@ -390,7 +396,7 @@ m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
 m6502_0.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
 m6502_0.init_sound(karnov_sound_update);
 //MCU
-mcs51_0:=cpu_mcs51.create(8000000,256);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000,256);
 mcs51_0.change_io_calls(in_port0,in_port1,nil,in_port3,out_port0,out_port1,out_port2,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
@@ -417,7 +423,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,karnov_proms)) then exit;
         //DIP
         marcade.dswa:=$ffbf;
-        marcade.dswa_val:=@karnov_dip;
+        marcade.dswa_val2:=@karnov_dip;
       end;
   220:begin  //Chelnov
         //MCU ROM
@@ -439,7 +445,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,chelnov_proms)) then exit;
         //DIP
         marcade.dswa:=$ff7f;
-        marcade.dswa_val:=@chelnov_dip;
+        marcade.dswa_val2:=@chelnov_dip;
       end;
 end;
 //poner la paleta

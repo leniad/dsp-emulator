@@ -159,7 +159,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=mcs48_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
     //Main
     z80_0.run(frame_m);
@@ -168,13 +168,9 @@ while EmuStatus=EsRuning do begin
     mcs48_0.run(frame_s);
     frame_s:=frame_s+mcs48_0.tframes-mcs48_0.contador;
     case f of
-      127:begin
-            z80_0.im0:=$cf;
-            z80_0.change_irq(HOLD_LINE);
-          end;
+      127:z80_0.change_irq_vector(HOLD_LINE,$cf);
       239:begin
-            z80_0.im0:=$d7;
-            z80_0.change_irq(HOLD_LINE);
+            z80_0.change_irq_vector(HOLD_LINE,$d7);
             update_video_spacefb;
           end;
     end;
@@ -340,6 +336,7 @@ begin
  mcs48_0.reset;
  dac_0.reset;
  reset_samples;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

@@ -1,7 +1,7 @@
 unit sid_sound;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,sid_tables,math;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,sid_tables,math,dialogs;
 
 const
   TYPE_8580=0;
@@ -403,6 +403,7 @@ var
 const
   rev:array[0..2] of byte=(2,1,0);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.tsample_num:=init_channel;
   self.clock:=clock;
   for v:=0 to (max_voices-1) do self.optr[v]:=sidOperator.create;

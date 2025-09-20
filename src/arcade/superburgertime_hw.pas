@@ -93,25 +93,25 @@ end;
 procedure supbtime_principal;
 var
   frame_m,frame_s:single;
-  f:byte;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
-while EmuStatus=EsRuning do begin
- for f:=0 to $ff do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   h6280_0.run(frame_s);
-   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+while EmuStatus=EsRunning do begin
+ for f:=0 to 273 do begin
    case f of
-      247:begin
+      248:begin
             m68000_0.irq[6]:=HOLD_LINE;
             video_update;
             marcade.in1:=marcade.in1 or $8;
           end;
-      255:marcade.in1:=marcade.in1 and $f7;
+      8:marcade.in1:=marcade.in1 and $f7;
    end;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(frame_s);
+   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
  end;
  eventos_supbtime;
  video_sync;
@@ -235,6 +235,7 @@ begin
  deco16ic_0.reset;
  deco_sprites_0.reset;
  deco16_snd_simple_reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
@@ -284,9 +285,9 @@ deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(14000000,$100);
+m68000_0:=cpu_m68000.create(14000000,274);
 //Sound CPU
-deco16_snd_simple_init(32220000 div 8,32220000,nil);
+deco16_snd_simple_init(32220000 div 8,32220000,nil,274);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   161:begin //Superburger Time

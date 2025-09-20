@@ -132,7 +132,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //Main
     z80_0.run(frame_m);
@@ -143,14 +143,12 @@ while EmuStatus=EsRuning do begin
     case f of
       $2c:z80_1.change_irq(HOLD_LINE);
       $6d:begin
-            z80_0.im0:=$cf;
-            z80_0.change_irq(HOLD_LINE);
+            z80_0.change_irq_vector(HOLD_LINE,$cf);
             z80_1.change_irq(HOLD_LINE);
           end;
       $af:z80_1.change_irq(HOLD_LINE);
       $f0:begin
-            z80_0.im0:=$d7;
-            z80_0.change_irq(HOLD_LINE);
+            z80_0.change_irq_vector(HOLD_LINE,$d7);
             z80_1.change_irq(HOLD_LINE);
             update_video_hw1942;
           end;
@@ -245,8 +243,8 @@ savedata_qsnapshot(data,size);
 size:=ay8910_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$c000],$4000);
-savedata_com_qsnapshot(@mem_snd[$4000],$800);
+savedata_qsnapshot(@memoria[$c000],$4000);
+savedata_qsnapshot(@mem_snd[$4000],$800);
 //MISC
 buffer[0]:=scroll and $ff;
 buffer[1]:=scroll shr 8;
@@ -295,6 +293,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

@@ -1,9 +1,8 @@
 unit spectrum_128k;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ay_8910,z80_sp,sysutils,
-     controls_engine,dialogs,rom_engine,pal_engine,sound_engine,z80pio,
-     gfx_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ay_8910,z80_sp,
+     controls_engine,rom_engine,pal_engine,sound_engine,z80pio,gfx_engine;
 
 const
   spec128_rom:array[0..1] of tipo_roms=(
@@ -14,18 +13,12 @@ const
 var
    memoria_128k:array[0..9,0..$3fff] of byte;
    paginacion_activa:boolean;
-   linea:word;
+   linea_128:word;
 
 function iniciar_128k:boolean;
-procedure spectrum128_main;
-function spec128_getbyte(direccion:word):byte;
 procedure spec128_putbyte(direccion:word;valor:byte);
-function spec128_inbyte(puerto:word):byte;
 procedure spec128_outbyte(puerto:word;valor:byte);
-procedure spec128k_reset;
-procedure spec128_retraso_memoria(direccion:word);
-procedure spec128_retraso_puerto(puerto:word);
-function spec128_lg():byte;
+function spec128_lg:byte;
 //Video
 procedure borde_128_full(linea:word);
 procedure video_128k(linea:word;pvideo:pbyte);
@@ -36,45 +29,6 @@ uses tap_tzx,principal,spectrum_misc;
 function spec128_lg:byte;
 begin
 spec128_lg:=mouse.lg_val;
-end;
-
-function iniciar_128k:boolean;
-var
- f:dword;
- h:byte;
- mem_temp:array[0..$7fff] of byte;
-begin
-principal1.panel2.Visible:=true;
-llamadas_maquina.bucle_general:=spectrum128_main;
-llamadas_maquina.reset:=spec128k_reset;
-llamadas_maquina.fps_max:=17734475/5/70908;
-iniciar_128k:=false;
-//Iniciar el Z80 y pantalla
-if not(spec_comun(17734475 div 5)) then exit;
-spec_z80.change_ram_calls(spec128_getbyte,spec128_putbyte);
-spec_z80.change_io_calls(spec128_inbyte,spec128_outbyte);
-spec_z80.change_retraso_call(spec128_retraso_memoria,spec128_retraso_puerto);
-ay8910_0:=ay8910_chip.create(17734475 div 10,AY8912,1);
-ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
-ay8910_1:=ay8910_chip.create(17734475 div 10,AY8912,1);
-case main_vars.tipo_maquina of
-  1:if not(roms_load(@mem_temp,spec128_rom)) then exit;
-  4:if not(roms_load(@mem_temp,spec_plus2_rom)) then exit;
-end;
-copymemory(@memoria_128k[8,0],@mem_temp[0],$4000);
-copymemory(@memoria_128k[9,0],@mem_temp[$4000],$4000);
-fillchar(var_spectrum.retraso[0],71000,0);
-f:=14361;
-for h:=0 to 191 do begin
-  copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
-  f:=f+228;
-end;
-case var_spectrum.audio_128k of
-  0:iniciar_audio(false);
-  1,2:iniciar_audio(true);
-end;
-spec128k_reset;
-iniciar_128k:=true;
 end;
 
 procedure spec128k_reset;
@@ -92,7 +46,7 @@ end;
 
 procedure video_128k(linea:word;pvideo:pbyte);
 var
-  nlinea1,nlinea2,x,color2,color,atrib,video,temp:byte;
+  f,nlinea1,nlinea2,x,color2,color,atrib,video,temp:byte;
   pant_x,pos_video:word;
   poner_linea:boolean;
   ptemp:pword;
@@ -103,7 +57,7 @@ case linea of
         63..254:begin
                 nlinea1:=linea-63;
                 nlinea2:=linea-15;
-                pos_video:=((linea-63) shr 3) shl 5;
+                pos_video:=(nlinea1 shr 3) shl 5;
                 for x:=0 to 31 do begin
                       ptvideo:=pvideo;
                       inc(ptvideo,$1800+pos_video);
@@ -111,7 +65,7 @@ case linea of
                       ptvideo:=pvideo;
                       inc(ptvideo,tabla_scr[nlinea1]+x);
                       video:=ptvideo^;
-                      if (var_spectrum.buffer_video[tabla_scr[nlinea1]+x] or (((atrib and $80)<>0) and not(main_screen.rapido))) then begin
+                      if (var_spectrum.buffer_video[tabla_scr[nlinea1]+x] or ((atrib and $80)<>0)) then begin
                         var_spectrum.buffer_video[tabla_scr[nlinea1]+x]:=false;
                         poner_linea:=true;
                         pant_x:=48+(x shl 3);
@@ -122,11 +76,24 @@ case linea of
                         end else begin
                           color2:=(atrib shr 3) and 7;
                           color:=atrib and 7;
-                          if (atrib and $40)<>0 then begin color:=color+8;color2:=color2+8;end;
-                          if ((atrib and $80)<>0) and var_spectrum.haz_flash then begin temp:=color;color:=color2;color2:=temp;end;
+                          if (atrib and $40)<>0 then begin
+                            color:=color+8;
+                            color2:=color2+8;
+                          end;
+                          if (((atrib and $80)<>0) and var_spectrum.haz_flash) then begin
+                            temp:=color;
+                            color:=color2;
+                            color2:=temp;
+                          end;
                         end;
                         ptemp:=punbuf;
-                        if (video and 128)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
+                        for f:=0 to 7 do begin
+                          if (video and $80)<>0 then ptemp^:=paleta[color]
+                            else ptemp^:=paleta[color2];
+                          inc(ptemp);
+                          video:=video shl 1;
+                        end;
+                        {if (video and 128)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
                         inc(ptemp);
                         if (video and 64)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
                         inc(ptemp);
@@ -140,7 +107,7 @@ case linea of
                         inc(ptemp);
                         if (video and 2)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
                         inc(ptemp);
-                        if (video and 1)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];
+                        if (video and 1)<>0 then ptemp^:=paleta[color] else ptemp^:=paleta[color2];}
                         putpixel(pant_x,nlinea2,8,punbuf,1);
                       end;
                       inc(pos_video);
@@ -148,7 +115,7 @@ case linea of
         end; {del selector}
         else exit;
 end; {del case}
-if poner_linea then actualiza_trozo_simple(48,nlinea2,256,1,1);
+if poner_linea then actualiza_trozo(48,nlinea2,256,1,1,48,nlinea2,256,1,PANT_TEMP);
 end;
 
 procedure borde_128_full(linea:word);
@@ -157,7 +124,7 @@ var
   f:word;
   posicion:dword;
 begin
-if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<14) or (linea>296)) then exit;
+if ((borde.tipo=0) or (linea<14) or (linea>296)) then exit;
 fillchar(borde.buffer[linea*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
 borde.posicion:=spec_z80.contador-228;
 if linea=14 then exit;
@@ -171,7 +138,7 @@ for f:=203 to 227 do begin
   inc(ptemp);
 end;
 putpixel(0,linea-15,48,punbuf,1);
-actualiza_trozo_simple(0,linea-15,48,1,1);
+actualiza_trozo(0,linea-15,48,1,1,0,linea-15,48,1,PANT_TEMP);
 if linea=296 then exit;
 //24t borde der --> 48 pixels
 ptemp:=punbuf;
@@ -183,7 +150,7 @@ for f:=128 to 151 do begin
   inc(ptemp);
 end;
 putpixel(304,linea-15,48,punbuf,1);
-actualiza_trozo_simple(304,linea-15,48,1,1);
+actualiza_trozo(304,linea-15,48,1,1,304,linea-15,48,1,PANT_TEMP);
 if ((linea>62) and (linea<255)) then exit;
 //128t Centro pantalla --> 256 pixels
 ptemp:=punbuf;
@@ -194,17 +161,17 @@ for f:=0 to 127 do begin
     inc(ptemp);
 end;
 putpixel(48,linea-15,256,punbuf,1);
-actualiza_trozo_simple(48,linea-15,256,1,1);
+actualiza_trozo(48,linea-15,256,1,1,48,linea-15,256,1,PANT_TEMP);
 end;
 
 procedure spectrum128_main;
 begin
 init_controls(true,true,true,false);
-while EmuStatus=EsRuning do begin
-  for linea:=0 to 310 do begin
+while EmuStatus=EsRunning do begin
+  for linea_128:=0 to 310 do begin
     spec_z80.run(228);
-    borde.borde_spectrum(linea);
-    video_128k(linea,@memoria_128k[var_spectrum.pantalla_128k,0]);
+    borde.borde_spectrum(linea_128);
+    video_128k(linea_128,@memoria_128k[var_spectrum.pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
   end;
   if spec_z80.contador<28 then begin
@@ -225,7 +192,7 @@ var
   posicion:dword;
 begin
 estados:=0;
-posicion:=linea*228+spec_z80.contador;
+posicion:=linea_128*228+spec_z80.contador;
 case (direccion and $c000) of
   $4000:estados:=var_spectrum.retraso[posicion];
   $c000:if ((var_spectrum.marco[3] and 1)<>0) then estados:=var_spectrum.retraso[posicion];
@@ -238,7 +205,7 @@ var
   estados:byte;
   posicion:dword;
 begin
-posicion:=linea*228+spec_z80.contador;
+posicion:=linea_128*228+spec_z80.contador;
 if (puerto and $c000)=$4000 then begin //Contenida
     if (puerto and 1)<>0 then begin //ultimo bit 1
        estados:=var_spectrum.retraso[posicion]+1;
@@ -301,7 +268,7 @@ if (puerto and 1)=0 then begin //ULA
 end else begin //Resto
    //Floating bus
     cont:=spec_z80.contador mod 228;
-    lin:=linea+(spec_z80.contador div 228);
+    lin:=linea_128+(spec_z80.contador div 228);
     if ((lin>62) and (lin<255) and (cont<128)) then begin
       lin:=lin-63;
       col:=(cont and $f8) shr 2;//div 8)*2;
@@ -333,13 +300,13 @@ end else begin //Resto
   if mouse.tipo<>MNONE then begin
     if mouse.tipo=MAMX then begin //AMX Mouse
         if (puerto and $80)<>0 then temp:=mouse.botones
-          else temp:=z80pio_cd_ba_r(0,puerto shr 5);
+          else temp:=pio_0.cd_ba_r(puerto shr 5);
     end;
     if mouse.tipo=MKEMPSTON then begin //Kempston Mouse
         case puerto of
-            $FADF:temp:=mouse.botones;
-            $FBDF:temp:=mouse.x;
-            $FFDF:temp:=mouse.y;
+            $fadf:temp:=mouse.botones;
+            $fbdf:temp:=mouse.x;
+            $ffdf:temp:=mouse.y;
         end;
     end;
   end;
@@ -354,7 +321,7 @@ var
 begin
 if (puerto and $1)=0 then begin //ULA
   if borde.tipo=2 then begin
-    fillchar(borde.buffer[linea*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
+    fillchar(borde.buffer[linea_128*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
     borde.posicion:=spec_z80.contador;
   end;
   if (ulaplus.activa and ulaplus.enabled) then borde.color:=(valor and 7)+16
@@ -404,8 +371,47 @@ end else begin //resto
                   end;
                 end;
         end;
-  if mouse.tipo=MAMX then z80pio_cd_ba_w(0,puerto shr 5,valor);
+  if mouse.tipo=MAMX then pio_0.cd_ba_w(puerto shr 5,valor);
 end;
+end;
+
+function iniciar_128k:boolean;
+var
+ f:dword;
+ h:byte;
+ mem_temp:array[0..$7fff] of byte;
+begin
+case var_spectrum.audio_128k of
+  0:iniciar_audio(false);
+  1,2:iniciar_audio(true);
+end;
+principal1.panel2.Visible:=true;
+llamadas_maquina.bucle_general:=spectrum128_main;
+llamadas_maquina.reset:=spec128k_reset;
+llamadas_maquina.fps_max:=17734475/5/70908;
+iniciar_128k:=false;
+//Iniciar el Z80 y pantalla
+if not(spec_comun(17734475 div 5)) then exit;
+spec_z80.change_ram_calls(spec128_getbyte,spec128_putbyte);
+spec_z80.change_io_calls(spec128_inbyte,spec128_outbyte);
+spec_z80.change_retraso_call(spec128_retraso_memoria,spec128_retraso_puerto);
+ay8910_0:=ay8910_chip.create(17734475 div 10,AY8912,1);
+ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
+ay8910_1:=ay8910_chip.create(17734475 div 10,AY8912,1);
+case main_vars.tipo_maquina of
+  1:if not(roms_load(@mem_temp,spec128_rom)) then exit;
+  4:if not(roms_load(@mem_temp,spec_plus2_rom)) then exit;
+end;
+copymemory(@memoria_128k[8,0],@mem_temp[0],$4000);
+copymemory(@memoria_128k[9,0],@mem_temp[$4000],$4000);
+fillchar(var_spectrum.retraso[0],71000,0);
+f:=14361;
+for h:=0 to 191 do begin
+  copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
+  f:=f+228;
+end;
+spec128k_reset;
+iniciar_128k:=true;
 end;
 
 end.

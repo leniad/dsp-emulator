@@ -140,7 +140,7 @@ init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 frame:=false;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     //main
     m6809_0.run(frame_m);
@@ -248,6 +248,7 @@ begin
  m6809_0.reset;
  z80_0.reset;
  ym2203_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

@@ -49,7 +49,7 @@ for f:=0 to $7fff do begin
     buffer[f]:=false;
   end;
 end;
-actualiza_trozo_simple(0,0,236,272,1);
+actualiza_trozo(0,0,236,272,1,0,0,236,272,PANT_TEMP);
 end;
 
 procedure eventos_epos;
@@ -76,7 +76,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 240 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -136,6 +136,7 @@ procedure reset_epos_hw;
 begin
  z80_0.reset;
  ay8910_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$be;

@@ -15,10 +15,12 @@ const
   NEC_V20=0;
   NEC_V30=1;
   NEC_V33=2;
+  NMI_IRQ=1;
+  INT_IRQ=2;
 
 type
         band_nec=record
-          SignVal,AuxVal,OverVal,ZeroVal,CarryVal,ParityVal,T,I,D,M:boolean;
+          SignVal,AuxVal,OverVal,ZeroVal,CarryVal,ParityVal,t,i,d,m:boolean;
         end;
         reg_nec=record
             eo,ip,old_pc:word;
@@ -33,27 +35,28 @@ type
             constructor create(clock:dword;frames_div:word;tipo:byte);
             destructor free;
           public
-            vect_req:byte;
             procedure reset;
             procedure run(maximo:single);
             procedure change_ram_calls(getbyte:tgetbyte16;putbyte:tputbyte16);
             procedure change_io_calls(inbyte:tgetbyte;outbyte:tputbyte);
             procedure change_io_calls16(inword:tgetword;outword:tputword);
+            procedure set_input(irqline,state:byte;vect_req:byte=$ff);
           private
             getbyte:tgetbyte16;
             putbyte:tputbyte16;
             r:preg_nec;
-            vect,prefetch_size,prefetch_cycles,tipo_cpu:byte;
+            prefetch_size,prefetch_cycles,tipo_cpu:byte;
             prefix_base:dword;
             prefetch_count:integer;
             prefetch_reset,seg_prefix:boolean;
-            ea_calculated,no_interrupt,irq_pending:boolean;
+            no_interrupt:boolean;
+            irq_pending:byte;
             inbyte:tgetbyte;
             outbyte:tputbyte;
             inword:tgetword;
             outword:tputword;
+            vect_req:byte;
             //procedure init_nec(tipo:byte);
-            procedure nec_nmi;
             procedure nec_interrupt(vect_num:word);
             procedure GetEA(ModRM:byte);
             procedure write_word(dir:dword;x:word);
@@ -64,7 +67,8 @@ type
             function DefaultBase(Seg:byte):dword;
             procedure CLKW(v20o,v30o,v33o,v20e,v30e,v33e:byte;addr:word);
             procedure CLKM(v20,v30,v33,v20m,v30m,v33m,ModRM:byte);
-            procedure CLKR(v20o,v30o,v33o,v20e,v30e,v33e,vall:byte;ModRM:word);
+            procedure CLKR(v20o,v30o,v33o,v20e,v30e,v33e,vall:byte;ModRM:byte);
+            procedure CLKS(clk_v20,clk_v30,clk_v33:byte);
             function RegByte(ModRM:byte):byte;
             function GetRMByte(ModRM:byte):byte;
             function RegWord(ModRM:byte):word;
@@ -87,12 +91,12 @@ type
             function DecWordReg(tmp:word):word;
             function ANDB(src,dst:byte):byte;
             function ANDW(src,dst:word):word;
-            function ADDB(src,dst:byte):byte;
-            function ADDW(src,dst:word):word;
+            function ADDB(src:word;dst:byte):byte;
+            function ADDW(src:dword;dst:word):word;
             function ORB(src,dst:byte):byte;
             function ORW(src,dst:word):word;
-            function SUBB(src,dst:byte):byte;
-            function SUBW(src,dst:word):word;
+            function SUBB(src:word;dst:byte):byte;
+            function SUBW(src:dword;dst:word):word;
             function XORB(src,dst:byte):byte;
             function XORW(src,dst:word):word;
             function SHR_BYTE(c,dst:byte):byte;
@@ -150,27 +154,28 @@ const
     PS=1;
     SS=2;
     DS0=3;
+    NEC_NMI_VECTOR=2;
 
 function inbyte_ff(direccion:word):byte;
 begin
   inbyte_ff:=$ff;
-  MessageDlg('in byte sin funcion', mtInformation,[mbOk], 0);
+  MessageDlg('in byte sin funcion',mtInformation,[mbOk],0);
 end;
 
 function inword_ff(direccion:dword):word;
 begin
   inword_ff:=$ffff;
-  MessageDlg('in word sin funcion', mtInformation,[mbOk], 0);
+  MessageDlg('in word sin funcion',mtInformation,[mbOk],0);
 end;
 
 procedure outbyte_ff(direccion:word;valor:byte);
 begin
-    MessageDlg('out byte sin funcion', mtInformation,[mbOk], 0);
+    MessageDlg('out byte sin funcion',mtInformation,[mbOk],0);
 end;
 
 procedure outword_ff(direccion:dword;valor:word);
 begin
-    MessageDlg('out word sin funcion', mtInformation,[mbOk], 0);
+    MessageDlg('out word sin funcion',mtInformation,[mbOk],0);
 end;
 
 constructor cpu_nec.create(clock:dword;frames_div:word;tipo:byte);
@@ -183,8 +188,8 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 case tipo of
     0:;
     1:begin
-        	self.prefetch_size:=6;		// 3 words */
-	        self.prefetch_cycles:= 2;		// two cycles per byte / four per word */
+        	self.prefetch_size:=6;		// 3 words
+	        self.prefetch_cycles:=2;		// two cycles per byte / four per word
           self.tipo_cpu:=tipo;
       end;
   end;
@@ -212,9 +217,10 @@ r.f.OverVal:=false;
 r.f.ZeroVal:=true;
 r.f.CarryVal:=false;
 r.f.ParityVal:=true;
-r.f.M:=true;
+r.f.m:=true;
+self.vect_req:=$ff;
+self.irq_pending:=0;
 self.prefetch_reset:=true;
-self.change_irq(CLEAR_LINE);
 r.ps_r:=$ffff;
 r.ds1_r:=0;
 r.ds0_r:=0;
@@ -256,7 +262,6 @@ var
   tempb:byte;
   E16:word;
 begin
-if self.ea_calculated then exit;
 case ModRM of
   $00,$08,$10,$18,$20,$28,$30,$38:begin
         EO:=r.bw.w+r.ix.w;
@@ -365,7 +370,6 @@ case ModRM of
       end;
   else MessageDlg('GetEA No Implementado ModRM '+inttohex(ModRM,10)+'. PC='+inttohex((r.ps_r shl 4)+r.ip,10), mtInformation,[mbOk], 0);
 end;
-self.ea_calculated:=true;
 r.eo:=EO;
 r.ea:=EA;
 end;
@@ -386,7 +390,7 @@ end;
 
 function cpu_nec.fetch:byte;
 begin
-  self.prefetch_count:=self.prefetch_count+1;
+  self.prefetch_count:=self.prefetch_count-1;
 	fetch:=self.getbyte((r.ps_r shl 4)+r.ip);
   r.ip:=r.ip+1;
 end;
@@ -400,7 +404,7 @@ procedure cpu_nec.do_prefetch(previous_icount:integer);
 var
   diff:integer;
 begin
-  diff:=previous_ICount-self.contador;
+  diff:=self.contador-previous_ICount;
 	{ The implementation is not accurate, but comes close.
      * It does not respect that the V30 will fetch two bytes
      * at once directly, but instead uses only 2 cycles instead
@@ -409,25 +413,25 @@ begin
 	while (self.prefetch_count<0) do begin
 		self.prefetch_count:=self.prefetch_count+1;
 		if (diff>self.prefetch_cycles) then diff:=diff-self.prefetch_cycles
-  		else self.contador:=self.contador+self.prefetch_cycles;
+  		else self.contador:=self.contador-self.prefetch_cycles;
 	end;
 	if self.prefetch_reset then begin
 		self.prefetch_count:=0;
 		self.prefetch_reset:=false;
 		exit;
 	end;
-	while ((diff >=self.prefetch_cycles) and (self.prefetch_count<self.prefetch_size)) do begin
+	while ((diff>=self.prefetch_cycles) and (self.prefetch_count<self.prefetch_size)) do begin
 		diff:=diff-self.prefetch_cycles;
 		self.prefetch_count:=self.prefetch_count+1;
 	end;
 end;
 
-procedure CLKS(clk_v20,clk_v30,clk_v33:byte);
+procedure cpu_nec.CLKS(clk_v20,clk_v30,clk_v33:byte);
 begin
-  case nec_0.tipo_cpu of
-    0:nec_0.contador:=nec_0.contador+clk_v20;
-    1:nec_0.contador:=nec_0.contador+clk_v30;
-    2:nec_0.contador:=nec_0.contador+clk_v33;
+  case self.tipo_cpu of
+    0:self.contador:=self.contador+clk_v20;
+    1:self.contador:=self.contador+clk_v30;
+    2:self.contador:=self.contador+clk_v33;
   end;
 end;
 
@@ -455,12 +459,12 @@ begin
    end;
 end;
 
-procedure cpu_nec.CLKR(v20o,v30o,v33o,v20e,v30e,v33e,vall:byte;ModRM:word);
+procedure cpu_nec.CLKR(v20o,v30o,v33o,v20e,v30e,v33e,vall:byte;ModRM:byte);
 begin
 if (ModRM>=$c0) then begin
   self.contador:=self.contador+vall;
 end else begin
-  if (r.ea and 1)<>0 then begin
+  if (self.r.ea and 1)<>0 then begin
     case self.tipo_cpu of
       0:self.contador:=self.contador+v20o;
       1:self.contador:=self.contador+v30o;
@@ -477,7 +481,6 @@ end;
 end;
 
 function cpu_nec.RegByte(ModRM:byte):byte;
-//AL, CL, DL, BL, AH, CH, DH, BH
 begin
 case ((ModRM and $38) shr 3) of
   0:RegByte:=r.aw.l;
@@ -492,7 +495,6 @@ end;
 end;
 
 function cpu_nec.GetRMByte(ModRM:byte):byte;
-//AL, CL, DL, BL, AH, CH, DH, BH
 begin
 if (ModRM>=$c0) then begin
     case (modRM and $7) of
@@ -512,7 +514,6 @@ end;
 end;
 
 function cpu_nec.RegWord(ModRM:byte):word;
-//AW, CW, DW, BW, SP, BP, IX, IY
 begin
 case ((ModRM and $38) shr 3) of
   0:RegWord:=r.aw.w;
@@ -527,7 +528,6 @@ end;
 end;
 
 function cpu_nec.GetRMWord(ModRM:byte):word;
-//AW, CW, DW, BW, SP, BP, IX, IY
 begin
 if (ModRM>=$c0) then begin
     case (ModRM and 7) of
@@ -549,7 +549,7 @@ end;
 procedure cpu_nec.PutRMByte(ModRM,valor:byte);
 begin
 	if (ModRM>=$c0) then begin
-    case (modRM and $7) of
+    case (modRM and 7) of
       0:r.aw.l:=valor;
       1:r.cw.l:=valor;
       2:r.dw.l:=valor;
@@ -568,7 +568,7 @@ end;
 procedure cpu_nec.PutbackRMByte(ModRM,valor:byte);
 begin
 	if (ModRM>=$c0) then begin
-    case (modRM and $7) of
+    case (modRM and 7) of
       0:r.aw.l:=valor;
       1:r.cw.l:=valor;
       2:r.dw.l:=valor;
@@ -582,7 +582,6 @@ begin
 end;
 
 procedure cpu_nec.PutBackRegByte(ModRM,valor:byte);
-//AL, CL, DL, BL, AH, CH, DH, BH
 begin
 case ((ModRM and $38) shr 3) of
   0:r.aw.l:=valor;
@@ -597,10 +596,9 @@ end;
 end;
 
 procedure cpu_nec.PutRMWord(ModRM:byte;valor:word);
-//AW, CW, DW, BW, SP, BP, IX, IY
 begin
 	if (ModRM>=$c0) then begin
-    case (modRM and $7) of
+    case (modRM and 7) of
       0:r.aw.w:=valor;
       1:r.cw.w:=valor;
       2:r.dw.w:=valor;
@@ -617,7 +615,6 @@ begin
 end;
 
 procedure cpu_nec.PutbackRMWord(ModRM:byte;valor:word);
-//AW, CW, DW, BW, SP, BP, IX, IY
 begin
 	if (ModRM>=$c0) then begin
     case (modRM and $7) of
@@ -634,7 +631,6 @@ begin
 end;
 
 procedure cpu_nec.PutBackRegWord(ModRM:byte;valor:word);
-//AW, CW, DW, BW, SP, BP, IX, IY
 begin
 case ((ModRM and $38) shr 3) of
   0:r.aw.w:=valor;
@@ -654,7 +650,7 @@ var
 begin
 	if (ModRM>=$c0)	then begin
     valor:=self.fetch;
-    case (modRM and $7) of
+    case (modRM and 7) of
       0:r.aw.l:=valor;
       1:r.cw.l:=valor;
       2:r.dw.l:=valor;
@@ -666,18 +662,18 @@ begin
     end;
   end	else begin
 		self.GetEA(ModRM);
-    self.putbyte(r.ea,self.fetch);
+    valor:=self.fetch;
+    self.putbyte(r.ea,valor);
 	end;
 end;
 
 procedure cpu_nec.PutImmRMWord(ModRM:byte);
-//AW, CW, DW, BW, SP, BP, IX, IY
 var
   valor:word;
 begin
 	if (ModRM>=$c0) then begin
     valor:=self.FETCHWORD;
-    case (modRM and $7) of
+    case (modRM and 7) of
       0:r.aw.w:=valor;
       1:r.cw.w:=valor;
       2:r.dw.w:=valor;
@@ -755,7 +751,7 @@ end;
 
 function cpu_nec.DecWordReg(tmp:word):word;
 var
-  tmp1:word;
+  tmp1:dword;
 begin
 	tmp1:=tmp-1;
 	r.f.OverVal:=(tmp=$8000);
@@ -785,7 +781,8 @@ begin
   andw:=dst;
 end;
 
-function cpu_nec.ADDB(src,dst:byte):byte;
+//OJO: que puede venir con carry sumado!
+function cpu_nec.ADDB(src:word;dst:byte):byte;
 var
   res:word;
 begin
@@ -797,7 +794,7 @@ begin
   ADDB:=res;
 end;
 
-function cpu_nec.ADDW(src,dst:word):word;
+function cpu_nec.ADDW(src:dword;dst:word):word;
 var
   res:dword;
 begin
@@ -829,7 +826,7 @@ begin
    ORW:=dst;
 end;
 
-function cpu_nec.SUBB(src,dst:byte):byte;
+function cpu_nec.SUBB(src:word;dst:byte):byte;
 var
   res:word;
 begin
@@ -841,7 +838,7 @@ begin
    SUBB:=res;
 end;
 
-function cpu_nec.SUBW(src,dst:word):word;
+function cpu_nec.SUBW(src:dword;dst:word):word;
 var
   res:dword;
 begin
@@ -929,13 +926,13 @@ end;
 
 function cpu_nec.ROR_BYTE(dst:byte):byte;
 begin
-   r.f.CarryVal:=(dst and $1)<>0;
+   r.f.CarryVal:=(dst and 1)<>0;
    ROR_BYTE:=(dst shr 1)+(byte(r.f.CarryVal) shl 7);
 end;
 
 function cpu_nec.ROR_WORD(dst:word):word;
 begin
-   r.f.CarryVal:=(dst and $1)<>0;
+   r.f.CarryVal:=(dst and 1)<>0;
    ROR_WORD:=(dst shr 1)+(byte(r.f.CarryVal) shl 15);
 end;
 
@@ -962,7 +959,7 @@ var
   temp:word;
 begin
  temp:=dst+(byte(r.f.CarryVal) shl 8);
- r.f.CarryVal:=(dst and $1)<>0;
+ r.f.CarryVal:=(temp and 1)<>0;
  RORC_BYTE:=temp shr 1;
 end;
 
@@ -971,7 +968,7 @@ var
   temp:dword;
 begin
  temp:=dst+(byte(r.f.CarryVal) shl 16);
- r.f.CarryVal:=(dst and $1)<>0;
+ r.f.CarryVal:=(temp and 1)<>0;
  RORC_WORD:=temp shr 1;
 end;
 
@@ -981,11 +978,15 @@ begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;
 end;
+var
+  temp:smallint;
 begin
   self.contador:=self.contador+c;
-  dst:=sshr(smallint(dst),c-1);
-  r.f.CarryVal:=(dst and $1)<>0;
-  dst:=sshr(smallint(dst),1);
+  temp:=smallint(dst);
+  temp:=sshr(temp,c-1);
+  r.f.CarryVal:=(temp and 1)<>0;
+  temp:=sshr(temp,1);
+  dst:=temp;
   self.SetSZPF_Word(dst);
   PutbackRMWord(ModRM,dst);
 end;
@@ -1014,7 +1015,7 @@ begin
 		result:=result mod 100;
 		v1:=((result div 10) shl 4) or (result mod 10);
 		self.PutMemB(DS1,di,v1);
-		r.f.ZeroVal:=(v1<>0);
+		if (v1<>0) then r.f.ZeroVal:=true;
 		si:=si+1;
 		di:=di+1;
 	end;
@@ -1038,60 +1039,50 @@ end;
 procedure cpu_nec.i_movsb;
 var
   tmp:byte;
-  df:integer;
 begin
   tmp:=self.GetMemB(DS0,r.ix.w);
   self.PutMemB(DS1,r.iy.w,tmp);
-  if r.f.d then df:=-1
-    else df:=1;
-  r.ix.w:=r.ix.w+df;
-  r.iy.w:=r.iy.w+df;
+  r.iy.w:=r.iy.w-2*byte(r.f.D)+1;
+  r.ix.w:=r.ix.w-2*byte(r.f.D)+1;
   CLKS(8,8,6);
 end;
 
 procedure cpu_nec.i_movsw;
 var
   tmp:word;
-  df:integer;
 begin
   tmp:=self.GetMemW(DS0,r.ix.w);
   self.PutMemW(DS1,r.iy.w,tmp);
-  if r.f.d then df:=-2
-    else df:=2;
-  r.ix.w:=r.ix.w+df;
-  r.iy.w:=r.iy.w+df;
+  r.ix.w:=r.ix.w-4*byte(r.f.D)+2;
+  r.iy.w:=r.iy.w-4*byte(r.f.D)+2;
   CLKS(16,16,10);
 end;
 
 procedure cpu_nec.i_lodsb;
 begin
   r.aw.l:=self.GetMemB(DS0,r.ix.w);
-  if r.f.d then r.ix.w:=r.ix.w-1
-    else r.ix.w:=r.ix.w+1;
+  r.ix.w:=r.ix.w-2*byte(r.f.D)+1;
   CLKS(4,4,3);
 end;
 
 procedure cpu_nec.i_stosb;
 begin
   self.PutMemB(DS1,r.iy.w,r.aw.l);
-  if r.f.d then r.iy.w:=r.iy.w-1
-    else r.iy.w:=r.iy.w+1;
+  r.iy.w:=r.iy.w-2*byte(r.f.D)+1;
   CLKS(4,4,3);
 end;
 
 procedure cpu_nec.i_lodsw;
 begin
   r.aw.w:=self.GetMemW(DS0,r.ix.w);
-  if r.f.d then r.ix.w:=r.ix.w-2
-    else r.ix.w:=r.ix.w+2;
+  r.ix.w:=r.ix.w-4*byte(r.f.D)+2;
   self.CLKW(8,8,5,8,4,3,r.ix.w);
 end;
 
 procedure cpu_nec.i_stosw;
 begin
   self.PutMemW(DS1,r.iy.w,r.aw.w);
-  if r.f.d then r.iy.w:=r.iy.w-2
-    else r.iy.w:=r.iy.w+2;
+  r.iy.w:=r.iy.w-4*byte(r.f.D)+2;
   self.CLKW(8,8,5,8,4,3,r.iy.w);
 end;
 
@@ -1102,8 +1093,7 @@ begin
   src:=self.GetMemB(DS1,r.iy.w);
   dst:=r.aw.l;
   self.SUBB(src,dst);
-  if r.f.d then r.iy.w:=r.iy.w-1
-    else r.iy.w:=r.iy.w+1;
+  r.iy.w:=r.iy.w-2*byte(r.f.d)+1;
   CLKS(4,4,3);
 end;
 
@@ -1114,8 +1104,7 @@ begin
   src:=self.GetMemW(DS1,r.iy.w);
   dst:=r.aw.w;
   self.SUBW(src,dst);
-  if r.f.d then r.iy.w:=r.iy.w-2
-    else r.iy.w:=r.iy.w+2;
+  r.iy.w:=r.iy.w-4*byte(r.f.D)+2;
   self.CLKW(8,8,5,8,4,3,r.iy.w);
 end;
 
@@ -1123,11 +1112,11 @@ procedure cpu_nec.ADJ4(param1,param2:shortint);
 var
   tmp:word;
 begin
-	if (r.f.AuxVal or ((r.aw.l and $f)>9))	then begin
+	if (r.f.AuxVal or ((r.aw.l and $f)>9)) then begin
 		tmp:=r.aw.l+param1;
     r.aw.l:=tmp;
     self.r.f.AuxVal:=true;
-    self.r.f.CarryVal:=self.r.f.CarryVal or ((tmp and $100)<>0);
+    if ((tmp and $100)<>0) then self.r.f.CarryVal:=true;
 	end;
 	if (r.f.CarryVal or (r.aw.l>$9f)) then begin
 		r.aw.l:=r.aw.l+param2;
@@ -1147,7 +1136,7 @@ var
   temp:word;
 begin
   temp:=$7002;
-  if r.f.CarryVal then temp:=$1;
+  if r.f.CarryVal then temp:=1;
   if r.f.ParityVal then temp:=temp+4;
   if r.f.AuxVal then temp:=temp+$10;
   if r.f.ZeroVal then temp:=temp+$40;
@@ -1169,10 +1158,10 @@ begin
         1:BITOP_BYTE:=r.cw.l;
         2:BITOP_BYTE:=r.dw.l;
         3:BITOP_BYTE:=r.bw.l;
-        4:BITOP_BYTE:=r.sp.l;
-        5:BITOP_BYTE:=r.bp.l;
-        6:BITOP_BYTE:=r.ix.l;
-        7:BITOP_BYTE:=r.iy.l;
+        4:BITOP_BYTE:=r.aw.h;
+        5:BITOP_BYTE:=r.cw.h;
+        6:BITOP_BYTE:=r.dw.h;
+        7:BITOP_BYTE:=r.bw.h;
       end
 	  else begin
 		  self.GetEA(ModRM);
@@ -1222,10 +1211,10 @@ begin
   r.f.ZeroVal:=(temp and $40)<>0;
   r.f.SignVal:=(temp and $80)<>0;
   r.f.t:=(temp and $100)<>0;
-  r.f.I:=(temp and $200)<>0;
-  r.f.D:=(temp and $400)<>0;
+  r.f.i:=(temp and $200)<>0;
+  r.f.d:=(temp and $400)<>0;
   r.f.OverVal:=(temp and $800)<>0;
-  r.f.m:=(temp and $8000)<>$8000;
+  r.f.m:=(temp and $8000)<>0;
 end;
 
 procedure i_popf;
@@ -1240,28 +1229,28 @@ end;
 
 procedure DEF_br8;
 begin
-ModRM:=self.FETCH;
+ModRM:=self.fetch;
 srcb:=RegByte(ModRM);
 dstb:=GetRMByte(ModRM);
 end;
 
 procedure DEF_wr16;
 begin
-ModRM:=FETCH;
+ModRM:=fetch;
 srcw:=RegWord(ModRM);
 dstw:=GetRMWord(ModRM);
 end;
 
 procedure DEF_r8b;
 begin
-ModRM:=FETCH;
+ModRM:=fetch;
 dstb:=RegByte(ModRM);
 srcb:=GetRMByte(ModRM);
 end;
 
 procedure DEF_r16w;
 begin
-ModRM:=FETCH;
+ModRM:=fetch;
 dstw:=RegWord(ModRM);
 srcw:=GetRMWord(ModRM);
 end;
@@ -1274,7 +1263,7 @@ end;
 
 procedure DEF_axd16;
 begin
-srcw:=FETCH+(FETCH shl 8);
+srcw:=fetchword;
 dstw:=r.aw.w;
 end;
 
@@ -1314,7 +1303,7 @@ case instruccion of
           r.aw.w:=ADDW(srcw,dstw);
           CLKS(4,4,2);
         end;
-    $06:begin  //i_push_ds1
+    $06:begin  //i_push_es
           PUSH(r.ds1_r);
           CLKS(12,8,3);
         end;
@@ -1376,7 +1365,7 @@ case instruccion of
                   ModRM:=fetch;
                   tmpb:=BITOP_BYTE(ModRM);
                   CLKS(4,4,4);
-                  tmpb1:=fetch and $7;
+                  tmpb1:=fetch and 7;
                   r.f.ZeroVal:=(tmpb and (1 shl tmpb1))=0;
                   r.f.CarryVal:=false;
                   r.f.OverVal:=false;
@@ -1394,7 +1383,7 @@ case instruccion of
                    ModRM:=fetch;
                    tmpb:=BITOP_BYTE(ModRM);
                    CLKS(6,6,4);
-                   tmpb1:=fetch and $7;
+                   tmpb1:=fetch and 7;
                    tmpb:=tmpb and not(1 shl tmpb1);
                    PutbackRMByte(ModRM,tmpb);
                 end;
@@ -1441,36 +1430,36 @@ case instruccion of
         end;
     $10:begin  //i_adc_br8
           DEF_br8;
-          srcb:=srcb+byte(r.f.CarryVal);
-          dstb:=ADDB(srcb,dstb);
+          tmpw:=srcb+byte(r.f.CarryVal);
+          dstb:=ADDB(tmpw,dstb);
           PutbackRMByte(ModRM,dstb);
           CLKM(2,2,2,16,16,7,ModRM);
         end;
     $11:begin //i_adc_wr16 29_04
           DEF_wr16;
-          srcw:=srcw+byte(r.f.CarryVal);
-          dstw:=ADDW(srcw,dstw);
+          tmpdw:=srcw+byte(r.f.CarryVal);
+          dstw:=ADDW(tmpdw,dstw);
           PutbackRMWord(ModRM,dstw);
           CLKR(24,24,11,24,16,7,2,ModRM);
         end;
     $12:begin  //i_adc_r8b  01_05
           DEF_r8b;
-          srcb:=srcb+byte(r.f.CarryVal);
-          dstb:=ADDB(srcb,dstb);
+          tmpw:=srcb+byte(r.f.CarryVal);
+          dstb:=ADDB(tmpw,dstb);
           PutBackRegByte(ModRM,dstb);
           CLKM(2,2,2,11,11,6,ModRM);
         end;
     $13:begin //i_adc_r16w 01_05
           DEF_r16w;
-          srcw:=srcw+byte(r.f.CarryVal);
-          dstw:=ADDW(srcw,dstw);
+          tmpdw:=srcw+byte(r.f.CarryVal);
+          dstw:=ADDW(tmpdw,dstw);
           PutBackRegWord(ModRM,dstw);
           CLKR(15,15,8,15,11,6,2,ModRM);
         end;
     $1b:begin //i_sbb_r16w 01_05
           DEF_r16w;
-          srcw:=srcw+byte(r.f.CarryVal);
-          dstw:=SUBW(srcw,dstw);
+          tmpdw:=srcw+byte(r.f.CarryVal);
+          dstw:=SUBW(tmpdw,dstw);
           PutBackRegWord(ModRM,dstw);
           CLKR(15,15,8,15,11,6,2,ModRM);
         end;
@@ -1582,7 +1571,7 @@ case instruccion of
             DEF_wr16;
             dstw:=XORW(srcw,dstw);
             PutbackRMWord(ModRM,dstw);
-            CLKR(24,24,11,24,16,7,2,r.ea);
+            CLKR(24,24,11,24,16,7,2,ModRM);
         end;
     $32:begin //i_xor_r8b
             DEF_r8b;
@@ -1807,14 +1796,14 @@ case instruccion of
           CLKW(12,12,5,12,8,5,r.sp.w);
         end;
     $6a:begin //i_push_d8
-          tmpw:=smallint(shortint(fetch));
+          tmpw:=shortint(fetch);
           self.PUSH(tmpw);
           CLKW(11,11,5,11,7,3,r.sp.w);
         end;
     $6b:begin //i_imul_d8
             DEF_r16w;
-            tmpw:=smallint(shortint(fetch));
-            tmpi:=integer(smallint(srcw))*integer(tmpw);
+            tmpi:=shortint(fetch);
+            tmpi:=smallint(srcw)*tmpi;
             r.f.CarryVal:=((tmpi div $8000)<>0) and ((tmpi div $8000)<>-1);
             r.f.OverVal:=r.f.CarryVal;
             PutBackRegWord(ModRM,word(tmpi));
@@ -1902,8 +1891,8 @@ case instruccion of
                   PutbackRMByte(ModRM,dstb);
                 end;
       	    $10:begin //ADDB CF 28/04
-                  srcb:=srcb+byte(r.f.CarryVal);
-                  dstb:=ADDB(srcb,dstb);
+                  tmpw:=srcb+byte(r.f.CarryVal);
+                  dstb:=ADDB(tmpw,dstb);
                   PutbackRMByte(ModRM,dstb);
                 end;
       	    $18:MessageDlg('$80 SUBB CF', mtInformation,[mbOk],0);// src+=CF;	SUBB;	PutbackRMByte(ModRM,dst);
@@ -1972,8 +1961,8 @@ case instruccion of
                   PutbackRMByte(ModRM,dstb);
                 end;
       	    $10:begin //ADDB CF 28/04
-                  srcb:=srcb+byte(r.f.CarryVal);
-                  dstb:=ADDB(srcb,dstb);
+                  tmpw:=srcb+byte(r.f.CarryVal);
+                  dstb:=ADDB(tmpw,dstb);
                   PutbackRMByte(ModRM,dstb);
                 end;
       	    $18:MessageDlg('$80 SUBB CF', mtInformation,[mbOk],0);// src+=CF;	SUBB;	PutbackRMByte(ModRM,dst);
@@ -1995,8 +1984,7 @@ case instruccion of
     $83:begin //i_83pre
           ModRM:=fetch;
           dstw:=GetRMWord(ModRM);  //dst
-          srcw:=fetch; //src
-          srcw:=smallint(shortint(srcw));
+          srcw:=shortint(fetch); //src
           if (ModRM>=$c0) then CLKS(4,4,2)
             else if ((ModRM and $38)=$38) then CLKW(17,17,8,17,13,6,r.ea)
               else CLKW(26,26,11,26,18,7,r.ea);
@@ -2010,8 +1998,8 @@ case instruccion of
                   PutbackRMWord(ModRM,dstw);
                 end;
       	    $10:begin // 01_05
-                   srcw:=srcw+byte(r.f.CarryVal);
-                   dstw:=ADDW(srcw,dstw);
+                   tmpdw:=srcw+byte(r.f.CarryVal);
+                   dstw:=ADDW(tmpdw,dstw);
                    PutbackRMWord(ModRM,dstw);
                 end;
       	    $18:MessageDlg('$83 SUBW CF', mtInformation,[mbOk],0);// src+=CF;	SUBW;	PutbackRMWord(ModRM,dst);	break;
@@ -2062,7 +2050,7 @@ case instruccion of
           ModRM:=fetch;
           srcw:=RegWord(ModRM);
           PutRMWord(ModRM,srcw);
-          CLKR(13,13,5,13,9,3,2,r.ea);
+          CLKR(13,13,5,13,9,3,2,ModRM);
         end;
     $8a:begin //i_mov_r8b
           ModRM:=fetch;
@@ -2074,11 +2062,10 @@ case instruccion of
           ModRM:=fetch;
           srcw:=GetRMWord(ModRM); //src
           PutBackRegWord(ModRM,srcw);
-          CLKR(15,15,7,15,11,5,2,r.ea);
+          CLKR(15,15,7,15,11,5,2,ModRM);
         end;
     $8c:begin //i_mov_wsreg
           ModRM:=fetch;
-          CLKR(14,14,5,14,10,3,2,ModRM);
 	        case (ModRM and $38) of
 		        $00:PutRMWord(ModRM,r.DS1_r);
 		        $08:PutRMWord(ModRM,r.PS_r);
@@ -2086,6 +2073,7 @@ case instruccion of
 		        $18:PutRMWord(ModRM,r.DS0_r);
               else MessageDlg('$8c MOV Sreg - Invalid', mtInformation,[mbOk],0);
           end;
+          CLKR(14,14,5,14,10,3,2,ModRM);
         end;
     $8d:begin //i_lea
           ModRM:=fetch;
@@ -2659,25 +2647,25 @@ case instruccion of
                     seg_prefix:=true;
                     prefix_base:=r.ds1_r shl 4;
                     tmpb:=fetch;
-                    inc(self.contador,2);
+                    self.contador:=self.contador+2;
                   end;
               $2e:begin
                     seg_prefix:=true;
                     prefix_base:=r.ps_r shl 4;
                     tmpb:=fetch;
-                    inc(self.contador,2);
+                    self.contador:=self.contador+2;
                   end;
 		          $36:begin
                     seg_prefix:=true;
                     prefix_base:=r.ss_r shl 4;
                     tmpb:=fetch;
-                    inc(self.contador,2);
+                    self.contador:=self.contador+2;
                   end;
 		          $3e:begin
                     seg_prefix:=true;
                     prefix_base:=r.ds0_r shl 4;
                     tmpb:=fetch;
-                    inc(self.contador,2);
+                    self.contador:=self.contador+2;
                   end;
             end;
             self.contador:=self.contador+2;
@@ -2697,14 +2685,14 @@ case instruccion of
                     repeat
                       self.i_movsb;
                       tmpw:=tmpw-1;
-                    until not((tmpw>0));
+                    until not(tmpw>0);
                     r.cw.w:=tmpw;
                   end;
               $a5:if (tmpw<>0) then begin
                     repeat
                       self.i_movsw;
                       tmpw:=tmpw-1;
-                    until not((tmpw>0));
+                    until not(tmpw>0);
                     r.cw.w:=tmpw;
                   end;
            	  $ae:if (tmpw<>0) then begin
@@ -2808,14 +2796,14 @@ case instruccion of
                     repeat
                        self.i_scasb;
                        tmpw:=tmpw-1;
-                    until not(((tmpw>0) and r.f.ZeroVal));
+                    until not((tmpw>0) and r.f.ZeroVal);
                     r.cw.w:=tmpw;
                   end;
         	    $af:if (tmpw<>0) then begin
                     repeat
                        self.i_scasw;
                        tmpw:=tmpw-1;
-                    until not(((tmpw>0) and r.f.ZeroVal));
+                    until not((tmpw>0) and r.f.ZeroVal);
                     r.cw.w:=tmpw;
                   end;
           		else MessageDlg('$f3 REPE invalido', mtInformation,[mbOk],0);
@@ -2842,15 +2830,15 @@ case instruccion of
                   end;
 		          $18:begin
                     r.f.CarryVal:=(tmpb<>0);
-                    tmpb:=not(tmpb)+1;
-                    SetSZPF_Byte(tmpb);
-                    PutbackRMByte(ModRM,tmpb);
+                    tmpw:=not(tmpb)+1;
+                    SetSZPF_Byte(tmpw);
+                    PutbackRMByte(ModRM,tmpw);
                     if (ModRM>=$c0) then self.contador:=self.contador+2
                       else self.contador:=self.contador+16;
                   end;
 		          $20:begin //MULU
-                    tmpw:=r.aw.l*tmpb;
-                    r.aw.w:=tmpw;
+                    tmpdw:=r.aw.l*tmpb;
+                    r.aw.w:=tmpdw;
                     r.f.OverVal:=(r.aw.h<>0);
                     r.f.CarryVal:=r.f.OverVal;
                     if (ModRM>=$c0) then self.contador:=self.contador+30
@@ -2893,9 +2881,9 @@ case instruccion of
                   end;
           		$18:begin  //NEG
                     r.f.CarryVal:=(tmpw<>0);
-                    tmpw:=not(tmpw)+1;
-                    SetSZPF_Word(tmpw);
-                    PutbackRMWord(ModRM,tmpw);
+                    tmpdw:=not(tmpw)+1;
+                    SetSZPF_Word(tmpdw);
+                    PutbackRMWord(ModRM,tmpdw);
                     if (ModRM>=$c0) then self.contador:=self.contador+2
                       else self.contador:=self.contador+16;
                   end;
@@ -2909,7 +2897,7 @@ case instruccion of
                       else self.contador:=self.contador+36;
                   end;
           		$28:begin // MUL
-                    tmpi:=integer(smallint(r.aw.w))*integer(smallint(tmpw));
+                    tmpi:=smallint(r.aw.w)*smallint(tmpw);
                     r.aw.w:=tmpi and $ffff;
                     r.dw.w:=tmpi div $10000;
                     r.f.CarryVal:=(r.dw.w<>0);
@@ -2972,19 +2960,19 @@ case instruccion of
            tmpb:=GetRMByte(ModRM);  //tmp
            case (ModRM and $38) of
     	        $00:begin  // INC
-                     tmpb1:=tmpb+1;
+                     tmpw:=tmpb+1;
                      r.f.OverVal:=(tmpb=$7f);
-                     r.f.AuxVal:=((tmpb1 xor (tmpb xor 1)) and $10)<>0;
-                     SetSZPF_Byte(tmpb1);
-                     PutbackRMByte(ModRM,tmpb1);
+                     r.f.AuxVal:=((tmpw xor (tmpb xor 1)) and $10)<>0;
+                     SetSZPF_Byte(tmpw);
+                     PutbackRMByte(ModRM,tmpw);
                      CLKM(2,2,2,16,16,7,ModRM);
                   end;
 		          $08:begin // DEC
-                     tmpb1:=tmpb-1;
+                     tmpw:=tmpb-1;
                      r.f.OverVal:=(tmpb=$80);
-                     r.f.AuxVal:=((tmpb1 xor (tmpb xor 1)) and $10)<>0;
-                     SetSZPF_Byte(tmpb1);
-                     PutbackRMByte(ModRM,tmpb1);
+                     r.f.AuxVal:=((tmpw xor (tmpb xor 1)) and $10)<>0;
+                     SetSZPF_Byte(tmpw);
+                     PutbackRMByte(ModRM,tmpw);
                      CLKM(2,2,2,16,16,7,ModRM);
                   end;
               else MessageDlg('Instruccion $fe no implementada', mtInformation,[mbOk], 0);
@@ -2995,19 +2983,19 @@ case instruccion of
           tmpw:=GetRMWord(ModRM);  //tmp
           case (ModRM and $38) of
           	  $00:begin  //INC
-                    tmpw1:=tmpw+1;  //tmp1
+                    tmpdw:=tmpw+1;  //tmp1
                     r.f.OverVal:=(tmpw=$7fff);
-                    r.f.AuxVal:=((tmpw1 xor (tmpw xor 1)) and $10)<>0;
-                    SetSZPF_Word(tmpw1);
-                    PutbackRMWord(ModRM,tmpw1);
+                    r.f.AuxVal:=((tmpdw xor (tmpw xor 1)) and $10)<>0;
+                    SetSZPF_Word(tmpdw);
+                    PutbackRMWord(ModRM,tmpdw);
                     CLKM(2,2,2,24,16,7,ModRM);
                   end;
         		  $08:begin  //DEC
-                    tmpw1:=tmpw-1;  //tmp1
+                    tmpdw:=tmpw-1;  //tmp1
                     r.f.OverVal:=(tmpw=$8000);
-                    r.f.AuxVal:=((tmpw1 xor (tmpw xor 1)) and $10)<>0;
-                    SetSZPF_Word(tmpw1);
-                    PutbackRMWord(ModRM,tmpw1);
+                    r.f.AuxVal:=((tmpdw xor (tmpw xor 1)) and $10)<>0;
+                    SetSZPF_Word(tmpdw);
+                    PutbackRMWord(ModRM,tmpdw);
                     CLKM(2,2,2,24,16,7,ModRM);
                   end;
         		  $10:begin // CALL
@@ -3035,40 +3023,34 @@ case instruccion of
   end; //del case
 end;
 
-procedure cpu_nec.nec_nmi;
+procedure cpu_nec.set_input(irqline,state:byte;vect_req:byte=$ff);
 begin
-  self.change_nmi(CLEAR_LINE);
-  i_pushf;
-  r.f.T:=false;
-  r.f.I:=false;
-	PUSH(r.ps_r);
-	PUSH(r.ip);
-  r.ip:=read_word(2*4);
-  r.ps_r:=read_word(2*4+2);
-  self.contador:=self.contador+9;
-	self.prefetch_reset:=true;
+case irqline of
+  INT_IRQ:begin
+            if (state=CLEAR_LINE) then self.irq_pending:=self.irq_pending and not(INT_IRQ)
+	          else begin
+              self.vect_req:=vect_req;
+              self.irq_pending:=self.irq_pending or INT_IRQ;
+		          //self.halted:=false;
+            end;
+          end;
+  NMI_IRQ:begin
+            if (self.nmi_state=state) then exit;
+	          self.nmi_state:=state;
+	          if (state<>CLEAR_LINE) then begin
+		          self.irq_pending:=self.irq_pending or NMI_IRQ;
+		          //self.halted:=false;
+            end;
+          end;
+end;
 end;
 
 procedure cpu_nec.nec_interrupt(vect_num:word);
 begin
-  if self.no_interrupt then begin
-    if not(self.irq_pending) then self.vect:=vect_num;
-    self.irq_pending:=true;
-    self.no_interrupt:=false;
-    exit;
-  end;
-  if not(r.f.I) then begin
-    if not(self.irq_pending) then self.vect:=vect_num;
-    self.irq_pending:=true;
-    exit;
-  end;
-  if vect_num=$100 then vect_num:=self.vect;
-  self.change_irq(CLEAR_LINE);
-  self.irq_pending:=false;
-  self.contador:=self.contador+14;
   i_pushf;
-  r.f.T:=false;
-  r.f.I:=false;
+  r.f.t:=false;
+  r.f.i:=false;
+  r.f.m:=true;
 	PUSH(r.ps_r);
 	PUSH(r.ip);
   r.ip:=read_word(vect_num*4);
@@ -3083,24 +3065,32 @@ begin
 self.contador:=0;
 while self.contador<maximo do begin
   //IRQ's
-  prev_icount:=self.contador;
-  if self.irq_pending then nec_interrupt($100)
-    else if self.pedir_nmi<>CLEAR_LINE then nec_nmi
-      else if self.pedir_irq<>CLEAR_LINE then nec_interrupt(self.vect_req);
-  self.opcode:=true;
-  {if ((((r.ps_r shl 4)+r.ip)=$304d0) and (self.numero_cpu=0)) then begin
+  if ((self.irq_pending<>0) and not(self.no_interrupt)) then begin
+    if (self.irq_pending and NMI_IRQ)<>0 then begin
+      nec_interrupt(NEC_NMI_VECTOR);
+      self.irq_pending:=self.irq_pending and not(NMI_IRQ);
+      self.nmi_state:=CLEAR_LINE;
+      self.contador:=self.contador+9;
+    end else if (self.r.f.I and (self.irq_pending<>0)) then begin
+                nec_interrupt(self.vect_req);
+                self.irq_pending:=self.irq_pending and not(INT_IRQ);
+                self.contador:=self.contador+14;
+             end;
+  end;
+  self.no_interrupt:=false;
+  {if ((((r.ps_r shl 4)+r.ip)=$eecf5) and (self.numero_cpu=0)) then begin
       r.ip:=0;
-      r.ip:=$4d0;
+      r.ip:=$f5;
   end;}
   self.r.old_pc:=self.r.ip;
+  self.opcode:=true;
   instruccion:=self.fetch;
   self.opcode:=false;
-  self.ea_calculated:=false;
+  prev_icount:=self.contador;
   self.ejecuta_instruccion(instruccion);
-  self.do_prefetch(prev_ICount);
-  self.no_interrupt:=false;
   timers.update(self.contador-prev_icount,self.numero_cpu);
   if @self.despues_instruccion<>nil then self.despues_instruccion(self.contador-prev_icount);
+  self.do_prefetch(prev_icount);
 end; //del while
 end;
 

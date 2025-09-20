@@ -1,7 +1,7 @@
 ﻿unit upd765;
 
 interface
-uses sysutils,{$IFDEF WINDOWS}windows,{$ENDIF}dialogs;
+{$IFDEF WINDOWS}uses windows;{$ENDIF}
 
 procedure WriteFDCMotor(value:byte);
 procedure WriteFDCData(value:byte);

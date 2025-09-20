@@ -172,7 +172,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for linea:=0 to 261 do begin
   //main
   for h:=1 to CPU_SYNC do begin
@@ -351,6 +351,7 @@ begin
  YM2151_0.reset;
  pokey_0.reset;
  slapstic_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ff6f;
  marcade.in1:=$ff;

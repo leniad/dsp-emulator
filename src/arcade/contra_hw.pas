@@ -20,17 +20,17 @@ const
         (n:'633e08.10g';l:$100;p:0;crc:$9f0949fa),(n:'633e09.12g';l:$100;p:$100;crc:$14ca5e19),
         (n:'633f10.18g';l:$100;p:$200;crc:$2b244d84),(n:'633f11.20g';l:$100;p:$300;crc:$14ca5e19));
         //Dip
-        contra_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin B'))),());
-        contra_dip_b:array [0..4] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 70K'),(dip_val:$10;dip_name:'40K 80K'),(dip_val:$8;dip_name:'80K'),(dip_val:$0;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        contra_dip_c:array [0..2] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Sound Mode';number:2;dip:((dip_val:$0;dip_name:'Mono'),(dip_val:$8;dip_name:'Stereo'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        contra_dip_a:array [0..2] of def_dip2=(
+        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+        (mask:$f0;name:'Coin B';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin B')),());
+        contra_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
+        (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 70K','40K 80K','80K','50K')),
+        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        contra_dip_c:array [0..2] of def_dip2=(
+        (mask:$1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
+        (mask:$8;name:'Sound Mode';number:2;val2:(0,8);name2:('Mono','Stereo')),());
         CPU_SYNC=4;
 
 var
@@ -155,7 +155,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=hd6309_0.tframes;
 frame_s:=m6809_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
     for h:=1 to CPU_SYNC do begin
       //Main
@@ -283,6 +283,7 @@ procedure reset_contra;
 begin
  hd6309_0.reset;
  m6809_0.reset;
+ reset_video;
  reset_audio;
  K007121_reset(0);
  K007121_reset(1);
@@ -365,10 +366,10 @@ clut_contra;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7a;
-marcade.dswc:=$0f;
-marcade.dswa_val:=@contra_dip_a;
-marcade.dswb_val:=@contra_dip_b;
-marcade.dswc_val:=@contra_dip_c;
+marcade.dswc:=$f;
+marcade.dswa_val2:=@contra_dip_a;
+marcade.dswb_val2:=@contra_dip_b;
+marcade.dswc_val2:=@contra_dip_c;
 reset_contra;
 iniciar_contra:=true;
 end;

@@ -71,7 +71,7 @@ for f:=0 to $3fff do begin
       data2:=data2 shr 1;
     end;
 end;
-actualiza_trozo_simple(0,0,255,255,1);
+actualiza_trozo(0,0,255,255,1,0,0,255,255,PANT_TEMP);
 end;
 
 procedure update_video_speakres;
@@ -96,7 +96,7 @@ for f:=0 to $3fff do begin
       data2:=data2 shr 1;
     end;
 end;
-actualiza_trozo_simple(0,0,255,255,1);
+actualiza_trozo(0,0,255,255,1,0,0,255,255,PANT_TEMP);
 end;
 
 procedure eventos_route16;
@@ -128,7 +128,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -259,6 +259,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  if main_vars.tipo_maquina=259 then dac_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

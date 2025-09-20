@@ -9,11 +9,12 @@ type
         destructor free;
     public
           sound_latch,pedir_irq:byte;
-          z80:cpu_z80;
           memoria:array[0..$83ff] of byte;
+          enabled:boolean;
           procedure reset;
           procedure run;
     private
+          z80:cpu_z80;
           tipo:byte;
           frame_s:single;
           last_cycles,clock:integer;
@@ -60,8 +61,8 @@ begin
 case direccion of
   0..$1fff:konamisnd_jungler_getbyte:=konamisnd_0.memoria[direccion];
   $2000..$2fff:konamisnd_jungler_getbyte:=konamisnd_0.memoria[$2000+(direccion and $3ff)];
-  $4000..$4fff:konamisnd_jungler_getbyte:=ay8910_0.Read;
-  $6000..$6fff:konamisnd_jungler_getbyte:=ay8910_1.Read;
+  $4000..$4fff:konamisnd_jungler_getbyte:=ay8910_0.read;
+  $6000..$6fff:konamisnd_jungler_getbyte:=ay8910_1.read;
 end;
 end;
 
@@ -71,10 +72,10 @@ case direccion of
      0..$1fff:;
      $2000..$2fff:konamisnd_0.memoria[$2000+(direccion and $3ff)]:=valor;
      $3000..$3fff:; //filtros
-     $4000..$4fff:ay8910_0.Write(valor);
-     $5000..$5fff:ay8910_0.Control(valor);
-     $6000..$6fff:ay8910_1.Write(valor);
-     $7000..$7fff:ay8910_1.Control(valor);
+     $4000..$4fff:ay8910_0.write(valor);
+     $5000..$5fff:ay8910_0.control(valor);
+     $6000..$6fff:ay8910_1.write(valor);
+     $7000..$7fff:ay8910_1.control(valor);
 end;
 end;
 
@@ -136,8 +137,8 @@ end;
 procedure konamisnd_frogger_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-    $40:ay8910_0.Write(valor);
-    $80:ay8910_0.Control(valor);
+    $40:ay8910_0.write(valor);
+    $80:ay8910_0.control(valor);
 end;
 end;
 
@@ -153,8 +154,10 @@ end;
 
 procedure konamisnd_update;
 begin
-  ay8910_0.update;
-  ay8910_1.update;
+  if konamisnd_0.enabled then begin
+    ay8910_0.update;
+    ay8910_1.update;
+  end;
 end;
 
 constructor konamisnd_chip.create(amp,ntipo:byte;clock:integer;frame_div:word);
@@ -165,7 +168,6 @@ self.z80.init_sound(konamisnd_update);
 ay8910_0:=ay8910_chip.create(clock,AY8910,amp);
 ay8910_0.change_io_calls(konamisnd0_porta,konamisnd0_portb,nil,nil);
 ay8910_1:=ay8910_chip.create(clock,AY8910,amp);
-self.frame_s:=self.z80.tframes;
 case ntipo of
   TIPO_TIMEPLT:self.z80.change_ram_calls(konamisnd_timeplt_getbyte,konamisnd_timeplt_putbyte);
   TIPO_JUNGLER:self.z80.change_ram_calls(konamisnd_jungler_getbyte,konamisnd_jungler_putbyte);
@@ -188,11 +190,13 @@ end;
 procedure konamisnd_chip.reset;
 begin
 self.z80.reset;
+self.frame_s:=self.z80.tframes;
 ay8910_0.reset;
 ay8910_1.reset;
 self.sound_latch:=0;
 self.clock:=0;
 self.last_cycles:=0;
+self.enabled:=true;
 end;
 
 procedure konamisnd_chip.run;
@@ -226,7 +230,7 @@ timer:=(hibit shl 7) or           // B7 is the output of the final divide-by-2 c
 		(BIT_n(cycles,14) shl 6) or // B6 is the high bit of the divide-by-5 counter
 		(BIT_n(cycles,13) shl 5) or // B5 is the 2nd highest bit of the divide-by-5 counter
 		(BIT_n(cycles,11) shl 4) or // B4 is the high bit of the divide-by-8 counter
-		$0e;                        // assume remaining bits are high, except B0 which is grounded
+		$e;                        // assume remaining bits are high, except B0 which is grounded
 end;
 
 end.

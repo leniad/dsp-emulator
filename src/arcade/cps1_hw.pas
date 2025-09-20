@@ -565,7 +565,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
     //main
     m68000_0.run(frame_m);
@@ -823,7 +823,6 @@ procedure reset_cps1;
 begin
  m68000_0.reset;
  z80_0.reset;
- reset_audio;
  case main_vars.tipo_maquina of
   103..111:begin
              ym2151_0.reset;
@@ -834,6 +833,8 @@ begin
              eepromser_0.reset;
           end;
  end;
+ reset_video;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;

@@ -18,10 +18,10 @@ type
       ADPCMVoice=record
 	        playing:boolean;			//if we are actively playing
 	        base_offset:dword;		// pointer to the base memory location
-	        sample:dword;			// current sample number
-	        count:dword;			// total samples to play
-          adpcm:adpcm_state; // current ADPCM state
-	        volume:dword;			// output volume
+	        sample:dword;			    // current sample number
+	        count:dword;			    // total samples to play
+          adpcm:adpcm_state;    // current ADPCM state
+	        volume:byte;			    // output volume
       end;
       snd_okim6295=class(snd_chip_class)
             constructor Create(clock:dword;pin7:byte;amp:single=1);
@@ -47,8 +47,6 @@ type
             function generate_adpcm(num_voice:byte):integer;
             procedure stream_update;
       end;
-
-procedure internal_update_oki6295(index:byte);
 
 var
     oki_6295_0,oki_6295_1:snd_okim6295;
@@ -109,8 +107,17 @@ begin
   end;
 end;
 
+procedure internal_update_oki6295(index:byte);
+begin
+  case index of
+    0:oki_6295_0.stream_update;
+    1:oki_6295_1.stream_update;
+  end;
+end;
+
 constructor snd_okim6295.create(clock:dword;pin7:byte;amp:single=1);
 begin
+  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   getmem(self.rom,$40000);
 	compute_tables;
@@ -210,7 +217,7 @@ begin
   self.voice[num_voice].sample:=sample;
   // output to the buffer, scaling by the volume
   //signal in range -2048..2047, volume in range 2..32 => signal * volume / 2 in range -32768..32767
-  generate_adpcm:=round(((self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1)))*self.amp);
+  generate_adpcm:=self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1);
 end;
 
 procedure snd_okim6295.reset;
@@ -317,18 +324,10 @@ begin
     else if self.out_>32767 then self.out_:=32767;
 end;
 
-procedure internal_update_oki6295(index:byte);
-begin
-  case index of
-    0:oki_6295_0.stream_update;
-    1:oki_6295_1.stream_update;
-  end;
-end;
-
 procedure snd_okim6295.update;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=self.out_;
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.out_;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.out_*self.amp);
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.out_*self.amp);
 end;
 
 end.

@@ -5,22 +5,17 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}timer_engine,sound_engine,main_engine;
 
 type
      //Call functions
-     tgetbyte=function (direccion:word):byte;
-     tputbyte=procedure (direccion:word;valor:byte);
-     tgetbyte16=function (direccion:dword):byte;
-     tputbyte16=procedure (direccion:dword;valor:byte);
-     tgetword=function (direccion:dword):word;
-     tputword=procedure (direccion:dword;valor:word);
-     tdespues_instruccion=procedure (tstates:word);
+     tgetbyte=function(direccion:word):byte;
+     tputbyte=procedure(direccion:word;valor:byte);
+     tgetbyte16=function(direccion:dword):byte;
+     tputbyte16=procedure(direccion:dword;valor:byte);
+     tgetword=function(direccion:dword):word;
+     tputword=procedure(direccion:dword;valor:word);
+     tdespues_instruccion=procedure(tstates:word);
      cpu_inport_call=function:byte;
-     cpu_outport_call=procedure (valor:byte);
+     cpu_outport_call=procedure(valor:byte);
      cpu_inport_call16=function:word;
-     cpu_outport_call16=procedure (valor:word);
-     //CPU Master class
-     tcpu_info=record
-       clock:dword;
-       num_cpu:byte;
-     end;
+     cpu_outport_call16=procedure(valor:word);
      cpu_class=class
           public
             //Misc
@@ -50,10 +45,9 @@ type
             getbyte:tgetbyte;
             putbyte:tputbyte;
         end;
-const
-  MAX_CPU=6;
+
 var
-  cpu_info:array[0..MAX_CPU] of tcpu_info;
+  cpu_0_clock:dword; //Para el autofire
 
 function cpu_main_init(clock:dword):byte;
 procedure cpu_main_reset;
@@ -122,8 +116,7 @@ end;
 
 function cpu_main_init(clock:dword):byte;
 begin
-  cpu_info[cpu_quantity].clock:=clock;
-  cpu_info[cpu_quantity].num_cpu:=cpu_quantity;
+  if cpu_quantity=0 then cpu_0_clock:=clock;
   cpu_main_init:=cpu_quantity;
   cpu_quantity:=cpu_quantity+1;
 end;

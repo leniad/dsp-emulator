@@ -2,8 +2,8 @@ unit pv2000;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,main_engine,controls_engine,sysutils,sound_engine,file_engine,
-     misc_functions,dialogs,tms99xx,sn_76496,rom_engine,lenguaje;
+     nz80,main_engine,controls_engine,sysutils,sound_engine,misc_functions,
+     tms99xx,sn_76496,rom_engine;
 
 function iniciar_pv2000:boolean;
 
@@ -131,13 +131,13 @@ var
 begin
 init_controls(false,true,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
       z80_0.run(frame);
       frame:=frame+z80_0.tframes-z80_0.contador;
       tms_0.refresh(f);
   end;
-  actualiza_trozo_simple(0,0,284,243,1);
+  actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
   eventos_pv2000;
   video_sync;
 end;
@@ -220,7 +220,7 @@ procedure pv2000_grabar_snapshot;
 var
   nombre:string;
 begin
-nombre:=snapshot_main_write;
+nombre:=snapshot_main_write(SPV2000);
 Directory.pv2000:=ExtractFilePath(nombre);
 end;
 
@@ -230,14 +230,14 @@ var
   longitud:integer;
   datos:pbyte;
 begin
-  if not(openrom(romfile)) then exit;
+  if not(openrom(romfile,SPV2000)) then exit;
   getmem(datos,$10000);
-  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+  if not(extract_data(romfile,datos,longitud,nombre_file,SPV2000)) then begin
     freemem(datos);
     exit;
   end;
   extension:=extension_fichero(nombre_file);
-  if (extension='DSP') then snapshot_r(datos,longitud)
+  if (extension='DSP') then snapshot_r(datos,longitud,SPV2000)
     else begin
             copymemory(@memoria[$c000],datos,longitud);
             reset_pv2000;

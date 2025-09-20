@@ -2,7 +2,7 @@ unit sega_vdp;
 
 interface
 uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
-     main_engine,pal_engine,tms99xx,dialogs,timer_engine;
+     main_engine,pal_engine,tms99xx,timer_engine;
 
 const
   LINES_NTSC=262;
@@ -32,6 +32,7 @@ const
       public
         irq_timer,linea_back,video_mode,hpos,hpos_temp:byte;
         VIDEO_VISIBLE_Y_TOTAL,VIDEO_Y_TOTAL:word;
+        BORDER_DIFF:byte;
         tms:tms99xx_chip;
         gg_set,trans,is_pal:boolean;
         procedure refresh(linea:word);
@@ -577,6 +578,7 @@ begin
 self.VIDEO_VISIBLE_Y_TOTAL:=294;
 self.VIDEO_Y_TOTAL:=LINES_PAL;
 self.is_pal:=true;
+self.BORDER_DIFF:=27;
 case mode of
   0:begin   //256x192
       self.Y_PIXELS:=192;
@@ -601,6 +603,7 @@ begin
 self.VIDEO_VISIBLE_Y_TOTAL:=243;
 self.VIDEO_Y_TOTAL:=LINES_NTSC;
 self.is_pal:=false;
+self.BORDER_DIFF:=0;
 case mode of
   0:begin
       self.Y_PIXELS:=192;

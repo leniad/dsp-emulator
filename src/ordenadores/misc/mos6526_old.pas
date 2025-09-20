@@ -1,8 +1,6 @@
 unit mos6526_old;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}dialogs,sysutils,cpu_misc,main_engine;
-
 type
   mos6526_chip=class
       constructor create(clock:dword);
@@ -15,7 +13,7 @@ type
       function read(direccion:byte):byte;
       procedure write(direccion,valor:byte);
       procedure change_calls(pa_read,pb_read:cpu_inport_call;pa_write,pb_write,irq_call:cpu_outport_call);
-      procedure sync(frame:single);
+      procedure sync(frame:word);
       procedure flag_w(valor:byte);
       procedure clock_tod;
     private
@@ -40,12 +38,9 @@ type
       procedure update_interrupt;
       procedure clock_pipeline;
   end;
-
 var
   mos6526_0,mos6526_1:mos6526_chip;
-
 implementation
-
 const
   PRA_=0;
 	PRB_=1;
@@ -64,31 +59,25 @@ const
   IMR_=ICR_;
 	CRA_=$E;
 	CRB_=$F;
-
   ICR_TA=$01;
   ICR_TB=$02;
   ICR_ALARM=$04;
   ICR_SP=$08;
   ICR_FLAG=$10;
-
   CRA_INMODE_PHI2=0;
 	CRA_INMODE_CNT=1;
-
   CRB_INMODE_PHI2=0;
 	CRB_INMODE_CNT=1;
 	CRB_INMODE_TA=2;
 	CRB_INMODE_CNT_TA=3;
 
-
 constructor mos6526_chip.create(clock:dword);
 begin
   self.clock:=clock;
 end;
-
 destructor mos6526_chip.free;
 begin
 end;
-
 procedure mos6526_chip.change_calls(pa_read,pb_read:cpu_inport_call;pa_write,pb_write,irq_call:cpu_outport_call);
 begin
   self.pa_read:=pa_read;
@@ -97,7 +86,6 @@ begin
   self.pb_write:=pb_write;
   self.irq_call:=irq_call;
 end;
-
 procedure mos6526_chip.reset;
 begin
   self.tod_stopped:=true;
@@ -148,13 +136,11 @@ begin
   self.cnt:=1;
   self.flag:=1;
 end;
-
-procedure mos6526_chip.sync(frame:single);
+procedure mos6526_chip.sync(frame:word);
 var
-  tframe:single;
+  f:word;
 begin
-  tframe:=frame;
-  while (tframe>0) do begin
+  for f:=1 to frame do begin
     if (self.pc=0) then begin
   		self.pc:=1;
       //MessageDlg('writepc', mtInformation,[mbOk], 0);
@@ -166,13 +152,8 @@ begin
   	self.update_pb;
   	self.update_interrupt;
   	self.clock_pipeline;
-    tframe:=tframe-1;
   end;
 end;
-
-//-------------------------------------------------
-//  clock_ta - clock timer A
-//-------------------------------------------------
 procedure mos6526_chip.clock_ta;
 begin
 	if (self.count_a3<>0) then self.ta:=self.ta-1;
@@ -192,10 +173,6 @@ begin
 		self.ta:=self.ta_latch;
 	end;
 end;
-
-//-------------------------------------------------
-//  clock_tb - clock timer B
-//-------------------------------------------------
 procedure mos6526_chip.clock_tb;
 begin
 	if (self.count_b3<>0) then self.tb:=self.tb-1;
@@ -216,17 +193,11 @@ begin
 	end;
 end;
 
-//-------------------------------------------------
-//  serial_output -
-//-------------------------------------------------
 procedure mos6526_chip.serial_output;
 begin
-	if ((self.ta_out<>0) and ((self.cra and $40)<>0)) then MessageDlg('serial write', mtInformation,[mbOk], 0);
+	//if ((self.ta_out<>0) and ((self.cra and $40)<>0)) then MessageDlg('serial write', mtInformation,[mbOk], 0);
 end;
 
-//-------------------------------------------------
-//  update_interrupt -
-//-------------------------------------------------
 procedure mos6526_chip.update_interrupt;
 begin
 	if (not(self.irq) and (self.ir1<>0)) then begin
@@ -237,54 +208,39 @@ begin
 	if ((self.tb_out<>0) and not(self.icr_read)) then self.icr:=self.icr or ICR_TB;
 	self.icr_read:=false;
 end;
-
-//-------------------------------------------------
-//  clock_pipeline - clock pipeline
-//-------------------------------------------------
 procedure mos6526_chip.clock_pipeline;
 begin
 	// timer A pipeline
 	self.count_a3:=self.count_a2;
 	if ((self.cra and $20)=CRA_INMODE_PHI2) then self.count_a2:=1;
-	self.count_a2:=self.count_a2 and $1;
+	self.count_a2:=self.count_a2 and (self.cra and 1);
 	self.count_a1:=self.count_a0;
 	self.count_a0:=0;
 	self.load_a2:=self.load_a1;
 	self.load_a1:=self.load_a0;
 	self.load_a0:=(self.cra and $10) shr 4;
-	self.cra:=self.cra and $ef;
-
+	self.cra:=self.cra and not($10);
 	self.oneshot_a0:=(self.cra and 8) shr 3;
-
 	// timer B pipeline
 	self.count_b3:=self.count_b2;
-
 	case ((self.crb and $60) shr 5) of
 	  CRB_INMODE_PHI2:self.count_b2:=1;
 	  CRB_INMODE_TA:self.count_b2:=self.ta_out;
 	  CRB_INMODE_CNT_TA:self.count_b2:=byte((self.ta_out<>0) and (self.cnt<>0));
   end;
-
 	self.count_b2:=self.count_b2 and (self.crb and 1);
 	self.count_b1:=self.count_b0;
 	self.count_b0:=0;
-
 	self.load_b2:=self.load_b1;
 	self.load_b1:=self.load_b0;
 	self.load_b0:=(self.crb and $10) shr 4;
-	self.crb:=self.crb and $ef;
-
+	self.crb:=self.crb and not($10);
 	self.oneshot_b0:=(self.crb and 8) shr 3;
-
 	// interrupt pipeline
 	if (self.ir0<>0) then self.ir1:=1;
   if (self.icr and self.imr)<>0 then self.ir0:=1
     else self.ir0:=0;
 end;
-
-//-------------------------------------------------
-//  update_pa - update port A
-//-------------------------------------------------
 procedure mos6526_chip.update_pa;
 var
   pa:byte;
@@ -295,10 +251,6 @@ begin
 		if addr(self.pa_write)<>nil then self.pa_write(pa);
 	end;
 end;
-
-//-------------------------------------------------
-//  update_pb - update port B
-//-------------------------------------------------
 procedure mos6526_chip.update_pb;
 var
   pb,pb6,pb7:byte;
@@ -307,13 +259,13 @@ begin
 	if (self.cra and 2)<>0 then begin
 		if (self.cra and 4)<>0 then pb6:=self.ta_pb6
       else pb6:=self.ta_out;
-		pb:=pb and $bf;
+		pb:=pb and not($40);
 		pb:=pb or (pb6 shl 6);
   end;
 	if (self.crb and 2)<>0 then begin
-		if (self.crb and $4)<>0 then pb7:=self.tb_pb7
+		if (self.crb and 4)<>0 then pb7:=self.tb_pb7
       else pb7:=self.tb_out;
-		pb:=pb and $7f;
+		pb:=pb and not($80);
 		pb:=pb or (pb7 shl 7);
 	end;
 	if (self.pb<>pb) then begin
@@ -321,10 +273,6 @@ begin
 		self.pb:=pb;
 	end;
 end;
-
-//-------------------------------------------------
-//  write_tod - time-of-day write
-//-------------------------------------------------
 procedure mos6526_chip.write_tod(offset,data:byte);
 var
   shift:byte;
@@ -333,10 +281,6 @@ begin
 	if (self.crb and $80)<>0 then self.alarm:=(self.alarm and not($ff shl shift)) or (data shl shift)
 	  else self.tod:=(self.tod and not($ff shl shift)) or (data shl shift);
 end;
-
-//-------------------------------------------------
-//  set_cra - control register A write
-//-------------------------------------------------
 procedure mos6526_chip.set_cra(data:byte);
 begin
 	if (((self.cra and 1)=0) and ((data and 1)<>0)) then self.ta_pb6:=1;
@@ -355,7 +299,6 @@ begin
 	self.cra:=data;
 	self.update_pb;
 end;
-
 procedure mos6526_chip.flag_w(valor:byte);
 begin
 	if (self.flag<>valor) then begin
@@ -363,12 +306,11 @@ begin
     self.flag:=valor;
   end;
 end;
-
 procedure mos6526_chip.clock_tod;
 function bcd_increment(value:byte):byte;
 begin
 	value:=value+1;
-	if ((value and $0f)>=$0a) then value:=value+($10-$0a);
+	if ((value and $0f)>=$0a) then value:=value+$10-$0a;
 	bcd_increment:=value;
 end;
 var
@@ -402,19 +344,14 @@ begin
 			end;
 		end;
 	end;
-	self.tod:= (subsecond shl 0) or (second shl 8) or (minute shl 16) or (hour or 24);
+	self.tod:=(subsecond shl 0) or (second shl 8) or (minute shl 16) or (hour or 24);
 end;
-
-//-------------------------------------------------
-//  set_crb - control register B write
-//-------------------------------------------------
 procedure mos6526_chip.set_crb(data:byte);
 begin
 	if (((self.crb and 1)=0) and ((data and $1)<>0)) then self.tb_pb7:=1;
 	self.crb:=data;
 	self.update_pb;
 end;
-
 function mos6526_chip.read(direccion:byte):byte;
 var
   res,tempb,pb6,pb7:byte;
@@ -437,13 +374,13 @@ case (direccion and $f) of
 		if (self.cra and $2)<>0 then begin
       if (self.cra and $4)<>0 then pb6:=self.ta_pb6
         else pb6:=self.ta_out;
-			res:=res and $bf;
+			res:=res and not($40);
 			res:=res or (pb6 shl 6);
 		end;
 		if (self.crb and $2)<>0 then begin
       if (self.crb and 4)<>0 then pb7:=self.tb_pb7
         else pb7:=self.tb_out;
-			res:=res and $7f;
+			res:=res and not($80);
 			res:=res or (pb7 shl 7);
 		end;
 		self.pc:=0;
@@ -457,6 +394,10 @@ case (direccion and $f) of
   TB_HI_:res:=self.tb shr 8;
   ICR_:begin
     res:=(self.ir1 shl 7) or self.icr;
+    //if self.icr<>0 then begin
+    //  read:=res;
+    //  exit
+    //end;
 		self.icr_read:=true;
 		self.ir0:=0;
 		self.ir1:=0;
@@ -470,13 +411,18 @@ case (direccion and $f) of
 end;
   read:=res;
 end;
-
 procedure mos6526_chip.write(direccion,valor:byte);
 begin
 case (direccion and $f) of
   PRA_:begin
 		    self.pra:=valor;
 		    self.update_pa;
+      end;
+  PRB_:begin
+		    self.prb:=valor;
+		    self.update_pb;
+        self.pc:=0;
+        //self.writepc
       end;
   DDRA_:begin
           self.ddra:=valor;
@@ -503,7 +449,6 @@ case (direccion and $f) of
 		      self.tb_latch:= (self.tb_latch and $ff00) or valor;
 		      if (self.load_b2<>0) then self.tb:=(self.tb and $ff00) or valor;
          end;
-
 	TB_HI_:begin
 		      self.tb_latch:= (valor shl 8) or (self.tb_latch and $ff);
 		      if ((self.crb and 1)=0) then self.load_b0:=1;
@@ -530,5 +475,4 @@ case (direccion and $f) of
   else MessageDlg('write mos6526 desconocido '+inttohex(direccion,4), mtInformation,[mbOk], 0);
 end;
 end;
-
 end.

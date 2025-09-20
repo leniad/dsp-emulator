@@ -121,7 +121,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
     //Main
     z80_0.run(frame_m);
@@ -265,15 +265,15 @@ savedata_qsnapshot(data,size);
 size:=ay8910_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$6000],$a000);
-savedata_com_qsnapshot(@mem_snd[$1000],$f000);
+savedata_qsnapshot(@memoria[$6000],$a000);
+savedata_qsnapshot(@mem_snd[$1000],$f000);
 //MISC
 buffer[0]:=sound_latch;
 buffer[1]:=mcu_clock;
 buffer[2]:=rom_bank;
 savedata_qsnapshot(@buffer,3);
-savedata_com_qsnapshot(@video_control,$10);
-savedata_com_qsnapshot(@video_ram,$4000*4);
+savedata_qsnapshot(@video_control,$10);
+savedata_qsnapshot(@video_ram,$4000*4);
 freemem(data);
 close_qsnapshot;
 end;
@@ -314,6 +314,7 @@ begin
  z80_0.change_nmi(PULSE_LINE);
  z80_1.reset;
  ay8910_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

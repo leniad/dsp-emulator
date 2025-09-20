@@ -8,6 +8,10 @@ const
   INPUT_PORT_A=-1;
   INPUT_PORT_B=-2;
   INPUT_PORT_C=-3;
+  INTERFACE_SCRAMBLE_REVERSE=1;
+  USE_MAGIC_ADDRESS_XOR=2;
+  INTERFACE_SCRAMBLE_INTERLEAVE=4;
+
 type
   ram_type=record
     wo:integer;
@@ -16,13 +20,10 @@ type
   end;
 
   cpu_deco_146=class
-      constructor create;
+      constructor create(props:byte=0);
       destructor free;
     public
       procedure set_interface_scramble(a9,a8,a7,a6,a5,a4,a3,a2,a1,a0:byte);
-      procedure set_interface_scramble_reverse;
-      procedure set_interface_scramble_interleave;
-      procedure set_use_magic_address_xor;
       function read_data(address:word;var csflags:byte):word;
       procedure reset;
       procedure write_data(address,data:word;var csflags:byte);
@@ -43,7 +44,7 @@ type
     end;
 
 var
-  main_deco146:cpu_deco_146;
+  deco146_0:cpu_deco_146;
 
 implementation
 const
@@ -1073,26 +1074,26 @@ const
 (wo:$06e;m:($04,$05,$06,$07,$00,$01,$02,$03,$0c,$0d,$0e,$0f,$08,$09,$0a,$0b);ux:true;un:false), //0x7fc
 (wo:$04c;m:($04,$05,$06,$07,$08,$09,$0a,$0b,$00,$01,$02,$03,$0c,$0d,$0e,$0f);ux:false;un:true)); //0x7fe
 
-constructor cpu_deco_146.create;
+constructor cpu_deco_146.create(props:byte=0);
 begin
-  self.set_interface_scramble(9,8,7,6,5,4,3,2,1,0);
   self.bankswitch_swap_read_address:=$78;
 	self.magic_read_address_xor:=$44a;
-	self.magic_read_address_xor_enabled:=false;
+  self.magic_read_address_xor_enabled:=(props and USE_MAGIC_ADDRESS_XOR)<>0;
 	self.xor_port:=$2c;
 	self.mask_port:=$36;
 	self.soundlatch_port:=$64;
 	self.configregion:=$8;
   copymemory(@self.internal_ram,@deco_146ram,sizeof(deco_146ram));
+  if (props and INTERFACE_SCRAMBLE_REVERSE)<>0 then self.set_interface_scramble(0,1,2,3,4,5,6,7,8,9)
+    else self.set_interface_scramble(9,8,7,6,5,4,3,2,1,0);
+  if (props and INTERFACE_SCRAMBLE_INTERLEAVE)<>0 then set_interface_scramble(4,5,3,6,2,7,1,8,0,9);
 end;
 
-destructor cpu_deco_146.Free;
+destructor cpu_deco_146.free;
 begin
 end;
 
-
 procedure cpu_deco_146.reset;
-
 var
   i:byte;
 begin
@@ -1103,10 +1104,10 @@ begin
 	self.region_selects[4]:=0;
 	self.region_selects[5]:=0;
 	self.current_rambank:=0;
-	self.m_nand:=$0000;
-	self.m_xor:=$0000;
+	self.m_nand:=0;
+	self.m_xor:=0;
 	self.m_latchaddr:=$ffff;
-	self.m_latchdata:=$0000;
+	self.m_latchdata:=0;
 	self.m_latchflag:=0;
   for i:=0 to $7f do begin
 		// the mutant fighter old sim assumes 0x0000
@@ -1127,21 +1128,6 @@ begin
   external_addrswap[2]:=a2;
   external_addrswap[1]:=a1;
   external_addrswap[0]:=a0;
-end;
-
-procedure cpu_deco_146.SET_INTERFACE_SCRAMBLE_REVERSE;
-begin
-  set_interface_scramble(0,1,2,3,4,5,6,7,8,9);
-end;
-
-procedure cpu_deco_146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
-begin
-  set_interface_scramble(4,5,3,6,2,7,1,8,0,9);
-end;
-
-procedure cpu_deco_146.SET_USE_MAGIC_ADDRESS_XOR;
-begin
-  magic_read_address_xor_enabled:=true;
 end;
 
 function reorder(input:word;weights:pbyte):word;

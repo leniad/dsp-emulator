@@ -28,15 +28,15 @@ const
         (n:'tse_20.13j';l:$8000;p:$20000;crc:$b03db778),(n:'tsu_19.11j';l:$8000;p:$28000;crc:$b5c82722),
         (n:'tse_22.17j';l:$8000;p:$30000;crc:$d4dedeb3),(n:'tsu_21.15j';l:$8000;p:$38000;crc:$98777006));
         //DIP
-        bionicc_dip:array [0..8] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Lives';number:4;dip:((dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'4'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$400;name:'Cabinet';number:2;dip:((dip_val:$400;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1800;name:'Bonus Life';number:4;dip:((dip_val:$1800;dip_name:'20k 40k 100k 60k+'),(dip_val:$1000;dip_name:'30k 50k 120k 70k+'),(dip_val:$800;dip_name:'20k 60k'),(dip_val:$0;dip_name:'30k 70k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$6000;name:'Difficulty';number:4;dip:((dip_val:$4000;dip_name:'Easy'),(dip_val:$6000;dip_name:'Medium'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Freeze';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bionicc_dip:array [0..8] of def_dip2=(
+        (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),
+        (mask:$300;name:'Lives';number:4;val4:($300,$200,$100,0);name4:('3','4','5','7')),
+        (mask:$400;name:'Cabinet';number:2;val2:($400,0);name2:('Upright','Cocktail')),
+        (mask:$1800;name:'Bonus Life';number:4;val4:($1800,$1000,$800,0);name4:('20K 40K 100K 60K+','30K 50K 120K 70K+','20K 60K','30K 70K')),
+        (mask:$6000;name:'Difficulty';number:4;val4:($4000,$6000,$2000,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$8000;name:'Freeze';number:2;val2:($8000,0);name2:('Off','On')),());
 
 var
  scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
@@ -50,7 +50,7 @@ procedure update_video_bionicc;
 var
   f,color,x,y,nchar,atrib,sx,sy,pos:word;
 begin
-fill_full_screen(3,1024);
+fill_full_screen(5,$400);
 for f:=$0 to $440 do begin
   //BG
   x:=f mod 33;
@@ -62,7 +62,7 @@ for f:=$0 to $440 do begin
   color:=(atrib and $18) shr 3;
   if (gfx[1].buffer[pos] or buffer_color[color+$40]) then begin
     nchar:=(bg_ram[pos shl 1] and $ff) or ((atrib and $7) shl 8);
-    put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,4,1,(atrib and $80)<>0,(atrib and $40)<>0);
+    put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,2,1,(atrib and $80)<>0,(atrib and $40)<>0);
     gfx[1].buffer[f]:=false;
   end;
 end;
@@ -81,9 +81,9 @@ for f:=$0 to $120 do begin // $121=17*17
     color:=(atrib and $18) shr 3;
     if (gfx[2].buffer[pos] or buffer_color[color+$44]) then begin
       nchar:=(fg_ram[pos shl 1] and $ff) or ((atrib and $7) shl 8);
-      put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,5,2,(atrib and $80)<>0,(atrib and $40)<>0,0);
-      if (atrib and $20)<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,6,2,(atrib and $80)<>0,(atrib and $40)<>0,1)
-        else put_gfx_block_trans(x*16,y*16,6,16,16);
+      put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,3,2,(atrib and $80)<>0,(atrib and $40)<>0,0);
+      if (atrib and $20)<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,4,2,(atrib and $80)<>0,(atrib and $40)<>0,1)
+        else put_gfx_block_trans(x*16,y*16,4,16,16);
       gfx[2].buffer[pos]:=false;
     end;
   end;
@@ -101,8 +101,8 @@ for f:=$0 to $3ff do begin
   end;
 end;
 // back
-scroll_x_y(4,3,scroll_bg_x and $7,scroll_bg_y and $7);
-scroll_x_y(5,3,scroll_fg_x and $f,scroll_fg_y and $f);
+scroll_x_y(2,5,scroll_bg_x and $7,scroll_bg_y and $7);
+scroll_x_y(3,5,scroll_fg_x and $f,scroll_fg_y and $f);
 //sprites
 for f:=$9f downto 0 do begin
   nchar:=buffer_sprites_w[f*4] and $7ff;
@@ -112,13 +112,13 @@ for f:=$9f downto 0 do begin
     y:=buffer_sprites_w[(f*4)+2];
     x:=buffer_sprites_w[(f*4)+3];
     put_gfx_sprite(nchar,color,(atrib and 2)<>0,false,3);
-    actualiza_gfx_sprite(x,y,3,3);
+    actualiza_gfx_sprite(x,y,5,3);
   end;
 end;
-scroll_x_y(6,3,scroll_fg_x and $f,scroll_fg_y and $f);
+scroll_x_y(4,5,scroll_fg_x and $f,scroll_fg_y and $f);
 //front
-actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
-actualiza_trozo_final(0,16,256,224,3);
+actualiza_trozo(0,0,256,256,1,0,0,256,256,5);
+actualiza_trozo_final(0,16,256,224,5);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
@@ -156,7 +156,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
     //main
     m68000_0.run(frame_m);
@@ -168,12 +168,12 @@ while EmuStatus=EsRuning do begin
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
     case f of
-    127:m68000_0.irq[4]:=HOLD_LINE;
-    239:begin
-          m68000_0.irq[2]:=HOLD_LINE;
-          update_video_bionicc;
-          copymemory(@buffer_sprites_w,@ram[$400],$280*2);
-        end;
+      127:m68000_0.irq[4]:=HOLD_LINE;
+      239:begin
+            m68000_0.irq[2]:=HOLD_LINE;
+            update_video_bionicc;
+            copymemory(@buffer_sprites_w,@ram[$400],$280*2);
+          end;
     end;
  end;
  eventos_bionicc;
@@ -200,7 +200,6 @@ end;
 end;
 
 procedure bionicc_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(pos,data:word);
 var
   bright:byte;
@@ -361,6 +360,7 @@ begin
  z80_0.reset;
  mcs51_0.reset;
  ym2151_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$ffff;
  scroll_fg_x:=0;
@@ -392,13 +392,13 @@ iniciar_bionicc:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
-screen_init(3,512,512,false,true);
-screen_init(4,256+8,256+8);
-screen_mod_scroll(4,264,256,255,264,256,255);
-screen_init(5,256+16,256+16,true);
-screen_mod_scroll(5,272,256,255,272,256,255);
-screen_init(6,256+16,256+16,true);
-screen_mod_scroll(6,272,256,255,272,256,255);
+screen_init(2,256+8,256+8,true);
+screen_mod_scroll(2,264,256,255,264,256,255);
+screen_init(3,256+16,256+16,true);
+screen_mod_scroll(3,272,256,255,272,256,255);
+screen_init(4,256+16,256+16,true);
+screen_mod_scroll(4,272,256,255,272,256,255);
+screen_init(5,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
 m68000_0:=cpu_m68000.create(12000000,256);
@@ -414,7 +414,7 @@ if not(roms_load16w(@rom,bionicc_rom)) then exit;
 //cargar sonido
 if not(roms_load(@mem_snd,bionicc_sound)) then exit;
 //MCU
-mcs51_0:=cpu_mcs51.create(6000000,256);
+mcs51_0:=cpu_mcs51.create(I8X51,6000000,256);
 mcs51_0.change_io_calls(nil,in_port1,nil,nil,nil,out_port1,nil,out_port3);
 mcs51_0.change_ram_calls(mcu_ext_ram_read,mcu_ext_ram_write);
 if not(roms_load(mcs51_0.get_rom_addr,bionicc_mcu)) then exit;
@@ -450,7 +450,7 @@ gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
 convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$dfff;
-marcade.dswa_val:=@bionicc_dip;
+marcade.dswa_val2:=@bionicc_dip;
 //final
 reset_bionicc;
 iniciar_bionicc:=true;

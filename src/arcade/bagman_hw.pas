@@ -1,9 +1,12 @@
 unit bagman_hw;
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,bagman_pal;
+
 function iniciar_bagman:boolean;
+
 implementation
 const
         //bagman
@@ -31,13 +34,13 @@ const
         sbagman_sprites:array[0..1] of tipo_roms=(
         (n:'1.1c';l:$1000;p:0;crc:$a046ff44),(n:'3.1f';l:$1000;p:$1000;crc:$a4422da4));
         //DIP
-        bagman_dip:array [0..6] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Coinage';number:2;dip:((dip_val:$0;dip_name:'2C/1C 1C/1C 1C/3C 1C/7C'),(dip_val:$4;dip_name:'1C/1C 1C/2C 1C/6C 1C/14C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Difficulty';number:4;dip:((dip_val:$18;dip_name:'Easy'),(dip_val:$10;dip_name:'Medium'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Language';number:2;dip:((dip_val:$20;dip_name:'English'),(dip_val:$0;dip_name:'French'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Bonus Life';number:2;dip:((dip_val:$40;dip_name:'30k'),(dip_val:$0;dip_name:'40k'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bagman_dip:array [0..6] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','4','5')),
+        (mask:$4;name:'Coinage';number:2;val2:(0,4);name2:('2C/1C 1C/1C 1C/3C 1C/7C','1C/1C 1C/2C 1C/6C 1C/14C')),
+        (mask:$18;name:'Difficulty';number:4;val4:($18,$10,8,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$20;name:'Language';number:2;val2:($20,0);name2:('English','French')),
+        (mask:$40;name:'Bonus Life';number:2;val2:($40,0);name2:('30K','40K')),
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
 var
  irq_enable,video_enable:boolean;
 
@@ -68,7 +71,7 @@ if video_enable then begin
     x:=memoria[$9802+(f*4)];
     if ((x<>0) and (y<>0)) then begin
       put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1);
-      actualiza_gfx_sprite((x+1) and $ff,(y-1) and $ff,2,1);
+      actualiza_gfx_sprite(x+1,y-1,2,1);
     end;
   end;
 end else fill_full_screen(2,$3ff);
@@ -104,7 +107,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -148,14 +151,14 @@ end;
 
 function bagman_inbyte(puerto:word):byte;
 begin
-  if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.Read;
+  if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.read;
 end;
 
 procedure bagman_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $08:AY8910_0.Control(valor);
-  $09:AY8910_0.Write(valor);
+  $08:ay8910_0.control(valor);
+  $09:ay8910_0.write(valor);
 end;
 end;
 
@@ -179,6 +182,7 @@ procedure reset_bagman;
 begin
  z80_0.reset;
  ay8910_0.reset;
+ reset_video;
  reset_audio;
  irq_enable:=true;
  video_enable:=true;
@@ -284,17 +288,17 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances_rg,@gweights,470,0,
 			2,@resistances_b,@bweights,470,0);
 for f:=0 to $3f do begin
-		// red component */
+		// red component
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
 		colores[f].r:=combine_3_weights(@rweights,bit0,bit1,bit2);
-		// green component */
+		// green component
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
 		colores[f].g:=combine_3_weights(@gweights,bit0,bit1,bit2);
-		// blue component */
+		// blue component
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
 		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);
@@ -302,7 +306,7 @@ end;
 set_pal(colores,$40);
 //DIP
 marcade.dswa:=$fe;
-marcade.dswa_val:=@bagman_dip;
+marcade.dswa_val2:=@bagman_dip;
 //final
 reset_bagman;
 iniciar_bagman:=true;

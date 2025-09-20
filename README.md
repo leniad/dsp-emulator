@@ -1,4 +1,495 @@
 # DSP Emulator status #
+<b>27/10/24 - DSP Emulator 0.23Final. Updated Windows binary, Ubuntu binary and full source. For full release info, please read 'Whats New 0.23.txt' file.<br>
+<pre>
+-General
+    +Video
+        -Fixed video freeze in Delphi 12
+        -Added general video reset
+        -Enhanced a bit full screen mode
+    +DIPs switches engine
+        -Still migrating DIPs to new data structure
+    +Sound
+        -Seibu Sound:
+            +Enhanced IRQs functions, uses new Z80 IRQ M0 functions
+            +General cleaning 
+    +CPUs
+        -MB88xx
+            +Added serial functions
+            +Fixed opcode $20
+            +Added opcode $2d
+        -NEC v20-v30
+            +Fixed prefetch
+            +Rewrited IRQ/NMI functions
+            +Fixed BITOP opcodes
+        -Z80
+            +Rewrited IRQ M0 and M2 callback functions
+            +New function to call IRQ with vector (removed im0 variable)
+            +Converted daisy chain functions to new IRQ M2 functions
+     +Devices
+        -SEGA 315-5195: added open bus function
+-Coleco
+    +Fixed support for cartridges up to 512Kb (Wizard of Wor)
+-Outrun
+    +Fixed end of sprite mark, fixes sprites left on screen
+    +Added clean memory when reset
+-Raiden
+    +Fixed sprites
+    +Fixed sound memory decryption, sound works now
+-Sega System 16A
+    +Fixed end of sprite mark, fixes sprites left on screen
+-Sega System 16B
+    +Fixed end of sprite mark, fixes sprites left on screen
+    +Added FD1089 functions
+    +Added IO and open bus functions
+    +Added clean memory when reset
+    +Riot City: added driver with sound
+    +SDI: added driver with sound
+    +Cotton: added driver with sound
+
+New Games
+<img src="https://i.ibb.co/jwyB66z/Cotton.png"> <img src="https://i.ibb.co/4Rw2sC6/RiotCity.png">
+<img src="https://i.ibb.co/JrWrzzR/sdi.png">
+</pre><br>
+<b>29/09/24 - DSP Emulator 0.23WIP4. Updated Windows binary and source<br>
+<pre>
+-General
+    +Controls Engine
+        -Added analog control reset
+    +Sound
+        -Konami: added mute, added to all drivers
+        -MSM5232: added sound chip, but sounds too fast (testing)
+        -YM2203: fixed sound amplification
+        -OKI6295: fixed sound amplification
+        -YM2413: bypass delphi shl function error
+    +Misc
+        -Added Taito 68705 protection device, unified from all drivers
+        -Split Galaxian stars from driver, converted into a device
+        -General cleaning and still working on new DIP switches data conversion
+        -Added new preview images
+-NES
+    +Fixed screen flicker in mapper 4 (Fixes Kings Quest V)
+-Arkanoid
+    +Removed MCU, used general Taito 68705
+-Armed Formation HW
+    +Added DIPs
+    +Removed sprite masks
+-China Gate
+    +Removed scan lines conversion
+    +Fixed FIRQs
+-City Connection
+    +Enhanced video parameters
+-Double Dragon HW
+    +Removed scan lines conversion
+    +Removed video masks
+    +Fixed FIQRs
+    +Double Dragon: change ROMs to world version
+-Food Fight
+    +Some video optimizations, removed fake scroll
+    +Fixed IRQ
+-Galaxian
+    +Removed stars generation
+    +Better background color handling
+-Legend of Kage
+    +Removed MCU, used general Taito 68705
+-Legendary Wings HW
+    +Added sound CPU reset
+    +Fire Ball: added driver with sound
+-Mysterious Stones
+    +Removed scan lines conversion
+    +Fixed IRQs
+-Pacman HW
+    +Enhanced Z80 map
+    +Removed video hack, converted to rotated screen
+    +Ponpoko: added driver with sound
+    +Wood Pecker: added driver with sound
+    +Eyes: added driver with sound
+    +Ali Baba and 40 Thieves: added driver with sound
+    +Piranha added driver with sound
+-Prehistoric Isle in 1930
+    +Enhanced video parameters
+    +Fixed IRQ
+-Rally X
+    +Optimized video functions
+    +Fixed video buffer
+    +Fixed screen rotation
+-Renegade
+    +Removed MCU, used general Taito 68705
+    +Enhanced video parameters
+    +Fixed screen size
+    +Fixed IRQs
+    +Fixed sound IRQs
+-Return of Invaders
+    +Removed MCU, used general Taito 68705
+-Slap Fight
+    +Removed MCU, used general Taito 68705
+    +Removed chars and tiles masks
+-Senjyo HW
+    +Baluba: Added DIP switches
+-Super Dodge Ball
+    +Enhanced video scroll
+-Tecmo 16
+    +Final Star Force: Added driver with sound
+-Time Pilot
+    +Changed screen render to line by line, fixed sprite render
+    +Fixed screen orientation
+-Tutankhan
+    +Added background stars
+-Wyvern F-0
+    +Added driver with sound
+
+          Before                     Now
+<img src="https://i.ibb.co/Xp8cTyq/Time-Pilot-before.png"> <img src="https://i.ibb.co/kXwJ1h2/Time-Pilot-now.png">
+
+New Games
+<img src="https://i.ibb.co/8YpxJRW/Ali-Baba-and-40-Thieves.png"> <img src="https://i.ibb.co/0Zgscth/Eyes.png">
+<img src="https://i.ibb.co/7b25vVP/Final-Star-Force.png"> <img src="https://i.ibb.co/dcKTjp4/Piranha.png">
+<img src="https://i.ibb.co/zNZ8hBq/Ponpoko.png"> <img src="https://i.ibb.co/Q89cn8X/Woodpecker.png">
+<img src="https://i.ibb.co/308LXR6/Wyvern-F-0.png"> <img src="https://i.ibb.co/1rpsr0Y/Fire-Ball.png">
+</pre><br>
+<b>01/09/24 - DSP Emulator 0.23WIP3. Updated Windows binary and source<br>
+<pre>
+-General
+    +Config
+        -Split ROMs and samples DAT info in two export buttons
+    +Misc
+        -Deco 104/146: converted to classes
+        -Fixed 'Gardia' ROMs export (Thanks to Neville)
+        -Fixed 'Kick'n Run' ROMs export size (Thanks to Neville)
+    +DIPs switches engine
+        -Rewrited engine
+        -New data structure, easy to maintain and easy to add
+        -Start migrate all DIPs to new structure
+    +Graphics engine
+        -Added mask to all functions, no need to mask the graphic number before call any function, removed graphic number mask from all drivers
+        -DECO BAC06
+            +Removed chars/tiles masks
+            +Added general color mask
+            +Added read/write 8bits functions
+    +Sound engine
+        -YM2413: added new sound chip
+        -SN76496: fixed snapshot
+        -VLM5030: changed to new tables values, rewrited some code
+    +CPUs
+        -M6809
+            +Added opcode $28
+        -HD6309
+            +Added opcodes $1,$28,$29 and $1X2e
+        -MCS51
+            +Added forced input function
+        -UPD781X
+            +UPD7801: Fixed CALT opcode
+            +Added opcode $a9 (makes SCV - 'Elevator Fight' playable)
+    +Timer engine
+        -One shot timers: added a new kind of timers, when called it's executed once, and then stops
+
+-Sega Master System
+    +Fixed sound chip order creation (Thanks to Neville)
+    +Removed big borders video in PAL version, NTSC and PAL have the same video size
+    +Added YM2413 sound
+-Super Cassette Vision
+    +Fixed vsync length (Fixes 'Mappy' sound speed)
+-Boogie Wings
+    +Still WIP driver, but enhanced the driver, still wrong colors and screen draw
+    +Fixed read/write maps
+    +Added screen parameters
+    +Added screen tiles and tiles bank calls
+    +Fixed ROMs loading
+-Deco 8 HW
+    +Super Real Darwin
+        -Fixed screen parameters and rotation
+        -Fixed sprites
+    +Last Mission: added driver with sound
+    +Shackled: added driver with sound
+    +Gondomania: added driver with sound
+    +Garyo Retsuden: added driver with sound
+    +Captain Silver: added driver with sound
+    +Cobra Command: added driver with sound
+    +The Real Ghostbusters: added driver with sound
+    +Psycho-Nics Oscar: added driver with sound
+-Hyper Sports HW
+    +Fixed screen rotation
+    +Hyper Sports: Fixed speech sounds
+    +Road Fighter: added driver with sound
+-Lasso HW
+    +Lasso: added driver with sound
+    +Chameleon: added driver with sound
+-Legendary Wings HW
+    +Avengers
+        -Updated ROMs to version D
+        -Added DIPs switches
+-Pang HW
+    +Added YM2413 sound
+-Track and Field
+    +Fixed speech sounds
+-Tehkan World Cup
+    +Added missing DIPs
+-Toki
+    +Added missing DIPs
+
+<img src="https://imgbb.host/images/NEG31.png"> <img src="https://imgbb.host/images/NEY07.png">
+<img src="https://imgbb.host/images/NE7JM.png"> <img src="https://imgbb.host/images/NEpX4.png">
+<img src="https://imgbb.host/images/NEgTb.png"> <img src="https://imgbb.host/images/NEapr.png">
+<img src="https://imgbb.host/images/NYXT7.png"> <img src="https://imgbb.host/images/NYFXl.png">
+<img src="https://imgbb.host/images/NYdFB.png"> <img src="https://imgbb.host/images/NYEB4.png">
+<img src="https://imgbb.host/images/NYxFc.png"> <img src="https://imgbb.host/images/NYOVL.png">
+</pre><br><br>
+<b>12/08/24 - DSP Emulator 0.23WIP2. Updated Windows binary and source<br>
+<pre>
+-General
+    +Misc
+        -Updated SDL2 library for windows 2.30.6
+        -ROMs export: Fixed '88 Gamed' ROM info (thanks to okurka)
+        -Updated Preview images
+    +Video
+        -Rewrited full screen mode
+            +Screen now it's scaled
+            +Hide mouse, except if needed (Spectrum mouse, Operation Wolf and Zero Point)
+            +Fixed mouse position click
+    +Sound engine
+        -Added close functions to clean variables
+        -Added some functions to ensure a sound chip have a CPU associated before it's created
+    +Controls Engine
+        -Joystick
+            +Removed calibrate functions, just press button to calibrate
+            +Rewrited all functions, now responds faster
+    +Timer Engine
+        -Add timer lapse, before call timer function
+    +CPU
+        -M6502
+            +Fixed 'brk' opcode (fixes Oric's 'SkoolDaze' and many others)
+        -M680X
+            +Added opcodes $2c, $2f and $85
+            +Rewrited get/put byte functions
+            +Make RAM and ROM internal
+        -MB88XX
+            +Rewrited internal flags functions
+        -Z80
+            +Added IRQ mode 2 external vector calls
+            +Daisy chain: clean all functions
+            +Z80 CTC: Clean daisy chain functions
+            +Z80 PIO: Converted to classes
+    +Devices
+        -VIA6522: Implemented VIA timers with the timer engine
+        -TAP/TZX Engine
+            +Fixed blocks $10,$11 and $14, misses one pulse
+            +Remove last block pause, and change pause functions
+            +Added T64 files
+-Spectrum
+    +Removed minimum border draw when fast speed, now draws full border lines (thanks to Neville)
+-Amstrad CPC
+    +Fixed lenslock protection, added 'Moon Cresta' protection
+    +Fixed tape/wav opening error
+-Casio PV1000
+    +Fixed IRQ generation
+    +Fixed screen size and border
+-Commodore 64
+    +Enhanced PRG loading
+    +Changed T64 to tape system, still not working
+-Oric HW
+    +Changed screen draw to line by line
+    +Fixed tape/wav opening error
+    +Changed sound chip to AY8912
+-Aliens
+    +Fixed CPU clock
+-Baraduke HW
+    +Changed to new M680X CPU engine
+-BombJack HW
+    +Merged with Calorie Kun
+    +Fixed background layer
+    +Changed memory map to a generalized one
+    +Added rotation screen
+    +Changed screen parameters
+    +Enhanced NMI
+-Breakthru HW
+    +Changed memory map to a generalized one
+    +Fixed DIPs
+-Bubblebobble
+    +Changed to new M680X CPU engine
+    +Added IRQ mode 2 external vector function
+    +Remove manual GFX invert
+-Centipede
+    +Enhanced IRQ generation
+-Double Dragon HW
+    +Double Dragon: Changed to new M680X CPU engine
+-Firetrap
+    +Added MSM5205 reset
+-Gaplus
+    +Fixed corrupted sprites
+-KiKi KaiKai HW
+    +KiKi KaiKai: Added driver with sound
+    +Kick and Run: Added driver with sound
+-Knuckle Joe
+    +Changed to new M680X CPU engine
+-Irem M62
+    +Changed to new M680X CPU engine
++Pacland
+    +Changed to new M680X CPU engine
++Pooyan
+    +Enhance palette conversion
++Shaolins Road
+    +Fixed Sprites
++Skykid
+    +Changed to new M680X CPU engine
++Senjyo HW
+    +Fixed slow inputs
+    +Changed to new Z80 PIO engine
++Super DodgeBall
+    +Changed to new M680X CPU engine
++Sega System 1/2
+    +Changed to new Z80 PIO engine
++System Namco86
+    +Changed to new M680X CPU engine
++Williams HW
+    +Changed to new M680X CPU engine
+    
+    
+        Before                                               0.23WIP2
+Full Screen
+<img src="https://i.ibb.co/kxByHxd/gng-before.jpg"> <img src="https://i.ibb.co/rxkbkpB/gng-023wip2.jpg">
+
+Casio PV1000 <img src="https://i.ibb.co/zZtZk1W/digdug-before.jpg">                 <img src="https://i.ibb.co/WyMSKWp/digdug-after.jpg">
+     
+     
+        New Games
+<img src="https://i.ibb.co/vBPfM25/Ki-Ki-Kai-Kai.jpg"> <img src="https://i.ibb.co/vYVcWMB/Kickand-Run.jpg">
+</pre><br>
+<b>25/03/24 - DSP Emulator 0.23WIP1. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Misc
+        -Fixed preview screen generation
+        -Fixed CRC show when a ROM file is not found
+    +Snapshot
+        -Simplified snapshot system functions 
+    +Video
+        -AVG/DVG: Added new vector draw system. WIP.
+        -GFX: Added invert option when convert GFX
+    +Sound
+        -MSM5205
+            +Rewrited all sound playing functions
+            +Make all variables, adpcm ROMS, and timing internal, removed all variables from drivers
+            +Make standard adpcm play functions by default, removed all repeated functions from drivers
+    +CPU
+        -M68000
+            +Fixed some timings
+            +Fixed 'divs' opcode (Now 'Space Harrier' works fine!)
+            +Fixed privilege exception in 'stop', 'move to sr' and 'move from sr' opcodes
+        -MCS51
+            +Added 8X52 and CMOS CPU types
+            +Enhanced internal RAM read/write
+            +Fixed IRQ generation
+            +Fixed parity calculation
+            +Fixed push/pop
+            +Fixed timer0 and timer1
+            +Fixed many opcodes
+            +Added opcodes $84
+        -Z80
+            +Added some more WZ
+    +Misc
+        -Sega deCript: Added another SEGA ROMs decript
+-Spectrum
+    +Added quick save/load (F7-F8/F9-F10)
+    +Spectrum 128/+3 some code cleaning
+-Amstrad CPC
+    +Added quick save/load (F7-F8/F9-F10)
+-Commodore 64
+    +Some memory functions clean
+    +Some tape control changes
+    +Added quick save/load (F7-F8/F9-F10)
+-Sega Master System
+    +Fixed pause (Fixes 'Bart Simpsons and the Space Mutants')
+    +Fixed BIOS loading
+-88 Games
+    +Added driver, screen draw problems... Maybe CPU bugs?
+-Ajax
+    +Fixed CPU clock
+-Aliens
+    +CPU map cleaning
+-Appoooh HW
+    +Appohhh: Added driver with sound
+    +Robo Wres 2001: Added driver with sound
+-Asteroids HW
+    +Added new vector system
+    +Lunar lander: added AVG-DVG prom
+-Bank Panic HW
+    +Bank Panic: added driver with sound
+    +Combat Hawk: added driver with sound
+-Bionic Commando
+    +Fixed background wrong colors
+-Blue Print HW
+    +Blue Print: added driver with sound
+    +Saturn: added driver with sound
+    +Grasspin: added driver with sound
+-Calorie Kun vs Moguranian
+    +Added driver with sound
+-Dooyong HW
+    +Blue Hawk: added driver with sound
+    +The Last Day: added driver with sound
+    +Gulf Storm: added driver with sound
+    +Pollux: added driver with sound
+    +Flying Tiger: added driver with sound
+-Galaxian HW
+    +Fixed background
+    +Fixed NMI clear
+    +Fixed sprite calculation procedures
+    +Fixed bullet draw
+    +Fixed scramble protection
+    +Ant Eater: added driver with sound
+    +Armored Car: added driver with sound
+    +The End: added driver with sound
+    +Battle of Atlantis: added driver with sound
+    +Calipso: added driver with sound
+    +Cavelon: added driver with sound
+-Gaplus
+    +Fixed sprites
+-Pirate Hihemaru
+    +Added screen priorities
+-Karnov HW
+    +Added IRQ assert/clean
+-Legendary Wings HW
+    +Legendary Wings: Update ROMs names
+    +Trojan: Fixed palette
+    +Avengers: added driver with sound, some sync problems...
+-Popeye HW
+    +Fixed DMA
+    +Popeye: Fixed screen draw
+    +Sky Skipper: adder driver with sound
+-The Simpsons
+    +Fixed CPU clock
+-Snowbros HW
+    +Come Back Toto: added driver with sound
+    +Hyper Pacman: added driver with sound
+-Steel Force HW
+    +Mortal Race: added driver with sound
+-Sega System 1/2 HW
+    +Removed Z80 special timings, added adjust cycle function, remove all CPU clock hacks
+    +Fixed palette
+    +Wonder Boy: removed decript procedures, now using new SEGA deCript
+    +Gardia: added driver with sound
+-ThunderX
+	+Better collisions functions
+	+Some CPU map cleaning
+	+Fixed CPU clock
+-Unico HW
+    +BurglarX: added driver with sound
+    +ZeroPoint: added driver with sound
+
+New Games
+<img src="https://i.ibb.co/Gd0fzzt/88-Games.png"> <img src="https://i.ibb.co/fCC9Ky4/Ant-Eater.png">
+<img src="https://i.ibb.co/cbXntKx/Appoooh.png"> <img src="https://i.ibb.co/BC3GsSW/Armored-Car.png">
+<img src="https://i.ibb.co/8Nd5wLZ/Avengers.png"> <img src="https://i.ibb.co/c2F2PDM/Bank-Panic.png">
+<img src="https://i.ibb.co/4V7TQv1/Battle-of-Atlantis.png"> <img src="https://i.ibb.co/7gjqpc1/Blue-Hawk.png">
+<img src="https://i.ibb.co/mTCjxxm/Blue-Print.png"> <img src="https://i.ibb.co/YDmRccd/BurglarX.png">
+<img src="https://i.ibb.co/1b2GPCz/Calipso.png"> <img src="https://i.ibb.co/Fq6wsf3/Calorie-Kun-vs-Moguranian.png">
+<img src="https://i.ibb.co/h8rpQbf/Cavelon.png"> <img src="https://i.ibb.co/1nx7pZ3/Combat-Hawk.png">
+<img src="https://i.ibb.co/z6fCfKs/Come-Back-Toto.png"> <img src="https://i.ibb.co/j56Wwry/Flying-Tiger.png">
+<img src="https://i.ibb.co/0VL7KWV/Gardia.png"> <img src="https://i.ibb.co/qg9q1Qf/Grasspin.png">
+<img src="https://i.ibb.co/M6RDCg1/Gulf-Storm.png"> <img src="https://i.ibb.co/Z8gjwws/Hyper-Pacman.png">
+<img src="https://i.ibb.co/CQ00JH3/Mortal-Race.png"> <img src="https://i.ibb.co/SccXJ38/Pollux.png">
+<img src="https://i.ibb.co/N1VK9cx/Robo-Wres-2001.png"> <img src="https://i.ibb.co/MDYzgVP/Saturn.png">
+<img src="https://i.ibb.co/WWgfTdr/Sky-Skipper.png"> <img src="https://i.ibb.co/1d8j9SQ/The-End.png">
+<img src="https://i.ibb.co/bv9ThLB/The-Last-Day.png"> <img src="https://i.ibb.co/w6Q3pN5/Zero-Point.png">
+</pre><br>
 <b>15/11/23 - DSP Emulator 0.22Final. Updated Windows binary and source. Please read 'Whats New 0.22' file for full details.<br>
 <pre>
 -General
@@ -27,9 +518,10 @@
 -Steel Force HW
     +Steel Force: added driver with sound
     +Twin Brats: added driver with sound
+
+<img src="https://i.ibb.co/3k72TKq/diverboy.png"> <img src="https://i.ibb.co/MkRDhV9/mugsmash.png">
+<img src="https://i.ibb.co/5BnT7Yq/stlforce.png"> <img src="https://i.ibb.co/Gd5mZSQ/twinbrat.png">
 </pre><br>
-<img src="https://i.ibb.co/3k72TKq/diverboy.png"><img src="https://i.ibb.co/MkRDhV9/mugsmash.png"><br>
-<img src="https://i.ibb.co/5BnT7Yq/stlforce.png"><img src="https://i.ibb.co/Gd5mZSQ/twinbrat.png"><br><br>
 <b>02/11/23 - DSP Emulator 0.22WIP6. Updated Windows binary and source.<br>
 <pre>
 -General
@@ -54,7 +546,7 @@
     +Added snapshots
     +Modernized mappers, better mapper reset
     +Changed a bit screen timings
-    +Added 'Wisdom Treee' mapper
+    +Added 'Wisdom Tree' mapper
     +Added partial mapper MBC6
 -NES
     +Added snapshots
@@ -66,10 +558,11 @@
 -Irem M63 HW
     +Wily Tower: added driver with sound
     +Fighting Basketball: added driver with sound
+
+<img src="https://i.ibb.co/F0v4vkF/birdiy.png"> <img src="https://i.ibb.co/SdNWnDY/wilytowr.png">
+<img src="https://i.ibb.co/yPQFCSn/fghtbskt.png"> <img src="https://i.ibb.co/YbQ9SYB/noas-ark.png" alt="NES black&white pal">
+<img src="https://i.ibb.co/XYtx8P5/hook.png" alt="GB Hook">
 </pre><br>
-<img src="https://i.ibb.co/F0v4vkF/birdiy.png"><img src="https://i.ibb.co/SdNWnDY/wilytowr.png"><br>
-<img src="https://i.ibb.co/yPQFCSn/fghtbskt.png"><img src="https://i.ibb.co/YbQ9SYB/noas-ark.png" alt="NES black&white pal"><br>
-<img src="https://i.ibb.co/XYtx8P5/hook.png" alt="GB Hook"><br><br>
 
 <b>22/08/23 - DSP Emulator 0.22WIP5. Updated Windows binary and source.<br>
 <pre>
@@ -132,10 +625,12 @@
     +Added new console, supports sound, controls, keyboard...
     +Added snapshots
     +All available games working
+
+<img src="https://i.ibb.co/K5630F6/sonic-bios.png"> <img src="https://i.ibb.co/jgSjLx7/pv1k-pooyan.png">
+<img src="https://i.ibb.co/khPw33g/pv1k-digdug.png"> <img src="https://i.ibb.co/tZjHjhz/pv2k-galaga.png">
+<img src="https://i.ibb.co/WzLYzmF/pv2k-super.png">
 </pre><br>
-<img src="https://i.ibb.co/K5630F6/sonic-bios.png"><br><img src="https://i.ibb.co/jgSjLx7/pv1k-pooyan.png">
-<img src="https://i.ibb.co/khPw33g/pv1k-digdug.png"><br><img src="https://i.ibb.co/tZjHjhz/pv2k-galaga.png">
-<img src="https://i.ibb.co/WzLYzmF/pv2k-super.png"><br><br>
+
 <b>09/08/23 - DSP Emulator 0.22WIP4.1. Fast fix... Updated Windows binary, OSX and source.<br>
 <pre>
 -General
@@ -145,7 +640,7 @@
         -Fixed compile i2cmem module
     +Fixed press 'ESC' for close pop-up windows
     +Fixed some spellings
-    +Some cosmetical changes
+    +Some cosmetic changes
     +ROMs export
     	-Fixed 'future spy' ROM info (thanks to Neville)
     	-Added 'gaplus' sample info, was missing
@@ -155,6 +650,7 @@
 -Donkey Kong HW
     +Fixed screen flip
 </pre><br>
+
 <b>08/08/23 - Updated docs.<br>
 <pre>
 -Updated 'How to compile'
@@ -293,12 +789,17 @@
         -Oric Atmos: added driver with sound
 -Sega System 1/2 HW
     +Changed Z80 timings, fixes Pitfall II intro
+
+     Before                                     After
+<img src="https://i.ibb.co/fY4p5Vy/zaptballs-before.png"> <img src="https://i.ibb.co/PgY8J2h/zaptballs.png">
+<img src="https://i.ibb.co/nbwR7g8/zaptballs2-before.png"> <img src="https://i.ibb.co/7n3xkzP/zaptballs2.png">
+                                   <img src="https://i.ibb.co/R6j4ztG/Pitfall2.png">
+
+     New Systems
+<img src="https://i.ibb.co/C1qr3dN/oric1.png"> <img src="https://i.ibb.co/Gt8DT3r/orica.png">
+<img src="https://i.ibb.co/QHKwX27/oric-atmos.png">
 </pre><br>
-<img src="https://i.ibb.co/fY4p5Vy/zaptballs-before.png" alt="before"> <img src="https://i.ibb.co/PgY8J2h/zaptballs.png"><br>
-<img src="https://i.ibb.co/nbwR7g8/zaptballs2-before.png" alt="before"> <img src="https://i.ibb.co/7n3xkzP/zaptballs2.png" alt="after"><br>
-<img src="https://i.ibb.co/C1qr3dN/oric1.png" alt="Oric 1"> <img src="https://i.ibb.co/Gt8DT3r/orica.png" alt="Oric Atmos"><br>
-<img src="https://i.ibb.co/R6j4ztG/Pitfall2.png" alt="Pitfall II fixed"><br>
-<img src="https://i.ibb.co/QHKwX27/oric-atmos.png" alt="Oirc Atmos in action"><br><br>
+
 <b>25/04/23 - DSP Emulator 0.22WIP1. Updated Windows binary and source.<br>
 <pre>
 -General
@@ -320,7 +821,7 @@
             +Rewrited and converted to class
             +Added internal Z80, ADPCM, sound chip and controls
             +Changed CPU mappers to internal
-            +Removed fake adpcm, using standar MSM5205
+            +Removed fake adpcm, using standard MSM5205
         -MSM5205
             +Converted to class
     +Devices
@@ -518,182 +1019,3 @@ Please read 'Whats New 0.21' file for full details<br><br>
 <img src="https://i.ibb.co/TgzTxTV/Airwolf.png"> <img src="https://i.ibb.co/PFmVY4f/Ambush.png"><br>
 <img src="https://i.ibb.co/TwdZJMY/magmax.png"> <img src="https://i.ibb.co/yX12fWz/srdmission.png"><br>
 <img src="https://i.ibb.co/pdpvh16/twinbee.png"> <img src="https://i.ibb.co/S332FHp/vendetta.png"><br><br>
-<b>09/10/22 - DSP Emulator 0.21WIP3. Updated Windows 32 and source update.<br>
-<pre>
--General
-    +Update preview images, added images for new drivers
-    +Update SDL library to 2.24.1
-    +Added sort options in game list menu. You can sort computers, Game & Watch, consoles and arcade (and arcade subtypes sport, run & gun, shot, maze, fight and drive)
-    +CPU
-        -Konami CPU: Fixed opcodes $6f, $76 and $7e. Fixes 'The Simpsons', which it's fully playable now.
-    +Konami 052109
-        -Fixed scroll, now 'Ajax' works fine.
--China Gate
-    +Added driver with sound
--Side Arms
-    +Added driver with sound
--Speed Rumbler
-    +Added driver with sound
-</pre><br>
-<img src="https://i.ibb.co/nQLhzkR/sidearms.png"> <img src="https://i.ibb.co/ZL4qdMG/chinagate.png"><br>
-<img src="https://i.ibb.co/HKM5b3X/speedrumbler.png"><br>
-<img src="https://i.ibb.co/DDZvm9x/ajax.png"> <img src="https://i.ibb.co/4J0nfrT/simpsons.png"><br>
-<img src="https://i.ibb.co/smYLSk8/sort-list.png"><br><br>
-<b>04/09/22 - DSP Emulator 0.21WIP2. Updated Windows 32 and source update. This release tries to improve general stability.<br>
-<pre>
--DSP 0.20Final has been repacked with preview images
--General
-    +Update preview images
-    +New option for consoles, now you can choose if you want start the driver with the window for loading games open or not
-    +Sound options simplified, now you can choose 'enabled' or 'disabled'
-    +Fixed label 'load disk' in console cartridge 'open' icon, now shows 'load game'
-    +If no game is loaded, shows a image, not just an empty window
-    +Fixed window priority, if a option window is active, the window behind is disabled
-    +Added some languaje translations in main config menu
-    +Changed 'Show game list', 'Configure DSP' and 'Save screen' icons
-    +Changed 'Show game list' and 'Configure DSP' position in main window
-    +Sound: removed 11025Hz and 22050Hz sample quality, they are useless!
-    +CPU
-        -M6805: Added opcodes $21, $56, $6a, $7a, $7f and $c1
--Amstrad CPC
-    +If a CDT tape is loaded and there is no pause block at the beginning, a 2000ms pause is added to the virtual tape
--Arkanoid
-    +Added driver with sound (Not correct sound chip)
--Renegade
-    +Fixed input
-    +Fixed sprites
-</pre><br>
-<img src="https://i.ibb.co/y6x0knj/arkanoid.png"><br><br>
-<b>01/08/22 - DSP Emulator 0.21WIP1. Updated Windows 32 and source update.<br>
-<pre>
--General
-    +Z80 CTC: converted to classes
-    +Added close function to many devices
-    +Sound: Make internal sound buffer bigger
-    +CPU
-        -M6809: Added opcodes $01, $29 and $1X2e
-        -M680X: 
-             + Added opcodes $47,$c2,$c9,$d9,$f0 and $fb
-             + Opcode $f3 is not for M6808
--Senjyo HW
-    +Update driver to new CTC
-    +Senjyo: Fixed ROMs export size (thanks to okurka)
--MCR HW
-    +Tapper: added driver with sound
--Williams HW
-    +Fixed sound
-    +Joust: added driver with sound
-    +Robotron: added driver with sound
-    +Stargate: added driver with sound
-</pre><br>
-<img src="https://i.ibb.co/7ygV8q2/joust.png"> <img src="https://i.ibb.co/QMLz9Cq/Robotron.png"><br>
-<img src="https://i.ibb.co/gzB2Ld8/Stargate.png"> <img src="https://i.ibb.co/WkrhCBH/Tapper.png"><br><br>
-<b>15/07/22 - DSP Emulator 0.20Final. Updated Windows (32 & 64), Linux (64), OSX (64) and source update.<br>
-<pre>
--General
-    +Changed transparent color (fixes 'Thunder & Lightning' sprites)
-    +CPU
-        -UPD78XX
-            +UPD7801
-                -Fixed IRQs
-                -Fixed timers
--Amstrad CPC
-    +Fixed green monitor palette
-    +Added green monitor brightness
--Coleco
-    +Fixed snapshot loading
--Super Cassete Vision
-    +Fixed remain issues
-    +Fixed BASIC Nyuumon RAM 
--Ninja Kid II HW
-    +Fixed sound init
--Seta HW
-    +Thunder & Lightning: added protection
-</pre><br><br>
-<b>29/06/22 - DSP Emulator 0.20WIP9. Win32 and source update.<br>
-<pre>
--General
-    +Updated SDL library to 2.0.22
-    +CPU
-        -UPD78XX
-            +Added many, many opcodes and fixed many others
-            +Added UPD7801 opcode timing tables
-            +Fixed IRQs
-            +Fixed outports
--Amstrad CPC
-    +Rewrited CRT video emulation
-    +Added green monitor option
-    +Fixed hardware scroll
--Super Cassete Vision
-    +Added video emulation
-    +Added Sound
-    +Added input
-    +Added ROM banking
-    +Everything moves slow... And I dont know why...
-</pre><br>
-<img src="https://i.ibb.co/4mPpzSG/007-after.png"> <img src="https://i.ibb.co/KKL0dMs/007-before.png"><br>
-<img src="https://i.ibb.co/twRdZ1T/actionf-after.png"> <img src="https://i.ibb.co/G9GP1GS/actionf-before.png"><br>
-<img src="https://i.ibb.co/gZQztF4/indy-after.png"> <img src="https://i.ibb.co/ypP0KgM/indy-before.png"><br>
-<img src="https://i.ibb.co/k1zBkFr/prof2-after.png"> <img src="https://i.ibb.co/7CYr8QC/prof2-before.png"><br>
-<img src="https://i.ibb.co/ZL3mxSw/rastan-after.png"> <img src="https://i.ibb.co/gjFBf4g/rastan-before.png"><br>
-<img src="https://i.ibb.co/9qwKFxd/rick2-after.png"> <img src="https://i.ibb.co/tX7LPNF/rick2-before.png"><br>
-<img src="https://i.ibb.co/RpYZDH5/scauldron-after.png"> <img src="https://i.ibb.co/2nGSkfs/scauldron-before.png"><br>
-<img src="https://i.ibb.co/h87xtth/xyp-after.png"> <img src="https://i.ibb.co/ZKPdGxV/xyp-before.png"><br>
-<img src="https://i.ibb.co/PcmnGKC/scv-db.png"> <img src="https://i.ibb.co/r0fkxgj/scv-dragons.png"><br>
-<img src="https://i.ibb.co/ZTwdqg2/scv-kungfu.png"> <img src="https://i.ibb.co/g967ZMt/scv-mappy.png"><br>
-<img src="https://i.ibb.co/NsvDYxP/scv-monster.png"> <img src="https://i.ibb.co/16r4ysL/scv-polepos2.png"><br>
-<img src="https://i.ibb.co/t3fXqTV/scv-prowr.png"><br><br>
-<b>01/05/22 - DSP Emulator 0.20WIP8. Win32 and source update.<br>
-<pre>
--General
-    +ROMs export
-        -Fixed Sly Spy ROMs info (Thanks to Neville)
-    +CPU
-        -Z80
-            +Added M1 raise signal (read opcode)
-        -M6800
-            +Added HD63701Y0 CPU
-            +Fixed internal read/write registers
-            +Fixed opcodes BHI and BLS (ouch!)
-            +Added opcode RORA
--Amstrad CPC
-    +Speed up video
-    +Dandanator added initial support
--Black Tiger
-    +Fixed MCU CPU clock
-    +Added video HW specs
--Commando
-    +Fixed main CPU clock
-    +Added video HW specs
--Ghost'n Goblins
-    +Added video HW specs
--Gun.Smoke HW
-    +Added video HW specs
--The Legend of Kage
-    +Rewrited video driver
-        -Fixed proirity BG/FG/Sprites
-        -Fixed disable screen
--Outrun (Thanks to Neville)
-    +Fixed palette
-    +Fixed shadows
--Senjyo HW (called StarForce before)
-    +Fixed video buffer
-    +Added BG stripe and radar
-    +Added char flip
-    +Added Senjyo driver with sound
-    +Added Baluba-louk no Densetsu driver with sound
--Super Dodgeball
-    +Added driver with sound
--Sega System 16A HW (Thanks to Neville)
-    +Fixed palette
-    +Fixed shadows
--Sega System 16B HW (Thanks to Neville)
-    +Fixed palette
-    +Fixed shadows
-</pre><br>
-<img src="https://i.ibb.co/pbCwPBB/alien-new.png"> <img src="https://i.ibb.co/yykkKdT/alien-old.png"><br>
-<img src="https://i.ibb.co/0F2cVnD/ddux-new.png"> <img src="https://i.ibb.co/RSjvvYx/ddux-old.png"><br>
-<img src="https://i.ibb.co/R7QD992/outrun-new.png"> <img src="https://i.ibb.co/pwW4hDV/outrun-old.png"><br>
-<img src="https://i.ibb.co/yNWN6Dq/baluba.png"> <img src="https://i.ibb.co/w6F4Wjc/dandanator.png"><br>
-<img src="https://i.ibb.co/7tc3krp/legend.png"> <img src="https://i.ibb.co/yd1TJv8/Senjyo.png"><br>
-<img src="https://i.ibb.co/N6bCFj9/superdb.png"><br><br>

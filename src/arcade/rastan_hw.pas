@@ -23,13 +23,12 @@ const
         rastan_adpcm:tipo_roms=(n:'b04-20.76';l:$10000;p:0;crc:$fd1a34cc);
 
 var
- scroll_x1,scroll_y1,scroll_x2,scroll_y2,adpcm_pos,adpcm_data:word;
+ scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
  bank_sound:array[0..3,$0..$3fff] of byte;
  rom:array[0..$2ffff] of word;
  ram1,ram3:array[0..$1fff] of word;
  spritebank,sound_bank:byte;
  ram2:array [0..$7fff] of word;
- adpcm:array[0..$ffff] of byte;
 
 procedure update_video_rastan;
 var
@@ -104,7 +103,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=tc0140syt_0.z80.tframes;
-while EmuStatus=EsRuning do begin
+while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
   //Main CPU
   m68000_0.run(frame_m);
@@ -202,12 +201,24 @@ case direccion of
   $9001:ym2151_0.write(valor);
   $a000:tc0140syt_0.slave_port_w(valor);
   $a001:tc0140syt_0.slave_comm_w(valor);
-  $b000:adpcm_pos:=(adpcm_pos and $00ff) or (valor shl 8);
-  $c000:msm5205_0.reset_w(0);
+  $b000:msm5205_0.pos:=(msm5205_0.pos and $ff) or (valor shl 8);
+  $c000:msm5205_0.reset_w(false);
   $d000:begin
-           msm5205_0.reset_w(1);
-           adpcm_pos:=adpcm_pos and $ff00;
+           msm5205_0.reset_w(true);
+           msm5205_0.pos:=msm5205_0.pos and $ff00;
         end;
+end;
+end;
+
+procedure snd_adpcm;
+begin
+if msm5205_0.data_val<>-1 then begin
+		msm5205_0.data_w(msm5205_0.data_val and $f);
+		msm5205_0.data_val:=-1;
+    msm5205_0.pos:=(msm5205_0.pos+1) and $ffff;
+end else begin
+		msm5205_0.data_val:=msm5205_0.rom_data[msm5205_0.pos];
+		msm5205_0.data_w(msm5205_0.data_val shr 4);
 end;
 end;
 
@@ -219,23 +230,12 @@ end;
 procedure sound_instruccion;
 begin
   ym2151_0.update;
+  msm5205_0.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
   tc0140syt_0.z80.change_irq(irqstate);
-end;
-
-procedure snd_adpcm;
-begin
-if (adpcm_data and $100)=0 then begin
-		msm5205_0.data_w(adpcm_data and $0f);
-		adpcm_data:=$100;
-    adpcm_pos:=(adpcm_pos+1) and $ffff;
-end else begin
-		adpcm_data:=adpcm[adpcm_pos];
-		msm5205_0.data_w(adpcm_data shr 4);
-end;
 end;
 
 //Main
@@ -245,6 +245,7 @@ begin
  tc0140syt_0.reset;
  YM2151_0.reset;
  msm5205_0.reset;
+ reset_video;
  reset_audio;
  marcade.in0:=$1f;
  marcade.in1:=$ff;
@@ -253,8 +254,6 @@ begin
  scroll_y1:=0;
  scroll_x2:=0;
  scroll_y2:=0;
- adpcm_data:=$100;
- adpcm_pos:=0;
 end;
 
 function iniciar_rastan:boolean;
@@ -285,21 +284,22 @@ tc0140syt_0:=tc0140syt_chip.create(4000000,256);
 tc0140syt_0.z80.change_ram_calls(rastan_snd_getbyte,rastan_snd_putbyte);
 tc0140syt_0.z80.init_sound(sound_instruccion);
 //Sound Chips
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,$10000);
+msm5205_0.change_advance(snd_adpcm);
+if not(roms_load(msm5205_0.rom_data,rastan_adpcm)) then exit;
 ym2151_0:=ym2151_chip.create(4000000);
 ym2151_0.change_port_func(sound_bank_rom);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
 if not(roms_load16w(@rom,rastan_rom)) then exit;
 //rom[$05FF9F]:=$fa;  //Cheeeeeeeeat
-//cargar sonido+ponerlas en su banco+adpcm
+//cargar sonido+ponerlas en su banco
 if not(roms_load(@memoria_temp,rastan_sound)) then exit;
 copymemory(@mem_snd[0],@memoria_temp[0],$4000);
 copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
 copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
 copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
 copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
-if not(roms_load(@adpcm,rastan_adpcm)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,rastan_char)) then exit;
 init_gfx(0,8,8,$4000);
