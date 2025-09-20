@@ -27,21 +27,21 @@ const
         (n:'2-4a.bin';l:$2000;p:$4000;crc:$206a13f1),(n:'2-5a.bin';l:$2000;p:$6000;crc:$b6d81984),
         (n:'2-6a.bin';l:$2000;p:$8000;crc:$5a26b38f),(n:'2-7a.bin';l:$2000;p:$a000;crc:$1e1ca773));
         //Dip
-        vulgus_dip_a:array [0..3] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(1,2,3,0);name4:('1','2','3','5')),
-        (mask:$1c;name:'Coin B';number:8;val8:($10,8,$18,4,$1c,$c,$14,0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','Invalid')),
-        (mask:$e0;name:'Coin A';number:8;val8:($80,$40,$c0,$20,$e0,$60,$a0,0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','Free Play')),());
-        vulgus_dip_b:array [0..4] of def_dip2=(
-        (mask:4;name:'Demo Music';number:2;val2:(0,4);name2:('Off','On')),
-        (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
-        (mask:$70;name:'Bonus Life';number:8;val8:($30,$50,$10,$70,$60,$20,$40,0);name8:('10K 50K','10K 60K','10K 70K','20K 60K','20K 70K','20K 80K','30K 70K','None')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
+        vulgus_dip_a:array [0..3] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$1;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1c;name:'Coin B';number:8;dip:((dip_val:$10;dip_name:'5C 1C'),(dip_val:$8;dip_name:'4C 1C'),(dip_val:$18;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$0;dip_name:'Invalid'),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Coin A';number:8;dip:((dip_val:$80;dip_name:'5C 1C'),(dip_val:$40;dip_name:'4C 1C'),(dip_val:$c0;dip_name:'3C 1C'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),())),());
+        vulgus_dip_b:array [0..4] of def_dip=(
+        (mask:$4;name:'Demo Music';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$70;name:'Bonus Life';number:8;dip:((dip_val:$30;dip_name:'10K 50K'),(dip_val:$50;dip_name:'10K 60K'),(dip_val:$10;dip_name:'10K 70K'),(dip_val:$70;dip_name:'20K 60K'),(dip_val:$60;dip_name:'20K 70K'),(dip_val:$20;dip_name:'20K 80K'),(dip_val:$40;dip_name:'30K 70K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  scroll_x,scroll_y:word;
  sound_command,palette_bank:byte;
 
-procedure update_video_vulgus;
+procedure update_video_vulgus;inline;
 var
   f,color,nchar,x,y:word;
   attr,row:byte;
@@ -101,26 +101,26 @@ actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
 actualiza_trozo_final(16,0,224,256,1);
 end;
 
-procedure eventos_vulgus;
+procedure eventos_vulgus;inline;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //system
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
@@ -129,22 +129,25 @@ end;
 procedure vulgus_principal;
 var
   f:byte;
+  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    eventos_vulgus;
-    if f=240 then begin
-      z80_0.change_irq_vector(HOLD_LINE,$d7);
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    //main
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //snd
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    if f=239 then begin
+      z80_0.change_irq(HOLD_LINE);
       update_video_vulgus;
     end;
-    //main
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    //snd
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
+  eventos_vulgus;
   video_sync;
 end;
 end;
@@ -152,7 +155,7 @@ end;
 function vulgus_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$9fff,$cc00..$cc7f,$d000..$efff:vulgus_getbyte:=memoria[direccion];
+  $0..$9fff,$cc00..$cc7f,$d000..$efff:vulgus_getbyte:=memoria[direccion];
   $c000:vulgus_getbyte:=marcade.in0;
   $c001:vulgus_getbyte:=marcade.in1;
   $c002:vulgus_getbyte:=marcade.in2;
@@ -226,18 +229,18 @@ end;
 procedure reset_vulgus;
 begin
  z80_0.reset;
+ z80_0.im0:=$d7;  //rst 10
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- frame_main:=z80_0.tframes;
- frame_snd:=z80_1.tframes;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
  scroll_x:=0;
  scroll_y:=0;
  sound_command:=0;
- palette_bank:=$ff;
+ palette_bank:=0;
 end;
 
 function iniciar_vulgus:boolean;
@@ -276,8 +279,8 @@ z80_1.init_sound(vulgus_sound_update);
 //IRQ Sound CPU
 timers.init(z80_1.numero_cpu,3000000/(8*60),vulgus_snd_irq,nil,true);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,AY8910);
-ay8910_1:=ay8910_chip.create(1500000,AY8910);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
 //cargar y desencriptar las ROMS
 if not(roms_load(@memoria,vulgus_rom)) then exit;
 //cargar ROMS sonido
@@ -302,21 +305,21 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //poner la paleta
 if not(roms_load(@memoria_temp,vulgus_pal)) then exit;
 for f:=0 to 255 do begin
-  bit0:=(memoria_temp[f] shr 0) and 1;
-  bit1:=(memoria_temp[f] shr 1) and 1;
-  bit2:=(memoria_temp[f] shr 2) and 1;
-  bit3:=(memoria_temp[f] shr 3) and 1;
-	colores[f].r:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  bit0:=(memoria_temp[f+$100] shr 0) and 1;
-  bit1:=(memoria_temp[f+$100] shr 1) and 1;
-  bit2:=(memoria_temp[f+$100] shr 2) and 1;
-  bit3:=(memoria_temp[f+$100] shr 3) and 1;
-	colores[f].g:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  bit0:=(memoria_temp[f+$200] shr 0) and 1;
-  bit1:=(memoria_temp[f+$200] shr 1) and 1;
-  bit2:=(memoria_temp[f+$200] shr 2) and 1;
-  bit3:=(memoria_temp[f+$200] shr 3) and 1;
-  colores[f].b:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  bit0:=(memoria_temp[f] shr 0) and $01;
+  bit1:=(memoria_temp[f] shr 1) and $01;
+  bit2:=(memoria_temp[f] shr 2) and $01;
+  bit3:=(memoria_temp[f] shr 3) and $01;
+	colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  bit0:=(memoria_temp[f+$100] shr 0) and $01;
+  bit1:=(memoria_temp[f+$100] shr 1) and $01;
+  bit2:=(memoria_temp[f+$100] shr 2) and $01;
+  bit3:=(memoria_temp[f+$100] shr 3) and $01;
+	colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  bit0:=(memoria_temp[f+$200] shr 0) and $01;
+  bit1:=(memoria_temp[f+$200] shr 1) and $01;
+  bit2:=(memoria_temp[f+$200] shr 2) and $01;
+  bit3:=(memoria_temp[f+$200] shr 3) and $01;
+  colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 end;
 set_pal(colores,256);
 //crear la tabla de colores
@@ -331,9 +334,10 @@ end;
 //Dip
 marcade.dswa:=$ff;
 marcade.dswb:=$7f;
-marcade.dswa_val2:=@vulgus_dip_a;
-marcade.dswb_val2:=@vulgus_dip_b;
+marcade.dswa_val:=@vulgus_dip_a;
+marcade.dswb_val:=@vulgus_dip_b;
 //final
+reset_vulgus;
 iniciar_vulgus:=true;
 end;
 

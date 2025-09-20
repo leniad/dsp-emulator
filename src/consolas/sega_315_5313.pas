@@ -289,7 +289,7 @@ begin
   case direccion of
     0,2:self.data_port_write(valor);
     4,6:self.control_port_write(valor);
-    $10,$12,$14,$16:if m68000_0.write_8bits_hi_dir then self.sega_psg.Write(valor and $ff);
+    $10,$12,$14,$16:if m68000_0.access_8bits_hi_dir then self.sega_psg.Write(valor and $ff);
       else halt(direccion);
   end;
 end;

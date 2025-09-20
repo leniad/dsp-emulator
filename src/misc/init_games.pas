@@ -1,7 +1,8 @@
 unit init_games;
 
 interface
-uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
+
+uses sysutils,main_engine,rom_engine,rom_export,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
   //Console
@@ -34,13 +35,7 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
-  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
-  mcr_hw,arkanoid_hw,sidearms_hw,speedrumbler_hw,chinagate_hw,magmax_hw,
-  ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
-  oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
-  mugsmashers_hw,steelforce_hw,bankpanic_hw,appoooh_hw,hw_88games,dooyong_hw,
-  blueprint_hw,unico_hw,kikikaikai_hw,lasso_hw,finalstarforce_hw,wyvernf0_hw,
-  taito_b_hw;
+  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw;
 
 type
   tgame_desc=record
@@ -52,464 +47,350 @@ type
               company:string;
               rom:ptipo_roms;
               samples:ptsample_file;
-              tipo:word;
             end;
 
 const
-  //Tipos diferentes
-  ARCADE=1;
-  COMPUTER=2;
-  GNW=4;
-  CONSOLE=8;
-  SPORT=$10;
-  RUN_GUN=$20;
-  SHOT=$40;
-  MAZE=$80;
-  FIGHT=$100;
-  DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=436;
+  GAMES_CONT=334;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
-  (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
-  (name:'Spectrum 128K';year:'1986';snd:1;hi:false;zip:'spec128';grid:1;company:'Sinclair';rom:@spec128;tipo:COMPUTER),
-  (name:'Spectrum +3';year:'1987';snd:1;hi:false;zip:'plus3';grid:2;company:'Amstrad';rom:@plus3;tipo:COMPUTER),
-  (name:'Spectrum +2A';year:'1987';snd:1;hi:false;zip:'plus3';grid:3;company:'Amstrad';rom:@plus3;tipo:COMPUTER),
-  (name:'Spectrum +2';year:'1986';snd:1;hi:false;zip:'plus2';grid:4;company:'Amstrad';rom:@spec_plus2;tipo:COMPUTER),
-  (name:'Spectrum 16K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:5;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
-  (name:'Amstrad CPC 464';year:'1984';snd:1;hi:false;zip:'cpc464';grid:7;company:'Amstrad';rom:@cpc464;tipo:COMPUTER),
-  (name:'Amstrad CPC 664';year:'1984';snd:1;hi:false;zip:'cpc664';grid:8;company:'Amstrad';rom:@cpc664;tipo:COMPUTER),
-  (name:'Amstrad CPC 6128';year:'1985';snd:1;hi:false;zip:'cpc6128';grid:9;company:'Amstrad';rom:@cpc6128;tipo:COMPUTER),
-  (name:'Commodore 64';year:'1982';snd:1;hi:false;zip:'c64';grid:3000;company:'Commodore';rom:@c64;tipo:COMPUTER),
-  (name:'Oric Atmos';year:'1984';snd:1;hi:false;zip:'orica';grid:3001;company:'Tangerine';rom:@orica;tipo:COMPUTER),
-  (name:'Oric 1';year:'1983';snd:1;hi:false;zip:'oric1';grid:3002;company:'Tangerine';rom:@oric1;tipo:COMPUTER),
+  (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
+  (name:'Spectrum 128K';year:'1986';snd:1;hi:false;zip:'spec128';grid:1;company:'Sinclair';rom:@spec128),
+  (name:'Spectrum +3';year:'1987';snd:1;hi:false;zip:'plus3';grid:2;company:'Amstrad';rom:@plus3),
+  (name:'Spectrum +2A';year:'1987';snd:1;hi:false;zip:'plus3';grid:3;company:'Amstrad';rom:@plus3),
+  (name:'Spectrum +2';year:'1986';snd:1;hi:false;zip:'plus2';grid:4;company:'Amstrad';rom:@spec_plus2),
+  (name:'Spectrum 16K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:5;company:'Sinclair';rom:@spectrum),
+  (name:'Amstrad CPC 464';year:'1984';snd:1;hi:false;zip:'cpc464';grid:7;company:'Amstrad';rom:@cpc464),
+  (name:'Amstrad CPC 664';year:'1984';snd:1;hi:false;zip:'cpc664';grid:8;company:'Amstrad';rom:@cpc664),
+  (name:'Amstrad CPC 6128';year:'1985';snd:1;hi:false;zip:'cpc6128';grid:9;company:'Amstrad';rom:@cpc6128),
+  (name:'Commodore 64';year:'1982';snd:1;hi:false;zip:'c64';grid:3000;company:'Commodore';rom:@c64),
   //Arcade
-  (name:'Pacman';year:'1980';snd:1;hi:false;zip:'pacman';grid:10;company:'Namco';rom:@pacman;tipo:ARCADE or MAZE),
-  (name:'Phoenix';year:'1980';snd:1;hi:false;zip:'phoenix';grid:11;company:'Amstar Electronics';rom:@phoenix;tipo:ARCADE or SHOT),
-  (name:'Mysterious Stones';year:'1984';snd:1;hi:false;zip:'mystston';grid:12;company:'Technos';rom:@mystston;tipo:ARCADE or RUN_GUN),
-  (name:'Bomb Jack';year:'1984';snd:1;hi:false;zip:'bombjack';grid:13;company:'Tehkan';rom:@bombjack;tipo:ARCADE or MAZE),
-  (name:'Frogger';year:'1981';snd:1;hi:true;zip:'frogger';grid:14;company:'Konami';rom:@frogger;tipo:ARCADE or MAZE),
-  (name:'Donkey Kong';year:'1981';snd:2;hi:false;zip:'dkong';grid:15;company:'Nintendo';rom:@dkong;samples:@dkong_samples;tipo:ARCADE or MAZE),
-  (name:'Black Tiger';year:'1986';snd:1;hi:true;zip:'blktiger';grid:16;company:'Capcom';rom:@blktiger;tipo:ARCADE or RUN_GUN),
-  (name:'Green Beret';year:'1985';snd:1;hi:true;zip:'gberet';grid:17;company:'Konami';rom:@gberet;tipo:ARCADE or RUN_GUN),
-  (name:'Commando';year:'1985';snd:1;hi:false;zip:'commando';grid:18;company:'Capcom';rom:@commando;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'Ghosts''n Goblins';year:'1985';snd:1;hi:false;zip:'gng';grid:19;company:'Capcom';rom:@gng;tipo:ARCADE or RUN_GUN),
-  (name:'Mikie';year:'1985';snd:1;hi:false;zip:'mikie';grid:20;company:'Konami';rom:@mikie;tipo:ARCADE or MAZE),
-  (name:'Shaolin''s Road';year:'1985';snd:1;hi:false;zip:'shaolins';grid:21;company:'Konami';rom:@shaolins;tipo:ARCADE or MAZE),
-  (name:'Yie Ar Kung-Fu';year:'1985';snd:1;hi:false;zip:'yiear';grid:22;company:'Konami';rom:@yiear;tipo:ARCADE or FIGHT),
-  (name:'Asteroids';year:'1979';snd:2;hi:false;zip:'asteroid';grid:23;company:'Atari';rom:@asteroid;samples:@asteroid_samples;tipo:ARCADE or SHOT),
-  (name:'Son Son';year:'1984';snd:1;hi:false;zip:'sonson';grid:24;company:'Capcom';rom:@sonson;tipo:ARCADE or RUN_GUN),
-  (name:'Star Force';year:'1984';snd:1;hi:false;zip:'starforc';grid:25;company:'Tehkan';rom:@starforc;tipo:ARCADE or SHOT),
-  (name:'Rygar';year:'1986';snd:1;hi:false;zip:'rygar';grid:26;company:'Tecmo';rom:@rygar;tipo:ARCADE or RUN_GUN),
-  (name:'Pitfall II';year:'1984';snd:1;hi:false;zip:'pitfall2';grid:27;company:'Sega';rom:@pitfall2;tipo:ARCADE or RUN_GUN),
-  (name:'Pooyan';year:'1982';snd:1;hi:false;zip:'pooyan';grid:28;company:'Konami';rom:@pooyan;tipo:ARCADE or SHOT),
-  (name:'Jungler';year:'1981';snd:1;hi:false;zip:'jungler';grid:29;company:'Konami';rom:@jungler;tipo:ARCADE or MAZE),
-  (name:'City Connection';year:'1986';snd:1;hi:false;zip:'citycon';grid:30;company:'Jaleco';rom:@citycon;tipo:ARCADE or DRIVE),
-  (name:'Burger Time';year:'1982';snd:1;hi:false;zip:'btime';grid:31;company:'Deco';rom:@btime;tipo:ARCADE or MAZE),
-  (name:'Express Raider';year:'1986';snd:1;hi:false;zip:'exprraid';grid:32;company:'Deco';rom:@exprraid;tipo:ARCADE or RUN_GUN),
-  (name:'Super Basketball';year:'1984';snd:1;hi:false;zip:'sbasketb';grid:33;company:'Konami';rom:@sbasketb;tipo:ARCADE or SPORT),
-  (name:'Lady Bug';year:'1981';snd:1;hi:false;zip:'ladybug';grid:34;company:'Universal';rom:@ladybug;tipo:ARCADE or MAZE),
-  (name:'Teddy Boy Blues';year:'1985';snd:1;hi:false;zip:'teddybb';grid:35;company:'Sega';rom:@teddybb;tipo:ARCADE or RUN_GUN),
-  (name:'Wonder Boy';year:'1986';snd:1;hi:false;zip:'wboy';grid:36;company:'Sega';rom:@wboy;tipo:ARCADE or RUN_GUN),
-  (name:'Wonder Boy in Monster Land';year:'1987';snd:1;hi:false;zip:'wbml';grid:37;company:'Sega';rom:@wbml;tipo:ARCADE or RUN_GUN),
-  (name:'Tehkan World Cup';year:'1985';snd:1;hi:false;zip:'tehkanwc';grid:38;company:'Tehkan';rom:@tehkanwc;tipo:ARCADE or SPORT),
-  (name:'Popeye';year:'1982';snd:1;hi:false;zip:'popeye';grid:39;company:'Nintendo';rom:@popeye;tipo:ARCADE or MAZE),
-  (name:'Psychic 5';year:'1987';snd:1;hi:false;zip:'psychic5';grid:40;company:'Jaleco';rom:@psychic5;tipo:ARCADE or RUN_GUN),
-  (name:'Terra Cresta';year:'1985';snd:1;hi:false;zip:'terracre';grid:41;company:'Nichibutsu';rom:@terracre;tipo:ARCADE or SHOT),
-  (name:'Kung-Fu Master';year:'1987';snd:1;hi:false;zip:'kungfum';grid:42;company:'Irem';rom:@kungfum;tipo:ARCADE or FIGHT),
-  (name:'Shoot Out';year:'1985';snd:1;hi:false;zip:'shootout';grid:43;company:'Data East';rom:@shootout;tipo:ARCADE or SHOT),
-  (name:'Vigilante';year:'1988';snd:1;hi:false;zip:'vigilant';grid:44;company:'Irem';rom:@vigilant;tipo:ARCADE or FIGHT),
-  (name:'Jackal';year:'1986';snd:1;hi:false;zip:'jackal';grid:45;company:'Konami';rom:@jackal;tipo:ARCADE or RUN_GUN),
-  (name:'Bubble Bobble';year:'1986';snd:1;hi:false;zip:'bublbobl';grid:46;company:'Taito';rom:@bublbobl;tipo:ARCADE or MAZE),
-  (name:'Galaxian';year:'1979';snd:4;hi:false;zip:'galaxian';grid:47;company:'Namco';rom:@galaxian;samples:@galaxian_samples;tipo:ARCADE or SHOT),
-  (name:'Jump Bug';year:'1981';snd:1;hi:false;zip:'jumpbug';grid:48;company:'Rock-Ola';rom:@jumpbug;tipo:ARCADE or RUN_GUN),
-  (name:'Moon Cresta';year:'1980';snd:4;hi:false;zip:'mooncrst';grid:49;company:'Nichibutsu';rom:@mooncrst;samples:@mooncrst_samples;tipo:ARCADE or SHOT),
-  (name:'Rally X';year:'1980';snd:3;hi:false;zip:'rallyx';grid:50;company:'Namco';rom:@rallyx;samples:@rallyx_samples;tipo:ARCADE or DRIVE or MAZE),
-  (name:'Prehistoric Isle in 1930';year:'1989';snd:1;hi:false;zip:'prehisle';grid:51;company:'SNK';rom:@prehisle;tipo:ARCADE or SHOT),
-  (name:'Tiger Road';year:'1987';snd:1;hi:false;zip:'tigeroad';grid:52;company:'Capcom';rom:@tigeroad;tipo:ARCADE or RUN_GUN),
-  (name:'F1 Dream';year:'1988';snd:1;hi:false;zip:'f1dream';grid:53;company:'Capcom';rom:@f1dream;tipo:ARCADE or SPORT or DRIVE),
-  (name:'Snowbros';year:'1990';snd:1;hi:false;zip:'snowbros';grid:54;company:'Toaplan';rom:@snowbros;tipo:ARCADE or MAZE),
-  (name:'Toki';year:'1989';snd:1;hi:false;zip:'toki';grid:55;company:'TAD';rom:@toki;tipo:ARCADE or RUN_GUN),
-  (name:'Contra';year:'1987';snd:1;hi:false;zip:'contra';grid:56;company:'Konami';rom:@contra;tipo:ARCADE or RUN_GUN),
-  (name:'Mappy';year:'1983';snd:1;hi:false;zip:'mappy';grid:57;company:'Namco';rom:@mappy;tipo:ARCADE or MAZE),
-  (name:'Rastan';year:'1987';snd:1;hi:false;zip:'rastan';grid:58;company:'Taito';rom:@rastan;tipo:ARCADE or RUN_GUN),
-  (name:'Legendary Wings';year:'1986';snd:1;hi:false;zip:'lwings';grid:59;company:'Capcom';rom:@lwings_roms;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'Section Z';year:'1985';snd:1;hi:false;zip:'sectionz';grid:60;company:'Capcom';rom:@sectionz_roms;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'Trojan';year:'1986';snd:1;hi:false;zip:'trojan';grid:61;company:'Capcom';rom:@trojan_roms;tipo:ARCADE or RUN_GUN),
-  (name:'Street Fighter';year:'1987';snd:1;hi:false;zip:'sf';grid:62;company:'Capcom';rom:@sfighter;tipo:ARCADE or FIGHT),
-  (name:'DigDug II';year:'1985';snd:1;hi:false;zip:'digdug2';grid:63;company:'Namco';rom:@digdug2;tipo:ARCADE or MAZE),
-  (name:'Super Pacman';year:'1985';snd:1;hi:false;zip:'superpac';grid:64;company:'Namco';rom:@spacman;tipo:ARCADE or MAZE),
-  (name:'Galaga';year:'1981';snd:3;hi:false;zip:'galaga';grid:65;company:'Namco';rom:@galaga;samples:@galaga_samples;tipo:ARCADE or SHOT),
-  (name:'Xain''d Sleena';year:'1986';snd:1;hi:false;zip:'xsleena';grid:66;company:'Technos';rom:@xsleena;tipo:ARCADE or RUN_GUN),
-  (name:'Hard Head';year:'1988';snd:1;hi:false;zip:'hardhead';grid:67;company:'Suna';rom:@hardhead;tipo:ARCADE or RUN_GUN),
-  (name:'Hard Head 2';year:'1989';snd:1;hi:false;zip:'hardhea2';grid:68;company:'Suna';rom:@hardhea2;tipo:ARCADE or RUN_GUN),
-  (name:'Saboten Bombers';year:'1992';snd:1;hi:false;zip:'sabotenb';grid:69;company:'NMK';rom:@sabotenb;tipo:ARCADE or MAZE),
-  (name:'New Rally X';year:'1981';snd:3;hi:false;zip:'nrallyx';grid:70;company:'Namco';rom:@nrallyx;samples:@rallyx_samples;tipo:ARCADE or DRIVE or MAZE),
-  (name:'Bomb Jack Twin';year:'1993';snd:1;hi:false;zip:'bjtwin';grid:71;company:'NMK';rom:@bjtwin;tipo:ARCADE or MAZE),
-  (name:'Spelunker';year:'1985';snd:1;hi:false;zip:'spelunkr';grid:72;company:'Broderbound';rom:@spelunkr;tipo:ARCADE or MAZE),
-  (name:'Spelunker II';year:'1986';snd:1;hi:false;zip:'spelunk2';grid:73;company:'Broderbound';rom:@spelunk2;tipo:ARCADE or MAZE),
-  (name:'Lode Runner';year:'1984';snd:1;hi:false;zip:'ldrun';grid:74;company:'Irem';rom:@ldrun;tipo:ARCADE or MAZE),
-  (name:'Lode Runner II';year:'1984';snd:1;hi:false;zip:'ldrun2';grid:75;company:'Irem';rom:@ldrun2;tipo:ARCADE or MAZE),
-  (name:'Knuckle Joe';year:'1985';snd:1;hi:false;zip:'kncljoe';grid:76;company:'Taito';rom:@kncljoe;tipo:ARCADE or FIGHT),
-  (name:'Wardner';year:'1987';snd:1;hi:false;zip:'wardner';grid:77;company:'Taito';rom:@wardner;tipo:ARCADE or RUN_GUN),
-  (name:'Big Karnak';year:'1991';snd:1;hi:false;zip:'bigkarnk';grid:78;company:'Gaelco';rom:@bigkarnk;tipo:ARCADE or RUN_GUN),
-  (name:'Exed-Exes';year:'1985';snd:1;hi:false;zip:'exedexes';grid:79;company:'Capcom';rom:@exedexes;tipo:ARCADE or SHOT),
-  (name:'Gun.Smoke';year:'1985';snd:1;hi:false;zip:'gunsmoke';grid:80;company:'Capcom';rom:@gunsmoke;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'1942';year:'1984';snd:1;hi:false;zip:'1942';grid:81;company:'Capcom';rom:@hw1942;tipo:ARCADE or SHOT),
-  (name:'1943';year:'1987';snd:1;hi:false;zip:'1943';grid:82;company:'Capcom';rom:@hw1943;tipo:ARCADE or SHOT),
-  (name:'1943 Kai';year:'1987';snd:1;hi:false;zip:'1943kai';grid:83;company:'Capcom';rom:@hw1943kai;tipo:ARCADE or SHOT),
-  (name:'Jail Break';year:'1986';snd:1;hi:false;zip:'jailbrek';grid:84;company:'Konami';rom:@jailbrek;tipo:ARCADE or RUN_GUN),
-  (name:'Circus Charlie';year:'1984';snd:1;hi:false;zip:'circusc';grid:85;company:'Konami';rom:@circusc;tipo:ARCADE or RUN_GUN),
-  (name:'Iron Horse';year:'1986';snd:1;hi:false;zip:'ironhors';grid:86;company:'Konami';rom:@ironhors;tipo:ARCADE or RUN_GUN),
-  (name:'R-Type';year:'1987';snd:1;hi:false;zip:'rtype';grid:87;company:'Irem';rom:@rtype;tipo:ARCADE or SHOT),
-  (name:'MS. Pac-man';year:'1981';snd:1;hi:false;zip:'mspacman';grid:88;company:'Namco';rom:@mspacman;tipo:ARCADE or MAZE),
-  (name:'Break Thru';year:'1986';snd:1;hi:false;zip:'brkthru';grid:89;company:'Data East';rom:@brkthru;tipo:ARCADE or RUN_GUN or DRIVE),
-  (name:'Darwin 4078';year:'1986';snd:1;hi:false;zip:'darwin';grid:90;company:'Data East';rom:@darwin;tipo:ARCADE or SHOT),
-  (name:'Super Real Darwin';year:'1987';snd:1;hi:false;zip:'srdarwin';grid:91;company:'Data East';rom:@srdarwin_roms;tipo:ARCADE or SHOT),
-  (name:'Double Dragon';year:'1987';snd:1;hi:false;zip:'ddragon';grid:92;company:'Taito';rom:@ddragon_roms;tipo:ARCADE or FIGHT),
-  (name:'Mr. Do!';year:'1982';snd:1;hi:false;zip:'mrdo';grid:93;company:'Universal';rom:@mrdo_roms;tipo:ARCADE or MAZE),
-  (name:'The Glob';year:'1983';snd:1;hi:false;zip:'theglob';grid:94;company:'Epos';rom:@theglob_roms;tipo:ARCADE or MAZE),
-  (name:'Super Glob';year:'1983';snd:1;hi:false;zip:'suprglob';grid:95;company:'Epos';rom:@suprglob_roms;tipo:ARCADE or MAZE),
-  (name:'Double Dragon II - The Revenge';year:'1988';snd:1;hi:false;zip:'ddragon2';grid:96;company:'Technos';rom:@ddragon2_roms;tipo:ARCADE or FIGHT),
-  (name:'Silk Worm';year:'1988';snd:1;hi:false;zip:'silkworm';grid:97;company:'Tecmo';rom:@silkworm;tipo:ARCADE or RUN_GUN or SHOT or DRIVE),
-  (name:'Tiger Heli';year:'1985';snd:1;hi:false;zip:'tigerh';grid:98;company:'Taito';rom:@tigerh_roms;tipo:ARCADE or SHOT),
-  (name:'Slap Fight';year:'1986';snd:1;hi:false;zip:'slapfigh';grid:99;company:'Taito';rom:@slapfigh_roms;tipo:ARCADE or SHOT),
-  (name:'The Legend of Kage';year:'1984';snd:1;hi:false;zip:'lkage';grid:100;company:'Taito';rom:@lkage;tipo:ARCADE or RUN_GUN),
-  (name:'Thunder Hoop';year:'1992';snd:1;hi:false;zip:'thoop';grid:101;company:'Gaelco';rom:@thoop;tipo:ARCADE or RUN_GUN),
-  (name:'Cabal';year:'1988';snd:1;hi:false;zip:'cabal';grid:102;company:'TAD';rom:@cabal;tipo:ARCADE or RUN_GUN),
-  (name:'Ghouls''n Ghosts';year:'1988';snd:1;hi:false;zip:'ghouls';grid:103;company:'Capcom';rom:@ghouls;tipo:ARCADE or RUN_GUN),
-  (name:'Final Fight';year:'1989';snd:1;hi:false;zip:'ffight';grid:104;company:'Capcom';rom:@ffight;tipo:ARCADE or FIGHT),
-  (name:'The King of Dragons';year:'1991';snd:1;hi:false;zip:'kod';grid:105;company:'Capcom';rom:@kod;tipo:ARCADE or FIGHT),
-  (name:'Street Fighter II - The World Warrior';year:'1991';snd:1;hi:false;zip:'sf2';grid:106;company:'Capcom';rom:@sf2;tipo:ARCADE or FIGHT),
-  (name:'Strider';year:'1989';snd:1;hi:false;zip:'strider';grid:107;company:'Capcom';rom:@strider;tipo:ARCADE or RUN_GUN),
-  (name:'Three Wonders';year:'1991';snd:1;hi:false;zip:'3wonders';grid:108;company:'Capcom';rom:@wonder3;tipo:ARCADE or RUN_GUN),
-  (name:'Captain Commando';year:'1991';snd:1;hi:false;zip:'captcomm';grid:109;company:'Capcom';rom:@captcomm;tipo:ARCADE or RUN_GUN),
-  (name:'Knights of the Round';year:'1991';snd:1;hi:false;zip:'knights';grid:110;company:'Capcom';rom:@knights;tipo:ARCADE or RUN_GUN),
-  (name:'Street Fighter II'': Champion Edition';year:'1992';snd:1;hi:false;zip:'sf2ce';grid:111;company:'Capcom';rom:@sf2ce;tipo:ARCADE or FIGHT),
-  (name:'Cadillacs and Dinosaurs';year:'1992';snd:1;hi:false;zip:'dino';grid:112;company:'Capcom';rom:@dino;tipo:ARCADE or FIGHT),
-  (name:'The Punisher';year:'1993';snd:1;hi:false;zip:'punisher';grid:113;company:'Capcom';rom:@punisher;tipo:ARCADE or FIGHT),
-  (name:'Shinobi';year:'1987';snd:1;hi:false;zip:'shinobi';grid:114;company:'Sega';rom:@shinobi;tipo:ARCADE or RUN_GUN),
-  (name:'Alex Kidd';year:'1986';snd:1;hi:false;zip:'alexkidd';grid:115;company:'Sega';rom:@alexkidd;tipo:ARCADE or RUN_GUN),
-  (name:'Fantasy Zone';year:'1986';snd:1;hi:false;zip:'fantzone';grid:116;company:'Sega';rom:@fantzone;tipo:ARCADE or RUN_GUN),
-  (name:'Time Pilot ''84';year:'1984';snd:1;hi:false;zip:'tp84';grid:117;company:'Konami';rom:@tp84;tipo:ARCADE or SHOT),
-  (name:'Tutankham';year:'1982';snd:1;hi:false;zip:'tutankhm';grid:118;company:'Konami';rom:@tutankhm;tipo:ARCADE or MAZE),
-  (name:'Pang';year:'1989';snd:1;hi:false;zip:'pang';grid:119;company:'Capcom';rom:@pang;tipo:ARCADE or SHOT),
-  (name:'Ninja Kid II';year:'1987';snd:1;hi:false;zip:'ninjakd2';grid:120;company:'UPL';rom:@ninjakd2;tipo:ARCADE or RUN_GUN),
-  (name:'Ark Area';year:'1988';snd:1;hi:false;zip:'arkarea';grid:121;company:'UPL';rom:@arkarea;tipo:ARCADE or SHOT),
-  (name:'Mutant Night';year:'1987';snd:1;hi:false;zip:'mnight';grid:122;company:'UPL';rom:@mnight;tipo:ARCADE or RUN_GUN),
-  (name:'Sky Kid';year:'1985';snd:1;hi:false;zip:'skykid';grid:123;company:'Namco';rom:@skykid;tipo:ARCADE or SHOT),
-  (name:'Rolling Thunder';year:'1986';snd:1;hi:false;zip:'rthunder';grid:124;company:'Namco';rom:@rthunder;tipo:ARCADE or RUN_GUN),
-  (name:'Hopping Mappy';year:'1986';snd:1;hi:false;zip:'hopmappy';grid:125;company:'Namco';rom:@hopmappy;tipo:ARCADE or MAZE),
-  (name:'Sky Kid Deluxe';year:'1986';snd:1;hi:false;zip:'skykiddx';grid:126;company:'Namco';rom:@skykiddx;tipo:ARCADE or SHOT),
-  (name:'Roc''n Rope';year:'1983';snd:1;hi:false;zip:'rocnrope';grid:127;company:'Konami';rom:@rocnrope;tipo:ARCADE or MAZE),
-  (name:'Repulse';year:'1985';snd:1;hi:false;zip:'repulse';grid:128;company:'Crux/Sega';rom:@repulse;tipo:ARCADE or SHOT),
-  (name:'The NewZealand Story';year:'1988';snd:1;hi:false;zip:'tnzs';grid:129;company:'Taito';rom:@tnzs;tipo:ARCADE or RUN_GUN),
-  (name:'Insector X';year:'1989';snd:1;hi:false;zip:'insectx';grid:130;company:'Taito';rom:@insectx;tipo:ARCADE or SHOT),
-  (name:'Pacland';year:'1984';snd:1;hi:false;zip:'pacland';grid:131;company:'Namco';rom:@pacland;tipo:ARCADE or RUN_GUN),
-  (name:'Mario Bros.';year:'1983';snd:2;hi:false;zip:'mario';grid:132;company:'Nintendo';rom:@mario;samples:@mario_samples;tipo:ARCADE or MAZE),
-  (name:'Solomon''s Key';year:'1986';snd:1;hi:false;zip:'solomon';grid:133;company:'Tecmo';rom:@solomon;tipo:ARCADE or MAZE),
-  (name:'Combat School';year:'1988';snd:1;hi:false;zip:'combatsc';grid:134;company:'Konami';rom:@combatsc;tipo:ARCADE or RUN_GUN),
-  (name:'Heavy Unit';year:'1988';snd:1;hi:false;zip:'hvyunit';grid:135;company:'Taito';rom:@hvyunit;tipo:ARCADE or SHOT),
-  (name:'P.O.W. - Prisoners of War';year:'1988';snd:1;hi:false;zip:'pow';grid:136;company:'SNK';rom:@pow;tipo:ARCADE or RUN_GUN),
-  (name:'Street Smart';year:'1988';snd:1;hi:false;zip:'streetsm';grid:137;company:'SNK';rom:@streetsm;tipo:ARCADE or FIGHT),
-  (name:'P47 - Phantom Fighter';year:'1989';snd:1;hi:false;zip:'p47';grid:138;company:'Jaleco';rom:@p47;tipo:ARCADE or SHOT),
-  (name:'Rod-Land';year:'1990';snd:1;hi:false;zip:'rodland';grid:139;company:'Jaleco';rom:@rodland;tipo:ARCADE or MAZE),
-  (name:'Saint Dragon';year:'1989';snd:1;hi:false;zip:'stdragon';grid:140;company:'Jaleco';rom:@stdragon;tipo:ARCADE or SHOT),
-  (name:'Time Pilot';year:'1982';snd:1;hi:false;zip:'timeplt';grid:141;company:'Konami';rom:@timeplt;tipo:ARCADE or SHOT),
-  (name:'Pengo';year:'1982';snd:1;hi:false;zip:'pengo';grid:142;company:'Sega';rom:@pengo;tipo:ARCADE or MAZE),
-  (name:'Scramble';year:'1981';snd:1;hi:false;zip:'scramble';grid:143;company:'Konami';rom:@scramble;tipo:ARCADE or SHOT),
-  (name:'Super Cobra';year:'1981';snd:1;hi:false;zip:'scobra';grid:144;company:'Konami';rom:@scobra;tipo:ARCADE or SHOT),
-  (name:'Amidar';year:'1982';snd:1;hi:false;zip:'amidar';grid:145;company:'Konami';rom:@amidar_roms;tipo:ARCADE or MAZE),
-  (name:'Twin Cobra';year:'1987';snd:1;hi:false;zip:'twincobr';grid:146;company:'Taito';rom:@twincobr;tipo:ARCADE or SHOT),
-  (name:'Flying Shark';year:'1987';snd:1;hi:false;zip:'fshark';grid:147;company:'Taito';rom:@fshark;tipo:ARCADE or SHOT),
-  (name:'Jr. Pac-Man';year:'1983';snd:1;hi:false;zip:'jrpacman';grid:148;company:'Bally Midway';rom:@jrpacman;tipo:ARCADE or MAZE),
-  (name:'Ikari III - The Rescue';year:'1989';snd:1;hi:false;zip:'ikari3';grid:149;company:'SNK';rom:@ikari3;tipo:ARCADE or FIGHT),
-  (name:'Search and Rescue';year:'1989';snd:1;hi:false;zip:'searchar';grid:150;company:'SNK';rom:@searchar;tipo:ARCADE or RUN_GUN),
-  (name:'Choplifter';year:'1985';snd:1;hi:false;zip:'choplift';grid:151;company:'Sega';rom:@choplift;tipo:ARCADE or SHOT or RUN_GUN),
-  (name:'Mister Viking';year:'1983';snd:1;hi:false;zip:'mrviking';grid:152;company:'Sega';rom:@mrviking;tipo:ARCADE or RUN_GUN),
-  (name:'Sega Ninja';year:'1985';snd:1;hi:false;zip:'seganinj';grid:153;company:'Sega';rom:@seganinj;tipo:ARCADE or RUN_GUN),
-  (name:'Up''n Down';year:'1983';snd:1;hi:false;zip:'upndown';grid:154;company:'Sega';rom:@upndown;tipo:ARCADE or DRIVE or MAZE),
-  (name:'Flicky';year:'1984';snd:1;hi:false;zip:'flicky';grid:155;company:'Sega';rom:@flicky;tipo:ARCADE or MAZE),
-  (name:'Robocop';year:'1988';snd:1;hi:false;zip:'robocop';grid:156;company:'Data East';rom:@robocop;tipo:ARCADE or RUN_GUN),
-  (name:'Baddudes vs. DragonNinja';year:'1988';snd:1;hi:false;zip:'baddudes';grid:157;company:'Data East';rom:@baddudes;tipo:ARCADE or FIGHT or RUN_GUN),
-  (name:'Hippodrome';year:'1989';snd:1;hi:false;zip:'hippodrm';grid:158;company:'Data East';rom:@hippodrm;tipo:ARCADE or FIGHT),
-  (name:'Tumble Pop';year:'1991';snd:1;hi:false;zip:'tumblep';grid:159;company:'Data East';rom:@tumblep;tipo:ARCADE or MAZE),
-  (name:'Funky Jet';year:'1992';snd:1;hi:false;zip:'funkyjet';grid:160;company:'Mitchell';rom:@funkyjet;tipo:ARCADE or MAZE),
-  (name:'Super Burger Time';year:'1990';snd:1;hi:false;zip:'supbtime';grid:161;company:'Data East';rom:@supbtime;tipo:ARCADE),
-  (name:'Caveman Ninja';year:'1991';snd:1;hi:false;zip:'cninja';grid:162;company:'Data East';rom:@cninja;tipo:ARCADE or RUN_GUN),
-  (name:'Robocop 2';year:'1991';snd:1;hi:false;zip:'robocop2';grid:163;company:'Data East';rom:@robocop2;tipo:ARCADE or RUN_GUN),
-  (name:'Diet Go Go';year:'1992';snd:1;hi:false;zip:'dietgo';grid:164;company:'Data East';rom:@dietgo;tipo:ARCADE or MAZE),
-  (name:'Act-Fancer Cybernetick Hyper Weapon';year:'1989';snd:1;hi:false;zip:'actfancr';grid:165;company:'Data East';rom:@actfancer;tipo:ARCADE or RUN_GUN),
-  (name:'Arabian';year:'1983';snd:1;hi:false;zip:'arabian';grid:166;company:'Sun Electronics';rom:@arabian;tipo:ARCADE or MAZE),
-  (name:'Dig Dug';year:'1982';snd:1;hi:false;zip:'digdug';grid:167;company:'Namco';rom:@digdug;tipo:ARCADE or MAZE),
-  (name:'Donkey Kong Jr.';year:'1982';snd:2;hi:false;zip:'dkongjr';grid:168;company:'Nintendo';rom:@dkongjr;samples:@dkjr_samples;tipo:ARCADE or MAZE),
-  (name:'Donkey Kong 3';year:'1983';snd:1;hi:false;zip:'dkong3';grid:169;company:'Nintendo';rom:@dkong3;tipo:ARCADE or MAZE),
-  (name:'Pirate Ship Higemaru';year:'1984';snd:1;hi:false;zip:'higemaru';grid:170;company:'Capcom';rom:@higemaru;tipo:ARCADE or MAZE),
-  (name:'Bagman';year:'1982';snd:4;hi:false;zip:'bagman';grid:171;company:'Valadon Automation';rom:@bagman;tipo:ARCADE or MAZE),
-  (name:'Super Bagman';year:'1984';snd:4;hi:false;zip:'sbagman';grid:172;company:'Valadon Automation';rom:@sbagman;tipo:ARCADE or MAZE),
-  (name:'Squash';year:'1992';snd:1;hi:false;zip:'squash';grid:173;company:'Gaelco';rom:@squash;tipo:ARCADE or SPORT),
-  (name:'Biomechanical Toy';year:'1995';snd:1;hi:false;zip:'biomtoy';grid:174;company:'Gaelco';rom:@biomtoy;tipo:ARCADE or RUN_GUN),
-  (name:'Congo Bongo';year:'1983';snd:3;hi:false;zip:'congo';grid:175;company:'Sega';rom:@congo;samples:@congo_samples;tipo:ARCADE or MAZE),
-  (name:'Kangaroo';year:'1982';snd:1;hi:false;zip:'kangaroo';grid:176;company:'Sun Electronics';rom:@kangaroo;tipo:ARCADE or MAZE),
-  (name:'Bionic Commando';year:'1987';snd:1;hi:false;zip:'bionicc';grid:177;company:'Capcom';rom:@bionicc;tipo:ARCADE or RUN_GUN),
-  (name:'WWF Superstar';year:'1989';snd:1;hi:false;zip:'wwfsstar';grid:178;company:'Technos Japan';rom:@wwfsstar;tipo:ARCADE or SPORT),
-  (name:'Rainbow Islands';year:'1987';snd:1;hi:false;zip:'rbisland';grid:179;company:'Taito';rom:@rbisland;tipo:ARCADE or RUN_GUN),
-  (name:'Rainbow Islands Extra';year:'1987';snd:1;hi:false;zip:'rbislande';grid:180;company:'Taito';rom:@rbislande;tipo:ARCADE or RUN_GUN),
-  (name:'Volfied';year:'1989';snd:1;hi:false;zip:'volfied';grid:181;company:'Taito';rom:@volfied;tipo:ARCADE or MAZE),
-  (name:'Operation Wolf';year:'1987';snd:1;hi:false;zip:'opwolf';grid:182;company:'Taito';rom:@opwolf;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'Super Pang';year:'1990';snd:1;hi:false;zip:'spang';grid:183;company:'Capcom';rom:@spang;tipo:ARCADE or SHOT),
-  (name:'Outrun';year:'1989';snd:1;hi:false;zip:'outrun';grid:184;company:'Sega';rom:@outrun;tipo:ARCADE or DRIVE),
-  (name:'Elevator Action';year:'1983';snd:1;hi:false;zip:'elevator';grid:185;company:'Taito';rom:@elevator;tipo:ARCADE or RUN_GUN),
-  (name:'Alien Syndrome';year:'1988';snd:1;hi:false;zip:'aliensyn';grid:186;company:'Sega';rom:@aliensyn;tipo:ARCADE or RUN_GUN),
-  (name:'Wonder Boy III - Monster Lair';year:'1987';snd:1;hi:false;zip:'wb3';grid:187;company:'Sega';rom:@wb3;tipo:ARCADE or RUN_GUN),
-  (name:'Zaxxon';year:'1982';snd:2;hi:false;zip:'zaxxon';grid:188;company:'Sega';rom:@zaxxon;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
-  (name:'Jungle King';year:'1982';snd:1;hi:false;zip:'junglek';grid:189;company:'Taito';rom:@junglek;tipo:ARCADE or RUN_GUN),
-  (name:'Hammerin'' Harry';year:'1990';snd:1;hi:false;zip:'hharry';grid:190;company:'Irem';rom:@hharry;tipo:ARCADE or RUN_GUN),
-  (name:'R-Type II';year:'1989';snd:1;hi:false;zip:'rtype2';grid:191;company:'Irem';rom:@rtype2;tipo:ARCADE or SHOT),
-  (name:'The Tower of Druaga';year:'1984';snd:1;hi:false;zip:'todruaga';grid:192;company:'Namco';rom:@todruaga;tipo:ARCADE or MAZE),
-  (name:'Motos';year:'1985';snd:1;hi:false;zip:'motos';grid:193;company:'Namco';rom:@motos;tipo:ARCADE or MAZE),
-  (name:'Dragon Buster';year:'1984';snd:1;hi:false;zip:'drgnbstr';grid:194;company:'Namco';rom:@drgnbstr;tipo:ARCADE or MAZE or RUN_GUN),
-  (name:'Vulgus';year:'1984';snd:1;hi:false;zip:'vulgus';grid:195;company:'Capcom';rom:@vulgus;tipo:ARCADE or SHOT),
-  (name:'Double Dragon 3 - The Rosetta Stone';year:'1990';snd:1;hi:false;zip:'ddragon3';grid:196;company:'Technos';rom:@ddragon3;tipo:ARCADE or FIGHT),
-  (name:'Block Out';year:'1990';snd:1;hi:false;zip:'blockout';grid:197;company:'Technos';rom:@blockout;tipo:ARCADE),
-  (name:'Tetris (Sega)';year:'1988';snd:1;hi:false;zip:'tetris';grid:198;company:'Sega';rom:@tetris;tipo:ARCADE),
-  (name:'Food Fight';year:'1982';snd:1;hi:false;zip:'foodf';grid:199;company:'Atari';rom:@foodf;tipo:ARCADE or MAZE),
-  (name:'Snap Jack';year:'1982';snd:1;hi:false;zip:'snapjack';grid:200;company:'Universal';rom:@snapjack;tipo:ARCADE or RUN_GUN),
-  (name:'Cosmic Avenger';year:'1981';snd:1;hi:false;zip:'cavenger';grid:201;company:'Universal';rom:@cavenger;tipo:ARCADE or SHOT),
-  (name:'Pleiads';year:'1981';snd:0;hi:false;zip:'pleiads';grid:202;company:'Tehkan';rom:@pleiads;tipo:ARCADE or SHOT),
-  (name:'Mr. Goemon';year:'1986';snd:1;hi:false;zip:'mrgoemon';grid:203;company:'Konami';rom:@mrgoemon;tipo:ARCADE or RUN_GUN),
-  (name:'Nemesis';year:'1985';snd:1;hi:false;zip:'nemesis';grid:204;company:'Konami';rom:@nemesis;tipo:ARCADE or SHOT),
-  (name:'Twinbee';year:'1985';snd:1;hi:false;zip:'twinbee';grid:205;company:'Konami';rom:@twinbee;tipo:ARCADE or SHOT),
-  (name:'Pirates';year:'1994';snd:1;hi:false;zip:'pirates';grid:206;company:'NIX';rom:@pirates;tipo:ARCADE or RUN_GUN),
-  (name:'Genix Family';year:'1994';snd:1;hi:false;zip:'genix';grid:207;company:'NIX';rom:@genix;tipo:ARCADE or RUN_GUN),
-  (name:'Juno First';year:'1983';snd:1;hi:false;zip:'junofrst';grid:208;company:'Konami';rom:@junofrst;tipo:ARCADE or SHOT),
-  (name:'Gyruss';year:'1983';snd:1;hi:false;zip:'gyruss';grid:209;company:'Konami';rom:@gyruss;tipo:ARCADE or SHOT),
-  (name:'Boogie Wings';year:'1992';snd:1;hi:false;zip:'boogwing';grid:210;company:'Data East';rom:@boogwing;tipo:ARCADE or RUN_GUN),
-  (name:'Free Kick';year:'1987';snd:1;hi:false;zip:'freekick';grid:211;company:'Nihon System';rom:@freekick;tipo:ARCADE or SPORT),
-  (name:'Pinball Action';year:'1985';snd:1;hi:false;zip:'pbaction';grid:212;company:'Tehkan';rom:@pbaction;tipo:ARCADE),
-  (name:'Renegade';year:'1986';snd:1;hi:false;zip:'renegade';grid:213;company:'Technos Japan';rom:@renegade;tipo:ARCADE or FIGHT),
-  (name:'Teenage Mutant Ninja Turtles';year:'1989';snd:1;hi:false;zip:'tmnt';grid:214;company:'Konami';rom:@tmnt;tipo:ARCADE or FIGHT),
-  (name:'Sunset Riders';year:'1991';snd:1;hi:false;zip:'ssriders';grid:215;company:'Konami';rom:@ssriders;tipo:ARCADE or RUN_GUN or FIGHT),
-  (name:'Gradius III';year:'1991';snd:1;hi:false;zip:'gradius3';grid:216;company:'Konami';rom:@gradius3;tipo:ARCADE or SHOT),
-  (name:'Space Invaders';year:'1978';snd:2;hi:false;zip:'invaders';grid:217;company:'Taito';rom:@spaceinv;samples:@spaceinv_samples;tipo:ARCADE or SHOT),
-  (name:'Centipede';year:'1980';snd:1;hi:false;zip:'centiped';grid:218;company:'Atari';rom:@centipede;tipo:ARCADE or SHOT),
-  (name:'Karnov';year:'1987';snd:1;hi:false;zip:'karnov';grid:219;company:'Data East';rom:@karnov;tipo:ARCADE or RUN_GUN),
-  (name:'Chelnov';year:'1987';snd:1;hi:false;zip:'chelnov';grid:220;company:'Data East';rom:@chelnov;tipo:ARCADE or RUN_GUN),
-  (name:'Aliens';year:'1990';snd:1;hi:false;zip:'aliens';grid:221;company:'Konami';rom:@aliens;tipo:ARCADE or RUN_GUN),
-  (name:'Super Contra';year:'1988';snd:1;hi:false;zip:'scontra';grid:222;company:'Konami';rom:@scontra;tipo:ARCADE or RUN_GUN),
-  (name:'Gang Busters';year:'1988';snd:1;hi:false;zip:'gbusters';grid:223;company:'Konami';rom:@gbusters;tipo:ARCADE or RUN_GUN),
-  (name:'Thunder Cross';year:'1988';snd:1;hi:false;zip:'thunderx';grid:224;company:'Konami';rom:@thunderx;tipo:ARCADE or SHOT),
-  (name:'The Simpsons';year:'1991';snd:1;hi:false;zip:'simpsons';grid:225;company:'Konami';rom:@simpsons;tipo:ARCADE or RUN_GUN or FIGHT),
-  (name:'Track & Field';year:'1983';snd:1;hi:false;zip:'trackfld';grid:226;company:'Konami';rom:@trackfield;tipo:ARCADE or SPORT),
-  (name:'Hyper Sports';year:'1984';snd:1;hi:false;zip:'hyperspt';grid:227;company:'Konami';rom:@hypersports;tipo:ARCADE or SPORT),
-  (name:'Megazone';year:'1983';snd:1;hi:false;zip:'megazone';grid:228;company:'Konami';rom:@megazone;tipo:ARCADE or SHOT),
-  (name:'Space Fire Bird';year:'1980';snd:4;hi:false;zip:'spacefb';grid:229;company:'Nintendo';rom:@spacefb;samples:@spacefb_samples;tipo:ARCADE or SHOT),
-  (name:'Ajax';year:'1987';snd:1;hi:false;zip:'ajax';grid:230;company:'Konami';rom:@ajax;tipo:ARCADE or SHOT),
-  (name:'Xevious';year:'1982';snd:3;hi:false;zip:'xevious';grid:231;company:'Namco';rom:@xevious;samples:@xevious_samples;tipo:ARCADE or SHOT),
-  (name:'The Combatribes';year:'1990';snd:1;hi:false;zip:'ctribe';grid:232;company:'Technos';rom:@ctribe;tipo:ARCADE or FIGHT),
-  (name:'Lunar Lander';year:'1979';snd:0;hi:false;zip:'llander';grid:233;company:'Atari';rom:@llander;tipo:ARCADE),
-  (name:'Crush Roller';year:'1981';snd:1;hi:false;zip:'crush';grid:234;company:'Alpha Denshi Co./Kural Samno Electric, Ltd.';rom:@crush;tipo:ARCADE or MAZE),
-  (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta;tipo:ARCADE or FIGHT),
-  (name:'Gauntlet';year:'1985';snd:1;hi:false;zip:'gauntlet';grid:236;company:'Atari';rom:@gauntlet2p;tipo:ARCADE or RUN_GUN),
-  (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro;tipo:ARCADE or SHOT),
-  (name:'Crazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber;tipo:ARCADE),
-  (name:'Return of the Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv;tipo:ARCADE or SHOT),
-  (name:'Tetris (Atari)';year:'1988';snd:1;hi:false;zip:'atetris';grid:240;company:'Atari Games';rom:@tetris_atari;tipo:ARCADE),
-  (name:'Ikari Warriors';year:'1986';snd:1;hi:false;zip:'ikari';grid:241;company:'SNK';rom:@ikari;tipo:ARCADE or RUN_GUN),
-  (name:'Athena';year:'1986';snd:1;hi:false;zip:'athena';grid:242;company:'SNK';rom:@athena;tipo:ARCADE or RUN_GUN),
-  (name:'T.N.K III';year:'1986';snd:1;hi:false;zip:'tnk3';grid:243;company:'SNK';rom:@tnk3;tipo:ARCADE or RUN_GUN),
-  (name:'Peter Pack Rat';year:'1984';snd:1;hi:false;zip:'peterpak';grid:244;company:'Atari';rom:@peterpak;tipo:ARCADE),
-  (name:'Gauntlet II';year:'1986';snd:1;hi:false;zip:'gaunt2';grid:245;company:'Atari';rom:@gaunt2;tipo:ARCADE or RUN_GUN),
-  (name:'Defender';year:'1980';snd:1;hi:false;zip:'defender';grid:246;company:'Williams';rom:@defender;tipo:ARCADE or SHOT),
-  (name:'Fire Ball';year:'1992';snd:1;hi:false;zip:'fball';grid:247;company:'FM Works';rom:@fball_roms;tipo:ARCADE or MAZE),
-  (name:'Mayday';year:'1980';snd:1;hi:false;zip:'mayday';grid:248;company:'Williams';rom:@mayday;tipo:ARCADE or SHOT),
-  (name:'Colony 7';year:'1981';snd:1;hi:false;zip:'colony7';grid:249;company:'Williams';rom:@colony7;tipo:ARCADE or SHOT),
-  (name:'Bosconian';year:'1981';snd:3;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco;samples:@bosco_samples;tipo:ARCADE or SHOT),
-  (name:'HangOn Jr.';year:'1985';snd:1;hi:false;zip:'hangonjr';grid:251;company:'Sega';rom:@hangonjr;tipo:ARCADE or SPORT or DRIVE),
-  (name:'Slap Shooter';year:'1986';snd:1;hi:false;zip:'slapshtr';grid:252;company:'Sega';rom:@slapshtr;tipo:ARCADE or SPORT),
-  (name:'Fantasy Zone II: The Tears of Opa-Opa';year:'1988';snd:1;hi:false;zip:'fantzn2';grid:253;company:'Sega';rom:@fantzn2;tipo:ARCADE or SHOT),
-  (name:'Opa Opa';year:'1987';snd:1;hi:false;zip:'opaopa';grid:254;company:'Sega';rom:@opaopa;tipo:ARCADE or MAZE),
-  (name:'Tetris (Sega System E)';year:'1988';snd:1;hi:false;zip:'tetrisse';grid:255;company:'Sega';rom:@tetrisse;tipo:ARCADE),
-  (name:'Transformer';year:'1986';snd:1;hi:false;zip:'transfrm';grid:256;company:'Sega';rom:@transfrm;tipo:ARCADE or SHOT),
-  (name:'Riddle of Pythagoras';year:'1986';snd:1;hi:false;zip:'ridleofp';grid:257;company:'Sega';rom:@ridleofp;tipo:ARCADE or MAZE),
-  (name:'Route 16';year:'1981';snd:1;hi:false;zip:'route16';grid:258;company:'Sun Electronics';rom:@route16;tipo:ARCADE or DRIVE),
-  (name:'Speak & Rescue';year:'1980';snd:1;hi:false;zip:'speakres';grid:259;company:'Sun Electronics';rom:@speakres;tipo:ARCADE or SHOT),
-  (name:'Galactic Warriors';year:'1985';snd:1;hi:false;zip:'gwarrior';grid:260;company:'Konami';rom:@gwarrior;tipo:ARCADE or FIGHT),
-  (name:'Salamander';year:'1986';snd:1;hi:false;zip:'salamand';grid:261;company:'Konami';rom:@salamander;tipo:ARCADE or SHOT),
-  (name:'Bad Lands';year:'1989';snd:1;hi:false;zip:'badlands';grid:262;company:'Atari';rom:@badlands;tipo:ARCADE or DRIVE),
-  (name:'Indiana Jones and the Temple of Doom';year:'1985';snd:1;hi:false;zip:'indytemp';grid:263;company:'Atari';rom:@indytemp;tipo:ARCADE or RUN_GUN),
-  (name:'Marble Madness';year:'1984';snd:1;hi:false;zip:'marble';grid:264;company:'Atari';rom:@marble;tipo:ARCADE or MAZE),
-  (name:'Soldier Girl Amazon';year:'1986';snd:1;hi:false;zip:'amazon';grid:265;company:'Nichibutsu';rom:@amazon;tipo:ARCADE or RUN_GUN),
-  (name:'Cosmo Police Galivan';year:'1985';snd:1;hi:false;zip:'galivan';grid:266;company:'Nichibutsu';rom:@galivan;tipo:ARCADE or RUN_GUN),
-  (name:'Ufo Robo Dangar';year:'1986';snd:1;hi:false;zip:'dangar';grid:267;company:'Nichibutsu';rom:@dangar;tipo:ARCADE or SHOT),
-  (name:'Last Duel';year:'1988';snd:1;hi:false;zip:'lastduel';grid:268;company:'Capcom';rom:@lastduel;tipo:ARCADE or DRIVE),
-  (name:'Mad Gear';year:'1989';snd:1;hi:false;zip:'madgear';grid:269;company:'Capcom';rom:@madgear;tipo:ARCADE or DRIVE),
-  (name:'Led Storm Rally 2011';year:'1989';snd:1;hi:false;zip:'leds2011';grid:270;company:'Capcom';rom:@leds2011;tipo:ARCADE or DRIVE),
-  (name:'Gigas';year:'1986';snd:1;hi:false;zip:'gigas';grid:271;company:'Sega';rom:@gigas;tipo:ARCADE or MAZE),
-  (name:'Gigas Mark II';year:'1986';snd:1;hi:false;zip:'gigasm2';grid:272;company:'Sega';rom:@gigasm2;tipo:ARCADE or MAZE),
-  (name:'Omega';year:'1986';snd:1;hi:false;zip:'omega';grid:273;company:'Nihon System';rom:@omega;tipo:ARCADE or MAZE),
-  (name:'Perfect Billard';year:'1987';snd:1;hi:false;zip:'pbillrd';grid:274;company:'Nihon System';rom:@pbillrd;tipo:ARCADE or SPORT),
-  (name:'Armed F';year:'1988';snd:1;hi:false;zip:'armedf';grid:275;company:'Nichibutsu';rom:@armedf;tipo:ARCADE or SHOT),
-  (name:'Terra Force';year:'1987';snd:1;hi:false;zip:'terraf';grid:276;company:'Nichibutsu';rom:@terraf;tipo:ARCADE or SHOT),
-  (name:'Crazy Climber 2';year:'1988';snd:1;hi:false;zip:'cclimbr2';grid:277;company:'Nichibutsu';rom:@cclimbr2;tipo:ARCADE),
-  (name:'Legion - Spinner-87';year:'1987';snd:1;hi:false;zip:'legion';grid:278;company:'Nichibutsu';rom:@legion;tipo:ARCADE or SHOT or DRIVE),
-  (name:'ASO - Armored Scrum Object';year:'1985';snd:1;hi:false;zip:'aso';grid:279;company:'SNK';rom:@aso;tipo:ARCADE or SHOT),
-  (name:'Fire Trap';year:'1986';snd:1;hi:false;zip:'firetrap';grid:280;company:'Woodplace Inc.';rom:@firetrap;tipo:ARCADE),
-  (name:'3x3 Puzzle';year:'1998';snd:1;hi:false;zip:'3x3puzzl';grid:281;company:'Ace Enterprise';rom:@puzz3x3;tipo:ARCADE),
-  (name:'Casanova';year:'199?';snd:1;hi:false;zip:'casanova';grid:282;company:'Promat';rom:@casanova;tipo:ARCADE or MAZE),
-  (name:'1945k III';year:'2000';snd:1;hi:false;zip:'1945kiii';grid:283;company:'Oriental Soft';rom:@k31945;tipo:ARCADE or SHOT),
-  (name:'96 Flag Rally';year:'2000';snd:1;hi:false;zip:'flagrall';grid:284;company:'Promat';rom:@flagrall;tipo:ARCADE or DRIVE),
-  (name:'Blood Bros.';year:'1990';snd:1;hi:false;zip:'bloodbro';grid:285;company:'TAD Corporation';rom:@bloodbros;tipo:ARCADE or RUN_GUN),
-  (name:'Sky Smasher';year:'1990';snd:1;hi:false;zip:'skysmash';grid:286;company:'Nihon System';rom:@skysmash;tipo:ARCADE or SHOT),
-  (name:'Baraduke';year:'1985';snd:1;hi:false;zip:'baraduke';grid:287;company:'Namco';rom:@baraduke;tipo:ARCADE or RUN_GUN),
-  (name:'Metro-Cross';year:'1985';snd:1;hi:false;zip:'metrocrs';grid:288;company:'Namco';rom:@metrocross;tipo:ARCADE or RUN_GUN),
-  (name:'The Return of Ishtar';year:'1986';snd:1;hi:false;zip:'roishtar';grid:289;company:'Namco';rom:@roishtar;tipo:ARCADE or MAZE),
-  (name:'Genpei ToumaDen';year:'1986';snd:1;hi:false;zip:'genpeitd';grid:290;company:'Namco';rom:@genpeitd;tipo:ARCADE or RUN_GUN),
-  (name:'Wonder Momo';year:'1987';snd:1;hi:false;zip:'wndrmomo';grid:291;company:'Namco';rom:@wndrmomo;tipo:ARCADE or RUN_GUN),
-  (name:'Altered Beast';year:'1988';snd:1;hi:false;zip:'altbeast';grid:292;company:'Sega';rom:@altbeast;tipo:ARCADE or FIGHT),
-  (name:'Golden Axe';year:'1989';snd:1;hi:false;zip:'goldnaxe';grid:293;company:'Sega';rom:@goldnaxe;tipo:ARCADE or FIGHT),
-  (name:'Dynamite Dux';year:'1988';snd:1;hi:false;zip:'ddux1';grid:294;company:'Sega';rom:@ddux;tipo:ARCADE or FIGHT),
-  (name:'E-Swat - Cyber Police';year:'1989';snd:1;hi:false;zip:'eswat';grid:295;company:'Sega';rom:@eswat;tipo:ARCADE or RUN_GUN or FIGHT),
-  (name:'Passing Shot';year:'1988';snd:1;hi:false;zip:'passsht';grid:296;company:'Sega';rom:@passsht;tipo:ARCADE or SPORT),
-  (name:'Aurail';year:'1990';snd:1;hi:false;zip:'aurail';grid:297;company:'Sega';rom:@aurail;tipo:ARCADE or RUN_GUN),
-  (name:'Hellfire';year:'1989';snd:1;hi:false;zip:'hellfire';grid:298;company:'Toaplan';rom:@hellfire;tipo:ARCADE or RUN_GUN),
-  (name:'Lock''n''Chase';year:'1981';snd:1;hi:false;zip:'lnc';grid:299;company:'Deco';rom:@lnc;tipo:ARCADE or MAZE),
-  (name:'Minky Monkey';year:'1982';snd:1;hi:false;zip:'mmonkey';grid:300;company:'Deco';rom:@mmonkey;tipo:ARCADE or MAZE),
-  (name:'Karate Champ';year:'1984';snd:1;hi:false;zip:'kchamp';grid:301;company:'Data East';rom:@karatechamp;tipo:ARCADE or SPORT or FIGHT),
-  (name:'Thundercade';year:'1987';snd:1;hi:false;zip:'tndrcade';grid:302;company:'Seta';rom:@tndrcade;tipo:ARCADE or SHOT),
-  (name:'Twin Eagle - Revenge Joe''s Brother';year:'1988';snd:1;hi:false;zip:'twineagl';grid:303;company:'Seta';rom:@twineagl;tipo:ARCADE or SHOT),
-  (name:'Thunder & Lightning';year:'1990';snd:1;hi:false;zip:'thunderl';grid:304;company:'Seta';rom:@thunderl;tipo:ARCADE or MAZE),
-  (name:'Ms Pac Man Twin';year:'1992';snd:1;hi:false;zip:'mspactwin';grid:305;company:'Susilu';rom:@mspactwin;tipo:ARCADE or MAZE),
-  (name:'Extermination';year:'1987';snd:1;hi:false;zip:'extrmatn';grid:306;company:'Taito';rom:@extrmatn;tipo:ARCADE or RUN_GUN),
-  (name:'Atomic Robo-kid';year:'1988';snd:1;hi:false;zip:'robokid';grid:307;company:'UPL';rom:@robokid;tipo:ARCADE or RUN_GUN),
-  (name:'Mr. Do''s Castle';year:'1983';snd:1;hi:false;zip:'docastle';grid:308;company:'Universal';rom:@docastle;tipo:ARCADE or MAZE),
-  (name:'Do! Run Run';year:'1984';snd:1;hi:false;zip:'dorunrun';grid:309;company:'Universal';rom:@dorunrun;tipo:ARCADE or MAZE),
-  (name:'Mr. Do''s Wild Ride';year:'1984';snd:1;hi:false;zip:'dowild';grid:310;company:'Universal';rom:@dowild;tipo:ARCADE or MAZE),
-  (name:'Jumping Jack';year:'1984';snd:1;hi:false;zip:'jjack';grid:311;company:'Universal';rom:@jjack;tipo:ARCADE),
-  (name:'Kick Rider';year:'1984';snd:1;hi:false;zip:'kickridr';grid:312;company:'Universal';rom:@kickridr;tipo:ARCADE or SPORT or DRIVE),
-  (name:'Indoor Soccer';year:'1985';snd:1;hi:false;zip:'idsoccer';grid:313;company:'Universal';rom:@idsoccer;tipo:ARCADE or SPORT),
-  (name:'Crystal Castles';year:'1983';snd:1;hi:false;zip:'ccastles';grid:314;company:'Atari';rom:@ccastles;tipo:ARCADE or MAZE),
-  (name:'Flower';year:'1986';snd:1;hi:false;zip:'flower';grid:315;company:'Clarue';rom:@flower;tipo:ARCADE or SHOT),
-  (name:'SlySpy';year:'1989';snd:1;hi:false;zip:'slyspy';grid:316;company:'Data East';rom:@slyspy;tipo:ARCADE or RUN_GUN),
-  (name:'Boulder Dash I-II';year:'1990';snd:1;hi:false;zip:'bouldash';grid:317;company:'Data East';rom:@bouldash;tipo:ARCADE or MAZE),
-  (name:'Super Dodge Ball';year:'1987';snd:1;hi:false;zip:'spdodgeb';grid:318;company:'Technos';rom:@sdodgeball;tipo:ARCADE or SPORT),
-  (name:'Senjyo';year:'1983';snd:1;hi:false;zip:'senjyo';grid:319;company:'Tehkan';rom:@senjyo;tipo:ARCADE or SHOT),
-  (name:'Baluba-louk no Densetsu';year:'1986';snd:1;hi:false;zip:'baluba';grid:320;company:'Able Corp, Ltd.';rom:@baluba;tipo:ARCADE or RUN_GUN),
-  (name:'Joust';year:'1982';snd:1;hi:false;zip:'joust';grid:321;company:'Williams';rom:@joust;tipo:ARCADE or MAZE),
-  (name:'Robotron';year:'1982';snd:1;hi:false;zip:'robotron';grid:322;company:'Williams';rom:@robotron;tipo:ARCADE or RUN_GUN),
-  (name:'Stargate';year:'1981';snd:1;hi:false;zip:'stargate';grid:323;company:'Williams';rom:@stargate;tipo:ARCADE or SHOT),
-  (name:'Tapper';year:'1983';snd:1;hi:false;zip:'tapper';grid:324;company:'Bally Midway';rom:@tapper;tipo:ARCADE),
-  (name:'Arkanoid';year:'1986';snd:1;hi:false;zip:'arkanoid';grid:325;company:'Taito';rom:@arkanoid;tipo:ARCADE or MAZE),
-  (name:'Side Arms - Hyper Dyne';year:'1986';snd:1;hi:false;zip:'sidearms';grid:326;company:'Capcom';rom:@sidearms;tipo:ARCADE or RUN_GUN or SHOT),
-  (name:'The Speed Rumbler';year:'1986';snd:1;hi:false;zip:'srumbler';grid:327;company:'Capcom';rom:@speedr;tipo:ARCADE or RUN_GUN),
-  (name:'China Gate';year:'1988';snd:1;hi:false;zip:'chinagat';grid:328;company:'Technos Japan';rom:@chinagate;tipo:ARCADE or RUN_GUN or FIGHT),
-  (name:'Mag Max';year:'1985';snd:1;hi:false;zip:'magmax';grid:329;company:'Nichibutsu';rom:@magmax;tipo:ARCADE or RUN_GUN),
-  (name:'S.R.D. Mission';year:'1986';snd:1;hi:false;zip:'srdmissn';grid:330;company:'Kyugo/Sega';rom:@srdmission;tipo:ARCADE or SHOT),
-  (name:'Airwolf';year:'1987';snd:1;hi:false;zip:'airwolf';grid:331;company:'Kyugo';rom:@airwolf;tipo:ARCADE or SHOT),
-  (name:'Ambush';year:'1983';snd:1;hi:false;zip:'ambush';grid:332;company:'Tecfri';rom:@ambush;tipo:ARCADE or SHOT),
-  (name:'Super Duck';year:'1992';snd:1;hi:false;zip:'supduck';grid:333;company:'Comad';rom:@superduck;tipo:ARCADE or MAZE),
-  (name:'Hang-On';year:'1985';snd:1;hi:false;zip:'hangon';grid:334;company:'Sega';rom:@hangon;tipo:ARCADE or SPORT),
-  (name:'Enduro Racer';year:'1986';snd:1;hi:false;zip:'enduror';grid:335;company:'Sega';rom:@enduror;tipo:ARCADE or SPORT),
-  (name:'Space Harrier';year:'1985';snd:1;hi:false;zip:'sharrier';grid:336;company:'Sega';rom:@sharrier_roms;tipo:ARCADE or RUN_GUN),
-  (name:'64th Street - A detective story';year:'1991';snd:1;hi:false;zip:'64street';grid:337;company:'Jaleco';rom:@th64_roms;tipo:ARCADE or FIGHT),
-  (name:'Shadow Warriors';year:'1988';snd:1;hi:false;zip:'shadoww';grid:338;company:'Tecmo';rom:@shadoww_roms;tipo:ARCADE or FIGHT),
-  (name:'Wild Fang/Tecmo Knight';year:'1989';snd:1;hi:false;zip:'wildfang';grid:339;company:'Tecmo';rom:@wildfang_roms;tipo:ARCADE or FIGHT),
-  (name:'Raiden';year:'1990';snd:1;hi:false;zip:'raiden';grid:340;company:'Seibu Kaihatsu';rom:@raiden_roms;tipo:ARCADE or SHOT),
-  (name:'Twins';year:'1993';snd:1;hi:false;zip:'twins';grid:341;company:'Ecogames';rom:@twins_roms;tipo:ARCADE or MAZE),
-  (name:'Twins (Electronic Devices)';year:'1994';snd:1;hi:false;zip:'twinsed1';grid:342;company:'Ecogames';rom:@twinsed1_roms;tipo:ARCADE or MAZE),
-  (name:'Hot Blocks - Tetrix II';year:'1993';snd:1;hi:false;zip:'hotblock';grid:343;company:'NIX?';rom:@hotblock_roms;tipo:ARCADE or MAZE),
-  (name:'Missile Command';year:'1980';snd:1;hi:false;zip:'missile';grid:344;company:'Atari';rom:@missile_roms;tipo:ARCADE or SHOT),
-  (name:'Super Missile Attack';year:'1981';snd:1;hi:false;zip:'suprmatk';grid:345;company:'Atari';rom:@suprmatk_roms;tipo:ARCADE or SHOT),
-  (name:'Super Zaxxon';year:'1982';snd:3;hi:false;zip:'szaxxon';grid:346;company:'Sega';rom:@szaxxon_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
-  (name:'Future Spy';year:'1984';snd:3;hi:false;zip:'futspy';grid:347;company:'Sega';rom:@futspy_roms;samples:@zaxxon_samples;tipo:ARCADE or SHOT),
-  (name:'Millipede';year:'1982';snd:1;hi:false;zip:'milliped';grid:348;company:'Atari';rom:@milliped_roms;tipo:ARCADE or SHOT),
-  (name:'Gaplus';year:'1984';snd:3;hi:false;zip:'gaplus';grid:349;company:'Namco';rom:@gaplus_roms;samples:@gaplus_samples;tipo:ARCADE or SHOT),
-  (name:'Super Xevious';year:'1984';snd:3;hi:false;zip:'sxevious';grid:350;company:'Namco';rom:@sxevious_roms;samples:@xevious_samples;tipo:ARCADE or SHOT),
-  (name:'Grobda';year:'1984';snd:1;hi:false;zip:'grobda';grid:351;company:'Namco';rom:@grobda_roms;tipo:ARCADE or SHOT),
-  (name:'Pac & Pal';year:'1983';snd:1;hi:false;zip:'pacnpal';grid:352;company:'Namco';rom:@pacnpal_roms;tipo:ARCADE or MAZE),
-  (name:'Birdiy';year:'1983';snd:1;hi:false;zip:'birdiy';grid:353;company:'Mama Top';rom:@birdiy_roms;tipo:ARCADE or MAZE),
-  (name:'Wily Tower';year:'1984';snd:1;hi:false;zip:'wilytowr';grid:354;company:'Irem';rom:@wilytower_roms;tipo:ARCADE or MAZE),
-  (name:'Fighting Basketball';year:'1984';snd:1;hi:false;zip:'fghtbskt';grid:355;company:'Irem';rom:@fightbasket_roms;tipo:ARCADE or SPORT),
-  (name:'Diverboy';year:'1992';snd:1;hi:false;zip:'diverboy';grid:356;company:'Gamart';rom:@diverboy_roms;tipo:ARCADE or MAZE),
-  (name:'Mug Smashers';year:'1990';snd:1;hi:false;zip:'mugsmash';grid:357;company:'Electronic Devices Italy';rom:@mugsmash_roms;tipo:ARCADE or FIGHT),
-  (name:'Steel Force';year:'1994';snd:1;hi:false;zip:'stlforce';grid:358;company:'Ecogames';rom:@steelforce_roms;tipo:ARCADE or MAZE or SHOT),
-  (name:'Twin Brats';year:'1995';snd:1;hi:false;zip:'twinbrat';grid:359;company:'Ecogames';rom:@twinbrats_roms;tipo:ARCADE or MAZE),
-  (name:'Mortal Race';year:'1995';snd:1;hi:false;zip:'mortalr';grid:360;company:'Ecogames';rom:@mortalrace_roms;tipo:ARCADE or DRIVE),
-  (name:'Bank Panic';year:'1985';snd:1;hi:false;zip:'bankp';grid:361;company:'Sanritsu/Sega';rom:@bankpanic_roms;tipo:ARCADE or SHOT),
-  (name:'Combat Hawk';year:'1987';snd:1;hi:false;zip:'combh';grid:362;company:'Sanritsu/Sega';rom:@combathawk_roms;tipo:ARCADE or SHOT),
-  (name:'Ant Eater';year:'1982';snd:1;hi:false;zip:'anteater';grid:363;company:'Tago Electronics';rom:@anteater_roms;tipo:ARCADE or MAZE),
-  (name:'Appoooh';year:'1984';snd:1;hi:false;zip:'appoooh';grid:364;company:'Sanritsu/Sega';rom:@appoooh_roms;tipo:ARCADE or SPORT),
-  (name:'Robo Wres 2001';year:'1986';snd:1;hi:false;zip:'robowres';grid:365;company:'Sanritsu/Sega';rom:@robowres_roms;tipo:ARCADE or SPORT),
-  (name:'Armored Car';year:'1981';snd:1;hi:false;zip:'armorcar';grid:366;company:'Stern Electronics';rom:@armoredcar_roms;tipo:ARCADE or MAZE),
-  (name:'88 Games';year:'1988';snd:1;hi:false;zip:'88games';grid:367;company:'Konami';rom:@hw88games_roms;tipo:ARCADE or SPORT),
-  (name:'Avengers';year:'1987';snd:1;hi:false;zip:'avengers';grid:368;company:'Capcom';rom:@avengers_roms;tipo:ARCADE or RUN_GUN),
-  (name:'The End';year:'1980';snd:1;hi:false;zip:'theend';grid:369;company:'Konami';rom:@theend_roms;tipo:ARCADE or SHOT),
-  (name:'Battle of Atlantis';year:'1981';snd:1;hi:false;zip:'atlantis';grid:370;company:'Comsoft';rom:@atlantis_roms;tipo:ARCADE or SHOT),
-  (name:'Blue Hawk';year:'1993';snd:1;hi:false;zip:'bluehawk';grid:371;company:'Dooyong';rom:@bluehawk_roms;tipo:ARCADE or SHOT),
-  (name:'The Last Day';year:'1990';snd:1;hi:false;zip:'lastday';grid:372;company:'Dooyong';rom:@lastday_roms;tipo:ARCADE or SHOT),
-  (name:'Gulf Storm';year:'1991';snd:1;hi:false;zip:'gulfstrm';grid:373;company:'Dooyong';rom:@gulfstorm_roms;tipo:ARCADE or SHOT),
-  (name:'Pollux';year:'1991';snd:1;hi:false;zip:'pollux';grid:374;company:'Dooyong';rom:@pollux_roms;tipo:ARCADE or SHOT),
-  (name:'Flying Tiger';year:'1992';snd:1;hi:false;zip:'flytiger';grid:375;company:'Dooyong';rom:@flytiger_roms;tipo:ARCADE or SHOT),
-  (name:'Sky Skipper';year:'1981';snd:1;hi:false;zip:'skyskipr';grid:376;company:'Nintendo';rom:@skyskipper_roms;tipo:ARCADE or SHOT),
-  (name:'Blue Print';year:'1982';snd:1;hi:false;zip:'blueprnt';grid:377;company:'Zilec Electronics/Bally Midway';rom:@blueprint_roms;tipo:ARCADE or MAZE),
-  (name:'Saturn';year:'1983';snd:1;hi:false;zip:'saturnzi';grid:378;company:'Zilec Electronics/Jaleco';rom:@saturnzi_roms;tipo:ARCADE or SHOT),
-  (name:'Grasspin';year:'1983';snd:1;hi:false;zip:'grasspin';grid:379;company:'Zilec Electronics/Jaleco';rom:@grasspin_roms;tipo:ARCADE or MAZE),
-  (name:'BurglarX';year:'1997';snd:1;hi:false;zip:'burglarx';grid:380;company:'Unico';rom:@burglarx_roms;tipo:ARCADE or MAZE),
-  (name:'Zero Point';year:'1998';snd:1;hi:false;zip:'zeropnt';grid:381;company:'Unico';rom:@zeropnt_roms;tipo:ARCADE or SHOT),
-  (name:'Calipso';year:'1982';snd:1;hi:false;zip:'calipso';grid:382;company:'Tago Electronics';rom:@calipso_roms;tipo:ARCADE or MAZE),
-  (name:'Calorie Kun vs Moguranian';year:'1986';snd:1;hi:false;zip:'calorie';grid:383;company:'Sega';rom:@caloriekun_roms;tipo:ARCADE or MAZE),
-  (name:'Gardia';year:'1986';snd:1;hi:false;zip:'gardia';grid:384;company:'Sega';rom:@gardia_roms;tipo:ARCADE or SHOT),
-  (name:'Cavelon';year:'1983';snd:1;hi:false;zip:'cavelon';grid:385;company:'Jetsoft';rom:@cavelon_roms;tipo:ARCADE or MAZE),
-  (name:'Come Back Toto';year:'1996';snd:1;hi:false;zip:'toto';grid:386;company:'SoftClub';rom:@toto_roms;tipo:ARCADE or MAZE),
-  (name:'Hyper Pacman';year:'1995';snd:1;hi:false;zip:'hyperpac';grid:387;company:'SemiCom';rom:@hyperpac_roms;tipo:ARCADE or MAZE),
-  (name:'KiKi KaiKai';year:'1986';snd:1;hi:false;zip:'kikikai';grid:388;company:'Taito';rom:@kikikaikai_roms;tipo:ARCADE or RUN_GUN OR MAZE),
-  (name:'Kick and Run';year:'1986';snd:1;hi:false;zip:'kicknrun';grid:389;company:'Taito';rom:@kickrun_roms;tipo:ARCADE or SPORT),
-  (name:'Lasso';year:'1982';snd:1;hi:false;zip:'lasso';grid:390;company:'SNK';rom:@lasso_roms;tipo:ARCADE or RUN_GUN),
-  (name:'Chameleon';year:'1983';snd:1;hi:false;zip:'chameleo';grid:391;company:'Jaleco';rom:@chameleo_roms;tipo:ARCADE or MAZE),
-  (name:'Last Mission';year:'1986';snd:1;hi:false;zip:'lastmisn';grid:392;company:'Data East';rom:@lastmisn_roms;tipo:ARCADE or SHOT),
-  (name:'Shackled';year:'1986';snd:1;hi:false;zip:'shackled';grid:393;company:'Data East';rom:@shackled_roms;tipo:ARCADE or MAZE),
-  (name:'Gondomania';year:'1987';snd:1;hi:false;zip:'gondo';grid:394;company:'Data East';rom:@gondo_roms;tipo:ARCADE or SHOT),
-  (name:'Garyo Retsuden';year:'1987';snd:1;hi:false;zip:'garyoret';grid:395;company:'Data East';rom:@garyoret_roms;tipo:ARCADE or SHOT),
-  (name:'Captain Silver';year:'1987';snd:1;hi:false;zip:'csilver';grid:396;company:'Data East';rom:@csilver_roms;tipo:ARCADE or RUN_GUN),
-  (name:'Cobra-Command';year:'1988';snd:1;hi:false;zip:'cobracom';grid:397;company:'Data East';rom:@cobracom_roms;tipo:ARCADE or SHOT),
-  (name:'The Real Ghostbusters';year:'1987';snd:1;hi:false;zip:'ghostb';grid:398;company:'Data East';rom:@ghostb_roms;tipo:ARCADE or RUN_GUN),
-  (name:'Psycho-Nics Oscar';year:'1987';snd:1;hi:false;zip:'oscar';grid:399;company:'Data East';rom:@oscar_roms;tipo:ARCADE or RUN_GUN),
-  (name:'Road Fighter';year:'1984';snd:1;hi:false;zip:'roadf';grid:400;company:'Konami';rom:@roadf_roms;tipo:ARCADE or DRIVE),
-  (name:'Ponpoko';year:'1982';snd:1;hi:false;zip:'ponpoko';grid:401;company:'Sigma';rom:@ponpoko_roms;tipo:ARCADE or MAZE),
-  (name:'Woodpecker';year:'1981';snd:1;hi:false;zip:'woodpeck';grid:402;company:'Amenip';rom:@woodpeck_roms;tipo:ARCADE or MAZE),
-  (name:'Eyes';year:'1982';snd:1;hi:false;zip:'eyes';grid:403;company:'Techstar';rom:@eyes_roms;tipo:ARCADE or MAZE),
-  (name:'Ali Baba and 40 Thieves';year:'1982';snd:1;hi:false;zip:'alibaba';grid:404;company:'Sega';rom:@alibaba_roms;tipo:ARCADE or MAZE),
-  (name:'Piranha';year:'1981';snd:1;hi:false;zip:'piranha';grid:405;company:'GL';rom:@piranha_roms;tipo:ARCADE or MAZE),
-  (name:'Final Star Force';year:'1992';snd:1;hi:false;zip:'fstarfrc';grid:406;company:'Tecmo';rom:@finalstarforce_roms;tipo:ARCADE or SHOT),
-  (name:'Wyvern F-0';year:'1985';snd:1;hi:false;zip:'wyvernf0';grid:407;company:'Taito';rom:@wyvernf0_roms;tipo:ARCADE or SHOT),
-  (name:'Riot City';year:'1991';snd:1;hi:false;zip:'riotcity';grid:408;company:'Sega/Westone';rom:@riotcity_roms;tipo:ARCADE or FIGHT),
-  (name:'SDI - Strategic Defense Initiative';year:'1987';snd:1;hi:false;zip:'sdib';grid:409;company:'Sega';rom:@sdi_roms;tipo:ARCADE or SHOT),
-  (name:'Cotton';year:'1991';snd:1;hi:false;zip:'cotton';grid:410;company:'Sega';rom:@cotton_roms;tipo:ARCADE or SHOT),
-  (name:'Discs of Tron';year:'1983';snd:1;hi:false;zip:'dotron';grid:411;company:'Bally Midway';rom:@dotron_roms;tipo:ARCADE or SHOT),
-  (name:'Tron';year:'1981';snd:1;hi:false;zip:'tron';grid:412;company:'Bally Midway';rom:@tron_roms;tipo:ARCADE or SHOT),
-  (name:'Timber';year:'1984';snd:1;hi:false;zip:'timber';grid:413;company:'Bally Midway';rom:@timber_roms;tipo:ARCADE or RUN_GUN),
-  (name:'Satan''s Hollow';year:'1981';snd:1;hi:false;zip:'shollow';grid:414;company:'Bally Midway';rom:@shollow_roms;tipo:ARCADE or SHOT),
-  (name:'Domino Man';year:'1982';snd:1;hi:false;zip:'domino';grid:415;company:'Bally Midway';rom:@domino_roms;tipo:ARCADE or MAZE),
-  (name:'Wacko';year:'1982';snd:1;hi:false;zip:'wacko';grid:416;company:'Bally Midway';rom:@wacko_roms;tipo:ARCADE or MAZE),
-  (name:'Nastar';year:'1988';snd:1;hi:false;zip:'nastar';grid:417;company:'Taito';rom:@nastar_roms;tipo:ARCADE or RUN_GUN or FIGHT),
-  (name:'Master of Weapon';year:'1989';snd:1;hi:false;zip:'masterw';grid:418;company:'Taito';rom:@masterw_roms;tipo:ARCADE or SHOT),
+  (name:'Pacman';year:'1980';snd:1;hi:false;zip:'pacman';grid:10;company:'Namco';rom:@pacman),
+  (name:'Phoenix';year:'1980';snd:1;hi:false;zip:'phoenix';grid:11;company:'Amstar Electronics';rom:@phoenix),
+  (name:'Mysterious Stones';year:'1984';snd:1;hi:false;zip:'mystston';grid:12;company:'Technos';rom:@mystston),
+  (name:'Bomb Jack';year:'1984';snd:1;hi:false;zip:'bombjack';grid:13;company:'Tehkan';rom:@bombjack),
+  (name:'Frogger';year:'1981';snd:1;hi:true;zip:'frogger';grid:14;company:'Konami';rom:@frogger),
+  (name:'Donkey Kong';year:'1981';snd:2;hi:false;zip:'dkong';grid:15;company:'Nintendo';rom:@dkong;samples:@dkong_samples),
+  (name:'Black Tiger';year:'1986';snd:1;hi:true;zip:'blktiger';grid:16;company:'Capcom';rom:@blktiger),
+  (name:'Green Beret';year:'1985';snd:1;hi:true;zip:'gberet';grid:17;company:'Konami';rom:@gberet),
+  (name:'Commando';year:'1985';snd:1;hi:false;zip:'commando';grid:18;company:'Capcom';rom:@commando),
+  (name:'Ghosts''n Goblins';year:'1985';snd:1;hi:false;zip:'gng';grid:19;company:'Capcom';rom:@gng),
+  (name:'Mikie';year:'1985';snd:1;hi:false;zip:'mikie';grid:20;company:'Konami';rom:@mikie),
+  (name:'Shaolin''s Road';year:'1985';snd:1;hi:false;zip:'shaolins';grid:21;company:'Konami';rom:@shaolins),
+  (name:'Yie Ar Kung-Fu';year:'1985';snd:1;hi:false;zip:'yiear';grid:22;company:'Konami';rom:@yiear),
+  (name:'Asteroids';year:'1979';snd:3;hi:false;zip:'asteroid';grid:23;company:'Atari';rom:@asteroid;samples:@asteroid_samples),
+  (name:'Son Son';year:'1984';snd:1;hi:false;zip:'sonson';grid:24;company:'Capcom';rom:@sonson),
+  (name:'Star Force';year:'1984';snd:1;hi:false;zip:'starforc';grid:25;company:'Tehkan';rom:@starforc),
+  (name:'Rygar';year:'1986';snd:1;hi:false;zip:'rygar';grid:26;company:'Tecmo';rom:@rygar),
+  (name:'Pitfall II';year:'1984';snd:1;hi:false;zip:'pitfall2';grid:27;company:'Sega';rom:@pitfall2),
+  (name:'Pooyan';year:'1982';snd:1;hi:false;zip:'pooyan';grid:28;company:'Konami';rom:@pooyan),
+  (name:'Jungler';year:'1981';snd:1;hi:false;zip:'jungler';grid:29;company:'Konami';rom:@jungler),
+  (name:'City Connection';year:'1986';snd:1;hi:false;zip:'citycon';grid:30;company:'Jaleco';rom:@citycon),
+  (name:'Burger Time';year:'1982';snd:1;hi:false;zip:'btime';grid:31;company:'Deco';rom:@btime),
+  (name:'Express Raider';year:'1986';snd:1;hi:false;zip:'exprraid';grid:32;company:'Deco';rom:@exprraid),
+  (name:'Super Basketball';year:'1984';snd:1;hi:false;zip:'sbasketb';grid:33;company:'Konami';rom:@sbasketb),
+  (name:'Lady Bug';year:'1981';snd:1;hi:false;zip:'ladybug';grid:34;company:'Universal';rom:@ladybug),
+  (name:'Teddy Boy Blues';year:'1985';snd:1;hi:false;zip:'teddybb';grid:35;company:'Sega';rom:@teddybb),
+  (name:'Wonder Boy';year:'1986';snd:1;hi:false;zip:'wboy';grid:36;company:'Sega';rom:@wboy),
+  (name:'Wonder Boy in Monster Land';year:'1987';snd:1;hi:false;zip:'wbml';grid:37;company:'Sega';rom:@wbml),
+  (name:'Tehkan World Cup';year:'1985';snd:1;hi:false;zip:'tehkanwc';grid:38;company:'Tehkan';rom:@tehkanwc),
+  (name:'Popeye';year:'1982';snd:1;hi:false;zip:'popeye';grid:39;company:'Nintendo';rom:@popeye),
+  (name:'Psychic 5';year:'1987';snd:1;hi:false;zip:'psychic5';grid:40;company:'Jaleco';rom:@psychic5),
+  (name:'Terra Cresta';year:'1985';snd:1;hi:false;zip:'terracre';grid:41;company:'Nichibutsu';rom:@terracre),
+  (name:'Kung-Fu Master';year:'1987';snd:1;hi:false;zip:'kungfum';grid:42;company:'Irem';rom:@kungfum),
+  (name:'Shoot Out';year:'1985';snd:1;hi:false;zip:'shootout';grid:43;company:'Data East';rom:@shootout),
+  (name:'Vigilante';year:'1988';snd:1;hi:false;zip:'vigilant';grid:44;company:'Irem';rom:@vigilant),
+  (name:'Jackal';year:'1986';snd:1;hi:false;zip:'jackal';grid:45;company:'Konami';rom:@jackal),
+  (name:'Bubble Bobble';year:'1986';snd:1;hi:false;zip:'bublbobl';grid:46;company:'Taito';rom:@bublbobl),
+  (name:'Galaxian';year:'1980';snd:2;hi:false;zip:'galaxian';grid:47;company:'Namco';rom:@galaxian;samples:@galaxian_samples),
+  (name:'Jump Bug';year:'1981';snd:1;hi:false;zip:'jumpbug';grid:48;company:'Rock-Ola';rom:@jumpbug),
+  (name:'Moon Cresta';year:'1980';snd:0;hi:false;zip:'mooncrst';grid:49;company:'Nichibutsu';rom:@mooncrst;samples:@mooncrst_samples),
+  (name:'Rally X';year:'1980';snd:3;hi:false;zip:'rallyx';grid:50;company:'Namco';rom:@rallyx;samples:@rallyx_samples),
+  (name:'Prehistoric Isle in 1930';year:'1989';snd:1;hi:false;zip:'prehisle';grid:51;company:'SNK';rom:@prehisle),
+  (name:'Tiger Road';year:'1987';snd:1;hi:false;zip:'tigeroad';grid:52;company:'Capcom';rom:@tigeroad),
+  (name:'F1 Dream';year:'1988';snd:1;hi:false;zip:'f1dream';grid:53;company:'Capcom';rom:@f1dream),
+  (name:'Snowbros';year:'1980';snd:1;hi:false;zip:'snowbros';grid:54;company:'Toaplan';rom:@snowbros),
+  (name:'Toki';year:'1989';snd:1;hi:false;zip:'toki';grid:55;company:'TAD';rom:@toki),
+  (name:'Contra';year:'1987';snd:1;hi:false;zip:'contra';grid:56;company:'Konami';rom:@contra),
+  (name:'Mappy';year:'1983';snd:1;hi:false;zip:'mappy';grid:57;company:'Namco';rom:@mappy),
+  (name:'Rastan';year:'1987';snd:1;hi:false;zip:'rastan';grid:58;company:'Taito';rom:@rastan),
+  (name:'Legendary Wings';year:'1986';snd:1;hi:false;zip:'lwings';grid:59;company:'Capcom';rom:@lwings),
+  (name:'Section Z';year:'1985';snd:1;hi:false;zip:'sectionz';grid:60;company:'Capcom';rom:@sectionz),
+  (name:'Trojan';year:'1986';snd:1;hi:false;zip:'trojan';grid:61;company:'Capcom';rom:@trojan),
+  (name:'Street Fighter';year:'1987';snd:1;hi:false;zip:'sf';grid:62;company:'Capcom';rom:@sfighter),
+  (name:'DigDug II';year:'1985';snd:1;hi:false;zip:'digdug2';grid:63;company:'Namco';rom:@digdug2),
+  (name:'Super Pacman';year:'1985';snd:1;hi:false;zip:'superpac';grid:64;company:'Namco';rom:@spacman),
+  (name:'Galaga';year:'1981';snd:1;hi:false;zip:'galaga';grid:65;company:'Namco';rom:@galaga;samples:@galaga_samples),
+  (name:'Xain''d Sleena';year:'1986';snd:1;hi:false;zip:'xsleena';grid:66;company:'Technos';rom:@xsleena),
+  (name:'Hard Head';year:'1988';snd:1;hi:false;zip:'hardhead';grid:67;company:'Suna';rom:@hardhead),
+  (name:'Hard Head 2';year:'1989';snd:0;hi:false;zip:'hardhea2';grid:68;company:'Suna';rom:@hardhea2),
+  (name:'Saboten Bombers';year:'1992';snd:1;hi:false;zip:'sabotenb';grid:69;company:'NMK';rom:@sabotenb),
+  (name:'New Rally X';year:'1981';snd:3;hi:false;zip:'nrallyx';grid:70;company:'Namco';rom:@nrallyx),
+  (name:'Bomb Jack Twin';year:'1993';snd:1;hi:false;zip:'bjtwin';grid:71;company:'NMK';rom:@bjtwin),
+  (name:'Spelunker';year:'1985';snd:1;hi:false;zip:'spelunkr';grid:72;company:'Broderbound';rom:@spelunkr),
+  (name:'Spelunker II';year:'1986';snd:1;hi:false;zip:'spelunk2';grid:73;company:'Broderbound';rom:@spelunk2),
+  (name:'Lode Runner';year:'1984';snd:1;hi:false;zip:'ldrun';grid:74;company:'Irem';rom:@ldrun),
+  (name:'Lode Runner II';year:'1984';snd:1;hi:false;zip:'ldrun2';grid:75;company:'Irem';rom:@ldrun2),
+  (name:'Knuckle Joe';year:'1985';snd:1;hi:false;zip:'kncljoe';grid:76;company:'Taito';rom:@kncljoe),
+  (name:'Wardner';year:'1987';snd:1;hi:false;zip:'wardner';grid:77;company:'Taito';rom:@wardner),
+  (name:'Big Karnak';year:'1991';snd:1;hi:false;zip:'bigkarnk';grid:78;company:'Gaelco';rom:@bigkarnk),
+  (name:'Exed-Exes';year:'1985';snd:1;hi:false;zip:'exedexes';grid:79;company:'Capcom';rom:@exedexes),
+  (name:'Gun.Smoke';year:'1985';snd:1;hi:false;zip:'gunsmoke';grid:80;company:'Capcom';rom:@gunsmoke),
+  (name:'1942';year:'1984';snd:1;hi:false;zip:'1942';grid:81;company:'Capcom';rom:@hw1942),
+  (name:'1943';year:'1987';snd:1;hi:false;zip:'1943';grid:82;company:'Capcom';rom:@hw1943),
+  (name:'1943 Kai';year:'1987';snd:1;hi:false;zip:'1943kai';grid:83;company:'Capcom';rom:@hw1943kai),
+  (name:'Jail Break';year:'1986';snd:1;hi:false;zip:'jailbrek';grid:84;company:'Konami';rom:@jailbrek),
+  (name:'Circus Chalie';year:'1984';snd:1;hi:false;zip:'circusc';grid:85;company:'Konami';rom:@circusc),
+  (name:'Iron Horse';year:'1986';snd:1;hi:false;zip:'ironhors';grid:86;company:'Konami';rom:@ironhors),
+  (name:'R-Type';year:'1987';snd:0;hi:false;zip:'rtype';grid:87;company:'Irem';rom:@rtype),
+  (name:'MS. Pac-man';year:'1981';snd:1;hi:false;zip:'mspacman';grid:88;company:'Namco';rom:@mspacman),
+  (name:'Break Thru';year:'1986';snd:1;hi:false;zip:'brkthru';grid:89;company:'Data East';rom:@brkthru),
+  (name:'Darwin 4078';year:'1986';snd:1;hi:false;zip:'darwin';grid:90;company:'Data East';rom:@darwin),
+  (name:'Super Real Darwin';year:'1987';snd:1;hi:false;zip:'srdarwin';grid:91;company:'Data East';rom:@srdarwin),
+  (name:'Double Dragon';year:'1987';snd:1;hi:false;zip:'ddragon';grid:92;company:'Taito';rom:@ddragon),
+  (name:'Mr. Do!';year:'1982';snd:1;hi:false;zip:'mrdo';grid:93;company:'Universal';rom:@mrdo),
+  (name:'The Glob';year:'1983';snd:1;hi:false;zip:'theglob';grid:94;company:'Epos';rom:@theglob),
+  (name:'Super Glob';year:'1983';snd:1;hi:false;zip:'suprglob';grid:95;company:'Epos';rom:@suprglob),
+  (name:'Double Dragon II - The Revenge';year:'1988';snd:1;hi:false;zip:'ddragon2';grid:96;company:'Technos';rom:@ddragon2),
+  (name:'Silk Worm';year:'1988';snd:1;hi:false;zip:'silkworm';grid:97;company:'Tecmo';rom:@silkworm),
+  (name:'Tiger Heli';year:'1985';snd:1;hi:false;zip:'tigerh';grid:98;company:'Taito';rom:@tigerh),
+  (name:'Slap Fight';year:'1986';snd:1;hi:false;zip:'slapfigh';grid:99;company:'Taito';rom:@slapfigh),
+  (name:'The Legend of Kage';year:'1984';snd:1;hi:false;zip:'lkage';grid:100;company:'Taito';rom:@lkage),
+  (name:'Thunder Hoop';year:'1992';snd:1;hi:false;zip:'thoop';grid:101;company:'Gaelco';rom:@thoop),
+  (name:'Cabal';year:'1988';snd:1;hi:false;zip:'cabal';grid:102;company:'TAD';rom:@cabal),
+  (name:'Ghouls''n Ghosts';year:'1988';snd:1;hi:false;zip:'ghouls';grid:103;company:'Capcom';rom:@ghouls),
+  (name:'Final Fight';year:'1989';snd:1;hi:false;zip:'ffight';grid:104;company:'Capcom';rom:@ffight),
+  (name:'The King of Dragons';year:'1991';snd:1;hi:false;zip:'kod';grid:105;company:'Capcom';rom:@kod),
+  (name:'Street Fighter II - The World Warrior';year:'1991';snd:1;hi:false;zip:'sf2';grid:106;company:'Capcom';rom:@sf2),
+  (name:'Strider';year:'1989';snd:1;hi:false;zip:'strider';grid:107;company:'Capcom';rom:@strider),
+  (name:'Three Wonders';year:'1991';snd:1;hi:false;zip:'3wonders';grid:108;company:'Capcom';rom:@wonder3),
+  (name:'Captain Commando';year:'1991';snd:1;hi:false;zip:'captcomm';grid:109;company:'Capcom';rom:@captcomm),
+  (name:'Knights of the Round';year:'1991';snd:1;hi:false;zip:'knights';grid:110;company:'Capcom';rom:@knights),
+  (name:'Street Fighter II'': Champion Edition';year:'1992';snd:1;hi:false;zip:'sf2ce';grid:111;company:'Capcom';rom:@sf2ce),
+  (name:'Cadillacs and Dinosaurs';year:'1992';snd:1;hi:false;zip:'dino';grid:112;company:'Capcom';rom:@dino),
+  (name:'The Punisher';year:'1993';snd:1;hi:false;zip:'punisher';grid:113;company:'Capcom';rom:@punisher),
+  (name:'Shinobi';year:'1987';snd:1;hi:false;zip:'shinobi';grid:114;company:'Sega';rom:@shinobi),
+  (name:'Alex Kidd';year:'1986';snd:1;hi:false;zip:'alexkidd';grid:115;company:'Sega';rom:@alexkidd),
+  (name:'Fantasy Zone';year:'1986';snd:1;hi:false;zip:'fantzone';grid:116;company:'Sega';rom:@fantzone),
+  (name:'Time Pilot ''84';year:'1984';snd:1;hi:false;zip:'tp84';grid:117;company:'Konami';rom:@tp84),
+  (name:'Tutankham';year:'1982';snd:1;hi:false;zip:'tutankhm';grid:118;company:'Konami';rom:@tutankhm),
+  (name:'Pang';year:'1989';snd:4;hi:false;zip:'pang';grid:119;company:'Capcom';rom:@pang),
+  (name:'Ninja Kid II';year:'1987';snd:1;hi:false;zip:'ninjakd2';grid:120;company:'UPL';rom:@ninjakd2),
+  (name:'Ark Area';year:'1988';snd:1;hi:false;zip:'arkarea';grid:121;company:'UPL';rom:@arkarea),
+  (name:'Mutant Night';year:'1987';snd:1;hi:false;zip:'mnight';grid:122;company:'UPL';rom:@mnight),
+  (name:'Sky Kid';year:'1985';snd:1;hi:false;zip:'skykid';grid:123;company:'Namco';rom:@skykid),
+  (name:'Rolling Thunder';year:'1986';snd:1;hi:false;zip:'rthunder';grid:124;company:'Namco';rom:@rthunder),
+  (name:'Hopping Mappy';year:'1986';snd:1;hi:false;zip:'hopmappy';grid:125;company:'Namco';rom:@hopmappy),
+  (name:'Sky Kid Deluxe';year:'1986';snd:1;hi:false;zip:'skykiddx';grid:126;company:'Namco';rom:@skykiddx),
+  (name:'Roc''n Rope';year:'1983';snd:1;hi:false;zip:'rocnrope';grid:127;company:'Konami';rom:@rocnrope),
+  (name:'Repulse';year:'1985';snd:1;hi:false;zip:'repulse';grid:128;company:'Sega';rom:@repulse),
+  (name:'The NewZealand Story';year:'1988';snd:1;hi:false;zip:'tnzs';grid:129;company:'Taito';rom:@tnzs),
+  (name:'Insector X';year:'1989';snd:1;hi:false;zip:'insectx';grid:130;company:'Taito';rom:@insectx),
+  (name:'Pacland';year:'1984';snd:4;hi:false;zip:'pacland';grid:131;company:'Namco';rom:@pacland),
+  (name:'Mario Bros.';year:'1983';snd:2;hi:false;zip:'mario';grid:132;company:'Nintendo';rom:@mario;samples:@mario_samples),
+  (name:'Solomon''s Key';year:'1986';snd:1;hi:false;zip:'solomon';grid:133;company:'Tecmo';rom:@solomon),
+  (name:'Combat School';year:'1988';snd:1;hi:false;zip:'combatsc';grid:134;company:'Konami';rom:@combatsc),
+  (name:'Heavy Unit';year:'1988';snd:1;hi:false;zip:'hvyunit';grid:135;company:'Taito';rom:@hvyunit),
+  (name:'P.O.W. - Prisoners of War';year:'1988';snd:1;hi:false;zip:'pow';grid:136;company:'SNK';rom:@pow),
+  (name:'Street Smart';year:'1988';snd:1;hi:false;zip:'streetsm';grid:137;company:'SNK';rom:@streetsm),
+  (name:'P47 - Phantom Fighter';year:'1989';snd:1;hi:false;zip:'p47';grid:138;company:'Jaleco';rom:@p47),
+  (name:'Rod-Land';year:'1990';snd:1;hi:false;zip:'rodland';grid:139;company:'Jaleco';rom:@rodland),
+  (name:'Saint Dragon';year:'1989';snd:1;hi:false;zip:'stdragon';grid:140;company:'Jaleco';rom:@stdragon),
+  (name:'Time Pilot';year:'1982';snd:1;hi:false;zip:'timeplt';grid:141;company:'Konami';rom:@timeplt),
+  (name:'Pengo';year:'1982';snd:1;hi:false;zip:'pengo';grid:142;company:'Sega';rom:@pengo),
+  (name:'Scramble';year:'1981';snd:1;hi:false;zip:'scramble';grid:143;company:'Konami';rom:@scramble),
+  (name:'Super Cobra';year:'1981';snd:1;hi:false;zip:'scobra';grid:144;company:'Konami';rom:@scobra),
+  (name:'Amidar';year:'1981';snd:1;hi:false;zip:'amidar';grid:145;company:'Konami';rom:@amidar),
+  (name:'Twin Cobra';year:'1987';snd:1;hi:false;zip:'twincobr';grid:146;company:'Taito';rom:@twincobr),
+  (name:'Flying Shark';year:'1987';snd:1;hi:false;zip:'fshark';grid:147;company:'Taito';rom:@fshark),
+  (name:'Jr. Pac-Man';year:'1983';snd:1;hi:false;zip:'jrpacman';grid:148;company:'Bally Midway';rom:@jrpacman),
+  (name:'Ikari III - The Rescue';year:'1989';snd:1;hi:false;zip:'ikari3';grid:149;company:'SNK';rom:@ikari3),
+  (name:'Search and Rescue';year:'1989';snd:1;hi:false;zip:'searchar';grid:150;company:'SNK';rom:@searchar),
+  (name:'Choplifter';year:'1985';snd:1;hi:false;zip:'choplift';grid:151;company:'Sega';rom:@choplift),
+  (name:'Mister Viking';year:'1983';snd:1;hi:false;zip:'mrviking';grid:152;company:'Sega';rom:@mrviking),
+  (name:'Sega Ninja';year:'1985';snd:1;hi:false;zip:'seganinj';grid:153;company:'Sega';rom:@seganinj),
+  (name:'Up''n Down';year:'1983';snd:1;hi:false;zip:'upndown';grid:154;company:'Sega';rom:@upndown),
+  (name:'Flicky';year:'1984';snd:1;hi:false;zip:'flicky';grid:155;company:'Sega';rom:@flicky),
+  (name:'Robocop';year:'1988';snd:1;hi:false;zip:'robocop';grid:156;company:'Data East';rom:@robocop),
+  (name:'Baddudes vs. DragonNinja';year:'1988';snd:1;hi:false;zip:'baddudes';grid:157;company:'Data East';rom:@baddudes),
+  (name:'Hippodrome';year:'1989';snd:1;hi:false;zip:'hippodrm';grid:158;company:'Data East';rom:@hippodrm),
+  (name:'Tumble Pop';year:'1991';snd:1;hi:false;zip:'tumblep';grid:159;company:'Data East';rom:@tumblep),
+  (name:'Funky Jet';year:'1992';snd:1;hi:false;zip:'funkyjet';grid:160;company:'Mitchell';rom:@funkyjet),
+  (name:'Super Burger Time';year:'1990';snd:1;hi:false;zip:'supbtime';grid:161;company:'Data East';rom:@supbtime),
+  (name:'Caveman Ninja';year:'1991';snd:1;hi:false;zip:'cninja';grid:162;company:'Data East';rom:@cninja),
+  (name:'Robocop 2';year:'1991';snd:1;hi:false;zip:'robocop2';grid:163;company:'Data East';rom:@robocop2),
+  (name:'Diet Go Go';year:'1992';snd:1;hi:false;zip:'dietgo';grid:164;company:'Data East';rom:@dietgo),
+  (name:'Act-Fancer Cybernetick Hyper Weapon';year:'1989';snd:1;hi:false;zip:'actfancr';grid:165;company:'Data East';rom:@actfancer),
+  (name:'Arabian';year:'1983';snd:1;hi:false;zip:'arabian';grid:166;company:'Sun Electronics';rom:@arabian),
+  (name:'Dig Dug';year:'1982';snd:1;hi:false;zip:'digdug';grid:167;company:'Namco';rom:@digdug),
+  (name:'Donkey Kong Jr.';year:'1982';snd:2;hi:false;zip:'dkongjr';grid:168;company:'Nintendo';rom:@dkongjr;samples:@dkjr_samples),
+  (name:'Donkey Kong 3';year:'1983';snd:1;hi:false;zip:'dkong3';grid:169;company:'Nintendo';rom:@dkong3),
+  (name:'Pirate Ship Higemaru';year:'1984';snd:1;hi:false;zip:'higemaru';grid:170;company:'Capcom';rom:@higemaru),
+  (name:'Bagman';year:'1982';snd:4;hi:false;zip:'bagman';grid:171;company:'Valadon Automation';rom:@bagman),
+  (name:'Super Bagman';year:'1984';snd:4;hi:false;zip:'sbagman';grid:172;company:'Valadon Automation';rom:@sbagman),
+  (name:'Squash';year:'1992';snd:1;hi:false;zip:'squash';grid:173;company:'Gaelco';rom:@squash),
+  (name:'Biomechanical Toy';year:'1995';snd:1;hi:false;zip:'biomtoy';grid:174;company:'Gaelco';rom:@biomtoy),
+  (name:'Congo Bongo';year:'1983';snd:3;hi:false;zip:'congo';grid:175;company:'Sega';rom:@congo;samples:@congo_samples),
+  (name:'Kangaroo';year:'1982';snd:1;hi:false;zip:'kangaroo';grid:176;company:'Sun Electronics';rom:@kangaroo),
+  (name:'Bionic Commando';year:'1987';snd:1;hi:false;zip:'bionicc';grid:177;company:'Capcom';rom:@bionicc),
+  (name:'WWF Superstar';year:'1989';snd:1;hi:false;zip:'wwfsstar';grid:178;company:'Technos Japan';rom:@wwfsstar),
+  (name:'Rainbow Islands';year:'1987';snd:1;hi:false;zip:'rbisland';grid:179;company:'Taito';rom:@rbisland),
+  (name:'Rainbow Islands Extra';year:'1987';snd:1;hi:false;zip:'rbislande';grid:180;company:'Taito';rom:@rbislande),
+  (name:'Volfied';year:'1989';snd:1;hi:false;zip:'volfied';grid:181;company:'Taito';rom:@volfied),
+  (name:'Operation Wolf';year:'1987';snd:1;hi:false;zip:'opwolf';grid:182;company:'Taito';rom:@opwolf),
+  (name:'Super Pang';year:'1990';snd:4;hi:false;zip:'spang';grid:183;company:'Capcom';rom:@spang),
+  (name:'Outrun';year:'1989';snd:0;hi:false;zip:'outrun';grid:184;company:'Sega';rom:@outrun),
+  (name:'Elevator Action';year:'1989';snd:1;hi:false;zip:'elevator';grid:185;company:'Taito';rom:@elevator),
+  (name:'Alien Syndrome';year:'1988';snd:1;hi:false;zip:'aliensyn';grid:186;company:'Sega';rom:@aliensyn),
+  (name:'Wonder Boy III - Monster Lair';year:'1987';snd:1;hi:false;zip:'wb3';grid:187;company:'Sega';rom:@wb3),
+  (name:'Zaxxon';year:'1982';snd:2;hi:false;zip:'zaxxon';grid:188;company:'Sega';rom:@zaxxon;samples:@zaxxon_samples),
+  (name:'Jungle King';year:'1982';snd:1;hi:false;zip:'junglek';grid:189;company:'Taito';rom:@junglek),
+  (name:'Hammerin'' Harry';year:'1990';snd:1;hi:false;zip:'hharry';grid:190;company:'Irem';rom:@hharry),
+  (name:'R-Type 2';year:'1989';snd:1;hi:false;zip:'rtype2';grid:191;company:'Irem';rom:@rtype2),
+  (name:'The Tower of Druaga';year:'1984';snd:1;hi:false;zip:'todruaga';grid:192;company:'Namco';rom:@todruaga),
+  (name:'Motos';year:'1985';snd:1;hi:false;zip:'motos';grid:193;company:'Namco';rom:@motos),
+  (name:'Dragon Buster';year:'1984';snd:1;hi:false;zip:'drgnbstr';grid:194;company:'Namco';rom:@drgnbstr),
+  (name:'Vulgus';year:'1984';snd:1;hi:false;zip:'vulgus';grid:195;company:'Capcom';rom:@vulgus),
+  (name:'Double Dragon 3 - The Rosetta Stone';year:'1990';snd:1;hi:false;zip:'ddragon3';grid:196;company:'Technos';rom:@ddragon3),
+  (name:'Block Out';year:'1990';snd:1;hi:false;zip:'blockout';grid:197;company:'Technos';rom:@blockout),
+  (name:'Tetris (Sega)';year:'1988';snd:1;hi:false;zip:'tetris';grid:198;company:'Sega';rom:@tetris),
+  (name:'Food Fight';year:'1982';snd:1;hi:false;zip:'foodf';grid:199;company:'Atari';rom:@foodf),
+  (name:'Snap Jack';year:'1982';snd:1;hi:false;zip:'snapjack';grid:200;company:'Universal';rom:@snapjack),
+  (name:'Cosmic Avenger';year:'1981';snd:1;hi:false;zip:'cavenger';grid:201;company:'Universal';rom:@cavenger),
+  (name:'Pleiads';year:'1981';snd:0;hi:false;zip:'pleiads';grid:202;company:'Tehkan';rom:@pleiads),
+  (name:'Mr. Goemon';year:'1986';snd:1;hi:false;zip:'mrgoemon';grid:203;company:'Konami';rom:@mrgoemon),
+  (name:'Nemesis';year:'1985';snd:1;hi:false;zip:'nemesis';grid:204;company:'Konami';rom:@nemesis),
+  (name:'Twinbee';year:'1985';snd:1;hi:false;zip:'twinbee';grid:205;company:'Konami';rom:@twinbee),
+  (name:'Pirates';year:'1994';snd:1;hi:false;zip:'pirates';grid:206;company:'NIX';rom:@pirates),
+  (name:'Genix Family';year:'1994';snd:1;hi:false;zip:'genix';grid:207;company:'NIX';rom:@genix),
+  (name:'Juno First';year:'1983';snd:1;hi:false;zip:'junofrst';grid:208;company:'Konami';rom:@junofrst),
+  (name:'Gyruss';year:'1983';snd:1;hi:false;zip:'gyruss';grid:209;company:'Konami';rom:@gyruss),
+  (name:'Boogie Wings';year:'1992';snd:1;hi:false;zip:'boogwing';grid:210;company:'Data East';rom:@boogwing),
+  (name:'Free Kick';year:'1987';snd:1;hi:false;zip:'freekick';grid:211;company:'Nihon System';rom:@freekick),
+  (name:'Pinball Action';year:'1985';snd:1;hi:false;zip:'pbaction';grid:212;company:'Tehkan';rom:@pbaction),
+  (name:'Renegade';year:'1986';snd:1;hi:false;zip:'renegade';grid:213;company:'Technos Japan';rom:@renegade),
+  (name:'Teenage Mutant Ninja Turtles';year:'1989';snd:1;hi:false;zip:'tmnt';grid:214;company:'Konami';rom:@tmnt),
+  (name:'Sunset Riders';year:'1991';snd:1;hi:false;zip:'ssriders';grid:215;company:'Konami';rom:@ssriders),
+  (name:'Gradius III';year:'1991';snd:1;hi:false;zip:'gradius3';grid:216;company:'Konami';rom:@gradius3),
+  (name:'Space Invaders';year:'1978';snd:2;hi:false;zip:'invaders';grid:217;company:'Taito';rom:@spaceinv;samples:@spaceinv_samples),
+  (name:'Centipede';year:'1980';snd:1;hi:false;zip:'centiped';grid:218;company:'Atari';rom:@centipede),
+  (name:'Karnov';year:'1987';snd:1;hi:false;zip:'karnov';grid:219;company:'Data East';rom:@karnov),
+  (name:'Chelnov';year:'1987';snd:1;hi:false;zip:'chelnov';grid:220;company:'Data East';rom:@chelnov),
+  (name:'Aliens';year:'1990';snd:1;hi:false;zip:'aliens';grid:221;company:'Konami';rom:@aliens),
+  (name:'Super Contra';year:'1988';snd:1;hi:false;zip:'scontra';grid:222;company:'Konami';rom:@scontra),
+  (name:'Gang Busters';year:'1988';snd:1;hi:false;zip:'gbusters';grid:223;company:'Konami';rom:@gbusters),
+  (name:'Thunder Cross';year:'1988';snd:1;hi:false;zip:'thunderx';grid:224;company:'Konami';rom:@thunderx),
+  (name:'The Simpsons';year:'1991';snd:1;hi:false;zip:'simpsons';grid:225;company:'Konami';rom:@simpsons),
+  (name:'Track & Field';year:'1983';snd:1;hi:false;zip:'trackfld';grid:226;company:'Konami';rom:@trackfield),
+  (name:'Hyper Sports';year:'1984';snd:1;hi:false;zip:'hyperspt';grid:227;company:'Konami';rom:@hypersports),
+  (name:'Megazone';year:'1983';snd:1;hi:false;zip:'megazone';grid:228;company:'Konami';rom:@megazone),
+  (name:'Space Fire Bird';year:'1980';snd:1;hi:false;zip:'spacefb';grid:229;company:'Nintendo';rom:@spacefb;samples:@spacefb_samples),
+  (name:'Ajax';year:'1987';snd:1;hi:false;zip:'ajax';grid:230;company:'Konami';rom:@ajax),
+  (name:'Xevious';year:'1982';snd:1;hi:false;zip:'xevious';grid:231;company:'Namco';rom:@xevious;samples:@xevious_samples),
+  (name:'The Combatribes';year:'1990';snd:1;hi:false;zip:'ctribe';grid:232;company:'Technos';rom:@ctribe),
+  (name:'Lunar Lander';year:'1979';snd:0;hi:false;zip:'llander';grid:233;company:'Atari';rom:@llander),
+  (name:'Crush Roller';year:'1981';snd:1;hi:false;zip:'crush';grid:234;company:'Alpha Denshi Co./Kural Samno Electric, Ltd.';rom:@crush),
+  (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta),
+  (name:'Gauntlet';year:'1985';snd:1;hi:false;zip:'gauntlet2p';grid:236;company:'Atari';rom:@gauntlet2p),
+  (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro),
+  (name:'Crazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber),
+  (name:'Return of the Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv),
+  (name:'Tetris (Atari)';year:'1988';snd:1;hi:false;zip:'atetris';grid:240;company:'Atari Games';rom:@tetris_atari),
+  (name:'Ikari Warriors';year:'1986';snd:1;hi:false;zip:'ikari';grid:241;company:'SNK';rom:@ikari),
+  (name:'Athena';year:'1986';snd:1;hi:false;zip:'athena';grid:242;company:'SNK';rom:@athena),
+  (name:'T.N.K III';year:'1986';snd:1;hi:false;zip:'tnk3';grid:243;company:'SNK';rom:@tnk3),
+  (name:'Peter Pack Rat';year:'1984';snd:1;hi:false;zip:'peterpak';grid:244;company:'Atari';rom:@peterpak),
+  (name:'Gauntlet II';year:'1986';snd:1;hi:false;zip:'gaunt2';grid:245;company:'Atari';rom:@gaunt2),
+  (name:'Defender';year:'1980';snd:1;hi:false;zip:'defender';grid:246;company:'Williams';rom:@defender),
+  (name:'Double Dragon (SpeedHack)';year:'1987';snd:1;hi:false;zip:'ddragon';grid:247;company:'Taito';rom:@ddragon),
+  (name:'Mayday';year:'1980';snd:1;hi:false;zip:'mayday';grid:248;company:'Williams';rom:@mayday),
+  (name:'Colony 7';year:'1981';snd:1;hi:false;zip:'colony7';grid:249;company:'Williams';rom:@colony7),
+  (name:'Bosconian';year:'1981';snd:3;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco;samples:@bosco_samples),
+  (name:'HangOn Jr.';year:'1985';snd:1;hi:false;zip:'hangonjr';grid:251;company:'Sega';rom:@hangonjr),
+  (name:'Slap Shooter';year:'1986';snd:1;hi:false;zip:'slapshtr';grid:252;company:'Sega';rom:@slapshtr),
+  (name:'Fantasy Zone II: The Tears of Opa-Opa';year:'1988';snd:1;hi:false;zip:'fantzn2';grid:253;company:'Sega';rom:@fantzn2),
+  (name:'Opa Opa';year:'1987';snd:1;hi:false;zip:'opaopa';grid:254;company:'Sega';rom:@opaopa),
+  (name:'Tetris (Sega System E)';year:'1988';snd:1;hi:false;zip:'tetrisse';grid:255;company:'Sega';rom:@tetrisse),
+  (name:'Transformer';year:'1986';snd:1;hi:false;zip:'transfrm';grid:256;company:'Sega';rom:@transfrm),
+  (name:'Riddle of Pythagoras';year:'1986';snd:1;hi:false;zip:'ridleofp';grid:257;company:'Sega';rom:@ridleofp),
+  (name:'Route 16';year:'1981';snd:1;hi:false;zip:'route16';grid:258;company:'Sun Electronics';rom:@route16),
+  (name:'Speak & Rescue';year:'1980';snd:1;hi:false;zip:'speakres';grid:259;company:'Sun Electronics';rom:@speakres),
+  (name:'Galactic Warriors';year:'1985';snd:1;hi:false;zip:'gwarrior';grid:260;company:'Konami';rom:@gwarrior),
+  (name:'Salamander';year:'1986';snd:1;hi:false;zip:'salamand';grid:261;company:'Konami';rom:@salamander),
+  (name:'Bad Lands';year:'1989';snd:1;hi:false;zip:'badlands';grid:262;company:'Atari';rom:@badlands),
+  (name:'Indiana Jones and the Temple of Doom';year:'1985';snd:1;hi:false;zip:'indytemp';grid:263;company:'Atari';rom:@indytemp),
+  (name:'Marble Madness';year:'1984';snd:1;hi:false;zip:'marble';grid:264;company:'Atari';rom:@marble),
+  (name:'Soldier Girl Amazon';year:'1986';snd:1;hi:false;zip:'amazon';grid:265;company:'Nichibutsu';rom:@amazon),
+  (name:'Cosmo Police Galivan';year:'1985';snd:1;hi:false;zip:'galivan';grid:266;company:'Nichibutsu';rom:@galivan),
+  (name:'Ufo Robo Dangar';year:'1986';snd:1;hi:false;zip:'dangar';grid:267;company:'Nichibutsu';rom:@dangar),
+  (name:'Last Duel';year:'1988';snd:1;hi:false;zip:'lastduel';grid:268;company:'Capcom';rom:@lastduel),
+  (name:'Mad Gear';year:'1989';snd:1;hi:false;zip:'madgear';grid:269;company:'Capcom';rom:@madgear),
+  (name:'Led Storm Rally 2011';year:'1989';snd:1;hi:false;zip:'leds2011';grid:270;company:'Capcom';rom:@leds2011),
+  (name:'Gigas';year:'1986';snd:1;hi:false;zip:'gigas';grid:271;company:'Sega';rom:@gigas),
+  (name:'Gigas Mark II';year:'1986';snd:1;hi:false;zip:'gigasm2';grid:272;company:'Sega';rom:@gigasm2),
+  (name:'Omega';year:'1986';snd:1;hi:false;zip:'omega';grid:273;company:'Nihon System';rom:@omega),
+  (name:'Perfect Billard';year:'1987';snd:1;hi:false;zip:'pbillrd';grid:274;company:'Nihon System';rom:@pbillrd),
+  (name:'Armed F';year:'1988';snd:1;hi:false;zip:'armedf';grid:275;company:'Nichibutsu';rom:@armedf),
+  (name:'Terra Force';year:'1987';snd:1;hi:false;zip:'terraf';grid:276;company:'Nichibutsu';rom:@terraf),
+  (name:'Crazy Climber 2';year:'1988';snd:1;hi:false;zip:'cclimbr2';grid:277;company:'Nichibutsu';rom:@cclimbr2),
+  (name:'Legion - Spinner-87';year:'1987';snd:1;hi:false;zip:'legion';grid:278;company:'Nichibutsu';rom:@legion),
+  (name:'ASO - Armored Scrum Object';year:'1985';snd:1;hi:false;zip:'aso';grid:279;company:'SNK';rom:@aso),
+  (name:'Fire Trap';year:'1986';snd:1;hi:false;zip:'firetrap';grid:280;company:'Woodplace Inc.';rom:@firetrap),
+  (name:'3x3 Puzzle';year:'1998';snd:1;hi:false;zip:'3x3puzzl';grid:281;company:'Ace Enterprise';rom:@puzz3x3),
+  (name:'Casanova';year:'199?';snd:1;hi:false;zip:'casanova';grid:282;company:'Promat';rom:@casanova),
+  (name:'1945k III';year:'2000';snd:1;hi:false;zip:'1945kiii';grid:283;company:'Oriental Soft';rom:@k31945),
+  (name:'96 Flag Rally';year:'2000';snd:1;hi:false;zip:'flagrall';grid:284;company:'Promat';rom:@flagrall),
+  (name:'Blood Bros.';year:'1990';snd:1;hi:false;zip:'bloodbro';grid:285;company:'TAD Corporation';rom:@bloodbros),
+  (name:'Sky Smasher';year:'1990';snd:1;hi:false;zip:'skysmash';grid:286;company:'Nihon System';rom:@skysmash),
+  (name:'Baraduke';year:'1985';snd:1;hi:false;zip:'baraduke';grid:287;company:'Namco';rom:@baraduke),
+  (name:'Metro-Cross';year:'1985';snd:1;hi:false;zip:'metrocrs';grid:288;company:'Namco';rom:@metrocross),
+  (name:'The Return of Ishtar';year:'1986';snd:1;hi:false;zip:'roishtar';grid:289;company:'Namco';rom:@roishtar),
+  (name:'Genpei ToumaDen';year:'1986';snd:1;hi:false;zip:'genpeitd';grid:290;company:'Namco';rom:@genpeitd),
+  (name:'Wonder Momo';year:'1987';snd:1;hi:false;zip:'wndrmomo';grid:291;company:'Namco';rom:@wndrmomo),
+  (name:'Altered Beast';year:'1988';snd:1;hi:false;zip:'altbeast';grid:292;company:'Sega';rom:@altbeast),
+  (name:'Golden Axe';year:'1989';snd:1;hi:false;zip:'goldnaxe';grid:293;company:'Sega';rom:@goldnaxe),
+  (name:'Dynamite Dux';year:'1988';snd:1;hi:false;zip:'ddux1';grid:294;company:'Sega';rom:@ddux),
+  (name:'E-Swat - Cyber Police';year:'1989';snd:1;hi:false;zip:'eswat';grid:295;company:'Sega';rom:@eswat),
+  (name:'Passing Shot';year:'1988';snd:1;hi:false;zip:'passsht';grid:296;company:'Sega';rom:@passsht),
+  (name:'Aurail';year:'1990';snd:1;hi:false;zip:'aurail';grid:297;company:'Sega';rom:@aurail),
+  (name:'Hellfire';year:'1989';snd:1;hi:false;zip:'hellfire';grid:298;company:'Toaplan';rom:@hellfire),
+  (name:'Lock''n''Chase';year:'1981';snd:1;hi:false;zip:'lnc';grid:299;company:'Deco';rom:@lnc),
+  (name:'Minky Monkey';year:'1982';snd:1;hi:false;zip:'mmonkey';grid:300;company:'Deco';rom:@mmonkey),
+  (name:'Karate Champ';year:'1984';snd:1;hi:false;zip:'kchamp';grid:301;company:'Data East';rom:@karatechamp),
+  (name:'Thundercade';year:'1987';snd:1;hi:false;zip:'tndrcade';grid:302;company:'Seta';rom:@tndrcade),
+  (name:'Twin Eagle - Revenge Joe''s Brother';year:'1988';snd:1;hi:false;zip:'twineagl';grid:303;company:'Seta';rom:@twineagl),
+  (name:'Thunder & Lightning';year:'1990';snd:1;hi:false;zip:'thunderl';grid:304;company:'Seta';rom:@thunderl),
+  (name:'Ms Pac Man Twin';year:'1992';snd:1;hi:false;zip:'mspactwin';grid:305;company:'Susilu';rom:@mspactwin),
+  (name:'Extermination';year:'1987';snd:1;hi:false;zip:'extrmatn';grid:306;company:'Taito';rom:@extrmatn),
+  (name:'Atomic Robo-kid';year:'1988';snd:1;hi:false;zip:'robokid';grid:307;company:'UPL';rom:@robokid),
+  (name:'Mr. Do''s Castle';year:'1983';snd:1;hi:false;zip:'docastle';grid:308;company:'Universal';rom:@docastle),
+  (name:'Do! Run Run';year:'1984';snd:1;hi:false;zip:'dorunrun';grid:309;company:'Universal';rom:@dorunrun),
+  (name:'Mr. Do''s Wild Ride';year:'1984';snd:1;hi:false;zip:'dowild';grid:310;company:'Universal';rom:@dowild),
+  (name:'Jumping Jack';year:'1984';snd:1;hi:false;zip:'jjack';grid:311;company:'Universal';rom:@jjack),
+  (name:'Kick Rider';year:'1984';snd:1;hi:false;zip:'kickridr';grid:312;company:'Universal';rom:@kickridr),
+  (name:'Indoor Soccer';year:'1985';snd:1;hi:false;zip:'idsoccer';grid:313;company:'Universal';rom:@idsoccer),
+  (name:'Crystal Castles';year:'1983';snd:1;hi:false;zip:'ccastles';grid:314;company:'Atari';rom:@ccastles),
+  (name:'Flower';year:'1986';snd:1;hi:false;zip:'flower';grid:315;company:'Clarue';rom:@flower),
+  (name:'SlySpy';year:'1989';snd:1;hi:false;zip:'slyspy';grid:316;company:'Data East';rom:@slyspy),
+  (name:'Boulder Dash I-II';year:'1990';snd:1;hi:false;zip:'bouldash';grid:317;company:'Data East';rom:@bouldash),
+  (name:'Super Dodge Ball';year:'1987';snd:1;hi:false;zip:'spdodgeb';grid:318;company:'Technos';rom:@sdodgeball),
+  (name:'Senjyo';year:'1983';snd:1;hi:false;zip:'senjyo';grid:319;company:'Tehkan';rom:@senjyo),
+  (name:'Baluba-louk no Densetsu';year:'1986';snd:1;hi:false;zip:'baluba';grid:320;company:'Able Corp, Ltd.';rom:@baluba),
   //*** Consoles
-  (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
-  (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
-  (name:'GameBoy';year:'198X';snd:1;hi:false;zip:'gameboy';grid:1002;company:'Nintendo';rom:@gameboy;tipo:CONSOLE),
-  (name:'GameBoy Color';year:'198X';snd:1;hi:false;zip:'gbcolor';grid:1002;company:'Nintendo';rom:@gbcolor;tipo:CONSOLE),
-  (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-';tipo:CONSOLE),
-  (name:'Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_;tipo:CONSOLE),
-  (name:'SG-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega';tipo:CONSOLE),
-  (name:'GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega';tipo:CONSOLE),
-  (name:'Super Cassette Vision';year:'1984';snd:1;hi:false;zip:'scv';grid:1007;company:'Epoch';rom:@scv;tipo:CONSOLE),
-  (name:'Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega';tipo:CONSOLE),
-  (name:'PV-1000';year:'1983';snd:1;hi:false;zip:'';grid:1009;company:'Casio';tipo:CONSOLE),
-  (name:'PV-2000';year:'1983';snd:1;hi:false;zip:'pv2000';grid:1010;company:'Casio';rom:@pv2000_rom;tipo:CONSOLE),
+  (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
+  (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
+  (name:'GameBoy';year:'198X';snd:1;hi:false;zip:'gameboy';grid:1002;company:'Nintendo';rom:@gameboy),
+  (name:'GameBoy Color';year:'198X';snd:1;hi:false;zip:'gbcolor';grid:1002;company:'Nintendo';rom:@gbcolor),
+  (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'),
+  (name:'Sega Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
+  (name:'SG-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
+  (name:'Sega GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega'),
+  (name:'Super Cassette Vision';year:'1984';snd:1;hi:false;zip:'scv';grid:1007;company:'Epoch';rom:@scv),
+  (name:'Sega Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega'),
   //G&W
-  (name:'Donkey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101;tipo:GNW),
-  (name:'Donkey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55;tipo:GNW),
-  (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56;tipo:GNW));
+  (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
+  (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
+  (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56));
 
 var
   orden_games:array[1..GAMES_CONT] of word;
@@ -536,8 +417,6 @@ case numero of
   8:principal1.CambiarMaquina(principal1.cpc6641);
   9:principal1.CambiarMaquina(principal1.cpc61281);
   3000:principal1.CambiarMaquina(principal1.c641);
-  3001:principal1.CambiarMaquina(principal1.oricatmos1);
-  3002:principal1.CambiarMaquina(principal1.oric1_1);
   10:principal1.CambiarMaquina(principal1.Pacman1);
   11:principal1.CambiarMaquina(principal1.Phoenix1);
   12:principal1.CambiarMaquina(principal1.MisteriousStone1);
@@ -775,7 +654,7 @@ case numero of
   244:principal1.CambiarMaquina(principal1.peterpak1);
   245:principal1.CambiarMaquina(principal1.gaunt21);
   246:principal1.CambiarMaquina(principal1.defender1);
-  247:principal1.CambiarMaquina(principal1.fireball1);
+  247:principal1.CambiarMaquina(principal1.ddragon_sh1);
   248:principal1.CambiarMaquina(principal1.mayday1);
   249:principal1.CambiarMaquina(principal1.colony71);
   250:principal1.CambiarMaquina(principal1.bosconian1);
@@ -849,104 +728,6 @@ case numero of
   318:principal1.CambiarMaquina(principal1.spdodgeb1);
   319:principal1.CambiarMaquina(principal1.senjyo1);
   320:principal1.CambiarMaquina(principal1.baluba1);
-  321:principal1.CambiarMaquina(principal1.joust1);
-  322:principal1.CambiarMaquina(principal1.robotron1);
-  323:principal1.CambiarMaquina(principal1.stargate1);
-  324:principal1.CambiarMaquina(principal1.tapper1);
-  325:principal1.CambiarMaquina(principal1.arkanoid1);
-  326:principal1.CambiarMaquina(principal1.sidearms1);
-  327:principal1.CambiarMaquina(principal1.speedrumbler1);
-  328:principal1.CambiarMaquina(principal1.chinagate1);
-  329:principal1.CambiarMaquina(principal1.magmax1);
-  330:principal1.CambiarMaquina(principal1.SRDMission1);
-  331:principal1.CambiarMaquina(principal1.airwolf1);
-  332:principal1.CambiarMaquina(principal1.ambush1);
-  333:principal1.CambiarMaquina(principal1.superduck1);
-  334:principal1.CambiarMaquina(principal1.hangon1);
-  335:principal1.CambiarMaquina(principal1.enduroracer1);
-  336:principal1.CambiarMaquina(principal1.spaceharrier1);
-  337:principal1.CambiarMaquina(principal1.N64thstreet1);
-  338:principal1.CambiarMaquina(principal1.ShadowWarriors1);
-  339:principal1.CambiarMaquina(principal1.wildfang1);
-  340:principal1.CambiarMaquina(principal1.raiden1);
-  341:principal1.CambiarMaquina(principal1.twins1);
-  342:principal1.CambiarMaquina(principal1.twinsed1);
-  343:principal1.CambiarMaquina(principal1.hotblocks1);
-  344:principal1.CambiarMaquina(principal1.missilecommand1);
-  345:principal1.CambiarMaquina(principal1.supermissileattack1);
-  346:principal1.CambiarMaquina(principal1.superzaxxon1);
-  347:principal1.CambiarMaquina(principal1.futurespy1);
-  348:principal1.CambiarMaquina(principal1.millipede1);
-  349:principal1.CambiarMaquina(principal1.gaplus1);
-  350:principal1.CambiarMaquina(principal1.superxevious1);
-  351:principal1.CambiarMaquina(principal1.grobda1);
-  352:principal1.CambiarMaquina(principal1.pacnpal1);
-  353:principal1.CambiarMaquina(principal1.birdiy1);
-  354:principal1.CambiarMaquina(principal1.wilytower1);
-  355:principal1.CambiarMaquina(principal1.FightingBasketball1);
-  356:principal1.CambiarMaquina(principal1.diverboy1);
-  357:principal1.CambiarMaquina(principal1.mugsmashers1);
-  358:principal1.CambiarMaquina(principal1.steelforce1);
-  359:principal1.CambiarMaquina(principal1.twinbrats1);
-  360:principal1.CambiarMaquina(principal1.mortalrace1);
-  361:principal1.CambiarMaquina(principal1.bankpanic1);
-  362:principal1.CambiarMaquina(principal1.combathawk1);
-  363:principal1.CambiarMaquina(principal1.anteater1);
-  364:principal1.CambiarMaquina(principal1.appoooh1);
-  365:principal1.CambiarMaquina(principal1.robowres1);
-  366:principal1.CambiarMaquina(principal1.armoredcar1);
-  367:principal1.CambiarMaquina(principal1.n88games1);
-  368:principal1.CambiarMaquina(principal1.avengers1);
-  369:principal1.CambiarMaquina(principal1.theend1);
-  370:principal1.CambiarMaquina(principal1.battleofatlantis1);
-  371:principal1.CambiarMaquina(principal1.bluehawk1);
-  372:principal1.CambiarMaquina(principal1.lastday1);
-  373:principal1.CambiarMaquina(principal1.gulfstorm1);
-  374:principal1.CambiarMaquina(principal1.pollux1);
-  375:principal1.CambiarMaquina(principal1.flyingtiger1);
-  376:principal1.CambiarMaquina(principal1.skyskipper1);
-  377:principal1.CambiarMaquina(principal1.blueprint1);
-  378:principal1.CambiarMaquina(principal1.saturn1);
-  379:principal1.CambiarMaquina(principal1.grasspin1);
-  380:principal1.CambiarMaquina(principal1.burglarx1);
-  381:principal1.CambiarMaquina(principal1.zeropoint1);
-  382:principal1.CambiarMaquina(principal1.calipso1);
-  383:principal1.CambiarMaquina(principal1.caloriekun1);
-  384:principal1.CambiarMaquina(principal1.gardia1);
-  385:principal1.CambiarMaquina(principal1.cavelon1);
-  386:principal1.CambiarMaquina(principal1.comebacktoto1);
-  387:principal1.CambiarMaquina(principal1.hyperpacman1);
-  388:principal1.CambiarMaquina(principal1.kikikaikai1);
-  389:principal1.CambiarMaquina(principal1.kickandrun1);
-  390:principal1.CambiarMaquina(principal1.lasso1);
-  391:principal1.CambiarMaquina(principal1.chameleon1);
-  392:principal1.CambiarMaquina(principal1.lastmission1);
-  393:principal1.CambiarMaquina(principal1.shackled1);
-  394:principal1.CambiarMaquina(principal1.gondomania1);
-  395:principal1.CambiarMaquina(principal1.garyoretsuden1);
-  396:principal1.CambiarMaquina(principal1.captainsilver1);
-  397:principal1.CambiarMaquina(principal1.cobracommand1);
-  398:principal1.CambiarMaquina(principal1.ghostbusters1);
-  399:principal1.CambiarMaquina(principal1.oscar1);
-  400:principal1.CambiarMaquina(principal1.roadfighter1);
-  401:principal1.CambiarMaquina(principal1.ponpoko1);
-  402:principal1.CambiarMaquina(principal1.woodpecker1);
-  403:principal1.CambiarMaquina(principal1.eyes1);
-  404:principal1.CambiarMaquina(principal1.alibaba1);
-  405:principal1.CambiarMaquina(principal1.piranha1);
-  406:principal1.CambiarMaquina(principal1.finalstarforce1);
-  407:principal1.CambiarMaquina(principal1.WyvernF01);
-  408:principal1.CambiarMaquina(principal1.RiotCity1);
-  409:principal1.CambiarMaquina(principal1.sdi1);
-  410:principal1.CambiarMaquina(principal1.cotton1);
-  411:principal1.CambiarMaquina(principal1.dotron1);
-  412:principal1.CambiarMaquina(principal1.tron1);
-  413:principal1.CambiarMaquina(principal1.timber1);
-  414:principal1.CambiarMaquina(principal1.shollow1);
-  415:principal1.CambiarMaquina(principal1.domino1);
-  416:principal1.CambiarMaquina(principal1.wacko1);
-  417:principal1.CambiarMaquina(principal1.nastar1);
-  418:principal1.CambiarMaquina(principal1.masterw1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -956,8 +737,6 @@ case numero of
   1006:principal1.CambiarMaquina(principal1.SegaGG1);
   1007:principal1.CambiarMaquina(principal1.SCV1);
   1008:principal1.CambiarMaquina(principal1.genesis1);
-  1009:principal1.CambiarMaquina(principal1.pv1000);
-  1010:principal1.CambiarMaquina(principal1.pv2000);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
@@ -977,8 +756,6 @@ principal1.CPC1.Checked:=false;
 principal1.CPC6641.Checked:=false;
 principal1.CPC61281.Checked:=false;
 principal1.c641.Checked:=false;
-principal1.oricatmos1.Checked:=false;
-principal1.oric1_1.Checked:=false;
 //Arcade
 principal1.phoenix1.Checked:=false;
 principal1.bombjack1.Checked:=false;
@@ -1217,7 +994,7 @@ principal1.tnk31.Checked:=false;
 principal1.peterpak1.Checked:=false;
 principal1.gaunt21.Checked:=false;
 principal1.defender1.Checked:=false;
-principal1.fireball1.Checked:=false;
+principal1.ddragon_sh1.Checked:=false;
 principal1.mayday1.Checked:=false;
 principal1.colony71.Checked:=false;
 principal1.bosconian1.Checked:=false;
@@ -1291,104 +1068,6 @@ principal1.bdash1.checked:=false;
 principal1.spdodgeb1.checked:=false;
 principal1.senjyo1.checked:=false;
 principal1.baluba1.checked:=false;
-principal1.joust1.checked:=false;
-principal1.robotron1.checked:=false;
-principal1.stargate1.checked:=false;
-principal1.tapper1.checked:=false;
-principal1.arkanoid1.checked:=false;
-principal1.sidearms1.checked:=false;
-principal1.speedrumbler1.checked:=false;
-principal1.chinagate1.checked:=false;
-principal1.magmax1.checked:=false;
-principal1.SRDMission1.Checked:=false;
-principal1.airwolf1.Checked:=false;
-principal1.ambush1.Checked:=false;
-principal1.superduck1.Checked:=false;
-principal1.hangon1.Checked:=false;
-principal1.enduroracer1.Checked:=false;
-principal1.spaceharrier1.Checked:=false;
-principal1.N64thstreet1.Checked:=false;
-principal1.shadowwarriors1.Checked:=false;
-principal1.wildfang1.Checked:=false;
-principal1.raiden1.Checked:=false;
-principal1.twins1.Checked:=false;
-principal1.twinsed1.Checked:=false;
-principal1.hotblocks1.Checked:=false;
-principal1.missilecommand1.Checked:=false;
-principal1.supermissileattack1.Checked:=false;
-principal1.superzaxxon1.Checked:=false;
-principal1.futurespy1.Checked:=false;
-principal1.millipede1.Checked:=false;
-principal1.gaplus1.Checked:=false;
-principal1.superxevious1.Checked:=false;
-principal1.grobda1.Checked:=false;
-principal1.pacnpal1.Checked:=false;
-principal1.birdiy1.Checked:=false;
-principal1.wilytower1.Checked:=false;
-principal1.FightingBasketball1.Checked:=false;
-principal1.diverboy1.Checked:=false;
-principal1.mugsmashers1.Checked:=false;
-principal1.steelforce1.Checked:=false;
-principal1.twinbrats1.Checked:=false;
-principal1.mortalrace1.Checked:=false;
-principal1.bankpanic1.Checked:=false;
-principal1.combathawk1.Checked:=false;
-principal1.anteater1.Checked:=false;
-principal1.appoooh1.Checked:=false;
-principal1.robowres1.Checked:=false;
-principal1.armoredcar1.Checked:=false;
-principal1.n88games1.Checked:=false;
-principal1.avengers1.Checked:=false;
-principal1.theend1.Checked:=false;
-principal1.battleofatlantis1.Checked:=false;
-principal1.bluehawk1.Checked:=false;
-principal1.lastday1.Checked:=false;
-principal1.gulfstorm1.Checked:=false;
-principal1.pollux1.Checked:=false;
-principal1.flyingtiger1.Checked:=false;
-principal1.skyskipper1.Checked:=false;
-principal1.blueprint1.Checked:=false;
-principal1.saturn1.Checked:=false;
-principal1.grasspin1.Checked:=false;
-principal1.burglarx1.Checked:=false;
-principal1.ZeroPoint1.Checked:=false;
-principal1.calipso1.Checked:=false;
-principal1.caloriekun1.Checked:=false;
-principal1.gardia1.Checked:=false;
-principal1.cavelon1.Checked:=false;
-principal1.comebacktoto1.Checked:=false;
-principal1.hyperpacman1.Checked:=false;
-principal1.kikikaikai1.Checked:=false;
-principal1.kickandrun1.Checked:=false;
-principal1.lasso1.Checked:=false;
-principal1.chameleon1.Checked:=false;
-principal1.lastmission1.Checked:=false;
-principal1.shackled1.Checked:=false;
-principal1.gondomania1.Checked:=false;
-principal1.GaryoRetsuden1.Checked:=false;
-principal1.captainsilver1.Checked:=false;
-principal1.cobracommand1.Checked:=false;
-principal1.ghostbusters1.Checked:=false;
-principal1.oscar1.Checked:=false;
-principal1.roadfighter1.Checked:=false;
-principal1.ponpoko1.Checked:=false;
-principal1.woodpecker1.Checked:=false;
-principal1.eyes1.Checked:=false;
-principal1.alibaba1.Checked:=false;
-principal1.piranha1.Checked:=false;
-principal1.finalstarforce1.Checked:=false;
-principal1.WyvernF01.Checked:=false;
-principal1.riotcity1.Checked:=false;
-principal1.sdi1.Checked:=false;
-principal1.cotton1.Checked:=false;
-principal1.dotron1.Checked:=false;
-principal1.tron1.Checked:=false;
-principal1.timber1.Checked:=false;
-principal1.shollow1.Checked:=false;
-principal1.domino1.Checked:=false;
-principal1.wacko1.Checked:=false;
-principal1.nastar1.Checked:=false;
-principal1.masterw1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1399,8 +1078,6 @@ principal1.sg10001.checked:=false;
 principal1.segagg1.checked:=false;
 principal1.scv1.checked:=false;
 principal1.genesis1.checked:=false;
-principal1.pv1000.checked:=false;
-principal1.pv2000.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
@@ -1428,7 +1105,6 @@ principal1.BitBtn11.Enabled:=true;
 principal1.BitBtn12.Enabled:=true;
 principal1.BitBtn14.Enabled:=true;
 principal1.BitBtn8.enabled:=false; //Arcade config
-principal1.BitBtn10.Hint:=leng.hints[8];
 case driver of
   0..6:begin
           principal1.Panel2.visible:=true;
@@ -1456,34 +1132,27 @@ case driver of
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
-  3001,3002:begin //Oric
-          principal1.Panel2.visible:=true;
-          //principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
-          //principal1.BitBtn1.enabled:=true;
-          principal1.BitBtn10.visible:=true; //Disco
-          principal1.BitBtn10.enabled:=true;
-          principal1.BitBtn11.visible:=false; //Save Snapshot
-          principal1.BitBtn9.visible:=true; //Load Snapshot
-       end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
-  1008:begin
+  1000,1003,1005,1006,1007,1008:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
-          principal1.BitBtn10.Hint:=leng.hints[20];
        end;
-  1000,1001,1003,1005,1006,1007,1009,1010:begin
+  1001:begin //Coleco
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartcuho
-          principal1.BitBtn11.visible:=true; //Snapshot
-          principal1.BitBtn10.Hint:=leng.hints[20];
+          principal1.BitBtn11.visible:=true; //Load Snapshot
        end;
-  1002,1004:begin
+  1002:begin
+          principal1.BitBtn1.visible:=true;
           principal1.Panel2.visible:=true;
-          principal1.BitBtn1.visible:=true; //Config
           principal1.BitBtn10.visible:=true; //Cartucho
-          principal1.BitBtn11.visible:=true; //Snapshot
-          principal1.BitBtn10.Hint:=leng.hints[20];
        end;
+  1004:begin //SMS
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn10.visible:=true; //Cartucho
+          principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+       end;
+  2000..2002:; //G&W
 end;
 end;
 
@@ -1495,13 +1164,12 @@ case tmaquina of
   2,3:llamadas_maquina.iniciar:=iniciar_3;
   7,8,9:llamadas_maquina.iniciar:=iniciar_cpc;
   3000:llamadas_maquina.iniciar:=iniciar_c64;
-  3001,3002:llamadas_maquina.iniciar:=iniciar_oric;
   //arcade
-  10,88,234,305,353,401,402,403,404,405:llamadas_maquina.iniciar:=iniciar_pacman;
-  11,202:llamadas_maquina.iniciar:=iniciar_phoenix;
+  10,88,234,305:llamadas_maquina.iniciar:=iniciar_pacman;
+  11,202:llamadas_maquina.iniciar:=phoenix_iniciar;
   12:llamadas_maquina.iniciar:=iniciar_ms;
-  13,383:llamadas_maquina.iniciar:=iniciar_bombjack;
-  14,47,48,49,143,144,145,363,366,369,370,382,385:llamadas_maquina.iniciar:=iniciar_galaxian;
+  13:llamadas_maquina.iniciar:=bombjack_iniciar;
+  14,47,48,49,143,144,145:llamadas_maquina.iniciar:=iniciar_hgalaxian;
   15,168,169:llamadas_maquina.iniciar:=iniciar_dkong;
   16:llamadas_maquina.iniciar:=iniciar_blktiger;
   17,203:llamadas_maquina.iniciar:=iniciar_gberet;
@@ -1514,7 +1182,7 @@ case tmaquina of
   24:llamadas_maquina.iniciar:=iniciar_sonson;
   25,319,320:llamadas_maquina.iniciar:=iniciar_starforce;
   26,97:llamadas_maquina.iniciar:=iniciar_tecmo;
-  27,35,36,37,151,152,153,154,155,384:cargar_system1; //Este lo dejo!!
+  27,35,36,37,151,152,153,154,155:Cargar_system1; //Este lo dejo!!
   28:llamadas_maquina.iniciar:=iniciar_pooyan;
   29,50,70:llamadas_maquina.iniciar:=iniciar_rallyxh;
   30:llamadas_maquina.iniciar:=iniciar_citycon;
@@ -1523,7 +1191,7 @@ case tmaquina of
   33:llamadas_maquina.iniciar:=iniciar_sbasketb;
   34,200,201:llamadas_maquina.iniciar:=iniciar_ladybug;
   38:llamadas_maquina.iniciar:=iniciar_tehkanwc;
-  39,376:llamadas_maquina.iniciar:=iniciar_popeye;
+  39:llamadas_maquina.iniciar:=iniciar_popeye;
   40:llamadas_maquina.iniciar:=iniciar_psychic5;
   41,265:llamadas_maquina.iniciar:=iniciar_terracre;
   42,72,73,74,75:llamadas_maquina.iniciar:=iniciar_irem_m62;
@@ -1533,14 +1201,14 @@ case tmaquina of
   46:llamadas_maquina.iniciar:=iniciar_bublbobl;
   51:llamadas_maquina.iniciar:=iniciar_prehisle;
   52,53:llamadas_maquina.iniciar:=iniciar_tigeroad;
-  54,386,387:llamadas_maquina.iniciar:=iniciar_snowbros;
+  54:llamadas_maquina.iniciar:=iniciar_snowbros;
   55:llamadas_maquina.iniciar:=iniciar_toki;
   56:llamadas_maquina.iniciar:=iniciar_contra;
-  57,63,64,192,193,351,352:llamadas_maquina.iniciar:=iniciar_mappyhw;
+  57,63,64,192,193:llamadas_maquina.iniciar:=iniciar_mappyhw;
   58:llamadas_maquina.iniciar:=iniciar_rastan;
-  59,60,61,247,368:llamadas_maquina.iniciar:=iniciar_lwings;
+  59,60,61:llamadas_maquina.iniciar:=iniciar_lwings;
   62:llamadas_maquina.iniciar:=iniciar_sfighter;
-  65,167,231,250,350:llamadas_maquina.iniciar:=iniciar_galagahw;
+  65,167,231,250:Cargar_galagahw;
   66:llamadas_maquina.iniciar:=iniciar_xain;
   67,68:llamadas_maquina.iniciar:=iniciar_suna_hw;
   69,71:llamadas_maquina.iniciar:=iniciar_nmk16;
@@ -1549,153 +1217,122 @@ case tmaquina of
   78,101,173,174:llamadas_maquina.iniciar:=iniciar_gaelco_hw;
   79:llamadas_maquina.iniciar:=iniciar_exedexes_hw;
   80,82,83:llamadas_maquina.iniciar:=iniciar_gunsmokehw;
-  81:llamadas_maquina.iniciar:=iniciar_hw1942;
+  81:Cargar_hw1942;
   84:llamadas_maquina.iniciar:=iniciar_jailbreak;
   85:llamadas_maquina.iniciar:=iniciar_circusc;
   86:llamadas_maquina.iniciar:=iniciar_ironhorse;
-  87,190,191:llamadas_maquina.iniciar:=iniciar_irem_m72;
+  87,190,191:Cargar_irem_m72;
   89,90:llamadas_maquina.iniciar:=iniciar_brkthru;
-  91,392,393,394,395,396,397,398,399:llamadas_maquina.iniciar:=iniciar_dec8;
-  92,96:llamadas_maquina.iniciar:=iniciar_ddragon;
+  91:Cargar_dec8;
+  92,96,247:llamadas_maquina.iniciar:=iniciar_ddragon;
   93:llamadas_maquina.iniciar:=iniciar_mrdo;
   94,95:llamadas_maquina.iniciar:=iniciar_epos_hw;
-  98,99:llamadas_maquina.iniciar:=iniciar_sf_hw;
+  98,99:Cargar_sf_hw;
   100:llamadas_maquina.iniciar:=iniciar_lk_hw;
   102:llamadas_maquina.iniciar:=iniciar_cabal;
   103,104,105,106,107,108,109,110,111,112,113:llamadas_maquina.iniciar:=iniciar_cps1;
   114,115,116,186,187,198:llamadas_maquina.iniciar:=iniciar_system16a;
   117:llamadas_maquina.iniciar:=iniciar_tp84;
   118:llamadas_maquina.iniciar:=iniciar_tutankham;
-  119,183:llamadas_maquina.iniciar:=iniciar_pang;
+  119,183:cargar_Pang;
   120,121,122,307:llamadas_maquina.iniciar:=iniciar_upl;
-  123,194:llamadas_maquina.iniciar:=iniciar_skykid;
+  123,194:Cargar_skykid;
   124,125,126,289,290,291:llamadas_maquina.iniciar:=iniciar_system86;
   127:llamadas_maquina.iniciar:=iniciar_rocnrope;
-  128,330,331:llamadas_maquina.iniciar:=iniciar_kyugo_hw;
+  128:llamadas_maquina.iniciar:=iniciar_kyugo_hw;
   129,130,306:llamadas_maquina.iniciar:=iniciar_tnzs;
-  131:llamadas_maquina.iniciar:=iniciar_pacland;
+  131:Cargar_pacland;
   132:llamadas_maquina.iniciar:=iniciar_mario;
   133:llamadas_maquina.iniciar:=iniciar_solomon;
   134:llamadas_maquina.iniciar:=iniciar_combatsc;
-  135:llamadas_maquina.iniciar:=iniciar_hvyunit;
+  135:Cargar_hvyunit;
   136,137,149,150:llamadas_maquina.iniciar:=iniciar_snk68;
-  138,139,140,337:llamadas_maquina.iniciar:=iniciar_megasys1;
+  138,139,140:Cargar_megasys1;
   141:llamadas_maquina.iniciar:=timepilot_iniciar;
   142:llamadas_maquina.iniciar:=iniciar_pengo;
-  146,147:llamadas_maquina.iniciar:=iniciar_twincobra;
+  146,147:Cargar_twincobra;
   148:llamadas_maquina.iniciar:=iniciar_jrpacman;
   156,157,158,316,317:llamadas_maquina.iniciar:=iniciar_dec0;
-  160:llamadas_maquina.iniciar:=iniciar_funkyjet;
-  159,161:llamadas_maquina.iniciar:=iniciar_supbtime;
+  160:Cargar_funkyjet;
+  159,161:Cargar_supbtime;
   162,163:llamadas_maquina.iniciar:=iniciar_cninja;
-  164:llamadas_maquina.iniciar:=iniciar_dietgo;
+  164:Cargar_Dietgo;
   165:llamadas_maquina.iniciar:=iniciar_actfancer;
-  166:llamadas_maquina.iniciar:=iniciar_arabian;
+  166:Cargar_Arabian;
   170:llamadas_maquina.iniciar:=iniciar_higemaru;
   171,172:llamadas_maquina.iniciar:=iniciar_bagman;
-  175,188,346,347:llamadas_maquina.iniciar:=iniciar_zaxxon;
+  175,188:llamadas_maquina.iniciar:=iniciar_zaxxon;
   176:llamadas_maquina.iniciar:=iniciar_kangaroo;
   177:llamadas_maquina.iniciar:=iniciar_bionicc;
   178:llamadas_maquina.iniciar:=iniciar_wwfsstar;
-  179,180:llamadas_maquina.iniciar:=iniciar_rainbow;
-  181:llamadas_maquina.iniciar:=iniciar_volfied;
-  182:llamadas_maquina.iniciar:=iniciar_opwolf;
+  179,180:Cargar_rainbow;
+  181:Cargar_volfied;
+  182:Cargar_opwolf;
   184:llamadas_maquina.iniciar:=iniciar_outrun;
-  185,189:llamadas_maquina.iniciar:=taitosj_iniciar;
+  185,189:Cargar_Taitosj;
   195:llamadas_maquina.iniciar:=iniciar_vulgus;
-  196,232:llamadas_maquina.iniciar:=iniciar_ddragon3;
-  197:llamadas_maquina.iniciar:=iniciar_blockout;
-  199:llamadas_maquina.iniciar:=iniciar_foodf;
-  204,205,260,261:llamadas_maquina.iniciar:=iniciar_nemesis;
-  206,207:llamadas_maquina.iniciar:=iniciar_pirates;
-  208:llamadas_maquina.iniciar:=iniciar_junofrst;
-  209:llamadas_maquina.iniciar:=gyruss_iniciar;
-  210:llamadas_maquina.iniciar:=iniciar_boogwing;
-  211,271,272,273,274:llamadas_maquina.iniciar:=iniciar_freekick;
+  196,232:Cargar_ddragon3;
+  197:Cargar_blockout;
+  199:Cargar_foodf;
+  204,205,260,261:Cargar_nemesis;
+  206,207:Cargar_pirates;
+  208:Cargar_junofrst;
+  209:Cargar_gyruss;
+  210:Cargar_boogwing;
+  211,271,272,273,274:Cargar_freekick;
   212:llamadas_maquina.iniciar:=iniciar_pinballaction;
   213:llamadas_maquina.iniciar:=iniciar_renegade;
-  214,215:llamadas_maquina.iniciar:=iniciar_tmnt;
-  216:llamadas_maquina.iniciar:=iniciar_gradius3;
-  217:llamadas_maquina.iniciar:=iniciar_spaceinv;
-  218,348:llamadas_maquina.iniciar:=iniciar_centipede;
+  214,215:Cargar_tmnt;
+  216:Cargar_gradius3;
+  217:Cargar_spaceinv;
+  218:Cargar_centipede;
   219,220:llamadas_maquina.iniciar:=iniciar_karnov;
-  221:llamadas_maquina.iniciar:=iniciar_aliens;
-  222,223,224:llamadas_maquina.iniciar:=iniciar_thunderx;
-  225:llamadas_maquina.iniciar:=iniciar_simpsons;
-  226:llamadas_maquina.iniciar:=iniciar_trackfield;
-  227,400:llamadas_maquina.iniciar:=iniciar_hypersports;
-  228:llamadas_maquina.iniciar:=iniciar_megazone;
-  229:llamadas_maquina.iniciar:=iniciar_spacefb;
-  230:llamadas_maquina.iniciar:=iniciar_ajax;
-  235:llamadas_maquina.iniciar:=iniciar_vendetta;
+  221:Cargar_aliens;
+  222,223,224:Cargar_thunderx;
+  225:cargar_simpsons;
+  226:cargar_trackfield;
+  227:cargar_hypersports;
+  228:Cargar_megazone;
+  229:Cargar_spacefb;
+  230:Cargar_ajax;
+  235:Cargar_vendetta;
   236,245:llamadas_maquina.iniciar:=iniciar_gauntlet;
   237:llamadas_maquina.iniciar:=iniciar_sauro;
   238:llamadas_maquina.iniciar:=iniciar_cclimber;
   239:llamadas_maquina.iniciar:=iniciar_retofinv;
   240:llamadas_maquina.iniciar:=iniciar_tetris;
   241,242,243,279:llamadas_maquina.iniciar:=iniciar_snk;
-  244,263,264:llamadas_maquina.iniciar:=iniciar_atari_sys1;
-  246,248,249,321,322,323:llamadas_maquina.iniciar:=iniciar_williams;
+  244,263,264:Cargar_atari_sys1;
+  246,248,249:Cargar_williams;
   251,252,253,254,255,256,257:llamadas_maquina.iniciar:=iniciar_systeme;
   258,259:llamadas_maquina.iniciar:=iniciar_route16_hw;
   262:llamadas_maquina.iniciar:=iniciar_badlands;
   266,267:llamadas_maquina.iniciar:=iniciar_galivan;
   268,269,270:llamadas_maquina.iniciar:=iniciar_lastduel;
   275,276,277,278:llamadas_maquina.iniciar:=iniciar_armedf;
-  280:llamadas_maquina.iniciar:=iniciar_firetrap;
-  281,282:llamadas_maquina.iniciar:=iniciar_puzz3x3;
-  283,284:llamadas_maquina.iniciar:=iniciar_k31945;
+  280:cargar_firetrap;
+  281,282:cargar_puzz3x3;
+  283,284:cargar_k31945;
   285,286:llamadas_maquina.iniciar:=iniciar_bloodbros;
-  287,288:llamadas_maquina.iniciar:=iniciar_baraduke;
-  292,293,294,295,296,297,408,409,410:llamadas_maquina.iniciar:=iniciar_system16b;
-  298:llamadas_maquina.iniciar:=iniciar_toaplan1;
-  301:llamadas_maquina.iniciar:=karatechamp_iniciar;
+  287,288:cargar_baraduke;
+  292,293,294,295,296,297:llamadas_maquina.iniciar:=iniciar_system16b;
+  298:cargar_toaplan1;
+  301:cargar_karatechamp;
   302,303,304:llamadas_maquina.iniciar:=iniciar_seta;
   308,309,310,311,312,313:llamadas_maquina.iniciar:=iniciar_mrdocastle;
   314:llamadas_maquina.iniciar:=iniciar_ccastles;
   315:llamadas_maquina.iniciar:=iniciar_flower;
   318:llamadas_maquina.iniciar:=iniciar_sdodgeball;
-  324,411,412,413,414,415,416:llamadas_maquina.iniciar:=iniciar_mcr;
-  325:llamadas_maquina.iniciar:=iniciar_arkanoid;
-  326:llamadas_maquina.iniciar:=iniciar_sidearms;
-  327:llamadas_maquina.iniciar:=iniciar_speedr;
-  328:llamadas_maquina.iniciar:=iniciar_chinagate;
-  329:llamadas_maquina.iniciar:=iniciar_magmax;
-  332:llamadas_maquina.iniciar:=iniciar_ambush;
-  333:llamadas_maquina.iniciar:=iniciar_superduck;
-  334,335,336:llamadas_maquina.iniciar:=iniciar_hangon;
-  338,339:llamadas_maquina.iniciar:=iniciar_shadoww;
-  340:llamadas_maquina.iniciar:=iniciar_raiden;
-  341,342,343:llamadas_maquina.iniciar:=iniciar_twins;
-  344,345:llamadas_maquina.iniciar:=iniciar_missilec;
-  349:llamadas_maquina.iniciar:=iniciar_gaplus;
-  354,355:llamadas_maquina.iniciar:=iniciar_irem_m63;
-  356:llamadas_maquina.iniciar:=iniciar_diverboy;
-  357:llamadas_maquina.iniciar:=iniciar_mugsmash;
-  358,359,360:llamadas_maquina.iniciar:=iniciar_steelforce;
-  361,362:llamadas_maquina.iniciar:=iniciar_bankpanic;
-  364,365:llamadas_maquina.iniciar:=iniciar_appoooh;
-  367:llamadas_maquina.iniciar:=iniciar_hw88games;
-  371,372,373,374,375:llamadas_maquina.iniciar:=iniciar_dooyong;
-  377,378,379:llamadas_maquina.iniciar:=iniciar_blueprint;
-  380,381:llamadas_maquina.iniciar:=iniciar_unico;
-  388,389:llamadas_maquina.iniciar:=iniciar_kikikaikai;
-  390,391:llamadas_maquina.iniciar:=iniciar_lasso;
-  406:llamadas_maquina.iniciar:=iniciar_finalstarforce;
-  407:llamadas_maquina.iniciar:=iniciar_wyvernf0;
-  417,418:llamadas_maquina.iniciar:=iniciar_taito_b;
   //consolas
-  1000:llamadas_maquina.iniciar:=iniciar_nes;
-  1001:llamadas_maquina.iniciar:=iniciar_coleco;
-  1002:llamadas_maquina.iniciar:=iniciar_gb;
-  1003:llamadas_maquina.iniciar:=iniciar_chip8;
-  1004:llamadas_maquina.iniciar:=iniciar_sms;
-  1005:llamadas_maquina.iniciar:=iniciar_sg;
-  1006:llamadas_maquina.iniciar:=iniciar_gg;
-  1007:llamadas_maquina.iniciar:=iniciar_scv;
+  1000:Cargar_NES;
+  1001:Cargar_coleco;
+  1002:Cargar_gb;
+  1003:Cargar_chip8;
+  1004:Cargar_SMS;
+  1005:Cargar_sg;
+  1006:Cargar_gg;
+  1007:Cargar_scv;
   1008:Cargar_genesis;
-  1009:llamadas_maquina.iniciar:=iniciar_pv1000;
-  1010:llamadas_maquina.iniciar:=iniciar_pv2000;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
@@ -1745,14 +1382,6 @@ end;
 if sender=principal1.c641 then begin
   tipo:=3000;
   principal1.c641.Checked:=true;
-end;
-if sender=principal1.oricatmos1 then begin
-  tipo:=3001;
-  principal1.oricatmos1.Checked:=true;
-end;
-if sender=principal1.oric1_1 then begin
-  tipo:=3002;
-  principal1.oric1_1.Checked:=true;
 end;
 //Arcade
 if sender=principal1.Pacman1 then begin
@@ -2703,9 +2332,9 @@ if sender=principal1.defender1 then begin
   tipo:=246;
   principal1.defender1.Checked:=true;
 end;
-if sender=principal1.fireball1 then begin
+if sender=principal1.ddragon_sh1 then begin
   tipo:=247;
-  principal1.fireball1.Checked:=true;
+  principal1.ddragon_sh1.Checked:=true;
 end;
 if sender=principal1.mayday1 then begin
   tipo:=248;
@@ -2999,398 +2628,6 @@ if sender=principal1.baluba1 then begin
   tipo:=320;
   principal1.baluba1.Checked:=true;
 end;
-if sender=principal1.joust1 then begin
-  tipo:=321;
-  principal1.joust1.Checked:=true;
-end;
-if sender=principal1.robotron1 then begin
-  tipo:=322;
-  principal1.robotron1.Checked:=true;
-end;
-if sender=principal1.stargate1 then begin
-  tipo:=323;
-  principal1.stargate1.Checked:=true;
-end;
-if sender=principal1.tapper1 then begin
-  tipo:=324;
-  principal1.tapper1.Checked:=true;
-end;
-if sender=principal1.arkanoid1 then begin
-  tipo:=325;
-  principal1.arkanoid1.Checked:=true;
-end;
-if sender=principal1.sidearms1 then begin
-  tipo:=326;
-  principal1.sidearms1.Checked:=true;
-end;
-if sender=principal1.speedrumbler1 then begin
-  tipo:=327;
-  principal1.speedrumbler1.Checked:=true;
-end;
-if sender=principal1.chinagate1 then begin
-  tipo:=328;
-  principal1.chinagate1.Checked:=true;
-end;
-if sender=principal1.magmax1 then begin
-  tipo:=329;
-  principal1.magmax1.Checked:=true;
-end;
-if sender=principal1.SRDMission1 then begin
-  tipo:=330;
-  principal1.SRDMission1.Checked:=true;
-end;
-if sender=principal1.airwolf1 then begin
-  tipo:=331;
-  principal1.airwolf1.Checked:=true;
-end;
-if sender=principal1.ambush1 then begin
-  tipo:=332;
-  principal1.ambush1.Checked:=true;
-end;
-if sender=principal1.superduck1 then begin
-  tipo:=333;
-  principal1.superduck1.Checked:=true;
-end;
-if sender=principal1.hangon1 then begin
-  tipo:=334;
-  principal1.hangon1.Checked:=true;
-end;
-if sender=principal1.enduroracer1 then begin
-  tipo:=335;
-  principal1.enduroracer1.Checked:=true;
-end;
-if sender=principal1.spaceharrier1 then begin
-  tipo:=336;
-  principal1.spaceharrier1.Checked:=true;
-end;
-if sender=principal1.N64thstreet1 then begin
-  tipo:=337;
-  principal1.N64thstreet1.Checked:=true;
-end;
-if sender=principal1.shadowwarriors1 then begin
-  tipo:=338;
-  principal1.shadowwarriors1.Checked:=true;
-end;
-if sender=principal1.wildfang1 then begin
-  tipo:=339;
-  principal1.wildfang1.Checked:=true;
-end;
-if sender=principal1.raiden1 then begin
-  tipo:=340;
-  principal1.raiden1.Checked:=true;
-end;
-if sender=principal1.twins1 then begin
-  tipo:=341;
-  principal1.twins1.Checked:=true;
-end;
-if sender=principal1.twinsed1 then begin
-  tipo:=342;
-  principal1.twinsed1.Checked:=true;
-end;
-if sender=principal1.hotblocks1 then begin
-  tipo:=343;
-  principal1.hotblocks1.Checked:=true;
-end;
-if sender=principal1.missilecommand1 then begin
-  tipo:=344;
-  principal1.missilecommand1.Checked:=true;
-end;
-if sender=principal1.supermissileattack1 then begin
-  tipo:=345;
-  principal1.supermissileattack1.Checked:=true;
-end;
-if sender=principal1.superzaxxon1 then begin
-  tipo:=346;
-  principal1.superzaxxon1.Checked:=true;
-end;
-if sender=principal1.futurespy1 then begin
-  tipo:=347;
-  principal1.futurespy1.Checked:=true;
-end;
-if sender=principal1.millipede1 then begin
-  tipo:=348;
-  principal1.millipede1.Checked:=true;
-end;
-if sender=principal1.gaplus1 then begin
-  tipo:=349;
-  principal1.gaplus1.Checked:=true;
-end;
-if sender=principal1.superxevious1 then begin
-  tipo:=350;
-  principal1.superxevious1.Checked:=true;
-end;
-if sender=principal1.grobda1 then begin
-  tipo:=351;
-  principal1.grobda1.Checked:=true;
-end;
-if sender=principal1.pacnpal1 then begin
-  tipo:=352;
-  principal1.pacnpal1.Checked:=true;
-end;
-if sender=principal1.birdiy1 then begin
-  tipo:=353;
-  principal1.birdiy1.Checked:=true;
-end;
-if sender=principal1.wilytower1 then begin
-  tipo:=354;
-  principal1.wilytower1.Checked:=true;
-end;
-if sender=principal1.FightingBasketball1 then begin
-  tipo:=355;
-  principal1.FightingBasketball1.Checked:=true;
-end;
-if sender=principal1.diverboy1 then begin
-  tipo:=356;
-  principal1.diverboy1.Checked:=true;
-end;
-if sender=principal1.MugSmashers1 then begin
-  tipo:=357;
-  principal1.MugSmashers1.Checked:=true;
-end;
-if sender=principal1.steelforce1 then begin
-  tipo:=358;
-  principal1.steelforce1.Checked:=true;
-end;
-if sender=principal1.twinbrats1 then begin
-  tipo:=359;
-  principal1.twinbrats1.Checked:=true;
-end;
-if sender=principal1.mortalrace1 then begin
-  tipo:=360;
-  principal1.mortalrace1.Checked:=true;
-end;
-if sender=principal1.bankpanic1 then begin
-  tipo:=361;
-  principal1.bankpanic1.Checked:=true;
-end;
-if sender=principal1.combathawk1 then begin
-  tipo:=362;
-  principal1.combathawk1.Checked:=true;
-end;
-if sender=principal1.anteater1 then begin
-  tipo:=363;
-  principal1.anteater1.Checked:=true;
-end;
-if sender=principal1.appoooh1 then begin
-  tipo:=364;
-  principal1.appoooh1.Checked:=true;
-end;
-if sender=principal1.robowres1 then begin
-  tipo:=365;
-  principal1.robowres1.Checked:=true;
-end;
-if sender=principal1.armoredcar1 then begin
-  tipo:=366;
-  principal1.armoredcar1.Checked:=true;
-end;
-if sender=principal1.n88games1 then begin
-  tipo:=367;
-  principal1.n88games1.Checked:=true;
-end;
-if sender=principal1.avengers1 then begin
-  tipo:=368;
-  principal1.avengers1.Checked:=true;
-end;
-if sender=principal1.theend1 then begin
-  tipo:=369;
-  principal1.theend1.Checked:=true;
-end;
-if sender=principal1.battleofatlantis1 then begin
-  tipo:=370;
-  principal1.battleofatlantis1.Checked:=true;
-end;
-if sender=principal1.bluehawk1 then begin
-  tipo:=371;
-  principal1.bluehawk1.Checked:=true;
-end;
-if sender=principal1.lastday1 then begin
-  tipo:=372;
-  principal1.lastday1.Checked:=true;
-end;
-if sender=principal1.gulfstorm1 then begin
-  tipo:=373;
-  principal1.gulfstorm1.Checked:=true;
-end;
-if sender=principal1.pollux1 then begin
-  tipo:=374;
-  principal1.pollux1.Checked:=true;
-end;
-if sender=principal1.flyingtiger1 then begin
-  tipo:=375;
-  principal1.flyingtiger1.Checked:=true;
-end;
-if sender=principal1.skyskipper1 then begin
-  tipo:=376;
-  principal1.skyskipper1.Checked:=true;
-end;
-if sender=principal1.blueprint1 then begin
-  tipo:=377;
-  principal1.blueprint1.Checked:=true;
-end;
-if sender=principal1.saturn1 then begin
-  tipo:=378;
-  principal1.saturn1.Checked:=true;
-end;
-if sender=principal1.grasspin1 then begin
-  tipo:=379;
-  principal1.grasspin1.Checked:=true;
-end;
-if sender=principal1.burglarx1 then begin
-  tipo:=380;
-  principal1.burglarx1.Checked:=true;
-end;
-if sender=principal1.zeropoint1 then begin
-  tipo:=381;
-  principal1.zeropoint1.Checked:=true;
-end;
-if sender=principal1.calipso1 then begin
-  tipo:=382;
-  principal1.calipso1.Checked:=true;
-end;
-if sender=principal1.caloriekun1 then begin
-  tipo:=383;
-  principal1.caloriekun1.Checked:=true;
-end;
-if sender=principal1.gardia1 then begin
-  tipo:=384;
-  principal1.gardia1.Checked:=true;
-end;
-if sender=principal1.cavelon1 then begin
-  tipo:=385;
-  principal1.cavelon1.Checked:=true;
-end;
-if sender=principal1.comebacktoto1 then begin
-  tipo:=386;
-  principal1.comebacktoto1.Checked:=true;
-end;
-if sender=principal1.hyperpacman1 then begin
-  tipo:=387;
-  principal1.hyperpacman1.Checked:=true;
-end;
-if sender=principal1.kikikaikai1 then begin
-  tipo:=388;
-  principal1.kikikaikai1.Checked:=true;
-end;
-if sender=principal1.kickandrun1 then begin
-  tipo:=389;
-  principal1.kickandrun1.Checked:=true;
-end;
-if sender=principal1.lasso1 then begin
-  tipo:=390;
-  principal1.lasso1.Checked:=true;
-end;
-if sender=principal1.chameleon1 then begin
-  tipo:=391;
-  principal1.chameleon1.Checked:=true;
-end;
-if sender=principal1.lastmission1 then begin
-  tipo:=392;
-  principal1.lastmission1.Checked:=true;
-end;
-if sender=principal1.shackled1 then begin
-  tipo:=393;
-  principal1.shackled1.Checked:=true;
-end;
-if sender=principal1.gondomania1 then begin
-  tipo:=394;
-  principal1.Gondomania1.Checked:=true;
-end;
-if sender=principal1.garyoretsuden1 then begin
-  tipo:=395;
-  principal1.garyoretsuden1.Checked:=true;
-end;
-if sender=principal1.captainsilver1 then begin
-  tipo:=396;
-  principal1.captainsilver1.Checked:=true;
-end;
-if sender=principal1.cobracommand1 then begin
-  tipo:=397;
-  principal1.cobracommand1.Checked:=true;
-end;
-if sender=principal1.ghostbusters1 then begin
-  tipo:=398;
-  principal1.ghostbusters1.Checked:=true;
-end;
-if sender=principal1.oscar1 then begin
-  tipo:=399;
-  principal1.oscar1.Checked:=true;
-end;
-if sender=principal1.roadfighter1 then begin
-  tipo:=400;
-  principal1.roadfighter1.Checked:=true;
-end;
-if sender=principal1.ponpoko1 then begin
-  tipo:=401;
-  principal1.ponpoko1.Checked:=true;
-end;
-if sender=principal1.woodpecker1 then begin
-  tipo:=402;
-  principal1.woodpecker1.Checked:=true;
-end;
-if sender=principal1.eyes1 then begin
-  tipo:=403;
-  principal1.eyes1.Checked:=true;
-end;
-if sender=principal1.alibaba1 then begin
-  tipo:=404;
-  principal1.alibaba1.Checked:=true;
-end;
-if sender=principal1.piranha1 then begin
-  tipo:=405;
-  principal1.piranha1.Checked:=true;
-end;
-if sender=principal1.finalstarforce1 then begin
-  tipo:=406;
-  principal1.finalstarforce1.Checked:=true;
-end;
-if sender=principal1.WyvernF01 then begin
-  tipo:=407;
-  principal1.WyvernF01.Checked:=true;
-end;
-if sender=principal1.riotcity1 then begin
-  tipo:=408;
-  principal1.riotcity1.Checked:=true;
-end;
-if sender=principal1.sdi1 then begin
-  tipo:=409;
-  principal1.sdi1.Checked:=true;
-end;
-if sender=principal1.cotton1 then begin
-  tipo:=410;
-  principal1.cotton1.Checked:=true;
-end;
-if sender=principal1.dotron1 then begin
-  tipo:=411;
-  principal1.dotron1.Checked:=true;
-end;
-if sender=principal1.tron1 then begin
-  tipo:=412;
-  principal1.tron1.Checked:=true;
-end;
-if sender=principal1.timber1 then begin
-  tipo:=413;
-  principal1.timber1.Checked:=true;
-end;
-if sender=principal1.shollow1 then begin
-  tipo:=414;
-  principal1.shollow1.Checked:=true;
-end;
-if sender=principal1.domino1 then begin
-  tipo:=415;
-  principal1.domino1.Checked:=true;
-end;
-if sender=principal1.wacko1 then begin
-  tipo:=416;
-  principal1.wacko1.Checked:=true;
-end;
-if sender=principal1.nastar1 then begin
-  tipo:=417;
-  principal1.nastar1.Checked:=true;
-end;
-if sender=principal1.masterw1 then begin
-  tipo:=418;
-  principal1.masterw1.Checked:=true;
-end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -3427,14 +2664,6 @@ end;
 if sender=principal1.genesis1 then begin
   tipo:=1008;
   principal1.genesis1.Checked:=true;
-end;
-if sender=principal1.pv1000 then begin
-  tipo:=1009;
-  principal1.pv1000.Checked:=true;
-end;
-if sender=principal1.pv2000 then begin
-  tipo:=1010;
-  principal1.pv2000.Checked:=true;
 end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin

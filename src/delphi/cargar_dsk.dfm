@@ -2,18 +2,19 @@ object load_dsk: Tload_dsk
   Left = 183
   Top = 154
   Caption = 'Open/Abrir Disk'
-  ClientHeight = 455
-  ClientWidth = 688
+  ClientHeight = 465
+  ClientWidth = 699
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  KeyPreview = True
+  OldCreateOrder = False
   Position = poDesigned
-  OnKeyUp = FormKeyUp
+  OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
     Left = 579
@@ -23,19 +24,20 @@ object load_dsk: Tload_dsk
     Caption = 'CANCELAR'
     TabOrder = 1
     OnClick = Button1Click
+    OnKeyUp = FileListBox1KeyUp
   end
   object GroupBox1: TGroupBox
     Left = 8
-    Top = 270
+    Top = 271
     Width = 565
-    Height = 179
+    Height = 185
     Caption = 'Contenido ZIP / Inside ZIP'
     TabOrder = 2
     object StringGrid1: TStringGrid
-      Left = 4
-      Top = 18
-      Width = 556
-      Height = 151
+      Left = 0
+      Top = 26
+      Width = 562
+      Height = 159
       TabStop = False
       ColCount = 2
       DefaultColWidth = 134
@@ -47,6 +49,7 @@ object load_dsk: Tload_dsk
       ScrollBars = ssVertical
       TabOrder = 0
       OnDblClick = StringGrid1DblClick
+      OnKeyUp = FileListBox1KeyUp
       ColWidths = (
         134
         134)
@@ -63,6 +66,7 @@ object load_dsk: Tload_dsk
     Caption = 'CARGAR'
     TabOrder = 0
     OnClick = Button2Click
+    OnKeyUp = FileListBox1KeyUp
   end
   object FileListBox1: TFileListBox
     Left = 271
@@ -74,6 +78,7 @@ object load_dsk: Tload_dsk
     TabOrder = 3
     OnClick = FileListBox1Click
     OnDblClick = FileListBox1DblClick
+    OnKeyUp = FileListBox1KeyUp
   end
   object DirectoryListBox1: TDirectoryListBox
     Left = 8
@@ -84,6 +89,7 @@ object load_dsk: Tload_dsk
     FileList = FileListBox1
     TabOrder = 4
     OnChange = DirectoryListBox1Change
+    OnKeyUp = FileListBox1KeyUp
   end
   object DriveComboBox1: TDriveComboBox
     Left = 8

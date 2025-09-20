@@ -25,23 +25,23 @@ const
         (n:'380_j18.2a';l:$20;p:0;crc:$10dd4eaa),(n:'380_j17.7b';l:$100;p:$20;crc:$13989357),
         (n:'380_j16.10c';l:$100;p:$120;crc:$c244f2aa));
         //Dip
-        circusc_dip_a:array [0..2] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-        circusc_dip_b:array [0..5] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
-        (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
-        (mask:$8;name:'Bonus Life';number:2;val2:(8,0);name2:('20K 90K 70K+','30K 110K 80K+')),
-        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        circusc_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$00;dip_name:'Free Play'))),());
+        circusc_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'20K 90K 70K+'),(dip_val:$0;dip_name:'30K 110K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_ena:boolean;
  mem_opcodes:array[0..$9fff] of byte;
- sound_latch,scroll_x:byte;
+ sound_latch,scroll_x,linea:byte;
  spritebank:word;
 
-procedure update_video_circusc;
+procedure update_video_circusc;inline;
 var
   x,y,atrib:byte;
   f,nchar,color:word;
@@ -68,7 +68,7 @@ scroll__x_part(2,3,scroll_x,0,80,176);
 //Sprites
 for f:=0 to $3f do begin
   atrib:=memoria[spritebank+1+(f*4)];
-  nchar:=(memoria[spritebank+(f*4)]+((atrib and $20) shl 3)) mod 384;
+  nchar:=memoria[spritebank+(f*4)]+((atrib and $20) shl 3);
   color:=(atrib and $f) shl 4;
   x:=240-memoria[spritebank+3+(f*4)];
   y:=memoria[spritebank+2+(f*4)];
@@ -80,7 +80,7 @@ scroll__x_part(1,3,scroll_x,0,80,176);
 actualiza_trozo_final(16,0,224,256,3);
 end;
 
-procedure eventos_circusc;
+procedure eventos_circusc;inline;
 begin
 if event.arcade then begin
   //p1
@@ -102,20 +102,19 @@ end;
 procedure circusc_principal;
 var
   frame_m,frame_s:single;
-  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+while EmuStatus=EsRuning do begin
+  for linea:=0 to $ff do begin
     //main
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    if linea=239 then begin
       if irq_ena then m6809_0.change_irq(HOLD_LINE);
       update_video_circusc;
     end;
@@ -168,7 +167,7 @@ case direccion of
  $0..$3fff:circusc_snd_getbyte:=mem_snd[direccion];
  $4000..$5fff:circusc_snd_getbyte:=mem_snd[$4000+(direccion and $3ff)];
  $6000..$7fff:circusc_snd_getbyte:=sound_latch;
- $8000..$9fff:circusc_snd_getbyte:=(z80_0.totalt shr 9) and $1e;
+ $8000..$9fff:circusc_snd_getbyte:=((trunc(z80_0.tframes*linea)+z80_0.contador) shr 9 and $1e);
 end;
 end;
 
@@ -201,7 +200,7 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  dac_0.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -285,8 +284,8 @@ end;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$4b;
-marcade.dswa_val2:=@circusc_dip_a;
-marcade.dswb_val2:=@circusc_dip_b;
+marcade.dswa_val:=@circusc_dip_a;
+marcade.dswb_val:=@circusc_dip_b;
 //final
 reset_circusc;
 iniciar_circusc:=true;

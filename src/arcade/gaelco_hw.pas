@@ -92,7 +92,7 @@ var
  sound_latch,gaelco_dec_val:byte;
  oki_rom:array[0..$c,0..$ffff] of byte;
 
-procedure draw_sprites_bk(pri:byte);
+procedure draw_sprites_bk(pri:byte);inline;
 var
 	x,i,color,attr,attr2,nchar:word;
   flipx,flipy:boolean;
@@ -127,7 +127,7 @@ begin
 	 end;
 end;
 
-procedure draw_all_bigk;
+procedure draw_all_bigk;inline;
 var
   f,color,sx,sy,pos,x,y,nchar,atrib1,atrib2:word;
   pant,h:byte;
@@ -180,7 +180,7 @@ for f:=0 to $164 do begin
 end;
 end;
 
-procedure update_video_bigk;
+procedure update_video_bigk;inline;
 begin
 fill_full_screen(17,0);
 draw_all_bigk;
@@ -233,7 +233,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -253,7 +253,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6809_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 511 do begin
     //main
     m68000_0.run(frame_m);
@@ -359,7 +359,7 @@ begin
 end;
 
 //Thunder Hoop
-procedure draw_sprites_thoop(pri:byte);
+procedure draw_sprites_thoop(pri:byte);inline;
 var
 	x,i,color,attr,attr2,nchar:word;
   flipx,flipy:boolean;
@@ -393,7 +393,7 @@ begin
 	 end;
 end;
 
-procedure draw_all_thoop;
+procedure draw_all_thoop;inline;
 var
   f,color,sx,sy,x,y,nchar,atrib1,atrib2,pos:word;
   pant,h:byte;
@@ -436,7 +436,7 @@ for f:=0 to $164 do begin
 end;
 end;
 
-procedure update_video_thoop;
+procedure update_video_thoop;inline;
 begin
 fill_full_screen(17,0);
 draw_all_thoop;
@@ -463,7 +463,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 511 do begin
      m68000_0.run(frame_m);
      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -612,7 +612,7 @@ begin
     ym3812_0.reset;
  end;
  oki_6295_0.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x0:=1;

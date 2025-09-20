@@ -3,11 +3,12 @@ unit snk_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,ym_3812,timer_engine;
+     pal_engine,sound_engine,ym_3812,timer_engine,sysutils;
 
 function iniciar_snk:boolean;
 
 implementation
+uses principal;
 const
         //ikari
         ikari_main:tipo_roms=(n:'1.rom';l:$10000;p:0;crc:$52a8b2dd);
@@ -136,7 +137,6 @@ var
   txt_ram,sprite_ram:array[0..$7ff] of byte;
   bg_ram:array[0..$1fff] of byte;
 
-procedure update_video_ikari;
 procedure draw_sprites16(pos:byte);
 var
   f,color,atrib:byte;
@@ -179,6 +179,7 @@ begin
 	end;
 end;
 
+procedure update_video_ikari;
 var
   g,atrib,color:byte;
   x,y,f,nchar,pos:word;
@@ -501,21 +502,19 @@ end;
 
 procedure snk_principal;
 var
+  frame_m,frame_sub,frame_snd:single;
   h,f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=z80_0.tframes;
+frame_sub:=z80_1.tframes;
+frame_snd:=z80_2.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 223 do begin
-    update_events_snk;
-    if f=0 then begin
-      z80_0.change_irq(HOLD_LINE);
-      z80_1.change_irq(HOLD_LINE);
-      update_video_snk;
-    end;
     for h:=1 to CPU_SYNC do begin
         //Main
-        z80_0.run(frame_main);
-        frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+        z80_0.run(frame_m);
+        frame_m:=frame_m+z80_0.tframes-z80_0.contador;
         //Sub
         z80_1.run(frame_sub);
         frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
@@ -523,12 +522,18 @@ while EmuStatus=EsRunning do begin
         z80_2.run(frame_snd);
         frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
     end;
+    if f=0 then begin
+      z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
+      update_video_snk;
+    end;
   end;
+  update_events_snk;
   video_sync;
 end;
 end;
 
-function hardflags_check(num:byte):byte;
+function hardflags_check(num:byte):byte;inline;
 var
   x,y,dx,dy:word;
   ret:byte;
@@ -544,7 +549,7 @@ begin
   hardflags_check:=ret;
 end;
 
-function hardflags_check8(num:byte):byte;
+function hardflags_check8(num:byte):byte;inline;
 begin
 	hardflags_check8:=
 		(hardflags_check(num+0) shl 0) or (hardflags_check(num+1) shl 1) or
@@ -1028,7 +1033,7 @@ end;
 
 procedure tnk3_sound_update;
 begin
-  ym3812_0.update;
+  YM3812_0.update;
 end;
 
 //Main
@@ -1037,10 +1042,8 @@ begin
  z80_0.reset;
  z80_1.reset;
  z80_2.reset;
- ym3812_0.reset;
- frame_main:=z80_0.tframes;
- frame_sub:=z80_1.tframes;
- frame_snd:=z80_2.tframes;
+ reset_audio;
+ YM3812_0.reset;
  txt_offset:=0;
  bg_offset:=0;
  bg_pal_offset:=0;
@@ -1137,7 +1140,7 @@ case main_vars.tipo_maquina of
   241:iniciar_video(216,288);
   242:iniciar_video(288,216);
   243,279:begin
-        main_screen.rot270_screen:=true;
+        main_screen.rol90_screen:=true;
         iniciar_video(288,216);
       end;
 end;
@@ -1348,6 +1351,7 @@ case main_vars.tipo_maquina of
       end;
 end;
 //final
+reset_snk;
 iniciar_snk:=true;
 end;
 

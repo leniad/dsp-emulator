@@ -123,7 +123,6 @@ type
                   refresh_rate:LongInt;
                   driverdata:Pointer;
                 end;
-    libsdlp_DisplayMode=^libsdl_DisplayMode;
     libsdlp_WindowShaper=^libsdl_WindowShaper; //PSDL_WindowShaper
     libsdlp_Window=^libsdl_Window; //PSDL_Window
     libsdl_WindowShapeParams=record

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes,SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons,lenguaje,controls_engine;
+  StdCtrls, Buttons,lenguaje,controls_engine,main_engine;
 
 type
 
@@ -116,7 +116,6 @@ type
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure Button9Click(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
   private
@@ -439,20 +438,12 @@ tecla_leida:=KEYBOARD_8;
 redefine1.close;
 end;
 
-procedure Tredefine1.FormKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  case key of
-      13,27:speedbutton1Click(nil);
-  end;
-end;
-
 procedure Tredefine1.FormShow(Sender: TObject);
 begin
    redefine1.Button1.Enabled:=false;
    redefine1.SetFocus;
    redefine1.Button1.Enabled:=true;
-   redefine1.Button1.Caption:=leng.mensajes[8];
+   redefine1.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 end;
 
 procedure Tredefine1.SpeedButton1Click(Sender: TObject);

@@ -1,5 +1,6 @@
 unit principal;
-//{$DEFINE FINAL}
+//{$SetPeFlags $20}
+{$DEFINE FINAL}
 interface
 
 uses
@@ -30,8 +31,10 @@ type
     NES1: TMenuItem;
     Timer1: TTimer;
     Spectrum128K1: TMenuItem;
-    consonido1: TMenuItem;
-    BombJackHW: TMenuItem;
+    N110251: TMenuItem;
+    N220501: TMenuItem;
+    N441001: TMenuItem;
+    BombJack1: TMenuItem;
     PacmanHW1: TMenuItem;
     Emulacion1: TMenuItem;
     Ordenadores8bits1: TMenuItem;
@@ -91,7 +94,7 @@ type
     wboy1: TMenuItem;
     wbml1: TMenuItem;
     tehkanwc1: TMenuItem;
-    PopeyeHW1: TMenuItem;
+    Popeye1: TMenuItem;
     Psychic51: TMenuItem;
     Brazil1: TMenuItem;
     M680001: TMenuItem;
@@ -118,7 +121,7 @@ type
     TigerRoadHW1: TMenuItem;
     TigerRoad1: TMenuItem;
     F1Dream1: TMenuItem;
-    SnowBrosHW1: TMenuItem;
+    SnowBros1: TMenuItem;
     Toki1: TMenuItem;
     FullScreen1: TMenuItem;
     Timer2: TTimer;
@@ -169,7 +172,7 @@ type
     BreakThruHawrdware1: TMenuItem;
     BrkThru1: TMenuItem;
     Darwin1: TMenuItem;
-    Dec8HW1: TMenuItem;
+    SRD1: TMenuItem;
     HD63091: TMenuItem;
     ddragon_hw: TMenuItem;
     MrDo1: TMenuItem;
@@ -219,7 +222,7 @@ type
     hopmappy1: TMenuItem;
     skykiddx1: TMenuItem;
     RocnRope1: TMenuItem;
-    kyugohw1: TMenuItem;
+    Repulse1: TMenuItem;
     heNewZelandStoryHardware1: TMenuItem;
     tnzs1: TMenuItem;
     InsectorX1: TMenuItem;
@@ -236,6 +239,7 @@ type
     RodLand1: TMenuItem;
     SaintDragon1: TMenuItem;
     TimePilot1: TMenuItem;
+    Timer4: TTimer;
     Pengo1: TMenuItem;
     Scramble1: TMenuItem;
     scobra1: TMenuItem;
@@ -345,7 +349,7 @@ type
     Gradius31: TMenuItem;
     BitBtn1: TBitBtn;
     SpaceInvaders1: TMenuItem;
-    CentipedeHW1: TMenuItem;
+    Centipede1: TMenuItem;
     KarnovHW1: TMenuItem;
     Karnov1: TMenuItem;
     Chelnov1: TMenuItem;
@@ -389,6 +393,7 @@ type
     Gaunt21: TMenuItem;
     WilliamsHW1: TMenuItem;
     Defender1: TMenuItem;
+    ddragon_sh1: TMenuItem;
     Mayday1: TMenuItem;
     Colony71: TMenuItem;
     Bosconian1: TMenuItem;
@@ -483,134 +488,6 @@ type
     Senjyo1: TMenuItem;
     StarForce1: TMenuItem;
     Baluba1: TMenuItem;
-    Joust1: TMenuItem;
-    Robotron1: TMenuItem;
-    Stargate1: TMenuItem;
-    MCR1: TMenuItem;
-    tapper1: TMenuItem;
-    Image2: TImage;
-    Arkanoid1: TMenuItem;
-    SideArms1: TMenuItem;
-    SpeedRumbler1: TMenuItem;
-    ChinaGate1: TMenuItem;
-    MagMax1: TMenuItem;
-    Repulse1: TMenuItem;
-    SRDMission1: TMenuItem;
-    Airwolf1: TMenuItem;
-    Ambush1: TMenuItem;
-    SuperDuck1: TMenuItem;
-    HangOnHW1: TMenuItem;
-    HangOn1: TMenuItem;
-    EnduroRacer1: TMenuItem;
-    SpaceHarrier1: TMenuItem;
-    N64thStreet1: TMenuItem;
-    ShadowWarriorsHW1: TMenuItem;
-    ShadowWarriors1: TMenuItem;
-    wildfang1: TMenuItem;
-    Raiden1: TMenuItem;
-    winsHW1: TMenuItem;
-    twins1: TMenuItem;
-    twinsed1: TMenuItem;
-    HotBlocks1: TMenuItem;
-    angerine1: TMenuItem;
-    Oric1_1: TMenuItem;
-    OricAtmos1: TMenuItem;
-    MissileCommandHW1: TMenuItem;
-    MissileCommand1: TMenuItem;
-    SuperMissileAttack1: TMenuItem;
-    SuperZaxxon1: TMenuItem;
-    FutureSpy1: TMenuItem;
-    Centipede1: TMenuItem;
-    Millipede1: TMenuItem;
-    Gaplus1: TMenuItem;
-    SuperXevious1: TMenuItem;
-    Grobda1: TMenuItem;
-    PacnPal1: TMenuItem;
-    pv1000: TMenuItem;
-    pv2000: TMenuItem;
-    Birdiy1: TMenuItem;
-    M63HW1: TMenuItem;
-    WilyTower1: TMenuItem;
-    FightingBasketball1: TMenuItem;
-    Diverboy1: TMenuItem;
-    MugSmashers1: TMenuItem;
-    SteelForceHW1: TMenuItem;
-    SteelForce1: TMenuItem;
-    twinbrats1: TMenuItem;
-    MortalRace1: TMenuItem;
-    BankPanicHW1: TMenuItem;
-    BankPanic1: TMenuItem;
-    CombatHawk1: TMenuItem;
-    AntEater1: TMenuItem;
-    AppooohHW1: TMenuItem;
-    Appoooh1: TMenuItem;
-    RoboWres1: TMenuItem;
-    ArmoredCar1: TMenuItem;
-    N88Games1: TMenuItem;
-    Avengers1: TMenuItem;
-    TheEnd1: TMenuItem;
-    BattleofAtlantis1: TMenuItem;
-    DooyongHW1: TMenuItem;
-    BlueHawk1: TMenuItem;
-    LastDay1: TMenuItem;
-    GulfStorm1: TMenuItem;
-    Pollux1: TMenuItem;
-    FlyingTiger1: TMenuItem;
-    Popeye1: TMenuItem;
-    SkySkipper1: TMenuItem;
-    BluePrintHW1: TMenuItem;
-    BLuePrint1: TMenuItem;
-    Saturn1: TMenuItem;
-    Grasspin1: TMenuItem;
-    UnicoHW1: TMenuItem;
-    BurglarX1: TMenuItem;
-    ZeroPoint1: TMenuItem;
-    Calipso1: TMenuItem;
-    Gardia1: TMenuItem;
-    Cavelon1: TMenuItem;
-    SnowBros1: TMenuItem;
-    ComeBackToto1: TMenuItem;
-    HyperPacman1: TMenuItem;
-    BombJack1: TMenuItem;
-    CalorieKun1: TMenuItem;
-    KiKiKaiKaiHW1: TMenuItem;
-    KiKiKaiKai1: TMenuItem;
-    KickandRun1: TMenuItem;
-    LassoHW1: TMenuItem;
-    Lasso1: TMenuItem;
-    Chameleon1: TMenuItem;
-    SRD1: TMenuItem;
-    LastMission1: TMenuItem;
-    Shackled1: TMenuItem;
-    Gondomania1: TMenuItem;
-    GaryoRetsuden1: TMenuItem;
-    CaptainSilver1: TMenuItem;
-    CobraCommand1: TMenuItem;
-    Ghostbusters1: TMenuItem;
-    oscar1: TMenuItem;
-    RoadFighter1: TMenuItem;
-    Ponpoko1: TMenuItem;
-    Woodpecker1: TMenuItem;
-    Eyes1: TMenuItem;
-    alibaba1: TMenuItem;
-    Piranha1: TMenuItem;
-    Tecmo16HW1: TMenuItem;
-    FinalStarforce1: TMenuItem;
-    WyvernF01: TMenuItem;
-    FireBall1: TMenuItem;
-    RiotCity1: TMenuItem;
-    sdi1: TMenuItem;
-    Cotton1: TMenuItem;
-    dotron1: TMenuItem;
-    tron1: TMenuItem;
-    timber1: TMenuItem;
-    shollow1: TMenuItem;
-    domino1: TMenuItem;
-    wacko1: TMenuItem;
-    aitoBHW1: TMenuItem;
-    Nastar1: TMenuItem;
-    masterw1: TMenuItem;
-    Auto1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -634,9 +511,8 @@ type
     procedure fLoadCartucho(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
+    procedure Timer4Timer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
-    procedure BitBtn3Click(Sender: TObject);
-    procedure Pausa1Click(Sender: TObject);
   private
     { Private declarations }
     procedure WndProc(var Message:TMessage); override;
@@ -649,12 +525,10 @@ var
   Child:TfrChild;
   //Misc Vars
   tipo_new:word;
-  estado_actual:TEmuStatus;
 
 implementation
 
-uses acercade,file_engine,poke_memoria,lenslock,spectrum_misc,tap_tzx,arcade_config,
-     config,config_cpc,config_sms,config_gb;
+uses acercade,file_engine,poke_memoria,lenslock,spectrum_misc,tap_tzx;
 {$R *.dfm}
 
 //Para evitar que cuando se pulsa ALT se vaya al menu añado esta funcion...
@@ -675,38 +549,29 @@ Init_sdl_lib;
 timers:=timer_eng.create;
 EmuStatus:=EsStoped;
 main_vars.cadena_dir:='\';
-directory.Base:=ExtractFilePath(application.ExeName);
+directory.Base:=extractfiledir(application.ExeName)+'\';
 file_ini_load;
 if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
 if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
 if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
-cambiar_idioma(main_vars.idioma);
-fix_screen_pos(415,325);
-case main_screen.video_mode of
-  1,3,5:begin
-        principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
-        principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
-      end;
-  2,4:begin
-        principal1.Left:=(screen.Width div 2)-principal1.Width;
-        principal1.Top:=(screen.Height div 2)-principal1.Height;
-      end;
-end;
-//No puedo evitar este timer... Hasta que no está creada la ventana de la aplicacion no puedo crear la ventana interior
+leer_idioma;
+principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-if EmuStatus<>EsRunning then begin
-  principal1.BitBtn3.Glyph:=nil;
-  EmuStatus:=EsRunning;
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+principal1.BitBtn3.Glyph:=nil;
+if EmuStatus=EsRuning then begin //Pausa
+  timer1.Enabled:=false;
+  EmuStatus:=EsPause;
+  principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
+end else begin //Play
+  EmuStatus:=EsRuning;
+  timer1.Enabled:=true;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
-  principal1.BitBtn3.Hint:=leng.hints[2];
-  if @llamadas_maquina.bucle_general<>nil then begin
-    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-    llamadas_maquina.bucle_general;
-  end;
+  if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
 end;
 end;
 
@@ -722,44 +587,33 @@ if main_vars.tipo_maquina<>tipo then begin
     if tape_window1.Showing then tape_window1.close;
     if lenslock1.Showing then lenslock1.close;
   end;
-  //Pongo la emulacion en pausa para que terminen todos los procesos, y luego ejecuto el timer3 para cambio de driver
   if main_vars.driver_ok then EmuStatus:=EsPause;
   tipo_new:=tipo;
   timer3.Enabled:=true;
 end;
 end;
 
-//Timer para poner mensajes...
 procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
-  velocidad:integer;
+  velocidad:word;
 begin
-if EmuStatus=EsRunning then begin
-  velocidad:=trunc((main_vars.frames_sec*100)/llamadas_maquina.fps_max);
-  statusbar1.Panels[0].Text:='FPS: '+inttostr(main_vars.frames_sec);
-  statusbar1.panels[1].text:=leng.mensajes[0]+': '+inttostr(velocidad)+'%';
-  statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
-  main_vars.frames_sec:=0;
-end;
+velocidad:=trunc((main_vars.frames_sec*100)/llamadas_maquina.fps_max);
+statusbar1.Panels[0].Text:='FPS: '+inttostr(main_vars.frames_sec);
+statusbar1.panels[1].text:=leng[main_vars.idioma].mensajes[0]+': '+inttostr(velocidad)+'%';
+statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
+main_vars.frames_sec:=0;
 end;
 
-//Inicializar DSP...
 procedure Tprincipal1.Timer2Timer(Sender: TObject);
 var
   tipo:word;
 begin
+//Inicializa las ventanas
 timer2.Enabled:=false;
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
-  SDL_SetHint(libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,'1');
-  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE)<0) then begin
-    MessageDlg('SDL2 library can not be initialized.', mtError,[mbOk], 0);
-    halt(0);
-  end;
-  controls_start;
-end;
+//Inicializo SDL
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
 Child:=TfrChild.Create(application);
-child.Width:=1;
-child.Height:=1;
 principal1.Caption:=principal1.Caption+DSP_VERSION;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;
@@ -770,17 +624,18 @@ end;
 load_game(tipo);
 end;
 
-//Cambio de maquina...
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
-sound_engine_close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
 main_vars.driver_ok:=false;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
+timers.autofire_init;
+QueryPerformanceFrequency(cont_micro);
+valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
@@ -797,110 +652,122 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
-  if ((marcade.dswa_val=nil) and (marcade.dswa_val2=nil)) then bitbtn8.Enabled:=false
-    else bitbtn8.Enabled:=true;
-  timers.autofire_init;
-  QueryPerformanceFrequency(cont_micro);
-  valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
-  QueryPerformanceCounter(cont_sincroniza);
-  principal1.BitBtn3.Glyph:=nil;
-  principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
-  timer1.Enabled:=true;
-  EmuStatus:=EsRunning;
+  principal1.timer1.Enabled:=true;
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-  if @llamadas_maquina.reset<>nil then begin
-    reset_game_general;
-    llamadas_maquina.reset;
-  end;
-  llamadas_maquina.bucle_general;
+  QueryPerformanceCounter(cont_sincroniza);
+  principal1.ejecutar1click(nil);
 end;
 end;
 
-//Continuar con la emulacion...
-procedure restart_emu;
+procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
+timer4.Enabled:=false;
+if not(main_vars.driver_ok) then exit;
+EmuStatus:=EmuStatusTemp;
+timer1.Enabled:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-if main_vars.driver_ok then begin
-  EmuStatus:=estado_actual;
-  llamadas_maquina.bucle_general;
-end;
-end;
-
-procedure Tprincipal1.BitBtn3Click(Sender: TObject);
-begin
-if EmuStatus=EsPause then ejecutar1click(nil)
-   else pausa1click(nil);
+llamadas_maquina.bucle_general;
 end;
 
 procedure Tprincipal1.CambiaAudio(Sender: TObject);
+var
+  tmp_audio:byte;
 begin
 if sound_status.hay_tsonido then begin
-  sound_status.sonido_activo:=(Tmenuitem(sender).Tag)<>0;
-  sinSonido1.Checked:=not(sound_status.sonido_activo);
-  conSonido1.Checked:=sound_status.sonido_activo;
+  if sender<>nil then tmp_audio:= Tmenuitem(sender).Tag
+    else begin
+      tmp_audio:=sound_status.calidad_audio;
+      sound_status.calidad_audio:=255;
+    end;
+  if tmp_audio<>sound_status.calidad_audio then begin
+    sound_status.calidad_audio:=tmp_audio;
+    if sound_status.calidad_audio=3 then begin
+      SinSonido1.Checked:=true;
+      sound_status.hay_sonido:=false;
+    end;
+    if sound_status.calidad_audio<>3 then begin
+      sound_status.hay_sonido:=true;
+      close_audio;
+      if sound_status.stereo then iniciar_audio(true)
+        else iniciar_audio(false);
+    end;
+  end;
 end;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_vars.mensaje_principal:='';
-if @llamadas_maquina.reset<>nil then begin
-  reset_game_general;
-  llamadas_maquina.reset;
-end;
+if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
-aboutbox.showmodal;
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
+EmuStatus:=EsPause;
+aboutbox.show;
+while aboutbox.Showing do application.ProcessMessages;
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);
 begin
-principal1.close;
+close;
 end;
 
 procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
 begin
-tmp_idioma:=Tmenuitem(sender).tag;
+if sender<>nil then tmp_idioma:= Tmenuitem(sender).tag
+  else begin
+    tmp_idioma:=main_vars.idioma;
+    main_vars.idioma:=255;
+  end;
 if main_vars.idioma<>tmp_idioma then begin
   main_vars.idioma:=tmp_idioma;
-  cambiar_idioma(tmp_idioma);
+  cambiar_idioma(main_vars.idioma);
 end;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+if child<>nil then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
-FLoadRom.showmodal;
-end;
-
-procedure Tprincipal1.Pausa1Click(Sender: TObject);
-begin
-principal1.BitBtn3.Glyph:=nil;
-principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
-principal1.BitBtn3.Hint:=leng.hints[1];
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
+FLoadRom.Show;
+while FLoadRom.Showing do application.ProcessMessages;
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 timer1.Enabled:=false;
-EmuStatus:=EsStoped;
+EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
-sound_engine_close;
 reset_dsp;
 file_ini_save;
-close_joystick;
-sdl_videoquit;
-sdl_quit;
+if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
+if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
+SDL_DestroyWindow(window_render);
+SDL_VideoQuit;
+SDL_Quit;
 close_sdl_lib;
 halt(0);
+end;
+
+procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
+begin
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
+EmuStatus:=EsPause;
+if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fPoke(Sender: TObject);
@@ -915,7 +782,12 @@ end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
-MConfig.Showmodal;
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
+EmuStatus:=EsPause;
+MConfig.Show;
+while MConfig.Showing do application.ProcessMessages;
+timer4.enabled:=true;
 end;
 
 procedure Tprincipal1.fSaveGif(Sender: TObject);
@@ -931,23 +803,24 @@ var
   JPG:TJPEGImage;
   imagen1:tbitmap;
 begin
-estado_actual:=EmuStatus;
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if saverom(nombre,indice,SBITMAP) then begin
+if SaveRom(StBitmap,nombre,indice) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
     3:nombre:=ChangeFileExt(nombre,'.gif');
   end;
   if FileExists(nombre) then begin
-    r:=MessageBox(0,pointer(leng.mensajes[3]), pointer(leng.mensajes[6]), MB_YESNO or MB_ICONWARNING);
+    r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
-      restart_emu;
+      Windows.SetFocus(child.Handle);
       exit;
     end;
     deletefile(nombre);
   end;
-  Directory.spectrum_image:=ExtractFilePath(nombre);
+  Directory.spectrum_image:=extractfiledir(nombre)+main_vars.cadena_dir;
   rect2.x:=0;
   rect2.y:=0;
   case main_screen.video_mode of
@@ -995,20 +868,15 @@ if saverom(nombre,indice,SBITMAP) then begin
   end;
   imagen1.Free;
 end;
-restart_emu;
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.ffastload(Sender: TObject);
 begin
 var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if var_spectrum.fastload then begin
-  principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
-  cinta_tzx.stop_tap:=true;
-end else begin
-  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
-  cinta_tzx.stop_tap:=false;
-end;
+if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
+  else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
@@ -1046,38 +914,35 @@ end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
-estado_actual:=EmuStatus;
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if @llamadas_maquina.cartuchos<>nil then llamadas_maquina.cartuchos;
-restart_emu;
+if @llamadas_maquina.cartuchos<>nil then
+  if not(llamadas_maquina.cartuchos) then MessageDlg('ROM/Cartucho/Snapshot no valido'+chr(10)+chr(13)+'ROM/Cartrigde/Snapshot not valid',mtError,[mbOk],0);
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
-estado_actual:=EmuStatus;
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if @llamadas_maquina.cintas<>nil then llamadas_maquina.cintas;
-restart_emu;
+if @llamadas_maquina.cintas<>nil then
+  if not(llamadas_maquina.cintas) then MessageDlg('Cinta/Snapshot no valido'+chr(10)+chr(13)+'Tape/Snapshot not valid',mtError,[mbOk],0);
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fConfigurar(Sender: TObject);
 begin
-case main_vars.tipo_maquina of
-  0..5:ConfigSP.showmodal;
-  7..9:configcpc.showmodal;
-  10..999:config_arcade.showmodal;
-  1002:configgb.showmodal;
-  1004:SMSConfig.Showmodal;
-  else if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+if (@llamadas_maquina.configurar=nil) then begin
+    Windows.SetFocus(child.Handle);
+    exit;
 end;
-end;
-
-procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
-begin
-estado_actual:=EmuStatus;
+timer1.Enabled:=false;
+EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
-restart_emu;
+llamadas_maquina.configurar;
+timer4.Enabled:=true;
 end;
 
 end.

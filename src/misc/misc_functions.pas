@@ -5,29 +5,9 @@ uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
      {$IFDEF windows}vcl.imaging.pngimage,{$ENDIF}{$endif}sysutils,forms,
      dialogs,controls;
 
-const
-  SARCADE=0;
-  SNES=1;
-  SCOLECO=2;
-  SGB=3;
-  SCHIP8=4;
-  SAMSTRADCPC=5;
-  SSMS=6;
-  SSPECTRUM=7;
-  SSG1000=8;
-  SC64=9;
-  SGG=10;
-  SSUPERCASSETTE=11;
-  SORIC=12;
-  SPV1000=14;
-  SPV2000=15;
-  SAMSTRADROM=16;
-  SROM=17;
-  SEXPORT=18;
-  SEXPORT_SAMPLES=22;
-  SBITMAP=19;
-  SGENESIS=20;
-  SGANDW=21;
+type
+  TSistema=(StNES,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,
+            StSMS,StExport,StSpectrum,StBitmap,StSG1000,StC64,StGG,StSuperCassette);
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
@@ -41,13 +21,11 @@ function BITSWAP16(val:word;B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B
 function BITSWAP24(val:dword;B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
 function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
 //Load/Save Systems ROM
-function openrom(var name:string;system_type:byte):boolean;
-function saverom(var name:string;var index:byte;system_type:byte):boolean;
-//Load data
-function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte):boolean;
+function OpenRom(Sistema:TSistema;var name:string):boolean;
+function SaveRom(sistema:TSistema;var name:string;var index:byte):boolean;
 
 implementation
-uses principal,main_engine,file_engine;
+uses principal,main_engine;
 
 procedure fix_screen_pos(width,height:word);
 var
@@ -74,25 +52,25 @@ principal1.BitBtn2.left:=(principal1.statusbar1.width div 2)-107-38{$ifdef fpc}-
 principal1.BitBtn3.left:=(principal1.statusbar1.width div 2)-79-28{$ifdef fpc}-7{$endif}; //79
 principal1.BitBtn5.left:=(principal1.statusbar1.width div 2)-47-22{$ifdef fpc}-8{$endif}; //47
 principal1.BitBtn6.left:=(principal1.statusbar1.width div 2)-19-12{$ifdef fpc}-6{$endif}; //19
-principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+14-1{$ifdef fpc}+6{$endif}; //14
-principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+42+9{$ifdef fpc}+8{$endif}; //42
-principal1.btncfg.left:=(principal1.statusbar1.width div 2)+72+22{$ifdef fpc}+9{$endif};  //72
-principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+103+29{$ifdef fpc}+11{$endif}; //103
+principal1.btncfg.left:=(principal1.statusbar1.width div 2)+14+3{$ifdef fpc}+6{$endif}; //14
+principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+42+13{$ifdef fpc}+8{$endif}; //42
+principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+72+22{$ifdef fpc}+9{$endif};  //72
+principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+103+29{$ifdef fpc}+11{$endif}; //103
 principal1.Left:=old_x;
 principal1.Top:=old_y;
 end;
 
-function bit(data:dword;bitpos:byte):boolean;
+function bit(data:dword;bitpos:byte):boolean;inline;
 begin
    bit:=((data shr bitpos) and 1)<>0;
 end;
 
-function bit_n(data:dword;bitpos:byte):byte;
+function bit_n(data:dword;bitpos:byte):byte;inline;
 begin
    bit_n:=(data shr bitpos) and 1;
 end;
 
-function BITSWAP8(val,B7,B6,B5,B4,B3,B2,B1,B0:byte):byte;
+function BITSWAP8(val,B7,B6,B5,B4,B3,B2,B1,B0:byte):byte;inline;
 var
   src:byte;
 begin
@@ -108,7 +86,7 @@ begin
   bitswap8:=src;
 end;
 
-function BITSWAP16(val:word;B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):word;
+function BITSWAP16(val:word;B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):word;inline;
 var
   src:word;
 begin
@@ -132,7 +110,7 @@ begin
   bitswap16:=src;
 end;
 
-function BITSWAP24(val:dword;B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
+function BITSWAP24(val:dword;B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;inline;
 var
   src:dword;
 begin
@@ -164,7 +142,7 @@ begin
      bitswap24:=src;
 end;
 
-function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;
+function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19,B18,B17,B16,B15,B14,B13,B12,B11,B10,B9,B8,B7,B6,B5,B4,B3,B2,B1,B0:byte):dword;inline;
 var
   src:dword;
 begin
@@ -243,286 +221,103 @@ calc_crc:=crc;
 end;
 {$endif}
 
-function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte):boolean;
+function OpenRom(Sistema:TSistema;var name:string):boolean;
 var
-  nombre_file,extension:string;
-  datos:pbyte;
-  salir,resultado:boolean;
-  crc:dword;
-  ext:array[1..10] of string;
-  f,total_ext:byte;
+  openDialog:topendialog;
 begin
-case system_type of
-  SNES:begin
-            ext[1]:='NES';
-            ext[2]:='DSP';
-            total_ext:=2;
-          end;
-  SCOLECO:begin
-            ext[1]:='COL';
-            ext[2]:='ROM';
-            ext[3]:='CSN';
-            ext[4]:='DSP';
-            total_ext:=4;
-          end;
-  SGB:begin
-            ext[1]:='GB';
-            ext[2]:='GBC';
-            ext[3]:='DSP';
-            total_ext:=3;
-          end;
-  SSG1000:begin
-            ext[1]:='SG';
-            ext[2]:='MV';
-            ext[3]:='DSP';
-            total_ext:=3;
-          end;
-  SGG:begin
-            ext[1]:='GG';
-            ext[2]:='DSP';
-            total_ext:=2;
-          end;
-  SSMS:begin
-            ext[1]:='SMS';
-            ext[2]:='ROM';
-            ext[3]:='DSP';
-            total_ext:=3;
-          end;
-  SSUPERCASSETTE:begin
-            ext[1]:='0';
-            ext[2]:='BIN';
-            ext[3]:='DSP';
-            total_ext:=3;
-          end;
-  SCHIP8:begin
-            ext[1]:='BIN';
-            ext[2]:='CH8';
-            ext[3]:='DSP';
-            total_ext:=3;
-          end;
-  SORIC:begin
-            ext[1]:='TAP';
-            ext[2]:='WAV';
-            total_ext:=2;
-          end;
-  SAMSTRADCPC:begin
-            ext[1]:='CDT';
-            ext[2]:='TZX';
-            ext[3]:='CSW';
-            ext[4]:='ROM';
-            ext[5]:='WAV';
-            ext[6]:='SNA';
-            total_ext:=6;
-          end;
-  SC64:begin
-            ext[1]:='TAP';
-            ext[2]:='PRG';
-            ext[3]:='T64';
-            ext[4]:='WAV';
-            ext[5]:='VSF';
-            total_ext:=5;
-          end;
-  SPV1000,SPV2000:begin
-            ext[1]:='BIN';
-            ext[2]:='DSP';
-            ext[3]:='ROM';
-            total_ext:=3;
-          end;
-  else begin
-          MessageDlg('Sistema sin definir!!!', mtInformation,[mbOk], 0);
-          extract_data:=false;
-          exit;
+openDialog:=TOpenDialog.Create(principal1);
+case Sistema of
+  StColecovision:begin
+         opendialog.InitialDir:=Directory.coleco_snap;
+         OpenDialog.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.dsp;*.bin;*.zip)|*.col;*.rom;*.csn;*.dsp;*.bin;*.zip';
        end;
-end;
-extension:=extension_fichero(romfile);
-datos:=nil;
-if extension='ZIP' then begin
-  resultado:=false;
-  f:=1;
-  salir:=false;
-  while not(salir) do begin
-    if search_file_from_zip(romfile,'*.'+ext[f],nombre_file,longitud,crc,false) then begin
-      resultado:=true;
-      salir:=true;
-    end;
-    f:=f+1;
-    if f>total_ext then salir:=true;
-  end;
-  if resultado then begin
-    getmem(datos,longitud);
-    if not(load_file_from_zip(romfile,nombre_file,datos,longitud,crc,true)) then resultado:=false;
-  end;
-end else begin
-  resultado:=false;
-  for f:=1 to total_ext do if extension=ext[f] then resultado:=true;
-  if resultado then begin
-    if read_file_size(romfile,longitud) then begin
-      getmem(datos,longitud);
-      if read_file(romfile,datos,longitud) then begin
-        resultado:=true;
-        nombre_file:=extractfilename(romfile)
-      end;
-    end else resultado:=false;
-  end;
-end;
-if not(resultado) then begin
-  MessageDlg('Error cargando.'+chr(10)+chr(13)+'Error loading.', mtInformation,[mbOk], 0);
-  if datos<>nil then freemem(datos);
-  extract_data:=false;
-  nombre_file:='';
-  exit;
-end;
-copymemory(data_des,datos,longitud);
-file_name:=nombre_file;
-if datos<>nil then freemem(datos);
-extract_data:=true;
-end;
-
-function openrom(var name:string;system_type:byte):boolean;
-var
-  opendialog:topendialog;
-begin
-opendialog:=TOpenDialog.Create(principal1);
-case system_type of
-  SCOLECO:begin
-         opendialog.InitialDir:=directory.coleco;
-         Opendialog.Filter:='ColecoVision Game/Snapshots (*.col;*.rom;*.csn;*.dsp;*.bin;*.zip)|*.col;*.rom;*.csn;*.dsp;*.bin;*.zip';
+  StNES:begin
+         opendialog.InitialDir:=Directory.Nes;
+         OpenDialog.Filter:='NES Files (*.nes;*zip)|*.nes;*.zip';
        end;
-  SNES:begin
-         opendialog.InitialDir:=directory.nes;
-         Opendialog.Filter:='NES Game (*.nes;*.dsp;*zip)|*.nes;*.dsp;*.zip';
+  StSMS:begin
+         opendialog.InitialDir:=Directory.sms;
+         OpenDialog.Filter:='SMS Files (*.sms;*.rom;*.zip)|*.sms;*.rom;*.zip';
        end;
-  SSMS:begin
-         opendialog.InitialDir:=directory.sms;
-         Opendialog.Filter:='SMS Game/Snapshot (*.sms;*.rom;*.dsp;*.zip)|*.sms;*.rom;*.dsp;*.zip';
+  Stgb:begin
+         opendialog.InitialDir:=Directory.GameBoy;
+         OpenDialog.Filter:='GB Files (*.gb;*.gbc;*zip)|*.gb;*.gbc;*.zip';
        end;
-  SGB:begin
-         opendialog.InitialDir:=directory.gameboy;
-         Opendialog.Filter:='GB Game (*.gb;*.gbc;*.dsp;*zip)|*.gb;*.gbc;*.dsp;*.zip';
+  StChip8:begin
+         opendialog.InitialDir:=Directory.Chip8;
+         OpenDialog.Filter:='Chip-8 Files (*.ch8;*.bin;*zip)|*.ch8;*.bin;*.zip';
        end;
-  SCHIP8:begin
-         opendialog.InitialDir:=directory.chip8;
-         Opendialog.Filter:='Chip-8 Files (*.ch8;*.bin;*.dsp;*zip)|*.ch8;*.bin;*.dsp;*.zip';
-       end;
-  SAMSTRADCPC:begin
+  StAmstrad:begin
          opendialog.InitialDir:=directory.amstrad_tap;
-         Opendialog.Filter:='CPC Tape/Snapshot/ROM (*.rom;*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.rom;*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
+         OpenDialog.Filter:='CPC Tape / Snapshot / ROM (*.rom;*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.rom;*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
        end;
-  SROM:begin
-         opendialog.InitialDir:=directory.arcade_list_roms[0];
-         Opendialog.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
+  StROM:begin
+         opendialog.InitialDir:=Directory.arcade_list_roms[0];
+         OpenDialog.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
        end;
-  SAMSTRADROM:begin
-         opendialog.InitialDir:=directory.Amstrad_rom;
-         Opendialog.Filter:='CPC ROM Files (*.rom;*.zip)|*.rom;*.zip';
+  StAmstradROM:begin
+         opendialog.InitialDir:=Directory.Amstrad_rom;
+         OpenDialog.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
        end;
-  SSG1000:begin
-         opendialog.InitialDir:=directory.sg1000;
-         Opendialog.Filter:='SG-1000 Game/Snapshot (*.sg;*.mv;*.dsp;*.zip)|*.sg;*.mv;*.dsp;*.zip';
+  StSG1000:begin
+         opendialog.InitialDir:=Directory.sg1000;
+         OpenDialog.Filter:='SG-1000 Files (*.sg;*.zip)|*.sg;*.zip';
        end;
-  SC64:begin
+  StC64:begin
          opendialog.InitialDir:=directory.c64_tap;
-         Opendialog.Filter:='C64 Tape/Snapshot (*.prg;*.t64;*.tap;*.wav;*.vsf;*.zip)|*.prg;*.t64;*.tap;*.wav;*.vsf;*.zip';
+         OpenDialog.Filter:='C64 Tape or Snapshot (*.prg;*.t64;*.tap;*.wav;*.vsf;*.zip)|*.prg;*.t64;*.tap;*.wav;*.vsf;*.zip';
        end;
-  SGG:begin
-         opendialog.InitialDir:=directory.gg;
-         Opendialog.Filter:='GG Game/Snapshot (*.gg;*.dsp;*.zip)|*.gg;*.dsp;*.zip';
+  StGG:begin
+         opendialog.InitialDir:=Directory.gg;
+         OpenDialog.Filter:='GG Files (*.gg;*.zip)|*.gg;*.zip';
        end;
-  SSUPERCASSETTE:begin
-         opendialog.InitialDir:=directory.scv;
-         Opendialog.Filter:='SCV Game/Snapshot (*.bin;*.dsp;*.zip)|*.bin;*.dsp;*.zip';
-       end;
-  SORIC:begin
-         opendialog.InitialDir:=directory.oric_tap;
-         Opendialog.Filter:='Oric Tape (*.tap;*.wav;*.zip)|*.tap;*.wav;*.zip';
-       end;
-  SPV1000:begin
-         opendialog.InitialDir:=directory.pv1000;
-         Opendialog.Filter:='PV1000 Game/Snapshot (*.rom;*.bin;*.dsp;*.zip)|*.rom;*.bin;*.dsp;*.zip';
-       end;
-  SPV2000:begin
-         opendialog.InitialDir:=directory.pv2000;
-         Opendialog.Filter:='PV2000 Game/Snapshot (*.rom;*.bin;*.dsp;*.zip)|*.rom;*.bin;*.dsp;*.zip';
+  StSuperCassette:begin
+         opendialog.InitialDir:=Directory.scv;
+         OpenDialog.Filter:='SCV Files (*.bin;*.zip)|*.bin;*.zip';
        end;
 end;
-openrom:=opendialog.execute;
-name:=opendialog.FileName;
+OpenRom:=OpenDialog.execute;
+name:=OpenDialog.FileName;
 opendialog.free;
 end;
 
-function saverom(var name:string;var index:byte;system_type:byte):boolean;
+function SaveRom(sistema:TSistema;var name:string;var index:byte):boolean;
 var
   SaveDialog:tsavedialog;
 begin
 SaveDialog:=TSaveDialog.Create(principal1);
-case system_type of
-  SCOLECO:begin
-         SaveDialog.InitialDir:=directory.coleco;
+case Sistema of
+  StColecovision:begin
+         SaveDialog.InitialDir:=Directory.coleco_snap;
          SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp|CSN Format (*.csn)|*.csn';
        end;
-  SAMSTRADCPC:begin
-         savedialog.InitialDir:=directory.amstrad_snap;
-         saveDialog.Filter:='SNA Format (*.sna)|*.sna';
+  StAmstrad:begin
+         savedialog.InitialDir:=Directory.amstrad_snap;
+         saveDialog.Filter:='SNA Format (*.SNA)|*.SNA';
        end;
-  SEXPORT:begin
+  StExport:begin
          SaveDialog.Filter:='DAT File (*.dat)|*.dat';
          SaveDialog.FileName:='dsp_roms_dat.dat';
        end;
-  SEXPORT_SAMPLES:begin
-         SaveDialog.Filter:='DAT File (*.dat)|*.dat';
-         SaveDialog.FileName:='dsp_samples_dat.dat';
-       end;
-  SSPECTRUM:begin
-         SaveDialog.InitialDir:=directory.spectrum_tap_snap;
+  StSpectrum:begin
+         SaveDialog.InitialDir:=Directory.spectrum_tap_snap;
          if ((main_vars.tipo_maquina=2) or (main_vars.tipo_maquina=3)) then SaveDialog.Filter:= 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP'
             else SaveDialog.Filter:= 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP|SNA Format (*.SNA)|*.SNA';
        end;
-  SBITMAP:begin
-         savedialog.InitialDir:=directory.spectrum_image;
+  StBitmap:begin
+         savedialog.InitialDir:=Directory.spectrum_image;
          saveDialog.Filter:='Imagen PNG(*.PNG)|*.png|Imagen JPG(*.JPG)|*.jpg|Imagen GIF(*.GIF)|*.gif';
-         SaveDialog.FileName:=StringReplace(StringReplace(llamadas_maquina.caption,'/','-',[rfReplaceAll, rfIgnoreCase]),':',' ',[rfReplaceAll, rfIgnoreCase]);
+         SaveDialog.FileName:=StringReplace(llamadas_maquina.caption,':',' ',[rfReplaceAll, rfIgnoreCase]);
        end;
-  SNES:begin
-         savedialog.InitialDir:=directory.nes;
+  StNES:begin
+         savedialog.InitialDir:=Directory.amstrad_snap;
          saveDialog.Filter:='DSP Format (*.DSP)|*.DSP';
-       end;
-  SGB:begin
-         savedialog.InitialDir:=directory.gameboy;
-         saveDialog.Filter:='DSP Format (*.DSP)|*.DSP';
-       end;
-  SSG1000:begin
-         SaveDialog.InitialDir:=directory.sg1000;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
-       end;
-  SSMS:begin
-         SaveDialog.InitialDir:=directory.sms;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
-       end;
-  SGG:begin
-         SaveDialog.InitialDir:=directory.gg;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
-       end;
-  SCHIP8:begin
-         SaveDialog.InitialDir:=directory.Chip8;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
-       end;
-  SSUPERCASSETTE:begin
-         SaveDialog.InitialDir:=directory.scv;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
-       end;
-  SPV1000:begin
-         SaveDialog.InitialDir:=directory.pv1000;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
-       end;
-  SPV2000:begin
-         SaveDialog.InitialDir:=directory.pv2000;
-         SaveDialog.Filter:='DSP Format (*.dsp)|*.dsp';
        end;
 end;
-saverom:=savedialog.execute;
-name:=savedialog.FileName;
-index:=savedialog.FilterIndex;
-savedialog.free;
+SaveRom:=SaveDialog.execute;
+name:=SaveDialog.FileName;
+index:=SaveDialog.FilterIndex;
+SaveDialog.free;
 end;
 
 end.

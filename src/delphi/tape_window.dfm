@@ -4,17 +4,19 @@ object tape_window1: Ttape_window1
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Tape View'
-  ClientHeight = 307
-  ClientWidth = 307
+  ClientHeight = 325
+  ClientWidth = 319
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = False
   Position = poDesigned
   OnClose = FormClose
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 48

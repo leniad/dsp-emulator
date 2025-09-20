@@ -1,4 +1,5 @@
 unit cargar_dsk;
+
 interface
 
 uses
@@ -21,8 +22,8 @@ type
     procedure Button1Click(Sender: TObject);
     procedure FileListBox1DblClick(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
+    procedure FileListBox1KeyUp(Sender:TObject;var Key:word;Shift: TShiftState);
     procedure DirectoryListBox1Change(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
@@ -30,13 +31,14 @@ type
   end;
 
 var
-  load_dsk:Tload_dsk;
+  load_dsk: Tload_dsk;
   file_name,file_extension,end_file_name:string;
   datos_dsk:pbyte;
   file_size,ultima_posicion:integer;
 
 implementation
 uses principal;
+
 {$R *.dfm}
 
 procedure Tload_dsk.Button1Click(Sender: TObject);
@@ -47,7 +49,6 @@ case main_vars.tipo_maquina of
   2:Directory.spectrum_disk:=FileListBox1.Directory+main_vars.cadena_dir;
   8,9:Directory.amstrad_disk:=FileListBox1.Directory+main_vars.cadena_dir;
   3000:Directory.c64_disk:=FileListBox1.Directory+main_vars.cadena_dir;
-  3001:Directory.c64_disk:=FileListBox1.Directory+main_vars.cadena_dir;
 end;
 ultima_posicion:=filelistbox1.ItemIndex;
 load_dsk.close;
@@ -81,10 +82,9 @@ end;
 procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
-  longitud:integer;
+  longitud,crc:integer;
   nothing1,nothing2,nothing3:boolean;
   file_inside_zip:string;
-  crc:dword;
 begin
 file_name:=filelistbox1.FileName;
 file_extension:=extension_fichero(filelistbox1.FileName);
@@ -145,37 +145,27 @@ end;
 procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
   correcto:boolean;
-  cadena:string;
 begin
 correcto:=false;
-if (datos_dsk=nil) then exit;
 if ((file_extension<>'DSK') and (file_extension<>'IPF') and (file_extension<>'D64')) then exit;
-if file_extension='DSK' then begin
-  case main_vars.tipo_maquina of
-    2,8,9:correcto:=dsk_format(0,file_size,datos_dsk);
-    3001:correcto:=oric_dsk_format(0,file_size,datos_dsk);
-  end;
-end;
+if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
 if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if file_extension='D64' then correcto:=d64_format(0,file_size,datos_dsk);
 if correcto then begin
-    cadena:=file_extension+':'+end_file_name;
-    case main_vars.tipo_maquina of
-      2,8,9:ResetFDC;
-    end;
+    llamadas_maquina.open_file:=file_extension+':'+end_file_name;
+    if main_vars.tipo_maquina<>3000 then ResetFDC;
     dsk[0].ImageName:=end_file_name;
     load_dsk.Button1Click(self);
 end else begin
   MessageDlg('Error abriendo el disco: "'+end_file_name+'".', mtError,[mbOk], 0);
-  cadena:='';
+  llamadas_maquina.open_file:='';
 end;
-change_caption(cadena);
+change_caption;
 freemem(datos_dsk);
 datos_dsk:=nil;
 end;
 
-procedure Tload_dsk.FormKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure Tload_dsk.FileListBox1KeyUp(Sender:TObject;var Key:word;Shift: TShiftState);
 begin
 case key of
   13:FileListBox1DblClick(self);
@@ -184,28 +174,19 @@ end;
 end;
 
 procedure Tload_dsk.FormShow(Sender: TObject);
-var
-  f:integer;
 begin
-f:=(principal1.left+(principal1.width div 2))-(load_dsk.Width div 2);
-if f<0 then load_dsk.Left:=0
-  else load_dsk.Left:=f;
-f:=(principal1.top+(principal1.Height div 2))-(load_dsk.Height div 2);
-if f<0 then load_dsk.Top:=0
-  else load_dsk.Top:=f;
 if main_vars.tipo_maquina<>3000 then filelistbox1.Mask:='*.zip;*.dsk;*.ipf'
   else filelistbox1.Mask:='*.zip;*.d64;*.ipf';
 stringgrid1.ColWidths[0]:=stringgrid1.Width-60;
 stringgrid1.ColWidths[1]:=60;
-stringgrid1.Cells[0,0]:=leng.varios[0];
-stringgrid1.Cells[1,0]:=leng.varios[1];
-Button2.Caption:=leng.mensajes[7];
-Button1.Caption:=leng.mensajes[8];
+stringgrid1.Cells[0,0]:=leng[main_vars.idioma].varios[0];
+stringgrid1.Cells[1,0]:=leng[main_vars.idioma].varios[1];
+Button2.Caption:=leng[main_vars.idioma].mensajes[7];
+Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 case main_vars.tipo_maquina of
   2:DirectoryListBox1.Directory:=Directory.spectrum_disk;
   8,9:DirectoryListBox1.Directory:=Directory.amstrad_disk;
   3000:DirectoryListBox1.Directory:=Directory.c64_disk;
-  3001:DirectoryListBox1.Directory:=Directory.c64_disk;
 end;
 if ((filelistbox1.Count=0) or (ultima_posicion<=0))  then begin
   ultima_posicion:=0;
@@ -221,7 +202,7 @@ end;
 
 procedure Tload_dsk.StringGrid1DblClick(Sender: TObject);
 var
-  crc:dword;
+  crc:integer;
   file_inside_zip:string;
 begin
 if stringgrid1.RowCount=1 then exit;

@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,
      misc_functions;
 
-function iniciar_dietgo:boolean;
+procedure cargar_dietgo;
 
 implementation
 const
@@ -30,7 +30,7 @@ var
  rom_opcode,rom_data:array[0..$3ffff] of word;
  ram:array[0..$7fff] of word;
 
-procedure update_video_dietgo;
+procedure update_video_dietgo;inline;
 begin
 deco16ic_0.update_pf_2(3,false);
 deco16ic_0.update_pf_1(3,true);
@@ -43,18 +43,18 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $0001);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $0002);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ffFd) else marcade.in0:=(marcade.in0 or $0002);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $0004);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $0008);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $ffF7) else marcade.in0:=(marcade.in0 or $0008);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $0010);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $0020);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $0040);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $0080);
   //P2
   if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $0100);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $0200);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $Fdff) else marcade.in0:=(marcade.in0 or $0200);
   if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $0400);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $0800);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $F7ff) else marcade.in0:=(marcade.in0 or $0800);
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
@@ -73,7 +73,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main
    m68000_0.run(frame_m);
@@ -95,8 +95,7 @@ while EmuStatus=EsRunning do begin
 end;
 end;
 
-function dietgo_getword(direccion:dword):word;
-function dietgo_protection_region_0_104_r(real_address:word):word;
+function dietgo_protection_region_0_104_r(real_address:word):word;inline;
 var
   deco146_addr:word;
   cs:byte;
@@ -104,9 +103,10 @@ begin
    //int real_address = 0 + (offset *2);
    deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
    cs:=0;
-   dietgo_protection_region_0_104_r:=deco104_0.read_data(deco146_addr,cs);
+   dietgo_protection_region_0_104_r:=main_deco104.read_data(deco146_addr,cs);
 end;
 
+function dietgo_getword(direccion:dword):word;
 begin
 case direccion of
   $0..$7ffff:if m68000_0.opcode then dietgo_getword:=rom_opcode[direccion shr 1]
@@ -120,9 +120,7 @@ case direccion of
 end;
 end;
 
-procedure dietgo_putword(direccion:dword;valor:word);
-
-procedure cambiar_color(numero:word);
+procedure cambiar_color(numero:word);inline;
 var
   color:tcolor;
 begin
@@ -136,7 +134,7 @@ begin
   end;
 end;
 
-procedure dietgo_protection_region_0_104_w(real_address,data:word);
+procedure dietgo_protection_region_0_104_w(real_address,data:word);inline;
 var
   deco146_addr:word;
   cs:byte;
@@ -144,9 +142,10 @@ begin
 	//int real_address = 0 + (offset *2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,  17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
-	deco104_0.write_data(deco146_addr, data,cs);
+	main_deco104.write_data(deco146_addr, data,cs);
 end;
 
+procedure dietgo_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM
@@ -188,11 +187,11 @@ begin
  m68000_0.reset;
  deco16ic_0.reset;
  deco_sprites_0.reset;
- deco104_0.reset;
+ main_deco104.reset;
  copymemory(oki_6295_0.get_rom_addr,@oki_rom[0],$40000);
  deco16_snd_simple_reset;
- reset_game_general;
- marcade.in0:=$ffff;
+ reset_audio;
+ marcade.in0:=$FFFF;
  marcade.in1:=$7;
 end;
 
@@ -210,9 +209,6 @@ var
   memoria_temp,ptemp:pbyte;
   memoria_temp_rom:pword;
 begin
-llamadas_maquina.bucle_general:=dietgo_principal;
-llamadas_maquina.reset:=reset_dietgo;
-llamadas_maquina.fps_max:=58;
 iniciar_dietgo:=false;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$0,$0,$f,$f,0,1,0,16,dietgo_bank_callback,dietgo_bank_callback);
@@ -256,7 +252,9 @@ gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,24,8,16,0);
 convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 //Proteccion deco104
-deco104_0:=cpu_deco_104.create(USE_MAGIC_ADDRESS_XOR or INTERFACE_SCRAMBLE_INTERLEAVE);
+main_deco104:=cpu_deco_104.create;
+main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
+main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
 //Dip
 marcade.dswa:=$ffff;
 marcade.dswa_val:=@dietgo_dip_a;
@@ -265,6 +263,14 @@ freemem(memoria_temp_rom);
 freemem(memoria_temp);
 reset_dietgo;
 iniciar_dietgo:=true;
+end;
+
+procedure Cargar_dietgo;
+begin
+llamadas_maquina.bucle_general:=dietgo_principal;
+llamadas_maquina.iniciar:=iniciar_dietgo;
+llamadas_maquina.reset:=reset_dietgo;
+llamadas_maquina.fps_max:=58;
 end;
 
 end.

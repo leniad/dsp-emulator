@@ -1,63 +1,62 @@
 object lenslock1: Tlenslock1
   Left = 672
-  Height = 251
+  Height = 201
   Top = 458
-  Width = 208
+  Width = 166
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'LensLock'
-  ClientHeight = 251
-  ClientWidth = 208
-  DesignTimePPI = 120
+  ClientHeight = 201
+  ClientWidth = 166
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -14
+  Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
-  LCLVersion = '4.0.0.1'
   OnClose = FormClose
   OnShow = FormShow
+  LCLVersion = '1.6.0.1'
   object BitBtn1: TBitBtn
-    Left = 34
-    Height = 31
-    Top = 200
-    Width = 54
+    Left = 27
+    Height = 25
+    Top = 160
+    Width = 43
     Caption = 'Show'
-    TabOrder = 0
     OnClick = BitBtn1Click
+    TabOrder = 0
   end
   object GroupBox2: TGroupBox
-    Left = 20
-    Height = 101
-    Top = 10
-    Width = 171
+    Left = 16
+    Height = 81
+    Top = 8
+    Width = 137
     Caption = 'LensLok'
-    ClientHeight = 79
-    ClientWidth = 167
+    ClientHeight = 63
+    ClientWidth = 133
     TabOrder = 1
     object Image1: TImage
-      Left = 4
-      Height = 71
+      Left = 3
+      Height = 57
       Top = 1
-      Width = 159
+      Width = 127
     end
   end
   object BitBtn18: TBitBtn
-    Left = 130
-    Height = 31
-    Top = 200
-    Width = 54
+    Left = 104
+    Height = 25
+    Top = 160
+    Width = 43
     Caption = 'Close'
-    TabOrder = 2
     OnClick = close_button
+    TabOrder = 2
   end
   object ComboBox1: TComboBox
-    Left = 20
-    Height = 25
-    Top = 140
-    Width = 171
-    ItemHeight = 17
+    Left = 16
+    Height = 21
+    Top = 112
+    Width = 137
+    ItemHeight = 13
     TabOrder = 3
     TabStop = False
     Text = 'ComboBox1'

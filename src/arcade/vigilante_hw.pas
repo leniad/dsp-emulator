@@ -20,26 +20,12 @@ const
         vigilante_dac:tipo_roms=(n:'vg_a-4d-.ic26';l:$10000;p:0;crc:$9b85101d);
         vigilante_sound:tipo_roms=(n:'vg_a-5j-.ic37';l:$10000;p:0;crc:$10582b2d);
         vigilante_tiles:array[0..2] of tipo_roms=(
-        (n:'vg_b-1d-.ic2';l:$10000;p:0;crc:$81b1ee5c),(n:'vg_b-1f-.ic3';l:$10000;p:$10000;crc:$d0d33673),
+        (n:'vg_b-1d-.ic2';l:$10000;p:$00000;crc:$81b1ee5c),(n:'vg_b-1f-.ic3';l:$10000;p:$10000;crc:$d0d33673),
         (n:'vg_b-1h-.ic4';l:$10000;p:$20000;crc:$aae81695));
-        //Dip
-        vigilante_dip_a:array[0..4] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','4','5')),
-        (mask:4;name:'Difficulty';number:2;val2:(4,0);name2:('Normal','Hard')),
-        (mask:8;name:'Decrease of Energy';number:2;val2:(8,0);name2:('Slow','Fast')),
-        (mask:$f0;name:'Coinage';number:16;val16:($a0,$b0,$c0,$d0,$10,$e0,$20,$30,$f0,$40,$90,$80,$70,$60,$50,0);name16:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 5C','Free Play')),());
-        vigilante_dip_b:array [0..7] of def_dip2=(
-        (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),
-        (mask:4;name:'Coin Mode';number:2;val2:(4,0);name2:('Mode 1','Mode 2')),
-        (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
-        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),
-        (mask:$20;name:'Stop Mode';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),());
 
 var
  rom_bank:array[0..3,0..$3fff] of byte;
- irq_vector,banco_rom,sound_latch,rear_color:byte;
+ banco_rom,sound_latch,rear_color:byte;
  rear_scroll,scroll_x,sample_addr:word;
  rear_disable,rear_ch_color:boolean;
  mem_dac:array[0..$ffff] of byte;
@@ -96,12 +82,12 @@ scroll__x(1,3,scroll_x);
 //sprites
 for f:=0 to $17 do begin
       atrib:=memoria[$c025+(f*8)];
-      nchar:=memoria[$c024+(f*8)]+ ((atrib and $f) shl 8);
-		  color:=(memoria[$c020+(f*8)] and $f) shl 4;
+      nchar:=memoria[$c024+(f*8)]+ ((atrib and $0f) shl 8);
+		  color:=(memoria[$c020+(f*8)] and $0f) shl 4;
 		  h:=1 shl ((atrib and $30) shr 4);
       nchar:=nchar and not(h-1);
-      x:=(memoria[$c026+(f*8)]+((memoria[$c027+(f*8)] and 1) shl 8));
-		  y:=(256+128-(memoria[$c022+(f*8)]+((memoria[$c023+(f*8)] and 1) shl 8)))-(16*h);
+      x:=(memoria[$c026+(f*8)]+((memoria[$c027+(f*8)] and $01) shl 8));
+		  y:=(256+128-(memoria[$c022+(f*8)]+((memoria[$c023+(f*8)] and $01) shl 8)))-(16*h);
       flip_y:=(atrib and $80)<>0;
       for i:=0 to (h-1) do begin
         if flip_y then c:=nchar+(h-1-i)
@@ -119,25 +105,16 @@ end;
 procedure eventos_vigilante;
 begin
 if event.arcade then begin
-  //Service
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
-  //P1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  //P2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or 10);
 end;
 end;
 
@@ -149,7 +126,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -174,8 +151,7 @@ case direccion of
 end;
 end;
 
-procedure vigilante_putbyte(direccion:word;valor:byte);
-procedure cambiar_color(dir:word);
+procedure cambiar_color(dir:word);inline;
 var
   color:tcolor;
   pos2:byte;
@@ -184,7 +160,7 @@ begin
   bank:=dir and $400;
   pos2:=(dir and $ff);
   pos:=bank+pos2;
-	color.r:=(buffer_paleta[pos+0]) shl 3;
+	color.r:=(buffer_paleta[pos+$000]) shl 3;
 	color.g:=(buffer_paleta[pos+$100]) shl 3;
 	color.b:=(buffer_paleta[pos+$200]) shl 3;
   set_pal_color(color,(bank shr 2)+pos2);
@@ -193,6 +169,8 @@ begin
   end;
   rear_ch_color:=(bank=$400);
 end;
+
+procedure vigilante_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$bfff:;
@@ -211,12 +189,12 @@ end;
 procedure snd_irq_set(tipo:byte);
 begin
   case tipo of
-    0:irq_vector:=irq_vector or $20; //Clear Z80
-    1:irq_vector:=irq_vector and $df; //Set Z80
-    2:irq_vector:=irq_vector or $10; //Clear YM2151
-    3:irq_vector:=irq_vector and $ef; //Set YM2151
+    0:z80_1.im0:=z80_1.im0 or $20; //Clear Z80
+    1:z80_1.im0:=z80_1.im0 and $df; //Set Z80
+    2:z80_1.im0:=z80_1.im0 or $10; //Clear YM2151
+    3:z80_1.im0:=z80_1.im0 and $ef; //Set YM2151
   end;
-  if (irq_vector<>$ff) then z80_1.change_irq_vector(ASSERT_LINE,irq_vector)
+  if (z80_1.im0<>$ff) then z80_1.change_irq(ASSERT_LINE)
     else z80_1.change_irq(CLEAR_LINE);
 end;
 
@@ -226,8 +204,8 @@ case (puerto and $ff) of
   0:vigilante_inbyte:=marcade.in0;
   1:vigilante_inbyte:=marcade.in1;
   2:vigilante_inbyte:=marcade.in2;
-  3:vigilante_inbyte:=marcade.dswa;
-  4:vigilante_inbyte:=marcade.dswb;
+  3:vigilante_inbyte:=$ff;
+  4:vigilante_inbyte:=$fd;
 end;
 end;
 
@@ -264,7 +242,7 @@ end;
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  1:snd_inbyte:=ym2151_0.status;
+  $1:snd_inbyte:=ym2151_0.status;
   $80:snd_inbyte:=sound_latch;
   $84:snd_inbyte:=mem_dac[sample_addr];
 end;
@@ -307,11 +285,10 @@ begin
  z80_0.reset;
  z80_1.reset;
  ym2151_0.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
- irq_vector:=$ff;
  banco_rom:=0;
  rear_ch_color:=true;
  sample_addr:=0;
@@ -324,14 +301,14 @@ end;
 
 function iniciar_vigilante:boolean;
 const
-  ps_x:array[0..15] of dword=(0*8+0,0*8+1,0*8+2,0*8+3,
+  ps_x:array[0..15] of dword=($00*8+0,$00*8+1,$00*8+2,$00*8+3,
 		                          $10*8+0,$10*8+1,$10*8+2,$10*8+3,
 		                          $20*8+0,$20*8+1,$20*8+2,$20*8+3,
 		                          $30*8+0,$30*8+1,$30*8+2,$30*8+3);
-  ps_y:array[0..15] of dword=(0*8,1*8,2*8,3*8,
-                          		4*8,5*8,6*8,7*8,
-                          		8*8,9*8,$a*8,$b*8,
-                           		$c*8,$d*8,$e*8,$f*8);
+  ps_y:array[0..15] of dword=($00*8,$01*8,$02*8,$03*8,
+                          		$04*8,$05*8,$06*8,$07*8,
+                          		$08*8,$09*8,$0A*8,$0B*8,
+                           		$0C*8,$0D*8,$0E*8,$0F*8);
   pt_x:array[0..31] of dword=(0*8+1, 0*8,  1*8+1, 1*8, 2*8+1, 2*8, 3*8+1, 3*8, 4*8+1, 4*8, 5*8+1, 5*8,
 	6*8+1, 6*8, 7*8+1, 7*8, 8*8+1, 8*8, 9*8+1, 9*8, 10*8+1, 10*8, 11*8+1, 11*8,
 	12*8+1, 12*8, 13*8+1, 13*8, 14*8+1, 14*8, 15*8+1, 15*8);
@@ -366,7 +343,7 @@ z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(snd_despues_instruccion);
 timers.init(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_nmi,nil,true);
 //sound chips
-dac_0:=dac_chip.create(0.6);
+dac_0:=dac_chip.Create;
 ym2151_0:=ym2151_chip.create(3579645);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms y rom en bancos
@@ -404,11 +381,6 @@ if not(roms_load(@memoria_temp,vigilante_tiles)) then exit;
 init_gfx(2,32,1,3*512*8);
 gfx_set_desc_data(4,0,16*8,0,2,4,6);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pc_y,false,false);
-//Dips
-marcade.dswa:=$ff;
-marcade.dswb:=$fd;
-marcade.dswa_val2:=@vigilante_dip_a;
-marcade.dswb_val2:=@vigilante_dip_b;
 //final
 reset_vigilante;
 iniciar_vigilante:=true;

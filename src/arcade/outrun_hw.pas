@@ -30,22 +30,20 @@ const
         (n:'opr-10193.66';l:$8000;p:$0000;crc:$bcd10dde),(n:'opr-10192.67';l:$8000;p:$10000;crc:$770f1270),
         (n:'opr-10191.68';l:$8000;p:$20000;crc:$20a284ab),(n:'opr-10190.69';l:$8000;p:$30000;crc:$7cab70e2),
         (n:'opr-10189.70';l:$8000;p:$40000;crc:$01366b54),(n:'opr-10188.71';l:$8000;p:$50000;crc:$bad30ad9));
-        outrun_dip_a:array [0..2] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(7,8,9,5,4,$f,3,2,1,6,$e,$d,$c,$b,$a,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin B too) or 1C 1C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C - 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin A too) or 1C 1C')),());
-        outrun_dip_b:array [0..3] of def_dip2=(
-        (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),
-        (mask:$30;name:'Time Adjust';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
+        outrun_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$7;dip_name:'4C/1C'),(dip_val:$8;dip_name:'3C/1C'),(dip_val:$9;dip_name:'2C/1C'),(dip_val:$5;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$4;dip_name:'2C/1C 4C/3C'),(dip_val:$f;dip_name:'1C/1C'),(dip_val:$3;dip_name:'1C/1C 5C/6C'),(dip_val:$2;dip_name:'1C/1C 4C/5C'),(dip_val:$1;dip_name:'1C/1C 2C/3C'),(dip_val:$6;dip_name:'2C/3C'),(dip_val:$e;dip_name:'1C/2C'),(dip_val:$d;dip_name:'1C/3C'),(dip_val:$c;dip_name:'1C/4C'),(dip_val:$b;dip_name:'1C/5C'),(dip_val:$a;dip_name:'1C/6C'),(dip_val:$0;dip_name:'Free Play (if Coin B too) or 1C/1C'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$70;dip_name:'4C/1C'),(dip_val:$80;dip_name:'3C/1C'),(dip_val:$90;dip_name:'2C/1C'),(dip_val:$50;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$40;dip_name:'2C/1C 4C/3C'),(dip_val:$f0;dip_name:'1C/1C'),(dip_val:$30;dip_name:'1C/1C 5C/6C'),(dip_val:$20;dip_name:'1C/1C 4C/5C'),(dip_val:$10;dip_name:'1C/1C 2C/3C'),(dip_val:$60;dip_name:'2C/3C'),(dip_val:$e0;dip_name:'1C/2C'),(dip_val:$d0;dip_name:'1C/3C'),(dip_val:$c0;dip_name:'1C/4C'),(dip_val:$b0;dip_name:'1C/5C'),(dip_val:$a0;dip_name:'1C/6C'),(dip_val:$00;dip_name:'Free Play (if Coin A too) or 1C/1C'))),());
+        outrun_dip_b:array [0..3] of def_dip=(
+        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Time Adjust';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$c0;dip_name:'Normal'),(dip_val:$40;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
         CPU_SYNC=4;
-
 type
   tsystem16_info=record
     	normal,shadow,hilight:array[0..31] of byte;
-      banks:byte;
-      screen:array[0..7] of byte;
+      s_banks:byte;
+      s16_screen:array[0..7] of byte;
       screen_enabled:boolean;
-      tile_buffer:array[0..7,0..$7ff] of boolean;
    end;
    toutrun_road=record
       control:byte;
@@ -58,7 +56,8 @@ var
  ram,ram2:array[0..$3fff] of word;
  road_ram,char_ram,sprite_ram:array[0..$7ff] of word;
  tile_ram:array[0..$7fff] of word;
- sprite_rom:array[0..$3ffff] of dword;
+ tile_buffer:array[0..$7fff] of boolean;
+ sprite_rom:array[0..$7ffff] of dword;
  s16_info:tsystem16_info;
  road_info:toutrun_road;
  adc_select,sound_latch:byte;
@@ -68,58 +67,59 @@ var
 
 implementation
 
-procedure update_video_outrun;
-procedure draw_sprites(pri:byte);
+procedure draw_sprites(pri:byte);inline;
 var
   f,sprpri,g:byte;
-  vzoom,hzoom,top,addr,bank,pix,data_7,color,height:word;
-  xpos,x,y,ydelta,ytarget,xacc,yacc,pitch,xdelta:integer;
+  xpos,vzoom,hzoom,top,addr,bank,pix,data_7,color,height:word;
+  x,y,ydelta,ytarget,xacc,yacc,pitch,xdelta:integer;
   pixels,spritedata:dword;
   hide,flip:boolean;
-procedure system16b_draw_pixel(x:integer;y,pix:word);
+procedure system16b_draw_pixel(x,y,pix:word);inline;
 var
   punt,punt2,temp1,temp2,temp3:word;
+  xf:integer;
 begin
+  xf:=x-$bd+6;
   //only draw if onscreen, not 0 or 15
-	if ((x>=0) and (x<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
+	if ((xf>=0) and (xf<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
       if (pix and $400f)=$400a then begin //Shadow
-          punt:=getpixel(x+ADD_SPRITE,y+ADD_SPRITE,7);
+          punt:=getpixel(xf+ADD_SPRITE,y+ADD_SPRITE,7);
           punt2:=paleta[$1000];
           temp1:=(((punt and $f800)+(punt2 and $f800)) shr 1) and $f800;
           temp2:=(((punt and $7e0)+(punt2 and $7e0)) shr 1) and $7e0;
           temp3:=(((punt and $1f)+(punt2 and $1f)) shr 1) and $1f;
           punt:=temp1 or temp2 or temp3;
       end else punt:=paleta[(pix and $7ff)+$800]; //Normal
-      putpixel(x+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
+      putpixel(xf+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
 	end;
 end;
 begin
-  for f:=0 to $ff do begin
-    if (sprite_ram[f*8] and $8000)<>0 then exit;
-    sprpri:=(sprite_ram[(f*8)+3] shr 12) and 3;
+  for f:=0 to $7f do begin
+    if (sprite_ram[f*$8] and $8000)<>0 then exit; //!
+    sprpri:=(sprite_ram[(f*$8)+3] shr 12) and 3;  //!
     if sprpri<>pri then continue;
-    addr:=sprite_ram[(f*8)+1];
-    sprite_ram[(f*8)+7]:=addr;
-    hide:=(sprite_ram[f*8] and $5000)<>0;
+    hide:=(sprite_ram[f*$8] and $5000)<>0; //!
     if hide then continue;
-    top:=(sprite_ram[f*8] and $1ff)-$100;
-    bank:=((sprite_ram[f*8] shr 9) and $7) mod s16_info.banks;
-		xpos:=sprite_ram[(f*8)+2] and $1ff;
+    top:=(sprite_ram[f*$8] and $1ff)-$100; //!
+    // initialize the end address to the start address
+    addr:=sprite_ram[(f*$8)+1];  //!
+    sprite_ram[(f*$8)+$7]:=addr;
+    bank:=((sprite_ram[f*$8] shr 9) and $7) mod s16_info.s_banks;
+		xpos:=sprite_ram[(f*$8)+2] and $1ff; //!
     if (sprite_ram[(f*8)+4] and $2000)<>0 then xdelta:=1
       else xdelta:=-1;
-    if ((xpos<$80) and (xdelta<0)) then xpos:=xpos+$149 //$200-$bd+6
-      else xpos:=xpos-$b7; //-$bd+6
-    vzoom:=sprite_ram[(f*8)+3] and $7ff;
-    hzoom:=sprite_ram[(f*8)+4] and $7ff;
+    if ((xpos<$80) and (xdelta<0)) then xpos:=xpos+$200;
+    vzoom:=sprite_ram[(f*$8)+3] and $7ff; //!
+    hzoom:=sprite_ram[(f*$8)+4] and $7ff; //!
     // clamp to a maximum of 8x (not 100% confirmed)
 		if (vzoom<$40) then vzoom:=$40;
 		if (hzoom<$40) then hzoom:=$40;
-    color:=((sprite_ram[(f*8)+5] and $7f) shl 4) or (sprite_ram[(f*8)+3] and $4000);
+    color:=((sprite_ram[(f*$8)+5] and $7f) shl 4) or (sprite_ram[(f*$8)+3] and $4000); //!
     // clamp to within the memory region size
 		spritedata:=$10000*bank;
-    flip:=((not(sprite_ram[(f*8)+4]) shr 14) and 1)<>0;
-		pitch:=smallint((sprite_ram[(f*8)+2] shr 1) or ((sprite_ram[(f*8)+4] and $1000) shl 3)) div 256;
-    height:=(sprite_ram[(f*8)+5] shr 8)+1;
+    flip:=((not(sprite_ram[(f*$8)+4]) shr 14) and 1)<>0; //!
+		pitch:=smallint((sprite_ram[(f*$8)+2] shr 1) or ((sprite_ram[(f*$8)+4] and $1000) shl 3)) div 256;
+    height:=(sprite_ram[(f*$8)+5] shr 8)+1; //!
     if (sprite_ram[(f*8)+4] and $8000)<>0 then ydelta:=1
       else ydelta:=-1;
     yacc:=0;
@@ -127,12 +127,15 @@ begin
     ytarget:=top+ydelta*height;
 		while y<>ytarget do begin
 			// advance a row
-			if ((y<256) and (y>=0)) then begin
+			if ((y<=256) and (y>=0)) then begin
         xacc:=0;
 				if not(flip) then begin
-          data_7:=addr;
+					// start at the word before because we preincrement below
+          sprite_ram[(f*$8)+$7]:=addr-1;
 					x:=xpos;
           while (((xdelta>0) and (x<512)) or ((xdelta<0) and (x>=0))) do begin
+            data_7:=sprite_ram[(f*$8)+$7]+1;
+            sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
             for g:=7 downto 0 do begin
 						  pix:=(pixels shr (g*4)) and $f;
@@ -143,16 +146,16 @@ begin
               end;
               xacc:=xacc-$200;
             end;
-						if (pixels and $f0)=$f0 then begin
-              sprite_ram[(f*8)+7]:=data_7;
-              break;
-            end else data_7:=data_7+1;
+						if (pixels and $f0)=$f0 then break;
 					end;
 				end else begin
-				  // flipped case
-          data_7:=addr;
+				// flipped case
+					// start at the word after because we predecrement below
+          sprite_ram[(f*$8)+$7]:=addr+1;
 					x:=xpos;
           while (((xdelta>0) and (x<512)) or ((xdelta<0) and (x>=0))) do begin
+            data_7:=sprite_ram[(f*$8)+$7]-1;
+            sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
             for g:=0 to 7 do begin
 						  pix:=(pixels shr (g*4)) and $f;
@@ -163,10 +166,7 @@ begin
               end;
               xacc:=xacc-$200;
             end;
-						if (pixels and $0f000000)=$0f000000 then begin
-              sprite_ram[(f*8)+7]:=data_7;
-              break;
-            end else data_7:=data_7-1;
+						if (pixels and $0f000000)=$0f000000 then break;
 					end;
 			 	end; //del flip
         yacc:=yacc+vzoom;
@@ -177,7 +177,8 @@ begin
 		end; //Del while
 	end;
 end;
-procedure draw_road(pri:byte);
+
+procedure draw_road(pri:byte);inline;
 var
   y,bgcolor:byte;
   x,data0,data1,pix0,pix1,color0,color1:word;
@@ -201,10 +202,10 @@ begin
             else if (data0 and $800)<>0 then color0:=data0 and $7f;
         3:if (data1 and $800)<>0 then color0:=data1 and $7f;
       end;
-      if color0<>$ff then single_line(ADD_SPRITE,y+ADD_SPRITE,paleta[color0 or road_info.colorbase3],320,7)
-        else single_line(ADD_SPRITE,y+ADD_SPRITE,paleta[$2000],320,7);
+      if color0<>$ff then single_line(0,y,paleta[color0 or road_info.colorbase3],320,8)
+        else single_line(0,y,paleta[$2000],320,8);
     end else begin //Foreground
-      single_line(0,y,paleta[MAX_COLORES],320,8);
+      single_line(0,y,paleta[MAX_COLORES],320,9);
       if (((data0 and $800)<>0) and ((data1 and $800)<>0)) then continue;
       // get road 0 data
       if (data0 and $800)<>0 then src0:=256*2*512
@@ -248,7 +249,7 @@ begin
               inc(ptemp);
 						  hpos0:=(hpos0+1) and $fff;
 					  end;
-            putpixel(0,y,320,punbuf,8);
+            putpixel(0,y,320,punbuf,9);
         end;
         1:begin
             hpos0:=(hpos0-($5f8+road_info.xoff)) and $fff;
@@ -265,7 +266,7 @@ begin
 						  hpos0:=(hpos0+1) and $fff;
 						  hpos1:=(hpos1+1) and $fff;
 					  end;
-            putpixel(0,y,320,punbuf,8);
+            putpixel(0,y,320,punbuf,9);
           end;
         2:begin
             hpos0:=(hpos0-($5f8+road_info.xoff)) and $fff;
@@ -282,7 +283,7 @@ begin
 						  hpos0:=(hpos0+1) and $fff;
 						  hpos1:=(hpos1+1) and $fff;
 					  end;
-            putpixel(0,y,320,punbuf,8);
+            putpixel(0,y,320,punbuf,9);
           end;
         3:begin
             if (data1 and $800)<>0 then continue;
@@ -295,52 +296,60 @@ begin
               inc(ptemp);
 						  hpos1:=(hpos1+1) and $fff;
 					  end;
-            putpixel(0,y,320,punbuf,8);
+            putpixel(0,y,320,punbuf,9);
         end;
       end;
     end;
   end;
 end;
-procedure draw_tiles(num:byte;px,py:word;scr:byte);
+
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
 var
   pos,f,nchar,color,data,x,y:word;
 begin
-  pos:=s16_info.screen[num]*$800;
+  pos:=s16_info.s16_screen[num]*$800;
   for f:=$0 to $7ff do begin
     data:=tile_ram[pos+f];
     color:=(data shr 6) and $7f;
-    if (s16_info.tile_buffer[num,f] or buffer_color[color]) then begin
+    if (tile_buffer[pos+f] or buffer_color[color]) then begin
       x:=((f and $3f) shl 3)+px;
       y:=((f shr 6) shl 3)+py;
       nchar:=data and $1fff;
-      put_gfx_trans(x,y,nchar,color shl 3,scr,0);
-      if (data and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
-        else put_gfx_block_trans(x,y,scr+1,8,8);
-      s16_info.tile_buffer[num,f]:=false;
+      if trans then begin
+        put_gfx_trans(x,y,nchar,color shl 3,scr,0);
+        if (data and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
+          else put_gfx_block_trans(x,y,scr+1,8,8);
+      end else begin
+        put_gfx(x,y,nchar,color shl 3,scr,0);
+        if (data and $8000)<>0 then put_gfx(x,y,nchar,color shl 3,scr+1,0)
+          else put_gfx_block(x,y,scr+1,8,8,$1fff);
+      end;
     end;
   end;
 end;
+
+procedure update_video_outrun;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
 begin
 if not(s16_info.screen_enabled) then begin
-  fill_full_screen(7,$2000);
   actualiza_trozo_final(0,0,320,224,7);
+  fill_full_screen(7,$2000);
   exit;
 end;
 //Background
-draw_tiles(0,0,256,3);
-draw_tiles(1,512,256,3);
-draw_tiles(2,0,0,3);
-draw_tiles(3,512,0,3);
+draw_tiles(0,0,256,3,true);
+draw_tiles(1,512,256,3,true);
+draw_tiles(2,0,0,3,true);
+draw_tiles(3,512,0,3,true);
 scroll_x1:=char_ram[$74d] and $3ff;
 scroll_x1:=(704-scroll_x1) and $3ff;
 scroll_y1:=char_ram[$749] and $1ff;
 //Foreground
-draw_tiles(4,0,256,5);
-draw_tiles(5,512,256,5);
-draw_tiles(6,0,0,5);
-draw_tiles(7,512,0,5);
+draw_tiles(4,0,256,5,true);
+draw_tiles(5,512,256,5,true);
+draw_tiles(6,0,0,5,true);
+draw_tiles(7,512,0,5,true);
 scroll_x2:=char_ram[$74c] and $3ff;
 scroll_x2:=(704-scroll_x2) and $3ff;
 scroll_y2:=char_ram[$748] and $1ff;
@@ -353,27 +362,30 @@ for f:=$0 to $6ff do begin
     y:=(f shr 6) shl 3;
     nchar:=atrib and $1ff;
     put_gfx_trans(x,y,nchar,color shl 3,1,0);
-    if (atrib and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
+    if (nchar and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
       else put_gfx_block_trans(x,y,2,8,8);
     gfx[0].buffer[f]:=false;
   end;
 end;
+draw_road(0);
+draw_road(1);
 //Lo pongo todo con prioridades, falta scrollrow y scrollcol!!
-draw_road(0); //R0
-scroll_x_y(3,7,scroll_x1,scroll_y1); //B0
+actualiza_trozo(0,0,320,256,8,0,0,320,256,7); //R0
+scroll_x_y(4,7,scroll_x1,scroll_y1); //B0
 draw_sprites(0);
-scroll_x_y(4,7,scroll_x1,scroll_y1); //B1
+scroll_x_y(3,7,scroll_x1,scroll_y1); //B1
 draw_sprites(1);
 scroll_x_y(5,7,scroll_x2,scroll_y2);  //F0
 draw_sprites(2);
 scroll_x_y(6,7,scroll_x2,scroll_y2); //F1
-draw_road(1); //R1
-actualiza_trozo(0,0,320,256,8,0,0,320,256,7); //R1
-actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //T0
+actualiza_trozo(0,0,320,256,9,0,0,320,256,7); //R1
+actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //T0
 draw_sprites(3);
-actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //T1
+actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //T1
 //Y lo pinto a la pantalla principal
 actualiza_trozo_final(0,0,320,224,7);
+//OJO: No puedo marcar el buffer como usado cuando pinto una pantalla, puede usarla de nuevo!!
+fillchar(tile_buffer,$8000,0);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
@@ -402,13 +414,27 @@ end;
 
 procedure outrun_principal;
 var
+  frame_m,frame_sub,frame_s:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_sub:=m68000_1.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
-     eventos_outrun;
+     for h:=1 to CPU_SYNC do begin
+        //main
+        m68000_0.run(frame_m);
+        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+        //main
+        m68000_1.run(frame_sub);
+        frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
+        //sound
+        z80_0.run(frame_s);
+        frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+     end;
      case f of
         65,129,193:begin
              m68000_0.irq[2]:=ASSERT_LINE;
@@ -426,18 +452,8 @@ while EmuStatus=EsRunning do begin
               m68000_1.irq[4]:=CLEAR_LINE;
             end;
      end;
-     for h:=1 to CPU_SYNC do begin
-        //main
-        m68000_0.run(frame_main);
-        frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-        //main
-        m68000_1.run(frame_sub);
-        frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
-        //sound
-        z80_0.run(frame_snd);
-        frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
-     end;
   end;
+  eventos_outrun;
   video_sync;
 end;
 end;
@@ -503,7 +519,7 @@ if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5
     0..$5ffff:outrun_getword:=rom2[(direccion and $3ffff) shr 1]; //ROM
     $60000..$7ffff:outrun_getword:=ram2[(direccion and $7fff) shr 1]; //RAM
     $80000..$8ffff:outrun_getword:=road_ram[(direccion and $fff) shr 1]; //RAM ROAD
-    $90000..$9ffff:if m68000_1.read_8bits_hi_dir then begin
+    $90000..$9ffff:if m68000_1.access_8bits_hi_dir then begin
                       for f:=0 to $7ff do begin
                         tempw:=road_ram[f];
                         road_ram[f]:=road_info.buffer[f];
@@ -516,71 +532,6 @@ if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5
 end;
 if not(zona) then outrun_getword:=s315_5195_0.read_reg((direccion shr 1) and $1f);
 end;
-
-procedure test_screen_change(direccion:word);
-var
-  tmp:byte;
-begin
-if direccion=$740 then begin
-          //Foreground
-          tmp:=(char_ram[$740] shr 12) and $f;
-          if tmp<>s16_info.screen[4] then begin
-            s16_info.screen[4]:=tmp;
-            fillchar(s16_info.tile_buffer[4,0],$800,1);
-          end;
-          tmp:=(char_ram[$740] shr 8) and $f;
-          if tmp<>s16_info.screen[5] then begin
-            s16_info.screen[5]:=tmp;
-            fillchar(s16_info.tile_buffer[5,0],$800,1);
-          end;
-          tmp:=(char_ram[$740] shr 4) and $f;
-          if tmp<>s16_info.screen[6] then begin
-            s16_info.screen[6]:=tmp;
-            fillchar(s16_info.tile_buffer[6,0],$800,1);
-          end;
-          tmp:=char_ram[$740] and $f;
-          if tmp<>s16_info.screen[7] then begin
-            s16_info.screen[7]:=tmp;
-            fillchar(s16_info.tile_buffer[7,0],$800,1);
-          end;
-end;
-if direccion=$741 then begin
-          //Background
-          tmp:=(char_ram[$741] shr 12) and $f;
-          if tmp<>s16_info.screen[0] then begin
-            s16_info.screen[0]:=tmp;
-            fillchar(s16_info.tile_buffer[0,0],$800,1);
-          end;
-          tmp:=(char_ram[$741] shr 8) and $f;
-          if tmp<>s16_info.screen[1] then begin
-            s16_info.screen[1]:=tmp;
-            fillchar(s16_info.tile_buffer[1,0],$800,1);
-          end;
-          tmp:=(char_ram[$741] shr 4) and $f;
-          if tmp<>s16_info.screen[2] then begin
-            s16_info.screen[2]:=tmp;
-            fillchar(s16_info.tile_buffer[2,0],$800,1);
-          end;
-          tmp:=char_ram[$741] and $f;
-          if tmp<>s16_info.screen[3] then begin
-            s16_info.screen[3]:=tmp;
-            fillchar(s16_info.tile_buffer[3,0],$800,1);
-          end;
-end;
-end;
-
-procedure standard_io_w(direccion,valor:word);
-begin
-case (direccion and $38) of
-		$0:pia8255_0.write(direccion and $3,valor and $ff);
-    $10:;
-    $18:;
-    $30:; //watchdog
-    $38:;
-end;
-end;
-
-procedure outrun_putword(direccion:dword;valor:word);
 
 procedure change_pal(direccion,valor:word);
 var
@@ -613,17 +564,70 @@ begin
   buffer_color[(direccion shr 3) and $7f]:=true;
 end;
 
-procedure test_tile_buffer(direccion:word);
+procedure test_screen_change(direccion:word);
 var
-  num_scr,f:byte;
-  pos:word;
+  tmp:byte;
 begin
-  num_scr:=direccion shr 11;
-  pos:=direccion and $7ff;
-  for f:=0 to 7 do
-    if s16_info.screen[f]=num_scr then s16_info.tile_buffer[f,pos]:=true;
+if direccion=$740 then begin
+          //Foreground
+          tmp:=(char_ram[$740] shr 12) and $f;
+          if tmp<>s16_info.s16_screen[4] then begin
+            s16_info.s16_screen[4]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+          tmp:=(char_ram[$740] shr 8) and $f;
+          if tmp<>s16_info.s16_screen[5] then begin
+            s16_info.s16_screen[5]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+          tmp:=(char_ram[$740] shr 4) and $f;
+          if tmp<>s16_info.s16_screen[6] then begin
+            s16_info.s16_screen[6]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+          tmp:=char_ram[$740] and $f;
+          if tmp<>s16_info.s16_screen[7] then begin
+            s16_info.s16_screen[7]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+end;
+if direccion=$741 then begin
+          //Background
+          tmp:=(char_ram[$741] shr 12) and $f;
+          if tmp<>s16_info.s16_screen[0] then begin
+            s16_info.s16_screen[0]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+          tmp:=(char_ram[$741] shr 8) and $f;
+          if tmp<>s16_info.s16_screen[1] then begin
+            s16_info.s16_screen[1]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+          tmp:=(char_ram[$741] shr 4) and $f;
+          if tmp<>s16_info.s16_screen[2] then begin
+            s16_info.s16_screen[2]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+          tmp:=char_ram[$741] and $f;
+          if tmp<>s16_info.s16_screen[3] then begin
+            s16_info.s16_screen[3]:=tmp;
+            fillchar(tile_buffer[$800*tmp],$800,1);
+          end;
+end;
 end;
 
+procedure standard_io_w(direccion,valor:word);
+begin
+case (direccion and $38) of
+		$0:pia8255_0.write(direccion and $3,valor and $ff);
+    $10:;
+    $18:;
+    $30:; //watchdog
+    $38:;
+end;
+end;
+
+procedure outrun_putword(direccion:dword;valor:word);
 var
   zona:boolean;
   tempd:dword;
@@ -650,7 +654,7 @@ if ((direccion>=s315_5195_0.dirs_start[1]) and (direccion<s315_5195_0.dirs_end[1
                   direccion:=(direccion and $ffff) shr 1;
                   if tile_ram[direccion]<>valor then begin
                     tile_ram[direccion]:=valor;
-                    test_tile_buffer(direccion);
+                    tile_buffer[direccion]:=true;
                   end;
                end;
       $10000..$1ffff:begin
@@ -688,7 +692,7 @@ end;
 if not(zona) then begin
   tempd:=s315_5195_0.dirs_start[1];
   s315_5195_0.write_reg((direccion shr 1) and $1f,valor and $ff);
-  if tempd<>s315_5195_0.dirs_start[1] then fillchar(s16_info.tile_buffer,$4000,0);
+  if tempd<>s315_5195_0.dirs_start[1] then fillchar(tile_buffer,$8000,0);
 end;
 end;
 
@@ -701,7 +705,7 @@ case direccion of
   0..$5ffff:outrun_sub_getword:=rom2[(direccion and $3ffff) shr 1];
   $60000..$7ffff:outrun_sub_getword:=ram2[(direccion and $7fff) shr 1];
   $80000..$8ffff:outrun_sub_getword:=road_ram[(direccion and $fff) shr 1];
-  $90000..$9ffff:if m68000_1.read_8bits_hi_dir then begin
+  $90000..$9ffff:if m68000_1.access_8bits_hi_dir then begin
                   for f:=0 to $7ff do begin
                     tempw:=road_ram[f];
                     road_ram[f]:=road_info.buffer[f];
@@ -802,16 +806,13 @@ begin
  m68000_0.reset;
  m68000_1.reset;
  z80_0.reset;
- frame_main:=m68000_0.tframes;
- frame_sub:=m68000_1.tframes;
- frame_snd:=z80_0.tframes;
  ym2151_0.reset;
  sega_pcm_0.reset;
  pia8255_0.reset;
+ reset_audio;
  marcade.in0:=$ef;
  s16_info.screen_enabled:=false;
- fillchar(s16_info.tile_buffer,$4000,1);
- fillchar(road_info.buffer,$1000,1);
+ fillchar(tile_buffer[0],$8000,1);
  adc_select:=0;
  sound_latch:=0;
  gear_hi:=false;
@@ -868,7 +869,8 @@ screen_mod_scroll(5,1024,512,1023,512,256,511);
 screen_init(6,1024,512,true);
 screen_mod_scroll(6,1024,512,1023,512,256,511);
 //Road
-screen_init(8,320,256,true);
+screen_init(8,320,256);
+screen_init(9,320,256,true);
 //Final
 screen_init(7,512,256,false,true);
 iniciar_video(320,224);
@@ -888,7 +890,7 @@ z80_0.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
 z80_0.init_sound(outrun_sound_act);
 if not(roms_load(@mem_snd,outrun_sound)) then exit;
 //Memory Mapper
-s315_5195_0:=t315_5195.create(m68000_0,outrun_snd_irq);
+s315_5195_0:=t315_5195.create(m68000_0,z80_0,outrun_snd_irq);
 //PPI 825
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,nil,nil,ppi8255_wportc);
@@ -911,7 +913,7 @@ gfx_set_desc_data(3,0,8*8,$20000*8,$10000*8,0);
 convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //Cargar ROM de los sprites
 if not(roms_load32dw(@sprite_rom,outrun_sprites)) then exit;
-s16_info.banks:=4;
+s16_info.s_banks:=4;
 //Cargar ROM road y decodificarla
 if not(roms_load(@memoria_temp,outrun_road)) then exit;
 decode_road;
@@ -921,9 +923,9 @@ road_info.colorbase3:=$780;
 road_info.xoff:=0;
 //dip
 marcade.dswa:=$ff;
-marcade.dswa_val2:=@outrun_dip_a;
+marcade.dswa_val:=@outrun_dip_a;
 marcade.dswb:=$fb;
-marcade.dswb_val2:=@outrun_dip_b;
+marcade.dswb_val:=@outrun_dip_b;
 //poner la paleta
 compute_resistor_weights(0,255,-1.0,
   6,addr(resistances_normal[0]),addr(weights[0]),0,0,
@@ -944,6 +946,7 @@ for f:=0 to 31 do begin
   s16_info.hilight[f]:=combine_6_weights(addr(weights[1]),i0,i1,i2,i3,i4,1);
 end;
 //final
+reset_outrun;
 iniciar_outrun:=true;
 end;
 

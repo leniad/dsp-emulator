@@ -213,7 +213,7 @@ destructor slapstic_type.free;
 begin
 end;
 
-function MATCHES_MASK_VALUE(val:word;maskval:mask_value):boolean;
+function MATCHES_MASK_VALUE(val:word;maskval:mask_value):boolean;inline;
 begin
   MATCHES_MASK_VALUE:=((val and maskval.mask)=maskval.value);
 end;

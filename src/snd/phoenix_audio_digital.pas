@@ -1,7 +1,7 @@
 unit phoenix_audio_digital;
 
 interface
-uses sound_engine,dialogs;
+uses sound_engine;
 
 procedure phoenix_audio_reset;
 procedure phoenix_audio_update;
@@ -60,7 +60,6 @@ var
   i,j:integer;
   shiftreg,bits:cardinal;
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   getmem(phoenix_sound[0],sizeof(phoenix_voz));
   getmem(phoenix_sound[1],sizeof(phoenix_voz));
   fillchar(phoenix_sound[0]^,sizeof(phoenix_voz),0);
@@ -95,7 +94,7 @@ begin
   phoenix_sound[1]:=nil;
 end;
 
-function update_c24(samplerate:integer):integer;
+function update_c24(samplerate:integer):integer;inline;
 var
 	n:integer;
   temp:extended;
@@ -137,7 +136,7 @@ begin
 	update_c24:=VMAX-c24_state.level;
 end;
 
-function update_c25(samplerate:integer):integer;
+function update_c25(samplerate:integer):integer;inline;
 var
 	n:integer;
   temp:extended;
@@ -178,7 +177,7 @@ begin
 	update_c25:=c25_state.level;
 end;
 
-function noise(samplerate:integer):integer;
+function noise(samplerate:integer):integer;inline;
 var
   vc24,vc25,sum,n:integer;
   level,frequency,temp:extended;

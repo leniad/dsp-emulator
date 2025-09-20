@@ -40,32 +40,8 @@ type
 var
   timers:timer_eng;
 
-procedure one_shot_timer_0(cpu:byte;time:single;final_procedure:exec_type_simple);
-procedure one_shot_timer_1(cpu:byte;time:single;final_procedure:exec_type_simple);
-
 implementation
-uses controls_engine,cpu_misc;
-
-var
-  one_shot_0,one_shot_1:ttimers;
-
-procedure one_shot_timer_0(cpu:byte;time:single;final_procedure:exec_type_simple);
-begin
-  one_shot_0.cpu:=cpu;
-  one_shot_0.actual_time:=0;
-  one_shot_0.time_final:=time;
-  one_shot_0.enabled:=true;
-  one_shot_0.execute_simple:=final_procedure;
-end;
-
-procedure one_shot_timer_1(cpu:byte;time:single;final_procedure:exec_type_simple);
-begin
-  one_shot_1.cpu:=cpu;
-  one_shot_1.actual_time:=0;
-  one_shot_1.time_final:=time;
-  one_shot_1.enabled:=true;
-  one_shot_1.execute_simple:=final_procedure;
-end;
+uses controls_engine,cpu_misc,main_engine;
 
 procedure auto_fire;
 begin
@@ -144,9 +120,8 @@ end;
 
 procedure timer_eng.autofire_init;
 begin
-  //Siempre contra la primera CPU!!!
-  self.autofire_timer:=self.init(0,1,auto_fire,nil,timers.autofire_on);
-  self.timer[self.autofire_timer].time_final:=350;//cpu_0_clock/10000;
+  self.autofire_timer:=self.init(cpu_info[0].num_cpu,1,auto_fire,nil,timers.autofire_on);
+  self.timer[self.autofire_timer].time_final:=cpu_info[0].clock/1000;
 end;
 
 function timer_eng.init(cpu:byte;time:single;exec_simple:exec_type_simple;exec_param:exec_type_param;ena:boolean;param0:byte=0):byte;
@@ -171,24 +146,10 @@ for f:=self.timer_count downto 0 do begin
     self.timer[f].actual_time:=self.timer[f].actual_time+time_add;
     //Atencion!!! si desactivo el timer dentro de la funcion, ya no tiene que hacer nada!
     while ((self.timer[f].actual_time>=self.timer[f].time_final) and self.timer[f].enabled) do begin
-        self.timer[f].actual_time:=self.timer[f].actual_time-self.timer[f].time_final;
         if @self.timer[f].execute_simple<>nil then self.timer[f].execute_simple
           else self.timer[f].execute_param(self.timer[f].param0);
+        self.timer[f].actual_time:=self.timer[f].actual_time-self.timer[f].time_final;
     end;
-  end;
-end;
-if ((one_shot_0.enabled) and (one_shot_0.cpu=cpu)) then begin
-  one_shot_0.actual_time:=one_shot_0.actual_time+time_add;
-  if one_shot_0.actual_time>=one_shot_0.time_final then begin
-    one_shot_0.enabled:=false;
-    one_shot_0.execute_simple;
-  end;
-end;
-if ((one_shot_1.enabled) and (one_shot_1.cpu=cpu)) then begin
-  one_shot_1.actual_time:=one_shot_1.actual_time+time_add;
-  if one_shot_1.actual_time>=one_shot_1.time_final then begin
-    one_shot_1.enabled:=false;
-    one_shot_1.execute_simple;
   end;
 end;
 end;
@@ -214,15 +175,11 @@ for f:=0 to MAX_TIMERS do begin
   self.timer[f].enabled:=false;
 end;
 for f:=0 to 11 do autofire_status[f]:=false;
-one_shot_0.execute_simple:=nil;
-one_shot_1.execute_simple:=nil;
 end;
 
 procedure timer_eng.reset(timer_num:byte);
 begin
   self.timer[timer_num].actual_time:=0;
-  one_shot_0.actual_time:=0;
-  one_shot_1.actual_time:=0;
 end;
 
 end.

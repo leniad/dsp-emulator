@@ -5,11 +5,11 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms36xx,phoenix_audio_digital,
      rom_engine,pal_engine,sound_engine;
 
-function iniciar_phoenix:boolean;
+function phoenix_iniciar:boolean;
 
 implementation
 var
- banco_pal,scroll_y,banco{$IFDEF PHOENIX_DEBUG},sound_latch_b{$ENDIF}:byte;
+ banco_pal,scroll_y,banco,sound_latch_b:byte;
  mem_video:array[0..1,0..$fff] of byte;
 
 const
@@ -37,17 +37,17 @@ const
         pleiads_pal:array[0..1] of tipo_roms=(
         (n:'7611-5.33';l:$100;p:0;crc:$e38eeb83),(n:'7611-5.26';l:$100;p:$100;crc:$7a1bcb1e));
         //Dip
-        phoenix_dip_a:array [0..3] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
-        (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('3k 30k','4k 40k','5k 50k','6k 60k')),
-        (mask:$10;name:'Coinage';number:2;val2:($10,0);name2:('2C 1C','1C 1C')),());
-        pleiads_dip_a:array [0..4] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
-        (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('3K 30K','4K 40K','5K 50K','6K 60K')),
-        (mask:$10;name:'Coinage';number:2;val2:($10,0);name2:('2C 1C','1C 1C')),
-        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')),());
+        phoenix_dip_a:array [0..3] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        pleiads_dip_a:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-procedure update_video_phoenix;
+procedure update_video_phoenix;inline;
 var
     nchar:byte;
     color,f,x,y:word;
@@ -79,30 +79,32 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
 //Phoenix
 procedure phoenix_principal;
 var
+  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     case f of
-        0:marcade.dswa:=marcade.dswa or $80;
-        208:begin
+        207:begin
               marcade.dswa:=marcade.dswa and $7f;
               update_video_phoenix;
             end;
+        255:marcade.dswa:=marcade.dswa or $80;
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
   phoenix_audio_update;
   eventos_phoenix;
@@ -157,20 +159,22 @@ end;
 //Pleiads
 procedure pleiads_principal;
 var
+  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     case f of
-        0:marcade.dswa:=marcade.dswa or $80;
-        208:begin
+        207:begin
               marcade.dswa:=marcade.dswa and $7f;
               update_video_phoenix;
             end;
+        255:marcade.dswa:=marcade.dswa or $80;
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
   eventos_phoenix;
   video_sync;
@@ -178,10 +182,8 @@ end;
 end;
 
 procedure pleiads_putbyte(direccion:word;valor:byte);
-{$IFDEF PHOENIX_DEBUG}
 var
   pitch,note:byte;
-{$ENDIF}
 begin
 direccion:=direccion and $7fff;
 case direccion of
@@ -231,7 +233,6 @@ end;
 procedure phoenix_reset;
 begin
   z80_0.reset;
-  frame_main:=z80_0.tframes;
   scroll_y:=0;
   banco_pal:=0;
   marcade.in0:=$ff;
@@ -244,7 +245,7 @@ begin
   if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
 end;
 
-function iniciar_phoenix:boolean;
+function phoenix_iniciar:boolean;
 var
       colores:tpaleta;
       ctemp1,ctemp2,f:byte;
@@ -258,7 +259,7 @@ begin
 llamadas_maquina.close:=phoenix_cerrar;
 llamadas_maquina.reset:=phoenix_reset;
 llamadas_maquina.fps_max:=61.035156;
-iniciar_phoenix:=false;
+phoenix_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_mod_scroll(1,256,256,255,256,256,255);
@@ -272,10 +273,11 @@ case main_vars.tipo_maquina of
   11:begin //Phoenix
         llamadas_maquina.bucle_general:=phoenix_principal;
         z80_0.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
-        if not(roms_load(@memoria,phoenix_rom)) then exit;
         //Chip sonido
         tms36xx_start(372,0.21,@phoenix_dec);
         phoenix_audio_start;
+        //cargar roms
+        if not(roms_load(@memoria,phoenix_rom)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,phoenix_char1)) then exit;
         init_gfx(0,8,8,512);
@@ -287,17 +289,19 @@ case main_vars.tipo_maquina of
         convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //poner paleta
         if not(roms_load(@memoria_temp,phoenix_pal)) then exit;
-        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and 7) or (f and $60);
+        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and $07) or (f and $60);
         //DIP
         marcade.dswa:=$e0;
-        marcade.dswa_val2:=@phoenix_dip_a;
+        marcade.dswa_val:=@phoenix_dip_a;
   end;
   202:begin //Pleiads
         llamadas_maquina.bucle_general:=pleiads_principal;
         z80_0.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
-        if not(roms_load(@memoria,pleiads_rom)) then exit;
         //Chip sonido
         tms36xx_start(247,0,@pleiads_dec);
+        //phoenix_audio_start;
+        //cargar roms
+        if not(roms_load(@memoria,pleiads_rom)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,pleiads_char1)) then exit;
         init_gfx(0,8,8,512);
@@ -309,10 +313,10 @@ case main_vars.tipo_maquina of
         convert_gfx(0,256*8*8,@memoria_temp,@pc_x,@pc_y,true,false);
         //poner paleta
         if not(roms_load(@memoria_temp,pleiads_pal)) then exit;
-        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and 7) or (f and $e0);
+        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $e0);
         //DIP
         marcade.dswa:=$e0;
-        marcade.dswa_val2:=@pleiads_dip_a;
+        marcade.dswa_val:=@pleiads_dip_a;
   end;
 end;
 for f:=0 to $ff do begin
@@ -326,7 +330,7 @@ end;
 set_pal(colores,256);
 //final
 phoenix_reset;
-iniciar_phoenix:=true;
+phoenix_iniciar:=true;
 end;
 
 end.

@@ -130,7 +130,9 @@ var
   buffer0,buffer1:array[0..8] of byte;
   buf_input,adpcm_status:byte;
   sprite_ram:array[0..$1ff] of byte;
+  adpcm:array[0..$ffff] of byte;
   draw_sprites:procedure;
+  adpcm_pos,adpcm_data:word;
 
 procedure docastle_draw_sprites;
 var
@@ -223,30 +225,34 @@ end;
 
 procedure mrdocastle_principal;
 var
+  frame_main,frame_slave,frame_misc:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_main:=z80_0.tframes;
+frame_slave:=z80_1.tframes;
+frame_misc:=z80_2.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    eventos_mrdocastle;
-    case f of
-        14,40,72,104,136,168,200,232:z80_1.change_irq(HOLD_LINE);
-        224:begin
+    for h:=1 to CPU_SYNC do begin
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+      z80_1.run(frame_slave);
+      frame_slave:=frame_slave+z80_1.tframes-z80_1.contador;
+      z80_2.run(frame_misc);
+      frame_misc:=frame_misc+z80_2.tframes-z80_2.contador;
+    end;
+      case f of
+        13,39,71,103,135,167,199,231:z80_1.change_irq(HOLD_LINE);
+        223:begin
               z80_0.change_irq(HOLD_LINE);
               z80_2.change_nmi(PULSE_LINE);
               update_video_mrdocastle;
             end;
-    end;
-    for h:=1 to CPU_SYNC do begin
-      z80_0.run(frame_main);
-      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-      z80_1.run(frame_snd);
-      frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
-      z80_2.run(frame_sub);
-      frame_sub:=frame_sub+z80_2.tframes-z80_2.contador;
-    end;
+      end;
   end;
+  eventos_mrdocastle;
   video_sync;
 end;
 end;
@@ -452,10 +458,10 @@ case direccion of
                                 gfx[0].buffer[direccion and $3ff]:=true;
                              end;
    $c000:if (valor and $80)<>0 then begin
-           msm5205_0.reset_w(true);
+           msm_5205_0.reset_w(1);
          end else begin
-           msm5205_0.pos:=(valor and $7f)*$200;
-           msm5205_0.reset_w(false);
+           adpcm_pos:=(valor and $7f)*$200;
+           msm_5205_0.reset_w(0);
          end;
    $e000:z80_1.change_nmi(PULSE_LINE);
 end;
@@ -463,26 +469,16 @@ end;
 
 procedure snd_adpcm;
 begin
-if (msm5205_0.data_val<>-1) then begin
-		msm5205_0.data_w(msm5205_0.data_val and $f);
-		msm5205_0.data_val:=-1;
-    msm5205_0.pos:=msm5205_0.pos+1;
-    if (msm5205_0.pos+1)=$10000 then msm5205_0.reset_w(true)
+if (adpcm_data and $100)=0 then begin
+		msm_5205_0.data_w(adpcm_data and $0f);
+		adpcm_data:=$100;
+    if (adpcm_pos+1)=$10000 then msm_5205_0.reset_w(1)
+      else adpcm_pos:=adpcm_pos+1;
 end else begin
-		msm5205_0.data_val:=msm5205_0.rom_data[msm5205_0.pos];
-		msm5205_0.data_w(msm5205_0.data_val shr 4);
+		adpcm_data:=adpcm[adpcm_pos];
+		msm_5205_0.data_w(adpcm_data shr 4);
 end;
 end;
-
-procedure idoor_update_sound;
-begin
-  sn_76496_0.Update;
-  sn_76496_1.Update;
-  sn_76496_2.Update;
-  sn_76496_3.Update;
-  msm5205_0.update;
-end;
-
 //Main
 procedure reset_mrdocastle;
 begin
@@ -493,10 +489,8 @@ begin
  sn_76496_1.reset;
  sn_76496_2.reset;
  sn_76496_3.reset;
- if (main_vars.tipo_maquina=313) then msm5205_0.reset;
- frame_main:=z80_0.tframes;
- frame_snd:=z80_1.tframes;
- frame_sub:=z80_2.tframes;
+ if (main_vars.tipo_maquina=313) then msm_5205_0.reset;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -505,6 +499,8 @@ begin
  fillchar(buffer1,9,0);
  buf_input:=0;
  adpcm_status:=0;
+ adpcm_pos:=0;
+ adpcm_data:=0;
 end;
 
 function iniciar_mrdocastle:boolean;
@@ -540,14 +536,13 @@ iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
-if ((main_vars.tipo_maquina=308) or (main_vars.tipo_maquina=311)) then main_screen.rot270_screen:=true;
+if ((main_vars.tipo_maquina=308) or (main_vars.tipo_maquina=311)) then main_screen.rol90_screen:=true;
 iniciar_video(240,192);
 //Main CPU
 z80_0:=cpu_z80.create(4000000,264*CPU_SYNC);
 //Slave CPU
 z80_1:=cpu_z80.create(4000000,264*CPU_SYNC);
-if (main_vars.tipo_maquina=313) then z80_1.init_sound(idoor_update_sound)
-  else z80_1.init_sound(mrdocastle_update_sound);
+z80_1.init_sound(mrdocastle_update_sound);
 //Tercera CPU
 z80_2:=cpu_z80.create(4000000,264*CPU_SYNC);
 z80_2.change_ram_calls(mrdocastle_getbyte_misc,mrdocastle_putbyte_misc);
@@ -672,9 +667,8 @@ case main_vars.tipo_maquina of
           z80_1.change_ram_calls(mrdocastle_getbyte_slave,mrdocastle_putbyte_slave);
           if not(roms_load(@mem_snd,idsoccer_slave)) then exit;
           if not(roms_load(@mem_misc,idsoccer_misc)) then exit;
-          msm5205_0:=MSM5205_chip.create(384000,MSM5205_S64_4B,0.4,$10000);
-          msm5205_0.change_advance(snd_adpcm);
-          if not(roms_load(msm5205_0.rom_data,idsoccer_adpcm)) then exit;
+          msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S64_4B,0.4,snd_adpcm);
+          if not(roms_load(@adpcm,idsoccer_adpcm)) then exit;
           //convertir chars
           if not(roms_load(@memoria_temp,idsoccer_char)) then exit;
           conv_chars;
@@ -712,6 +706,7 @@ for f:=0 to 255 do begin
 end;
 set_pal(colores,512);
 //final
+reset_mrdocastle;
 iniciar_mrdocastle:=true;
 end;
 

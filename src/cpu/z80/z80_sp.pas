@@ -73,8 +73,8 @@ r.r:=((r.r+1) and $7f) or (r.r and $80);
 dec(r.sp,2);
 self.spec_putbyte(r.sp+1,r.pc shr 8);
 self.spec_putbyte(r.sp,r.pc and $ff);
-r.iff2:= false;
-r.iff1:= False;
+r.IFF2:= false;
+r.IFF1:= False;
 Case r.im of
         0:begin //12t
               r.pc:= $38;
@@ -86,7 +86,7 @@ Case r.im of
             end;
         2:begin //19t
                 if self.daisy then posicion:=z80daisy_ack
-                    else posicion:=self.irq_vector;
+                    else posicion:=self.im2_lo;
                 posicion:=posicion or (r.i shl 8);
                 r.pc:=self.spec_getbyte(posicion)+(self.spec_getbyte(posicion+1) shl 8);
                 self.contador:=self.contador+7; //19 en total -12 de guardar SP y coger PC
@@ -101,7 +101,7 @@ var
  instruccion,temp:byte;
  posicion:parejas;
  ban_temp:band_z80;
- pcontador:integer;
+ pcontador:byte;
  irq_temp:boolean;
  cantidad_t:word;
 begin
@@ -405,8 +405,8 @@ case instruccion of
                 spec_putbyte(r.hl.w,temp);
             end;
         $37:begin  {scf >4t<}
-                r.f.bit5:=(r.a and $20)<>0;
-                r.f.bit3:=(r.a and 8)<>0;
+                r.f.bit5:=((r.a and $20)<>0) or r.f.bit5;
+                r.f.bit3:=((r.a and 8)<>0) or r.f.bit3;
                 r.f.c:=true;
                 r.f.h:=false;
                 r.f.n:=false;
@@ -446,8 +446,8 @@ case instruccion of
                 r.pc:=r.pc+1;
             end;
         $3f:begin   {ccf >4t<}
-                r.f.bit5:=(r.a and $20)<>0;
-                r.f.bit3:=(r.a and 8)<>0;
+                r.f.bit5:=((r.a and $20)<>0) or r.f.bit5;
+                r.f.bit3:=((r.a and 8)<>0) or r.f.bit3;
                 r.f.h:=r.f.c;
                 r.f.n:=false;
                 r.f.c:=not(r.f.c);
@@ -1075,7 +1075,6 @@ case instruccion of
   cantidad_t:=self.contador-pcontador;
   spectrum_despues_instruccion(cantidad_t);
   timers.update(cantidad_t,self.numero_cpu);
-  self.totalt:=self.totalt+cantidad_t;
 end; {del while}
 end;
 
@@ -2066,8 +2065,7 @@ var
  tempb,instruccion:byte;
  temp2:word;
 begin
-if tipo then temp2:=r.ix.w
-  else temp2:=r.iy.w;
+if tipo then temp2:=r.ix.w else temp2:=r.iy.w;
 self.retraso(r.pc);inc(self.contador,3);
 instruccion:=self.getbyte(r.pc);
 r.pc:=r.pc+1;
@@ -2292,7 +2290,7 @@ case instruccion of
         $23:begin {ld E,sla (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(@r.de.l);
+                rlc_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $24:begin {ld H,sla (IX+d)}
@@ -2314,10 +2312,11 @@ case instruccion of
                 spec_putbyte(temp2,tempb);
             end;
         $27:begin {ld A,sla (IX+d)}
-                r.a:=spec_getbyte(temp2);
+                tempb:=spec_getbyte(temp2);
+                r.a:=tempb;
                 self.retraso(temp2);inc(self.contador);
-                sla_8(@r.a);
-                spec_putbyte(temp2,r.a);
+                sla_8(@tempb);
+                spec_putbyte(temp2,tempb);
             end;
         $28:begin //ld B,sra (IX+d)
                 r.bc.h:=spec_getbyte(temp2);
@@ -3691,7 +3690,6 @@ case instruccion of
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   r.pc:=r.pc-2;
-                  r.wz:=r.pc+1;
                 end;
         end;
         $b3:begin //otir añadido el dia 18-09-04 >16t o 21t<
@@ -3716,7 +3714,6 @@ case instruccion of
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   r.pc:=r.pc-2;
-                  r.wz:=r.pc+1;
                 end;
             end;
         { $b4..$b7:nop*2}
@@ -3796,7 +3793,6 @@ case instruccion of
                         self.retraso(r.hl.w);self.contador:=self.contador+1;
                         self.retraso(r.hl.w);self.contador:=self.contador+1;
                         r.pc:=r.pc-2;
-                        r.wz:=r.pc+1;
                  end;
             end;
         $bb:begin //otdr
@@ -3822,7 +3818,6 @@ case instruccion of
                     self.retraso(r.hl.w);self.contador:=self.contador+1;
                     self.retraso(r.hl.w);self.contador:=self.contador+1;
                     r.pc:=r.pc-2;
-                    r.wz:=r.pc+1;
                 end;
             end;
         $fb:main_vars.mensaje_principal:='Instruccion no implmentada EDFB';

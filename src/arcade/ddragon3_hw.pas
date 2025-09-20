@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295,qsnapshot;
 
-function iniciar_ddragon3:boolean;
+procedure cargar_ddragon3;
 
 implementation
 const
@@ -38,29 +38,29 @@ const
         (n:'28j7-0.ic11';l:$40000;p:0;crc:$a8b773f1),(n:'28j6-0.ic13';l:$40000;p:$1;crc:$617530fc),
         (n:'28j5-0.ic12';l:$40000;p:$80000;crc:$cef0a821),(n:'28j4-0.ic14';l:$40000;p:$80001;crc:$b84fda09));
         //DIP
-        ddragon3_dip_a:array [0..9] of def_dip2=(
-        (mask:3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-        (mask:$10;name:'Continue Discount';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
-        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$300;name:'Difficulty';number:4;val4:($200,$300,$100,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$400;name:'Player Vs. Player Damage';number:2;val2:($400,0);name2:('Off','On')),
-        (mask:$2000;name:'Stage Clear Energy';number:2;val2:(0,$2000);name2:('0','50')),
-        (mask:$4000;name:'Starting Energy';number:2;val2:(0,$4000);name2:('200','230')),
-        (mask:$8000;name:'Players';number:2;val2:($8000,0);name2:('2','3')),());
-        ctribe_dip_a:array [0..3] of def_dip2=(
-        (mask:$300;name:'Coinage';number:4;val4:(0,$100,$300,$200);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-        (mask:$1000;name:'Continue Discount';number:2;val2:($1000,0);name2:('Off','On')),
-        (mask:$2000;name:'Demo Sounds';number:2;val2:(0,$2000);name2:('Off','On')),());
-        ctribe_dip_b:array [0..4] of def_dip2=(
-        (mask:$300;name:'Difficulty';number:4;val4:($200,$300,$100,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$400;name:'Timer Speed';number:2;val2:($400,0);name2:('Normal','Fast')),
-        (mask:$800;name:'FBI Logo';number:2;val2:(0,$800);name2:('Off','On')),
-        (mask:$2000;name:'Stage Clear Energy';number:2;val2:($2000,0);name2:('0','50')),());
-        ctribe_dip_c:array [0..3] of def_dip2=(
-        (mask:$100;name:'More Stage Clear Energy';number:2;val2:($100,0);name2:('Off','On')),
-        (mask:$200;name:'Players';number:2;val2:($200,0);name2:('2','3')),
-        (mask:$1000;name:'Flip Screen';number:2;val2:($1000,0);name2:('Off','On')),());
+        ddragon3_dip_a:array [0..9] of def_dip=(
+        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Continue Discount';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$300;name:'Difficulty';number:4;dip:((dip_val:$200;dip_name:'Easy'),(dip_val:$300;dip_name:'Normal'),(dip_val:$100;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Player Vs. Player Damage';number:2;dip:((dip_val:$400;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Stage Clear Energy';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2000;dip_name:'50'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Starting Energy';number:2;dip:((dip_val:$0;dip_name:'200'),(dip_val:$4000;dip_name:'230'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Players';number:2;dip:((dip_val:$8000;dip_name:'2'),(dip_val:$0;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ctribe_dip_a:array [0..3] of def_dip=(
+        (mask:$300;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$100;dip_name:'2C 1C'),(dip_val:$300;dip_name:'1C 1C'),(dip_val:$200;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Continue Discount';number:2;dip:((dip_val:$1000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ctribe_dip_b:array [0..4] of def_dip=(
+        (mask:$300;name:'Difficulty';number:4;dip:((dip_val:$200;dip_name:'Easy'),(dip_val:$300;dip_name:'Normal'),(dip_val:$100;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Timer Speed';number:2;dip:((dip_val:$400;dip_name:'Normal'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$800;name:'FBI Logo';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$800;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Stage Clear Energy';number:2;dip:((dip_val:$2000;dip_name:'0'),(dip_val:$0;dip_name:'50'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ctribe_dip_c:array [0..3] of def_dip=(
+        (mask:$100;name:'More Stage Clear Energy';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$200;name:'Players';number:2;dip:((dip_val:$200;dip_name:'2'),(dip_val:0;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Flip Screen';number:2;dip:((dip_val:$1000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  video_update_dd3:procedure;
@@ -73,7 +73,7 @@ var
  fg_ram,ram2:array[0..$7ff] of word;
  sound_latch,vblank:byte;
 
-procedure draw_sprites;
+procedure draw_sprites;inline;
 var
   atrib,nchar,color,x,y,count:word;
   f,h:byte;
@@ -110,7 +110,7 @@ for f:=0 to $ff do begin
 	end; //del for
 end;
 
-procedure draw_video;
+procedure draw_video;inline;
 var
   f,x,y,nchar,atrib:word;
   color:byte;
@@ -139,7 +139,7 @@ fill_full_screen(3,$600);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure update_video_ddragon3;
+procedure update_video_ddragon3;inline;
 begin
 draw_video;
 case (vreg and $60) of
@@ -162,7 +162,7 @@ end;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
-procedure update_video_ctribe;
+procedure update_video_ctribe;inline;
 begin
 draw_video;
 if (vreg and $8)<>0 then begin
@@ -232,28 +232,33 @@ end;
 
 procedure ddragon3_principal;
 var
+  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 271 do begin
-    events_update_dd3;
+    //main
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    if ((f mod 16)=0) then m68000_0.irq[5]:=ASSERT_LINE;
     case f of
-        0,16,32,48,64,80,96,112,128,144,160,176,192,108,224,240,256:m68000_0.irq[5]:=ASSERT_LINE;
-        8:vblank:=0;
-        248:begin
-              m68000_0.irq[6]:=ASSERT_LINE;
-              vblank:=1;
+          7:begin
+              vblank:=0;
               video_update_dd3;
             end;
+        247:begin
+              m68000_0.irq[6]:=ASSERT_LINE;
+              vblank:=1;
+            end;
     end;
-    //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_snd);
-    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
+ events_update_dd3;
  video_sync;
 end;
 end;
@@ -302,7 +307,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);
+procedure cambiar_color(pos,data:word);inline;
 var
   color:tcolor;
 begin
@@ -388,7 +393,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_ctribe(pos,data:word);
+procedure cambiar_color_ctribe(pos,data:word);inline;
 var
   color:tcolor;
 begin
@@ -479,14 +484,14 @@ size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2151_0.save_snapshot(data);
-savedata_qsnapshot(data,size);
+savedata_com_qsnapshot(data,size);
 size:=oki_6295_0.save_snapshot(data);
-savedata_qsnapshot(data,size);
+savedata_com_qsnapshot(data,size);
 //MEM
-savedata_qsnapshot(@fg_ram,$800*2);
-savedata_qsnapshot(@bg_ram,$400*2);
-savedata_qsnapshot(@ram,$2000*2);
-savedata_qsnapshot(@buffer_sprites_w,$800*2);
+savedata_com_qsnapshot(@fg_ram,$800*2);
+savedata_com_qsnapshot(@bg_ram,$400*2);
+savedata_com_qsnapshot(@ram,$2000*2);
+savedata_com_qsnapshot(@buffer_sprites_w,$800*2);
 buffer[0]:=vreg and $ff;
 buffer[1]:=vreg shr 8;
 buffer[2]:=bg_tilebase and $ff;
@@ -502,7 +507,7 @@ buffer[11]:=bg_scrolly shr 8;
 buffer[12]:=sound_latch;
 buffer[13]:=vblank;
 savedata_qsnapshot(@buffer,14);
-savedata_qsnapshot(@buffer_paleta,$400*2);
+savedata_com_qsnapshot(@buffer_paleta,$400*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -563,8 +568,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
- frame_main:=m68000_0.tframes;
- frame_snd:=z80_0.tframes;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  bg_tilebase:=0;
@@ -590,11 +594,6 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
-llamadas_maquina.bucle_general:=ddragon3_principal;
-llamadas_maquina.reset:=reset_ddragon3;
-llamadas_maquina.fps_max:=57.444853;
-llamadas_maquina.load_qsnap:=ddragon3_qload;
-llamadas_maquina.save_qsnap:=ddragon3_qsave;
 iniciar_ddragon3:=false;
 iniciar_audio(false);
 //Pantallas
@@ -610,9 +609,9 @@ m68000_0:=cpu_m68000.create(10000000,272);
 z80_0:=cpu_z80.create(3579545,272);
 z80_0.init_sound(ddragon3_sound_update);
 //Sound Chips
-ym2151_0:=ym2151_chip.create(3579545,1);
+ym2151_0:=ym2151_chip.create(3579545,0.5);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1.5);
 getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   196:begin //DDW 3
@@ -639,7 +638,7 @@ case main_vars.tipo_maquina of
         convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
         //DIP
         marcade.dswa:=$ffff;
-        marcade.dswa_val2:=@ddragon3_dip_a;
+        marcade.dswa_val:=@ddragon3_dip_a;
         video_update_dd3:=update_video_ddragon3;
         events_update_dd3:=eventos_ddragon3;
   end;
@@ -666,18 +665,29 @@ case main_vars.tipo_maquina of
         convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
         //DIP
         marcade.dswa:=$ffff;
-        marcade.dswa_val2:=@ctribe_dip_a;
+        marcade.dswa_val:=@ctribe_dip_a;
         marcade.dswb:=$ffff;
-        marcade.dswb_val2:=@ctribe_dip_b;
+        marcade.dswb_val:=@ctribe_dip_b;
         marcade.dswc:=$ffff;
-        marcade.dswc_val2:=@ctribe_dip_c;
+        marcade.dswc_val:=@ctribe_dip_c;
         video_update_dd3:=update_video_ctribe;
         events_update_dd3:=eventos_ctribe;
       end;
 end;
   //final
 freemem(memoria_temp);
+reset_ddragon3;
 iniciar_ddragon3:=true;
+end;
+
+procedure Cargar_ddragon3;
+begin
+llamadas_maquina.iniciar:=iniciar_ddragon3;
+llamadas_maquina.bucle_general:=ddragon3_principal;
+llamadas_maquina.reset:=reset_ddragon3;
+llamadas_maquina.fps_max:=57.444853;
+llamadas_maquina.load_qsnap:=ddragon3_qload;
+llamadas_maquina.save_qsnap:=ddragon3_qsave;
 end;
 
 end.

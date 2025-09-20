@@ -3,9 +3,9 @@ unit config;
 interface
 
 uses
-  Controls, Classes, Forms, StdCtrls, lenguaje,spectrum_misc,main_engine,
-  sound_engine,z80pio,z80daisy,z80_sp,misc_functions,timer_engine,
-  controls_engine;
+  lib_sdl2,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls,ComCtrls,lenguaje,spectrum_misc,main_engine,
+  sound_engine,z80pio,z80daisy,z80_sp,misc_functions,timer_engine;
 
 type
   TConfigSP = class(TForm)
@@ -79,15 +79,7 @@ close;
 end;
 
 procedure TConfigSP.FormShow(Sender: TObject);
-var
-  f:integer;
 begin
-f:=(principal1.left+(principal1.width div 2))-(configsp.Width div 2);
-if f<0 then configsp.Left:=0
-  else configsp.Left:=f;
-f:=(principal1.top+(principal1.Height div 2))-(configsp.Height div 2);
-if f<0 then configsp.Top:=0
-  else configsp.Top:=f;
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
@@ -159,7 +151,7 @@ end;
     1:radiobutton15.Checked:=true;
     2:radiobutton16.Checked:=true;
   end;
-Button2.Caption:=leng.mensajes[8];
+Button2.Caption:=leng[main_vars.idioma].mensajes[8];
 end;
 
 procedure TConfigSP.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
@@ -190,7 +182,7 @@ with ConfigSP do begin
   end;
   if radiobutton9.Checked then begin
     borde.tipo:=2;
-    fillchar(borde.buffer,78000,$80);
+    fillchar(borde.buffer,71136,16);
     case main_vars.tipo_maquina of
       0,5:borde.borde_spectrum:=borde_48_full;
       1,2,3,4:borde.borde_spectrum:=borde_128_full;
@@ -203,14 +195,13 @@ with ConfigSP do begin
     else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
       else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
         else if radiobutton20.Checked then mouse.tipo:=MAMX;
-  if (mouse.tipo<>0) then show_mouse_cursor
-    else hide_mouse_cursor;
+  if (mouse.tipo<>0) then sdl_showcursor(1)
+    else sdl_showcursor(0);
   if mouse.tipo=3 then begin
-    pio_0:=tz80pio.create;
-    pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
-    z80daisy_init(Z80_PIO0_TYPE);
-    pio_0.reset;
-    spec_z80.enable_daisy;
+    z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
+    z80daisy_init(Z80_PIO_TYPE,Z80_DAISY_NONE,Z80_DAISY_NONE,0,0,0);
+    z80pio_reset(0);
+    spec_z80.daisy:=true;
   end;
   lenslok.activo:=radiobutton12.Checked;
   if lenslok.activo then lenslock1.Show;
@@ -256,7 +247,7 @@ procedure TConfigSP.Button3Click(Sender: TObject);
 var
   file_name:string;
 begin
-if OpenRom(file_name,SROM) then Edit1.Text:=file_name;
+if OpenRom(StROM,file_name) then Edit1.Text:=file_name;
 end;
 
 end.

@@ -2,7 +2,7 @@ unit k005289;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine,timer_engine,dialogs;
+     sound_engine,timer_engine;
 
 type
     k005289_snd_chip=class(snd_chip_class)
@@ -88,7 +88,6 @@ end;
 
 constructor k005289_snd_chip.create(clock:dword;amp:single=1);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.amp:=amp;
   self.rate:=clock div CLOCK_DIVIDER;
 	self.tsample_num:=init_channel;

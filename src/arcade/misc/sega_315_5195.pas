@@ -6,9 +6,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}m68000,nz80,main_engine;
 type
 
   tsound_call=procedure(sound_latch:byte);
-  topen_bus=function:byte;
   t315_5195=class
-          constructor create(cpu_m68k:cpu_m68000;isound_call:tsound_call);
+          constructor create(cpu_m68k:cpu_m68000;cpu_iz80:cpu_z80;isound_call:tsound_call);
           destructor free;
         public
           dirs_start:array[0..7] of dword;
@@ -18,29 +17,22 @@ type
           procedure set_map;
           function read_reg(dir:byte):byte;
           procedure write_reg(dir,valor:byte);
-          procedure change_open_bus(open_bus:topen_bus);
         protected
           regs:array[0..$1f] of byte;
           m68k:cpu_m68000;
+          iz80:cpu_z80;
           sound_call:tsound_call;
-          open_bus:topen_bus;
   end;
 
 var
   s315_5195_0:t315_5195;
 
 implementation
-
-constructor t315_5195.create(cpu_m68k:cpu_m68000;isound_call:tsound_call);
+constructor t315_5195.create(cpu_m68k:cpu_m68000;cpu_iz80:cpu_z80;isound_call:tsound_call);
 begin
   self.m68k:=cpu_m68k;
+  self.iz80:=cpu_iz80;
   self.sound_call:=isound_call;
-  self.open_bus:=nil;
-end;
-
-procedure t315_5195.change_open_bus(open_bus:topen_bus);
-begin
-  self.open_bus:=open_bus;
 end;
 
 destructor t315_5195.free;
@@ -64,7 +56,7 @@ const
 begin
 for f:=0 to 7 do begin
   self.dirs_start[f]:=self.regs[$11+(f*2)] shl 16;
-  self.dirs_end[f]:=self.dirs_start[f]+size[self.regs[$10+(f*2)] and 3];
+  self.dirs_end[f]:=self.dirs_start[f]+size[self.regs[$10+(f*2)] and $3];
 end;
 end;
 
@@ -78,7 +70,6 @@ begin
     2:if (self.regs[2] and 3)=3 then res:=0
         else res:=$f;
     3:res:=self.from_sound;
-    else if @self.open_bus<>nil then res:=self.open_bus;
   end;
   read_reg:=res;
 end;

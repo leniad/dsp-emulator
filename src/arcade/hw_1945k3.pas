@@ -4,7 +4,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine;
 
-function iniciar_k31945:boolean;
+procedure cargar_k31945;
 
 implementation
 const
@@ -46,14 +46,13 @@ var
  rom:array[0..$7ffff] of word;
  ram1,ram2:array[0..$7fff] of word;
  video,video_buffer:array[0..$7ff] of word;
- sprite:array[0..$fff] of word;
+ sprite,sprite_buffer:array[0..$fff] of word;
  oki1_rom,oki2_rom:array[0..3,0..$3ffff] of byte;
  y_size,oki1_bank,oki2_bank:byte;
- sprites_count,y_count,t1scroll_x,t1scroll_y:word;
+ sprites_count,y_count,char_mask,sprite_mask,t1scroll_x,t1scroll_y:word;
  vram_refresh:boolean;
 
-procedure update_video_k31945;
-procedure put_gfx_sprite_1945(nchar:dword;ngfx:byte;flick:boolean);
+procedure put_gfx_sprite_1945(nchar:dword;ngfx:byte;flick:boolean);inline;
 var
   x,y,pos_y,ptemp:byte;
   temp,temp2:pword;
@@ -78,6 +77,8 @@ for y:=0 to 15 do begin
   pos_y:=pos_y+1;
 end;
 end;
+
+procedure update_video_k31945;
 var
   f,nchar,x,y:word;
 begin
@@ -85,23 +86,23 @@ for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=video_buffer[f];
+    nchar:=video_buffer[f] and char_mask;
     put_gfx(x*16,y*16,nchar,0,1,0);
     gfx[0].buffer[f]:=false;
   end;
 end;
 scroll_x_y(1,2,t1scroll_x,t1scroll_y);
 for f:=0 to sprites_count do begin
-  x:=((buffer_sprites_w[f] and $ff00) shr 8) or ((buffer_sprites_w[f+$7ff] and $1) shl 8);
-  y:=buffer_sprites_w[f] and $ff;
-  nchar:=(buffer_sprites_w[$7ff+f] and $7ffe) shr 1;
-  put_gfx_sprite_1945(nchar,1,(buffer_sprites_w[f+$7ff] and $8000)<>0);
+  x:=((sprite_buffer[f] and $ff00) shr 8) or ((sprite_buffer[f+$7ff] and $1) shl 8);
+  y:=sprite_buffer[f] and $ff;
+  nchar:=(sprite_buffer[$7ff+f] and $7ffe) shr 1;
+  put_gfx_sprite_1945(nchar and sprite_mask,1,(sprite_buffer[f+$7ff] and $8000)<>0);
   actualiza_gfx_sprite(x,y,2,1);
 end;
 actualiza_trozo_final(0,0,320,y_size,2);
 end;
 
-procedure eventos_k31945;
+procedure eventos_k31945;inline;
 begin
 if event.arcade then begin
   //P1
@@ -131,24 +132,26 @@ end;
 
 procedure k31945_principal;
 var
+  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=m68000_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to y_count do begin
-   eventos_k31945;
+   m68000_0.run(frame);
+   frame:=frame+m68000_0.tframes-m68000_0.contador;
    if f=y_size then begin
       m68000_0.irq[4]:=HOLD_LINE;
       update_video_k31945;
    end;
-   m68000_0.run(frame_main);
-   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
  end;
+ eventos_k31945;
  video_sync;
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -164,7 +167,7 @@ var
 begin
   oldval:=vram_refresh;
 	if (not(oldval) and newval) then begin
-    copymemory(@buffer_sprites_w,@sprite,$1000*2);
+    copymemory(@sprite_buffer,@sprite,$1000*2);
     copymemory(@video_buffer,@video,$400*2);
     fillchar(gfx[0].buffer,$400,1);
   end;
@@ -284,7 +287,7 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  if main_vars.tipo_maquina=283 then oki_6295_1.reset;
- frame_main:=m68000_0.tframes;
+ reset_audio;
  oki1_bank:=0;
  oki2_bank:=0;
  t1scroll_x:=0;
@@ -310,22 +313,15 @@ begin
 end;
 begin
 iniciar_k31945:=false;
-llamadas_maquina.bucle_general:=k31945_principal;
-llamadas_maquina.iniciar:=iniciar_k31945;
-llamadas_maquina.reset:=reset_k31945;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,512,511);
 screen_init(2,512,512,false,true);
 screen_mod_sprites(2,512,256,511,255);
 if main_vars.tipo_maquina=283 then begin
-  main_screen.rot270_screen:=true;
+  main_screen.rol90_screen:=true;
   y_size:=224;
-  llamadas_maquina.fps_max:=59.637405;
-end else begin
-  y_size:=240;
-  llamadas_maquina.fps_max:=49.603176;
-end;
+end else y_size:=240;
 iniciar_video(320,y_size);
 //mem aux
 getmem(memoria_temp,$400000);
@@ -348,6 +344,8 @@ case main_vars.tipo_maquina of
         copymemory(oki_6295_1.get_rom_addr,memoria_temp,$40000);
         copymemory(@oki2_rom[0,0],memoria_temp,$40000);
         copymemory(@oki2_rom[1,0],@memoria_temp[$40000],$40000);
+        char_mask:=$1fff;
+        sprite_mask:=$3fff;
         //x_size=432 y_size=262, total sprites=432*262/(4+128)
         y_count:=262-1;
         sprites_count:=round((432*262)/(4+128))-1;
@@ -376,6 +374,8 @@ case main_vars.tipo_maquina of
         copymemory(@oki1_rom[0,0],memoria_temp,$40000);
         copymemory(@oki1_rom[1,0],@memoria_temp[$40000],$40000);
         copymemory(@oki1_rom[2,0],@memoria_temp[$80000],$40000);
+        char_mask:=$fff;
+        sprite_mask:=$3fff;
         //x_size=432 y_size=315
         y_count:=315-1;
         sprites_count:=round((432*315)/(4+128))-1;
@@ -394,7 +394,17 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
+reset_k31945;
 iniciar_k31945:=true;
+end;
+
+procedure cargar_k31945;
+begin
+llamadas_maquina.bucle_general:=k31945_principal;
+llamadas_maquina.iniciar:=iniciar_k31945;
+llamadas_maquina.reset:=reset_k31945;
+if main_vars.tipo_maquina=283 then llamadas_maquina.fps_max:=59.637405
+  else llamadas_maquina.fps_max:=49.603176;
 end;
 
 end.

@@ -19,17 +19,17 @@ const
         (n:'ua0-12.u14';l:$40000;p:$80000;crc:$00b5381c),(n:'ua0-13.u15';l:$40000;p:$c0000;crc:$8f9a0ed3),
         (n:'ua0-6.u8';l:$40000;p:$100000;crc:$14ecc7bb),(n:'ua0-7.u9';l:$40000;p:$140000;crc:$ff1a4e68),
         (n:'ua0-8.u10';l:$40000;p:$180000;crc:$936e1884),(n:'ua0-9.u11';l:$40000;p:$1c0000;crc:$e812371c));
-        tndrcade_dip:array [0..10] of def_dip2=(
-        (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c;name:'Bonus Life';number:4;val4:($c,4,0,8);name4:('50K','50K 150K+','70K 200K+','100K')),
-        (mask:$30;name:'Lives';number:4;val4:($10,0,$30,$20);name4:('1','2','3','5')),
-        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$80;name:'Licensed To';number:2;val2:($80,0);name2:('Taito America Corp.','Taito Corp. Japan')),
-        (mask:$100;name:'Title';number:2;val2:($100,0);name2:('Thundercade','Twin Formation')),
-        (mask:$200;name:'Flip Screen';number:2;val2:($200,0);name2:('Off','On')),
-        (mask:$800;name:'Demo Sounds';number:2;val2:($800,0);name2:('Off','On')),
-        (mask:$3000;name:'Coin A';number:4;val4:($1000,$3000,0,$2000);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$c000;name:'Coin B';number:4;val4:($4000,$c000,0,$8000);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
+        tndrcade_dip:array [0..10] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$c;dip_name:'50K'),(dip_val:$4;dip_name:'50K 150K+'),(dip_val:$0;dip_name:'70K 200K+'),(dip_val:$8;dip_name:'100K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Licensed To';number:2;dip:((dip_val:$80;dip_name:'Taito America Corp.'),(dip_val:$0;dip_name:'Taito Corp. Japan'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$100;name:'Title';number:2;dip:((dip_val:$100;dip_name:'Thundercade'),(dip_val:$0;dip_name:'Twin Formation'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$200;name:'Flip Screen';number:2;dip:((dip_val:$200;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$800;name:'Demo Sounds';number:2;dip:((dip_val:$800;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3000;name:'Coin A';number:4;dip:((dip_val:$1000;dip_name:'2C 1C'),(dip_val:$3000;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$2000;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c000;name:'Coin B';number:4;dip:((dip_val:$4000;dip_name:'2C 1C'),(dip_val:$c000;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$8000;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Twin Eagle
         twineagl_rom:tipo_roms=(n:'ua2-1';l:$80000;p:0;crc:$5c3fe531);
         twineagl_snd:tipo_roms=(n:'ua2-2';l:$2000;p:0;crc:$783ca84e);
@@ -41,17 +41,17 @@ const
         (n:'ua2-9';l:$80000;p:$100000;crc:$a451eae9),(n:'ua2-10';l:$80000;p:$100001;crc:$5bbe1f56));
         twineagl_pcm:array[0..1] of tipo_roms=(
         (n:'ua2-11';l:$80000;p:0;crc:$624e6057),(n:'ua2-12';l:$80000;p:$80000;crc:$3068ff64));
-        twineagl_dip:array [0..10] of def_dip2=(
-        (mask:1;name:'Copyright / License';number:2;val2:(0,1);name2:('Taito America/Romstar','Taito Corp Japan')),
-        (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
-        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),
-        (mask:$30;name:'Coin A';number:4;val4:($10,$30,0,$20);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$300;name:'Difficulty';number:4;val4:($200,$300,$100,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c00;name:'Bonus Life';number:4;val4:($c00,$800,$400,0);name4:('Never','500K','1000K','500K 1500K')),
-        (mask:$3000;name:'Lives';number:4;val4:($1000,0,$3000,$2000);name4:('1','2','3','5')),
-        (mask:$4000;name:'Licensor Option';number:2;val2:($4000,0);name2:('Option 1','Option 2')),
-        (mask:$8000;name:'Coinage Type';number:2;val2:($8000,0);name2:('Coin Mode 2','Coin Mode 2')),());
+        twineagl_dip:array [0..10] of def_dip=(
+        (mask:$1;name:'Copyright / License';number:2;dip:((dip_val:$0;dip_name:'Taito America / Romstar'),(dip_val:$1;dip_name:'Taito Corp Japan'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$8;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$20;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$80;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$300;name:'Difficulty';number:4;dip:((dip_val:$200;dip_name:'Easy'),(dip_val:$300;dip_name:'Normal'),(dip_val:$100;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c00;name:'Bonus Life';number:4;dip:((dip_val:$c00;dip_name:'Never'),(dip_val:$800;dip_name:'500K'),(dip_val:$400;dip_name:'1000K'),(dip_val:$8;dip_name:'500K 1500K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3000;name:'Lives';number:4;dip:((dip_val:$1000;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$3000;dip_name:'3'),(dip_val:$2000;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Licensor Option';number:2;dip:((dip_val:$4000;dip_name:'Option 1'),(dip_val:$0;dip_name:'Option 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Coinage Type';number:2;dip:((dip_val:$8000;dip_name:'Coin Mode 2'),(dip_val:$0;dip_name:'Coin Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Thunder & Lightning
         thunderl_rom:array[0..1] of tipo_roms=(
         (n:'m4';l:$8000;p:0;crc:$1e6b9462),(n:'m5';l:$8000;p:$1;crc:$7e82793e));
@@ -60,18 +60,18 @@ const
         (n:'t15';l:$20000;p:$40001;crc:$b97a7b56),(n:'t14';l:$20000;p:$40000;crc:$79c707be));
         thunderl_pcm:array[0..1] of tipo_roms=(
         (n:'r28';l:$80000;p:0;crc:$a043615d),(n:'r27';l:$80000;p:$80000;crc:$cb8425a3));
-        thunderl_dip_a:array [0..2] of def_dip2=(
-        (mask:$10;name:'Force 1 Life';number:2;val2:(0,$10);name2:('Off','On')),
-        (mask:$e0;name:'Copyright';number:8;val8:($80,$c0,$e0,$a0,$60,$40,$20,0);name8:('Romstar','Seta (Romstar License)','Seta (Visco License)','Visco','None','None','None','None')),());
-        thunderl_dip_b:array [0..8] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:($c,$d,8,$e,9,4,0,5,$a,$f,1,6,2,$b,7,3);name16:('4C 1C','3C 1C','4C 2C','2C 1C','3C 2C','4C 3C','4C 4C','3C 3C','3C 3C','1C 1C','3C 4C','2C 3C','2C 4C','1C 2C','1C 3C','1C 4C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($c0,$d0,$80,$e0,$90,$40,0,$50,$a0,$f0,$10,$60,$20,$b0,$70,$30);name16:('4C 1C','3C 1C','4C 2C','2C 1C','3C 2C','4C 3C','4C 4C','3C 3C','3C 3C','1C 1C','3C 4C','2C 3C','2C 4C','1C 2C','1C 3C','1C 4C')),
-        (mask:$200;name:'Flip Screen';number:2;val2:(0,$200);name2:('Off','On')),
-        (mask:$400;name:'Cabinet';number:2;val2:(0,$400);name2:('Upright','Cocktail')),
-        (mask:$800;name:'Controls';number:2;val2:($800,0);name2:('2','1')),
-        (mask:$1000;name:'Demo Sounds';number:2;val2:($1000,0);name2:('Off','On')),
-        (mask:$2000;name:'Lives';number:2;val2:($2000,0);name2:('3','2')),
-        (mask:$c000;name:'Difficulty';number:4;val4:($8000,$c000,$4000,0);name4:('Easy','Normal','Hard','Hardest')),());
+        thunderl_dip_a:array [0..2] of def_dip=(
+        (mask:$10;name:'Force 1 Life';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$10;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Copyright';number:8;dip:((dip_val:$80;dip_name:'Romstar'),(dip_val:$c0;dip_name:'Seta (Romstar License)'),(dip_val:$e0;dip_name:'Seta (Visco License)'),(dip_val:$a0;dip_name:'Visco'),(dip_val:$60;dip_name:'None'),(dip_val:$40;dip_name:'None'),(dip_val:$20;dip_name:'None'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),());
+        thunderl_dip_b:array [0..8] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$0c;dip_name:'4C 1C'),(dip_val:$0d;dip_name:'3C 1C'),(dip_val:$08;dip_name:'4C 2C'),(dip_val:$0e;dip_name:'2C 1C'),(dip_val:$09;dip_name:'3C 2C'),(dip_val:$04;dip_name:'4C 3C'),(dip_val:$0;dip_name:'4C 4C'),(dip_val:$05;dip_name:'3C 3C'),(dip_val:$0a;dip_name:'3C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$01;dip_name:'3C 4C'),(dip_val:$06;dip_name:'2C 3C'),(dip_val:$02;dip_name:'2C 4C'),(dip_val:$0b;dip_name:'1C 2C'),(dip_val:$07;dip_name:'1C 3C'),(dip_val:$03;dip_name:'1C 4C'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$c0;dip_name:'4C 1C'),(dip_val:$d0;dip_name:'3C 1C'),(dip_val:$80;dip_name:'4C 2C'),(dip_val:$e0;dip_name:'2C 1C'),(dip_val:$90;dip_name:'3C 2C'),(dip_val:$40;dip_name:'4C 3C'),(dip_val:$0;dip_name:'4C 4C'),(dip_val:$50;dip_name:'3C 3C'),(dip_val:$a0;dip_name:'3C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$10;dip_name:'3C 4C'),(dip_val:$60;dip_name:'2C 3C'),(dip_val:$20;dip_name:'2C 4C'),(dip_val:$b0;dip_name:'1C 2C'),(dip_val:$70;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'))),
+        (mask:$200;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$200;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$400;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$800;name:'Controls';number:2;dip:((dip_val:$800;dip_name:'2'),(dip_val:$0;dip_name:'1'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Demo Sounds';number:2;dip:((dip_val:$1000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Lives';number:2;dip:((dip_val:$2000;dip_name:'3'),(dip_val:$0;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c000;name:'Difficulty';number:4;dip:((dip_val:$8000;dip_name:'Easy'),(dip_val:$c000;dip_name:'Normal'),(dip_val:$4000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$4ffff] of word;
@@ -99,7 +99,7 @@ begin
   actualiza_trozo_final(0,16,384,224,1);
 end;
 
-procedure cambiar_color(pos,data:word);
+procedure cambiar_color(pos,data:word);inline;
 var
   color:tcolor;
 begin
@@ -137,17 +137,20 @@ end;
 
 procedure seta_principal_snd_cpu;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=m6502_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 255 do begin
     //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    m6502_0.run(frame_snd);
-    frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
+    m6502_0.run(frame_s);
+    frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
     scanlines_proc(f);
  end;
  eventos_seta;
@@ -157,14 +160,16 @@ end;
 
 procedure seta_principal;
 var
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 255 do begin
     //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     scanlines_proc(f);
  end;
  eventos_proc;
@@ -358,7 +363,7 @@ case direccion of
                         tilebank[(direccion and 7) shr 1]:=valor;
                         fillchar(gfx[1].buffer,$2000,1);
                      end;
-    $500000..$500001:if m68000_0.write_8bits_hi_dir then begin
+    $500000..$500001:if m68000_0.access_8bits_hi_dir then begin
                         if (valor and $30)=0 then m68000_0.irq[3]:=CLEAR_LINE;
                      end;
     $700000..$7003ff:if buffer_paleta[(direccion and $3ff) shr 1]<>valor then begin
@@ -533,17 +538,15 @@ begin
         ym2203_0.reset;
         ym3812_0.reset;
         m6502_0.reset;
-        frame_snd:=m6502_0.tframes;
       end;
   303:begin
         x1_010_0.reset;
         m6502_0.reset;
-        frame_snd:=m6502_0.tframes;
       end;
   304:x1_010_0.reset;
  end;
+ reset_audio;
  seta_sprite0.reset;
- frame_main:=m68000_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -598,7 +601,7 @@ case main_vars.tipo_maquina of
         screen_mod_scroll(2,1024,512,1023,512,256,511);
       end;
 end;
-main_screen.rot270_screen:=true;
+main_screen.rol90_screen:=true;
 iniciar_video(384,224);
 //Main CPU
 m68000_0:=cpu_m68000.create(16000000 div 2,256);
@@ -622,13 +625,13 @@ case main_vars.tipo_maquina of
         ym2203_0.change_io_calls(tndrcade_porta_read,tndrcade_portb_read,nil,nil);
         ym3812_0:=ym3812_chip.create(YM3812_FM,16000000 div 4);
         //Video chips (sin bancos de sprites)
-        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40);
+        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40,$3fff,nil);
         //convertir gfx
         if not(roms_load(ptemp,tndrcade_sprites)) then exit;
         convert_sprites($4000);
         //DIP
         marcade.dswa:=$f77f;
-        marcade.dswa_val2:=@tndrcade_dip;
+        marcade.dswa_val:=@tndrcade_dip;
     end;
     303:begin  //Twin Eagle
         scanlines_proc:=twineagl_scan_lines;
@@ -649,7 +652,7 @@ case main_vars.tipo_maquina of
         x1_010_0:=tx1_010.create(16000000);
         if not(roms_load(@x1_010_0.rom,twineagl_pcm)) then exit;
         //Video chips (Sin bancos de sprites)
-        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40);
+        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40,$1fff,nil);
         //convertir gfx
         if not(roms_load16w(pword(ptemp),twineagl_sprites)) then exit;
         convert_sprites($2000);
@@ -659,7 +662,7 @@ case main_vars.tipo_maquina of
         convert_gfx(1,0,ptemp,@ps_x_te,@ps_y_te,false,false);
         //DIP
         marcade.dswa:=$bff7;
-        marcade.dswa_val2:=@twineagl_dip;
+        marcade.dswa_val:=@twineagl_dip;
     end;
     304:begin
         scanlines_proc:=thunderl_scan_lines;
@@ -672,19 +675,20 @@ case main_vars.tipo_maquina of
         x1_010_0:=tx1_010.create(16000000);
         if not(roms_load(@x1_010_0.rom,thunderl_pcm)) then exit;
         //Video chips (sin bancos de sprites)
-        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40);
+        seta_sprite0:=tseta_sprites.create(0,1,$1000 div $40,$fff,nil);
         //convertir gfx
         if not(roms_load16w(pword(ptemp),thunderl_sprites)) then exit;
         convert_sprites($1000);
         //DIP
         marcade.dswa:=$e0;
-        marcade.dswa_val2:=@thunderl_dip_a;
+        marcade.dswa_val:=@thunderl_dip_a;
         marcade.dswb:=$e9ff;
-        marcade.dswb_val2:=@thunderl_dip_b;
+        marcade.dswb_val:=@thunderl_dip_b;
     end;
 end;
 freemem(ptemp);
 //final
+reset_seta;
 iniciar_seta:=true;
 end;
 

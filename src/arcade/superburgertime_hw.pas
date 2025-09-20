@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common;
 
-function iniciar_supbtime:boolean;
+procedure cargar_supbtime;
 
 implementation
 const
@@ -93,25 +93,25 @@ end;
 procedure supbtime_principal;
 var
   frame_m,frame_s:single;
-  f:word;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
-while EmuStatus=EsRunning do begin
- for f:=0 to 273 do begin
-   case f of
-      248:begin
-            m68000_0.irq[6]:=HOLD_LINE;
-            video_update;
-            marcade.in1:=marcade.in1 or $8;
-          end;
-      8:marcade.in1:=marcade.in1 and $f7;
-   end;
+while EmuStatus=EsRuning do begin
+ for f:=0 to $ff do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    h6280_0.run(frame_s);
    frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+   case f of
+      247:begin
+            m68000_0.irq[6]:=HOLD_LINE;
+            video_update;
+            marcade.in1:=marcade.in1 or $8;
+          end;
+      255:marcade.in1:=marcade.in1 and $f7;
+   end;
  end;
  eventos_supbtime;
  video_sync;
@@ -136,7 +136,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -235,7 +235,7 @@ begin
  deco16ic_0.reset;
  deco_sprites_0.reset;
  deco16_snd_simple_reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
 end;
@@ -275,18 +275,15 @@ begin
 end;
 begin
 iniciar_supbtime:=false;
-llamadas_maquina.bucle_general:=supbtime_principal;
-llamadas_maquina.reset:=reset_supbtime;
-llamadas_maquina.fps_max:=58;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
 deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(14000000,274);
+m68000_0:=cpu_m68000.create(14000000,$100);
 //Sound CPU
-deco16_snd_simple_init(32220000 div 8,32220000,nil,274);
+deco16_snd_simple_init(32220000 div 8,32220000,nil);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   161:begin //Superburger Time
@@ -339,6 +336,14 @@ case main_vars.tipo_maquina of
 end;
 reset_supbtime;
 iniciar_supbtime:=true;
+end;
+
+procedure cargar_supbtime;
+begin
+llamadas_maquina.bucle_general:=supbtime_principal;
+llamadas_maquina.iniciar:=iniciar_supbtime;
+llamadas_maquina.reset:=reset_supbtime;
+llamadas_maquina.fps_max:=58;
 end;
 
 end.

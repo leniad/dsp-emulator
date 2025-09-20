@@ -5,12 +5,12 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine;
 
-function iniciar_puzz3x3:boolean;
+procedure cargar_puzz3x3;
 
 implementation
 const
         puzz3x3_rom:array[0..1] of tipo_roms=(
-        (n:'1.bin';l:$20000;p:0;crc:$e9c39ee7),(n:'2.bin';l:$20000;p:1;crc:$524963be));
+        (n:'1.bin';l:$20000;p:0;crc:$e9c39ee7),(n:'2.bin';l:$20000;p:$1;crc:$524963be));
         puzz3x3_gfx1:array[0..3] of tipo_roms=(
         (n:'3.bin';l:$80000;p:0;crc:$53c2aa6a),(n:'4.bin';l:$80000;p:1;crc:$fb0b76fd),
         (n:'5.bin';l:$80000;p:2;crc:$b6c1e108),(n:'6.bin';l:$80000;p:3;crc:$47cb0e8e));
@@ -42,7 +42,7 @@ const
         casanova_oki:array[0..1] of tipo_roms=(
         (n:'casanova.su2';l:$80000;p:0;crc:$84a8320e),(n:'casanova.su3';l:$40000;p:$80000;crc:$334a2d1a));
         casanova_dip_a:array [0..4] of def_dip=(
-        (mask:3;name:'Coinage';number:4;dip:((dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'3C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'3C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Dip Info';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -54,7 +54,7 @@ var
  video2,video2_final,video3,video3_final:array[0..$7ff] of word;
  oki_rom:array[0..2,0..$3ffff] of byte;
  oki_bank:byte;
- t1scroll_x,t1scroll_y,vblank:word;
+ t1scroll_x,t1scroll_y,vblank,char_mask,tile_mask:word;
  copy_gfx,long_video:boolean;
 
 procedure update_video_puzz3x3;
@@ -66,7 +66,7 @@ for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=video1_final[f];
+    nchar:=video1_final[f] and char_mask;
     put_gfx(x*16,y*16,nchar,0,1,0);
     gfx[0].buffer[f]:=false;
   end;
@@ -75,12 +75,12 @@ for f:=0 to $7ff do begin
   x:=f mod 64;
   y:=f div 64;
   if gfx[1].buffer[f] then begin
-    nchar:=video2_final[f];
+    nchar:=video2_final[f] and tile_mask;
     put_gfx_trans(x*8,y*8,nchar,$100,2,1);
     gfx[1].buffer[f]:=false;
   end;
   if gfx[2].buffer[f] then begin
-    nchar:=video3_final[f];
+    nchar:=video3_final[f] and tile_mask;
     put_gfx_trans(x*8,y*8,nchar,$200,3,2);
     gfx[2].buffer[f]:=false;
   end;
@@ -100,7 +100,7 @@ if copy_gfx then begin
 end;
 end;
 
-procedure eventos_puzz3x3;
+procedure eventos_puzz3x3;inline;
 begin
 if event.arcade then begin
   //P1
@@ -126,23 +126,25 @@ end;
 
 procedure puzz3x3_principal;
 var
+  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
- for f:=0 to 255 do begin
-   eventos_puzz3x3;
+frame:=m68000_0.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to $ff do begin
+   m68000_0.run(frame);
+   frame:=frame+m68000_0.tframes-m68000_0.contador;
    case f of
-      22:vblank:=0;
-      248:begin
+      21:vblank:=0;
+      247:begin
             vblank:=$ffff;
             m68000_0.irq[4]:=HOLD_LINE;
             update_video_puzz3x3;
           end;
    end;
-   m68000_0.run(frame_main);
-   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
  end;
+ eventos_puzz3x3;
  video_sync;
 end;
 end;
@@ -150,7 +152,7 @@ end;
 function puzz3x3_getword(direccion:dword):word;
 begin
 case direccion of
-  0..$7ffff:puzz3x3_getword:=rom[direccion shr 1];
+  $0..$7ffff:puzz3x3_getword:=rom[direccion shr 1];
   $100000..$10ffff:puzz3x3_getword:=ram[(direccion and $ffff) shr 1];
   $200000..$2007ff:puzz3x3_getword:=video1[(direccion and $7ff) shr 1];
   $201000..$201fff:puzz3x3_getword:=video2[(direccion and $fff) shr 1];
@@ -164,9 +166,7 @@ case direccion of
 end;
 end;
 
-procedure puzz3x3_putword(direccion:dword;valor:word);
-
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -176,6 +176,7 @@ begin
   set_pal_color(color,numero);
 end;
 
+procedure puzz3x3_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM
@@ -230,7 +231,7 @@ procedure reset_puzz3x3;
 begin
  m68000_0.reset;
  oki_6295_0.reset;
- frame_main:=m68000_0.tframes;
+ reset_audio;
  oki_bank:=0;
  vblank:=$ffff;
  long_video:=true;
@@ -267,8 +268,6 @@ begin
 end;
 begin
 iniciar_puzz3x3:=false;
-llamadas_maquina.bucle_general:=puzz3x3_principal;
-llamadas_maquina.reset:=reset_puzz3x3;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,512,511);
@@ -291,6 +290,8 @@ case main_vars.tipo_maquina of
         copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
         copymemory(@oki_rom[0,0],memoria_temp,$40000);
         copymemory(@oki_rom[1,0],@memoria_temp[$40000],$40000);
+        char_mask:=$1fff;
+        tile_mask:=$1fff;
         //gfx1
         if not(roms_load32b_b(memoria_temp,puzz3x3_gfx1)) then exit;
         convert_gfx1($2000);
@@ -313,6 +314,8 @@ case main_vars.tipo_maquina of
         copymemory(@oki_rom[0,0],memoria_temp,$40000);
         copymemory(@oki_rom[1,0],@memoria_temp[$40000],$40000);
         copymemory(@oki_rom[2,0],@memoria_temp[$80000],$40000);
+        char_mask:=$3fff;
+        tile_mask:=$7fff;
         //gfx1
         if not(roms_load32b_b(memoria_temp,casanova_gfx1)) then exit;
         convert_gfx1($4000);
@@ -331,7 +334,15 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
+reset_puzz3x3;
 iniciar_puzz3x3:=true;
+end;
+
+procedure cargar_puzz3x3;
+begin
+llamadas_maquina.bucle_general:=puzz3x3_principal;
+llamadas_maquina.iniciar:=iniciar_puzz3x3;
+llamadas_maquina.reset:=reset_puzz3x3;
 end;
 
 end.

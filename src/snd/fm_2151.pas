@@ -1,7 +1,8 @@
 unit fm_2151;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}math,timer_engine,sound_engine,dialogs;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
+     math,timer_engine,sound_engine;
 
 type
   YM2151Operator=record
@@ -136,6 +137,7 @@ implementation
 const
   CLEAR_LINE=0;
   ASSERT_LINE=1;
+  M_PI=3.1415926535;
 	MAXOUT=32767;
 	MINOUT=-32768;
   FREQ_SH=16;  // 16.16 fixed point (frequency calculations) */
@@ -385,7 +387,7 @@ var
   d1l_tab:array[0..15] of dword;
   salida_fm:array[0..2] of integer;
 
-function sshr(num:int64;fac:byte):int64;
+function sshr(num:int64;fac:byte):int64;inline;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;
@@ -538,7 +540,7 @@ begin
 		end;
 end;
 
-procedure envelope_KONKOFF(num:byte;n_op:byte;v:integer);
+procedure envelope_KONKOFF(num:byte;n_op:byte;v:integer);inline;
 var
 	chip:pYM2151;
 begin
@@ -556,7 +558,7 @@ begin
 	  else KEY_OFF(chip.oper[n_op+3],1);
 end;
 
-procedure set_connect(num,op:byte;cha,v:integer);
+procedure set_connect(num,op:byte;cha,v:integer);inline;
 var
 	om1,om2:pYM2151Operator;
 	oc1:pYM2151Operator;
@@ -648,7 +650,7 @@ begin
 	end;
 end;
 
-procedure refresh_EG(num,n_op:byte);
+procedure refresh_EG(num,n_op:byte);inline;
 var
 	kc:dword;
 	v,f:dword;
@@ -891,7 +893,6 @@ procedure YM_2151Init(num:byte;clock:dword);
 var
   f:byte;
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
 	getmem(FM2151[num],sizeof(YM2151));
   fillchar(FM2151[num]^,sizeof(YM2151),0);
   for f:=0 to 31 do begin
@@ -1114,7 +1115,7 @@ begin
 		// envelope generator */
     n_op:=0;
     i:=32;
-		repeat
+		while (i<>0) do begin
       op:=chip.oper[n_op];	// CH 0 M1 */
 			case (op.state) of
 			  EG_ATT:begin	// attack phase */
@@ -1155,7 +1156,7 @@ begin
 			end;
 			n_op:=n_op+1;
       i:=i-1;
-    until (i=0);
+		end;
 	end;
 end;
 
@@ -1249,7 +1250,7 @@ begin
 	// phase generator */
   n_op:=0;
   i:=8;
-	repeat
+	while (i<>0) do begin
     op:=chip.oper[n_op];	// CH 0 M1 */
     op2:=chip.oper[n_op+1];
     op3:=chip.oper[n_op+2];
@@ -1278,7 +1279,7 @@ begin
 		end;
 		n_op:=n_op+4;
     i:=i-1;
-  until (i=0);
+	end;
 	{ CSM is calculated *after* the phase generator calculations (verified on real chip)
     * CSM keyon line seems to be ORed with the KO line inside of the chip.
     * The result is that it only works when KO (register 0x08) is off, ie. 0
@@ -1290,21 +1291,21 @@ begin
 		if (chip.csm_req=2)	then begin // KEY ON */
       n_op:=0;
       i:=32;
-			repeat
+			while (i<>0) do begin
 				KEY_ON(num,n_op,2);
         n_op:=n_op+1;
         i:=i-1;
-      until (i=0);
+      end;
 			chip.csm_req:=1;
 		end	else begin					// KEY OFF */
       n_op:=0;
       i:=32;
-			repeat
+			while (i<>0) do begin
         op:=chip.oper[n_op];	// CH 0 M1 */
 				KEY_OFF(op,2);
 				n_op:=n_op+1;
         i:=i-1;
-			until (i=0);
+			end;
 			chip.csm_req:=0;
 		end;
 	end;
@@ -1355,7 +1356,7 @@ begin
 			else if (outl<MINOUT) then outl:=MINOUT;
 		if (outr>MAXOUT) then outr:=MAXOUT
 			else if (outr<MINOUT) then outr:=MINOUT;
-    salida_fm[0]:=outl+outr;
+    salida_fm[0]:=(outl+outr) div 2;
     salida_fm[1]:=outl;
     salida_fm[2]:=outr;
     advance(num);

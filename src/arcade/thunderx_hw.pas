@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,timer_engine;
 
-function iniciar_thunderx:boolean;
+procedure cargar_thunderx;
 
 implementation
 
@@ -87,73 +87,116 @@ const
         (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 200K'),(dip_val:$10;dip_name:'50K 300K'),(dip_val:$8;dip_name:'30K'),(dip_val:$0;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        layer_colorbase:array[0..2] of byte=(48,0,16);
-
 
 var
  tiles_rom,sprite_rom,k007232_rom:pbyte;
  sound_latch,sprite_colorbase,bank0_bank,rom_bank1,latch_1f98,priority,thunderx_timer:byte;
+ layer_colorbase:array[0..2] of byte;
  rom_bank:array[0..$f,0..$1fff] of byte;
- pmc_ram:array[0..$7ff] of byte;
+ ram_bank:array[0..2,0..$7ff] of byte;
  video_bank_call:tvideo_bank_func;
  call_function_1f98:tfunction_1f98;
 
 procedure scontra_videobank(valor:byte);
 begin
-  rom_bank1:=valor and $f;
-  bank0_bank:=(valor and $10) shr 4;
-  priority:=valor and $80;
+     rom_bank1:=valor and $f;
+     bank0_bank:=(valor and $10) shr 4;
+     priority:=valor and $80;
 end;
 
 procedure gbusters_videobank(valor:byte);
 begin
-  bank0_bank:=valor and 1;
-  priority:=valor and 8;
+     bank0_bank:=valor and $1;
+     priority:=valor and $8;
 end;
 
 procedure thunderx_videobank(valor:byte);
 begin
-  if (valor and $10)<>0 then bank0_bank:=2 //PCM
-    else bank0_bank:=valor and $1; //1 --> RAM 0 --> Paleta
-  priority:=valor and $8;
+     if (valor and $10)<>0 then bank0_bank:=2
+        else bank0_bank:=valor and $1;
+     priority:=valor and $8;
 end;
 
 procedure scontra_1f98_call(valor:byte);
 begin
-  if (valor and $1)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
-    else k052109_0.set_rmrd_line(CLEAR_LINE);
-  latch_1f98:=valor;
+     if (valor and $1)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
+        else k052109_0.set_rmrd_line(CLEAR_LINE);
+     latch_1f98:=valor;
 end;
 
-procedure calculate_collisions;
+procedure run_collisions(s0,e0,s1,e1:integer;cm,hm:byte);inline;
 var
-   p0,p1,f,h,e0:word;
-   s0,s1,e1,cm,hm,p0_lim:byte;
+   p0,p1:integer;
+   ii,jj:integer;
+   l0,r0,b0,t0,l1,r1,b1,t1:integer;
 begin
-e0:=(pmc_ram[0] shl 8)+pmc_ram[1];
-e0:=(e0-15) div 5;
-e1:=(pmc_ram[2]-15) div 5;
-s0:=(pmc_ram[5]-16) div 5;
-s1:=(pmc_ram[6]-16) div 5;
-cm:=pmc_ram[3];
-hm:=pmc_ram[4];
 p0:=(16+5*s0)-5;
-p0_lim:=$e6;
-for f:=s0 to (e0-1) do begin
+for ii:=s0 to (e0-1) do begin
     p0:=p0+5;
-    if ((pmc_ram[p0+0] and cm)=0) then continue;
+    if ((ram_bank[2,p0+0] and cm)=0) then continue; // check valid
+    // get area
+    l0:=ram_bank[2,p0+3]-ram_bank[2,p0+1];
+    r0:=ram_bank[2,p0+3]+ram_bank[2,p0+1];
+    t0:=ram_bank[2,p0+4]-ram_bank[2,p0+2];
+    b0:=ram_bank[2,p0+4]+ram_bank[2,p0+2];
     p1:=(16+5*s1)-5;
-    for h:=s1 to (e1-1) do begin
+    for jj:=s1 to (e1-1) do begin
         p1:=p1+5;
-	      if ((pmc_ram[p1+0] and hm)=0) then continue;
-        if ((pmc_ram[p1+1]+pmc_ram[p0+1])<abs(pmc_ram[p1+3]-pmc_ram[p0+3])) then continue;
-			  if ((pmc_ram[p1+2]+pmc_ram[p0+2])<abs(pmc_ram[p1+4]-pmc_ram[p0+4])) then continue;
-      	// set flags
-        pmc_ram[p1+0]:=(pmc_ram[p1+0] and $8f) or $10;
-      	if (p0+4)>=p0_lim then pmc_ram[p0+0]:=(pmc_ram[p0+0] and $9b) or (pmc_ram[p1+0] and $04) or $10;
-        break;
+	if ((ram_bank[2,p1+0] and hm)=0) then continue; // check valid
+	// get area
+	l1:=ram_bank[2,p1+3]-ram_bank[2,p1+1];
+	r1:=ram_bank[2,p1+3]+ram_bank[2,p1+1];
+	t1:=ram_bank[2,p1+4]-ram_bank[2,p1+2];
+	b1:=ram_bank[2,p1+4]+ram_bank[2,p1+2];
+	// overlap check
+	if (l1>=r0) then continue;
+	if (l0>=r1) then continue;
+	if (t1>=b0) then continue;
+	if (t0>=b1) then continue;
+	// set flags
+	ram_bank[2,p0+0]:=(ram_bank[2,p0+0] and $9f) or (ram_bank[2,p1+0] and $04) or $10;
+	ram_bank[2,p1+0]:=(ram_bank[2,p1+0] and $9f) or $10;
     end;
 end;
+end;
+
+procedure calculate_collisions;inline;
+var
+    X0,Y0,X1,Y1:integer;
+    CM,HM:byte;
+begin
+	// the data at 0x00 to 0x06 defines the operation
+	//
+	// 0x00 : word : last byte of set 0
+	// 0x02 : byte : last byte of set 1
+	// 0x03 : byte : collide mask
+	// 0x04 : byte : hit mask
+	// 0x05 : byte : first byte of set 0
+	// 0x06 : byte : first byte of set 1
+	//
+	// the USA version is slightly different:
+	//
+	// 0x05 : word : first byte of set 0
+	// 0x07 : byte : first byte of set 1
+	//
+	// the operation is to intersect set 0 with set 1
+	// collide mask specifies objects to ignore
+	// hit mask is 40 to set bit on object 0 and object 1
+	// hit mask is 20 to set bit on object 1 only
+	Y0:=(ram_bank[2,0] shl 8)+ram_bank[2,1];
+	Y0:=(Y0-15) div 5;
+	Y1:=(ram_bank[2,2]-15) div 5;
+	if (ram_bank[2,5]<16) then begin // US Thunder Cross uses this form
+		X0:=(ram_bank[2,5] shl 8)+ram_bank[2,6];
+		X0:=(X0-16) div 5;
+		X1:= (ram_bank[2,7]-16) div 5;
+	end else begin // Japan Thunder Cross uses this form
+		X0:=(ram_bank[2,5]-16) div 5;
+		X1:=(ram_bank[2,6]-16) div 5;
+        end;
+	CM:=ram_bank[2,3];
+	HM:=ram_bank[2,4];
+	run_collisions(X0,Y0,X1,Y1,CM,HM);
 end;
 
 procedure thunderx_1f98_call(valor:byte);
@@ -188,8 +231,8 @@ end;
 
 procedure thunderx_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
 begin
-// The PROM allows for mixed priorities, where sprites would have
-// priority over text but not on one or both of the other two planes.
+// The PROM allows for mixed priorities, where sprites would have */
+// priority over text but not on one or both of the other two planes. */
 case (color and $30) of
      $0:pri:=0;
      $10:pri:=3;
@@ -215,14 +258,15 @@ if priority<>0 then begin
    k052109_0.draw_layer(2,4);
    k051960_0.draw_sprites(2,-1);
    k052109_0.draw_layer(1,4);
+   k051960_0.draw_sprites(3,-1);
 end else begin
    k052109_0.draw_layer(1,4);
-   k051960_0.draw_sprites(2,-1);
+   k051960_0.draw_sprites(3,-1);
    k052109_0.draw_layer(2,4);
+   k051960_0.draw_sprites(2,-1);
 end;
 k051960_0.draw_sprites(0,-1);
 k052109_0.draw_layer(0,4);
-k051960_0.draw_sprites(3,-1);
 actualiza_trozo_final(112,16,288,224,4);
 end;
 
@@ -259,20 +303,20 @@ begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    eventos_thunderx;
-    if f=240 then begin
-        update_video_thunderx;
-        if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
-    end;
     //main
     konami_0.run(frame_m);
     frame_m:=frame_m+konami_0.tframes-konami_0.contador;
     //sound
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    if f=239 then begin
+                    update_video_thunderx;
+                    if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
+                  end;
   end;
+  eventos_thunderx;
   video_sync;
 end;
 end;
@@ -290,29 +334,21 @@ case direccion of
                    $1f95:thunderx_getbyte:=marcade.dswb; //dsw2
                    $1f98:thunderx_getbyte:=latch_1f98;
                    else if k052109_0.get_rmrd_line=CLEAR_LINE then begin
-                           case direccion of
-                              0..$1f8f,$1f96..$1f97,$1f99..$37ff,$3808..$3bff:thunderx_getbyte:=k052109_0.read(direccion);
-                              $3800..$3807:thunderx_getbyte:=k051960_0.k051937_read(direccion-$3800);
-                              $3c00..$3fff:thunderx_getbyte:=k051960_0.read(direccion-$3c00);
-                           end;
+                           if ((direccion>=$3800) and (direccion<$3808)) then thunderx_getbyte:=k051960_0.k051937_read(direccion-$3800)
+                              else if (direccion<$3c00) then thunderx_getbyte:=k052109_0.read(direccion)
+                                  else thunderx_getbyte:=k051960_0.read(direccion-$3c00);
                         end else thunderx_getbyte:=k052109_0.read(direccion);
               end;
     $4000..$57ff,$8000..$ffff:thunderx_getbyte:=memoria[direccion];
-    $5800..$5fff:begin
-                    direccion:=direccion and $7ff;
-                    case bank0_bank of
-                      0:thunderx_getbyte:=buffer_paleta[direccion];
-                      1:thunderx_getbyte:=memoria[$5800+direccion];
-                      2:if (latch_1f98 and 2)<>0 then thunderx_getbyte:=pmc_ram[direccion]
-                          else thunderx_getbyte:=0;
-                    end;
-                 end;
+    $5800..$5fff:if (bank0_bank=2) then begin
+                    if (latch_1f98 and 2)<>0 then thunderx_getbyte:=ram_bank[2,direccion and $7ff]
+                       else thunderx_getbyte:=0;
+                 end else thunderx_getbyte:=ram_bank[bank0_bank,direccion and $7ff];
     $6000..$7fff:thunderx_getbyte:=rom_bank[rom_bank1,direccion and $1fff];
     end;
 end;
 
-procedure thunderx_putbyte(direccion:word;valor:byte);
-procedure cambiar_color(pos:word);
+procedure cambiar_color(pos:word);inline;
 var
   color:tcolor;
   valor:word;
@@ -324,28 +360,31 @@ begin
   set_pal_color_alpha(color,pos);
   k052109_0.clean_video_buffer;
 end;
+
+procedure thunderx_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     $0..$3fff:case direccion of
-                   0..$1f7f,$1f81..$1f83,$1f85..$1f87,$1f89..$1f97,$1f99..$37ff,$3808..$3bff:k052109_0.write(direccion,valor);
                    $1f80:video_bank_call(valor);
                    $1f84:sound_latch:=valor;
                    $1f88:z80_0.change_irq(HOLD_LINE);
                    $1f98:call_function_1f98(valor);
-                   $3800..$3807:k051960_0.k051937_write(direccion-$3800,valor);
-                   $3c00..$3fff:k051960_0.write(direccion-$3c00,valor);
+                   else if ((direccion>=$3800) and (direccion<$3808)) then k051960_0.k051937_write(direccion-$3800,valor)
+                           else if (direccion<$3c00) then k052109_0.write(direccion,valor)
+                               else k051960_0.write(direccion-$3c00,valor);
               end;
     $4000..$57ff:memoria[direccion]:=valor;
     $5800..$5fff:begin
                  direccion:=direccion and $7ff;
-                 case bank0_bank of
-                    0:if buffer_paleta[direccion]<>valor then begin
-                        buffer_paleta[direccion]:=valor;
-                        cambiar_color(direccion shr 1);
-                      end;
-                    1:memoria[$5800+direccion]:=valor;
-                    2:if (latch_1f98 and 2)<>0 then pmc_ram[direccion]:=valor;
+                 if bank0_bank=0 then begin
+                    if buffer_paleta[direccion]<>valor then begin
+                       buffer_paleta[direccion]:=valor;
+                       cambiar_color(direccion shr 1);
+                    end;
                  end;
+                 if (bank0_bank=2) then begin
+                    if (latch_1f98 and 2)<>0 then ram_bank[2,direccion]:=valor;
+                 end else ram_bank[bank0_bank,direccion]:=valor;
             end;
     $6000..$ffff:; //ROM
 end;
@@ -417,6 +456,7 @@ begin
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -427,26 +467,12 @@ begin
  priority:=0;
 end;
 
-procedure cerrar_thunderx;
-begin
-if main_vars.tipo_maquina<>224 then if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
 function iniciar_thunderx:boolean;
 var
    temp_mem:array[0..$1ffff] of byte;
    f:byte;
 begin
 iniciar_thunderx:=false;
-llamadas_maquina.close:=cerrar_thunderx;
-llamadas_maquina.reset:=reset_thunderx;
-llamadas_maquina.bucle_general:=thunderx_principal;
-llamadas_maquina.fps_max:=59.17;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
@@ -458,7 +484,7 @@ if main_vars.tipo_maquina<>224 then main_screen.rot90_screen:=true;
 iniciar_video(288,224,true);
 iniciar_audio(false);
 //Main CPU
-konami_0:=cpu_konami.create(12000000,256);
+konami_0:=cpu_konami.create(3000000,256);
 konami_0.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);
@@ -479,6 +505,7 @@ case main_vars.tipo_maquina of
             z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
             z80_0.init_sound(scontra_sound_update);
             //Sound Chips
+            ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$80000);
             if not(roms_load(k007232_rom,scontra_k007232)) then exit;
             k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,scontra_k007232_cb);
@@ -486,10 +513,10 @@ case main_vars.tipo_maquina of
             video_bank_call:=scontra_videobank;
             getmem(tiles_rom,$100000);
             if not(roms_load32b_b(tiles_rom,scontra_tiles)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,0,thunderx_cb,tiles_rom,$100000);
+            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$100000);
             getmem(sprite_rom,$100000);
             if not(roms_load32b_b(sprite_rom,scontra_sprites)) then exit;
-            k051960_0:=k051960_chip.create(4,1,sprite_rom,$100000,thunderx_sprite_cb,2);
+            k051960_0:=k051960_chip.create(4,sprite_rom,$100000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
             marcade.dswa_val:=@scontra_dip_a;
@@ -515,6 +542,7 @@ case main_vars.tipo_maquina of
             z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
             z80_0.init_sound(scontra_sound_update);
             //Sound Chips
+            ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$40000);
             if not(roms_load(k007232_rom,gbusters_k007232)) then exit;
             k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,scontra_k007232_cb);
@@ -522,10 +550,10 @@ case main_vars.tipo_maquina of
             video_bank_call:=gbusters_videobank;
             getmem(tiles_rom,$80000);
             if not(roms_load32b(tiles_rom,gbusters_tiles)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,0,gbusters_cb,tiles_rom,$80000);
+            k052109_0:=k052109_chip.create(1,2,3,gbusters_cb,tiles_rom,$80000);
             getmem(sprite_rom,$80000);
             if not(roms_load32b(sprite_rom,gbusters_sprites)) then exit;
-            k051960_0:=k051960_chip.create(4,1,sprite_rom,$80000,thunderx_sprite_cb,2);
+            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
             marcade.dswa_val:=@scontra_dip_a;
@@ -552,14 +580,16 @@ case main_vars.tipo_maquina of
             //Sound CPU
             z80_0.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
             z80_0.init_sound(thunderx_sound_update);
+            //Sound Chips
+            ym2151_0:=ym2151_chip.create(3579545);
             //Iniciar video
             video_bank_call:=thunderx_videobank;
             getmem(tiles_rom,$80000);
             if not(roms_load32b_b(tiles_rom,thunderx_tiles)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,0,thunderx_cb,tiles_rom,$80000);
+            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$80000);
             getmem(sprite_rom,$80000);
             if not(roms_load32b_b(sprite_rom,thunderx_sprites)) then exit;
-            k051960_0:=k051960_chip.create(4,1,sprite_rom,$80000,thunderx_sprite_cb,2);
+            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
             marcade.dswa_val:=@scontra_dip_a;
@@ -569,11 +599,32 @@ case main_vars.tipo_maquina of
             marcade.dswc_val:=@gbusters_dip_c;
      end;
 end;
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
+layer_colorbase[0]:=48;
+layer_colorbase[1]:=0;
+layer_colorbase[2]:=16;
 sprite_colorbase:=32;
 //final
+reset_thunderx;
 iniciar_thunderx:=true;
+end;
+
+procedure cerrar_thunderx;
+begin
+if main_vars.tipo_maquina<>224 then if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+end;
+
+procedure Cargar_thunderx;
+begin
+llamadas_maquina.iniciar:=iniciar_thunderx;
+llamadas_maquina.close:=cerrar_thunderx;
+llamadas_maquina.reset:=reset_thunderx;
+llamadas_maquina.bucle_general:=thunderx_principal;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

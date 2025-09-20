@@ -139,7 +139,7 @@ var
 
 implementation
 
-function compute_log(value:integer):integer;
+function compute_log(value:integer):integer;inline;
 var
   log:integer;
 begin
@@ -159,7 +159,7 @@ end;
 	compute_log:=log;
 end;
 
-function round_to_powerof2(value:integer):integer;
+function round_to_powerof2(value:integer):integer;inline;
 var
   log:integer;
 begin

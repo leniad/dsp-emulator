@@ -1,5 +1,5 @@
 unit M6502;
-//{$define DEBUG}
+{$define DEBUG}
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,cpu_misc;
@@ -39,14 +39,13 @@ type
             function call_nmi:byte;
             function call_irq:byte;
         end;
-
 const
   TCPU_M6502=0;
   TCPU_DECO16=1;
   TCPU_NES=2;
   TCPU_M65C02=3;
 var
-  m6502_0,m6502_1,m6502_2:cpu_m6502;
+  m6502_0,m6502_1:cpu_m6502;
 
 implementation
 
@@ -126,7 +125,6 @@ const
         2, 6, 2, 2, 3, 3, 5, 2, 2, 2, 2, 2, 4, 4, 6, 2,  //e
         2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 4, 2, 2, 4, 7, 2);
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-        IGNORE_FLAGS=$CF;
 
 var
   tipo_dir,estados_t:array[0..$ff] of byte;
@@ -201,19 +199,17 @@ begin
   self.read_dummy:=temp^<>0;
 end;
 
-procedure pon_pila(r:preg_m6502;valor:byte);
+procedure pon_pila(r:preg_m6502;valor:byte);inline;
 begin
   r.p.n:=(valor and $80)<>0;
   r.p.o_v:=(valor and $40)<>0;
-  r.p.t:=(valor and $20)<>0;
-  r.p.brk:=(valor and $10)<>0;
   r.p.dec:=(valor and 8)<>0;
   r.p.int:=(valor and 4)<>0;
   r.p.z:=(valor and 2)<>0;
   r.p.c:=(valor and 1)<>0;
 end;
 
-function dame_pila(r:preg_m6502):byte;
+function dame_pila(r:preg_m6502):byte;inline;
 var
   temp:byte;
 begin
@@ -238,18 +234,17 @@ end;
 r.a:=0;
 r.x:=0;
 r.y:=0;
-r.sp:=$fd;
+r.sp:=$FD;
 r.z:=0;
 self.contador:=0;
 r.p.n:=false;
 r.p.o_v:=false;
-r.p.t:=false;
+r.p.t:=true;
 r.p.brk:=false;
 r.p.dec:=false;
 r.p.int:=true;
 r.p.z:=false;
 r.p.c:=false;
-self.totalt:=0;
 self.after_ei:=false;
 self.change_nmi(CLEAR_LINE);
 self.change_irq(CLEAR_LINE);
@@ -358,8 +353,7 @@ end;
 procedure cpu_m6502.run(maximo:single);
 var
     instruccion,numero,tempb,carry:byte;
-    tempw,posicion:word;
-    old_contador:integer;
+    tempw,posicion,old_contador:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
@@ -373,6 +367,7 @@ if self.pedir_reset<>CLEAR_LINE then begin
     exit;
   end;
 end;
+r.ppc:=r.pc;
 self.read_dummy:=false;
 if not(self.after_ei) then begin
   if (self.pedir_nmi<>CLEAR_LINE) then
@@ -381,7 +376,6 @@ if not(self.after_ei) then begin
     self.estados_demas:=self.call_irq
       else self.estados_demas:=0;
 end;
-r.ppc:=r.pc;
 self.after_ei:=false;
 self.opcode:=true;
 instruccion:=self.getbyte(r.pc);
@@ -482,10 +476,10 @@ case instruccion of
             r.sp:=r.sp-1;
             self.putbyte($100+r.sp,r.pc and $ff);
             r.sp:=r.sp-1;
-            r.p.brk:=true;
-            self.putbyte($100+r.sp,dame_pila(self.r));
+            self.putbyte($100+r.sp,dame_pila(self.r) or $10);
             r.sp:=r.sp-1;
             r.p.int:=true;
+            r.p.brk:=true;
             case self.tipo_cpu of
               TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
               TCPU_DECO16:r.pc:=self.getbyte($FFF3)+(self.getbyte($FFF2) shl 8);
@@ -508,7 +502,7 @@ case instruccion of
             self.putbyte(posicion,tempb);
           end;
       $04,$0c,$14,$1c,$3a,$3c,$44,$54,$5c,$7c,$82,$89,$c2,$d4,$dc,$e2,$f4,$fc://if self.tipo_cpu=TCPU_M65C02 then
-          {$ifdef DEBUG}  //nop dobles y triples
+          {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif};
           //else self.getbyte(r.pc);  // <-- Fallo CPU NOP
@@ -607,8 +601,7 @@ case instruccion of
       $28:begin  //PLP
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.sp:=r.sp+1;
-            //Tengo que ingnorar el BRK!
-            tempb:=self.getbyte($100+r.sp) and IGNORE_FLAGS;
+            tempb:=self.getbyte($100+r.sp);
             pon_pila(self.r,tempb);
             self.after_ei:=true;
           end;
@@ -642,8 +635,7 @@ case instruccion of
           end;
       $40:begin //RTI
                 r.sp:=r.sp+1;
-                //Tengo que ignorarel flag brk!!
-                pon_pila(self.r,self.getbyte($100+r.sp) and IGNORE_FLAGS);
+                pon_pila(self.r,self.getbyte($100+r.sp));
                 r.sp:=r.sp+1;
                 r.pc:=self.getbyte($100+r.sp);
                 r.sp:=r.sp+1;
@@ -802,8 +794,11 @@ case instruccion of
           end;
       $80:if self.tipo_cpu=TCPU_M65C02 then begin //bra
             r.pc:=r.pc+shortint(numero);
-          end else begin  //nop doble
+          end else begin
             self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
           end;
       $81,$85,$8d,$91,$92,$95,$99,$9d:self.putbyte(posicion,r.a); //STA
       $83,$87,$8f,$97:self.putbyte(posicion,r.a and r.x); //sax
@@ -838,7 +833,7 @@ case instruccion of
              r.p.z:=(r.a=0);
              r.p.n:=(r.a and $80)<>0;
            end;
-      $9a:begin  //TXS
+      $9A:begin  //TXS
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.sp:=r.x;
           end;
@@ -847,34 +842,34 @@ case instruccion of
                 {$ifdef DEBUG}
                 MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
                 {$endif};
-      $a0,$a4,$ac,$b4,$bc:begin //LDY
+      $A0,$a4,$ac,$b4,$bc:begin //LDY
              r.y:=self.getbyte(posicion);
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
-      $a1,$a5,$a9,$ad,$b1,$b5,$b9,$bd:begin //LDA
+      $A1,$a5,$a9,$ad,$b1,$b5,$b9,$bd:begin //LDA
             r.a:=self.getbyte(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $a2,$a6,$ae,$b6,$be:begin //LDX
+      $A2,$a6,$ae,$b6,$be:begin //LDX
              r.x:=self.getbyte(posicion);
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $a8:begin  //TAY
+      $A8:begin  //TAY
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.y:=r.a;
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
-      $aa:begin  //TAX
+      $AA:begin  //TAX
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.x:=r.a;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $b0:if r.p.c then begin  //BCS salta si c true
+      $B0:if r.p.c then begin  //BCS salta si c true
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
@@ -894,17 +889,17 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $b8:begin  //CLV
+      $B8:begin  //CLV
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.o_v:=false;
           end;
-      $ba:begin  //TSX
+      $BA:begin  //TSX
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.x:=r.sp;
             r.p.z:=(r.x=0);
             r.p.n:=(r.x and $80)<>0;
           end;
-      $c0,$c4,$cc:begin //CPY
+      $C0,$C4,$CC:begin //CPY
             tempw:=r.y-self.getbyte(posicion);
             r.p.c:=(tempw and $100)=0;
             r.p.z:=(tempw and $ff)=0;
@@ -992,7 +987,7 @@ case instruccion of
              sbc(self.r,tempb,self.tipo_cpu);
              self.putbyte(posicion,tempb);
           end;
-      $e6,$ee,$f6,$fe:begin  //INC
+      $E6,$ee,$F6,$fe:begin  //INC
              tempb:=self.getbyte(posicion);
              self.putbyte(posicion,tempb);  // <-- Fallo CPU
              tempb:=tempb+1;
@@ -1000,18 +995,18 @@ case instruccion of
              r.p.n:=(tempb and $80)<>0;
              self.putbyte(posicion,tempb);
            end;
-      $e8:begin  //INX
+      $E8:begin  //INX
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.x:=r.x+1;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $f0:if r.p.z then begin  //BEQ salta si z true
+      $F0:if r.p.z then begin  //BEQ salta si z true
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
-      $f8:begin  //SED
+      $F8:begin  //SED
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.dec:=true;
           end;
@@ -1034,11 +1029,8 @@ case instruccion of
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-//Ojo!! el contador se puede incrementar en la funcion siguiente!!
+timers.update(self.contador-old_contador,self.numero_cpu);
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
-tempw:=self.contador-old_contador;
-timers.update(tempw,self.numero_cpu);
-self.totalt:=self.totalt+tempw;
 end; //del while!!
 end;
 end.

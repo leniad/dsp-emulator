@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      timer_engine,pal_engine,sound_engine,ppi8255,mc8123;
 
-function iniciar_freekick:boolean;
+procedure cargar_freekick;
 
 implementation
 const
@@ -175,7 +175,7 @@ begin
 end;
 end;
 
-procedure update_video_freekick;
+procedure update_video_freekick;inline;
 var
   f,nchar:word;
   x,y,color,atrib:byte;
@@ -201,21 +201,21 @@ procedure eventos_freekick;
 begin
 if event.arcade then begin
   //IN0
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //IN1
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
@@ -224,18 +224,20 @@ end;
 procedure freekick_principal;
 var
   f:word;
+  frame_m:single;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 262 do begin
-    eventos_freekick;
-    if f=240 then begin
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    if f=239 then begin
       update_video_freekick;
       if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
+  eventos_freekick;
   video_sync;
 end;
 end;
@@ -436,7 +438,7 @@ begin
     pia8255_0.reset;
     pia8255_1.reset;
  end;
- frame_main:=z80_0.tframes;
+ reset_audio;
  snd_rom_addr:=0;
  spinner:=false;
  nmi_enable:=false;
@@ -473,8 +475,6 @@ begin
 end;
 begin
 iniciar_freekick:=false;
-llamadas_maquina.bucle_general:=freekick_principal;
-llamadas_maquina.reset:=reset_freekick;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
@@ -482,13 +482,8 @@ if main_vars.tipo_maquina=274 then begin
   iniciar_video(256,224);
   main_screen.rot90_screen:=true;
 end else iniciar_video(224,256);
-if main_vars.tipo_maquina=273 then begin
-  clock:=3072000;
-  llamadas_maquina.fps_max:=60.836502
-end else begin
-  clock:=3000000;
-  llamadas_maquina.fps_max:=59.410646;
-end;
+if main_vars.tipo_maquina=273 then clock:=3072000
+  else clock:=3000000;
 //Main CPU
 z80_0:=cpu_z80.create(clock,263);
 z80_0.init_sound(freekick_sound_update);
@@ -658,7 +653,17 @@ for f:=0 to $1ff do begin
 end;
 set_pal(colores,$200);
 //final
+reset_freekick;
 iniciar_freekick:=true;
+end;
+
+procedure cargar_freekick;
+begin
+  llamadas_maquina.iniciar:=iniciar_freekick;
+  llamadas_maquina.bucle_general:=freekick_principal;
+  llamadas_maquina.reset:=reset_freekick;
+  if main_vars.tipo_maquina=273 then llamadas_maquina.fps_max:=60.836502
+    else llamadas_maquina.fps_max:=59.410646;
 end;
 
 end.

@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 type
   tyle_chip=class
-          constructor create(screen,screen_pri:byte;color_add:word;mult,color_mask:byte);
+          constructor create(screen,screen_pri:byte;color_add,num_mask:word;mult:byte);
           destructor free;
           public
             data:array[0..$1fff] of word;
@@ -20,24 +20,17 @@ type
             procedure show_pf;
             procedure show_pf_pri;
             procedure change_control0(pos,valor:word);
-            procedure change_control0_8b(pos:word;valor:byte);
-            procedure change_control0_8b_swap(pos:word;valor:byte);
             procedure change_control1(pos,valor:word;dec1:boolean=false);
-            procedure change_control1_8b(pos:word;valor:byte);
-            procedure change_control1_8b_swap(pos:word;valor:byte);
-            procedure write_tile_data_8b(pos:word;valor:byte;mask:word);
-            procedure write_tile_data_8b_swap(pos:word;valor:byte;mask:word);
-            procedure write_rowscroll_8b(pos:word;valor:byte);
           private
             pos_scroll_x:array[0..$ff] of word;
             pos_scroll_y:array[0..$f] of word;
-            mult,screen,screen_pri,color_mask:byte;
-            color_add,scroll_x,scroll_y,control,long_bloque_x,long_bloque_y:word;
+            mult,screen,screen_pri:byte;
+            color_add,scroll_x,scroll_y,control,num_mask,long_bloque_x,long_bloque_y:word;
             procedure update_16x16(gfx_num:byte;trans,pri:boolean);
             procedure update_8x8(gfx_num:byte;trans:boolean);
         end;
   bac06_chip=class
-          constructor create(pri1,pri2,pri3:boolean;color_add1,color_add2,color_add3:word;mult1,mult2,mult3:byte;sprite_color:word;color_mask:byte=$f);
+          constructor create(pri1,pri2,pri3:boolean;color_add1,color_add2,color_add3,num_mask1,num_mask2,num_mask3:word;mult1,mult2,mult3:byte;sprite_color:word);
           destructor free;
           public
             tile_1,tile_2,tile_3:tyle_chip;
@@ -47,7 +40,6 @@ type
             procedure update_sprite_data(data:pbyte);
           private
             sprite_color:word;
-            color_mask:byte;
         end;
 
 var
@@ -55,13 +47,13 @@ var
 
 implementation
 
-constructor tyle_chip.create(screen,screen_pri:byte;color_add:word;mult,color_mask:byte);
+constructor tyle_chip.create(screen,screen_pri:byte;color_add,num_mask:word;mult:byte);
 begin
   self.screen:=screen;
   self.screen_pri:=screen_pri;
   self.color_add:=color_add;
+  self.num_mask:=num_mask;
   self.mult:=mult;
-  self.color_mask:=color_mask;
 end;
 
 destructor tyle_chip.free;
@@ -86,7 +78,7 @@ begin
  fillchar(self.buffer,$1000,1);
 end;
 
-constructor bac06_chip.create(pri1,pri2,pri3:boolean;color_add1,color_add2,color_add3:word;mult1,mult2,mult3:byte;sprite_color:word;color_mask:byte=$f);
+constructor bac06_chip.create(pri1,pri2,pri3:boolean;color_add1,color_add2,color_add3,num_mask1,num_mask2,num_mask3:word;mult1,mult2,mult3:byte;sprite_color:word);
 var
   sc_pri1,sc_pri2,sc_pri3:byte;
 begin
@@ -103,11 +95,10 @@ begin
   if pri3 then screen_init(6,1024,1024,true)
     else sc_pri3:=3;
   screen_init(7,512,512,false,true);
-  self.tile_1:=tyle_chip.create(1,sc_pri1,color_add1,mult1,color_mask);
-  self.tile_2:=tyle_chip.create(2,sc_pri2,color_add2,mult2,color_mask);
-  self.tile_3:=tyle_chip.create(3,sc_pri3,color_add3,mult3,color_mask);
+  self.tile_1:=tyle_chip.create(1,sc_pri1,color_add1,num_mask1,mult1);
+  self.tile_2:=tyle_chip.create(2,sc_pri2,color_add2,num_mask2,mult2);
+  self.tile_3:=tyle_chip.create(3,sc_pri3,color_add3,num_mask3,mult3);
   self.sprite_color:=sprite_color;
-  self.color_mask:=color_mask;
   iniciar_video(256,240);
 end;
 
@@ -141,7 +132,6 @@ for f:=0 to $ff do begin
 		color:=x shr 12;
 		if ((color and pri_mask)<>pri_val) then continue;
 		if (((x and $800)<>0) and ((main_vars.frames_sec and 1)<>0)) then continue;
-    color:=color and self.color_mask;
 		fx:=(y and $2000)<>0;
 		fy:=(y and $4000)<>0;
 		multi:=(1 shl ((y and $1800) shr 11))-1; // 1x, 2x, 4x, 8x height
@@ -158,7 +148,7 @@ for f:=0 to $ff do begin
     mult:=-16;
 		while (multi>=0) do begin
       if nchar<>0 then begin
-        put_gfx_sprite(nchar-multi*inc,(color shl 4)+self.sprite_color,fx,fy,num_gfx);
+        put_gfx_sprite(nchar-multi*inc,(color shl 4)+sprite_color,fx,fy,num_gfx);
         actualiza_gfx_sprite(x,(y+mult*multi) and $1ff,7,num_gfx);
       end;
 			multi:=multi-1;
@@ -218,9 +208,9 @@ for f:=0 to $fff do begin
       end;
   end;
   atrib:=self.data[pos];
-  color:=(atrib shr 12) and self.color_mask;
+  color:=(atrib shr 12);
   if (self.buffer[pos] or self.buffer_color[color]) then begin
-    nchar:=atrib and $fff;
+    nchar:=atrib and self.num_mask;
     if trans then put_gfx_trans(x*8,y*8,nchar,(color shl 4)+self.color_add,self.screen,gfx_num)
       else put_gfx(x*8,y*8,nchar,(color shl 4)+self.color_add,self.screen,gfx_num);
     self.buffer[pos]:=false;
@@ -253,13 +243,13 @@ for f:=0 to ($3ff*self.mult) do begin
       end;
   end;
   atrib:=self.data[pos];
-  color:=(atrib shr 12) and self.color_mask;
+  color:=(atrib shr 12);
   if (self.buffer[pos] or self.buffer_color[color]) then begin
-    nchar:=atrib and $fff;
+    nchar:=atrib and self.num_mask;
     if trans then put_gfx_trans(x*16,y*16,nchar,(color shl 4)+self.color_add,self.screen,gfx_num)
       else put_gfx(x*16,y*16,nchar,(color shl 4)+color_add,self.screen,gfx_num);
     if pri then begin
-      if (atrib and $8000)<>0 then put_gfx_dec0(x*16,y*16,nchar,(color shl 4)+self.color_add,self.screen_pri,gfx_num)
+      if (color and $8)=8 then put_gfx_dec0(x*16,y*16,nchar,(color shl 4)+self.color_add,self.screen_pri,gfx_num)
         else put_gfx_block_trans(x*16,y*16,self.screen_pri,16,16);
     end;
     self.buffer[pos]:=false;
@@ -293,24 +283,6 @@ if self.control=0 then scroll_x_y(self.screen_pri,7,self.scroll_x,self.scroll_y)
   else scroll_xy_part(self.screen_pri,7,self.long_bloque_x,self.long_bloque_y,@self.pos_scroll_x[0],@self.pos_scroll_y[0],self.scroll_x,self.scroll_y);
 end;
 
-procedure tyle_chip.change_control0_8b(pos:word;valor:byte);
-var
-  tempw:word;
-begin
-if (pos and 1)<>0 then tempw:=(self.control_0[(pos and 7) shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.control_0[(pos and 7) shr 1] and $ff00) or valor;
-self.change_control0((pos and 7) shr 1,tempw);
-end;
-
-procedure tyle_chip.change_control0_8b_swap(pos:word;valor:byte);
-var
-  tempw:word;
-begin
-if (pos and 1)=0 then tempw:=(self.control_0[(pos and 7) shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.control_0[(pos and 7) shr 1] and $ff00) or valor;
-self.change_control0((pos and 7) shr 1,tempw);
-end;
-
 procedure tyle_chip.change_control0(pos,valor:word);
 var
   tempw:word;
@@ -342,25 +314,6 @@ case pos of
 end;
 end;
 
-procedure tyle_chip.change_control1_8b(pos:word;valor:byte);
-var
-  tempw:word;
-begin
-if (pos and 1)=0 then tempw:=(self.control_1[(pos and 7) shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.control_1[(pos and 7) shr 1] and $ff00) or valor;
-self.change_control1((pos and 7) shr 1,tempw);
-end;
-
-procedure tyle_chip.change_control1_8b_swap(pos:word;valor:byte);
-var
-  tempw:word;
-begin
-if (pos and 1)<>0 then tempw:=(self.control_1[(pos and 7) shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.control_1[(pos and 7) shr 1] and $ff00) or valor;
-self.change_control1((pos and 7) shr 1,tempw);
-end;
-
-
 procedure tyle_chip.change_control1(pos,valor:word;dec1:boolean=false);
 begin
 if self.control_1[pos]=valor then exit;
@@ -372,42 +325,6 @@ case pos of
       else self.long_bloque_x:=1 shl (valor and $f);
   3:self.long_bloque_y:=16 shl (valor and $f);
 end;
-end;
-
-procedure tyle_chip.write_tile_data_8b(pos:word;valor:byte;mask:word);
-var
-  tempw:word;
-begin
-pos:=pos and mask;
-if (pos and 1)=0 then tempw:=(self.data[pos shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.data[pos shr 1] and $ff00) or valor;
-if self.data[pos shr 1]<>tempw then begin
-  self.data[pos shr 1]:=tempw;
-  self.buffer[pos shr 1]:=true;
-end;
-end;
-
-procedure tyle_chip.write_tile_data_8b_swap(pos:word;valor:byte;mask:word);
-var
-  tempw:word;
-begin
-pos:=pos and mask;
-if (pos and 1)<>0 then tempw:=(self.data[pos shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.data[pos shr 1] and $ff00) or valor;
-if self.data[pos shr 1]<>tempw then begin
-  self.data[pos shr 1]:=tempw;
-  self.buffer[pos shr 1]:=true;
-end;
-end;
-
-procedure tyle_chip.write_rowscroll_8b(pos:word;valor:byte);
-var
-  tempw:word;
-begin
-pos:=pos and $3ff;
-if (pos and 1)=0 then tempw:=(self.rowscroll[pos shr 1] and $ff) or (valor shl 8)
-  else tempw:=(self.rowscroll[pos shr 1] and $ff00) or valor;
-self.rowscroll[pos shr 1]:=tempw;
 end;
 
 end.

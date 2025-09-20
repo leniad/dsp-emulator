@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,pal_engine,
      sound_engine,qsnapshot;
 
-function iniciar_hw1942:boolean;
+procedure cargar_hw1942;
 
 implementation
 const
@@ -42,7 +42,6 @@ var
  scroll:word;
  sound_command,rom_bank,palette_bank:byte;
 
-procedure update_video_hw1942;
 procedure draw_sprites;
 var
   f,color,nchar,x,y:word;
@@ -64,6 +63,7 @@ begin
   end;
 end;
 
+procedure update_video_hw1942;
 var
   f,color,nchar,pos,x,y:word;
   attr:byte;
@@ -132,7 +132,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main
     z80_0.run(frame_m);
@@ -143,12 +143,14 @@ while EmuStatus=EsRunning do begin
     case f of
       $2c:z80_1.change_irq(HOLD_LINE);
       $6d:begin
-            z80_0.change_irq_vector(HOLD_LINE,$cf);
+            z80_0.im0:=$cf;
+            z80_0.change_irq(HOLD_LINE);
             z80_1.change_irq(HOLD_LINE);
           end;
       $af:z80_1.change_irq(HOLD_LINE);
       $f0:begin
-            z80_0.change_irq_vector(HOLD_LINE,$d7);
+            z80_0.im0:=$d7;
+            z80_0.change_irq(HOLD_LINE);
             z80_1.change_irq(HOLD_LINE);
             update_video_hw1942;
           end;
@@ -243,8 +245,8 @@ savedata_qsnapshot(data,size);
 size:=ay8910_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_qsnapshot(@memoria[$c000],$4000);
-savedata_qsnapshot(@mem_snd[$4000],$800);
+savedata_com_qsnapshot(@memoria[$c000],$4000);
+savedata_com_qsnapshot(@mem_snd[$4000],$800);
 //MISC
 buffer[0]:=scroll and $ff;
 buffer[1]:=scroll shr 8;
@@ -293,7 +295,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -319,10 +321,6 @@ const
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
 iniciar_hw1942:=false;
-llamadas_maquina.bucle_general:=hw1942_principal;
-llamadas_maquina.reset:=reset_hw1942;
-llamadas_maquina.save_qsnap:=hw1942_qsave;
-llamadas_maquina.load_qsnap:=hw1942_qload;
 iniciar_audio(false);
 screen_init(1,256,512,false,true);
 screen_init(2,256,512);
@@ -337,8 +335,8 @@ z80_1:=cpu_z80.create(3000000,$100);
 z80_1.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
 z80_1.init_sound(hw1942_sound_update);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,AY8910);
-AY8910_1:=ay8910_chip.create(1500000,AY8910);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
 //cargar roms y ponerlas en su sitio
 if not(roms_load(@memoria_temp,hw1942_rom)) then exit;
 copymemory(@memoria,@memoria_temp,$8000);
@@ -384,6 +382,15 @@ marcade.dswb_val:=@hw1942_dip_b;
 //final
 reset_hw1942;
 iniciar_hw1942:=true;
+end;
+
+procedure cargar_hw1942;
+begin
+llamadas_maquina.iniciar:=iniciar_hw1942;
+llamadas_maquina.bucle_general:=hw1942_principal;
+llamadas_maquina.reset:=reset_hw1942;
+llamadas_maquina.save_qsnap:=hw1942_qsave;
+llamadas_maquina.load_qsnap:=hw1942_qload;
 end;
 
 end.

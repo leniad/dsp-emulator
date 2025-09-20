@@ -1,8 +1,7 @@
 unit upd1771;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}timer_engine,
-     sound_engine,dialogs;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}timer_engine,sound_engine;
 
 const
   MAX_PACKET_SIZE=$8000;
@@ -19,11 +18,8 @@ type
         procedure change_calls(ack_handler:tack_handler);
         procedure pcm_write(state:byte);
         procedure update;
-        function save_snapshot(data:pbyte):word;
-        procedure load_snapshot(data:pbyte);
       private
-        clock,index:dword;
-        nw_tpos:byte;
+        clock,index,nw_tpos:dword;
         timer,expected_bytes,pc3,t_tpos,state:byte;
         t_ppos:word;
         n_value:array[0..2] of byte;
@@ -36,9 +32,9 @@ type
         ack_handler:tack_handler;
         salida:smallint;
   end;
-
 var
   upd1771_0:upd1771_chip;
+procedure internal_update;
 
 implementation
 
@@ -83,54 +79,8 @@ begin
   timers.enabled(upd1771_0.timer,false);
 end;
 
-procedure internal_update;
-var
-  wlfsr_val:integer;
-  res:array[0..2] of byte;
-  f:byte;
-  temp:integer;
-begin
-  upd1771_0.salida:=0;
-	case upd1771_0.state of
-		STATE_TONE:begin
-				        temp:=WAVEFORMS[upd1771_0.t_timbre][upd1771_0.t_tpos]*upd1771_0.t_volume;
-                if temp>16384 then upd1771_0.salida:=16384
-                  else upd1771_0.salida:=temp;
-				        upd1771_0.t_ppos:=upd1771_0.t_ppos+1;
-				        if (upd1771_0.t_ppos>=upd1771_0.t_period) then begin
-					        upd1771_0.t_tpos:=upd1771_0.t_tpos+1;
-					        if (upd1771_0.t_tpos=32) then upd1771_0.t_tpos:=upd1771_0.t_offset;
-					        upd1771_0.t_ppos:=0;
-                end;
-              end;
-		STATE_NOISE:begin
-				          //"wavetable-LFSR" component
-				          wlfsr_val:=noise_tbl[upd1771_0.nw_tpos]-127;//data too wide
-				          upd1771_0.nw_ppos:=upd1771_0.nw_ppos+1;
-				          if (upd1771_0.nw_ppos>=upd1771_0.nw_period) then begin
-					          upd1771_0.nw_tpos:=upd1771_0.nw_tpos+1;
-					          upd1771_0.nw_ppos:=0;
-                  end;
-				          //mix in each of the noise's 3 pulse components
-				          for f:=0 to 2 do begin
-					          res[f]:=upd1771_0.n_value[f]*127;
-					          upd1771_0.n_ppos[f]:=upd1771_0.n_ppos[f]+1;
-					          if (upd1771_0.n_ppos[f]>=upd1771_0.n_period[f]) then begin
-						          upd1771_0.n_ppos[f]:=0;
-						          upd1771_0.n_value[f]:=not(upd1771_0.n_value[f]);
-                    end;
-                  end;
-				          //not quite, but close.
-                  temp:=(wlfsr_val*upd1771_0.nw_volume) or (res[0]*upd1771_0.n_volume[0]) or (res[1]*upd1771_0.n_volume[1]) or (res[2]*upd1771_0.n_volume[2]);
-                  if temp>32767 then upd1771_0.salida:=32767
-                    else upd1771_0.salida:=temp;
-                end;
-  end;
-end;
-
 constructor upd1771_chip.create(clock:integer;amp:single);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.clock:=clock;
   self.amp:=amp;
   self.tsample_num:=init_channel;
@@ -234,76 +184,56 @@ begin
 	pc3:=state;
 end;
 
+procedure internal_update;
+var
+  wlfsr_val:integer;
+  res:array[0..2] of byte;
+  f:byte;
+  temp:integer;
+begin
+  upd1771_0.salida:=0;
+	case upd1771_0.state of
+		STATE_TONE:begin
+				        temp:=WAVEFORMS[upd1771_0.t_timbre][upd1771_0.t_tpos]*upd1771_0.t_volume;
+                if temp>16384 then upd1771_0.salida:=16384
+                  else upd1771_0.salida:=temp;
+				        upd1771_0.t_ppos:=upd1771_0.t_ppos+1;
+				        if (upd1771_0.t_ppos>=upd1771_0.t_period) then begin
+					        upd1771_0.t_tpos:=upd1771_0.t_tpos+1;
+					        if (upd1771_0.t_tpos=32) then upd1771_0.t_tpos:=upd1771_0.t_offset;
+					        upd1771_0.t_ppos:=0;
+                end;
+              end;
+		STATE_NOISE:begin
+				          //"wavetable-LFSR" component
+				          wlfsr_val:=noise_tbl[upd1771_0.nw_tpos]-127;//data too wide
+				          upd1771_0.nw_ppos:=upd1771_0.nw_ppos+1;
+				          if (upd1771_0.nw_ppos>=upd1771_0.nw_period) then begin
+					          upd1771_0.nw_tpos:=upd1771_0.nw_tpos+1;
+					          if (upd1771_0.nw_tpos=NOISE_SIZE) then upd1771_0.nw_tpos:=0;
+					          upd1771_0.nw_ppos:=0;
+                  end;
+				          //mix in each of the noise's 3 pulse components
+				          for f:=0 to 2 do begin
+					          res[f]:=upd1771_0.n_value[f]*127;
+					          upd1771_0.n_ppos[f]:=upd1771_0.n_ppos[f]+1;
+					          if (upd1771_0.n_ppos[f]>=upd1771_0.n_period[f]) then begin
+						          upd1771_0.n_ppos[f]:=0;
+						          upd1771_0.n_value[f]:=not(upd1771_0.n_value[f]);
+                    end;
+                  end;
+				          //not quite, but close.
+                  temp:=(wlfsr_val*upd1771_0.nw_volume) or (res[0]*upd1771_0.n_volume[0]) or (res[1]*upd1771_0.n_volume[1]) or (res[2]*upd1771_0.n_volume[2]);
+                  if temp>32767 then upd1771_0.salida:=32767
+                    else upd1771_0.salida:=temp;
+                end;
+  end;
+end;
+
 procedure upd1771_chip.update;
 begin
   tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(salida*amp);
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(salida*amp);
-end;
-
-function upd1771_chip.save_snapshot(data:pbyte):word;
-var
-  temp:pbyte;
-  buffer:array[0..64] of byte;
-  size:word;
-begin
-temp:=data;
-copymemory(temp,@self.packet,MAX_PACKET_SIZE);
-inc(temp,MAX_PACKET_SIZE);
-copymemory(@buffer[0],@self.clock,4);
-copymemory(@buffer[4],@self.index,4);
-buffer[8]:=self.nw_tpos;
-buffer[9]:=self.expected_bytes;
-buffer[10]:=self.pc3;
-buffer[11]:=self.t_tpos;
-buffer[12]:=self.state;
-copymemory(@buffer[13],@self.t_ppos,2);
-copymemory(@buffer[15],@self.n_value,3);
-copymemory(@buffer[18],@self.n_ppos,4*3);
-copymemory(@buffer[30],@self.n_period,4*3);
-buffer[42]:=self.t_volume;
-buffer[43]:=self.t_timbre;
-buffer[44]:=self.t_offset;
-buffer[45]:=self.nw_timbre;
-buffer[46]:=self.nw_volume;
-copymemory(@buffer[47],@self.nw_ppos,4);
-copymemory(@buffer[51],@self.nw_period,4);
-copymemory(@buffer[55],@self.n_volume,2*3);
-copymemory(@buffer[61],@self.t_period,2);
-copymemory(@buffer[63],@self.salida,2);
-copymemory(temp,@buffer[0],65);
-save_snapshot:=size+65;
-end;
-
-procedure upd1771_chip.load_snapshot(data:pbyte);
-var
-  temp:pbyte;
-  buffer:array[0..64] of byte;
-begin
-temp:=data;
-copymemory(@self.packet,temp,MAX_PACKET_SIZE);
-inc(temp,MAX_PACKET_SIZE);
-copymemory(@buffer[0],temp,65);
-copymemory(@self.clock,@buffer[0],4);
-copymemory(@self.index,@buffer[4],4);
-self.nw_tpos:=buffer[8];
-self.expected_bytes:=buffer[9];
-self.pc3:=buffer[10];
-self.t_tpos:=buffer[11];
-self.state:=buffer[12];
-copymemory(@self.t_ppos,@buffer[13],2);
-copymemory(@self.n_value,@buffer[15],3);
-copymemory(@self.n_ppos,@buffer[18],4*3);
-copymemory(@self.n_period,@buffer[30],4*3);
-self.t_volume:=buffer[42];
-self.t_timbre:=buffer[43];
-self.t_offset:=buffer[44];
-self.nw_timbre:=buffer[45];
-self.nw_volume:=buffer[46];
-copymemory(@self.nw_ppos,@buffer[47],4);
-copymemory(@self.nw_period,@buffer[51],4);
-copymemory(@self.n_volume,@buffer[55],2*3);
-copymemory(@self.t_period,@buffer[61],2);
-copymemory(@self.salida,@buffer[63],2);
 end;
 
 end.

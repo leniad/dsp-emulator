@@ -1,7 +1,7 @@
 unit mos6526;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}cpu_misc,main_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}dialogs,sysutils,cpu_misc,main_engine;
 
 type
   registros=packed record
@@ -42,7 +42,7 @@ type
   end;
 
 var
-  mos6526_0,mos6526_1:mos6526_chip;
+  mos6526_0:mos6526_chip;
 
 implementation
 uses commodore64,mos6566;

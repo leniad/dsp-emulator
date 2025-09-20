@@ -1,7 +1,7 @@
 unit samples;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     dialogs,sound_engine,file_engine,main_engine;
+     dialogs,sysutils,sound_engine,file_engine,main_engine;
 
 const
   MAX_SAMPLES=30;
@@ -19,7 +19,6 @@ type
              pos:dword;
              restart,loop:boolean;
              tsample:byte;
-             amp:single;
         end;
   ptipo_audio=^tipo_audio;
   tipo_samples=record
@@ -36,7 +35,7 @@ var
   samples_loaded:boolean;
 
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
-function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1;name:string=''):boolean;
+function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1;parent:boolean=false;name:string=''):boolean;
 function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean;amp:single=1):boolean;
 procedure start_sample(num:byte);
 procedure samples_update;
@@ -45,7 +44,6 @@ procedure close_samples;
 procedure reset_samples;
 procedure stop_all_samples;
 function sample_status(num:byte):boolean;
-procedure change_vol_sample(num_sample:byte;amp:single);
 
 implementation
 uses init_games;
@@ -204,7 +202,6 @@ getmem(data_samples.audio[sample_pos].data,longitud*2);
 data_samples.audio[sample_pos].long:=longitud;
 data_samples.audio[sample_pos].restart:=restart;
 data_samples.audio[sample_pos].loop:=loop;
-data_samples.audio[sample_pos].amp:=1;
 copymemory(data_samples.audio[sample_pos].data,sample_data,longitud*2);
 //Inicializar solo el sample
 if ((data_samples.num_samples-1)<=MAX_CHANNELS) then begin
@@ -214,15 +211,14 @@ end;
 load_samples_raw:=true;
 end;
 
-function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1;name:string=''):boolean;
+function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1;parent:boolean=false;name:string=''):boolean;
 var
   f,sample_size:word;
   ptemp:pbyte;
-  longitud:integer;
+  longitud,crc:integer;
   nombre_zip:string;
-  crc:dword;
 begin
-if name<>'' then begin
+if parent then begin
     nombre_zip:=name;
 end else begin
   for f:=1 to GAMES_CONT do begin
@@ -260,7 +256,6 @@ for f:=0 to (sample_size-1) do begin
     end;
     data_samples.audio[f].restart:=nombre_samples[f].restart;
     data_samples.audio[f].loop:=nombre_samples[f].loop;
-    data_samples.audio[f].amp:=1;
 end;
 freemem(ptemp);
 data_samples.num_samples:=sample_size;
@@ -353,7 +348,7 @@ for f:=0 to (data_samples.num_samples-1) do begin
     ptemp:=data_samples.audio[f].data;
     inc(ptemp,data_samples.audio[f].pos);
     data_samples.audio[f].pos:=data_samples.audio[f].pos+1;
-    tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=trunc(smallint(ptemp^)*data_samples.amp*data_samples.audio[f].amp);
+    tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=trunc(smallint(ptemp^)*data_samples.amp);
     if data_samples.audio[f].pos=data_samples.audio[f].long then begin
       if data_samples.audio[f].loop then begin
         data_samples.audio[f].pos:=0;
@@ -379,11 +374,6 @@ for f:=0 to data_samples.num_samples-1 do begin
 end;
 freemem(data_samples);
 data_samples:=nil;
-end;
-
-procedure change_vol_sample(num_sample:byte;amp:single);
-begin
-  data_samples.audio[num_sample].amp:=amp;
 end;
 
 end.

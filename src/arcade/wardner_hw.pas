@@ -3,9 +3,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
-
 function iniciar_wardnerhw:boolean;
-
 implementation
 const
         wardner_rom:array[0..3] of tipo_roms=(
@@ -29,29 +27,26 @@ const
         (n:'82s137.3d';l:$400;p:$800;crc:$70b537b9),(n:'82s137.3e';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s131.3b';l:$200;p:$1000;crc:$9dfffaff),(n:'82s131.3a';l:$200;p:$1200;crc:$712bad47),
         (n:'82s131.2a';l:$200;p:$1400;crc:$ac843ca6),(n:'82s131.1a';l:$200;p:$1600;crc:$50452ff8));
-        wardner_dip_a:array [0..5] of def_dip2=(
-        (mask:$1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
-        (mask:$2;name:'Flip Screen';number:2;val2:(0,2);name2:('Off','On')),
-        (mask:$8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
-        (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
-        wardner_dip_b:array [0..3] of def_dip2=(
-        (mask:$3;name:'Difficulty';number:4;val4:(1,0,2,3);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('30K 80K 50K+','50K 100K 50K+','30K','50K')),
-        (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('1','3','4','5')),());
-
+        wardner_dip_a:array [0..5] of def_dip=(
+        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$30;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$80;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        wardner_dip_b:array [0..3] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'30k 80k 50k+'),(dip_val:$4;dip_name:'50k 100k 50k+'),(dip_val:$8;dip_name:'30k'),(dip_val:$c;dip_name:'50k'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'1'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  mem_rom:array[0..7,0..$7fff] of byte;
  rom_bank:byte;
- int_enable,wardner_dsp_bio,dsp_execute,video_ena:boolean;
+ int_enable,wardner_dsp_BIO,dsp_execute,video_ena:boolean;
  txt_ram:array[0..$7ff] of word;
  bg_ram:array[0..$1fff] of word;
  fg_ram:array[0..$fff] of word;
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank,main_ram_seg,dsp_addr_w:word;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
-
-procedure update_video_wardner;
-procedure draw_sprites(priority:word);
+procedure draw_sprites(priority:word);inline;
 var
   f,nchar,atrib,x,y:word;
   flipx,flipy:boolean;
@@ -59,7 +54,7 @@ var
 begin
 for f:=0 to $1ff do begin
   atrib:=memoria[$8002+(f shl 3)]+(memoria[$8003+(f shl 3)] shl 8);
-  if ((atrib and $c00)=priority) then begin
+  if ((atrib and $0c00)=priority) then begin
     y:=(memoria[$8006+(f shl 3)]+(memoria[$8007+(f shl 3)] shl 8)) shr 7;
     if (y and $1ff)>$100 then continue;
     nchar:=(memoria[$8000+(f shl 3)]+(memoria[$8001+(f shl 3)] shl 8)) and $7ff;
@@ -73,6 +68,7 @@ for f:=0 to $1ff do begin
   end;
 end;
 end;
+procedure update_video_wardner;inline;
 var
   f,nchar,x,y,atrib:word;
   color:byte;
@@ -122,42 +118,53 @@ end else fill_full_screen(4,$800);
 actualiza_trozo_final(0,0,320,240,4);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
-
 procedure eventos_wardner;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
   //SYS
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
 end;
 end;
-
 procedure wardnerhw_principal;
 var
   f:word;
+  frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_mcu:=tms32010_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 285 do begin
+    //MAIN CPU
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //SND CPU
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    //MCU
+    tms32010_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
     case f of
       0:marcade.in0:=marcade.in0 and $7f;
-      240:begin
+      239:begin
             marcade.in0:=marcade.in0 or $80;
             if int_enable then begin
                 z80_0.change_irq(HOLD_LINE);
@@ -166,21 +173,11 @@ while EmuStatus=EsRunning do begin
             update_video_wardner;
           end;
     end;
-    //MAIN CPU
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    //SND CPU
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
-    //MCU
-    tms32010_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
   end;
   eventos_wardner;
   video_sync;
 end;
 end;
-
 function wardner_dsp_r:word;
 begin
 	// DSP can read data from main CPU RAM via DSP IO port 1
@@ -190,7 +187,6 @@ begin
       else wardner_dsp_r:=0;
 	end;
 end;
-
 procedure wardner_dsp_w(valor:word);
 begin
   // Data written to main CPU RAM via DSP IO port 1
@@ -207,31 +203,27 @@ begin
 						end;
 	end;
 end;
-
 procedure wardner_dsp_addrsel_w(valor:word);
 begin
   main_ram_seg:=valor and $e000;
 	dsp_addr_w:=(valor and $7ff) shl 1;
 	if (main_ram_seg=$6000) then main_ram_seg:=$7000;
 end;
-
 procedure wardner_dsp_bio_w(valor:word);
 begin
-  if (valor and $8000)<>0 then wardner_dsp_bio:=false;
+  if (valor and $8000)<>0 then wardner_dsp_BIO:=false;
 	if (valor=0) then begin
 		if dsp_execute then begin
       z80_0.change_halt(CLEAR_LINE);
 			dsp_execute:=false;
 		end;
-		wardner_dsp_bio:=true;
+		wardner_dsp_BIO:=true;
 	end;
 end;
-
-function wardner_bio_r:boolean;
+function wardner_BIO_r:boolean;
 begin
-  wardner_bio_r:=wardner_dsp_bio;
+  wardner_BIO_r:=wardner_dsp_BIO;
 end;
-
 function wardner_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -239,7 +231,6 @@ case direccion of
   $c000..$c7ff:wardner_snd_getbyte:=memoria[direccion];
 end;
 end;
-
 procedure wardner_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -248,25 +239,21 @@ case direccion of
   $c000..$c7ff:memoria[direccion]:=valor;
 end;
 end;
-
 function wardner_snd_inbyte(puerto:word):byte;
 begin
 if (puerto and $ff)=0 then wardner_snd_inbyte:=ym3812_0.status;
 end;
-
 procedure wardner_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  0:ym3812_0.control(valor);
-  1:ym3812_0.write(valor);
+  $0:ym3812_0.control(valor);
+  $1:ym3812_0.write(valor);
 end;
 end;
-
 procedure snd_irq(irqstate:byte);
 begin
   z80_1.change_irq(irqstate);
 end;
-
 function wardner_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -279,10 +266,7 @@ case direccion of
                end else wardner_getbyte:=mem_rom[rom_bank,direccion and $7fff];
 end;
 end;
-
-procedure wardner_putbyte(direccion:word;valor:byte);
-
-procedure cambiar_color(numero:word);
+procedure cambiar_color(numero:word);inline;
 var
   tmp_color:word;
   color:tcolor;
@@ -299,7 +283,7 @@ begin
     $600..$6ff:buffer_color[(numero shr 3) and $1f]:=true;
   end;
 end;
-
+procedure wardner_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$6fff:;
@@ -316,7 +300,6 @@ case direccion of
                 end;
 end;
 end;
-
 function wardner_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
@@ -333,46 +316,45 @@ case (puerto and $ff) of
   $65:wardner_inbyte:=fg_ram[fg_offs] shr 8;
 end;
 end;
-
 procedure wardner_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $10:txt_scroll_x:=(txt_scroll_x and $ff00) or valor;
-  $11:txt_scroll_x:=(txt_scroll_x and $ff) or ((valor and 1) shl 8);
+  $11:txt_scroll_x:=(txt_scroll_x and $00ff) or ((valor and $1) shl 8);
   $12:txt_scroll_y:=(txt_scroll_y and $ff00) or valor;
-  $13:txt_scroll_y:=(txt_scroll_y and $ff) or ((valor and 1) shl 8);
+  $13:txt_scroll_y:=(txt_scroll_y and $00ff) or ((valor and $1) shl 8);
   $14:txt_offs:=(txt_offs and $ff00) or valor;
-  $15:txt_offs:=(txt_offs and $ff) or ((valor and 7) shl 8);
+  $15:txt_offs:=(txt_offs and $00ff) or ((valor and $7) shl 8);
   $20:bg_scroll_x:=(bg_scroll_x and $ff00) or valor;
-  $21:bg_scroll_x:=(bg_scroll_x and $ff) or ((valor and 1) shl 8);
+  $21:bg_scroll_x:=(bg_scroll_x and $00ff) or ((valor and $1) shl 8);
   $22:bg_scroll_y:=(bg_scroll_y and $ff00) or valor;
-  $23:bg_scroll_y:=(bg_scroll_y and $ff) or ((valor and 1) shl 8);
+  $23:bg_scroll_y:=(bg_scroll_y and $00ff) or ((valor and $1) shl 8);
   $24:bg_offs:=(bg_offs and $ff00) or valor;
-  $25:bg_offs:=(bg_offs and $ff) or ((valor and $f) shl 8);
+  $25:bg_offs:=(bg_offs and $00ff) or ((valor and $f) shl 8);
   $30:fg_scroll_x:=(fg_scroll_x and $ff00) or valor;
-  $31:fg_scroll_x:=(fg_scroll_x and $ff) or ((valor and 1) shl 8);
+  $31:fg_scroll_x:=(fg_scroll_x and $00ff) or ((valor and $1) shl 8);
   $32:fg_scroll_y:=(fg_scroll_y and $ff00) or valor;
-  $33:fg_scroll_y:=(fg_scroll_y and $ff) or ((valor and 1) shl 8);
+  $33:fg_scroll_y:=(fg_scroll_y and $00ff) or ((valor and $1) shl 8);
   $34:fg_offs:=(fg_offs and $ff00) or valor;
-  $35:fg_offs:=(fg_offs and $ff) or ((valor and $f) shl 8);
+  $35:fg_offs:=(fg_offs and $00ff) or ((valor and $f) shl 8);
   $5a:case (valor and $f) of
-        0:begin
+        $0:begin
 	            tms32010_0.change_halt(CLEAR_LINE);
               z80_0.change_halt(ASSERT_LINE);
               tms32010_0.change_irq(ASSERT_LINE);
 	          end;
-	      1:begin
+	      $1:begin
               tms32010_0.change_irq(CLEAR_LINE);
 	            tms32010_0.change_halt(ASSERT_LINE);
             end;
       end;
   $5c:case (valor and $f) of
-		    4:int_enable:=false;
-		    5:int_enable:=true;
-		    6:main_screen.flip_main_screen:=false;
-        7:main_screen.flip_main_screen:=true;
-        8:bg_bank:=0;
-        9:bg_bank:=$1000;
+		    $4:int_enable:=false;
+		    $5:int_enable:=true;
+		    $6:main_screen.flip_main_screen:=false;
+        $7:main_screen.flip_main_screen:=true;
+        $8:bg_bank:=0;
+        $9:bg_bank:=$1000;
 		    $a:fg_bank:=0;
         $b:fg_bank:=$1000;
         $c:video_ena:=false;
@@ -412,23 +394,18 @@ case (puerto and $ff) of
   $70:rom_bank:=valor;
 end;
 end;
-
 procedure wardner_sound_update;
 begin
   ym3812_0.update;
 end;
-
 //Main
 procedure reset_wardnerhw;
 begin
  z80_0.reset;
  z80_1.reset;
  tms32010_0.reset;
- frame_main:=z80_0.tframes;
- frame_snd:=z80_1.tframes;
- frame_mcu:=tms32010_0.tframes;
  ym3812_0.reset;
- reset_game_general;
+ reset_audio;
  txt_scroll_x:=0;
  txt_scroll_y:=0;
  bg_scroll_x:=0;
@@ -446,12 +423,11 @@ begin
  fg_bank:=0;
  int_enable:=false;
  video_ena:=true;
- wardner_dsp_bio:=false;
+ wardner_dsp_BIO:=false;
  dsp_execute:=false;
  main_ram_seg:=0;
  dsp_addr_w:=0;
 end;
-
 function iniciar_wardnerhw:boolean;
 var
     f:word;
@@ -480,19 +456,26 @@ iniciar_video(320,240);
 z80_0:=cpu_z80.create(24000000 div 4,286);
 z80_0.change_ram_calls(wardner_getbyte,wardner_putbyte);
 z80_0.change_io_calls(wardner_inbyte,wardner_outbyte);
-if not(roms_load(@memoria_temp,wardner_rom)) then exit;
-copymemory(@memoria,@memoria_temp,$8000);
-for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
-copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
 //Sound CPU
 z80_1:=cpu_z80.create(14000000 div 4,286);
 z80_1.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
 z80_1.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
 z80_1.init_sound(wardner_sound_update);
-if not(roms_load(@mem_snd,wardner_snd_rom)) then exit;
-//MCU CPU
+//TMS MCU
 tms32010_0:=cpu_tms32010.create(14000000,286);
-tms32010_0.change_io_calls(wardner_bio_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
+tms32010_0.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,14000000 div 4);
+ym3812_0.change_irq_calls(snd_irq);
+//cargar roms
+if not(roms_load(@memoria_temp,wardner_rom)) then exit;
+//Mover las ROMS a su sitio
+copymemory(@memoria,@memoria_temp[$0],$8000);
+for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
+copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
+//cargar ROMS sonido
+if not(roms_load(@mem_snd,wardner_snd_rom)) then exit;
+//cargar ROMS MCU y organizarlas
 if not(roms_load(@memoria_temp,wardner_mcu_rom)) then exit;
 for f:=0 to $3ff do
    rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
@@ -501,10 +484,7 @@ for f:=0 to $1ff do
    //1024-2047
    rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1200] and $f)) shl 8) or
                         (memoria_temp[f+$1400] and $f) shl 4+(memoria_temp[f+$1600] and $f);
-copymemory(tms32010_0.get_rom_addr,@rom,$1000);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,14000000 div 4);
-ym3812_0.change_irq_calls(snd_irq);
+copymemory(tms32010_0.get_rom_addr,@rom[0],$1000);
 //convertir chars
 if not(roms_load(@memoria_temp,wardner_char)) then exit;
 init_gfx(0,8,8,2048);
@@ -530,11 +510,10 @@ convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=1;
 marcade.dswb:=0;
-marcade.dswa_val2:=@wardner_dip_a;
-marcade.dswb_val2:=@wardner_dip_b;
+marcade.dswa_val:=@wardner_dip_a;
+marcade.dswb_val:=@wardner_dip_b;
 //final
 reset_wardnerhw;
 iniciar_wardnerhw:=true;
 end;
-
 end.

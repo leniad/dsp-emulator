@@ -67,9 +67,9 @@ implementation
 const
     estados_t:array[0..255] of byte=(
     //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-      6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
+      6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
       0, 0, 2, 4, 0, 0, 4, 9, 0, 2, 3, 0, 3, 2, 8, 6,  // 10 *
-      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,  // 20 Branch *
+      3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 3,  // 20 Branch *
       2, 2, 2, 2, 5, 4, 5, 4, 0, 4, 3, 4,16,11, 0, 0,  // 30 *
       2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 0, 1,  // 40 reg A MODO A *
       2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 0, 1,  // 50 reg B MODO B *
@@ -86,9 +86,9 @@ const
 
     paginacion:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-        1, 1, 1, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
+        1,$f, 1, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
         0, 0, 0, 0,$f,$f, 3, 3,$f, 0, 2,$f, 2, 0, 2, 2,  //10
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  //20
+        2, 2, 2, 2, 2, 2, 2, 2,$f,$f, 2, 2, 2, 2, 2, 2,  //20
         4, 4, 4, 4, 2, 2, 2, 2,$f, 0, 0, 0, 2, 0,$f,$f,  //30
         0,$f,$f, 0, 0,$f, 0, 0, 0, 0, 0,$f, 0, 0,$f, 0,  //40
         0,$f,$f, 0, 0,$f, 0, 0, 0, 0, 0,$f, 0, 0,$f, 0,  //50
@@ -107,7 +107,7 @@ const
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  Instrucciones $10 y $11 (+1)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10
-        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 5, 5, // 20
+        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 0, 5, // 20
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50
@@ -126,7 +126,7 @@ const
       //0 1 2 3 4 5 6 7 8 9 a b c d e f
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //00
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //10
-        0,0,3,3,3,3,3,3,0,0,3,3,3,3,3,3,  //20
+        0,0,3,3,3,3,3,3,0,0,3,3,3,3,0,3,  //20
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //30
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //40
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //50
@@ -228,7 +228,7 @@ end;
 procedure cpu_m6809.reset;
 begin
 self.opcode:=false;
-r.pc:=self.getword($fffe);
+r.pc:=self.getword($FFFE);
 r.dp:=0;
 self.contador:=0;
 self.pon_pila($50);
@@ -259,7 +259,7 @@ end;
 procedure cpu_m6809.push_sw(reg:word);
 begin
 r.s:=r.s-2;
-self.putbyte(r.s+1,reg and $ff);
+self.putbyte(r.s+1,reg and $FF);
 self.putbyte(r.s,(reg shr 8));
 end;
 
@@ -288,7 +288,7 @@ end;
 procedure cpu_m6809.push_uw(reg:word);
 begin
 r.u:=r.u-2;
-self.putbyte(r.u+1,reg and $ff);
+self.putbyte(r.u+1,reg and $FF);
 self.putbyte(r.u,(reg shr 8));
 end;
 
@@ -324,7 +324,7 @@ end else begin
 end;
 r.cc.i:=true;
 r.cc.f:=true;
-r.pc:=self.getword($fffc);
+r.pc:=self.getword($FFFC);
 if (self.pedir_nmi=PULSE_LINE) then self.pedir_nmi:=CLEAR_LINE;
 if (self.pedir_nmi=ASSERT_LINE) then self.nmi_state:=ASSERT_LINE;
 end;
@@ -346,7 +346,7 @@ end else begin
   self.push_s(self.dame_pila);
   call_irq:=19;
 end;
-r.pc:=self.getword($fff8);
+r.pc:=self.getword($FFF8);
 r.cc.i:=true;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
 end;
@@ -364,7 +364,7 @@ end else begin
 end;
 r.cc.f:=true;
 r.cc.i:=true;
-r.pc:=self.getword($fff6);
+r.pc:=self.getword($FFF6);
 if self.pedir_firq=HOLD_LINE then self.pedir_firq:=CLEAR_LINE;
 end;
 
@@ -464,8 +464,10 @@ procedure cpu_m6809.trf(valor:byte);
 var
   temp:word;
 begin
-temp:=$ffff;
-case (valor shr 4) of
+if ((valor xor (valor shr 4)) and $08)<>0 then begin
+  temp:=$ff
+end else begin
+  case (valor shr 4) of
     $0:temp:=r.d.w; //D
     $1:temp:=r.x;  //X
     $2:temp:=r.y; //Y
@@ -476,6 +478,7 @@ case (valor shr 4) of
     $9:temp:=r.d.b; //b
     $a:temp:=self.dame_pila;  //cc
     $b:temp:=r.dp; //dp
+  end;
 end;
 case (valor and 15) of
     $0:r.d.w:=temp; //D
@@ -495,9 +498,11 @@ procedure cpu_m6809.trf_ex(valor:byte);
 var
   temp1,temp2:word;
 begin
-temp1:=$ffff;
-temp2:=$ffff;
-case (valor shr 4) of
+if ((valor xor (valor shr 4)) and $08)<>0 then begin
+    temp1:=$ff;
+    temp2:=$ff;
+end else begin
+  case (valor shr 4) of
     $0:temp1:=r.d.w; //D
     $1:temp1:=r.x;  //X
     $2:temp1:=r.y; //Y
@@ -508,8 +513,8 @@ case (valor shr 4) of
     $9:temp1:=r.d.b; //b
     $a:temp1:=self.dame_pila;  //cc
     $b:temp1:=r.dp; //dp
-end;
-case (valor and $f) of
+  end;
+  case (valor and 15) of
     $0:temp2:=r.d.w; //D
     $1:temp2:=r.x;  //X
     $2:temp2:=r.y; //Y
@@ -520,6 +525,7 @@ case (valor and $f) of
     $9:temp2:=r.d.b; //b
     $a:temp2:=self.dame_pila;  //cc
     $b:temp2:=r.dp; //dp
+  end;
 end;
 case (valor shr 4) of
     $0:r.d.w:=temp2; //D
@@ -533,7 +539,7 @@ case (valor shr 4) of
     $a:self.pon_pila(temp2);  //cc
     $b:r.dp:=temp2; //dp
 end;
-case (valor and $f) of
+case (valor and 15) of
     $0:r.d.w:=temp1; //D
     $1:r.x:=temp1;  //X
     $2:r.y:=temp1; //Y
@@ -617,10 +623,10 @@ case paginacion[instruccion] of
          r.pc:=r.pc+2;
          posicion:=self.getword(posicion);
       end;
-    else MessageDlg('Num CPU6809-'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
+    else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$1,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc));  //neg 4T
+      $0,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc));  //neg 4T
       $2,$3,$63,$73:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T ($2 es ilegal!!)
       $4,$64,$74:self.putbyte(posicion,m680x_lsr(self.getbyte(posicion),@r.cc)); //lsr 4T
       $6,$66,$76:self.putbyte(posicion,m680x_ror(self.getbyte(posicion),@r.cc)); //ror 4T
@@ -676,7 +682,7 @@ case instruccion of
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $24:if not(r.cc.c) then begin //lbcc
+               $24:if not(r.cc.c) then begin //lbcc
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
@@ -684,7 +690,7 @@ case instruccion of
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $26:if not(r.cc.z) then begin //lbne
+               $26:if not(r.cc.z) then begin //lbne
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
@@ -692,7 +698,7 @@ case instruccion of
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2a:if not(r.cc.n) then begin //lbpl
+               $2a:if not(r.cc.n) then begin //lbpl
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
@@ -700,19 +706,15 @@ case instruccion of
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2c:if (r.cc.n=r.cc.v) then begin //bge
+                $2c:if (not(r.cc.n)=not(r.cc.v)) then begin //bge
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2d:if not(r.cc.n=r.cc.v) then begin //bnge
+                $2d:if not(not(r.cc.n)=not(r.cc.v)) then begin //bnge
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2e:if ((r.cc.n=r.cc.v) and not(r.cc.z)) then begin  //lbgt
-                      r.pc:=r.pc+smallint(posicion);
-                      self.estados_demas:=self.estados_demas+1;
-                    end;
-                $2f:if not((r.cc.n=r.cc.v) and not(r.cc.z)) then begin //ble
+               $2f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then begin //ble
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
@@ -781,8 +783,6 @@ case instruccion of
       $25:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs 3T
       $26:if not(r.cc.z) then r.pc:=r.pc+shortint(numero); //bne 3T
       $27:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq 3T
-      $28:if not(r.cc.v) then r.pc:=r.pc+shortint(numero); //bvc 3T
-      $29:if r.cc.v then r.pc:=r.pc+shortint(numero); //bvs 3T
       $2a:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl 3T
       $2b:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi 3T
       $2c:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//bge 3T

@@ -22,17 +22,17 @@ const
         (n:'a-j5.bin';l:$4000;p:0;crc:$21efe866),(n:'a-j6.bin';l:$4000;p:$4000;crc:$7f984c80),
         (n:'a-j7.bin';l:$4000;p:$8000;crc:$df69e51b),(n:'a-j8.bin';l:$4000;p:$c000;crc:$0094cb8b));
         //DIP
-        pinballaction_dipa:array [0..5] of def_dip2=(
-        (mask:3;name:'Coin B';number:4;val4:(0,1,2,3);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
-        (mask:$c;name:'Coin A';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
-        (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
-        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        pinballaction_dipb:array [0..4] of def_dip2=(
-        (mask:7;name:'Bonus Life';number:8;val8:(1,4,0,3,6,2,5,7);name8:('70K 200K 1000K','100K 300K 1000K','70K 200K','100K 300K','200K 1000K','100K','200K','None')),
-        (mask:8;name:'Extra';number:2;val2:(8,0);name2:('Hard','Easy')),
-        (mask:$30;name:'Flippers';number:4;val4:(0,$10,$20,$30);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$c0;name:'Difficulty (Outlanes)';number:4;val4:(0,$40,$80,$c0);name4:('Easy','Medium','Hard','Hardest')),());
+        pinballaction_dipa:array [0..5] of def_dip=(
+        (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin A';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$c;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$40;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        pinballaction_dipb:array [0..4] of def_dip=(
+        (mask:$7;name:'Bonus Life';number:8;dip:((dip_val:$1;dip_name:'70k 200k 1000k'),(dip_val:$4;dip_name:'100k 300k 1000k'),(dip_val:$0;dip_name:'70k 200k'),(dip_val:$3;dip_name:'100k 300k'),(dip_val:$6;dip_name:'200k 1000k'),(dip_val:$2;dip_name:'100k'),(dip_val:$5;dip_name:'200k'),(dip_val:$7;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Extra';number:2;dip:((dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Easy'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Flippers';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$10;dip_name:'Medium'),(dip_val:$20;dip_name:'Hard'),(dip_val:$30;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Difficulty (Outlanes)';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$40;dip_name:'Medium'),(dip_val:$80;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  sound_latch,scroll_y:byte;
@@ -48,7 +48,7 @@ begin
 //background
 for f:=0 to $3ff do begin
   atrib:=memoria[$dc00+f];
-  color:=atrib and 7;
+  color:=atrib and $7;
   if (gfx[1].buffer[f] or buffer_color[color+$10]) then begin
       x:=31-(f div 32);
       y:=f mod 32;
@@ -95,15 +95,15 @@ procedure eventos_pinballaction;
 begin
 if event.arcade then begin
   //Player 1
-  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.but3[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
+  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.but3[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
   //Player 2
-  if arcade_input.but2[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.but3[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
+  if arcade_input.but2[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.but3[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
   //System
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
@@ -114,40 +114,31 @@ end;
 
 procedure pinballaction_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-    eventos_pinballaction;
-    if f=240 then begin
-      if nmi_mask then z80_0.change_nmi(PULSE_LINE);
-      update_video_pinballaction;
-    end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+  //CPU 1
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+  //CPU Sound
+  z80_1.run(frame_s);
+  frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+  if f=240 then begin
+     if nmi_mask then z80_0.change_nmi(PULSE_LINE);
+     update_video_pinballaction;
+  end;
  end;
+ eventos_pinballaction;
  video_sync;
 end;
 end;
 
-function pinballaction_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$e07f:pinballaction_getbyte:=memoria[direccion];
-  $e400..$e5ff:pinballaction_getbyte:=buffer_paleta[direccion and $1ff];
-  $e600:pinballaction_getbyte:=marcade.in0; //p1
-  $e601:pinballaction_getbyte:=marcade.in1; //p2
-  $e602:pinballaction_getbyte:=marcade.in2; //system
-  $e604:pinballaction_getbyte:=marcade.dswa;
-  $e605:pinballaction_getbyte:=marcade.dswb;
-end;
-end;
-
-procedure pinballaction_putbyte(direccion:word;valor:byte);
-procedure cambiar_color(dir:word);
+procedure cambiar_color(dir:word);inline;
 var
   tmp_color:byte;
   color:tcolor;
@@ -161,9 +152,24 @@ begin
   set_pal_color(color,dir);
   case dir of
     0..127:buffer_color[dir shr 3]:=true;
-    128..255:buffer_color[((dir shr 4) and 7)+$10]:=true;
+    128..255:buffer_color[((dir shr 4) and $7)+$10]:=true;
   end;
 end;
+
+function pinballaction_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$e07f:pinballaction_getbyte:=memoria[direccion];
+  $e400..$e5ff:pinballaction_getbyte:=buffer_paleta[direccion and $1ff];
+  $e600:pinballaction_getbyte:=marcade.in0; //p1
+  $e601:pinballaction_getbyte:=marcade.in1; //p2
+  $e602:pinballaction_getbyte:=marcade.in2; //system
+  $e604:pinballaction_getbyte:=marcade.dswa;
+  $e605:pinballaction_getbyte:=marcade.dswb;
+end;
+end;
+
+procedure pinballaction_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$7fff:;
@@ -180,12 +186,13 @@ case direccion of
                     buffer_paleta[direccion and $1ff]:=valor;
                     cambiar_color(direccion and $1fe);
                  end;
-    $e600:nmi_mask:=(valor and 1)<>0;
+    $e600:nmi_mask:=(valor and $1)<>0;
     $e604:main_screen.flip_main_screen:=(valor and 1)<>0;
     $e606:scroll_y:=valor-3;
     $e800:begin
             sound_latch:=valor;
-            z80_1.change_irq_vector(HOLD_LINE,0);
+            z80_1.change_irq(HOLD_LINE);
+            z80_1.im2_lo:=0;
           end;
 end;
 end;
@@ -193,7 +200,7 @@ end;
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$1fff,$4000..$47ff:snd_getbyte:=mem_snd[direccion];
+  $0..$1fff,$4000..$47ff:snd_getbyte:=mem_snd[direccion];
   $8000:snd_getbyte:=sound_latch;
 end;
 end;
@@ -209,18 +216,19 @@ end;
 procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $10:ay8910_0.control(valor);
-  $11:ay8910_0.write(valor);
-  $20:ay8910_1.control(valor);
-  $21:ay8910_1.write(valor);
-  $30:ay8910_2.control(valor);
-  $31:ay8910_2.write(valor);
+  $10:ay8910_0.Control(valor);
+  $11:ay8910_0.Write(valor);
+  $20:ay8910_1.Control(valor);
+  $21:ay8910_1.Write(valor);
+  $30:ay8910_2.Control(valor);
+  $31:ay8910_2.Write(valor);
 end;
 end;
 
 procedure pbaction_sound_irq;
 begin
-  z80_1.change_irq_vector(HOLD_LINE,2);
+  z80_1.change_irq(HOLD_LINE);
+  z80_1.im2_lo:=2;
 end;
 
 procedure pinballaction_sound_update;
@@ -235,11 +243,10 @@ procedure reset_pinballaction;
 begin
  z80_0.reset;
  z80_1.reset;
- frame_main:=z80_0.tframes;
- frame_snd:=z80_1.tframes;
  ay8910_0.reset;
  ay8910_1.reset;
  ay8910_2.reset;
+ reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -274,18 +281,20 @@ iniciar_video(224,256);
 //Main CPU
 z80_0:=cpu_z80.create(4000000,$100);
 z80_0.change_ram_calls(pinballaction_getbyte,pinballaction_putbyte);
-if not(roms_load(@memoria,pinballaction_rom)) then exit;
 //Sound CPU
 z80_1:=cpu_z80.create(3072000,$100);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(nil,snd_outbyte);
 z80_1.init_sound(pinballaction_sound_update);
 timers.init(z80_1.numero_cpu,3072000/(2*60),pbaction_sound_irq,nil,true);
-if not(roms_load(@mem_snd,pinballaction_sound)) then exit;
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,AY8910);
-ay8910_1:=ay8910_chip.create(1500000,AY8910);
-ay8910_2:=ay8910_chip.create(1500000,AY8910);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.25);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.25);
+ay8910_2:=ay8910_chip.create(1500000,AY8910,0.25);
+//cargar roms
+if not(roms_load(@memoria,pinballaction_rom)) then exit;
+//cargar sonido
+if not(roms_load(@mem_snd,pinballaction_sound)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,pinballaction_chars)) then exit;
 init_gfx(0,8,8,$400);
@@ -310,9 +319,10 @@ gfx_set_desc_data(3,0,128*8,$40*0*8*128,$40*1*8*128,$40*2*8*128);
 convert_gfx(3,0,@memoria_temp[$1000],@psd_x,@psd_y,true,false);
 //DIP
 marcade.dswa:=$40;
-marcade.dswa_val2:=@pinballaction_dipa;
-marcade.dswb:=0;
-marcade.dswb_val2:=@pinballaction_dipb;
+marcade.dswa_val:=@pinballaction_dipa;
+marcade.dswb:=$0;
+marcade.dswb_val:=@pinballaction_dipb;
+reset_pinballaction;
 iniciar_pinballaction:=true;
 end;
 

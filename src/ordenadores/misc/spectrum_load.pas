@@ -26,12 +26,11 @@ procedure spectrum_load_exit;
 procedure spectrum_load_close;
 
 implementation
-uses principal;
 
 procedure spectrum_load_init;
 begin
-load_spec.Button2.Caption:=leng.mensajes[7];
-load_spec.Button1.Caption:=leng.mensajes[8];
+load_spec.Button2.Caption:=leng[main_vars.idioma].mensajes[7];
+load_spec.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 load_spec.FileListBox1.Mask:='*.zip;*.sp;*.zx;*.sna;*.z80;*.tzx;*.tap;*.csw;*.dsp;*.wav;*.szx;*.pzx';
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then load_spec.FileListBox1.Mask:=load_spec.FileListBox1.Mask+';*.rom';
 {$ifdef fpc}
@@ -56,7 +55,7 @@ type
 procedure spectrum_load_click;
 var
   g:integer;
-  long_bloque,crc:dword;
+  long_bloque:dword;
   f,h,i:byte;
   t1,t2,t3,t4,t5:integer;
   hay_imagen,salida,hay_scr:boolean;
@@ -93,7 +92,7 @@ if extension='ZIP' then begin
       datos:=nil;
     end;
     getmem(datos_scr,t1);
-    load_file_from_zip(nombre,nombre_file,datos_scr,t1,crc,false);
+    load_file_from_zip(nombre,nombre_file,datos_scr,t1,t2,false);
   end;
   //Comprobar si hay ROM
   spec_rom.hay_rom:=search_file_from_zip(nombre,'*.rom',spec_rom.nombre_rom,t1,t2,false);
@@ -105,7 +104,7 @@ if extension='ZIP' then begin
         spec_rom.datos_rom:=nil;
       end;
       getmem(spec_rom.datos_rom,spec_rom.rom_size);
-      load_file_from_zip(nombre,spec_rom.nombre_rom,spec_rom.datos_rom,t1,crc,false);
+      load_file_from_zip(nombre,spec_rom.nombre_rom,spec_rom.datos_rom,t1,t2,false);
   end;
   search_file_from_zip(nombre,'*.*',nombre_file,file_size,t2,false);
   repeat
@@ -116,7 +115,7 @@ if extension='ZIP' then begin
     getmem(datos,file_size);
     extension:=extension_fichero(nombre_file);
     if ((extension='TAP') or (extension='TZX') or (extension='PZX') or (extension='CSW') or (extension='WAV') or (extension='DSP') or (extension='SZX') or (extension='ZX') or (extension='Z80') or (extension='SP') or (extension='SNA')) then begin
-      load_file_from_zip(nombre,nombre_file,datos,t1,crc,true);
+      load_file_from_zip(nombre,nombre_file,datos,t1,t2,true);
       nombre:=nombre_file;
       break;
     end;
@@ -385,7 +384,7 @@ if ((extension='Z80') or (extension='DSP')) then begin
         inc(temp,z80_ram.longitud+3);inc(g,z80_ram.longitud+3);
         getmem(temp2,$5000);
         t1:=z80_ram.longitud;
-        if extension='DSP' then Decompress_zlib(pointer(@z80_ram.datos[0]),t1,pointer(temp2),t2)
+        if extension='DSP' then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(temp2),t1)
           else descomprimir_z80(temp2,@z80_ram.datos[0],t1);
       end else begin //Sin comprimir
         copymemory(z80_ram,datos,$4000+3);
@@ -491,7 +490,6 @@ end;
 procedure spectrum_load_exit;
 var
   resultado,cinta:boolean;
-  cadena:string;
 begin
 if ((datos=nil) and not(spec_rom.hay_rom)) then exit;
 rom_cambiada_48:=false;
@@ -503,7 +501,7 @@ if spec_rom.hay_rom then begin
   llamadas_maquina.reset;
   rom_cambiada_48:=true;
   resultado:=true;
-  cadena:='ROM: '+spec_rom.nombre_rom;
+  llamadas_maquina.open_file:='ROM: '+spec_rom.nombre_rom;
 end;
 if extension='TAP' then begin
   resultado:=abrir_tap(datos,file_size);
@@ -522,7 +520,7 @@ if extension='CSW' then begin
   cinta:=true;
 end;
 if extension='WAV' then begin
-  resultado:=abrir_wav(datos,file_size,3500000);
+  resultado:=abrir_wav(datos,file_size);
   cinta:=true;
 end;
 if ((extension='Z80') or (extension='DSP')) then resultado:=abrir_z80(datos,file_size,extension='DSP');
@@ -532,30 +530,21 @@ if extension='ZX' then resultado:=abrir_zx(datos,file_size);
 if extension='SZX' then resultado:=abrir_szx(datos,file_size);
 if not(resultado) then begin
   MessageDlg('No es una cinta o un snapshot válido.'+chr(10)+chr(13)+'Not a valid tape or snapshot', mtInformation,[mbOk], 0);
-  cadena:='';
+  llamadas_maquina.open_file:='';
 end else begin
     //Si todo ha ido bien y no hay ROM, devolver la original!
     if not(rom_cambiada_48) then copymemory(@memoria[0],@mem_snd[0],$4000);
-    principal1.BitBtn14.Enabled:=false;
     if cinta then begin
       tape_window1.edit1.Text:=nombre;
       tape_window1.show;
       tape_window1.BitBtn1.Enabled:=true;
       tape_window1.BitBtn2.Enabled:=false;
-      cadena:=extension+': '+nombre;
-      cinta_tzx.name:=cadena;
-      principal1.BitBtn14.Enabled:=true;
-      principal1.BitBtn14.Glyph:=nil;
-      if extension='TAP' then begin
-        principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
-        var_spectrum.fastload:=true;
-      end else if ((extension='TZX') or (extension='PZX')) then begin
-                  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
-                  var_spectrum.fastload:=false;
-               end;
-    end else begin  //Snapshot
+      llamadas_maquina.open_file:=extension+': '+nombre;
+      cinta_tzx.name:=llamadas_maquina.open_file;
+    end else begin  //Snap shot
+      change_caption;
       main_screen.rapido:=false;
-      cadena:=extension+': '+nombre;
+      llamadas_maquina.open_file:=extension+': '+nombre;
     end;
     Directory.spectrum_tap_snap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
     ultima_posicion:=load_spec.filelistbox1.ItemIndex;
@@ -569,7 +558,7 @@ if spec_rom.datos_rom<>nil then begin
   freemem(spec_rom.datos_rom);
   spec_rom.datos_rom:=nil;
 end;
-change_caption(cadena);
+change_caption;
 end;
 
 procedure spectrum_load_close;

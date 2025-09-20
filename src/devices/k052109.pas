@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,gfx_engine;
 type
   t_k052109_cb=procedure(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
   k052109_chip=class
-        constructor create(pant1,pant2,pant3,ngfx:byte;call_back:t_k052109_cb;rom:pbyte;rom_size:dword);
+        constructor create(pant1,pant2,pant3:byte;call_back:t_k052109_cb;rom:pbyte;rom_size:dword);
         destructor free;
     public
         rmrd_line:byte;
@@ -35,7 +35,6 @@ type
         tileflip_enable,romsubbank,scrollctrl:byte;
         charrombank,charrombank_2:array[0..3] of byte;
         pant:array[0..2] of byte;
-        ngfx:byte;
         irq_enabled,has_extra_video_ram:boolean;
         char_rom:pbyte;
         char_size,char_mask:dword;
@@ -50,26 +49,24 @@ var
   k052109_0:k052109_chip;
 
 implementation
+
+constructor k052109_chip.create(pant1,pant2,pant3:byte;call_back:t_k052109_cb;rom:pbyte;rom_size:dword);
 const
-  pc_x_ram:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
   pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-
-constructor k052109_chip.create(pant1,pant2,pant3,ngfx:byte;call_back:t_k052109_cb;rom:pbyte;rom_size:dword);
 begin
   self.has_extra_video_ram:=false;
   self.pant[0]:=pant1;
   self.pant[1]:=pant2;
   self.pant[2]:=pant3;
-  self.ngfx:=ngfx;
   self.k052109_cb:=call_back;
   self.char_rom:=rom;
   self.char_size:=rom_size;
   self.char_mask:=(rom_size div 32)-1;
-  init_gfx(ngfx,8,8,rom_size div 32);
+  init_gfx(0,8,8,rom_size div 32);
   gfx_set_desc_data(4,0,8*32,24,16,8,0);
-  convert_gfx(ngfx,0,rom,@pc_x,@pc_y,false,false);
-  gfx[ngfx].trans[0]:=true;
+  convert_gfx(0,0,rom,@pc_x[0],@pc_y[0],false,false);
+  gfx[0].trans[0]:=true;
 end;
 
 destructor k052109_chip.free;
@@ -107,22 +104,24 @@ end;
 
 function k052109_chip.read(direccion:word):byte;
 var
-  color,flags,priority,bank:word;
-  addr,code:dword;
+  color,flags,priority,bank,addr:word;
+  code:dword;
 begin
 	if (self.rmrd_line=CLEAR_LINE) then begin
 		read:=self.ram[direccion];
-	end else begin  // Punk Shot and TMNT read from 0000-1fff, Aliens from 2000-3fff
+	end else begin  // Punk Shot and TMNT read from 0000-1fff, Aliens from 2000-3fff */
+	 //	assert (m_char_size != 0);
 		code:=(direccion and $1fff) shr 5;
 		color:=self.romsubbank;
 		flags:=0;
 		priority:=0;
-		bank:=self.charrombank[(color and $0c) shr 2] shr 2;   // discard low bits (TMNT)
+		bank:=self.charrombank[(color and $0c) shr 2] shr 2;   // discard low bits (TMNT) */
 		bank:=bank or (self.charrombank_2[(color and $0c) shr 2] shr 2); // Surprise Attack uses this 2nd bank in the rom test
-	  if self.has_extra_video_ram then code:=code or (color shl 8) // kludge for X-Men
+	  if self.has_extra_video_ram then code:=code or (color shl 8) // kludge for X-Men */
 	    else k052109_cb(0,bank,code,color,flags,priority);
 		addr:=(code shl 5)+(direccion and $1f);
 		addr:=addr and (char_size-1);
+//      logerror("%04x: off = %04x sub = %02x (bnk = %x) adr = %06x\n", space.device().safe_pc(), offset, m_romsubbank, bank, addr);
 		read:=self.char_rom[addr];
 	end;
 end;
@@ -132,8 +131,8 @@ var
   bank,dirty:byte;
   i:word;
 begin
-if ((direccion and $1fff)<$1800) then begin // tilemap RAM
-		if (direccion>=$4000) then self.has_extra_video_ram:=true;  // kludge for X-Men
+if ((direccion and $1fff)<$1800) then begin // tilemap RAM */
+		if (direccion>=$4000) then self.has_extra_video_ram:=true;  // kludge for X-Men */
 		self.ram[direccion]:=val;
     self.video_buffer[(direccion and $1800) shr 11,direccion and $7ff]:=true;
 end	else begin   // control registers
@@ -252,18 +251,18 @@ for f:=0 to $7ff do begin
 	  flags:=0;
 	  priority:=0;
 	  bank:=self.charrombank[(color and $0c) shr 2];
-	  if self.has_extra_video_ram then bank:=(color and $0c) shr 2; // kludge for X-Men
+	  if self.has_extra_video_ram then bank:=(color and $0c) shr 2; // kludge for X-Men */
 	  color:=(color and $f3) or ((bank and $03) shl 2);
 	  bank:=bank shr 2;
     old_flip_y:=(color and $02)<>0;
 	  self.k052109_cb(layer,bank,nchar,color,flags,priority);
-	  // if the callback set flip X but it is not enabled, turn it off
+	  // if the callback set flip X but it is not enabled, turn it off */
 	  if ((self.tileflip_enable and 1)=0) then flip_x:=false
       else flip_x:=(flags and 1)<>0;
-	  // if flip Y is enabled and the attribute but is set, turn it on
+	  // if flip Y is enabled and the attribute but is set, turn it on */
 	  if (old_flip_y and ((self.tileflip_enable and 2)<>0)) then flip_y:=true
       else flip_y:=(flags and 2)<>0;
-    put_gfx_trans_flip(pos_x*8,pos_y*8,nchar and self.char_mask,color shl 4,self.pant[layer],self.ngfx,flip_x,flip_y);
+    put_gfx_trans_flip(pos_x*8,pos_y*8,nchar and self.char_mask,color shl 4,self.pant[layer],0,flip_x,flip_y);
 	  //tileinfo.category = priority;
     video_buffer[layer,f]:=false;
   end;
@@ -272,54 +271,85 @@ end;
 
 procedure k052109_chip.calc_scroll_1;
 var
-  offs:byte;
+  xscroll,yscroll,offs:word;
 begin
 if ((self.scrollctrl and $03)=$02) then begin
-		self.scroll_y[1,0]:=self.ram[$180c];
-		for offs:=0 to $1f do self.scroll_x[1,offs]:=(self.ram[$1a00+(2*(offs and $fff8))]+256*self.ram[$1a00+(2*(offs and $fff8)+1)])-6;
+    yscroll:=self.ram[$180c];
+		self.scroll_y[1,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$1a00+(2*(offs and $fff8))]+256*self.ram[$1a00+(2*(offs and $fff8)+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[1,(offs+yscroll) and $ff]:=xscroll;
+		end;
     self.scroll_tipo[1]:=0;
-	    end else if ((self.scrollctrl and $03)=$03) then begin
-		        self.scroll_y[1,0]:=self.ram[$180c];
-		        for offs:=0 to $ff do self.scroll_x[1,offs]:=(self.ram[$1a00+(2*offs)]+256*self.ram[$1a00+(2*offs+1)])-6;
-            self.scroll_tipo[1]:=1;
-          end else if ((self.scrollctrl and $04)=$04) then begin
-              self.scroll_x[1,0]:=(self.ram[$1a00]+256*self.ram[$1a01])-6;
-		          for offs:=0 to $3f do self.scroll_y[1,offs]:=self.ram[$1800+offs];
-              self.scroll_tipo[1]:=2;
-	          end else begin
-                  self.scroll_x[1,0]:=(self.ram[$1a00]+(self.ram[$1a01] shl 8))-6;
-		              self.scroll_y[1,0]:=self.ram[$180c];
-                  self.scroll_tipo[1]:=3;
-	              end;
+	end else if ((self.scrollctrl and $03)=$03) then begin
+		yscroll:=self.ram[$180c];
+		self.scroll_y[1,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$1a00+(2*offs)]+256*self.ram[$1a00+(2*offs+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[1,(offs+yscroll) and $ff]:=xscroll;
+		end;
+    self.scroll_tipo[1]:=1;
+	end else if ((self.scrollctrl and $04)=$04) then begin
+		xscroll:=(self.ram[$1a00]+256*self.ram[$1a01])-6;
+    self.scroll_x[1,0]:=xscroll;
+		for offs:=0 to 511 do begin
+			yscroll:=self.ram[$1800+(offs div 8)];
+      self.scroll_y[1,(offs+xscroll) and $1ff]:=yscroll;
+		end;
+    self.scroll_tipo[1]:=2;
+	end else begin
+    self.scroll_x[1,0]:=(self.ram[$1a00]+(self.ram[$1a01] shl 8))-6;
+		self.scroll_y[1,0]:=self.ram[$180c];
+    self.scroll_tipo[1]:=3;
+	end;
 end;
 
 procedure k052109_chip.calc_scroll_2;
 var
-  offs:byte;
+  xscroll,yscroll,offs:word;
 begin
 if ((self.scrollctrl and $18)=$10) then begin
-		self.scroll_y[2,0]:=self.ram[$380c];
-		for offs:=0 to $1f do self.scroll_x[2,offs]:=(self.ram[$3a00+(2*(offs and $fff8))]+256*self.ram[$3a00+(2*(offs and $fff8)+1)])-6;
+    yscroll:=self.ram[$380c];
+		self.scroll_y[2,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$3a00+(2*(offs and $fff8))]+256*self.ram[$3a00+(2*(offs and $fff8)+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[2,(offs+yscroll) and $ff]:=xscroll;
+		end;
     self.scroll_tipo[2]:=0;
 	end else if ((self.scrollctrl and $18)=$18) then begin
-		    self.scroll_y[2,0]:=self.ram[$380c];
-		    for offs:=0 to $ff do self.scroll_x[2,offs]:=(self.ram[$3a00+(2*offs)]+256*self.ram[$3a00+(2*offs+1)])-6;
-        self.scroll_tipo[2]:=1;
-	    end else if ((self.scrollctrl and $20)=$20) then begin
-            self.scroll_x[2,0]:=(self.ram[$3a00]+256*self.ram[$3a01])-6;
-		        for offs:=0 to $3f do self.scroll_y[2,offs]:=self.ram[$3800+offs];
-            self.scroll_tipo[2]:=2;
-	        end else begin
-                self.scroll_x[2,0]:=(self.ram[$3a00]+(self.ram[$3a01] shl 8))-6;
-		            self.scroll_y[2,0]:=self.ram[$380c];
-                self.scroll_tipo[2]:=3;
-	            end;
+    yscroll:=self.ram[$380c];
+		self.scroll_y[2,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$3a00+(2*offs)]+256*self.ram[$3a00+(2*offs+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[2,(offs+yscroll) and $ff]:=xscroll;
+		end;
+    self.scroll_tipo[2]:=1;
+	end else if ((self.scrollctrl and $20)=$20) then begin
+    xscroll:=(self.ram[$3a00]+256*self.ram[$3a01])-6;
+    self.scroll_x[2,0]:=xscroll;
+		for offs:=0 to 511 do begin
+			yscroll:=self.ram[$3800+(offs div 8)];
+      self.scroll_y[2,(offs+xscroll) and $1ff]:=yscroll;
+		end;
+    self.scroll_tipo[2]:=2;
+	end else begin
+    self.scroll_x[2,0]:=(self.ram[$3a00]+(self.ram[$3a01] shl 8))-6;
+		self.scroll_y[2,0]:=self.ram[$380c];
+    self.scroll_tipo[2]:=3;
+	end;
 end;
 
 procedure k052109_chip.recalc_chars(num:dword);
+const
+  pc_x_ram:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+  pc_y_ram:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
 begin
   gfx_set_desc_data(4,0,8*32,0,1,2,3);
-  convert_gfx_single(self.ngfx,0,self.char_rom,@pc_x_ram,@pc_y,false,false,num);
+  convert_gfx_single(0,0,self.char_rom,@pc_x_ram,@pc_y_ram,false,false,num);
   self.clean_video_buffer;
 end;
 
@@ -338,9 +368,8 @@ case layer of
   0:actualiza_trozo(0,0,512,256,self.pant[0],0,0,512,256,final_screen); //Esta es fija
   1,2:begin
       case self.scroll_tipo[layer] of
-        0:scroll__x_part2(self.pant[layer],final_screen,8,@self.scroll_x[layer,0],0,self.scroll_y[layer,0]);
-        1:scroll__x_part2(self.pant[layer],final_screen,1,@self.scroll_x[layer,0],0,self.scroll_y[layer,0]);
-        2:scroll__y_part2(self.pant[layer],final_screen,8,@self.scroll_y[layer],self.scroll_x[layer,0]);
+        0,1:scroll__x_part2(self.pant[layer],final_screen,1,@self.scroll_x[layer,0]);
+        2:scroll__y_part2(self.pant[layer],final_screen,1,@self.scroll_y[layer,0]);
         3:scroll_x_y(self.pant[layer],final_screen,self.scroll_x[layer,0],self.scroll_y[layer,0]);
       end;
     end;

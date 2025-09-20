@@ -15,10 +15,9 @@ object ConfigSP: TConfigSP
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
-  KeyPreview = True
-  LCLVersion = '4.0.0.1'
   OnKeyUp = FormKeyUp
   OnShow = FormShow
+  LCLVersion = '2.0.8.0'
   object GroupBox1: TGroupBox
     Left = 20
     Height = 542
@@ -77,9 +76,9 @@ object ConfigSP: TConfigSP
         Font.Name = 'Tahoma'
         Font.Pitch = fpVariable
         Font.Quality = fqDraft
+        OnClick = Button3Click
         ParentFont = False
         TabOrder = 1
-        OnClick = Button3Click
       end
     end
     object GroupBox3: TGroupBox
@@ -401,9 +400,9 @@ object ConfigSP: TConfigSP
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
+          OnKeyUp = FormKeyUp
           ParentFont = False
           TabOrder = 0
-          OnKeyUp = FormKeyUp
         end
         object RadioButton18: TRadioButton
           Left = 16
@@ -417,9 +416,9 @@ object ConfigSP: TConfigSP
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
+          OnKeyUp = FormKeyUp
           ParentFont = False
           TabOrder = 1
-          OnKeyUp = FormKeyUp
         end
       end
       object GroupBox13: TGroupBox
@@ -437,8 +436,8 @@ object ConfigSP: TConfigSP
           Top = 6
           Width = 72
           Caption = 'Enabled'
-          TabOrder = 0
           OnKeyUp = FormKeyUp
+          TabOrder = 0
         end
         object RadioButton27: TRadioButton
           Left = 16
@@ -446,8 +445,8 @@ object ConfigSP: TConfigSP
           Top = 35
           Width = 74
           Caption = 'Disabled'
-          TabOrder = 1
           OnKeyUp = FormKeyUp
+          TabOrder = 1
         end
       end
     end
@@ -557,9 +556,9 @@ object ConfigSP: TConfigSP
           Font.Name = 'Tahoma'
           Font.Pitch = fpVariable
           Font.Quality = fqDraft
+          OnKeyUp = FormKeyUp
           ParentFont = False
           TabOrder = 4
-          OnKeyUp = FormKeyUp
         end
       end
       object GroupBox6: TGroupBox
@@ -704,9 +703,9 @@ object ConfigSP: TConfigSP
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
+    OnClick = Button1Click
     ParentFont = False
     TabOrder = 1
-    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 378
@@ -720,8 +719,8 @@ object ConfigSP: TConfigSP
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
+    OnClick = Button2Click
     ParentFont = False
     TabOrder = 2
-    OnClick = Button2Click
   end
 end

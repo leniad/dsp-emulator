@@ -114,11 +114,10 @@ with ConfigSP do begin
   if (mouse.tipo<>0) then sdl_showcursor(1)
     else sdl_showcursor(0);
   if mouse.tipo=3 then begin
-    pio_0:=tz80pio.create;
-    pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
-    z80daisy_init(Z80_PIO0_TYPE);
-    pio_0.reset;
-    spec_z80.enable_daisy;
+    z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
+    z80daisy_init(Z80_PIO_TYPE,Z80_DAISY_NONE,Z80_DAISY_NONE,0,0,0);
+    z80pio_reset(0);
+    spec_z80.daisy:=true;
   end;
   lenslok.activo:=radiobutton12.Checked;
   if lenslok.activo then lenslock1.Show;
@@ -169,7 +168,7 @@ procedure TConfigSP.Button3Click(Sender: TObject);
 var
    file_name:string;
 begin
-if OpenRom(file_name,SROM) then Edit1.Text:=file_name;
+if OpenRom(StROM,file_name) then Edit1.Text:=file_name;
 end;
 
 procedure TConfigSP.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -248,7 +247,7 @@ end;
     1:radiobutton15.Checked:=true;
     2:radiobutton16.Checked:=true;
   end;
-Button2.Caption:=leng.mensajes[8];
+Button2.Caption:=leng[main_vars.idioma].mensajes[8];
 end;
 
 initialization

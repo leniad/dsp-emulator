@@ -7,6 +7,10 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 function iniciar_system2:boolean;
 procedure system2_principal;
+procedure cambiar_color_system2(numero:byte;pos:word);
+
+var
+  bg_ram_bank,rom_bank:byte;
 
 implementation
 uses system1_hw;
@@ -58,9 +62,9 @@ const
 
 var
   type_row_scroll:boolean;
-  roms_dec:array[0..3,0..$3fff] of byte;
+  roms,roms_dec:array[0..3,0..$3fff] of byte;
 
-procedure update_video;
+procedure update_video;inline;
 var
   f:byte;
   x_temp:word;
@@ -72,7 +76,7 @@ yscroll:=bg_ram[$7ba];
 update_video_system1;
 end;
 
-procedure update_video_row_scroll;
+procedure update_video_row_scroll;inline;
 var
   f:byte;
 begin
@@ -85,22 +89,25 @@ end;
 procedure system2_principal;
 var
   f:word;
+  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 259 do begin
-    eventos_system1;
-    if f=224 then begin
+    //Main CPU
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    if f=223 then begin
       z80_0.change_irq(HOLD_LINE);
       if type_row_scroll then update_video_row_scroll
         else update_video;
+      eventos_system1;
     end;
-    //Main CPU
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
   video_sync;
 end;
@@ -120,6 +127,16 @@ case direccion of
   $f000..$f3ff:system2_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
   $f800..$fbff:system2_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
 end;
+end;
+
+procedure cambiar_color_system2(numero:byte;pos:word);
+var
+  color:tcolor;
+begin
+  color.r:=pal4bit(memoria_proms[numero]);
+  color.g:=pal4bit(memoria_proms[numero+$100]);
+  color.b:=pal4bit(memoria_proms[numero+$200]);
+  set_pal_color(color,pos);
 end;
 
 procedure system2_putbyte(direccion:word;valor:byte);
@@ -172,10 +189,9 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(20000000 div 5,260);
+z80_0:=cpu_z80.create(4000000,260);
 z80_0.change_ram_calls(system2_getbyte,system2_putbyte);
 z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
-z80_0.change_misc_calls(nil,nil,system1_adjust_cycle);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
@@ -185,8 +201,8 @@ timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_s
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
 //Sound Chip
-sn_76496_0:=sn76496_chip.create(2000000,system1_ready_cb,0.5);
-sn_76496_1:=sn76496_chip.create(4000000,system1_ready_cb,1);
+sn_76496_0:=sn76496_chip.Create(2000000,0.5);
+sn_76496_1:=sn76496_chip.Create(4000000);
 //Timers
 case main_vars.tipo_maquina of
   37:begin

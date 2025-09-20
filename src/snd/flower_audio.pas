@@ -43,6 +43,12 @@ var
 
 implementation
 
+function sshr(num:int64;fac:byte):int64;inline;
+begin
+  if num<0 then sshr:=-(abs(num) shr fac)
+    else sshr:=num shr fac;
+end;
+
 procedure flower_chip.make_mixer_table;
 var
   f:word;
@@ -142,11 +148,6 @@ begin
 end;
 
 procedure flower_chip.update;
-function sshr(num:int64;fac:byte):int64;
-begin
-  if num<0 then sshr:=-(abs(num) shr fac)
-    else sshr:=num shr fac;
-end;
 var
   f:byte;
   res:integer;

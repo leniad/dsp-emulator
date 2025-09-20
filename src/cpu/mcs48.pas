@@ -3,7 +3,6 @@ interface
 //{$define DEBUG}
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      dialogs,sysutils,timer_engine,main_engine,cpu_misc,i8243;
-
 type
         band_mcs48=record
                 bit1,bit2,bit4,unk,b,f,a,c:boolean;
@@ -25,7 +24,7 @@ type
                 i8243:i8243_chip;
                 procedure run(maximo:single);
                 procedure reset;
-                procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte;ext_inport:tgetbyte;ext_outport:tputbyte);
+                procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
                 function get_rom_addr:pbyte;
                 function upi41_master_r(direccion:byte):byte;
                 procedure upi41_master_w(direccion,valor:byte);
@@ -41,13 +40,13 @@ type
                 dbbo:byte;               // 8-bit output data buffer (UPI-41 only)
                 feature_mask:byte;
                 irq_polled,tirq_enabled,xirq_enabled,timer_flag,flags_enabled,dma_enabled,irq_in_progress,timer_overflow:boolean;
-	              timecount_enabled:byte;
+	        timecount_enabled:byte;
                 ram_mask:byte;
                 rom_mask:word;
                 chip_type:byte;
                 f1:boolean;
-                in_port,ext_inport:tgetbyte;
-                out_port,ext_outport:tputbyte;
+                in_port:tgetbyte;
+                out_port:tputbyte;
                 function test_r(valor:byte):byte;
                 function bus_r:byte;
                 procedure bus_w(valor:byte);
@@ -64,10 +63,7 @@ type
                 procedure add(valor:byte);
                 procedure addc(valor:byte);
                 procedure expander_operation(operation,port:byte);
-                procedure cond(test:boolean);
-                function read_byte(direccion:word):byte;
         end;
-
 const
   I8039=0;
   I8035=1;
@@ -98,12 +94,12 @@ const
 //0 1 2 3 4 5 6 7 8 9 a b c d e f
   1,0,2,2,2,1,0,1,2,2,2,0,0,0,0,0, //00
   1,1,2,2,2,1,2,1,1,1,1,1,1,1,1,1, //10
-  0,0,2,2,2,1,2,1,1,1,1,1,1,1,1,1, //20
+  0,0,2,2,2,0,2,1,1,1,1,1,1,1,1,1, //20
   0,0,2,0,2,1,2,1,0,2,2,0,2,2,2,2, //30
-  1,1,1,2,2,1,2,1,1,1,1,1,1,1,1,1, //40
+  1,1,1,2,2,0,2,1,1,1,1,1,1,1,1,1, //40
   0,0,2,2,2,1,2,1,1,1,1,1,1,1,1,1, //50
   1,1,1,0,2,1,0,1,1,1,1,1,1,1,1,1, //60
-  1,1,2,0,2,1,2,1,1,1,1,1,1,1,1,1, //70
+  0,0,2,0,2,1,2,1,1,1,1,1,1,1,1,1, //70
   2,2,0,2,2,1,2,0,0,2,2,0,0,0,0,0, //80
   1,0,2,2,2,1,2,1,0,2,2,0,0,0,0,0, //90
   1,1,0,2,2,1,0,0,1,1,1,1,1,1,1,1, //a0
@@ -114,20 +110,16 @@ const
   1,1,2,0,2,1,2,1,1,1,1,1,1,1,1,1);//f0
 var
   mcs48_0:cpu_mcs48;
-
 implementation
-
 constructor cpu_mcs48.create(clock:dword;frames_div:word;chip_type:byte);
 begin
 getmem(self.r,sizeof(reg_mcs48));
 fillchar(self.r^,sizeof(reg_mcs48),0);
-self.numero_cpu:=cpu_main_init(clock div 15);
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock div 15;
 self.tframes:=(clock/15/frames_div)/llamadas_maquina.fps_max;
 self.in_port:=nil;
 self.out_port:=nil;
-self.ext_inport:=nil;
-self.ext_outport:=nil;
 self.chip_type:=chip_type;
 case chip_type of
   I8035:begin
@@ -150,7 +142,6 @@ case chip_type of
   else MessageDlg('Unkown CPU MCS48', mtInformation,[mbOk], 0);
 end;
 end;
-
 destructor cpu_mcs48.free;
 begin
 freemem(self.r);
@@ -159,20 +150,15 @@ if self.chip_type=N7751 then begin
   self.i8243:=nil;
 end;
 end;
-
-procedure cpu_mcs48.change_io_calls(in_port:tgetbyte;out_port:tputbyte;ext_inport:tgetbyte;ext_outport:tputbyte);
+procedure cpu_mcs48.change_io_calls(in_port:tgetbyte;out_port:tputbyte);
 begin
   self.in_port:=in_port;
   self.out_port:=out_port;
-  self.ext_inport:=ext_inport;
-  self.ext_outport:=ext_outport;
 end;
-
 function cpu_mcs48.get_rom_addr:pbyte;
 begin
   get_rom_addr:=@self.rom[0];
 end;
-
 function cpu_mcs48.dame_pila:byte;
 var
   temp:byte;
@@ -188,7 +174,6 @@ begin
   if r.psw.bit1 then temp:=temp or 1;
   dame_pila:=temp;
 end;
-
 procedure cpu_mcs48.pon_pila(valor:byte);
 begin
   r.psw.c:=(valor and $80)<>0;
@@ -200,18 +185,13 @@ begin
   r.psw.bit2:=(valor and 2)<>0;
   r.psw.bit1:=(valor and 1)<>0;
 end;
-
 procedure cpu_mcs48.reset;
+var
+  tempb:byte;
 begin
   self.r.pc:=0;
-  self.r.psw.c:=false;
-  self.r.psw.a:=false;
-  self.r.psw.b:=false;
-  self.r.psw.f:=false;
-  self.r.psw.bit1:=false;
-  self.r.psw.bit2:=false;
-  self.r.psw.bit4:=false;
-  self.r.psw.unk:=false;
+  tempb:=self.dame_pila;
+  self.pon_pila(tempb and $c0);
   self.update_regptr;
   self.f1:=false;
   self.r.a11:=0;
@@ -236,7 +216,6 @@ begin
   self.change_reset(CLEAR_LINE);
   if self.chip_type=N7751 then self.i8243.reset;
 end;
-
 function cpu_mcs48.upi41_master_r(direccion:byte):byte;
 begin
   // if just reading the status, return it
@@ -254,7 +233,6 @@ begin
   end;
 	upi41_master_r:=self.dbbo;
 end;
-
 procedure cpu_mcs48.upi41_master_w(direccion,valor:byte);
 begin
   // data always goes to the input buffer
@@ -270,33 +248,27 @@ begin
 	// set F1 accordingly
 	self.f1:=(direccion and $1)<>0;
 end;
-
 function cpu_mcs48.test_r(valor:byte):byte;
 begin
   if addr(self.in_port)<>nil then test_r:=self.in_port(MCS48_PORT_T0+valor)
     else test_r:=$ff;
 end;
-
 function cpu_mcs48.bus_r:byte;
 begin
   if addr(self.in_port)<>nil then bus_r:=self.in_port(MCS48_PORT_BUS);
 end;
-
 procedure cpu_mcs48.bus_w(valor:byte);
 begin
   if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_BUS,valor);
 end;
-
 function cpu_mcs48.port_r(port_num:byte):byte;
 begin
   if addr(self.in_port)<>nil then port_r:=self.in_port(MCS48_PORT_P0+port_num);
 end;
-
 procedure cpu_mcs48.port_w(port_num,valor:byte);
 begin
   if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_P0+port_num,valor);
 end;
-
 procedure cpu_mcs48.expander_operation(operation,port:byte);
 begin
   // put opcode/data on low 4 bits of P2
@@ -318,7 +290,6 @@ begin
   // generate low-to-high transition on PROG line
   if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_PROG,1);
 end;
-
 procedure cpu_mcs48.update_regptr;
 begin
   if self.r.psw.b then begin
@@ -341,96 +312,89 @@ begin
     r.r7:=@self.ram[7];
   end;
 end;
-
 function cpu_mcs48.read_rom(direccion:word):byte;
 begin
   if self.rom_mask<>0 then read_rom:=self.rom[direccion and self.rom_mask]
     else read_rom:=self.getbyte(direccion);
-  r.pc:=((r.pc+1) and $7ff) or (r.pc and $800);
 end;
-
-function cpu_mcs48.read_byte(direccion:word):byte;
-begin
-  if self.rom_mask<>0 then read_byte:=self.rom[direccion and self.rom_mask]
-    else read_byte:=self.getbyte(direccion);
-end;
-
 procedure cpu_mcs48.push_pc_psw;
 var
-  sp,pila:byte;
+  sp:byte;
 begin
-  pila:=self.dame_pila;
-	sp:=pila and $7;
-	self.ram[8+2*sp]:=self.r.pc;
-	self.ram[9+2*sp]:=((self.r.pc shr 8) and $0f) or (pila and $f0);
-	self.pon_pila((pila and $f0) or ((sp+1) and $7));
+	sp:=self.dame_pila and $07;
+	self.ram[(8+2*sp) and self.ram_mask]:=self.r.pc;
+	self.ram[(9+2*sp) and self.ram_mask]:=((self.r.pc shr 8) and $0f) or (self.dame_pila and $f0);
+	self.pon_pila((self.dame_pila and $f0) or ((sp+1) and $07));
 end;
-
 function cpu_mcs48.check_irqs:byte;
+var
+   tempb:byte;
 begin
   check_irqs:=0;
   // if something is in progress, we do nothing
   if self.irq_in_progress then exit;
   // external interrupts take priority
   if (((self.pedir_irq<>CLEAR_LINE) or ((self.sts and STS_IBF)<>0)) and self.xirq_enabled) then begin
-     // indicate we took the external IRQ
-     // !!!!!!!!!!!!!! --> standard_irq_callback(0);
-     check_irqs:=2;
      self.irq_in_progress:=true;
      // force JNI to be taken (hack)
      if self.irq_polled then begin
         self.r.pc:=((self.r.old_pc+1) and $7ff) or (self.r.old_pc and $800);
-        self.cond(true);
+        tempb:=self.read_rom(r.pc);
+        self.r.pc:=self.r.pc+1;
+        self.r.pc:=((r.pc-1) and $f00) or tempb;
      end;
      // transfer to location 0x03
      self.push_pc_psw;
      self.r.pc:=$03;
+     // indicate we took the external IRQ
+     // !!!!!!!!!!!!!! --> standard_irq_callback(0);
+     check_irqs:=2;
   // timer overflow interrupts follow
   end else if (self.timer_overflow and self.tirq_enabled) then begin
-      //!!!!!!!!!!!!!!standard_irq_callback(1, m_pc);
-      check_irqs:=2;
       self.irq_in_progress:=true;
       // transfer to location 0x07
       self.push_pc_psw;
       self.r.pc:=$07;
       // timer overflow flip-flop is reset once taken
       self.timer_overflow:=false;
+      check_irqs:=2;
   end;
 end;
-
 procedure cpu_mcs48.burn_cycles(count:byte);
 var
   timerover:boolean;
   oldtimer,f:byte;
 begin
 	timerover:=false;
-	// if the timer is enabled, accumulate prescaler cycles
-	if (self.timecount_enabled=TIMER_ENABLED) then begin
+	// if the timer is enabled, accumulate prescaler cycles */
+	if (self.timecount_enabled and TIMER_ENABLED)<>0 then begin
 		oldtimer:=self.timer;
 		self.prescaler:=self.prescaler+count;
 		self.timer:=self.timer+(self.prescaler shr 5);
 		self.prescaler:=self.prescaler and $1f;
 		timerover:=((oldtimer<>0) and (self.timer=0));
 	end else begin
-	  // if the counter is enabled, poll the T1 test input once for each cycle
-	  if (self.timecount_enabled=COUNTER_ENABLED) then begin
-	    for f:=0 to (count-1) do begin
-		    self.t1_history:=(self.t1_history shl 1) or (self.test_r(1) and 1);
+	// if the counter is enabled, poll the T1 test input once for each cycle */
+	  if (self.timecount_enabled and COUNTER_ENABLED)<>0 then begin
+		  for f:=0 downto (count-1) do begin
+			  self.t1_history:=(self.t1_history shl 1) or (self.test_r(1) and 1);
 			  if ((self.t1_history and 3)=2) then begin
           self.timer:=self.timer+1;
           timerover:=(self.timer=0);
         end;
-      end;
+		  end;
     end;
   end;
-	// if either source caused a timer overflow, set the flags
+	// if either source caused a timer overflow, set the flags and check IRQs */
 	if timerover then begin
 		self.timer_flag:=true;
-		// according to the docs, if an overflow occurs with interrupts disabled, the overflow is not stored
-		if (self.tirq_enabled) then self.timer_overflow:=true;
+		// according to the docs, if an overflow occurs with interrupts disabled, the overflow is not stored */
+		if (self.tirq_enabled) then begin
+			self.timer_overflow:=true;
+			self.check_irqs;
+		end;
 	end;
 end;
-
 function cpu_mcs48.p2_mask:byte;
 var
   res:byte;
@@ -444,7 +408,6 @@ begin
 	if (self.dma_enabled) then res:=res and not(P2_DRQ or P2_NDACK);
 	p2_mask:=res;
 end;
-
 procedure cpu_mcs48.add(valor:byte);
 var
   tempw,tempw2:word;
@@ -455,7 +418,6 @@ begin
   self.r.psw.c:=(tempw and $100)<>0;
   self.r.a:=tempw;
 end;
-
 procedure cpu_mcs48.addc(valor:byte);
 var
   tempw,tempw2:word;
@@ -468,15 +430,6 @@ begin
   self.r.psw.c:=(tempw and $100)<>0;
   self.r.a:=tempw;
 end;
-
-procedure cpu_mcs48.cond(test:boolean);
-var
-  tempw:word;
-begin
-tempw:=(r.pc and $f00) or self.read_rom(r.pc);
-if test then r.pc:=tempw;
-end;
-
 procedure cpu_mcs48.run(maximo:single);
 var
   tempb:byte;
@@ -498,6 +451,7 @@ end;
 estados_demas:=self.check_irqs;
 r.old_pc:=r.pc;
 instruccion:=self.read_rom(r.pc);
+r.pc:=r.pc+1;
 self.opcode:=false;
 case instruccion of
   $00:; //nop
@@ -513,9 +467,13 @@ case instruccion of
          end else begin //outl_bus_a
           MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $02 outl_bus_a no implementada. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0)
          end;
-  $03:self.add(self.read_rom(r.pc)); //add_a_n
+  $03:begin //add_a_n
+        self.add(self.read_rom(r.pc));
+        r.pc:=r.pc+1;
+      end;
   $04,$24,$44,$64,$84,$a4,$c4,$e4:begin  //jmp_XX
         tempb:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
         if self.irq_in_progress then tempw:=0
           else tempw:=self.r.a11;
         self.r.pc:=tempb or tempw or ((instruccion shr 5) shl 8);
@@ -528,10 +486,18 @@ case instruccion of
   $0a:r.a:=self.port_r(2) and r.p2; //in_a_p2
   $10:self.ram[r.r0^ and self.ram_mask]:=self.ram[r.r0^ and self.ram_mask]+1; //inc_xr0
   $11:self.ram[r.r1^ and self.ram_mask]:=self.ram[r.r1^ and self.ram_mask]+1; //inc_xr1
-  $12:self.cond((r.a and 1)<>0); //jb_0
-  $13:self.addc(self.read_rom(r.pc)); //addc_a_n
+  $12:begin //jb_0
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and 1)<>0) then r.pc:=((r.pc-1) and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
+  $13:begin //addc_a_n
+        self.addc(self.read_rom(r.pc));
+        r.pc:=r.pc+1;
+      end;
   $14,$34,$54,$74,$94,$b4,$d4,$f4:begin //call_XX
         tempb:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
         self.push_pc_psw;
         if self.irq_in_progress then tempw:=0
           else tempw:=self.r.a11;
@@ -539,7 +505,9 @@ case instruccion of
       end;
   $15:self.xirq_enabled:=false; //dis_i
   $16:begin //jtf
-        self.cond(self.timer_flag);
+        tempb:=self.read_rom(r.pc);
+        if self.timer_flag then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
         self.timer_flag:=false;
       end;
   $17:r.a:=r.a+1; //inc_a
@@ -554,7 +522,7 @@ case instruccion of
   $22:if self.chip_type=I8042 then begin //in_a_dbb
           // acknowledge the IBF IRQ and clear the bit in STS
 	        //if ((self.sts and STS_IBF)<>0) then
-          // !!!!!!!!!!standard_irq_callback(UPI41_INPUT_IBF);
+          //  halt(0);//standard_irq_callback(UPI41_INPUT_IBF);
 	        self.sts:=self.sts and not(STS_IBF);
 	        // if P2 flags are enabled, update the state of P2
 	        if (self.flags_enabled and ((self.r.p2 and P2_NIBF)=0)) then begin
@@ -565,9 +533,15 @@ case instruccion of
          end else begin //ilegal
           MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $22 ilegal!. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0)
          end;
-  $23:r.a:=self.read_rom(r.pc); //mov_a_n
-  $25:self.tirq_enabled:=true; //en_tcnti
-  $26:self.cond((self.test_r(0)=0));  //jnt_0
+  $23:begin  //mov_a_n
+        r.a:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $26:begin //jnt_0
+        tempb:=self.read_rom(r.pc);
+        if (self.test_r(0)=0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $27:r.a:=0; //clr_a
   $28:begin //xch_a_r0
         tempb:=r.a;
@@ -609,12 +583,20 @@ case instruccion of
         r.a:=r.r7^;
         r.r7^:=tempb;
       end;
-  $32:self.cond((r.a and 2)<>0);  //jb_1
+  $32:begin //jb_1
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and 2)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $35:begin //dis_tcnti
         self.tirq_enabled:=false;
         self.timer_overflow:=false;
       end;
-  $36:self.cond(self.test_r(0)<>0);  //jt_0
+  $36:begin //jt_0
+        tempb:=self.read_rom(r.pc);
+        if (self.test_r(0)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $37:r.a:=r.a xor $ff; //cpl_a
   $39:begin //outl_p1_a
         self.r.p1:=self.r.a;
@@ -632,12 +614,15 @@ case instruccion of
   $40:self.r.a:=self.r.a or self.ram[r.r0^ and self.ram_mask]; //orl_a_xr0
   $41:self.r.a:=self.r.a or self.ram[r.r1^ and self.ram_mask]; //orl_a_xr1
   $42:r.a:=self.timer; //mov_a_t
-  $43:r.a:=r.a or self.read_rom(r.pc); //orl_a_n
-  $45:begin //strt_cnt
-        if (self.timecount_enabled<>COUNTER_ENABLED) then self.t1_history:=self.test_r(1);
-	      self.timecount_enabled:=COUNTER_ENABLED;
+  $43:begin //orl_a_n
+        r.a:=r.a or self.read_rom(r.pc);
+        r.pc:=r.pc+1;
       end;
-  $46:self.cond(self.test_r(1)=0);  //jnt_1
+  $46:begin //jnt_1
+        tempb:=self.read_rom(r.pc);
+        if (self.test_r(1)=0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $47:r.a:=(r.a shl 4) or (r.a shr 4); //swap_a
   $48:r.a:=r.a or r.r0^; //orl_a_r0
   $49:r.a:=r.a or r.r1^; //orl_a_r1
@@ -647,22 +632,33 @@ case instruccion of
   $4d:r.a:=r.a or r.r5^; //orl_a_r5
   $4e:r.a:=r.a or r.r6^; //orl_a_r6
   $4f:r.a:=r.a or r.r7^; //orl_a_r7
-  $52:self.cond((r.a and 4)<>0);  //jb_2
-  $53:self.r.a:=self.r.a and self.read_rom(r.pc); //anl_a_n
+  $52:begin //jb_2
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and 4)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
+  $53:begin //anl_a_n
+        self.r.a:=self.r.a and self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
   $55:begin  //strt_t
         self.timecount_enabled:=TIMER_ENABLED;
         self.prescaler:=0;
       end;
-  $56:self.cond(self.test_r(1)<>0);  //jt_1
+  $56:begin //jt_1
+        tempb:=self.read_rom(r.pc);
+        if (self.test_r(1)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $57:begin //da_a
-        if (((self.r.a and $f)>$9) or self.r.psw.a) then begin
-          if (self.r.a>$f9) then self.r.psw.c:=true;
-          self.r.a:=self.r.a+$06;
-	      end;
-	      if (((self.r.a and $f0)>$90) or self.r.psw.c) then begin
-	        self.r.a:=self.r.a+$60;
-	        self.r.psw.c:=true;
-	      end;
+        if (((self.r.a and $0f)>$09) or self.r.psw.a) then begin
+	   if (self.r.a>$f9) then self.r.psw.c:=true;
+           self.r.a:=self.r.a+$06;
+	end;
+	if (((self.r.a and $f0)>$90) or self.r.psw.c) then begin
+	   self.r.a:=self.r.a+$60;
+	   self.r.psw.c:=true;
+	end;
       end;
   $58:r.a:=r.a and r.r0^; //anl_a_r0
   $59:r.a:=r.a and r.r1^; //anl_a_r1
@@ -689,11 +685,17 @@ case instruccion of
   $6d:self.add(r.r5^); //add_a_r5
   $6e:self.add(r.r6^); //add_a_r6
   $6f:self.add(r.r7^); //add_a_r7
-  $70:self.addc(self.ram[r.r0^ and self.ram_mask]);  //adc_a_xr0
-  $71:self.addc(self.ram[r.r1^ and self.ram_mask]);  //adc_a_xr1
-  $72:self.cond((r.a and 8)<>0);  //jb_3
-  $75:if self.chip_type<>N7751 then{$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $75 desconocida. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif};
-  $76:self.cond(self.f1);  //jf1
+  $72:begin //jb_3
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and 8)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
+  $75:{$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $75 desconocida. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif};
+  $76:begin //jf1
+        tempb:=self.read_rom(r.pc);
+        if self.f1 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $77:r.a:=(r.a shr 1) or (r.a shl 7); //rr_a
   $78:self.addc(r.r0^); //adc_a_r0
   $79:self.addc(r.r1^); //adc_a_r1
@@ -704,65 +706,81 @@ case instruccion of
   $7e:self.addc(r.r6^); //adc_a_r6
   $7f:self.addc(r.r7^); //adc_a_r7
   $80:if self.chip_type=I8042 then {$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $80 ilegal I8042. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif}
-         else if addr(self.ext_inport)<>nil then self.r.a:=self.ext_inport(self.r.r0^) //movx_a_xr0
+         else if addr(self.in_port)<>nil then self.r.a:=self.in_port(self.r.r0^) //movx_a_xr0
           else self.r.a:=$ff;
   $81:if self.chip_type=I8042 then {$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $81 ilegal I8042. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif}
-         else if addr(self.ext_inport)<>nil then self.r.a:=self.ext_inport(self.r.r1^) //movx_a_xr1
+         else if addr(self.in_port)<>nil then self.r.a:=self.in_port(self.r.r1^) //movx_a_xr1
           else self.r.a:=$ff;
   $83:begin //ret
-        tempb:=(self.dame_pila-1) and $7;
-	      r.pc:=self.ram[8+2*tempb];
-	      r.pc:=r.pc or (self.ram[9+2*tempb] shl 8);
-	      if self.irq_in_progress then r.pc:=r.pc and $7ff
+        tempb:=(self.dame_pila-1) and $07;
+	r.pc:=self.ram[(8+2*tempb) and self.ram_mask];
+	r.pc:=r.pc or (self.ram[(9+2*tempb) and self.ram_mask] shl 8);
+	if self.irq_in_progress then r.pc:=r.pc and $7ff
            else r.pc:=r.pc and $fff;
-	      self.pon_pila((self.dame_pila and $f0) or tempb);
+	self.pon_pila((self.dame_pila and $f0) or tempb);
       end;
   $85:r.psw.f:=false; //clr_f0
   $86:if self.chip_type=I8042 then begin
-            self.cond((self.sts and STS_OBF)<>0);
+            tempb:=self.read_rom(r.pc);
+            if (self.sts and STS_OBF)<>0 then r.pc:=(r.pc and $f00) or tempb
+               else r.pc:=r.pc+1;
          end else begin //jni
-              self.irq_polled:=(self.pedir_irq<>CLEAR_LINE);
-              self.cond(self.pedir_irq<>CLEAR_LINE);
+              tempb:=self.read_rom(r.pc);
+              self.irq_polled:=(self.pedir_irq=CLEAR_LINE);
+              if self.pedir_irq<>CLEAR_LINE then r.pc:=(r.pc and $f00) or tempb
+                 else r.pc:=r.pc+1;
          end;
   $89:begin //orl_p1_n
         self.r.p1:=self.r.p1 or self.read_rom(r.pc);
+        self.r.pc:=self.r.pc+1;
         self.port_w(1,self.r.p1);
       end;
   $8a:begin //orl_p2_n
         self.r.p2:=self.r.p2 or (self.read_rom(r.pc) and self.p2_mask);
+        self.r.pc:=self.r.pc+1;
         self.port_w(2,self.r.p2);
       end;
   $90:if self.chip_type=I8042 then begin //mov_sts_a
             self.sts:=(self.sts and $0f) or (self.r.a and $f0);
          end else begin //movx_xr0_a
           estados_demas:=estados_demas+1;
-          if addr(self.ext_outport)<>nil then self.ext_outport(self.r.r0^,self.r.a);
+          MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $90 movx_xr0_a no implementada. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0)
          end;
-  $92:self.cond((r.a and $10)<>0);  //jb_4
+  $92:begin //jb_4
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and $10)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $93:begin //retr
-        // implicitly clear the IRQ in progress flip flop
-	      self.irq_in_progress:=false;
-        tempb:=(self.dame_pila-1) and $7;
-	      r.pc:=self.ram[8+2*tempb];
-	      r.pc:=r.pc or (self.ram[9+2*tempb] shl 8);
-	      self.pon_pila(((r.pc shr 8) and $f0) or tempb);
-	      r.pc:=r.pc and $fff;
-	      self.update_regptr;
+          // implicitly clear the IRQ in progress flip flop
+	  self.irq_in_progress:=false;
+          tempb:=(self.dame_pila-1) and $07;
+	  r.pc:=self.ram[(8+2*tempb) and self.ram_mask];
+	  r.pc:=r.pc or (self.ram[(9+2*tempb) and self.ram_mask] shl 8);
+	  self.pon_pila(((r.pc shr 8) and $f0) or $08 or tempb);
+	  r.pc:=r.pc and $fff;
+	  self.update_regptr;
       end;
   $95:r.psw.f:=not(r.psw.f); //cpl_f0
-  $96:self.cond(r.a<>0);  //jnz
+  $96:begin //jnz
+        tempb:=self.read_rom(r.pc);
+        if r.a<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $97:r.psw.c:=false; //clr_c
   $99:begin //anl_p1_n
         r.p1:=r.p1 and self.read_rom(r.pc);
+        r.pc:=r.pc+1;
         self.port_w(1,r.p1);
       end;
   $9a:begin //anl_p2_n
         r.p2:=r.p2 and (self.read_rom(r.pc) or not(self.p2_mask));
+        r.pc:=r.pc+1;
         self.port_w(2,r.p2);
       end;
   $a0:self.ram[self.r.r0^ and self.ram_mask]:=self.r.a; //mov_xr0_a
   $a1:self.ram[self.r.r1^ and self.ram_mask]:=self.r.a; //mov_xr1_a
-  $a3:r.a:=self.read_byte((r.pc and $f00) or r.a); //movp_a_xa
+  $a3:r.a:=self.read_rom((r.pc and $f00) or r.a); //movp_a_xa
   $a5:self.f1:=false; //clr_f1
   $a8:r.r0^:=r.a; //mov_r0_a
   $a9:r.r1^:=r.a; //mov_r1_a
@@ -772,28 +790,70 @@ case instruccion of
   $ad:r.r5^:=r.a; //mov_r5_a
   $ae:r.r6^:=r.a; //mov_r6_a
   $af:r.r7^:=r.a; //mov_r7_a
-  $b0:self.ram[self.r.r0^ and self.ram_mask]:=self.read_rom(self.r.pc);  //mov_xr0_n
-  $b1:self.ram[self.r.r1^ and self.ram_mask]:=self.read_rom(self.r.pc);  //mov_xr1_n
-  $b2:self.cond((r.a and $20)<>0);  //jb_5
+  $b0:begin //mov_xr0_n
+        self.ram[self.r.r0^ and self.ram_mask]:=self.read_rom(self.r.pc);
+        self.r.pc:=self.r.pc+1;
+      end;
+  $b1:begin //mov_xr1_n
+        self.ram[self.r.r1^ and self.ram_mask]:=self.read_rom(self.r.pc);
+        self.r.pc:=self.r.pc+1;
+      end;
+  $b2:begin //jb_5
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and $20)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $b3:begin //jmpp_xa
         self.r.pc:=self.r.pc and $f00;
-        self.r.pc:=self.r.pc or self.read_byte(self.r.pc or self.r.a);
+        self.r.pc:=self.r.pc or self.read_rom(self.r.pc or self.r.a);
       end;
   $b5:self.f1:=not(self.f1); //cpl_f1
-  $b6:self.cond(r.psw.f); //jf0
-  $b8:self.r.r0^:=self.read_rom(r.pc); //mov_r0_n
-  $b9:self.r.r1^:=self.read_rom(r.pc); //mov_r1_n
-  $ba:self.r.r2^:=self.read_rom(r.pc); //mov_r1_n
-  $bb:self.r.r3^:=self.read_rom(r.pc); //mov_r3_n
-  $bc:self.r.r4^:=self.read_rom(r.pc); //mov_r4_n
-  $bd:self.r.r5^:=self.read_rom(r.pc); //mov_r5_n
-  $be:self.r.r6^:=self.read_rom(r.pc); //mov_r6_n
-  $bf:self.r.r7^:=self.read_rom(r.pc); //mov_r7_n
+  $b6:begin //jf0
+        tempb:=self.read_rom(r.pc);
+        if r.psw.f then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
+  $b8:begin //mov_r0_n
+        self.r.r0^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $b9:begin //mov_r1_n
+        self.r.r1^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $ba:begin //mov_r2_n
+        self.r.r2^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $bb:begin //mov_r3_n
+        self.r.r3^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $bc:begin //mov_r4_n
+        self.r.r4^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $bd:begin //mov_r5_n
+        self.r.r5^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $be:begin //mov_r6_n
+        self.r.r6^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
+  $bf:begin //mov_r7_n
+        self.r.r7^:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+      end;
   $c5:begin //sel_rb0
         r.psw.b:=false;
         self.update_regptr;
       end;
-  $c6:self.cond(r.a=0);  //jz
+  $c6:begin //jz
+        tempb:=self.read_rom(r.pc);
+        if r.a=0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $c7:self.r.a:=self.dame_pila or 8;//mov_a_psw
   $c8:r.r0^:=r.r0^-1; //dec_r0
   $c9:r.r1^:=r.r1^-1; //dec_r1
@@ -803,15 +863,25 @@ case instruccion of
   $cd:r.r5^:=r.r5^-1; //dec_r5
   $ce:r.r6^:=r.r6^-1; //dec_r6
   $cf:r.r7^:=r.r7^-1; //dec_r7
-  $d2:self.cond((r.a and $40)<>0);  //jb_6
-  $d3:r.a:=r.a xor self.read_rom(r.pc); //xrl_a_n
+  $d2:begin //jb_6
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and $40)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
+  $d3:begin  //xrl_a_n
+        tempb:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+        r.a:=r.a xor tempb;
+      end;
   $d5:begin  //sel_rb1
         r.psw.b:=true;
         self.update_regptr;
       end;
   $d6:if self.chip_type=I8042 then begin //jnibf
         self.irq_polled:=(self.sts and STS_IBF)<>0;
-        self.cond((self.sts and STS_IBF)=0);
+        tempb:=self.read_rom(r.pc);
+        if ((self.sts and STS_IBF)=0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end else {$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $d6 ilegal. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif};
   $d7:begin //mov_psw_a
         self.pon_pila(self.r.a and $f7);
@@ -825,51 +895,79 @@ case instruccion of
   $dd:r.a:=r.a xor r.r5^; //xrl_a_r5
   $de:r.a:=r.a xor r.r6^; //xrl_a_r6
   $df:r.a:=r.a xor r.r7^; //xrl_a_r7
-  $e3:r.a:=self.read_byte($300 or r.a);  //movp3_a_xa
+  $e3:r.a:=self.read_rom($300 or r.a);  //movp3_a_xa
   $e5:if self.chip_type=I8042 then begin
          {$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $e5 en dma I8042. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif}
          end else self.r.a11:=0;   //sel_mb0
-  $e6:self.cond(not(r.psw.c));  //jnc
+  $e6:begin //jnc
+        tempb:=self.read_rom(r.pc);
+        if not(r.psw.c) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $e7:r.a:=(r.a shl 1) or (r.a shr 7); //rl_a
   $e8:begin //djnz_r0
         r.r0^:=r.r0^-1;
-        self.cond(r.r0^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r0^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $e9:begin //djnz_r1
         r.r1^:=r.r1^-1;
-        self.cond(r.r1^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r1^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $ea:begin //djnz_r2
         r.r2^:=r.r2^-1;
-        self.cond(r.r2^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r2^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $eb:begin //djnz_r3
         r.r3^:=r.r3^-1;
-        self.cond(r.r3^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r3^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $ec:begin //djnz_r4
         r.r4^:=r.r4^-1;
-        self.cond(r.r4^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r4^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $ed:begin //djnz_r5
         r.r5^:=r.r5^-1;
-        self.cond(r.r5^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r5^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $ee:begin //djnz_r6
         r.r6^:=r.r6^-1;
-        self.cond(r.r6^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r6^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $ef:begin //djnz_r7
         r.r7^:=r.r7^-1;
-        self.cond(r.r7^<>0);
+        tempb:=self.read_rom(r.pc);
+        if r.r7^<>0 then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
       end;
   $f0:r.a:=self.ram[r.r0^ and self.ram_mask]; //mov_a_xr0
   $f1:r.a:=self.ram[r.r1^ and self.ram_mask]; //mov_a_xr1
-  $f2:self.cond((r.a and $80)<>0);  //jb_7
+  $f2:begin //jb_7
+        tempb:=self.read_rom(r.pc);
+        if ((r.a and $80)<>0) then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $f5:if self.chip_type=I8042 then begin
          {$ifdef DEBUG}MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $f5 en flags I8042. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0){$endif}
          end else r.a11:=$800; //sel_mb1
-  $f6:self.cond(r.psw.c);  //jc
+  $f6:begin //jc
+        tempb:=self.read_rom(r.pc);
+        if r.psw.c then r.pc:=(r.pc and $f00) or tempb
+           else r.pc:=r.pc+1;
+      end;
   $f7:begin //rlc_a
         tempb:=r.a;
         r.a:=(r.a shl 1) or byte(r.psw.c);
@@ -883,7 +981,7 @@ case instruccion of
   $fd:self.r.a:=self.r.r5^; //mov_a_r5
   $fe:self.r.a:=self.r.r6^; //mov_a_r6
   $ff:self.r.a:=self.r.r7^; //mov_a_r7
-  else MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc-1,10)+' '+inttohex(r.old_pc,10),mtInformation,[mbOk], 0);
+  else MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc-1,10), mtInformation,[mbOk], 0);
 end;
 {$ifdef DEBUG}if ciclos_mcs48[instruccion]=0 then
         MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: '+inttohex(instruccion,2)+' con T cero. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0);{$endif}
@@ -893,5 +991,4 @@ if (self.timecount_enabled<>0) then burn_cycles(tempb);
 timers.update(tempb,self.numero_cpu);
 end;
 end;
-
 end.

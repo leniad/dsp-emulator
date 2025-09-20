@@ -84,7 +84,7 @@ var
        0:$FF -> Fijo
        1:----xxxx xxxx----
    2 y 3:xxxxyyyy yyyyyyyy}
-procedure poner_sprites(group:byte);
+procedure poner_sprites(group:byte);inline;
 var
   f,i,nchar,atrib,color,x:word;
   tiledata_pos:word;
@@ -135,9 +135,9 @@ end;
 
 procedure update_video_pow;
 var
-  f:word;
-  color:word;
-  x,y,nchar:word;
+        f:word;
+        color:word;
+        x,y,nchar:word;
 begin
 fill_full_screen(2,$7ff);
 for f:=$0 to $3ff do begin
@@ -213,23 +213,26 @@ end;
 
 procedure snk68_principal;
 var
+  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
-   eventos_pow;
-   if f=240 then begin
+   //Main CPU
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   //Sound CPU
+   z80_0.run(frame_s);
+   frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+   if f=239 then begin
       m68000_0.irq[1]:=HOLD_LINE;
       update_video_nmk68;
    end;
-   //Main CPU
-   m68000_0.run(frame_main);
-   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-   //Sound CPU
-   z80_0.run(frame_snd);
-   frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
+ eventos_pow;
  video_sync;
 end;
 end;
@@ -251,7 +254,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -383,8 +386,7 @@ begin
  z80_0.reset;
  ym3812_0.reset;
  upd7759_0.reset;
- frame_main:=m68000_0.tframes;
- frame_snd:=z80_0.tframes;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -521,6 +523,7 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
+reset_snk68;
 iniciar_snk68:=true;
 end;
 

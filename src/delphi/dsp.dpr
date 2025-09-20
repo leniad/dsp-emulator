@@ -1,6 +1,4 @@
 program dsp;
-
-
 uses
   Forms,
   coleco in '..\CONSOLAS\coleco.pas',
@@ -94,7 +92,7 @@ uses
   contra_hw in '..\arcade\contra_hw.pas',
   mappy_hw in '..\arcade\mappy_hw.pas',
   rastan_hw in '..\arcade\rastan_hw.pas',
-  taito_sound in '..\arcade\misc\taito_sound.pas',
+  taitosnd in '..\snd\taitosnd.pas',
   namcoio_56xx_58xx in '..\devices\namcoio_56xx_58xx.pas',
   legendarywings_hw in '..\arcade\legendarywings_hw.pas',
   streetfighter_hw in '..\arcade\streetfighter_hw.pas',
@@ -210,6 +208,8 @@ uses
   volfied_cchip in '..\arcade\misc\volfied_cchip.pas',
   operationwolf_hw in '..\arcade\operationwolf_hw.pas',
   opwolf_cchip in '..\arcade\misc\opwolf_cchip.pas',
+  joystick_calibrate in 'joystick_calibrate.pas' {joy_calibration},
+  eeprom in '..\devices\eeprom.pas',
   outrun_hw in '..\arcade\outrun_hw.pas',
   taitosj_hw in '..\arcade\taitosj_hw.pas',
   fd1089 in '..\devices\fd1089.pas',
@@ -233,6 +233,7 @@ uses
   config_sms in 'config_sms.pas' {SMSConfig},
   lib_sdl2 in '..\misc\lib_sdl2.pas',
   renegade_hw in '..\arcade\renegade_hw.pas',
+  generic_adpcm in '..\snd\generic_adpcm.pas',
   tmnt_hw in '..\arcade\tmnt_hw.pas',
   eepromser in '..\devices\eepromser.pas',
   gradius3_hw in '..\arcade\gradius3_hw.pas',
@@ -293,6 +294,8 @@ uses
   galivan_hw in '..\arcade\galivan_hw.pas',
   lastduel_hw in '..\arcade\lastduel_hw.pas',
   commodore64 in '..\ordenadores\commodore64.pas',
+  mos6526 in '..\ordenadores\misc\mos6526.pas',
+  mos6566 in '..\ordenadores\misc\mos6566.pas',
   mos6526_old in '..\ordenadores\misc\mos6526_old.pas',
   sid_sound in '..\snd\sid_sound.pas',
   sid_tables in '..\snd\sid_tables.pas',
@@ -325,53 +328,7 @@ uses
   flower_audio in '..\snd\flower_audio.pas',
   superdodgeball_hw in '..\arcade\superdodgeball_hw.pas',
   upd1771 in '..\snd\upd1771.pas',
-  sega_pcm in '..\snd\sega_pcm.pas',
-  blitter_williams in '..\arcade\misc\blitter_williams.pas',
-  mcr_hw in '..\arcade\mcr_hw.pas',
-  arkanoid_hw in '..\arcade\arkanoid_hw.pas',
-  sidearms_hw in '..\arcade\sidearms_hw.pas',
-  speedrumbler_hw in '..\arcade\speedrumbler_hw.pas',
-  chinagate_hw in '..\arcade\chinagate_hw.pas',
-  magmax_hw in '..\arcade\magmax_hw.pas',
-  ambush_hw in '..\arcade\ambush_hw.pas',
-  superduck_hw in '..\arcade\superduck_hw.pas',
-  hangon_hw in '..\arcade\hangon_hw.pas',
-  shadow_warriors_hw in '..\arcade\shadow_warriors_hw.pas',
-  raiden_hw in '..\arcade\raiden_hw.pas',
-  twins_hw in '..\arcade\twins_hw.pas',
-  i2cmem in '..\devices\i2cmem.pas',
-  oric_hw in '..\ordenadores\oric_hw.pas',
-  oric_disc in '..\ordenadores\misc\oric_disc.pas',
-  via6522 in '..\devices\via6522.pas',
-  missilecommand_hw in '..\arcade\missilecommand_hw.pas',
-  gaplus_hw in '..\arcade\gaplus_hw.pas',
-  pv1000 in '..\consolas\pv1000.pas',
-  pv2000 in '..\consolas\pv2000.pas',
-  m63_hw in '..\arcade\m63_hw.pas',
-  diverboy_hw in '..\arcade\diverboy_hw.pas',
-  mugsmashers_hw in '..\arcade\mugsmashers_hw.pas',
-  steelforce_hw in '..\arcade\steelforce_hw.pas',
-  mos6566 in '..\ordenadores\misc\mos6566.pas',
-  mos6526 in '..\ordenadores\misc\mos6526.pas',
-  avg_dvg in '..\arcade\misc\avg_dvg.pas',
-  bankpanic_hw in '..\arcade\bankpanic_hw.pas',
-  appoooh_hw in '..\arcade\appoooh_hw.pas',
-  sega_decrypt_2 in '..\arcade\misc\sega_decrypt_2.pas',
-  hw_88games in '..\arcade\hw_88games.pas',
-  dooyong_hw in '..\arcade\dooyong_hw.pas',
-  blueprint_hw in '..\arcade\blueprint_hw.pas',
-  unico_hw in '..\arcade\unico_hw.pas',
-  kikikaikai_hw in '..\arcade\kikikaikai_hw.pas',
-  lasso_hw in '..\arcade\lasso_hw.pas',
-  ym_2413 in '..\snd\ym_2413.pas',
-  finalstarforce_hw in '..\arcade\finalstarforce_hw.pas',
-  wyvernf0_hw in '..\arcade\wyvernf0_hw.pas',
-  taito_68705 in '..\arcade\misc\taito_68705.pas',
-  galaxian_stars in '..\arcade\misc\galaxian_stars.pas',
-  msm5232 in '..\snd\msm5232.pas',
-  taito_b_hw in '..\arcade\taito_b_hw.pas',
-  taito_tc0180vcu in '..\arcade\misc\taito_tc0180vcu.pas',
-  ym_2610 in '..\snd\ym_2610.pas';
+  sega_pcm in '..\snd\sega_pcm.pas';
 
 {$R *.res}
 begin
@@ -386,10 +343,11 @@ begin
   Application.CreateForm(TConfigSP, ConfigSP);
   Application.CreateForm(TAboutBox, AboutBox);
   Application.CreateForm(Tload_dsk, load_dsk);
+  Application.CreateForm(TFLoadRom, FLoadRom);
   Application.CreateForm(Tconfig_arcade, config_arcade);
+  Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(TConfigCPC, ConfigCPC);
   Application.CreateForm(Tconfiggb, configgb);
-  Application.CreateForm(TFLoadRom, FLoadRom);
   Application.Run;
 end.

@@ -1,8 +1,7 @@
 unit ym_3812;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}fmopl,timer_engine,sound_engine,cpu_misc,
-     dialogs;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}fmopl,timer_engine,sound_engine,cpu_misc;
 
 type
   ym3812_chip=class(snd_chip_class)
@@ -54,11 +53,10 @@ constructor ym3812_chip.create(type_:byte;clock:dword;amp:single=1);
 var
   rate:integer;
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   self.num:=chips_total;
   rate:=round(clock/72);
-  // emulator create
+  // emulator create */
   self.OPL:=OPLCreate(sound_status.cpu_clock,clock,rate);
   self.reset;
   case type_ of
@@ -93,7 +91,7 @@ var
 begin
   self.OPL.output:=0;
   advance_lfo(self.OPL);
-  // FM part
+  // FM part */
   OPL_CALC_CH(self.OPL,self.OPL.P_CH[0]);
   OPL_CALC_CH(self.OPL,self.OPL.P_CH[1]);
   OPL_CALC_CH(self.OPL,self.OPL.P_CH[2]);
@@ -104,16 +102,16 @@ begin
      OPL_CALC_CH(self.OPL,self.OPL.P_CH[6]);
      OPL_CALC_CH(self.OPL,self.OPL.P_CH[7]);
      OPL_CALC_CH(self.OPL,self.OPL.P_CH[8]);
-  end else begin		// Rhythm part
+  end else begin		// Rhythm part */
       OPL_CALC_RH(self.OPL,self.OPL.noise_rng and 1);
   end;
-  lt:=self.OPL.output*2;
-  // limit check
+  lt:=trunc((self.OPL.output shl 1)*self.amp);
+  // limit check */
   if lt>$7fff then lt:=$7fff
    else if lt<-$7fff then lt:=-$7fff;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(lt*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(lt*self.amp);
-  // store to sound buffer
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
+  // store to sound buffer */
   advance(self.OPL);
 end;
 

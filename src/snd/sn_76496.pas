@@ -1,24 +1,14 @@
 unit sn_76496;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,sound_engine,timer_engine,
-     dialogs;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine;
 
 type
 
- type_ready_cb=procedure(state:byte);
-
  SN76496_chip=class(snd_chip_class)
-      constructor create(clock:dword;ready_cb:type_ready_cb=nil;amp:single=1);
+      constructor Create(clock:dword;amp:single=1);
       destructor free;
     public
-      procedure write(data:byte);
-      procedure update;
-      procedure reset;
-      function save_snapshot(data:pbyte):word;
-      procedure load_snapshot(data:pbyte);
-      procedure change_clock(clock:dword);
-    private
       UpdateStep:dword;
     	VolTable:array[0..15] of single;	// volume table
     	Registers:array[0..7] of word;	// registers
@@ -26,11 +16,15 @@ type
     	Volume:array [0..3] of single;
       Period,Count:array [0..3] of integer;		// volume of voice 0-2 and noise
       Output:array [0..3] of byte;
-    	RNG:cardinal;		// noise generator
-    	NoiseFB:integer;		// noise feedback mask
-      ready_state:byte;
-      ready_cb:type_ready_cb;
-      chip_num:byte;
+    	RNG:cardinal;		// noise generator      */
+    	NoiseFB:integer;		// noise feedback mask */
+      procedure Write(data:byte);
+      procedure update;
+      procedure reset;
+      function save_snapshot(data:pbyte):word;
+      procedure load_snapshot(data:pbyte);
+      procedure change_clock(clock:dword);
+    private
       procedure set_gain(gain:integer);
       procedure resample;
  end;
@@ -40,32 +34,39 @@ var
 
 implementation
 const
+     REGS_SIZE=161;
      MAX_OUTPUT=$7fff;
      SN_STEP=$10000;
      FB_WNOISE=$14002;
      FB_PNOISE=$8000;
      NG_PRESET=$0f35;
-var
-  chips_total:integer=-1;
 
-constructor sn76496_chip.create(clock:dword;ready_cb:type_ready_cb=nil;amp:single=1);
+constructor sn76496_chip.Create(clock:dword;amp:single=1);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.amp:=amp;
   self.set_gain(0);
 	self.clock:=clock;
   self.tsample_num:=init_channel;
 	self.resample;
   self.reset;
-  self.ready_cb:=ready_cb;
-  chips_total:=chips_total+1;
-  self.chip_num:=chips_total;
 end;
 
 destructor sn76496_chip.free;
 begin
-  chips_total:=chips_total-1;
 end;
+
+type
+    tsn76496=packed record
+        UpdateStep:dword;
+        VolTable:array[0..15] of single;
+        Registers:array[0..7] of word;
+        LastRegister:byte;
+        Volume:array [0..3] of single;
+        Period,Count:array [0..3] of integer;
+        Output:array [0..3] of byte;
+        RNG:cardinal;
+        NoiseFB:integer;
+    end;
 
 procedure sn76496_chip.change_clock(clock:dword);
 begin
@@ -75,72 +76,44 @@ end;
 
 function sn76496_chip.save_snapshot(data:pbyte):word;
 var
-  ptemp:pbyte;
-  size_:dword;
+  sn76496:^tsn76496;
 begin
-  ptemp:=data;
-  copymemory(ptemp,@self.UpdateStep,4);
-  inc(ptemp,4);size_:=4;
-  copymemory(ptemp,@self.VolTable,16*sizeof(single));
-  inc(ptemp,16*sizeof(single));size_:=size_+16*sizeof(single);
-  copymemory(ptemp,@self.Registers,8*2);
-  inc(ptemp,8*2);size_:=size_+8*2;
-  copymemory(ptemp,@self.LastRegister,1);
-  inc(ptemp);size_:=size_+1;
-  copymemory(ptemp,@self.Volume,4*sizeof(single));
-  inc(ptemp,4*sizeof(single));size_:=size_+4*sizeof(single);
-  copymemory(ptemp,@self.Period,4*4);
-  inc(ptemp,4*4);size_:=size_+4*4;
-  copymemory(ptemp,@self.Count,4*4);
-  inc(ptemp,4*4);size_:=size_+4*4;
-  copymemory(ptemp,@self.Output,4);
-  inc(ptemp,4);size_:=size_+4;
-  copymemory(ptemp,@self.RNG,4);
-  inc(ptemp,4);size_:=size_+4;
-  copymemory(ptemp,@self.NoiseFB,4);
-  inc(ptemp,4);size_:=size_+4;
-  save_snapshot:=size_;
+  getmem(sn76496,sizeof(tsn76496));
+  sn76496.UpdateStep:=self.UpdateStep;
+  copymemory(@sn76496.VolTable,@self.VolTable,16*sizeof(single));
+  copymemory(@sn76496.Registers,@self.Registers,8*2);
+  sn76496.LastRegister:=self.LastRegister;
+  copymemory(@sn76496.Volume,@self.Volume,4*sizeof(single));
+  copymemory(@sn76496.Period,@self.Period,4*4);
+  copymemory(@sn76496.Count,@self.Count,4*4);
+  copymemory(@sn76496.Output,@self.Output,4);
+  sn76496.RNG:=self.RNG;
+  sn76496.NoiseFB:=self.NoiseFB;
+  copymemory(data,sn76496,REGS_SIZE);
+  freemem(sn76496);
+  save_snapshot:=REGS_SIZE;
 end;
 
 procedure sn76496_chip.load_snapshot(data:pbyte);
 var
-  ptemp:pbyte;
+  sn76496:^tsn76496;
 begin
-  ptemp:=data;
-  copymemory(@self.UpdateStep,ptemp,4);
-  inc(ptemp,4);
-  copymemory(@self.VolTable,ptemp,16*sizeof(single));
-  inc(ptemp,16*sizeof(single));
-  copymemory(@self.Registers,ptemp,8*2);
-  inc(ptemp,8*2);
-  copymemory(@self.LastRegister,ptemp,1);
-  inc(ptemp);
-  copymemory(@self.Volume,ptemp,4*sizeof(single));
-  inc(ptemp,4*sizeof(single));
-  copymemory(@self.Period,ptemp,4*4);
-  inc(ptemp,4*4);
-  copymemory(@self.Count,ptemp,4*4);
-  inc(ptemp,4*4);
-  copymemory(@self.Output,ptemp,4);
-  inc(ptemp,4);
-  copymemory(@self.RNG,ptemp,4);
-  inc(ptemp,4);
-  copymemory(@self.NoiseFB,ptemp,4);
+  getmem(sn76496,sizeof(tsn76496));
+  copymemory(sn76496,data,REGS_SIZE);
+  self.UpdateStep:=sn76496.UpdateStep;
+  copymemory(@self.VolTable,@sn76496.VolTable,16*sizeof(single));
+  copymemory(@self.Registers,@sn76496.Registers,8*2);
+  self.LastRegister:=sn76496.LastRegister;
+  copymemory(@self.Volume,@sn76496.Volume,4*sizeof(single));
+  copymemory(@self.Period,@sn76496.Period,4*4);
+  copymemory(@self.Count,@sn76496.Count,4*4);
+  copymemory(@self.Output,@sn76496.Output,4);
+  self.RNG:=sn76496.RNG;
+  self.NoiseFB:=sn76496.NoiseFB;
+  freemem(sn76496);
 end;
 
-procedure end_ready_0;
-begin
-  sn_76496_0.ready_state:=ASSERT_LINE;
-  sn_76496_0.ready_cb(sn_76496_0.ready_state);
-end;
-
-procedure end_ready_1;
-begin
-  sn_76496_1.ready_state:=ASSERT_LINE;
-  sn_76496_1.ready_cb(sn_76496_1.ready_state);
-end;
-
-procedure sn76496_chip.write(data:byte);
+procedure sn76496_chip.Write(data:byte);
 var
   r,c,n:integer;
 begin
@@ -206,16 +179,6 @@ begin
 				end;
     end;  //del case
 	end;
-  self.ready_state:=CLEAR_LINE;
-	if @self.ready_cb<>nil then begin
-    self.ready_cb(self.ready_state);
-    //(clock()/(4*m_clock_divider))); clockdivider=8;
-    case self.chip_num of
-      0:one_shot_timer_0(sound_status.cpu_num,sound_status.cpu_clock/(self.clock/(4*8)),end_ready_0);
-      1:one_shot_timer_1(sound_status.cpu_num,sound_status.cpu_clock/(self.clock/(4*8)),end_ready_1);
-    end;
-  end;
-
 end;
 
 procedure sn76496_chip.set_gain(gain:integer);
@@ -256,8 +219,6 @@ for i:=0 to 3 do begin
 end;
 self.RNG:=NG_PRESET;
 self.Output[3]:=self.RNG and 1;
-self.ready_state:=ASSERT_LINE;
-if @self.ready_cb<>nil then self.ready_cb(self.ready_state);
 end;
 
 procedure sn76496_chip.resample;
@@ -336,7 +297,6 @@ begin
 				vol[2] * self.Volume[2] + vol[3] * self.Volume[3];
     if (out_sn>MAX_OUTPUT*SN_STEP) then out_sn:=MAX_OUTPUT*SN_STEP;
     tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc((out_sn/SN_STEP)*self.amp);
-    if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc((out_sn/SN_STEP)*self.amp);
 end;
 
 end.

@@ -4,11 +4,8 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,timer_engine,dac;
-
-function karatechamp_iniciar:boolean;
-
+procedure cargar_karatechamp;
 implementation
-
 const
     karatechamp_rom:array[0..5] of tipo_roms=(
     (n:'b014.bin';l:$2000;p:0;crc:$0000d1a0),(n:'b015.bin';l:$2000;p:$2000;crc:$03fae67e),
@@ -32,18 +29,16 @@ const
     (n:'br27';l:$100;p:0;crc:$f683c54a),(n:'br26';l:$100;p:$100;crc:$3ddbb6c4),
     (n:'br25';l:$100;p:$200;crc:$ba4a5651));
     //Dip
-    karatechamp_dip:array [0..6] of def_dip2=(
-    (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-    (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-    (mask:$10;name:'Difficulty';number:2;val2:(0,$10);name2:('Hard','Normal')),
-    (mask:$20;name:'Free Play';number:2;val2:($20,0);name2:('Off','On')),
-    (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')),
-    (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-
+    karatechamp_dip:array [0..6] of def_dip=(
+    (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$10;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Hard'),(dip_val:$10;dip_name:'Normal'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$20;name:'Free Play';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+    (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
   sound_latch:byte;
   nmi_enable,nmi_enable_sound:boolean;
-
 procedure update_video_karatechamp;
 var
     x,y,atrib,color:byte;
@@ -72,55 +67,54 @@ for f:=0 to $3f do begin
 end;
 actualiza_trozo_final(16,0,224,256,2);
 end;
-
 procedure eventos_karatechamp;
 begin
 if event.arcade then begin
   //SYS
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   //P1
-  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or 1;
-  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or 2;
-  if arcade_input.up[0] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or 4;
-  if arcade_input.down[0] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or 8;
+  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or $1;
+  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or $2;
+  if arcade_input.up[0] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or $4;
+  if arcade_input.down[0] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or $8;
   if arcade_input.right[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
   if arcade_input.left[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
   if arcade_input.up[1] then marcade.in1:=marcade.in1 and $bf else marcade.in1:=marcade.in1 or $40;
   if arcade_input.down[1] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
 end;
 end;
-
 procedure karatechamp_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    eventos_karatechamp;
-    if f=242 then begin
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    //Main
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //Sound
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    if (f=241) then begin
       if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
       update_video_karatechamp;
     end;
-    //Main
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    //Sound
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
+  eventos_karatechamp;
   video_sync;
 end;
 end;
-
 function karatechamp_getbyte(direccion:word):byte;
 begin
-  karatechamp_getbyte:=memoria[direccion];
+karatechamp_getbyte:=memoria[direccion];
 end;
-
 procedure karatechamp_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -132,7 +126,6 @@ case direccion of
                  end;
 end;
 end;
-
 function karatechamp_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
@@ -143,7 +136,6 @@ case (puerto and $ff) of
   $a8:;
 end;
 end;
-
 procedure karatechamp_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -158,13 +150,11 @@ case (puerto and $ff) of
       end;
 end;
 end;
-
 //sound
 function karatechamp_getbyte_snd(direccion:word):byte;
 begin
   karatechamp_getbyte_snd:=mem_snd[direccion];
 end;
-
 procedure karatechamp_putbyte_snd(direccion:word;valor:byte);
 begin
 case direccion of
@@ -172,10 +162,9 @@ case direccion of
     $e000..$e2ff:mem_snd[direccion]:=valor;
 end;
 end;
-
 function karatechamp_inbyte_snd(puerto:word):byte;
 begin
-if (puerto and $ff)=6 then begin
+if (puerto and $ff)=$6 then begin
   karatechamp_inbyte_snd:=sound_latch;
   z80_1.change_irq(CLEAR_LINE);
 end;
@@ -195,19 +184,16 @@ case (puerto and $ff) of
     end;
 end;
 end;
-
 procedure karatechamp_snd_irq;
 begin
   if nmi_enable_sound then z80_1.change_nmi(ASSERT_LINE);
 end;
-
 procedure karatechamp_sound_update;
 begin
-  ay8910_0.update;
-  ay8910_1.update;
+  ay8910_0.Update;
+  ay8910_1.Update;
   dac_0.update;
 end;
-
 //Main
 procedure karatechamp_reset;
 begin
@@ -216,15 +202,13 @@ z80_1.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 dac_0.reset;
-frame_main:=z80_0.tframes;
-frame_snd:=z80_1.tframes;
+reset_audio;
 nmi_enable:=false;
 nmi_enable_sound:=false;
 sound_latch:=0;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 end;
-
 function karatechamp_iniciar:boolean;
 const
   ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
@@ -236,8 +220,6 @@ var
   f:word;
   memoria_temp:array[0..$17fff] of byte;
 begin
-llamadas_maquina.bucle_general:=karatechamp_principal;
-llamadas_maquina.reset:=karatechamp_reset;
 karatechamp_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -257,8 +239,8 @@ if not(roms_load(@mem_snd,karatechamp_sound)) then exit;
 //IRQ Sound CPU
 timers.init(z80_1.numero_cpu,3000000/125,karatechamp_snd_irq,nil,true);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(12000000 div 12,AY8910);
-ay8910_1:=ay8910_chip.create(12000000 div 12,AY8910);
+ay8910_0:=ay8910_chip.create(12000000 div 12,AY8910,1);
+ay8910_1:=ay8910_chip.create(12000000 div 12,AY8910,1);
 dac_0:=dac_chip.create;
 //cargar chars
 if not(roms_load(@memoria_temp,karatechamp_char)) then exit;
@@ -287,9 +269,15 @@ end;
 set_pal(colores,$100);
 //DIP
 marcade.dswa:=$3f;
-marcade.dswa_val2:=@karatechamp_dip;
+marcade.dswa_val:=@karatechamp_dip;
 //Final
+karatechamp_reset;
 karatechamp_iniciar:=true;
 end;
-
+procedure cargar_karatechamp;
+begin
+llamadas_maquina.iniciar:=karatechamp_iniciar;
+llamadas_maquina.bucle_general:=karatechamp_principal;
+llamadas_maquina.reset:=karatechamp_reset;
+end;
 end.

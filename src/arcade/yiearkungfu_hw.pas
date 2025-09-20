@@ -16,27 +16,27 @@ const
         yiear_sprites:array[0..3] of tipo_roms=(
         (n:'g04_5.bin';l:$4000;p:0;crc:$45109b29),(n:'g03_6.bin';l:$4000;p:$4000;crc:$1d650790),
         (n:'g06_3.bin';l:$4000;p:$8000;crc:$e6aa945b),(n:'g05_4.bin';l:$4000;p:$c000;crc:$cc187c22));
-        yiear_pal:tipo_roms=(n:'yiear.clr';l:$20;p:0;crc:$c283d71f);
-        yiear_vlm:tipo_roms=(n:'a12_9.bin';l:$2000;p:0;crc:$f75a1539);
+        yiear_pal:tipo_roms=(n:'yiear.clr';l:$20;p:$0;crc:$c283d71f);
+        yiear_vlm:tipo_roms=(n:'a12_9.bin';l:$2000;p:$0;crc:$f75a1539);
         //Dip
-        yiear_dip_a:array [0..2] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        yiear_dip_b:array [0..5] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
-        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
-        (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('30K 80K','40K 90K')),
-        (mask:$30;name:'Difficulty';number:4;val4:($30,$10,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        yiear_dip_c:array [0..2] of def_dip2=(
-        (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')),());
+        yiear_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),())),());
+        yiear_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'30K 80K'),(dip_val:$0;dip_name:'40K 90K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Difficulty';number:4;dip:((dip_val:$30;dip_name:'Easy'),(dip_val:$10;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        yiear_dip_c:array [0..2] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_ena,nmi_ena:boolean;
  sound_latch:byte;
 
-procedure update_video_yiear;
+procedure update_video_yiear;inline;
 var
   x,y:byte;
   f,nchar,atrib:word;
@@ -68,40 +68,42 @@ procedure eventos_yiear;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   //P2
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   //SYS
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
 procedure yiear_principal;
 var
+  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    if f=240 then begin
+frame:=m6809_0.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    m6809_0.run(frame);
+    frame:=frame+m6809_0.tframes-m6809_0.contador;
+    if f=239 then begin
       if irq_ena then m6809_0.change_irq(HOLD_LINE);
       update_video_yiear;
     end;
-    m6809_0.run(frame_main);
-    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
   end;
   eventos_yiear;
   video_sync;
@@ -111,7 +113,7 @@ end;
 function yiear_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0:yiear_getbyte:=vlm5030_0.get_bsy;
+  $0:yiear_getbyte:=vlm5030_0.get_bsy;
   $4c00:yiear_getbyte:=marcade.dswb;
   $4d00:yiear_getbyte:=marcade.dswc;
   $4e00:yiear_getbyte:=marcade.in0;
@@ -126,9 +128,9 @@ procedure yiear_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $4000:begin
-          irq_ena:=(valor and 4)<>0;
-          nmi_ena:=(valor and 2)<>0;
-          main_screen.flip_main_screen:=(valor and 1)<>0;
+          irq_ena:=(valor and $4)<>0;
+          nmi_ena:=(valor and $2)<>0;
+          main_screen.flip_main_screen:=(valor and $1)<>0;
         end;
   $4800:sound_latch:=valor;
   $4900:sn_76496_0.Write(sound_latch);
@@ -174,7 +176,7 @@ savedata_qsnapshot(data,size);
 size:=vlm5030_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_qsnapshot(@memoria[0],$8000);
+savedata_com_qsnapshot(@memoria[$0],$8000);
 //MISC
 buffer[0]:=byte(irq_ena);
 buffer[1]:=byte(nmi_ena);
@@ -216,10 +218,9 @@ end;
 procedure reset_yiear;
 begin
  m6809_0.reset;
- frame_main:=m6809_0.tframes;
  sn_76496_0.reset;
  vlm5030_0.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -254,12 +255,15 @@ iniciar_video(256,224);
 m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
 m6809_0.init_sound(yiear_sound_update);
-timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
-if not(roms_load(@memoria,yiear_rom)) then exit;
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(18432000 div 12);
+//cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
 if not(roms_load(vlm5030_0.get_rom_addr,yiear_vlm)) then exit;
+//NMI sonido
+timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
+//cargar roms
+if not(roms_load(@memoria,yiear_rom)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,yiear_char)) then exit;
 init_gfx(0,8,8,512);
@@ -292,9 +296,9 @@ set_pal(colores,32);
 marcade.dswa:=$ff;
 marcade.dswb:=$5b;
 marcade.dswc:=$ff;
-marcade.dswa_val2:=@yiear_dip_a;
-marcade.dswb_val2:=@yiear_dip_b;
-marcade.dswc_val2:=@yiear_dip_c;
+marcade.dswa_val:=@yiear_dip_a;
+marcade.dswb_val:=@yiear_dip_b;
+marcade.dswc_val:=@yiear_dip_c;
 //final
 reset_yiear;
 iniciar_yiear:=true;

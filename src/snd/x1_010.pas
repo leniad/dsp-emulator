@@ -3,7 +3,7 @@ unit x1_010;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      {$ifndef windows}main_engine,{$endif}
-     sound_engine,timer_engine,dialogs;
+     sound_engine,timer_engine;
 
 const
   VOL_BASE=(2*32*256/30);
@@ -111,7 +111,6 @@ end;
 
 constructor tx1_010.create(clock:dword);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.clock:=clock;
   self.rate:=clock/512;
   self.reset;
@@ -144,9 +143,11 @@ if sound_status.stereo then begin
   tsample[self.tsample_,sound_status.posicion_sonido+1]:=self.rsignal;
 end else tsample[self.tsample_,sound_status.posicion_sonido]:=self.lsignal+self.rsignal;
 end;
+
 function tx1_010.save_snapshot(data:pbyte):word;
 begin
 end;
+
 procedure tx1_010.load_snapshot(data:pbyte);
 begin
 end;

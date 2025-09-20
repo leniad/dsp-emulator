@@ -83,7 +83,7 @@ procedure Tload_spec.FileListBox1KeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
 case key of
-  13:if filelistbox1.FileName<>'' then Button2Click(sender);
+  13:Button2Click(sender);
   27:button1click(sender);
 end;
 end;

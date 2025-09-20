@@ -1,7 +1,7 @@
 unit k051960;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine,main_engine,pal_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine,main_engine;
 
 const
     NUM_SPRITES=128;
@@ -9,7 +9,7 @@ type
   t_k051960_cb=procedure(var code:word;var color:word;var pri:word;var shadow:word);
   t_irq_call=procedure(state:byte);
   k051960_chip=class
-      constructor create(pant,ngfx:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
+      constructor create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
       destructor free;
     public
       procedure reset;
@@ -23,12 +23,12 @@ type
       procedure update_line(line:word);
     private
       ram:array[0..$3ff] of byte;
-      counter,pant,ngfx:byte;
+      counter,pant:byte;
       readroms,nmi_enabled,spriteflip:boolean;
       romoffset:word;
       spriterombank:array[0..2] of byte;
       sprite_rom:pbyte;
-      sprite_size:dword;
+      sprite_size,sprite_mask:dword;
       k051960_cb:t_k051960_cb;
       sorted_list:array[0..(NUM_SPRITES)-1] of integer;
       irq_cb,firq_cb,nmi_cb:t_irq_call;
@@ -52,7 +52,7 @@ begin
 	self.spriterombank[2]:=0;
 end;
 
-constructor k051960_chip.create(pant,ngfx:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
+constructor k051960_chip.create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
 const
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 		8*32+0, 8*32+1, 8*32+2, 8*32+3, 8*32+4, 8*32+5, 8*32+6, 8*32+7);
@@ -65,26 +65,26 @@ const
 begin
   self.sprite_rom:=spr_rom;
   self.sprite_size:=spr_size;
+  self.sprite_mask:=(spr_size div 128)-1;
   self.k051960_cb:=call_back;
   self.pant:=pant;
-  self.ngfx:=ngfx;
-  init_gfx(ngfx,16,16,sprite_size div 128);
+  init_gfx(1,16,16,sprite_size div 128);
   case tipo of
     0:begin
         gfx_set_desc_data(4,0,8*128,24,16,8,0);
-        convert_gfx(ngfx,0,spr_rom,@ps_x,@ps_y,false,false);
+        convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
       end;
     1:begin
         gfx_set_desc_data(4,0,8*128,0,1,2,3);
-        convert_gfx(ngfx,0,spr_rom,@ps_x_gra3,@ps_y_gra3,false,false);
+        convert_gfx(1,0,spr_rom,@ps_x_gra3[0],@ps_y_gra3[0],false,false);
       end;
     2:begin
         gfx_set_desc_data(4,0,8*128,0,8,16,24);
-        convert_gfx(ngfx,0,spr_rom,@ps_x,@ps_y,false,false);
+        convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
       end;
   end;
-  gfx[ngfx].trans[0]:=true;
-  gfx[ngfx].alpha[$f]:=true; //Para shadow
+  gfx[1].trans[0]:=true;
+  gfx[1].alpha[$f]:=true;
 end;
 
 destructor k051960_chip.free;
@@ -119,9 +119,9 @@ end;
 function k051960_chip.read(direccion:word):byte;
 begin
 	if self.readroms then begin
-		// the 051960 remembers the last address read and uses it when reading the sprite ROMs
+		// the 051960 remembers the last address read and uses it when reading the sprite ROMs */
 		self.romoffset:=(direccion and $3fc) shr 2;
-		read:=self.fetchromdata(direccion and 3);    // only 88 Games reads the ROMs from here
+		read:=self.fetchromdata(direccion and 3);    // only 88 Games reads the ROMs from here */
 	end else read:=self.ram[direccion];
 end;
 
@@ -130,14 +130,14 @@ begin
 	self.ram[direccion]:=valor;
 end;
 
-// should this be split by k051960?
+// should this be split by k051960? */
 function k051960_chip.k051937_read(direccion:word):byte;
 begin
   k051937_read:=0;
 	if (self.readroms and (direccion>=4) and (direccion<8)) then begin
 		k051937_read:=self.fetchromdata(direccion and 3);
 	end else if (direccion=0) then begin
-		// some games need bit 0 to pulse
+		// some games need bit 0 to pulse */
 		k051937_read:=self.counter and 1;
     self.counter:=self.counter+1;
   end;
@@ -153,19 +153,29 @@ end;
 procedure k051960_chip.k051937_write(direccion:word;valor:byte);
 begin
 	if (direccion=0) then begin
-		// bit 0 is IRQ enable
+		//if (data & 0xc2) popmessage("051937 reg 00 = %02x",data);
+		// bit 0 is IRQ enable */
 		if (((valor and $01)<>0) and (addr(self.irq_cb)<>nil)) then self.irq_cb(CLEAR_LINE);
-		// bit 1: probably FIRQ enable
+		// bit 1: probably FIRQ enable */
     if (((valor and $02)<>0) and (addr(self.firq_cb)<>nil)) then self.firq_cb(CLEAR_LINE);
-		// bit 2 is NMI enable
+		// bit 2 is NMI enable */
     self.nmi_enabled:=(valor and $04)<>0;
     if ((addr(self.nmi_cb)<>nil) and self.nmi_enabled) then self.nmi_cb(CLEAR_LINE);
-		// bit 3 = flip screen
+		// bit 3 = flip screen */
 		self.spriteflip:=(valor and $08)<>0;
-		// bit 4 used by Devastators and TMNT, unknown
-		// bit 5 = enable gfx ROM reading
+		// bit 4 used by Devastators and TMNT, unknown */
+		// bit 5 = enable gfx ROM reading */
 		self.readroms:=(valor and $20)<>0;
-	end else if ((direccion>=2) and (direccion<5)) then self.spriterombank[direccion-2]:=valor;
+		//logerror("%04x: write %02x to 051937 address %x\n", machine().cpu->safe_pc(), data, offset);
+	end else if (direccion=1) then begin
+//  popmessage("%04x: write %02x to 051937 address %x", machine().cpu->safe_pc(), data, offset);
+//logerror("%04x: write %02x to unknown 051937 address %x\n", machine().cpu->safe_pc(), data, offset);
+	  end else if ((direccion>=2) and (direccion<5)) then begin
+		  self.spriterombank[direccion-2]:=valor;
+    end else begin
+	      //  popmessage("%04x: write %02x to 051937 address %x", machine().cpu->safe_pc(), data, offset);
+	      //logerror("%04x: write %02x to unknown 051937 address %x\n", machine().cpu->safe_pc(), data, offset);
+	    end;
 end;
 
 procedure k051960_chip.update_sprites;
@@ -237,19 +247,19 @@ begin
 					  else c:=c+yoffset[y];
           if (shadow<>0) then begin
             if ((zx=1) and (zy=1)) then begin
-              put_gfx_sprite_alpha(c,color shl 4,flipx,flipy,self.ngfx);
-              actualiza_gfx_sprite_alpha(sx,sy,self.pant,self.ngfx);
+              put_gfx_sprite_alpha(c and self.sprite_mask,color shl 4,flipx,flipy,1);
+              actualiza_gfx_sprite_alpha(sx,sy,self.pant,1);
             end else begin
-              put_gfx_sprite_zoom_alpha(c,color shl 4,flipx,flipy,self.ngfx,zx,zy);
-              actualiza_gfx_sprite_zoom_alpha(sx,sy,self.pant,self.ngfx,zx,zy);
+              put_gfx_sprite_zoom_alpha(c and self.sprite_mask,color shl 4,flipx,flipy,1,zx,zy);
+              actualiza_gfx_sprite_zoom_alpha(sx,sy,self.pant,1,zx,zy);
             end;
           end else begin
             if ((zx=1) and (zy=1)) then begin
-              put_gfx_sprite(c,color shl 4,flipx,flipy,self.ngfx);
-              actualiza_gfx_sprite(sx,sy,self.pant,self.ngfx);
+              put_gfx_sprite(c and self.sprite_mask,color shl 4,flipx,flipy,1);
+              actualiza_gfx_sprite(sx,sy,self.pant,1);
             end else begin
-              put_gfx_sprite_zoom(c,color shl 4,flipx,flipy,self.ngfx,zx,zy);
-              actualiza_gfx_sprite_zoom(sx,sy,self.pant,self.ngfx,zx,zy);
+              put_gfx_sprite_zoom(c and self.sprite_mask,color shl 4,flipx,flipy,1,zx,zy);
+              actualiza_gfx_sprite_zoom(sx,sy,self.pant,1,zx,zy);
             end;
           end;
 				end;

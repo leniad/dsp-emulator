@@ -5,9 +5,9 @@ unit rainbowislands_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2151,
-     taito_sound,rom_engine,pal_engine,sound_engine{$IFDEF MCU},taito_cchip{$ELSE IF},rainbow_cchip{$ENDIF};
+     taitosnd,rom_engine,pal_engine,sound_engine{$IFDEF MCU},taito_cchip{$ELSE IF},rainbow_cchip{$ENDIF};
 
-function iniciar_rainbow:boolean;
+procedure cargar_rainbow;
 
 implementation
 const
@@ -32,8 +32,8 @@ const
         (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'ModeA 2C-1C/ModeB 1C-4C'),(dip_val:$c0;dip_name:'ModeA 1C-1C/ModeB 1C-2C'),(dip_val:$0;dip_name:'ModeA 2C-3C/ModeB 1C-6C'),(dip_val:$80;dip_name:'ModeA 1C-2C/ModeB 1C-3C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //DIP
         rainbow_dip2:array [0..5] of def_dip=(
-        (mask:4;name:'Bonus Life';number:2;dip:((dip_val:$4;dip_name:'100k 1000k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:8;name:'Complete Bonus';number:2;dip:((dip_val:$8;dip_name:'1up'),(dip_val:$0;dip_name:'100k'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Bonus Life';number:2;dip:((dip_val:$4;dip_name:'100k 1000k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Complete Bonus';number:2;dip:((dip_val:$8;dip_name:'1up'),(dip_val:$0;dip_name:'100k'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$40;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Coin Mode';number:2;dip:((dip_val:$80;dip_name:'Mode A (Japan)'),(dip_val:$0;dip_name:'Mode B (World)'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -41,12 +41,13 @@ const
 
 var
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
+ bank_sound:array[0..3,$0..$3fff] of byte;
  rom:array[0..$3ffff] of word;
  ram1,ram3:array[0..$1fff] of word;
  ram2:array [0..$7fff] of word;
- spritebank:byte;
+ spritebank,sound_bank:byte;
 
-procedure update_video_rainbow;
+procedure update_video_rainbow;inline;
 var
   f,x,y,nchar,atrib,color:word;
   flipx,flipy:boolean;
@@ -112,30 +113,35 @@ end;
 
 procedure rainbow_principal;
 var
+  frame_m,frame_s,frame_mcu:single;
   h,f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=tc0140syt_0.z80.tframes;
+{$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-    eventos_rainbow;
-    if f=240 then begin
-        update_video_rainbow;
-        m68000_0.irq[4]:=HOLD_LINE;
-        {$IFDEF MCU}cchip_0.set_int;{$ENDIF}
-    end;
     for h:=1 to CPU_SYNC do begin
       //Main CPU
-      m68000_0.run(frame_main);
-      frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
       //Sound CPU
-      tc0140syt_0.run;
+      tc0140syt_0.z80.run(frame_s);
+      frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
       //MCU
       {$IFDEF MCU}
       cchip_0.upd7810.run(frame_mcu);
       frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
       {$ENDIF}
     end;
+    if f=239 then begin
+        update_video_rainbow;
+        m68000_0.irq[4]:=HOLD_LINE;
+        {$IFDEF MCU}cchip_0.set_int;{$ENDIF}
+    end;
  end;
+ eventos_rainbow;
  video_sync;
 end;
 end;
@@ -148,7 +154,7 @@ case direccion of
   $200000..$203fff:rainbow_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $390000..$390002:rainbow_getword:=marcade.dswa;
   $3b0000..$3b0002:rainbow_getword:=marcade.dswb;
-  $3e0002:if m68000_0.read_8bits_hi_dir then rainbow_getword:=tc0140syt_0.comm_r;
+  $3e0002:if m68000_0.access_8bits_hi_dir then rainbow_getword:=tc0140syt_0.comm_r;
   {$IFDEF MCU}
   $800000..$8007ff:rainbow_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
   $800800..$800fff:rainbow_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
@@ -161,8 +167,7 @@ case direccion of
 end;
 end;
 
-procedure rainbow_putword(direccion:dword;valor:word);
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -172,6 +177,8 @@ begin
   set_pal_color(color,numero);
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
+
+procedure rainbow_putword(direccion:dword;valor:word);
 begin
 case direccion of
       0..$7ffff:;
@@ -211,6 +218,43 @@ case direccion of
 end;
 end;
 
+function rainbow_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $4000..$7fff:rainbow_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
+  $9001:rainbow_snd_getbyte:=ym2151_0.status;
+  $a001:rainbow_snd_getbyte:=tc0140syt_0.slave_comm_r;
+  else rainbow_snd_getbyte:=mem_snd[direccion];
+end;
+end;
+
+procedure rainbow_snd_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$7fff:;
+  $9000:ym2151_0.reg(valor);
+  $9001:ym2151_0.write(valor);
+  $a000:tc0140syt_0.slave_port_w(valor);
+  $a001:tc0140syt_0.slave_comm_w(valor);
+    else mem_snd[direccion]:=valor;
+end;
+end;
+
+procedure sound_bank_rom(valor:byte);
+begin
+  sound_bank:=valor and 3;
+end;
+
+procedure sound_instruccion;
+begin
+  ym2151_0.update;
+end;
+
+procedure ym2151_snd_irq(irqstate:byte);
+begin
+  tc0140syt_0.z80.change_irq(irqstate);
+end;
+
 function rainbow_800007:byte;
 begin
   rainbow_800007:=marcade.in0;
@@ -236,13 +280,14 @@ procedure reset_rainbow;
 begin
  m68000_0.reset;
  tc0140syt_0.reset;
+ ym2151_0.reset;
  {$IFDEF MCU}cchip_0.reset;{$ENDIF}
- frame_main:=m68000_0.tframes;
- {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=0;//$fc;
  marcade.in2:=$ff;
  marcade.in3:=$ff;
+ sound_bank:=0;
  scroll_x1:=0;
  scroll_y1:=0;
  scroll_x2:=0;
@@ -256,7 +301,7 @@ const
   ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
 var
-  memoria_temp:pbyte;
+  memoria_temp,ptemp:pbyte;
 procedure convert_chars;
 begin
   init_gfx(0,8,8,$4000);
@@ -264,6 +309,7 @@ begin
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
   convert_gfx(0,0,memoria_temp,@ps_x,@pc_y,false,false);
 end;
+
 procedure convert_sprites;
 begin
   init_gfx(1,16,16,$1400);
@@ -271,10 +317,9 @@ begin
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
   convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 end;
+
 begin
 iniciar_rainbow:=false;
-llamadas_maquina.bucle_general:=rainbow_principal;
-llamadas_maquina.reset:=reset_rainbow;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,256,511);
@@ -286,7 +331,13 @@ iniciar_video(320,224);
 m68000_0:=cpu_m68000.create(8000000,256*CPU_SYNC);
 m68000_0.change_ram16_calls(rainbow_getword,rainbow_putword);
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_SYNC,SOUND_RAINBOWI);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_SYNC);
+tc0140syt_0.z80.change_ram_calls(rainbow_snd_getbyte,rainbow_snd_putbyte);
+tc0140syt_0.z80.init_sound(sound_instruccion);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
@@ -302,12 +353,13 @@ case main_vars.tipo_maquina of
          {$ENDIF}
          if not(roms_load16w(@rom,rainbow_rom)) then exit;
          //cargar sonido+ponerlas en su banco
+         ptemp:=memoria_temp;
          if not(roms_load(memoria_temp,rainbow_sound)) then exit;
-         copymemory(@tc0140syt_0.snd_rom,memoria_temp,$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[0,0],@memoria_temp[0],$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[1,0],@memoria_temp[$4000],$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[2,0],@memoria_temp[$8000],$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[3,0],@memoria_temp[$c000],$4000);
+         copymemory(@mem_snd[0],memoria_temp,$4000);
+         copymemory(@bank_sound[0,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[1,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[2,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[3,0],ptemp,$4000);
          //convertir chars
          if not(roms_load(memoria_temp,rainbow_char)) then exit;
          convert_chars;
@@ -328,12 +380,13 @@ case main_vars.tipo_maquina of
          {$ENDIF}
          if not(roms_load16w(@rom,rainbowe_rom)) then exit;
          //cargar sonido+ponerlas en su banco
+         ptemp:=memoria_temp;
          if not(roms_load(memoria_temp,rainbow_sound)) then exit;
-         copymemory(@tc0140syt_0.snd_rom,memoria_temp,$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[0,0],@memoria_temp[0],$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[1,0],@memoria_temp[$4000],$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[2,0],@memoria_temp[$8000],$4000);
-         copymemory(@tc0140syt_0.snd_bank_rom[3,0],@memoria_temp[$c000],$4000);
+         copymemory(@mem_snd[0],memoria_temp,$4000);
+         copymemory(@bank_sound[0,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[1,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[2,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[3,0],ptemp,$4000);
          //convertir chars
          if not(roms_load(memoria_temp,rainbow_char)) then exit;
          convert_chars;
@@ -350,7 +403,15 @@ marcade.dswb:=$bf;
 marcade.dswb_val:=@rainbow_dip2;
 //final
 freemem(memoria_temp);
+reset_rainbow;
 iniciar_rainbow:=true;
+end;
+
+procedure Cargar_rainbow;
+begin
+llamadas_maquina.iniciar:=iniciar_rainbow;
+llamadas_maquina.bucle_general:=rainbow_principal;
+llamadas_maquina.reset:=reset_rainbow;
 end;
 
 end.

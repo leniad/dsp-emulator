@@ -10,26 +10,26 @@ function iniciar_jackal:boolean;
 implementation
 const
         jackal_rom:array[0..1] of tipo_roms=(
-        (n:'j-v02.rom';l:$10000;p:0;crc:$0b7e0584),(n:'j-v03.rom';l:$4000;p:$10000;crc:$3e0dfb83));
+        (n:'j-v02.rom';l:$10000;p:$0;crc:$0b7e0584),(n:'j-v03.rom';l:$4000;p:$10000;crc:$3e0dfb83));
         jackal_chars:array[0..3] of tipo_roms=(
-        (n:'631t04.bin';l:$20000;p:0;crc:$457f42f0),(n:'631t05.bin';l:$20000;p:1;crc:$732b3fc1),
+        (n:'631t04.bin';l:$20000;p:0;crc:$457f42f0),(n:'631t05.bin';l:$20000;p:$1;crc:$732b3fc1),
         (n:'631t06.bin';l:$20000;p:$40000;crc:$2d10e56e),(n:'631t07.bin';l:$20000;p:$40001;crc:$4961c397));
         jackal_sound:tipo_roms=(n:'631t01.bin';l:$8000;p:$8000;crc:$b189af6a);
         jackal_proms:array[0..1] of tipo_roms=(
         (n:'631r08.bpr';l:$100;p:0;crc:$7553a172),(n:'631r09.bpr';l:$100;p:$100;crc:$a74dd86c));
         //Dip
-        jackal_dip_a:array [0..2] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin B')),());
-        jackal_dip_b:array [0..4] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','4','7')),
-        (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 150K','50K 200K','30K','50K')),
-        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        jackal_dip_c:array [0..3] of def_dip2=(
-        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Sound Adjustment';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Sound Mode';number:2;val2:($80,0);name2:('Mono','Stereo')),());
+        jackal_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin B'))),());
+        jackal_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 150K'),(dip_val:$10;dip_name:'50K 200K'),(dip_val:$8;dip_name:'30K'),(dip_val:$0;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        jackal_dip_c:array [0..3] of def_dip=(
+        (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Sound Adjustment';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Sound Mode';number:2;dip:((dip_val:$80;dip_name:'Mono'),(dip_val:$0;dip_name:'Stereo'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  memoria_rom:array[0..1,0..$7fff] of byte;
@@ -38,9 +38,7 @@ var
  banco,scroll_x,scroll_y,scroll_crt,sprite_crt,ram_bank,sprite_bank:byte;
  irq_enable:boolean;
 
-procedure update_video_jackal;
-
-procedure draw_sprites(bank:byte;pos:word);
+procedure draw_sprites(bank:byte;pos:word);inline;
 var
   sn1,sn2,attr,a,b,c,d,flipx_v,flipy_v:byte;
 	flipx,flipy:boolean;
@@ -59,23 +57,23 @@ begin
   if (attr and $c)<>0 then begin    // half-size sprite
 			nchar:=(sn1*4+((sn2 and (8+4)) shr 2)+((sn2 and (2+1)) shl 10))+(bank*4096);
 			case (attr and $c) of
-        4:begin
+        $04:begin
               put_gfx_sprite_diff(nchar,color,flipx,flipy,1,8,0);
               put_gfx_sprite_diff(nchar+1,color,flipx,flipy,1,8,8);
               actualiza_gfx_sprite_size(x,y,2,16,16);
             end;
-        8:begin
+        $08:begin
               put_gfx_sprite_diff(nchar,color,flipx,flipy,1,0,0);
               put_gfx_sprite_diff(nchar-2,color,flipx,flipy,1,8,0);
               actualiza_gfx_sprite_size(x,y,2,16,8);
 			      end;
-        $c:begin
+        $0c:begin
               put_gfx_sprite(nchar,color,flipx,flipy,1);
               actualiza_gfx_sprite(x+8,y,2,1);
 			      end;
       end;
   end else begin
-      nchar:=(sn1+((sn2 and 3) shl 8))+(bank*1024);
+      nchar:=(sn1+((sn2 and $03) shl 8))+(bank*1024);
 			if (attr and $10)<>0 then begin
         a:=16 xor flipx_v;
         b:=0 xor flipx_v;
@@ -93,12 +91,13 @@ begin
   end;
 end;
 
+procedure update_video_jackal;inline;
 var
   x,y,f,nchar:word;
   atrib:byte;
 begin
 //background
-for f:=0 to $3ff do begin
+for f:=$0 to $3ff do begin
     if gfx[0].buffer[f] then begin
       x:=31-(f div 32);
       y:=f mod 32;
@@ -109,19 +108,19 @@ for f:=0 to $3ff do begin
     end;
 end;
 //scroll de varios tipos...
-if (scroll_crt and 2)<>0 then begin
+if (scroll_crt and $2)<>0 then begin
   //horizontal 8 lineas independientes
   //eje X
-  if (scroll_crt and 4)<>0 then scroll__x_part2(1,2,8,@memoria_zram[ram_bank]);
+  if (scroll_crt and $4)<>0 then scroll__x_part2(1,2,8,@memoria_zram[ram_bank]);
   //Eje Y
-  if (scroll_crt and 8)<>0 then scroll__y_part2(1,2,8,@memoria_zram[ram_bank]);
+  if (scroll_crt and $8)<>0 then scroll__y_part2(1,2,8,@memoria_zram[ram_bank]);
 end else begin
   //Scroll total
   scroll_x_y(1,2,scroll_x,scroll_y);
 end;
 //sprites
-for f:=0 to 48 do draw_sprites(1,(sprite_crt and 8)*$100+f*5);
-for f:=0 to $ff do draw_sprites(0,(sprite_crt and 8)*$100+f*5);
+for f:=0 to 48 do draw_sprites(1,(sprite_crt and $8)*$100+f*5);
+for f:=0 to $ff do draw_sprites(0,(sprite_crt and $8)*$100+f*5);
 actualiza_trozo_final(16,8,224,240,2);
 end;
 
@@ -129,45 +128,48 @@ procedure eventos_jackal;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYSTEM
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
 procedure jackal_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 255 do begin
-    if f=240 then begin
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
+    if f=239 then begin
       if irq_enable then begin
         m6809_0.change_irq(HOLD_LINE);
         m6809_1.change_nmi(PULSE_LINE);
       end;
       update_video_jackal;
     end;
-    m6809_0.run(frame_main);
-    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
-    m6809_1.run(frame_snd);
-    frame_snd:=frame_snd+m6809_1.tframes-m6809_1.contador;
   end;
   eventos_jackal;
   video_sync;
@@ -194,18 +196,18 @@ end;
 procedure jackal_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0:scroll_x:=not(valor);
-  1:scroll_y:=valor;
-  2:scroll_crt:=valor;
-  3:sprite_crt:=valor;
-  4:begin
-        irq_enable:=(valor and 2)<>0;
-        main_screen.flip_main_screen:=(valor and 8)<>0;
+  $0:scroll_x:=not(valor);
+  $1:scroll_y:=valor;
+  $2:scroll_crt:=valor;
+  $3:sprite_crt:=valor;
+  $4:begin
+        irq_enable:=(valor and $2)<>0;
+        main_screen.flip_main_screen:=(valor and $8)<>0;
      end;
   $1c:begin
           banco:=(valor and $20) shr 5;
           ram_bank:=(valor and $10) shr 4;
-          sprite_bank:=(valor and 8) shr 3;
+          sprite_bank:=(valor and $8) shr 3;
         end;
   $20..$5f:memoria_zram[ram_bank,direccion-$20]:=255-valor;
   $60..$1fff:memoria[direccion]:=valor;
@@ -228,9 +230,7 @@ case direccion of
 end;
 end;
 
-procedure sound_putbyte(direccion:word;valor:byte);
-
-procedure cambiar_color(dir:word);
+procedure cambiar_color(dir:word);inline;
 var
   data:word;
   color:tcolor;
@@ -246,6 +246,7 @@ begin
   if ((dir>$ff) and (dir<$200)) then fillchar(gfx[0].buffer,$400,1);
 end;
 
+procedure sound_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $2000:ym2151_0.reg(valor);
@@ -269,10 +270,8 @@ procedure reset_jackal;
 begin
  m6809_0.reset;
  m6809_1.reset;
- frame_main:=m6809_0.tframes;
- frame_snd:=m6809_1.tframes;
  ym2151_0.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$1f;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -344,16 +343,16 @@ for f:=0 to $ff do gfx[0].colores[f]:=f or $100;
 if not(roms_load(@memoria_temp,jackal_proms)) then exit;
 //0..$ff --> banco 0 --> valor
 //$100..$1ff --> banco 1 --> valor+$10
-for f:=0 to $1ff do gfx[1].colores[f]:=memoria_temp[f] and $f+((f shr 8)*$10);
+for f:=$0 to $1ff do gfx[1].colores[f]:=memoria_temp[f] and $0f+((f shr 8)*$10);
 //sprites x2
 copymemory(@gfx[2].colores,@gfx[1].colores,$200*2);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$5f;
 marcade.dswc:=$20;
-marcade.dswa_val2:=@jackal_dip_a;
-marcade.dswb_val2:=@jackal_dip_b;
-marcade.dswc_val2:=@jackal_dip_c;
+marcade.dswa_val:=@jackal_dip_a;
+marcade.dswb_val:=@jackal_dip_b;
+marcade.dswc_val:=@jackal_dip_c;
 //final
 reset_jackal;
 iniciar_jackal:=true;

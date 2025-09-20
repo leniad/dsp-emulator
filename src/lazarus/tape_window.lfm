@@ -15,9 +15,9 @@ object tape_window1: Ttape_window1
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
-  LCLVersion = '4.0.0.1'
   OnClose = FormClose
   OnShow = FormShow
+  LCLVersion = '2.0.8.0'
   object Edit1: TEdit
     Left = 22
     Height = 25
@@ -152,12 +152,12 @@ object tape_window1: Ttape_window1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
+      OnClick = fPlayCinta
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
       TabStop = False
-      OnClick = fPlayCinta
     end
     object BitBtn2: TBitBtn
       Left = 109
@@ -234,12 +234,12 @@ object tape_window1: Ttape_window1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
+      OnClick = fstopcinta
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
       TabStop = False
-      OnClick = fstopcinta
     end
     object BitBtn3: TBitBtn
       Left = 312
@@ -352,12 +352,12 @@ object tape_window1: Ttape_window1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
+      OnClick = cerrar_cinta
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
       TabStop = False
-      OnClick = cerrar_cinta
     end
   end
   object StringGrid2: TStringGrid
@@ -490,12 +490,12 @@ object tape_window1: Ttape_window1
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     }
+    OnClick = BitBtn4Click
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 3
     TabStop = False
-    OnClick = BitBtn4Click
   end
   object StringGrid1: TStringGrid
     Cursor = crHandPoint

@@ -2,10 +2,10 @@ unit operationwolf_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m68000,main_engine,controls_engine,gfx_engine,taito_sound,rom_engine,
-     pal_engine,sound_engine,opwolf_cchip,msm5205;
+     m68000,main_engine,controls_engine,gfx_engine,ym_2151,msm5205,
+     taitosnd,rom_engine,pal_engine,sound_engine,opwolf_cchip;
 
-function iniciar_opwolf:boolean;
+procedure cargar_opwolf;
 
 var
  rom:array[0..$2ffff] of word;
@@ -22,12 +22,16 @@ const
 
 var
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
+ bank_sound:array[0..3,$0..$3fff] of byte;
  ram1:array[0..$3fff] of word;
  ram3:array[0..$1fff] of word;
- spritebank:byte;
+ spritebank,sound_bank:byte;
  ram2:array [0..$7fff] of word;
+ adpcm:array[0..$7ffff] of byte;
+ adpcm_b,adpcm_c:array[0..5] of byte;
+ adpcm_pos,adpcm_end,adpcm_data:array[0..1] of dword;
 
-procedure update_video_opwolf;
+procedure update_video_opwolf;inline;
 var
   f,x,y,nchar,atrib,color:word;
   flipx,flipy:boolean;
@@ -79,36 +83,40 @@ end;
 procedure eventos_opwolf;
 begin
 if event.mouse then begin
-  if raton.button1 then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if raton.button2 then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if raton.button1 then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if raton.button2 then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
 end;
 if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
 end;
 end;
 
 procedure opwolf_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(true,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=tc0140syt_0.z80.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-  eventos_opwolf;
-  if f=248 then begin
+  //Main CPU
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+  //Sound CPU
+  tc0140syt_0.z80.run(frame_s);
+  frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+  if f=247 then begin
     update_video_opwolf;
     m68000_0.irq[5]:=HOLD_LINE;
   end;
-  //Main CPU
-  m68000_0.run(frame_main);
-  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-  //Sound CPU
-  tc0140syt_0.run;
  end;
+ eventos_opwolf;
  video_sync;
 end;
 end;
@@ -127,14 +135,13 @@ case direccion of
   $380002:opwolf_getword:=$7f;
   $3a0000:opwolf_getword:=raton.x+15;  //mouse x
   $3a0002:opwolf_getword:=raton.y;  //mouse y
-  $3e0002:if m68000_0.read_8bits_hi_dir then opwolf_getword:=tc0140syt_0.comm_r;
+  $3e0002:if m68000_0.access_8bits_hi_dir then opwolf_getword:=tc0140syt_0.comm_r;
   $c00000..$c0ffff:opwolf_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:opwolf_getword:=ram3[(direccion and $3fff) shr 1];
 end;
 end;
 
-procedure opwolf_putword(direccion:dword;valor:word);
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -144,9 +151,11 @@ begin
   set_pal_color(color,numero);
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
+
+procedure opwolf_putword(direccion:dword;valor:word);
 begin
+if direccion<$40000 then exit;
 case direccion of
-      0..$3ffff:;
       $0ff000..$0ff7ff:opwolf_cchip_data_w(direccion and $7ff,valor);
 	    $0ff802:opwolf_cchip_status_w(valor);
 	    $0ffc00:opwolf_cchip_bank_w(valor);
@@ -177,19 +186,114 @@ case direccion of
 end;
 end;
 
+function opwolf_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$3fff,$8000..$8fff:opwolf_snd_getbyte:=mem_snd[direccion];
+  $4000..$7fff:opwolf_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
+  $9001:opwolf_snd_getbyte:=ym2151_0.status;
+  $a001:opwolf_snd_getbyte:=tc0140syt_0.slave_comm_r;
+end;
+end;
+
+procedure opwolf_snd_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$7fff:exit;
+  $8000..$8fff:mem_snd[direccion]:=valor;
+  $9000:ym2151_0.reg(valor);
+  $9001:ym2151_0.write(valor);
+  $a000:tc0140syt_0.slave_port_w(valor);
+  $a001:tc0140syt_0.slave_comm_w(valor);
+  $b000..$b006:begin
+                  adpcm_b[direccion and $7]:=valor;
+                	if ((direccion and $7)=$04) then begin //trigger ?
+                		adpcm_pos[0]:=(adpcm_b[0]+(adpcm_b[1] shl 8))*16;
+                		adpcm_end[0]:=(adpcm_b[2]+(adpcm_b[3] shl 8))*16;
+                		msm_5205_0.reset_w(0);
+                  end;
+	             end;
+  $c000..$c006:begin
+                  adpcm_c[direccion and $7]:=valor;
+                	if ((direccion and $7)=$04) then begin //trigger ?
+                		adpcm_pos[1]:=(adpcm_c[0]+(adpcm_c[1] shl 8))*16;
+                		adpcm_end[1]:=(adpcm_c[2]+(adpcm_c[3] shl 8))*16;
+                		msm_5205_1.reset_w(0);
+	                end;
+               end;
+  end;
+end;
+
+procedure sound_bank_rom(valor:byte);
+begin
+  sound_bank:=valor and 3;
+end;
+
+procedure opwolf_sound_update;
+begin
+  ym2151_0.update;
+end;
+
+procedure ym2151_snd_irq(irqstate:byte);
+begin
+  tc0140syt_0.z80.change_irq(irqstate);
+end;
+
+procedure snd_adpcm_0;
+begin
+if (adpcm_data[0] and $100)=0 then begin
+		msm_5205_0.data_w(adpcm_data[0] and $0f);
+		adpcm_data[0]:=$100;
+    adpcm_pos[0]:=(adpcm_pos[0]+1) and $7ffff;
+		if (adpcm_pos[0]=adpcm_end[0]) then msm_5205_0.reset_w(1);
+	end else begin
+		adpcm_data[0]:=adpcm[adpcm_pos[0]];
+		msm_5205_0.data_w(adpcm_data[0] shr 4);
+	end;
+end;
+
+procedure snd_adpcm_1;
+begin
+if (adpcm_data[1] and $100)=0 then begin
+		msm_5205_1.data_w(adpcm_data[1] and $0f);
+		adpcm_data[1]:=$100;
+    adpcm_pos[1]:=(adpcm_pos[1]+1) and $7ffff;
+		if (adpcm_pos[1]=adpcm_end[1]) then msm_5205_1.reset_w(1);
+	end else begin
+		adpcm_data[1]:=adpcm[adpcm_pos[1]];
+		msm_5205_1.data_w(adpcm_data[1] shr 4);
+	end;
+end;
+
 //Main
 procedure reset_opwolf;
 begin
  m68000_0.reset;
  tc0140syt_0.reset;
+ ym2151_0.reset;
+ msm_5205_0.reset;
+ msm_5205_1.reset;
+ msm_5205_0.reset_w(1);
+ msm_5205_1.reset_w(1);
  opwolf_cchip_reset;
- frame_main:=m68000_0.tframes;
+ reset_audio;
  marcade.in0:=$fc;
  marcade.in1:=$ff;
+ sound_bank:=0;
  scroll_x1:=0;
  scroll_y1:=0;
  scroll_x2:=0;
  scroll_y2:=0;
+ adpcm_b[0]:=0;
+ adpcm_c[0]:=0;
+ adpcm_b[1]:=0;
+ adpcm_c[1]:=0;
+ adpcm_pos[0]:=0;
+ adpcm_pos[1]:=0;
+ adpcm_end[0]:=0;
+ adpcm_end[1]:=0;
+ adpcm_data[0]:=$100;
+ adpcm_data[1]:=$100;
 end;
 
 function iniciar_opwolf:boolean;
@@ -201,8 +305,6 @@ var
   memoria_temp:array[0..$7ffff] of byte;
 begin
 iniciar_opwolf:=false;
-llamadas_maquina.bucle_general:=opwolf_principal;
-llamadas_maquina.reset:=reset_opwolf;
 iniciar_audio(true);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,256,511);
@@ -213,20 +315,28 @@ iniciar_video(320,240);
 //Main CPU
 m68000_0:=cpu_m68000.create(8000000,256);
 m68000_0.change_ram16_calls(opwolf_getword,opwolf_putword);
-if not(roms_load16w(@rom,opwolf_rom)) then exit;
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256,SOUND_OPWOLF);
-if not(roms_load(msm5205_0.rom_data,opwolf_adpcm)) then exit;
-if not(roms_load(msm5205_1.rom_data,opwolf_adpcm)) then exit;
-//cargar sonido+ponerlas en su banco+adpcm
-if not(roms_load(@memoria_temp,opwolf_sound)) then exit;
-copymemory(@tc0140syt_0.snd_rom,@memoria_temp,$4000);
-copymemory(@tc0140syt_0.snd_bank_rom[0,0],@memoria_temp[0],$4000);
-copymemory(@tc0140syt_0.snd_bank_rom[1,0],@memoria_temp[$4000],$4000);
-copymemory(@tc0140syt_0.snd_bank_rom[2,0],@memoria_temp[$8000],$4000);
-copymemory(@tc0140syt_0.snd_bank_rom[3,0],@memoria_temp[$c000],$4000);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256);
+tc0140syt_0.z80.change_ram_calls(opwolf_snd_getbyte,opwolf_snd_putbyte);
+tc0140syt_0.z80.init_sound(opwolf_sound_update);
 //MCU
 opwolf_init_cchip(m68000_0.numero_cpu);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
+//cargar roms
+if not(roms_load16w(@rom,opwolf_rom)) then exit;
+//cargar sonido+ponerlas en su banco+adpcm
+if not(roms_load(@memoria_temp,opwolf_sound)) then exit;
+copymemory(@mem_snd[0],@memoria_temp[0],$4000);
+copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
+copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
+copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
+copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
+if not(roms_load(@adpcm,opwolf_adpcm)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,opwolf_char)) then exit;
 init_gfx(0,8,8,$4000);
@@ -241,7 +351,15 @@ gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //final
 show_mouse_cursor;
+reset_opwolf;
 iniciar_opwolf:=true;
+end;
+
+procedure Cargar_opwolf;
+begin
+llamadas_maquina.iniciar:=iniciar_opwolf;
+llamadas_maquina.bucle_general:=opwolf_principal;
+llamadas_maquina.reset:=reset_opwolf;
 end;
 
 end.

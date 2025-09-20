@@ -2,8 +2,8 @@ unit zaxxon_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     sound_engine,sn_76496,timer_engine,ppi8255,samples,sega_decrypt;
+     nz80,main_engine,controls_engine,gfx_engine,rom_engine,
+     pal_engine,sound_engine,sn_76496,timer_engine,ppi8255,samples;
 
 function iniciar_zaxxon:boolean;
 
@@ -27,7 +27,7 @@ const
         congo_tilemap:array[0..1] of tipo_roms=(
         (n:'congo6.u57';l:$2000;p:0;crc:$d637f02b),(n:'congo7.u58';l:$2000;p:$2000;crc:$80927943));
         congo_samples:array[0..4] of tipo_nombre_samples=(
-        (nombre:'gorilla.wav'),(nombre:'bass.wav'),(nombre:'congal.wav'),(nombre:'congah.wav'),(nombre:'rim.wav'));
+        (nombre:'gorilla.wav';restart:true),(nombre:'bass.wav'),(nombre:'congal.wav'),(nombre:'congah.wav'),(nombre:'rim.wav'));
         congo_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'10000'),(dip_val:$1;dip_name:'20000'),(dip_val:$2;dip_name:'30000'),(dip_val:$0;dip_name:'40000'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$c;dip_name:'Easy'),(dip_val:$4;dip_name:'Medium'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -52,10 +52,10 @@ const
         (n:'zaxxon8.u91';l:$2000;p:0;crc:$28d65063),(n:'zaxxon7.u90';l:$2000;p:$2000;crc:$6284c200),
         (n:'zaxxon10.u93';l:$2000;p:$4000;crc:$a95e61fd),(n:'zaxxon9.u92';l:$2000;p:$6000;crc:$7e42691f));
         zaxxon_samples:array[0..11] of tipo_nombre_samples=(
-        (nombre:'03.wav';restart:false;loop:true),(nombre:'02.wav';restart:true),(nombre:'01.wav';restart:true;loop:true),
-        (nombre:'00.wav';restart:true;loop:true),(nombre:'11.wav';restart:true),(nombre:'10.wav'),
+        (nombre:'03.wav';restart:false),(nombre:'02.wav';restart:true),(nombre:'01.wav';restart:true),
+        (nombre:'00.wav';restart:true),(nombre:'11.wav';restart:true),(nombre:'10.wav';restart:true),
         (nombre:'08.wav';restart:true),(nombre:'23.wav';restart:true),(nombre:'21.wav';restart:true),
-        (nombre:'20.wav'),(nombre:'05.wav';restart:true;loop:true),(nombre:'04.wav';restart:true;loop:true));
+        (nombre:'20.wav';restart:true),(nombre:'05.wav';restart:true),(nombre:'04.wav';restart:true));
         //DIP
         zaxxon_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'10000'),(dip_val:$1;dip_name:'20000'),(dip_val:$2;dip_name:'30000'),(dip_val:$0;dip_name:'40000'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -65,69 +65,18 @@ const
         zaxxon_dip_b:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin B';number:16;dip:((dip_val:$f;dip_name:'4C 1C'),(dip_val:$7;dip_name:'3C 1C'),(dip_val:$b;dip_name:'2C 1C'),(dip_val:$6;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$a;dip_name:'2C/1C 3C/2C 4C/3C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C/1C 5C/6C'),(dip_val:$c;dip_name:'1C/1C 4C/5C'),(dip_val:$4;dip_name:'1C/1C 2C/3C'),(dip_val:$d;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C/2C 5C/11C'),(dip_val:$0;dip_name:'1C/2C 4C/9C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$9;dip_name:'1C 4C'),(dip_val:$1;dip_name:'1C 5C'),(dip_val:$6;dip_name:'1C 6C'))),
         (mask:$f0;name:'Coin A';number:16;dip:((dip_val:$f0;dip_name:'4C 1C'),(dip_val:$70;dip_name:'3C 1C'),(dip_val:$b0;dip_name:'2C 1C'),(dip_val:$60;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$a0;dip_name:'2C/1C 3C/2C 4C/3C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C/1C 5C/6C'),(dip_val:$c0;dip_name:'1C/1C 4C/5C'),(dip_val:$40;dip_name:'1C/1C 2C/3C'),(dip_val:$d0;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C/2C 5C/11C'),(dip_val:$00;dip_name:'1C/2C 4C/9C'),(dip_val:$50;dip_name:'1C 3C'),(dip_val:$90;dip_name:'1C 4C'),(dip_val:$10;dip_name:'1C 5C'),(dip_val:$60;dip_name:'1C 6C'))),());
-        //Super Zaxxon
-        szaxxon_rom:array[0..2] of tipo_roms=(
-        (n:'1804e.u27';l:$2000;p:0;crc:$af7221da),(n:'1803e.u28';l:$2000;p:$2000;crc:$1b90fb2a),
-        (n:'1802e.u29';l:$1000;p:$4000;crc:$07258b4a));
-        szaxxon_pal:array[0..1] of tipo_roms=(
-        (n:'pr-5168.u98';l:$100;p:0;crc:$15727a9f),(n:'pr-5167.u72';l:$100;p:$100;crc:$deaa21f7));
-        szaxxon_char:array[0..1] of tipo_roms=(
-        (n:'1815b.u68';l:$800;p:0;crc:$bccf560c),(n:'1816b.u69';l:$800;p:$800;crc:$d28c628b));
-        szaxxon_bg:array[0..2] of tipo_roms=(
-        (n:'1807b.u113';l:$2000;p:0;crc:$f51af375),(n:'1806b.u112';l:$2000;p:$2000;crc:$a7de021d),
-        (n:'1805b.u111';l:$2000;p:$4000;crc:$5bfb3b04));
-        szaxxon_sprites:array[0..2] of tipo_roms=(
-        (n:'1812e.u77';l:$2000;p:0;crc:$1503ae41),(n:'1813e.u78';l:$2000;p:$2000;crc:$3b53d83f),
-        (n:'1814e.u79';l:$2000;p:$4000;crc:$581e8793));
-        szaxxon_tilemap:array[0..3] of tipo_roms=(
-        (n:'1809b.u91';l:$2000;p:0;crc:$dd1b52df),(n:'1808b.u90';l:$2000;p:$2000;crc:$b5bc07f0),
-        (n:'1811b.u93';l:$2000;p:$4000;crc:$68e84174),(n:'1810b.u92';l:$2000;p:$6000;crc:$a509994b));
-        szaxxon_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'10000'),(dip_val:$1;dip_name:'20000'),(dip_val:$2;dip_name:'30000'),(dip_val:$0;dip_name:'40000'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Difficulty';number:2;dip:((dip_val:$4;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Sound';number:2;dip:((dip_val:$40;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        //Future Spy
-        futspy_rom:array[0..2] of tipo_roms=(
-        (n:'fs_snd.u27';l:$2000;p:0;crc:$7578fe7f),(n:'fs_snd.u28';l:$2000;p:$2000;crc:$8ade203c),
-        (n:'fs_snd.u29';l:$1000;p:$4000;crc:$734299c3));
-        futspy_pal:array[0..1] of tipo_roms=(
-        (n:'futrprom.u98';l:$100;p:0;crc:$9ba2acaa),(n:'futrprom.u72';l:$100;p:$100;crc:$f9e26790));
-        futspy_char:array[0..1] of tipo_roms=(
-        (n:'fs_snd.u68';l:$800;p:0;crc:$305fae2d),(n:'fs_snd.u69';l:$800;p:$800;crc:$3c5658c0));
-        futspy_bg:array[0..2] of tipo_roms=(
-        (n:'fs_vid.u113';l:$2000;p:0;crc:$36d2bdf6),(n:'fs_vid.u112';l:$2000;p:$2000;crc:$3740946a),
-        (n:'fs_vid.u111';l:$2000;p:$4000;crc:$4cd4df98));
-        futspy_sprites:array[0..2] of tipo_roms=(
-        (n:'fs_vid.u77';l:$4000;p:0;crc:$1b93c9ec),(n:'fs_vid.u78';l:$4000;p:$4000;crc:$50e55262),
-        (n:'fs_vid.u79';l:$4000;p:$8000;crc:$bfb02e3e));
-        futspy_tilemap:array[0..3] of tipo_roms=(
-        (n:'fs_vid.u91';l:$2000;p:0;crc:$86da01f4),(n:'fs_vid.u90';l:$2000;p:$2000;crc:$2bd41d2d),
-        (n:'fs_vid.u93';l:$2000;p:$4000;crc:$b82b4997),(n:'fs_vid.u92';l:$2000;p:$6000;crc:$af4015af));
-        futspy_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$08;dip_name:'4C 1C'),(dip_val:$07;dip_name:'3C 1C'),(dip_val:$06;dip_name:'2C 1C'),(dip_val:$0a;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$0b;dip_name:'2C/1C 4C/3C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$0e;dip_name:'1C/1C 2C/3C'),(dip_val:$0d;dip_name:'1C/1C 4C/5C'),(dip_val:$0c;dip_name:'1C/1C 5C/6C'),(dip_val:$09;dip_name:'2C 3C'),(dip_val:$01;dip_name:'1C 2C'),(dip_val:$0f;dip_name:'1C/2C 5C/11C'),(dip_val:$02;dip_name:'1C 3C'),(dip_val:$03;dip_name:'1C 4C'),(dip_val:$04;dip_name:'1C 5C'),(dip_val:$05;dip_name:'1C 6C'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$80;dip_name:'4C 1C'),(dip_val:$70;dip_name:'3C 1C'),(dip_val:$60;dip_name:'2C 1C'),(dip_val:$a0;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$b0;dip_name:'2C/1C 4C/3C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$e0;dip_name:'1C/1C 2C/3C'),(dip_val:$d0;dip_name:'1C/1C 4C/5C'),(dip_val:$c0;dip_name:'1C/1C 5C/6C'),(dip_val:$90;dip_name:'2C 3C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$f0;dip_name:'1C/2C 5C/11C'),(dip_val:$20;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'),(dip_val:$40;dip_name:'1C 5C'),(dip_val:$50;dip_name:'1C 6C'))),());
-        futspy_dip_b:array [0..5] of def_dip=(
-        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$4;dip_name:'4'),(dip_val:$8;dip_name:'5'),(dip_val:$c;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'20K 40K 60K'),(dip_val:$10;dip_name:'30K 60K 90K'),(dip_val:$20;dip_name:'40K 70K 100K'),(dip_val:$30;dip_name:'40K 80K 120K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$40;dip_name:'Medium'),(dip_val:$80;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_vblank,bg_enable:boolean;
- congo_fg_bank,pal_offset,bg_position:word;
- bg_color,congo_color_bank,sound_latch,fg_color:byte;
- bg_mem:array[0..$fff,0..$ff] of byte;
- bg_mem_color:array[0..$1ff,0..31] of byte;
+ congo_color_bank,congo_fg_bank,pal_offset,fg_color,bg_color,bg_position:word;
+ sound_latch:byte;
+ bg_mem:array[0..4095,0..255] of byte;
+ bg_mem_color:array[0..511,0..31] of byte;
  congo_sprite,coin_status,sound_state:array[0..2] of byte;
  coin_press:array[0..1] of boolean;
  coin_enable:array[0..2] of boolean;
- mem_dec:array[0..$5fff] of byte;
- color_buffer:array[0..$ff] of byte;
 
-function find_minimum_y(value:byte):byte;
+function find_minimum_y(value:byte):byte;inline;
 var
   y:byte;
   sum:word;
@@ -150,10 +99,10 @@ begin
 	find_minimum_y:=(y+1) and $ff;
 end;
 
-procedure draw_back;
+procedure update_video_congo;
 var
-  color,srcx,srcy:word;
-  x,y:byte;
+  f,color,nchar,x,y,srcx,srcy:word;
+  atrib,atrib2:byte;
   pixel:array[0..$ff,0..$ff] of word;
 begin
 //Background
@@ -176,30 +125,21 @@ if bg_enable then begin
 					// value is 0x40 for non-flipped, or 0x38 for flipped
           srcy:=srcy-$40;
 				  // store the pixel, offset by the color offset
-          pixel[y,x]:=paleta[bg_mem[srcx and $fff,srcy and $ff]+bg_mem_color[(srcx and $fff) shr 3,(srcy and $ff) shr 3]+color];
+          pixel[y,x]:=paleta[bg_mem[srcx and $7ff,srcy and $ff]+bg_mem_color[(srcx and $7ff) shr 3,(srcy and $ff) shr 3]+color];
 			end;
 	end;
   putpixel(0,0,$10000,@pixel,3);
   actualiza_trozo(0,0,256,256,3,0,0,256,256,2);
 end else fill_full_screen(2,0);
-end;
-
-procedure update_video_congo;
-var
-  f,x,y:word;
-  color,nchar:byte;
-  atrib,atrib2:byte;
-begin
-draw_back;
 for f:=$1f downto 0 do begin
         atrib:=buffer_sprites[(f*4)+1];
         atrib2:=buffer_sprites[(f*4)+2];
-        y:=224-find_minimum_y(buffer_sprites[(f*4)+3]);
+        y:=find_minimum_y(buffer_sprites[(f*4)+3]);
 		    nchar:=atrib and $7f;
 		    color:=(atrib2 and $1f)+(congo_color_bank shl 5);
 		    x:=buffer_sprites[(f*4)+0]+$ef+1;
         put_gfx_sprite(nchar,color shl 3,(atrib and $80)<>0,(atrib2 and $80)<>0,2);
-        actualiza_gfx_sprite(x,y,2,2);
+        actualiza_gfx_sprite(x,224-y,2,2);
 end;
 for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
@@ -218,34 +158,23 @@ end;
 procedure eventos_zaxxon;
 begin
 if event.arcade then begin
-  //P1
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $Fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $F7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
-  //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   //SW100
   if arcade_input.start[0] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
   //COIN
-  if arcade_input.coin[0] then coin_press[0]:=true
-    else begin
-      if coin_press[0] then coin_status[0]:=byte(coin_enable[0])*$20;
-      coin_press[0]:=false;
-    end;
-  if arcade_input.coin[1] then coin_press[1]:=true
-    else begin
-      if coin_press[1] then coin_status[1]:=byte(coin_enable[1])*$40;
-      coin_press[1]:=false;
-    end;
+  if arcade_input.coin[0] then coin_press[0]:=true else begin
+    if coin_press[0] then coin_status[0]:=byte(coin_enable[0])*$20;
+    coin_press[0]:=false;
+  end;
+  if arcade_input.coin[1] then coin_press[1]:=true else begin
+    if coin_press[1] then coin_status[1]:=byte(coin_enable[1])*$40;
+    coin_press[1]:=false;
+  end;
 end;
 end;
 
@@ -257,7 +186,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -280,10 +209,10 @@ case direccion of
         $a000..$bfff:congo_getbyte:=memoria[(direccion and $7ff)+$a000];
         $c000..$dfff:case (direccion and $3f) of
                         0,4:congo_getbyte:=marcade.in0;
-                        1,5:congo_getbyte:=marcade.in1;
+                        1,5:congo_getbyte:=0;
                         2,6:congo_getbyte:=marcade.dswa;
                         3,7:congo_getbyte:=marcade.dswb;
-                        8..$f:congo_getbyte:=marcade.in2+coin_status[0]+coin_status[1];
+                        8..$f:congo_getbyte:=marcade.in2+coin_status[0]+coin_status[1]; //SW100
                      end;
 end;
 end;
@@ -312,23 +241,21 @@ case direccion of
                               irq_vblank:=(valor and 1)<>0;
                               if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
                             end;
-	                      $21:if fg_color<>((valor and 1) shl 7) then begin
-                              fg_color:=(valor and 1) shl 7;
+	                      $21:begin
+                              fg_color:=(valor and 1)*$80;
                               pal_offset:=fg_color+(congo_color_bank shl 8);
-                              fillchar(gfx[0].buffer,$400,1);
                             end;
-	                      $23:bg_color:=(valor and 1) shl 7;
-	                      $26:if congo_fg_bank<>((valor and 1) shl 8) then begin
+	                      $23:bg_color:=(valor and 1)*$80;
+	                      $26:begin
                               congo_fg_bank:=(valor and 1) shl 8;
                               fillchar(gfx[0].buffer,$400,1);
                             end;
-	                      $27:if congo_color_bank<>(valor and 1) then begin
+	                      $27:begin
                               congo_color_bank:=valor and 1;
                               pal_offset:=fg_color+(congo_color_bank shl 8);
-                              fillchar(gfx[0].buffer,$400,1);
                             end;
 	                      $28,$2a,$2c,$2e:bg_position:=(bg_position and $700) or valor;
-                        $29,$2b,$2d,$2f:bg_position:=(bg_position and $ff) or ((valor and 7) shl 8);
+                        $29,$2b,$2d,$2f:bg_position:=(bg_position and $ff) or ((valor shl 8) and $700);
 	                      $30..$32:congo_sprite[direccion and $3]:=valor;
                         $33:if (valor=1) then begin
                                 saddr:=congo_sprite[0] or (congo_sprite[1] shl 8);
@@ -384,7 +311,7 @@ begin
 	// bit 7 = mute
   if (valor and $80)<>0 then stop_all_samples;
 	// GORILLA: channel 0
-	if (((diff and $02)<>0) and ((valor and $02)=0)) then start_sample(0);
+	if (((diff and $02)<>0) and (not((valor and $02)<>0))) then start_sample(0);
 end;
 
 procedure ppi8255_congo_wportc(valor:byte);
@@ -394,17 +321,17 @@ begin
   diff:=valor xor sound_state[2];
 	sound_state[2]:=valor;
 	// BASS DRUM: channel 1
-	if (((diff and $01)<>0) and ((valor and $01)=0)) then start_sample(1);
-	if (((diff and $01)<>0) and ((valor and $01)<>0)) then stop_sample(1);
+	if (((diff and $01)<>0) and (not((valor and $01)<>0))) then start_sample(1);
+	//if (((diff and $01)<>0) and ((valor and $01)<>0)) then stop_sample(1);
 	// CONGA (LOW): channel 2
-	if (((diff and $02)<>0) and ((valor and $02)=0)) then start_sample(2);
-	if (((diff and $02)<>0) and ((valor and $02)<>0)) then stop_sample(2);
+	if (((diff and $02)<>0) and (not((valor and $02)<>0))) then start_sample(2);
+	//if (((diff and $02)<>0) and ((valor and $02)<>0)) then stop_sample(2);
 	// CONGA (HIGH): channel 3
-	if (((diff and $04)<>0) and ((valor and $04)=0)) then start_sample(3);
-	if (((diff and $04)<>0) and ((valor and $04)<>0)) then stop_sample(3);
+	if (((diff and $04)<>0) and (not((valor and $04)<>0))) then start_sample(3);
+	//if (((diff and $04)<>0) and ((valor and $04)<>0)) then stop_sample(3);
 	// RIM: channel 4
-	if (((diff and $08)<>0) and ((valor and $08)=0)) then start_sample(4);
-	if (((diff and $08)<>0) and ((valor and $08)<>0)) then stop_sample(4);
+	if (((diff and $08)<>0) and (not((valor and $08)<>0))) then start_sample(4);
+	//if (((diff and $08)<>0) and ((valor and $08)<>0)) then stop_sample(4);
 end;
 
 procedure congo_sound_update;
@@ -420,30 +347,56 @@ begin
 end;
 
 //Zaxxon
-procedure update_video_zaxxon;
+procedure update_video_zaxxon;inline;
 var
-  f,x,y:word;
-  nchar,color:byte;
+  f,color,nchar:word;
+  x,y,srcx,srcy:word;
+  pixel:array[0..$ff,0..$ff] of word;
   flipx,flipy:boolean;
 begin
-draw_back;
+//Background
+if bg_enable then begin
+  color:=bg_color+(congo_color_bank shl 8);
+  // loop over visible rows
+  for x:=0 to $ff do begin
+			//VF = flipped V signals
+			// base of the source row comes from VF plus the scroll value
+			// this is done by the 3 4-bit adders at U56, U74, U75
+      srcx:=x-(((bg_position-127) shl 1) xor $fff)-1;
+			// loop over visible columns
+			for y:=0 to $ff do begin
+				  // start with HF = flipped H signals
+					// position within source row is a two-stage addition
+					// first stage is HF plus half the VF, done by the 2 4-bit
+					// adders at U53, U54
+          srcy:=y-((x shr 1) xor $ff)-1;
+					// second stage is first stage plus a constant based on the flip
+					// value is 0x40 for non-flipped, or 0x38 for flipped
+          srcy:=srcy-$40;
+				  // store the pixel, offset by the color offset
+          pixel[y,x]:=paleta[bg_mem[srcx and $fff,srcy and $ff]+bg_mem_color[(srcx and $fff) shr 3,(srcy and $ff) shr 3]+color];
+			end;
+	end;
+  putpixel(0,0,$10000,@pixel,3);
+  actualiza_trozo(0,0,256,256,3,0,0,256,256,2);
+end else fill_full_screen(2,0);
 for f:=$1f downto 0 do begin
-        y:=224-find_minimum_y(memoria[$a003+(f*4)]);
+        y:=find_minimum_y(memoria[$a003+(f*4)]);
 		    flipy:=((memoria[$a002+(f*4)]) and $80)<>0;
 		    flipx:=((memoria[$a001+(f*4)]) and $80)<>0;
-		    nchar:=memoria[$a001+(f*4)];
+		    nchar:=memoria[$a001+(f*4)] and $3f;
 		    color:=memoria[$a002+(f*4)] and $1f;
 		    x:=memoria[$a000+(f*4)]+$ef+1;
         put_gfx_sprite(nchar,color shl 3,flipx,flipy,2);
-        actualiza_gfx_sprite(x,y,2,2);
+        actualiza_gfx_sprite(x,224-y,2,2);
 end;
 for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
       x:=31-(f shr 5);
       y:=f and $1f;
-      color:=(color_buffer[y+32*(f shr 7)] and $f) shl 3;
+      color:=(buffer_paleta[y+32*(f shr 7)]) and $f;
       nchar:=memoria[$8000+f];
-      put_gfx_trans(x*8,y*8,nchar,color+fg_color,1,0);
+      put_gfx_trans(x*8,y*8,nchar,color*2 shl 2,1,0);
       gfx[0].buffer[f]:=false;
     end;
 end;
@@ -458,7 +411,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -480,9 +433,9 @@ case direccion of
     $a000..$bfff:zaxxon_getbyte:=memoria[$a000+(direccion and $ff)];
     $c000..$dfff:case (direccion and $103) of
                     $000:zaxxon_getbyte:=marcade.in0;
-                    $001:zaxxon_getbyte:=marcade.in1;
+                    $001:zaxxon_getbyte:=0;
                     $002:zaxxon_getbyte:=marcade.dswa;
-                    $003:zaxxon_getbyte:=marcade.dswb;
+                    $003:zaxxon_getbyte:=$33;
                     $100:zaxxon_getbyte:=marcade.in2+coin_status[0]+coin_status[1]; //SW100
                  end;
     $e000..$ffff:case (direccion and $ff) of
@@ -503,9 +456,9 @@ case direccion of
     $a000..$bfff:memoria[$a000+(direccion and $ff)]:=valor;
     $c000..$dfff:case (direccion and $7) of
                     0..2:begin
-                            coin_enable[direccion and $3]:=(valor and 1)<>0;
-                            if not(coin_enable[direccion and $3]) then coin_status[direccion and $3]:=0;
-                         end;
+                        coin_enable[direccion and $3]:=(valor and 1)<>0;
+                        if not(coin_enable[direccion and $3]) then coin_status[direccion and $3]:=0;
+                      end;
                     4:; //coin_counter_w
                     6:main_screen.flip_main_screen:=(valor and 1)=0;
                  end;
@@ -515,13 +468,13 @@ case direccion of
                           irq_vblank:=(valor and 1)<>0;
                           if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
                         end;
-                    $f1:if fg_color<>((valor and 1) shl 7) then begin
-                          fg_color:=(valor and 1) shl 7;
-                          fillchar(gfx[0].buffer,$400,1);
-                        end;
+                    $f1:begin
+                              fg_color:=(valor and 1)*$80;
+                              pal_offset:=fg_color+(congo_color_bank shl 8);
+                            end;
                     $f8:bg_position:=(bg_position and $700) or valor;
-                    $f9:bg_position:=(bg_position and $ff) or ((valor and 7) shl 8);
-                    $fa:bg_color:=(valor and 1) shl 7;
+                    $f9:bg_position:=(bg_position and $ff) or ((valor shl 8) and $700);
+                    $fa:bg_color:=(valor and 1)*$80;
                     $fb:bg_enable:=(valor and 1)<>0;
                  end;
 end;
@@ -534,25 +487,25 @@ begin
   diff:=valor xor sound_state[0];
 	sound_state[0]:=valor;
 	// PLAYER SHIP A/B: volume
-	change_vol_sample(10,0.1+0.078*(valor and $03));
-	change_vol_sample(11,0.1+0.078*(valor and $03));
+	//m_samples->set_volume(10, 0.5 + 0.157 * (data & 0x03));
+	//m_samples->set_volume(11, 0.5 + 0.157 * (data & 0x03));
 	// PLAYER SHIP C: channel 10
-  if (((diff and $4)<>0) and ((valor and $4)=0)) then start_sample(10);
-  if (((diff and $4)<>0) and ((valor and $4)<>0)) then stop_sample(10);
+	//if ((diff & 0x04) && !(data & 0x04)) m_samples->start(10, 10, true);
+  if (((diff and $4)<>0) and (not((valor and $4)<>0))) then start_sample(10);
 	// PLAYER SHIP D: channel 11
-  if (((diff and $8)<>0) and ((valor and $8)=0)) then start_sample(11);
-  if (((diff and $8)<>0) and ((valor and $8)<>0)) then stop_sample(11);
+	//if ((diff & 0x08) && !(data & 0x08)) m_samples->start(11, 11, true);
+  if (((diff and $8)<>0) and not(((valor and $8)<>0))) then start_sample(11);
 	// HOMING MISSILE: channel 0
-  if (((diff and $10)<>0) and ((valor and $10)=0)) then start_sample(0);
-  if (((diff and $10)<>0) and ((valor and $10)<>0)) then stop_sample(0);
+	//if ((diff & 0x10) && !(data & 0x10)) m_samples->start(0, 0, true);
+  if (((diff and $10)<>0) and not(((valor and $10)<>0))) then start_sample(0);
 	// BASE MISSILE: channel 1
-  if (((diff and $20)<>0) and ((valor and $20)=0)) then start_sample(1);
+  if (((diff and $20)<>0) and not(((valor and $20)<>0))) then start_sample(1);
 	// LASER: channel 2
-  if (((diff and $40)<>0) and ((valor and $40)=0)) then start_sample(2);
-  if (((diff and $40)<>0) and ((valor and $40)<>0)) then stop_sample(2);
+	//if ((diff & 0x40) && !(data & 0x40)) m_samples->start(2, 2, true);
+  if (((diff and $40)<>0) and not(((valor and $40)<>0))) then start_sample(2);
 	// BATTLESHIP: channel 3
-	if (((diff and $80)<>0) and ((valor and $80)=0)) then start_sample(3);
-  if (((diff and $80)<>0) and ((valor and $80)<>0)) then stop_sample(3);
+	//if ((diff & 0x80) && !(data & 0x80)) m_samples->start(3, 3, true);
+	if (((diff and $80)<>0) and not(((valor and $80)<>0))) then start_sample(3);
 end;
 
 procedure ppi8255_zaxxon_wportb(valor:byte);
@@ -562,11 +515,14 @@ begin
   diff:=valor xor sound_state[1];
 	sound_state[1]:=valor;
 	// S-EXP: channel 4
-  if (((diff and $10)<>0) and ((valor and $10)=0)) then start_sample(4);
+	//if ((diff & 0x10) && !(data & 0x10)) m_samples->start(4, 4);
+  if (((diff and $10)<>0) and not(((valor and $10)<>0))) then start_sample(4);
 	// M-EXP: channel 5
-  if (((diff and $20)<>0) and ((valor and $20)=0)) then start_sample(5);
+	//if ((diff & 0x20) && !(data & 0x20) && !m_samples->playing(5)) m_samples->start(5, 5);
+  if (((diff and $20)<>0) and not(((valor and $20)<>0))) then start_sample(5);
 	// CANNON: channel 6
-  if (((diff and $80)<>0) and ((valor and $80)=0)) then start_sample(6);
+	//if ((diff & 0x80) && !(data & 0x80)) m_samples->start(6, 6);
+  if (((diff and $80)<>0) and not(((valor and $80)<>0))) then start_sample(6);
 end;
 
 procedure ppi8255_zaxxon_wportc(valor:byte);
@@ -576,11 +532,14 @@ begin
   diff:=valor xor sound_state[2];
 	sound_state[2]:=valor;
 	// SHOT: channel 7
-  if (((diff and $1)<>0) and ((valor and $1)=0)) then start_sample(7);
+	//if ((diff & 0x01) && !(data & 0x01)) m_samples->start(7, 7);
+  if (((diff and $1)<>0) and not(((valor and $1)<>0))) then start_sample(7);
 	// ALARM2: channel 8
-  if (((diff and $4)<>0) and ((valor and $4)=0)) then start_sample(8);
+	//if ((diff & 0x04) && !(data & 0x04)) m_samples->start(8, 8);
+  if (((diff and $4)<>0) and not(((valor and $4)<>0))) then start_sample(8);
 	// ALARM3: channel 9
-  if (((diff and $8)<>0) and ((valor and $8)=0)) then start_sample(9);
+	//if ((diff & 0x08) && !(data & 0x08) && !m_samples->playing(9)) m_samples->start(9, 9);
+  if (((diff and $8)<>0) and not(((valor and $8)<>0))) then start_sample(9);
 end;
 
 procedure zaxxon_sound_update;
@@ -588,26 +547,17 @@ begin
   samples_update;
 end;
 
-//Encrypted Z80
-function enc_getbyte(direccion:word):byte;
-begin
-case direccion of
-    $0..$6fff:if z80_0.opcode then enc_getbyte:=mem_dec[direccion]
-                else enc_getbyte:=memoria[direccion];
-    else enc_getbyte:=zaxxon_getbyte(direccion);
-end;
-end;
-
 procedure reset_zaxxon;
 begin
  z80_0.reset;
  if main_vars.tipo_maquina=175 then begin
-    z80_1.reset;
-    sn_76496_0.reset;
-    sn_76496_1.reset;
+  z80_1.reset;
+  sn_76496_0.reset;
+  sn_76496_1.reset;
  end;
+ reset_samples;
  pia8255_0.reset;
- reset_game_general;
+ reset_audio;
  irq_vblank:=false;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -705,7 +655,7 @@ for f:=0 to (size-1) do begin
 		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);
 end;
 set_pal(colores,size);
-copymemory(@color_buffer,@memoria_temp[$100],$100);
+for f:=0 to $ff do buffer_paleta[f]:=memoria_temp[$100+f];
 end;
 begin
 llamadas_maquina.reset:=reset_zaxxon;
@@ -747,7 +697,7 @@ case main_vars.tipo_maquina of
         //poner la paleta
         if not(roms_load(@memoria_temp,congo_pal)) then exit;
         convert_palette($200);
-        //background
+        //backgroud
         if not(roms_load(@memoria_temp,congo_tilemap)) then exit;
         conv_static_background($2000);
         //DIP
@@ -783,64 +733,6 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@zaxxon_dip_a;
         marcade.dswb:=$33;
         marcade.dswb_val:=@zaxxon_dip_b;
-     end;
-  346:begin  //Super Zaxxon
-        llamadas_maquina.bucle_general:=zaxxon_principal;
-        z80_0.change_ram_calls(enc_getbyte,zaxxon_putbyte);
-        pia8255_0:=pia8255_chip.create;
-        pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
-        //Samples
-        if load_samples(zaxxon_samples,1,'zaxxon.zip') then z80_0.init_sound(zaxxon_sound_update);
-        //cargar roms
-        if not(roms_load(@memoria,szaxxon_rom)) then exit;
-        decrypt_sega(@memoria,@mem_dec,7);
-        if not(roms_load(@memoria_temp,szaxxon_char)) then exit;
-        conv_chars;
-        if not(roms_load(@memoria_temp,szaxxon_bg)) then exit;
-        conv_background;
-        //convertir sprites
-        if not(roms_load(@memoria_temp,szaxxon_sprites)) then exit;
-        conv_sprites($40);
-        //poner la paleta
-        if not(roms_load(@memoria_temp,szaxxon_pal)) then exit;
-        convert_palette($100);
-        //Background
-        if not(roms_load(@memoria_temp,szaxxon_tilemap)) then exit;
-        conv_static_background($4000);
-        //DIP
-        marcade.dswa:=$7f;
-        marcade.dswa_val:=@szaxxon_dip_a;
-        marcade.dswb:=$33;
-        marcade.dswb_val:=@zaxxon_dip_b;
-     end;
-     347:begin  //Future Spy
-        llamadas_maquina.bucle_general:=zaxxon_principal;
-        z80_0.change_ram_calls(enc_getbyte,zaxxon_putbyte);
-        pia8255_0:=pia8255_chip.create;
-        pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
-        //Samples
-        if load_samples(zaxxon_samples,1,'zaxxon.zip') then z80_0.init_sound(zaxxon_sound_update);
-        //cargar roms
-        if not(roms_load(@memoria,futspy_rom)) then exit;
-        decrypt_sega(@memoria,@mem_dec,8);
-        if not(roms_load(@memoria_temp,futspy_char)) then exit;
-        conv_chars;
-        if not(roms_load(@memoria_temp,futspy_bg)) then exit;
-        conv_background;
-        //convertir sprites
-        if not(roms_load(@memoria_temp,futspy_sprites)) then exit;
-        conv_sprites($80);
-        //poner la paleta
-        if not(roms_load(@memoria_temp,futspy_pal)) then exit;
-        convert_palette($100);
-        //Background
-        if not(roms_load(@memoria_temp,futspy_tilemap)) then exit;
-        conv_static_background($4000);
-        //DIP
-        marcade.dswa:=$0;
-        marcade.dswa_val:=@futspy_dip_a;
-        marcade.dswb:=$43;
-        marcade.dswb_val:=@futspy_dip_b;
      end;
 end;
 //final

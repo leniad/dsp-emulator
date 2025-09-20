@@ -11,7 +11,7 @@ implementation
 const
         //Armed F
         armedf_rom:array[0..5] of tipo_roms=(
-        (n:'06.3d';l:$10000;p:0;crc:$0f9015e2),(n:'01.3f';l:$10000;p:1;crc:$816ff7c5),
+        (n:'06.3d';l:$10000;p:0;crc:$0f9015e2),(n:'01.3f';l:$10000;p:$1;crc:$816ff7c5),
         (n:'07.5d';l:$10000;p:$20000;crc:$5b3144a5),(n:'02.4f';l:$10000;p:$20001;crc:$fa10c29d),
         (n:'af_08.rom';l:$10000;p:$40000;crc:$d1d43600),(n:'af_03.rom';l:$10000;p:$40001;crc:$bbe1fe2d));
         armedf_sound:tipo_roms=(n:'af_10.rom';l:$10000;p:0;crc:$c5eacb87);
@@ -22,22 +22,9 @@ const
         (n:'af_04.rom';l:$10000;p:0;crc:$44d3af4f),(n:'af_05.rom';l:$10000;p:$10000;crc:$92076cab));
         armedf_sprites:array[0..1] of tipo_roms=(
         (n:'af_11.rom';l:$20000;p:0;crc:$b46c473c),(n:'af_12.rom';l:$20000;p:$20000;crc:$23cb6bfe));
-        armedf_dip_a:array [0..7] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
-        (mask:4;name:'1st Bonus Life';number:2;val2:(4,0);name2:('20K','40K')),
-        (mask:8;name:'2st Bonus Life';number:2;val2:(8,0);name2:('60K','80K')),
-        (mask:$c;name:'Bonus Life';number:4;val4:($c,4,8,0);name4:('20K 60K+','20K 80K+','40K 60K+','40K 80K+')),
-        (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
-        (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($c0,$80,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
-        armedf_dip_b:array [0..4] of def_dip2=(
-        (mask:3;name:'Coin A';number:4;val4:(1,3,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$c;name:'Coin B';number:4;val4:(4,$c,0,8);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$30;name:'Allow Continue';number:4;val4:($30,$20,$10,0);name4:('No','3 Times','5 Times','Yes')),
-        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),());
         //Terra Force
         terraf_rom:array[0..5] of tipo_roms=(
-        (n:'8.6e';l:$10000;p:0;crc:$fd58fa06),(n:'3.6h';l:$10000;p:1;crc:$54823a7d),
+        (n:'8.6e';l:$10000;p:0;crc:$fd58fa06),(n:'3.6h';l:$10000;p:$1;crc:$54823a7d),
         (n:'7.4e';l:$10000;p:$20000;crc:$fde8de7e),(n:'2.4h';l:$10000;p:$20001;crc:$db987414),
         (n:'6.3e';l:$10000;p:$40000;crc:$a5bb8c3b),(n:'1.3h';l:$10000;p:$40001;crc:$d2de6d28));
         terraf_sound:tipo_roms=(n:'11.17k';l:$10000;p:0;crc:$4407d475);
@@ -49,22 +36,9 @@ const
         (n:'5.15h';l:$10000;p:0;crc:$25d23dfd),(n:'4.13h';l:$10000;p:$10000;crc:$b9b0fe27));
         terraf_sprites:array[0..1] of tipo_roms=(
         (n:'12.7d';l:$10000;p:0;crc:$2d1f2ceb),(n:'13.9d';l:$10000;p:$10000;crc:$1d2f92d6));
-        terraf_dip_a:array [0..7] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
-        (mask:4;name:'1st Bonus Life';number:2;val2:(4,0);name2:('20K','50K')),
-        (mask:8;name:'2st Bonus Life';number:2;val2:(8,0);name2:('60K','90K')),
-        (mask:$c;name:'Bonus Life';number:4;val4:($c,4,8,0);name4:('20K 60K+','20K 90K+','50K 60K+','50K 90K+')),
-        (mask:$10;name:'Demo Sounds';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($c0,$80,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
-        terraf_dip_b:array [0..4] of def_dip2=(
-        (mask:3;name:'Coin A';number:4;val4:(1,3,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$c;name:'Coin B';number:4;val4:(4,$c,0,8);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$c0;name:'Allow Continue';number:4;val4:($c0,$80,$40,0);name4:('No','3 Times','5 Times','Yes')),());
         //Crazy Climber 2
         cclimbr2_rom:array[0..5] of tipo_roms=(
-        (n:'4.bin';l:$10000;p:0;crc:$7922ea14),(n:'1.bin';l:$10000;p:1;crc:$2ac7ed67),
+        (n:'4.bin';l:$10000;p:0;crc:$7922ea14),(n:'1.bin';l:$10000;p:$1;crc:$2ac7ed67),
         (n:'6.bin';l:$10000;p:$20000;crc:$7905c992),(n:'5.bin';l:$10000;p:$20001;crc:$47be6c1e),
         (n:'3.bin';l:$10000;p:$40000;crc:$1fb110d6),(n:'2.bin';l:$10000;p:$40001;crc:$0024c15b));
         cclimbr2_sound:array[0..1] of tipo_roms=(
@@ -76,25 +50,11 @@ const
         cclimbr2_fg:array[0..1] of tipo_roms=(
         (n:'7.bin';l:$10000;p:0;crc:$cbdd3906),(n:'8.bin';l:$10000;p:$10000;crc:$b2a613c0));
         cclimbr2_sprites:array[0..3] of tipo_roms=(
-        (n:'15.bin';l:$10000;p:0;crc:$4bf838be),(n:'13.bin';l:$10000;p:$20000;crc:$6b6ec999),
+        (n:'15.bin';l:$10000;p:$00000;crc:$4bf838be),(n:'13.bin';l:$10000;p:$20000;crc:$6b6ec999),
         (n:'16.bin';l:$10000;p:$10000;crc:$21a265c5),(n:'14.bin';l:$10000;p:$30000;crc:$f426a4ad));
-        cclimbr2_dip_a:array [0..7] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
-        (mask:4;name:'1st Bonus Life';number:2;val2:(4,0);name2:('30K','60K')),
-        (mask:8;name:'2st Bonus Life';number:2;val2:(8,0);name2:('70K','None')),
-        (mask:$c;name:'Bonus Life';number:4;val4:($c,4,8,0);name4:('30K 130K+','60K 130K+','30K','60K')),
-        (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
-        (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
-        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Easy','Normal')),());
-        cclimbr2_dip_b:array [0..5] of def_dip2=(
-        (mask:3;name:'Coin A';number:4;val4:(1,3,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$c;name:'Coin B';number:4;val4:(4,$c,0,8);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','3 Times')),
-        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Partial Invulnerability';number:2;val2:($40,0);name2:('Off','On')),());
         //Legion
         legion_rom:array[0..3] of tipo_roms=(
-        (n:'lg1.bin';l:$10000;p:1;crc:$c4aeb724),(n:'lg3.bin';l:$10000;p:0;crc:$777e4935),
+        (n:'lg1.bin';l:$10000;p:1;crc:$c4aeb724),(n:'lg3.bin';l:$10000;p:$0;crc:$777e4935),
         (n:'legion.1b';l:$10000;p:$20001;crc:$c306660a),(n:'legion.1d';l:$10000;p:$20000;crc:$c2e45e1e));
         legion_sound:array[0..1] of tipo_roms=(
         (n:'legion.1h';l:$4000;p:0;crc:$2ca4f7f0),(n:'legion.1i';l:$8000;p:$4000;crc:$79f4a827));
@@ -105,22 +65,9 @@ const
         (n:'legion.1e';l:$10000;p:0;crc:$a9d70faf),(n:'legion.1f';l:$8000;p:$18000;crc:$f018313b));
         legion_sprites:array[0..1] of tipo_roms=(
         (n:'legion.1k';l:$10000;p:0;crc:$ff5a0db9),(n:'legion.1j';l:$10000;p:$10000;crc:$bae220c8));
-        legion_dip_a:array [0..5] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
-        (mask:4;name:'Bonus Life';number:2;val2:(4,0);name2:('30K 100K+','50K')),
-        (mask:8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
-        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$80;name:'Allow Invulnerability';number:2;val2:($80,0);name2:('No','Yes')),());
-        legion_dip_b:array [0..6] of def_dip2=(
-        (mask:3;name:'Coin A';number:4;val4:(1,3,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$c;name:'Coin B';number:4;val4:(4,$c,0,8);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$10;name:'Coin Slots';number:2;val2:($10,0);name2:('Common','Individual')),
-        (mask:$20;name:'Difficulty';number:2;val2:($20,0);name2:('Easy','Hard')),
-        (mask:$40;name:'P1 Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'P2 Invulnerability';number:2;val2:($80,0);name2:('Off','On')),());
 
 var
- sprite_num,video_reg,scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
+ sprite_mask,sprite_num,video_reg,scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
  rom:array[0..$2ffff] of word;
  ram:array[0..$63ff] of word;
  ram_txt:array[0..$fff] of byte;
@@ -129,8 +76,7 @@ var
  update_video:procedure;
  calc_pos_txt:function(x,y:byte):word;
 
-procedure draw_sprites(prio:byte);
-procedure armedf_put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;clut:byte);
+procedure armedf_put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx,clut:byte);inline;
 var
   x,y,pos_y:byte;
   temp,temp2:pword;
@@ -138,8 +84,7 @@ var
   punto:word;
   dir_x,dir_y:integer;
 begin
-nchar:=nchar mod gfx[3].elements;
-pos:=gfx[3].datos;
+pos:=gfx[ngfx].datos;
 inc(pos,nchar*16*16);
 if flipy then begin
   pos_y:=15;
@@ -169,6 +114,8 @@ for y:=0 to 15 do begin
   pos_y:=pos_y+dir_y;
 end;
 end;
+
+procedure draw_sprites(prio:byte);inline;
 var
   atrib,f,nchar,sx,sy:word;
   flip_x,flip_y:boolean;
@@ -185,12 +132,12 @@ begin
     clut:=atrib and $7f;
     sx:=buffer_sprites_w[(f*4)+3] and $1ff;
     sy:=sprite_offset+240-(buffer_sprites_w[(f*4)+0] and $1ff);
-    armedf_put_gfx_sprite(nchar,(color shl 4)+$200,flip_x,flip_y,clut);
+    armedf_put_gfx_sprite(nchar and sprite_mask,(color shl 4)+$200,flip_x,flip_y,3,clut);
     actualiza_gfx_sprite(sx,sy,5,3);
   end;
 end;
 
-procedure draw_fg_bg(f:word;x,y:byte);
+procedure draw_fg_bg(f:word;x,y:byte);inline;
 var
   color:byte;
   atrib,nchar:word;
@@ -222,10 +169,10 @@ for f:=0 to $7ff do begin
  atrib:=ram_txt[$800+f];
  color:=atrib shr 4;
  if (gfx[0].buffer[f] or buffer_color[color]) then begin
-    nchar:=ram_txt[f]+((atrib and 3) shl 8);
+    nchar:=ram_txt[f]+((atrib and $3) shl 8);
     color:=color shl 4;
     put_gfx(x*8,y*8,nchar,color,1,0);
-    if (atrib and 8)=0 then put_gfx_trans(x*8,y*8,nchar,color,2,0)
+    if (atrib and $8)=0 then put_gfx_trans(x*8,y*8,nchar,color,2,0)
       else put_gfx_block_trans(x*8,y*8,2,8,8);
     gfx[0].buffer[f]:=false;
  end;
@@ -273,10 +220,10 @@ for f:=0 to $7ff do begin
    color:=atrib shr 4;
  end;
  if (gfx[0].buffer[pos] or buffer_color[color]) then begin
-    nchar:=nchar or ((atrib and 3) shl 8);
+    nchar:=nchar or ((atrib and $3) shl 8);
     color:=color shl 4;
     put_gfx(x*8,y*8,nchar,color,1,0);
-    if (atrib and 8)=0 then put_gfx_trans(x*8,y*8,nchar,color,2,0)
+    if (atrib and $8)=0 then put_gfx_trans(x*8,y*8,nchar,color,2,0)
       else put_gfx_block_trans(x*8,y*8,2,8,8);
     gfx[0].buffer[pos]:=false;
  end;
@@ -300,10 +247,10 @@ procedure eventos_armedf;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
@@ -312,10 +259,10 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
   //P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
@@ -324,24 +271,29 @@ end;
 
 procedure armedf_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-    eventos_armedf;
-    if f=248 then begin
-      m68000_0.irq[irq_level]:=ASSERT_LINE;
-      update_video;
-    end;
     //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    z80_0.run(frame_snd);
-    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    case f of
+    247:begin
+          m68000_0.irq[irq_level]:=ASSERT_LINE;
+          update_video;
+        end;
+    end;
  end;
  frame:=frame+1;
+ eventos_armedf;
  video_sync;
 end;
 end;
@@ -525,12 +477,11 @@ procedure reset_armedf;
 begin
  m68000_0.reset;
  z80_0.reset;
- frame_main:=m68000_0.tframes;
- frame_snd:=z80_0.tframes;
- ym3812_0.reset;
+ YM3812_0.reset;
  dac_0.reset;
  dac_1.reset;
  if main_vars.tipo_maquina=276 then nb1414m4_0.reset;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_fg_x:=0;
@@ -595,7 +546,7 @@ screen_mod_scroll(3,1024,512,1023,512,256,511);
 screen_init(4,1024,512,true);
 screen_mod_scroll(4,1024,512,1023,512,256,511);
 screen_init(5,512,512,false,true);
-if ((main_vars.tipo_maquina=275) or (main_vars.tipo_maquina=278)) then main_screen.rot270_screen:=true;
+if ((main_vars.tipo_maquina=275) or (main_vars.tipo_maquina=278)) then main_screen.rol90_screen:=true;
 size_x:=0;
 size_y:=0;
 case main_vars.tipo_maquina of
@@ -615,10 +566,10 @@ z80_0.change_io_calls(armedf_snd_in,armedf_snd_out);
 z80_0.init_sound(armedf_sound_update);
 timers.init(z80_0.numero_cpu,4000000/(4000000/512),armedf_snd_irq,nil,true);
 //Sound Chips
-if (main_vars.tipo_maquina=278) then ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,0.4)
-  else ym3812_0:=ym3812_chip.create(YM3812_FM,4000000,0.4);
-dac_0:=dac_chip.create(2);
-dac_1:=dac_chip.create(2);
+if (main_vars.tipo_maquina=278) then ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,0.6)
+  else ym3812_0:=ym3812_chip.create(YM3812_FM,4000000,0.6);
+dac_0:=dac_chip.create(1);
+dac_1:=dac_chip.create(1);
 irq_level:=1;
 sprite_offset:=$80;
 calc_pos_txt:=calc_pos_terraf;
@@ -644,11 +595,10 @@ case main_vars.tipo_maquina of
             conv_sprites($800);
             //DIP
             marcade.dswa:=$ffdf;
-            marcade.dswa_val2:=@armedf_dip_a;
             marcade.dswb:=$ffcf;
-            marcade.dswb_val2:=@armedf_dip_b;
             //Misc
             update_video:=update_video_armedf;
+            sprite_mask:=$7ff;
             sprite_num:=$200-1;
   end;
   276:begin //Terra Force
@@ -674,10 +624,9 @@ case main_vars.tipo_maquina of
             conv_sprites($400);
             //DIP
             marcade.dswa:=$ffcf;
-            marcade.dswa_val2:=@terraf_dip_a;
             marcade.dswb:=$ff3f;
-            marcade.dswb_val2:=@terraf_dip_b;
             //Misc
+            sprite_mask:=$3ff;
             sprite_num:=$80-1;
   end;
   277:begin //Crazy Climber 2
@@ -704,10 +653,9 @@ case main_vars.tipo_maquina of
             conv_sprites($800);
             //DIP
             marcade.dswa:=$ffdf;
-            marcade.dswa_val2:=@cclimbr2_dip_a;
             marcade.dswb:=$ffff;
-            marcade.dswb_val2:=@cclimbr2_dip_b;
             //Misc
+            sprite_mask:=$7ff;
             sprite_num:=$200-1;
             irq_level:=2;
             sprite_offset:=0;
@@ -736,17 +684,17 @@ case main_vars.tipo_maquina of
             conv_sprites($400);
             //DIP
             marcade.dswa:=$ffdf;
-            marcade.dswa_val2:=@legion_dip_a;
             marcade.dswb:=$ffff;
-            marcade.dswb_val2:=@legion_dip_b;
             //Misc
             calc_pos_txt:=calc_pos_legion;
+            sprite_mask:=$3ff;
             sprite_num:=$80-1;
             irq_level:=2;
             sprite_offset:=0;
   end;
 end;
 //final
+reset_armedf;
 iniciar_armedf:=true;
 end;
 

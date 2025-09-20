@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,nec_v20_v30,main_engine,controls_engine,gfx_engine,ym_2151,
      rom_engine,pal_engine,sound_engine,timer_engine,dac;
 
-function iniciar_irem_m72:boolean;
+procedure cargar_irem_m72;
 
 implementation
 const
@@ -204,7 +204,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=nec_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to 283 do begin
     //Main CPU
     nec_0.run(frame_m);
@@ -213,18 +213,20 @@ while EmuStatus=EsRunning do begin
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if ((f<255) and (f=(m72_raster_irq_position-1))) then begin
-      nec_0.set_input(INT_IRQ,HOLD_LINE,irq_base[1]+2);
+      nec_0.vect_req:=irq_base[1]+2;
+      nec_0.change_irq(HOLD_LINE);
       if not(video_off) then paint_video_irem_m72(0,f);
     end;
     if f=255 then begin
-      nec_0.set_input(INT_IRQ,HOLD_LINE,irq_base[1]);
+      nec_0.vect_req:=irq_base[1];
+      nec_0.change_irq(HOLD_LINE);
       if not(video_off) then begin
         paint_video_irem_m72(m72_raster_irq_position and $ff,f);
         update_video_irem_m72;
       end else fill_full_screen(0,0);
     end;
  end;
- actualiza_trozo(0,0,384,256,6,0,0,384,256,PANT_TEMP);
+ actualiza_trozo_simple(0,0,384,256,6);
  eventos_irem_m72;
  video_sync;
 end;
@@ -623,8 +625,9 @@ end;
 //Sound
 procedure sound_irq_ack;
 begin
+z80_0.im0:=snd_irq_vector;
 if snd_irq_vector=$ff then z80_0.change_irq(CLEAR_LINE)
-  else z80_0.change_irq_vector(ASSERT_LINE,snd_irq_vector);
+  else z80_0.change_irq(ASSERT_LINE);
 timers.enabled(timer_sound,false);
 end;
 
@@ -725,7 +728,7 @@ begin
  case main_vars.tipo_maquina of
   190,191:dac_0.reset;
  end;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x1:=0;
@@ -752,9 +755,6 @@ var
   memoria_temp:pbyte;
 begin
 iniciar_irem_m72:=false;
-llamadas_maquina.reset:=reset_irem_m72;
-llamadas_maquina.fps_max:=55.017606;
-llamadas_maquina.bucle_general:=irem_m72_principal;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,256,511);
@@ -870,6 +870,14 @@ ym2151_0.change_irq_func(ym2151_snd_irq);
 freemem(memoria_temp);
 reset_irem_m72;
 iniciar_irem_m72:=true;
+end;
+
+procedure Cargar_irem_m72;
+begin
+llamadas_maquina.iniciar:=iniciar_irem_m72;
+llamadas_maquina.reset:=reset_irem_m72;
+llamadas_maquina.fps_max:=55.017606;
+llamadas_maquina.bucle_general:=irem_m72_principal;
 end;
 
 end.

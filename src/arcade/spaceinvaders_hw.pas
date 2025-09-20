@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      samples,pal_engine,sound_engine,qsnapshot;
 
-function iniciar_spaceinv:boolean;
+procedure cargar_spaceinv;
 
 implementation
 
@@ -17,10 +17,10 @@ const
         (nombre:'1.wav'),(nombre:'2.wav'),(nombre:'3.wav'),(nombre:'4.wav'),(nombre:'5.wav'),
         (nombre:'6.wav'),(nombre:'7.wav'),(nombre:'8.wav'),(nombre:'9.wav'));
         //DIP
-        spaceinv_dip:array [0..3] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
-        (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('1000','1500')),
-        (mask:$80;name:'Display Coinage';number:2;val2:($80,0);name2:('Off','On')),());
+        spaceinv_dip:array [0..3] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'1000'),(dip_val:$0;dip_name:'1500'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Display Coinage';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
   shift_data:word;
@@ -67,37 +67,43 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   //System
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
 end;
 end;
 
 procedure spaceinv_principal;
 var
+  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
-    eventos_spaceinv;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     case f of
-    96:z80_0.change_irq_vector(HOLD_LINE,$cf);
-    224:begin
-          z80_0.change_irq_vector(HOLD_LINE,$d7);
+    95:begin
+          z80_0.im0:=$cf;
+          z80_0.change_irq(HOLD_LINE);
+       end;
+    223:begin
+          z80_0.im0:=$d7;
+          z80_0.change_irq(HOLD_LINE);
           update_video_spaceinv;
         end;
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
+  eventos_spaceinv;
   video_sync;
 end;
 end;
 
 function spaceinv_getbyte(direccion:word):byte;
 begin
-direccion:=direccion and $7fff;
+direccion:=direccion and $7FFF;
 case direccion of
   0..$1fff,$4000..$5fff:spaceinv_getbyte:=memoria[direccion];
   $2000..$3fff,$6000..$7fff:spaceinv_getbyte:=memoria[$2000+(direccion and $1fff)];
@@ -106,7 +112,7 @@ end;
 
 procedure spaceinv_putbyte(direccion:word;valor:byte);
 begin
-direccion:=direccion and $7fff;
+direccion:=direccion and $7FFF;
 case direccion of
   0..$1fff,$4000..$5fff:exit;
   $2000..$3fff,$6000..$7fff:memoria[$2000+(direccion and $1fff)]:=valor;
@@ -115,7 +121,7 @@ end;
 
 function spaceinv_inbyte(puerto:word):byte;
 begin
-case (puerto and 7) of
+case (puerto and $7) of
   0,4:spaceinv_inbyte:=8 or marcade.in0;
   1,5:spaceinv_inbyte:=marcade.in1 or marcade.in0;
   2,6:spaceinv_inbyte:=marcade.dswa or marcade.in0;
@@ -125,7 +131,7 @@ end;
 
 procedure spaceinv_outbyte(puerto:word;valor:byte);
 begin
-case (puerto and 7) of
+case (puerto and $7) of
   2:shift_count:=not(valor) and 7;
   3:begin //sound1
        if (((valor and 1)<>0) and ((sound1 and 1)=0)) then start_sample(7);
@@ -164,7 +170,7 @@ getmem(data,2000);
 size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_qsnapshot(@memoria[$2000],$2000);
+savedata_com_qsnapshot(@memoria[$2000],$2000);
 //MISC
 buffer[0]:=shift_data shr 8;
 buffer[1]:=shift_data and $ff;
@@ -203,13 +209,13 @@ end;
 procedure reset_spaceinv;
 begin
  z80_0.reset;
- frame_main:=z80_0.tframes;
+ reset_audio;
  shift_data:=0;
  shift_count:=0;
  sound1:=0;
  sound2:=0;
  marcade.in0:=0;
- marcade.in1:=9;
+ marcade.in1:=$9;
 end;
 
 function iniciar_spaceinv:boolean;
@@ -217,11 +223,6 @@ var
   colores:tpaleta;
 begin
 iniciar_spaceinv:=false;
-llamadas_maquina.bucle_general:=spaceinv_principal;
-llamadas_maquina.reset:=reset_spaceinv;
-llamadas_maquina.fps_max:=59.541985;
-llamadas_maquina.save_qsnap:=spaceinv_qsave;
-llamadas_maquina.load_qsnap:=spaceinv_qload;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
@@ -235,7 +236,7 @@ if not(roms_load(@memoria,spaceinv_rom)) then exit;
 if (load_samples(spaceinv_samples)) then z80_0.init_sound(spaceinv_sound_update);
 //DIP
 marcade.dswa:=0;
-marcade.dswa_val2:=@spaceinv_dip;
+marcade.dswa_val:=@spaceinv_dip;
 colores[0].r:=0;
 colores[0].g:=0;
 colores[0].b:=0;
@@ -250,7 +251,18 @@ colores[3].g:=0;
 colores[3].b:=0;
 set_pal(colores,4);
 //final
+reset_spaceinv;
 iniciar_spaceinv:=true;
+end;
+
+procedure Cargar_spaceinv;
+begin
+llamadas_maquina.iniciar:=iniciar_spaceinv;
+llamadas_maquina.bucle_general:=spaceinv_principal;
+llamadas_maquina.reset:=reset_spaceinv;
+llamadas_maquina.fps_max:=59.541985;
+llamadas_maquina.save_qsnap:=spaceinv_qsave;
+llamadas_maquina.load_qsnap:=spaceinv_qload;
 end;
 
 end.

@@ -75,7 +75,6 @@ type
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure Button9Click(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure RadioButton10Change(Sender: TObject);
     procedure RadioButton9Change(Sender: TObject);
@@ -97,7 +96,7 @@ procedure put_text_file(number:byte);
 var
     file_name:string;
 begin
-if OpenRom(file_name,SAMSTRADROM) then begin
+ if OpenRom(StAmstradROM,file_name) then begin
     case number of
       0:configcpc.Edit7.Text:=file_name;
       1:configcpc.Edit1.Text:=file_name;
@@ -108,7 +107,7 @@ if OpenRom(file_name,SAMSTRADROM) then begin
       6:configcpc.Edit6.Text:=file_name;
     end;
     cpc_rom[number].name:=file_name;
-end;
+  end;
 end;
 
 procedure clear_text_file(number:byte);
@@ -127,26 +126,6 @@ end;
 
 procedure Tconfigcpc.FormShow(Sender: TObject);
 begin
-case main_vars.tipo_maquina of
-  7,8:begin
-        groupbox3.enabled:=false;
-        radiobutton5.Enabled:=false;
-        radiobutton6.Enabled:=false;
-        radiobutton7.Enabled:=false;
-        radiobutton5.Checked:=true;
-      end;
-  9:begin
-        groupbox3.enabled:=true;
-        radiobutton5.Enabled:=true;
-        radiobutton6.Enabled:=true;
-        radiobutton7.Enabled:=true;
-        case cpc_ga.ram_exp of
-          0:radiobutton5.Checked:=true;
-          1:radiobutton6.Checked:=true;
-          2:radiobutton7.Checked:=true;
-        end;
-    end;
-end;
 case main_vars.tipo_maquina of
   8:begin //CPC 664
       radiobutton2.Enabled:=false;
@@ -180,6 +159,11 @@ Edit6.Text:=cpc_rom[6].name;
 //Lenslock
 if lenslok.activo then radiobutton12.Checked:=true
   else radiobutton13.Checked:=true;
+case cpc_ga.ram_exp of
+  0:radiobutton5.Checked:=true;
+  1:radiobutton6.Checked:=true;
+  2:radiobutton7.Checked:=true;
+end;
 trackbar1.Position:=cpc_crt.bright;
 if cpc_crt.color_monitor then begin
   radiobutton9.Checked:=true;
@@ -312,15 +296,6 @@ end;
 procedure Tconfigcpc.Button9Click(Sender: TObject);
 begin
   put_text_file(5);
-end;
-
-procedure Tconfigcpc.FormKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-case key of
-    13:button13Click(nil);
-    27:button14click(nil);
-end;
 end;
 
 initialization

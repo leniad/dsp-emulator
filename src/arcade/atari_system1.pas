@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pokey,
      pal_engine,sound_engine,slapstic,ym_2151,atari_mo;
 
-function iniciar_atari_sys1:boolean;
+procedure cargar_atari_sys1;
 
 implementation
 const
@@ -172,7 +172,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for linea:=0 to 261 do begin
   //main
   for h:=1 to CPU_SYNC do begin
@@ -223,7 +223,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -346,17 +346,18 @@ end;
 //Main
 procedure reset_atari_sys1;
 begin
- slapstic_0.reset;
- rom_bank:=slapstic_0.current_bank;
  m68000_0.reset;
  m6502_0.reset;
- ym2151_0.reset;
+ YM2151_0.reset;
  pokey_0.reset;
+ slapstic_0.reset;
+ reset_audio;
  marcade.in0:=$ff6f;
  marcade.in1:=$ff;
  marcade.in2:=$87;
  scroll_x:=0;
  scroll_y:=0;
+ rom_bank:=slapstic_0.current_bank;
  vblank:=$10;
  bankselect:=0;
  playfield_tile_bank:=0;
@@ -490,9 +491,6 @@ end;
 end;
 begin
 iniciar_atari_sys1:=false;
-llamadas_maquina.bucle_general:=atari_sys1_principal;
-llamadas_maquina.reset:=reset_atari_sys1;
-llamadas_maquina.fps_max:=59.922743;
 iniciar_audio(true);
 screen_init(1,512,256,true);
 screen_init(2,512,512);
@@ -594,7 +592,16 @@ for f:=0 to $ff do begin
   inc(ptemp);
 end;
 //final
+reset_atari_sys1;
 iniciar_atari_sys1:=true;
+end;
+
+procedure cargar_atari_sys1;
+begin
+llamadas_maquina.iniciar:=iniciar_atari_sys1;
+llamadas_maquina.bucle_general:=atari_sys1_principal;
+llamadas_maquina.reset:=reset_atari_sys1;
+llamadas_maquina.fps_max:=59.922743;
 end;
 
 end.

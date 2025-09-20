@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,misc_functions,
      deco_146;
 
-function iniciar_funkyjet:boolean;
+procedure cargar_funkyjet;
 
 implementation
 const
@@ -32,7 +32,7 @@ var
  rom:array[0..$3ffff] of word;
  ram:array[0..$1fff] of word;
 
-procedure update_video_funkyjet;
+procedure update_video_funkyjet;inline;
 begin
 //fill_full_screen(3,$200);
 deco16ic_0.update_pf_2(3,false);
@@ -41,7 +41,7 @@ deco_sprites_0.draw_sprites;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
-procedure eventos_funkyjet;
+procedure eventos_funkyjet;inline;
 begin
 if event.arcade then begin
   //P1
@@ -74,27 +74,27 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   case f of
-      248:begin
-            m68000_0.irq[6]:=HOLD_LINE;
-            update_video_funkyjet;
-            marcade.in1:=marcade.in1 or $8;
-          end;
-      8:marcade.in1:=marcade.in1 and $fff7;
-   end;
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    h6280_0.run(trunc(frame_s));
    frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+   case f of
+      247:begin
+            m68000_0.irq[6]:=HOLD_LINE;
+            update_video_funkyjet;
+            marcade.in1:=marcade.in1 or $8;
+          end;
+      255:marcade.in1:=marcade.in1 and $fff7;
+   end;
  end;
  eventos_funkyjet;
  video_sync;
 end;
 end;
 
-function funkyjet_deco146_r(real_address:word):word;
+function funkyjet_deco146_r(real_address:word):word;inline;
 var
   deco146_addr:dword;
   data:word;
@@ -103,7 +103,7 @@ begin
   //real_address:=0+(offset*2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18,13,12,11,17,16,15,14,10,  9,  8,  7,  6,   5,  4,  3,  2,  1,    0) and $7fff;
 	cs:=0;
-	data:=deco146_0.read_data(deco146_addr,cs);
+	data:=main_deco146.read_data(deco146_addr,cs);
 	funkyjet_deco146_r:=data;
 end;
 
@@ -122,9 +122,7 @@ case direccion of
 end;
 end;
 
-procedure funkyjet_putword(direccion:dword;valor:word);
-
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -138,7 +136,7 @@ begin
   end;
 end;
 
-procedure funkyjet_deco146_w(real_address,data:word);
+procedure funkyjet_deco146_w(real_address,data:word);inline;
 var
   deco146_addr:dword;
   cs:byte;
@@ -146,9 +144,10 @@ begin
 	//real_address:=0+(offset *2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,10,  9,  8,  7,  6,   5,  4,  3,  2,  1,    0) and $7fff;
 	cs:=0;
-	deco146_0.write_data(deco146_addr,data,cs);
+	main_deco146.write_data(deco146_addr,data,cs);
 end;
 
+procedure funkyjet_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM
@@ -178,11 +177,11 @@ end;
 procedure reset_funkyjet;
 begin
  m68000_0.reset;
- deco146_0.reset;
+ main_deco146.reset;
  deco16ic_0.reset;
  deco_sprites_0.reset;
  deco16_snd_simple_reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$fff7;
 end;
@@ -197,9 +196,6 @@ var
   memoria_temp:pbyte;
 begin
 iniciar_funkyjet:=false;
-llamadas_maquina.bucle_general:=funkyjet_principal;
-llamadas_maquina.reset:=reset_funkyjet;
-llamadas_maquina.fps_max:=58;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
 deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
@@ -236,7 +232,8 @@ gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$2000*64*8+8,$2000*64*8+0,8,0);
 convert_gfx(2,0,memoria_temp,@pt_x,@pt_y,false,false);
 //Deco 146
-deco146_0:=cpu_deco_146.create(INTERFACE_SCRAMBLE_INTERLEAVE);
+main_deco146:=cpu_deco_146.create;
+main_deco146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
 //Dip
 marcade.dswa:=$ffff;
 marcade.dswa_val:=@funkyjet_dip_a;
@@ -244,6 +241,14 @@ marcade.dswa_val:=@funkyjet_dip_a;
 freemem(memoria_temp);
 reset_funkyjet;
 iniciar_funkyjet:=true;
+end;
+
+procedure Cargar_funkyjet;
+begin
+llamadas_maquina.bucle_general:=funkyjet_principal;
+llamadas_maquina.iniciar:=iniciar_funkyjet;
+llamadas_maquina.reset:=reset_funkyjet;
+llamadas_maquina.fps_max:=58;
 end;
 
 end.

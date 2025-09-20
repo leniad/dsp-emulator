@@ -26,16 +26,16 @@ const
         (nombre:'tune13.wav';restart:true),(nombre:'tune14.wav';restart:true),(nombre:'tune15.wav';restart:true),(nombre:'tune16.wav';restart:true),(nombre:'tune17.wav'),(nombre:'tune18.wav'),(nombre:'tune19.wav'),
         (nombre:'coin.wav'),(nombre:'insert_coin.wav'),(nombre:'turtle.wav'),(nombre:'crab.wav'),(nombre:'fly.wav'));
         //Dip
-        mario_dip_a:array [0..4] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
-        (mask:$c;name:'Coinage';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
-        (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('20K','30K','40K','None')),
-        (mask:$c0;name:'Difficulty';number:4;val4:(0,$80,$40,$c0);name4:('Easy','Medium','Hard','Hardest')),());
+        mario_dip_a:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coinage';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$c;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'20K'),(dip_val:$10;dip_name:'30K'),(dip_val:$20;dip_name:'40K'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$80;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  haz_nmi:boolean;
  gfx_bank,palette_bank,scroll_y,death_val,skid_val:byte;
 
-procedure update_video_mario;
+procedure update_video_mario;inline;
 var
   atrib:byte;
   f,x,y,color,nchar:word;
@@ -57,7 +57,7 @@ for f:=0 to $7f do begin
   if memoria[$7000+(f*4)]=0 then continue;
   nchar:=memoria[$7002+(f*4)];
   atrib:=memoria[$7001+(f*4)];
-  color:=((atrib and $f)+16*palette_bank) shl 3;
+  color:=((atrib and $0f)+16*palette_bank) shl 3;
   x:=240-(memoria[$7003+(f*4)]-8);
   y:=memoria[$7000+(f*4)]+$f9;
   put_gfx_sprite(nchar,color,(atrib and $80)=0,(atrib and $40)=0,1);
@@ -71,14 +71,14 @@ begin
 if main_vars.service1 then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.but0[0] then marcade.in0:=marcade.in0 or $10 else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.but0[1] then marcade.in1:=marcade.in1 or $10 else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $bf);
@@ -87,19 +87,21 @@ end;
 
 procedure mario_principal;
 var
+  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    eventos_mario;
-    if f=240 then begin
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
+    if f=239 then begin
       if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       update_video_mario;
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
+  eventos_mario;
   video_sync;
 end;
 end;
@@ -107,7 +109,7 @@ end;
 function mario_getbyte(direccion:word):byte;
 begin
 case direccion of
-     0..$77ff,$f000..$ffff:mario_getbyte:=memoria[direccion];
+     $0..$77ff,$f000..$ffff:mario_getbyte:=memoria[direccion];
      $7c00:mario_getbyte:=marcade.in0;
      $7c80:mario_getbyte:=marcade.in1;
      $7f80:mario_getbyte:=marcade.dswa;
@@ -143,7 +145,7 @@ case direccion of
               12:start_sample(16); //tune bonus perfecto
               13:start_sample(17); //lanzar el ultimo bicho
               14:start_sample(18); //tune en bonus
-              15:start_sample(19); //tune coin cogido en bonus
+              15:start_sample(19); //tune coin cojido en bonus
             end;
             case (valor shr 4) of
               1:start_sample(20);
@@ -192,7 +194,8 @@ end;
 procedure reset_mario;
 begin
  z80_0.reset;
- frame_main:=z80_0.tframes;
+ reset_samples;
+ reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  haz_nmi:=false;
@@ -214,8 +217,9 @@ getmem(data,20000);
 //CPU
 size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
+//SND
 //MEM
-savedata_qsnapshot(@memoria[$6000],$1800);
+savedata_com_qsnapshot(@memoria[$6000],$1800);
 //MISC
 buffer[0]:=byte(haz_nmi);
 buffer[1]:=gfx_bank;
@@ -238,6 +242,7 @@ getmem(data,20000);
 //CPU
 loaddata_qsnapshot(data);
 z80_0.load_snapshot(data);
+//SND
 //MEM
 loaddata_qsnapshot(@memoria[$6000]);
 //MISC
@@ -314,8 +319,9 @@ end;
 set_pal(colores,$200);
 //DIP
 marcade.dswa:=0;
-marcade.dswa_val2:=@mario_dip_a;
+marcade.dswa_val:=@mario_dip_a;
 //final
+reset_mario;
 iniciar_mario:=true;
 end;
 

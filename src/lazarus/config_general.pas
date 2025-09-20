@@ -26,8 +26,6 @@ type
     BitBtn19: TBitBtn;
     BitBtn2: TBitBtn;
     BitBtn20: TBitBtn;
-    BitBtn21: TBitBtn;
-    BitBtn22: TBitBtn;
     BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
@@ -36,13 +34,14 @@ type
     BitBtn8: TBitBtn;
     BitBtn9: TBitBtn;
     Button1: TButton;
-    Button9: TButton;
-    Button10: TButton;
-    Button11: TButton;
-    Button12: TButton;
     Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
+    Button5: TButton;
+    Button6: TButton;
     Button7: TButton;
     Button8: TButton;
+    Button9: TButton;
     CheckBox1: TCheckBox;
     CheckBox10: TCheckBox;
     CheckBox11: TCheckBox;
@@ -51,7 +50,6 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
-    CheckBox17: TCheckBox;
     CheckBox9: TCheckBox;
     CheckBox2: TCheckBox;
     CheckBox3: TCheckBox;
@@ -61,7 +59,19 @@ type
     CheckBox7: TCheckBox;
     CheckBox8: TCheckBox;
     ComboBox1: TComboBox;
+    ComboBox10: TComboBox;
+    ComboBox11: TComboBox;
+    ComboBox12: TComboBox;
+    ComboBox13: TComboBox;
+    ComboBox14: TComboBox;
     ComboBox2: TComboBox;
+    ComboBox3: TComboBox;
+    ComboBox4: TComboBox;
+    ComboBox5: TComboBox;
+    ComboBox6: TComboBox;
+    ComboBox7: TComboBox;
+    ComboBox8: TComboBox;
+    ComboBox9: TComboBox;
     D1: TDirectoryEdit;
     D2: TDirectoryEdit;
     D6: TDirectoryEdit;
@@ -69,10 +79,7 @@ type
     D3: TDirectoryEdit;
     D4: TEdit;
     GroupBox1: TGroupBox;
-    GroupBox10: TGroupBox;
     GroupBox2: TGroupBox;
-    GroupBox3: TGroupBox;
-    GroupBox4: TGroupBox;
     GroupBox6: TGroupBox;
     GroupBox7: TGroupBox;
     GroupBox8: TGroupBox;
@@ -81,8 +88,6 @@ type
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
     Label15: TLabel;
     Label16: TLabel;
     Label17: TLabel;
@@ -90,8 +95,10 @@ type
     Label19: TLabel;
     Label2: TLabel;
     Label20: TLabel;
-    Label25: TLabel;
-    Label26: TLabel;
+    Label21: TLabel;
+    Label22: TLabel;
+    Label23: TLabel;
+    Label24: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
@@ -104,6 +111,7 @@ type
     RadioButton10: TRadioButton;
     RadioButton11: TRadioButton;
     RadioButton12: TRadioButton;
+    RadioButton13: TRadioButton;
     RadioButton14: TRadioButton;
     RadioButton15: TRadioButton;
     RadioButton16: TRadioButton;
@@ -112,17 +120,22 @@ type
     RadioButton19: TRadioButton;
     RadioButton2: TRadioButton;
     RadioButton20: TRadioButton;
+    RadioButton21: TRadioButton;
+    RadioButton22: TRadioButton;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
-    GroupBox5: TRadioGroup;
     RadioButton5: TRadioButton;
     RadioButton6: TRadioButton;
     RadioButton7: TRadioButton;
     RadioButton8: TRadioButton;
     RadioButton9: TRadioButton;
+    RadioGroup1: TRadioGroup;
+    RadioGroup2: TRadioGroup;
+    GroupBox5: TRadioGroup;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
+    TabSheet4: TTabSheet;
     TabSheet5: TTabSheet;
     TabSheet6: TTabSheet;
     procedure BitBtn10Click(Sender: TObject);
@@ -137,8 +150,6 @@ type
     procedure BitBtn19Click(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn20Click(Sender: TObject);
-    procedure BitBtn21Click(Sender: TObject);
-    procedure BitBtn22Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
     procedure BitBtn4Click(Sender: TObject);
@@ -147,36 +158,25 @@ type
     procedure BitBtn7Click(Sender: TObject);
     procedure BitBtn8Click(Sender: TObject);
     procedure BitBtn9Click(Sender: TObject);
-    procedure Button9Click(Sender: TObject);
-    procedure Button10Click(Sender: TObject);
-    procedure Button11Click(Sender: TObject);
-    procedure Button12Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
     procedure CheckBox16Click(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
-    procedure ComboBox2Change(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
-    procedure GroupBox1Click(Sender: TObject);
-    procedure RadioButton10Click(Sender: TObject);
-    procedure RadioButton11Click(Sender: TObject);
-    procedure RadioButton12Change(Sender: TObject);
     procedure RadioButton1Click(Sender: TObject);
     procedure RadioButton21Change(Sender: TObject);
     procedure RadioButton22Change(Sender: TObject);
     procedure RadioButton2Click(Sender: TObject);
     procedure RadioButton3Click(Sender: TObject);
     procedure RadioButton4Click(Sender: TObject);
-    procedure RadioButton5Change(Sender: TObject);
-    procedure RadioButton5Click(Sender: TObject);
-    procedure RadioButton6Click(Sender: TObject);
-    procedure RadioButton7Click(Sender: TObject);
-    procedure RadioButton8Click(Sender: TObject);
-    procedure RadioButton9Click(Sender: TObject);
   private
     { private declarations }
   public
@@ -186,10 +186,9 @@ type
 var
   MConfig:TMConfig;
   tecla_leida:word;
-  idioma_antes:byte;
 
 implementation
-uses principal, redefine;
+uses principal, redefine,joystick_calibration;
 
 { TMConfig }
 function nombre_tecla(num: word):string;
@@ -257,175 +256,94 @@ begin
   end;
 end;
 
-function get_button(player:byte):byte;
-var
-  f,res:byte;
-  salir,tempb:boolean;
-begin
-salir:=false;
-while not(salir) do begin
-  SDL_JoystickUpdate;
-  application.ProcessMessages;
-  if salir then break;
-  for f:=0 to joystick.buttons[player]-1 do begin
-    tempb:=SDL_JoystickGetButton(joystick_def[player],f)=1;
-    if tempb then begin
-      res:=f;
-      salir:=true;
-    end;
-  end;
-end;
-get_button:=res;
-end;
-
 procedure TMConfig.BitBtn10Click(Sender: TObject);
 begin
-  if arcade_input.use_key[0] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn10.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut1[0]:=tecla_leida;
-      end;
-  end else begin
-      bitbtn10.Caption:='Press but';
-      arcade_input.jbut1[0]:=get_button(arcade_input.num_joystick[0]);
-      bitbtn10.Caption:=inttostr(arcade_input.jbut1[0]);
-  end;
+  redefine1.showmodal;
+    if tecla_leida<>$FFFF then begin
+      bitbtn10.Caption:=nombre_tecla(tecla_leida);
+      arcade_input.nbut1[0]:=tecla_leida;
+    end;
 end;
 
 procedure TMConfig.BitBtn11Click(Sender: TObject);
 begin
-  if arcade_input.use_key[0] then begin
-    redefine1.showmodal;
-    if tecla_leida<>$FFFF then begin
-      bitbtn11.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut2[0]:=tecla_leida;
-    end;
-  end else begin
-    bitbtn11.Caption:='Press but';
-    arcade_input.jbut2[0]:=get_button(arcade_input.num_joystick[0]);
-    bitbtn11.Caption:=inttostr(arcade_input.jbut2[0]);
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    bitbtn11.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut2[0]:=tecla_leida;
   end;
 end;
 
 procedure TMConfig.BitBtn12Click(Sender: TObject);
 begin
-  if arcade_input.use_key[1] then begin
-    redefine1.showmodal;
-    if tecla_leida<>$FFFF then begin
-      bitbtn12.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut0[1]:=tecla_leida;
-    end;
-  end else begin
-    bitbtn12.Caption:='Press but';
-    arcade_input.jbut0[1]:=get_button(arcade_input.num_joystick[1]);
-    bitbtn12.Caption:=inttostr(arcade_input.jbut0[1]);
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    bitbtn12.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut0[1]:=tecla_leida;
   end;
 end;
 
 procedure TMConfig.BitBtn13Click(Sender: TObject);
 begin
-  if arcade_input.use_key[1] then begin
-    redefine1.showmodal;
-    if tecla_leida<>$FFFF then begin
-      bitbtn13.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut1[1]:=tecla_leida;
-    end;
-  end else begin
-    bitbtn13.Caption:='Press but';
-    arcade_input.jbut1[1]:=get_button(arcade_input.num_joystick[1]);
-    bitbtn13.Caption:=inttostr(arcade_input.jbut1[1]);
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    bitbtn13.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut1[1]:=tecla_leida;
   end;
 end;
 
 procedure TMConfig.BitBtn14Click(Sender: TObject);
 begin
-  if arcade_input.use_key[1] then begin
-    redefine1.showmodal;
-    if tecla_leida<>$FFFF then begin
-      bitbtn14.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut2[1]:=tecla_leida;
-    end;
-  end else begin
-    bitbtn14.Caption:='Press but';
-    arcade_input.jbut2[1]:=get_button(arcade_input.num_joystick[1]);
-    bitbtn14.Caption:=inttostr(arcade_input.jbut2[1]);
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    bitbtn14.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut2[1]:=tecla_leida;
   end;
 end;
 
 procedure TMConfig.BitBtn15Click(Sender: TObject);
 begin
-  if arcade_input.use_key[0] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn15.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut4[0]:=tecla_leida;
-      end;
-    end else begin
-      bitbtn15.Caption:='Press but';
-      arcade_input.jbut4[0]:=get_button(arcade_input.num_joystick[0]);
-      bitbtn15.Caption:=inttostr(arcade_input.jbut4[0]);
-    end;
+redefine1.showmodal;
+if tecla_leida<>$FFFF then begin
+    bitbtn15.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut4[0]:=tecla_leida;
+end;
 end;
 
 procedure TMConfig.BitBtn16Click(Sender: TObject);
 begin
-  if arcade_input.use_key[0] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn16.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut5[0]:=tecla_leida;
-      end;
-    end else begin
-      bitbtn16.Caption:='Press but';
-      arcade_input.jbut5[0]:=get_button(arcade_input.num_joystick[0]);
-      bitbtn16.Caption:=inttostr(arcade_input.jbut5[0]);
-    end;
+redefine1.showmodal;
+if tecla_leida<>$FFFF then begin
+      bitbtn16.Caption:=nombre_tecla(tecla_leida);
+      arcade_input.nbut5[0]:=tecla_leida;
+end;
 end;
 
 procedure TMConfig.BitBtn17Click(Sender: TObject);
 begin
-  if arcade_input.use_key[0] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn17.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut3[0]:=tecla_leida;
-      end;
-    end else begin
-      bitbtn17.Caption:='Press but';
-      arcade_input.jbut3[0]:=get_button(arcade_input.num_joystick[0]);
-      bitbtn17.Caption:=inttostr(arcade_input.jbut3[0]);
-    end;
+redefine1.showmodal;
+if tecla_leida<>$FFFF then begin
+    bitbtn17.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut3[0]:=tecla_leida;
+end;
 end;
 
 procedure TMConfig.BitBtn18Click(Sender: TObject);
 begin
-  if arcade_input.use_key[1] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn18.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut3[1]:=tecla_leida;
-      end;
-    end else begin
-      bitbtn18.Caption:='Press but';
-      arcade_input.jbut3[1]:=get_button(arcade_input.num_joystick[1]);
-      bitbtn18.Caption:=inttostr(arcade_input.jbut3[1]);
-    end;
+redefine1.showmodal;
+if tecla_leida<>$FFFF then begin
+    bitbtn18.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut3[1]:=tecla_leida;
+end;
 end;
 
 procedure TMConfig.BitBtn19Click(Sender: TObject);
 begin
-  if arcade_input.use_key[1] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn19.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut4[1]:=tecla_leida;
-      end;
-    end else begin
-      bitbtn19.Caption:='Press but';
-      arcade_input.jbut4[1]:=get_button(arcade_input.num_joystick[1]);
-      bitbtn19.Caption:=inttostr(arcade_input.jbut4[1]);
-    end;
+redefine1.showmodal;
+if tecla_leida<>$FFFF then begin
+    bitbtn19.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut4[1]:=tecla_leida;
+end;
 end;
 
 procedure TMConfig.BitBtn1Click(Sender: TObject);
@@ -439,27 +357,11 @@ end;
 
 procedure TMConfig.BitBtn20Click(Sender: TObject);
 begin
-  if arcade_input.use_key[1] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        bitbtn20.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nbut5[1]:=tecla_leida;
-      end;
-    end else begin
-      bitbtn20.Caption:='Press but';
-      arcade_input.jbut5[1]:=get_button(arcade_input.num_joystick[1]);
-      bitbtn20.Caption:=inttostr(arcade_input.jbut5[1]);
-    end;
+redefine1.showmodal;
+if tecla_leida<>$FFFF then begin
+    bitbtn20.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut5[1]:=tecla_leida;
 end;
-
-procedure TMConfig.BitBtn21Click(Sender: TObject);
-begin
-  export_roms;
-end;
-
-procedure TMConfig.BitBtn22Click(Sender: TObject);
-begin
-  export_samples;
 end;
 
 procedure TMConfig.BitBtn2Click(Sender: TObject);
@@ -527,76 +429,10 @@ end;
 
 procedure TMConfig.BitBtn9Click(Sender: TObject);
 begin
-  if arcade_input.use_key[0] then begin
-    redefine1.showmodal;
-    if tecla_leida<>$FFFF then begin
-      bitbtn9.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut0[0]:=tecla_leida;
-    end;
-  end else begin
-    bitbtn9.Caption:='Press but';
-    arcade_input.jbut0[0]:=get_button(arcade_input.num_joystick[0]);
-    bitbtn9.Caption:=inttostr(arcade_input.jbut0[0]);
-  end;
-end;
-
-procedure TMConfig.Button9Click(Sender: TObject);
-begin
-  if arcade_input.use_key[0] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        Button9.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.ncoin[0]:=tecla_leida;
-      end;
-    end else begin
-      Button9.Caption:='Press but';
-      arcade_input.jcoin[0]:=get_button(arcade_input.num_joystick[0]);
-      Button9.Caption:=inttostr(arcade_input.jcoin[0]);
-    end;
-end;
-
-procedure TMConfig.Button10Click(Sender: TObject);
-begin
-  if arcade_input.use_key[0] then begin
-      redefine1.showmodal;
-      if tecla_leida<>$FFFF then begin
-        Button10.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nstart[0]:=tecla_leida;
-      end;
-    end else begin
-      Button10.Caption:='Press but';
-      arcade_input.jstart[0]:=get_button(arcade_input.num_joystick[0]);
-      Button10.Caption:=inttostr(arcade_input.jstart[0]);
-    end;
-end;
-
-procedure TMConfig.Button11Click(Sender: TObject);
-begin
-  if arcade_input.use_key[1] then begin
-     redefine1.showmodal;
-     if tecla_leida<>$FFFF then begin
-        Button11.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.ncoin[1]:=tecla_leida;
-     end;
-  end else begin
-      Button11.Caption:='Press but';
-      arcade_input.jcoin[1]:=get_button(arcade_input.num_joystick[1]);
-      Button11.Caption:=inttostr(arcade_input.jcoin[1]);
-  end;
-end;
-
-procedure TMConfig.Button12Click(Sender: TObject);
-begin
-  if arcade_input.use_key[1] then begin
-     redefine1.showmodal;
-     if tecla_leida<>$FFFF then begin
-        Button12.Caption:=nombre_tecla(tecla_leida);
-        arcade_input.nstart[1]:=tecla_leida;
-     end;
-  end else begin
-      Button12.Caption:='Press but';
-      arcade_input.jstart[1]:=get_button(arcade_input.num_joystick[1]);
-      Button12.Caption:=inttostr(arcade_input.jstart[1]);
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    bitbtn9.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut0[0]:=tecla_leida;
   end;
 end;
 
@@ -615,17 +451,25 @@ begin
   if d5.Text[length(d5.Text)]<>main_vars.cadena_dir then Directory.Arcade_hi:=Directory.Arcade_hi+main_vars.cadena_dir;
   Directory.qsnapshot:=D6.Text;
   if d6.Text[length(d6.Text)]<>main_vars.cadena_dir then Directory.qsnapshot:=Directory.qsnapshot+main_vars.cadena_dir;
-  if radiobutton5.Checked then main_vars.idioma:=0
-    else if radiobutton6.Checked then main_vars.idioma:=1
-      else if radiobutton7.Checked then main_vars.idioma:=2
-        else if radiobutton8.Checked then main_vars.idioma:=3
-          else if radiobutton9.Checked then main_vars.idioma:=4
-            else if radiobutton10.Checked then main_vars.idioma:=5
-              else if radiobutton11.Checked then main_vars.idioma:=6
-                else if radiobutton12.Checked then main_vars.idioma:=200;
-  sound_status.sonido_activo:=radiobutton14.Checked;
-  principal1.SinSonido1.Checked:=not(radiobutton14.Checked);
-  principal1.ConSonido1.Checked:=radiobutton14.Checked;
+  if radiobutton5.Checked then tmp_var:=0
+    else if radiobutton6.Checked then tmp_var:=1
+      else if radiobutton7.Checked then tmp_var:=2
+        else if radiobutton8.Checked then tmp_var:=3
+          else if radiobutton9.Checked then tmp_var:=4
+            else if radiobutton10.Checked then tmp_var:=5
+              else if radiobutton11.Checked then tmp_var:=6;
+  if tmp_var<> main_vars.idioma then begin
+    main_vars.idioma:=tmp_var;
+    principal1.IdiomaClick(nil);
+  end;
+  if radiobutton12.Checked then tmp_var:=0
+    else if radiobutton13.Checked then tmp_var:=1
+      else if radiobutton14.Checked then tmp_var:=2
+        else if radiobutton15.Checked then tmp_var:=3;
+  if tmp_var<>sound_status.calidad_audio then begin
+    sound_status.calidad_audio:=tmp_var;
+    principal1.CambiaAudio(nil);
+  end;
   if groupbox5.Enabled then begin
     if radiobutton16.Checked then tmp_var:=1
       else if radiobutton17.Checked then tmp_var:=2
@@ -649,8 +493,19 @@ begin
 //Arreglar entradas arcade
   arcade_input.use_key[0]:=radiobutton1.Checked;
   arcade_input.use_key[1]:=radiobutton3.Checked;
-  arcade_input.num_joystick[0]:=combobox1.ItemIndex;
   arcade_input.num_joystick[1]:=combobox2.ItemIndex;
+  arcade_input.jbut0[0]:=combobox3.ItemIndex;
+  arcade_input.jbut1[0]:=combobox4.ItemIndex;
+  arcade_input.jbut2[0]:=combobox5.ItemIndex;
+  arcade_input.jbut3[0]:=combobox9.ItemIndex;
+  arcade_input.jbut4[0]:=combobox10.ItemIndex;
+  arcade_input.jbut5[0]:=combobox11.ItemIndex;
+  arcade_input.jbut0[1]:=combobox6.ItemIndex;
+  arcade_input.jbut1[1]:=combobox7.ItemIndex;
+  arcade_input.jbut2[1]:=combobox8.ItemIndex;
+  arcade_input.jbut3[1]:=combobox12.ItemIndex;
+  arcade_input.jbut4[1]:=combobox13.ItemIndex;
+  arcade_input.jbut5[1]:=combobox14.ItemIndex;
   timers.autofire_on:=checkbox16.Checked;
   if timers.autofire_on then begin
     timers.autofire_enabled[0]:=checkbox4.Checked;
@@ -671,35 +526,62 @@ end;
 
 procedure TMConfig.Button2Click(Sender: TObject);
 begin
-if main_vars.idioma<>idioma_antes then begin
-   main_vars.idioma:=idioma_antes;
-   cambiar_idioma(idioma_antes);
-end;
-close;
+  close;
 end;
 
 procedure TMConfig.Button3Click(Sender: TObject);
 begin
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    button3.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.ncoin[0]:=tecla_leida;
+  end;
+end;
 
+procedure TMConfig.Button4Click(Sender: TObject);
+begin
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    button4.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.ncoin[1]:=tecla_leida;
+  end;
+end;
+
+procedure TMConfig.Button5Click(Sender: TObject);
+begin
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    button5.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nstart[0]:=tecla_leida;
+  end;
+end;
+
+procedure TMConfig.Button6Click(Sender: TObject);
+begin
+  redefine1.showmodal;
+  if tecla_leida<>$FFFF then begin
+    button6.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nstart[1]:=tecla_leida;
+  end;
 end;
 
 procedure TMConfig.Button7Click(Sender: TObject);
 begin
-SDL_JoystickUpdate;
-arcade_input.joy_x[0]:=SDL_JoystickGetAxis(joystick_def[0],0);
-arcade_input.joy_y[0]:=SDL_JoystickGetAxis(joystick_def[0],1);
-//SDL_JoystickGetAxisInitialState(joystick_def[0],0,@arcade_input.joy_x[0]);
-//SDL_JoystickGetAxisInitialState(joystick_def[0],1,@arcade_input.joy_y[0]);
+joy_calibration.show;
+bucle_joystick(0);
 end;
 
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
-SDL_JoystickUpdate;
-arcade_input.joy_x[1]:=SDL_JoystickGetAxis(joystick_def[1],0);
-arcade_input.joy_y[1]:=SDL_JoystickGetAxis(joystick_def[1],1);
-//SDL_JoystickGetAxisInitialState(joystick_def[1],0,@arcade_input.joy_x[1]);
-//SDL_JoystickGetAxisInitialState(joystick_def[1],1,@arcade_input.joy_y[1]);
+joy_calibration.show;
+bucle_joystick(1);
 end;
+
+procedure TMConfig.Button9Click(Sender: TObject);
+begin
+export_roms;
+end;
+
 
 procedure TMConfig.CheckBox16Click(Sender: TObject);
 begin
@@ -724,11 +606,14 @@ end;
 procedure TMConfig.ComboBox1Change(Sender: TObject);
 begin
   arcade_input.num_joystick[0]:=combobox1.ItemIndex;
-end;
-
-procedure TMConfig.ComboBox2Change(Sender: TObject);
-begin
-  arcade_input.num_joystick[1]:=combobox2.ItemIndex;
+  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+      radiobutton21.Enabled:=true;
+      radiobutton22.Enabled:=true;
+  end else begin
+      radiobutton21.Enabled:=false;
+      radiobutton22.Enabled:=true;
+      radiobutton22.Checked:=true;
+  end;
 end;
 
 procedure TMConfig.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -739,33 +624,29 @@ begin
   end;
 end;
 
-procedure cambiar_texto_idioma(idioma:byte);
-begin
-cambiar_idioma(idioma);
-MConfig.GroupBox3.Caption:=leng.archivo[1];
-MConfig.button2.Caption:=leng.mensajes[8];
-MConfig.checkbox2.Caption:=leng.varios[2];
-MConfig.checkbox1.Caption:=leng.varios[3];
-MConfig.checkbox3.Caption:=leng.varios[4];
-MConfig.checkbox17.Caption:=leng.varios[5];
-MConfig.radiobutton15.Caption:=leng.opciones[3];
-MConfig.radiobutton14.Caption:=leng.opciones[5];
-MConfig.groupbox4.Caption:=leng.opciones[1];
-Mconfig.TabSheet2.Caption:=leng.opciones[6];
-end;
-
 procedure TMConfig.FormShow(Sender: TObject);
 var
-  f:integer;
+  f:byte;
+function extract_joy_name(nombre:pansichar):string;
+var
+    ptemp:pbyte;
+    cadena:string;
 begin
-  f:=(principal1.left+(principal1.width div 2))-(MConfig.Width div 2);
-  if f<0 then MConfig.Left:=0
-    else MConfig.Left:=f;
-  f:=(principal1.top+(principal1.Height div 2))-(MConfig.Height div 2);
-  if f<0 then MConfig.Top:=0
-    else MConfig.Top:=f;
-  idioma_antes:=main_vars.idioma;
-  cambiar_texto_idioma(main_vars.idioma);
+    if nombre=nil then begin
+      extract_joy_name:='None';
+      exit;
+    end;
+    ptemp:=pbyte(nombre);
+    cadena:='';
+    while ptemp^<>0 do begin
+      cadena:=cadena+chr(ptemp^);
+      inc(ptemp);
+    end;
+    extract_joy_name:=cadena;
+end;
+begin
+  radiogroup1.Caption:=leng[main_vars.idioma].archivo[1];
+  button2.Caption:=leng[main_vars.idioma].mensajes[8];
   //idioma
   case main_vars.idioma of
     0:radiobutton5.Checked:=true;
@@ -775,11 +656,15 @@ begin
     4:radiobutton9.Checked:=true;
     5:radiobutton10.Checked:=true;
     6:radiobutton11.Checked:=true;
-    200:radiobutton12.Checked:=true;
   end;
   //audio
-  if sound_status.sonido_activo then radiobutton14.Checked:=true
-    else radiobutton15.Checked:=true;
+  radiobutton15.Caption := leng[main_vars.idioma].opciones[3];
+  case sound_status.calidad_audio of
+    0:radiobutton12.Checked:=true;
+    1:radiobutton13.Checked:=true;
+    2:radiobutton14.Checked:=true;
+    3:radiobutton15.Checked:=true;
+  end;
   //video
   case main_screen.video_mode of
     1:radiobutton16.Checked:=true;
@@ -802,7 +687,7 @@ begin
   D5.Text:=Directory.Arcade_hi;
   D6.Text:=Directory.qsnapshot;
   //Componer todas las entradas
-  if joystick.num=0 then begin
+  if event.num_joysticks=0 then begin
     radiobutton1.Checked:=true;
     radiobutton2.Checked:=false;
     radiobutton2.enabled:=false;
@@ -812,111 +697,203 @@ begin
     radiobutton4.enabled:=false;
     button8.Enabled:=false;
     combobox1.Enabled:=false;
-    combobox1.Clear;
+    combobox1.Items.Add('');
+    combobox1.itemindex:=0;
     combobox2.Enabled:=false;
-    combobox2.Clear;
+    combobox2.Items.Add('');
+    combobox2.itemindex:=0;
+    bitbtn9.visible:=true;
+    bitbtn10.visible:=true;
+    bitbtn11.visible:=true;
+    bitbtn15.visible:=true;
+    bitbtn16.visible:=true;
+    bitbtn17.visible:=true;
+    combobox3.Visible:=false;
+    combobox4.Visible:=false;
+    combobox5.Visible:=false;
+    combobox9.Visible:=false;
+    combobox10.Visible:=false;
+    combobox11.Visible:=false;
+    bitbtn12.Visible:=true;
+    bitbtn13.visible:=true;
+    bitbtn14.visible:=true;
+    bitbtn18.Visible:=true;
+    bitbtn19.visible:=true;
+    bitbtn20.visible:=true;
+    combobox6.Visible:=false;
+    combobox7.Visible:=false;
+    combobox8.Visible:=false;
+    combobox12.Visible:=false;
+    combobox13.Visible:=false;
+    combobox14.Visible:=false;
+    radiobutton21.enabled:=false;
+    radiobutton22.enabled:=false;
+    //radiobutton23.enabled:=false;
+    //radiobutton24.enabled:=false;
   end else begin
-    combobox1.clear;
-    combobox2.clear;
-    for f:=0 to (joystick.num-1) do begin
-      combobox1.Items.Add(joystick.nombre[f]);
-      combobox2.Items.Add(joystick.nombre[f]);
-    end;
     radiobutton2.enabled:=true;
+    if arcade_input.use_key[0] then begin
+      radiobutton1.Checked:=true;
+      radiobutton2.Checked:=false;
+      button7.Enabled:=false;
+      bitbtn1.Enabled:=true;
+      bitbtn2.Enabled:=true;
+      bitbtn3.Enabled:=true;
+      bitbtn4.Enabled:=true;
+      bitbtn9.visible:=true;
+      bitbtn10.visible:=true;
+      bitbtn11.visible:=true;
+      bitbtn15.visible:=true;
+      bitbtn16.visible:=true;
+      bitbtn17.visible:=true;
+      combobox3.Visible:=false;
+      combobox4.Visible:=false;
+      combobox5.Visible:=false;
+      combobox9.Visible:=false;
+      combobox10.Visible:=false;
+      combobox11.Visible:=false;
+      radiobutton21.enabled:=false;
+      radiobutton22.enabled:=false;
+    end else begin
+      radiobutton1.Checked:=false;
+      radiobutton2.Checked:=true;
+      button7.Enabled:=true;
+      bitbtn1.Enabled:=false;
+      bitbtn2.Enabled:=false;
+      bitbtn3.Enabled:=false;
+      bitbtn4.Enabled:=false;
+      bitbtn9.visible:=false;
+      bitbtn10.visible:=false;
+      bitbtn11.visible:=false;
+      bitbtn15.visible:=false;
+      bitbtn16.visible:=false;
+      bitbtn17.visible:=false;
+      combobox3.Visible:=true;
+      combobox4.Visible:=true;
+      combobox5.Visible:=true;
+      combobox9.Visible:=true;
+      combobox10.Visible:=true;
+      combobox11.Visible:=true;
+      bitbtn7.enabled:=true;
+      if SDL_JoystickNumHats(joystick_def[0])<>0 then begin
+        radiobutton21.Enabled:=true;
+        radiobutton22.Enabled:=true;
+      end else begin
+        radiobutton21.Enabled:=false;
+        radiobutton22.Enabled:=true;
+        radiobutton22.Checked:=true;
+      end;
+    end;
     radiobutton4.enabled:=true;
+    if arcade_input.use_key[1] then begin
+      radiobutton3.Checked:=true;
+      radiobutton4.Checked:=false;
+      button8.Enabled:=false;
+      bitbtn5.Enabled:=true;
+      bitbtn6.Enabled:=true;
+      bitbtn7.Enabled:=true;
+      bitbtn8.Enabled:=true;
+      bitbtn12.Visible:=true;
+      bitbtn13.visible:=true;
+      bitbtn14.visible:=true;
+      bitbtn18.Visible:=true;
+      bitbtn19.visible:=true;
+      bitbtn20.visible:=true;
+      combobox6.Visible:=false;
+      combobox7.Visible:=false;
+      combobox8.Visible:=false;
+      combobox12.Visible:=false;
+      combobox13.Visible:=false;
+      combobox14.Visible:=false;
+      //radiobutton23.enabled:=false;
+      //radiobutton24.enabled:=false;
+    end else begin
+      radiobutton3.Checked:=false;
+      radiobutton4.Checked:=true;
+      button8.Enabled:=true;
+      bitbtn5.Enabled:=false;
+      bitbtn6.Enabled:=false;
+      bitbtn7.Enabled:=false;
+      bitbtn8.Enabled:=false;
+      bitbtn12.Visible:=false;
+      bitbtn13.visible:=false;
+      bitbtn14.visible:=false;
+      bitbtn12.Visible:=false;
+      bitbtn13.visible:=false;
+      bitbtn14.visible:=false;
+      combobox6.Visible:=true;
+      combobox7.Visible:=true;
+      combobox8.Visible:=true;
+      combobox12.Visible:=true;
+      combobox13.Visible:=true;
+      combobox14.Visible:=true;
+      bitbtn8.enabled:=true;
+      {if SDL_JoystickNumHats(joystick_def[1])<>0 then begin
+        radiobutton23.Enabled:=true;
+        radiobutton24.Enabled:=true;
+      end else begin
+        radiobutton23.Enabled:=false;
+        radiobutton24.Enabled:=true;
+        radiobutton24.Checked:=true;
+      end;}
+    end;
+    combobox1.Clear;
+    combobox2.Clear;
+    for f:=0 to (event.num_joysticks-1) do begin
+      combobox1.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
+      combobox2.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
+    end;
+    combobox1.Enabled:=true;
     combobox1.ItemIndex:=arcade_input.num_joystick[0];
+    combobox2.Enabled:=true;
     combobox2.ItemIndex:=arcade_input.num_joystick[1];
-  end;
-  if arcade_input.use_key[0] then begin
-     radiobutton1.Checked:=true;
-     radiobutton2.Checked:=false;
-     combobox1.Enabled:=false;
-     button7.Enabled:=false;
-     bitbtn1.Enabled:=true;
-     bitbtn2.Enabled:=true;
-     bitbtn3.Enabled:=true;
-     bitbtn4.Enabled:=true;
-     bitbtn9.Caption:=nombre_tecla(arcade_input.nbut0[0]);
-     bitbtn10.Caption:=nombre_tecla(arcade_input.nbut1[0]);
-     bitbtn11.Caption:=nombre_tecla(arcade_input.nbut2[0]);
-     bitbtn17.Caption:=nombre_tecla(arcade_input.nbut3[0]);
-     bitbtn15.Caption:=nombre_tecla(arcade_input.nbut4[0]);
-     bitbtn16.Caption:=nombre_tecla(arcade_input.nbut5[0]);
-     //Player 1
-     bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
-     bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
-     bitbtn3.Caption:=nombre_tecla(arcade_input.ndown[0]);
-     bitbtn4.Caption:=nombre_tecla(arcade_input.nup[0]);
-     //Misc Keys
-     button9.Caption:=nombre_tecla(arcade_input.ncoin[0]);
-     Button10.Caption:=nombre_tecla(arcade_input.nstart[0]);
-  end else begin
-     radiobutton1.Checked:=false;
-     radiobutton2.Checked:=true;
-     button7.Enabled:=true;
-     bitbtn1.Enabled:=false;
-     bitbtn2.Enabled:=false;
-     bitbtn3.Enabled:=false;
-     bitbtn4.Enabled:=false;
-     bitbtn7.enabled:=true;
-     bitbtn9.Caption:=inttostr(arcade_input.jbut0[0]);
-     bitbtn10.Caption:=inttostr(arcade_input.jbut1[0]);
-     bitbtn11.Caption:=inttostr(arcade_input.jbut2[0]);
-     bitbtn17.Caption:=inttostr(arcade_input.jbut3[0]);
-     bitbtn15.Caption:=inttostr(arcade_input.jbut4[0]);
-     bitbtn16.Caption:=inttostr(arcade_input.jbut5[0]);
-     //Misc Keys
-     button9.Caption:=inttostr(arcade_input.jcoin[0]);
-     Button10.Caption:=inttostr(arcade_input.jstart[0]);
-  end;
-  if arcade_input.use_key[1] then begin
-     radiobutton3.Checked:=true;
-     radiobutton4.Checked:=false;
-     combobox2.Enabled:=false;
-     button8.Enabled:=false;
-     bitbtn5.Enabled:=true;
-     bitbtn6.Enabled:=true;
-     bitbtn7.Enabled:=true;
-     bitbtn8.Enabled:=true;
-     bitbtn12.Caption:=nombre_tecla(arcade_input.nbut0[1]);
-     bitbtn13.Caption:=nombre_tecla(arcade_input.nbut1[1]);
-     bitbtn14.Caption:=nombre_tecla(arcade_input.nbut2[1]);
-     bitbtn18.Caption:=nombre_tecla(arcade_input.nbut3[1]);
-     bitbtn19.Caption:=nombre_tecla(arcade_input.nbut4[1]);
-     bitbtn20.Caption:=nombre_tecla(arcade_input.nbut5[1]);
-     //Player 2
-     bitbtn6.Caption:=nombre_tecla(arcade_input.nleft[1]);
-     bitbtn7.Caption:=nombre_tecla(arcade_input.nright[1]);
-     bitbtn8.Caption:=nombre_tecla(arcade_input.ndown[1]);
-     bitbtn5.Caption:=nombre_tecla(arcade_input.nup[1]);
-     //Misc keys
-     Button11.Caption:=nombre_tecla(arcade_input.ncoin[1]);
-     Button12.Caption:=nombre_tecla(arcade_input.nstart[1]);
-   end else begin
-     radiobutton3.Checked:=false;
-     radiobutton4.Checked:=true;
-     combobox2.Enabled:=true;
-     button8.Enabled:=true;
-     bitbtn5.Enabled:=false;
-     bitbtn6.Enabled:=false;
-     bitbtn7.Enabled:=false;
-     bitbtn8.Enabled:=false;
-     bitbtn12.Caption:=inttostr(arcade_input.jbut0[1]);
-     bitbtn13.Caption:=inttostr(arcade_input.jbut1[1]);
-     bitbtn14.Caption:=inttostr(arcade_input.jbut2[1]);
-     bitbtn18.Caption:=inttostr(arcade_input.jbut3[1]);
-     bitbtn19.Caption:=inttostr(arcade_input.jbut4[1]);
-     bitbtn20.Caption:=inttostr(arcade_input.jbut5[1]);
-     //Misc keys
-     Button11.Caption:=inttostr(arcade_input.jcoin[1]);
-     Button12.Caption:=inttostr(arcade_input.jstart[1]);
+    combobox3.Clear;
+    combobox4.Clear;
+    combobox5.Clear;
+    combobox9.Clear;
+    combobox10.Clear;
+    combobox11.Clear;
+    combobox6.Clear;
+    combobox7.Clear;
+    combobox8.Clear;
+    combobox12.Clear;
+    combobox13.Clear;
+    combobox14.Clear;
+    for f:=0 to (sdl_joysticknumbuttons(joystick_def[0])-1) do begin
+      combobox3.Items.Add('But '+inttostr(f));
+      combobox4.Items.Add('But '+inttostr(f));
+      combobox5.Items.Add('But '+inttostr(f));
+      combobox9.Items.Add('But '+inttostr(f));
+      combobox10.Items.Add('But '+inttostr(f));
+      combobox11.Items.Add('But '+inttostr(f));
+    end;
+    for f:=0 to (sdl_joysticknumbuttons(joystick_def[1])-1) do begin
+      combobox6.Items.Add('But ' + inttostr(f));
+      combobox7.Items.Add('But ' + inttostr(f));
+      combobox8.Items.Add('But ' + inttostr(f));
+      combobox12.Items.Add('But ' + inttostr(f));
+      combobox13.Items.Add('But ' + inttostr(f));
+      combobox14.Items.Add('But ' + inttostr(f));
+    end;
+    combobox3.ItemIndex:=arcade_input.jbut0[0];
+    combobox4.ItemIndex:=arcade_input.jbut1[0];
+    combobox5.ItemIndex:=arcade_input.jbut2[0];
+    combobox9.ItemIndex:=arcade_input.jbut3[0];
+    combobox10.ItemIndex:=arcade_input.jbut4[0];
+    combobox11.ItemIndex:=arcade_input.jbut5[0];
+    combobox6.ItemIndex:=arcade_input.jbut0[1];
+    combobox7.ItemIndex:=arcade_input.jbut1[1];
+    combobox8.ItemIndex:=arcade_input.jbut2[1];
+    combobox12.ItemIndex:=arcade_input.jbut3[1];
+    combobox13.ItemIndex:=arcade_input.jbut4[1];
+    combobox14.ItemIndex:=arcade_input.jbut5[1];
   end;
   checkbox4.Checked:=timers.autofire_enabled[0];
-  CheckBox5.Checked:=timers.autofire_enabled[1];
-  CheckBox6.Checked:=timers.autofire_enabled[2];
-  CheckBox7.Checked:=timers.autofire_enabled[3];
-  CheckBox8.Checked:=timers.autofire_enabled[4];
-  CheckBox9.Checked:=timers.autofire_enabled[5];
+  CheckBox4.Checked:=timers.autofire_enabled[1];
+  CheckBox5.Checked:=timers.autofire_enabled[2];
+  CheckBox6.Checked:=timers.autofire_enabled[3];
+  CheckBox7.Checked:=timers.autofire_enabled[4];
+  CheckBox8.Checked:=timers.autofire_enabled[5];
   checkbox10.Checked:=timers.autofire_enabled[6];
   checkbox11.Checked:=timers.autofire_enabled[7];
   checkbox12.Checked:=timers.autofire_enabled[8];
@@ -925,29 +902,33 @@ begin
   checkbox15.Checked:=timers.autofire_enabled[11];
   checkbox16.Checked:=timers.autofire_on;
   CheckBox16Click(self);
-end;
-
-procedure TMConfig.GroupBox1Click(Sender: TObject);
-begin
-
-end;
-
-procedure TMConfig.RadioButton10Click(Sender: TObject);
-begin
-  main_vars.idioma:=5;
-  cambiar_texto_idioma(5);
-end;
-
-procedure TMConfig.RadioButton11Click(Sender: TObject);
-begin
-  main_vars.idioma:=6;
-  cambiar_texto_idioma(6);
-end;
-
-procedure TMConfig.RadioButton12Change(Sender: TObject);
-begin
-  main_vars.idioma:=200;
-  cambiar_texto_idioma(200);
+  //Player 1
+  bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
+  bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
+  bitbtn3.Caption:=nombre_tecla(arcade_input.ndown[0]);
+  bitbtn4.Caption:=nombre_tecla(arcade_input.nup[0]);
+  bitbtn9.Caption:=nombre_tecla(arcade_input.nbut0[0]);
+  bitbtn10.Caption:=nombre_tecla(arcade_input.nbut1[0]);
+  bitbtn11.Caption:=nombre_tecla(arcade_input.nbut2[0]);
+  bitbtn17.Caption:=nombre_tecla(arcade_input.nbut3[0]);
+  bitbtn15.Caption:=nombre_tecla(arcade_input.nbut4[0]);
+  bitbtn16.Caption:=nombre_tecla(arcade_input.nbut5[0]);
+  //Player 2
+  bitbtn6.Caption:=nombre_tecla(arcade_input.nleft[1]);
+  bitbtn7.Caption:=nombre_tecla(arcade_input.nright[1]);
+  bitbtn8.Caption:=nombre_tecla(arcade_input.ndown[1]);
+  bitbtn5.Caption:=nombre_tecla(arcade_input.nup[1]);
+  bitbtn12.Caption:=nombre_tecla(arcade_input.nbut0[1]);
+  bitbtn13.Caption:=nombre_tecla(arcade_input.nbut1[1]);
+  bitbtn14.Caption:=nombre_tecla(arcade_input.nbut2[1]);
+  bitbtn18.Caption:=nombre_tecla(arcade_input.nbut3[1]);
+  bitbtn19.Caption:=nombre_tecla(arcade_input.nbut4[1]);
+  bitbtn20.Caption:=nombre_tecla(arcade_input.nbut5[1]);
+  //Misc Keys
+  button3.Caption:=nombre_tecla(arcade_input.ncoin[0]);
+  button4.Caption:=nombre_tecla(arcade_input.ncoin[1]);
+  button5.Caption:=nombre_tecla(arcade_input.nstart[0]);
+  button6.Caption:=nombre_tecla(arcade_input.nstart[1]);
 end;
 
 procedure TMConfig.RadioButton1Click(Sender: TObject);
@@ -956,23 +937,22 @@ begin
   bitbtn2.Enabled:=true;
   bitbtn3.Enabled:=true;
   bitbtn4.Enabled:=true;
+  bitbtn9.visible:=true;
+  bitbtn10.visible:=true;
+  bitbtn11.visible:=true;
+  bitbtn15.visible:=true;
+  bitbtn16.visible:=true;
+  bitbtn17.visible:=true;
   combobox1.enabled:=false;
+  combobox3.Visible:=false;
+  combobox4.Visible:=false;
+  combobox5.Visible:=false;
+  combobox9.Visible:=false;
+  combobox10.Visible:=false;
+  combobox11.Visible:=false;
   button7.Enabled:=false;
-  bitbtn9.Caption:=nombre_tecla(arcade_input.nbut0[0]);
-  bitbtn10.Caption:=nombre_tecla(arcade_input.nbut1[0]);
-  bitbtn11.Caption:=nombre_tecla(arcade_input.nbut2[0]);
-  bitbtn17.Caption:=nombre_tecla(arcade_input.nbut3[0]);
-  bitbtn15.Caption:=nombre_tecla(arcade_input.nbut4[0]);
-  bitbtn16.Caption:=nombre_tecla(arcade_input.nbut5[0]);
-  //Player 1
-  bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
-  bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
-  bitbtn3.Caption:=nombre_tecla(arcade_input.ndown[0]);
-  bitbtn4.Caption:=nombre_tecla(arcade_input.nup[0]);
-  //Misc Keys
-  button9.Caption:=nombre_tecla(arcade_input.ncoin[0]);
-  Button9.Caption:=nombre_tecla(arcade_input.nstart[0]);
-  arcade_input.use_key[0]:=true;
+  radiobutton21.Enabled:=false;
+  radiobutton22.Enabled:=false;
 end;
 
 procedure TMConfig.RadioButton21Change(Sender: TObject);
@@ -987,23 +967,32 @@ end;
 
 procedure TMConfig.RadioButton2Click(Sender: TObject);
 begin
-  if joystick.num=0 then exit;
-  arcade_input.use_key[0]:=false;
   bitbtn1.Enabled:=false;
   bitbtn2.Enabled:=false;
   bitbtn3.Enabled:=false;
   bitbtn4.Enabled:=false;
+  bitbtn9.visible:=false;
+  bitbtn10.visible:=false;
+  bitbtn11.visible:=false;
+  bitbtn15.visible:=false;
+  bitbtn16.visible:=false;
+  bitbtn17.visible:=false;
   combobox1.enabled:=true;
+  combobox3.Visible:=true;
+  combobox4.Visible:=true;
+  combobox5.Visible:=true;
+  combobox9.Visible:=true;
+  combobox10.Visible:=true;
+  combobox11.Visible:=true;
   button7.Enabled:=true;
-  bitbtn9.Caption:=inttostr(arcade_input.jbut0[0]);
-  bitbtn10.Caption:=inttostr(arcade_input.jbut1[0]);
-  bitbtn11.Caption:=inttostr(arcade_input.jbut2[0]);
-  bitbtn17.Caption:=inttostr(arcade_input.jbut3[0]);
-  bitbtn15.Caption:=inttostr(arcade_input.jbut4[0]);
-  bitbtn16.Caption:=inttostr(arcade_input.jbut5[0]);
-  //Misc Keys
-  button9.Caption:=inttostr(arcade_input.jcoin[0]);
-  Button9.Caption:=inttostr(arcade_input.jstart[0]);
+  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+    radiobutton21.Enabled:=true;
+    radiobutton22.Enabled:=true;
+  end else begin
+    radiobutton21.Enabled:=false;
+    radiobutton22.Enabled:=true;
+    radiobutton22.Checked:=true;
+  end;
 end;
 
 procedure TMConfig.RadioButton3Click(Sender: TObject);
@@ -1012,79 +1001,40 @@ begin
   bitbtn6.Enabled:=true;
   bitbtn7.Enabled:=true;
   bitbtn8.Enabled:=true;
-  combobox2.Enabled:=false;
+  bitbtn12.visible:=true;
+  bitbtn13.visible:=true;
+  bitbtn14.visible:=true;
+  bitbtn18.visible:=true;
+  bitbtn19.visible:=true;
+  bitbtn20.visible:=true;
+  combobox6.Visible:=false;
+  combobox7.Visible:=false;
+  combobox8.Visible:=false;
+  combobox12.Visible:=false;
+  combobox13.Visible:=false;
+  combobox14.Visible:=false;
   button8.Enabled:=false;
-  bitbtn12.Caption:=nombre_tecla(arcade_input.nbut0[1]);
-  bitbtn13.Caption:=nombre_tecla(arcade_input.nbut1[1]);
-  bitbtn14.Caption:=nombre_tecla(arcade_input.nbut2[1]);
-  bitbtn18.Caption:=nombre_tecla(arcade_input.nbut3[1]);
-  bitbtn19.Caption:=nombre_tecla(arcade_input.nbut4[1]);
-  bitbtn20.Caption:=nombre_tecla(arcade_input.nbut5[1]);
-  //Player 2
-  bitbtn6.Caption:=nombre_tecla(arcade_input.nleft[1]);
-  bitbtn7.Caption:=nombre_tecla(arcade_input.nright[1]);
-  bitbtn8.Caption:=nombre_tecla(arcade_input.ndown[1]);
-  bitbtn5.Caption:=nombre_tecla(arcade_input.nup[1]);
-  //Misc keys
-  Button10.Caption:=nombre_tecla(arcade_input.ncoin[1]);
-  Button11.Caption:=nombre_tecla(arcade_input.nstart[1]);
-  arcade_input.use_key[1]:=true;
 end;
 
 procedure TMConfig.RadioButton4Click(Sender: TObject);
 begin
-  if joystick.num=0 then exit;
-  arcade_input.use_key[1]:=false;
   bitbtn5.Enabled:=false;
   bitbtn6.Enabled:=false;
   bitbtn7.Enabled:=false;
   bitbtn8.Enabled:=false;
-  combobox2.Enabled:=true;
+  bitbtn12.visible:=false;
+  bitbtn13.visible:=false;
+  bitbtn14.visible:=false;
+  bitbtn18.visible:=false;
+  bitbtn19.visible:=false;
+  bitbtn20.visible:=false;
+  combobox6.Visible:=true;
+  combobox7.Visible:=true;
+  combobox8.Visible:=true;
+  combobox12.Visible:=true;
+  combobox13.Visible:=true;
+  combobox14.Visible:=true;
   button8.Enabled:=true;
-  bitbtn12.Caption:=inttostr(arcade_input.jbut0[1]);
-  bitbtn13.Caption:=inttostr(arcade_input.jbut1[1]);
-  bitbtn14.Caption:=inttostr(arcade_input.jbut2[1]);
-  bitbtn18.Caption:=inttostr(arcade_input.jbut3[1]);
-  bitbtn19.Caption:=inttostr(arcade_input.jbut4[1]);
-  bitbtn20.Caption:=inttostr(arcade_input.jbut5[1]);
-  //Misc keys
-  Button10.Caption:=inttostr(arcade_input.jcoin[1]);
-  Button11.Caption:=inttostr(arcade_input.jstart[1]);
-end;
-
-procedure TMConfig.RadioButton5Change(Sender: TObject);
-begin
-
-end;
-
-procedure TMConfig.RadioButton5Click(Sender: TObject);
-begin
-  main_vars.idioma:=0;
-  cambiar_texto_idioma(0);
-end;
-
-procedure TMConfig.RadioButton6Click(Sender: TObject);
-begin
-  main_vars.idioma:=1;
-  cambiar_texto_idioma(1);
-end;
-
-procedure TMConfig.RadioButton7Click(Sender: TObject);
-begin
-  main_vars.idioma:=2;
-  cambiar_texto_idioma(2);
-end;
-
-procedure TMConfig.RadioButton8Click(Sender: TObject);
-begin
-  main_vars.idioma:=3;
-  cambiar_texto_idioma(3);
-end;
-
-procedure TMConfig.RadioButton9Click(Sender: TObject);
-begin
-  main_vars.idioma:=4;
-  cambiar_texto_idioma(4);
 end;
 
 initialization

@@ -6,14 +6,14 @@ uses {$IFDEF windows}windows,{$ENDIF}lib_sdl2;
 const
     MAX_NETS=3;
     MAX_RES_PER_NET=18;
-    SET_TRANS_COLOR=$69; //:-)
+    SET_TRANS_COLOR=$FEF7;
     MAX_COLORES=$8000;
 type
   tcolor=record
                 r,g,b:byte;
                 a:byte;
          end;
-  tpaleta=array[0..MAX_COLORES] of tcolor;
+  tpaleta=array[0..max_colores] of tcolor;
 var
   paleta,buffer_paleta:array[0..MAX_COLORES] of word;
   paleta32,paleta_alpha:array[0..MAX_COLORES] of dword;
@@ -180,7 +180,7 @@ begin
 	end;
 end;
 
-function combine_2_weights(tab:psingle;w0,w1:integer):integer;
+function combine_2_weights(tab:psingle;w0,w1:integer):integer;inline;
 var
   res:single;
   ptemp:psingle;
@@ -193,7 +193,7 @@ begin
   combine_2_weights:=trunc(res);
 end;
 
-function combine_3_weights(tab:psingle;w0,w1,w2:integer):integer;
+function combine_3_weights(tab:psingle;w0,w1,w2:integer):integer;inline;
 var
   res:single;
   ptemp:psingle;
@@ -208,7 +208,7 @@ begin
   combine_3_weights:=trunc(res);
 end;
 
-function combine_4_weights(tab:psingle;w0,w1,w2,w3:integer):integer;
+function combine_4_weights(tab:psingle;w0,w1,w2,w3:integer):integer;inline;
 var
   res:single;
   ptemp:psingle;
@@ -225,7 +225,7 @@ begin
   combine_4_weights:=trunc(res);
 end;
 
-function combine_6_weights(tab:psingle;w0,w1,w2,w3,w4,w5:integer):integer;
+function combine_6_weights(tab:psingle;w0,w1,w2,w3,w4,w5:integer):integer;inline;
 var
   res:single;
   ptemp:psingle;
@@ -246,25 +246,25 @@ begin
   combine_6_weights:=trunc(res);
 end;
 
-function pal1bit(bits:byte):byte;
+function pal1bit(bits:byte):byte;inline;
 begin
   if (bits and 1)<>0 then pal1bit:=$ff
     else pal1bit:=0;
 end;
 
-function pal2bit(bits:byte):byte;
+function pal2bit(bits:byte):byte;inline;
 begin
 	bits:=bits and 3;
 	pal2bit:=(bits shl 6) or (bits shl 4) or (bits shl 2) or bits;
 end;
 
-function pal3bit(bits:byte):byte;
+function pal3bit(bits:byte):byte;inline;
 begin
 	bits:=bits and 7;
 	pal3bit:=(bits shl 5) or (bits shl 2) or (bits shr 1);
 end;
 
-function pal4bit(bits:byte):byte;
+function pal4bit(bits:byte):byte;inline;
 begin
 	bits:=bits and $f;
 	pal4bit:=(bits shl 4) or bits;
@@ -277,7 +277,7 @@ begin
 	pal4bit_i:=(bits and $f)*ztable[i];
 end;
 
-function pal5bit(bits:byte):byte;
+function pal5bit(bits:byte):byte;inline;
 begin
 	bits:=bits and $1f;
 	pal5bit:=(bits shl 3) or (bits shr 2);
@@ -290,7 +290,7 @@ begin
 end;
 
 //Palette functions
-procedure set_pal(ppaleta:tpaleta;total_colors:word);
+procedure set_pal(ppaleta:tpaleta;total_colors:word);inline;
 var
   colors:word;
 begin
@@ -298,17 +298,17 @@ for colors:=0 to total_colors-1 do
         paleta[colors]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, ppaleta[colors].r, ppaleta[colors].g, ppaleta[colors].b);
 end;
 
-procedure set_pal_color(pcolor:tcolor;pal_pos:word);
+procedure set_pal_color(pcolor:tcolor;pal_pos:word);inline;
 begin
 paleta[pal_pos]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
 end;
 
-function convert_pal_color(pcolor:tcolor):word;
+function convert_pal_color(pcolor:tcolor):word;inline;
 begin
 convert_pal_color:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
 end;
 
-procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);
+procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);inline;
 begin
 paleta[pal_pos]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
 paleta32[pal_pos]:=SDL_MapRGBA(pantalla[PANT_SPRITES_ALPHA].format, pcolor.r, pcolor.g, pcolor.b,$ff);

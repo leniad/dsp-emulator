@@ -32,7 +32,7 @@ var
  palette:byte;
  buffer:array[0..$7fff] of boolean;
 
-procedure update_video_epos;
+procedure update_video_epos;inline;
 var
   f,x,y,temp:word;
   atrib:byte;
@@ -49,7 +49,7 @@ for f:=0 to $7fff do begin
     buffer[f]:=false;
   end;
 end;
-actualiza_trozo(0,0,236,272,1,0,0,236,272,PANT_TEMP);
+actualiza_trozo_simple(0,0,236,272,1);
 end;
 
 procedure eventos_epos;
@@ -76,7 +76,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 240 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -136,7 +136,7 @@ procedure reset_epos_hw;
 begin
  z80_0.reset;
  ay8910_0.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$be;
  palette:=0;
@@ -146,8 +146,9 @@ end;
 function iniciar_epos_hw:boolean;
 var
   colores:tpaleta;
+  f:word;
   memoria_temp:array[0..$1f] of byte;
-  f,bit0,bit1,bit2:byte;
+  bit0,bit1,bit2:byte;
 begin
 llamadas_maquina.bucle_general:=epos_hw_principal;
 llamadas_maquina.reset:=reset_epos_hw;
@@ -161,7 +162,7 @@ z80_0.change_ram_calls(epos_getbyte,epos_putbyte);
 z80_0.change_io_calls(epos_inbyte,epos_outbyte);
 z80_0.init_sound(epos_sound_update);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(687500,AY8910);
+AY8910_0:=ay8910_chip.create(687500,AY8910,1);
 case main_vars.tipo_maquina of
   94:begin
       //cargar roms

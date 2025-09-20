@@ -5,7 +5,7 @@ uses gfx_engine,misc_functions;
 
 type
   pandora_gfx=class
-    constructor create(color_offset:word;clear_screen:boolean);
+    constructor create(sprite_mask,color_offset:word;clear_screen:boolean);
     destructor free;
     public
       procedure reset;
@@ -19,6 +19,7 @@ type
       sprite_ram:array[0..$fff] of byte;
       bg_color:byte;
       clear_screen:boolean;
+      mask_nchar:word;
       color_offset:word;
   end;
 
@@ -27,8 +28,9 @@ var
 
 implementation
 
-constructor pandora_gfx.create(color_offset:word;clear_screen:boolean);
+constructor pandora_gfx.create(sprite_mask,color_offset:word;clear_screen:boolean);
 begin
+  self.mask_nchar:=sprite_mask;
   self.color_offset:=color_offset;
   self.clear_screen:=clear_screen;
 end;
@@ -66,7 +68,7 @@ for f:=0 to $1ff do begin
 			y:=sy and $1ff;
   end;
   if nchar=0 then continue;
-  put_gfx_sprite(nchar,(color and $f0)+self.color_offset,(atrib and $80)<>0,(atrib and $40)<>0,ngfx);
+  put_gfx_sprite(nchar and self.mask_nchar,(color and $f0)+self.color_offset,(atrib and $80)<>0,(atrib and $40)<>0,ngfx);
   actualiza_gfx_sprite(x,y,screen,ngfx);
 end;
 end;

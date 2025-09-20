@@ -4,19 +4,19 @@ object config_arcade: Tconfig_arcade
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Arcade Config'
-  ClientHeight = 381
-  ClientWidth = 812
+  ClientHeight = 374
+  ClientWidth = 818
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  KeyPreview = True
+  OldCreateOrder = False
   Position = poDesktopCenter
   OnClose = FormClose
   OnKeyUp = FormKeyUp
-  OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8

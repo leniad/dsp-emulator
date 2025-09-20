@@ -1,10 +1,11 @@
 unit pang_hw;
+
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,kabuki_decript,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,oki6295,sound_engine,eepromser,ym_2413;
+     pal_engine,oki6295,sound_engine,eeprom;
 
-function iniciar_pang:boolean;
+procedure cargar_pang;
 
 implementation
 const
@@ -28,6 +29,7 @@ const
         (n:'spe_02.rom';l:$20000;p:0;crc:$63c9dfd2),(n:'03.f2';l:$20000;p:$20000;crc:$3ae28bc1),
         (n:'spe_04.rom';l:$20000;p:$80000;crc:$9d7b225b),(n:'05.g2';l:$20000;p:$a0000;crc:$4a060884));
         spang_eeprom:tipo_roms=(n:'eeprom-spang.bin';l:$80;p:0;crc:$deae1291);
+
 var
  mem_rom_op,mem_rom_dat:array[0..$f,0..$3fff] of byte;
  mem_dat:array[0..$7fff] of byte;
@@ -36,7 +38,7 @@ var
  vblank,irq_source:byte;
  pal_bank:word;
 
-procedure update_video_pang;
+procedure update_video_pang;inline;
 var
   x,y,f,color,nchar:word;
   atrib:byte;
@@ -71,50 +73,52 @@ procedure eventos_pang;
 begin
 if event.arcade then begin
   //IN1
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
   //IN2
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
   //IN0
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
 end;
 
 procedure pang_principal;
 var
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    eventos_pang;
+frame_m:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     case f of
-      0:begin
+      $ef:begin
+            z80_0.change_irq(HOLD_LINE);
+            irq_source:=1;
+          end;
+      $f7:vblank:=8;
+      $ff:begin
           z80_0.change_irq(HOLD_LINE);
           vblank:=0;
           irq_source:=0;
       end;
-      240:begin
-            z80_0.change_irq(HOLD_LINE);
-            irq_source:=1;
-            update_video_pang;
-          end;
-      248:vblank:=8;
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
+  update_video_pang;
+  eventos_pang;
   video_sync;
 end;
 end;
@@ -133,8 +137,7 @@ case direccion of
 end;
 end;
 
-procedure pang_putbyte(direccion:word;valor:byte);
-procedure cambiar_color(pos:word);
+procedure cambiar_color(pos:word);inline;
 var
   tmp_color:byte;
   color:tcolor;
@@ -147,6 +150,8 @@ begin
   set_pal_color(color,pos shr 1);
   buffer_color[(pos shr 5) and $7f]:=true;
 end;
+
+procedure pang_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$bfff:;
@@ -173,33 +178,30 @@ case (puerto and $ff) of
   0:pang_inbyte:=marcade.in0;
   1:pang_inbyte:=marcade.in1;
   2:pang_inbyte:=marcade.in2;
-  5:pang_inbyte:=(eepromser_0.do_read shl 7) or vblank or 2 or irq_source;
+  5:pang_inbyte:=(eeprom_0.readbit shl 7) or vblank or 2 or irq_source;
 end;
 end;
 
 procedure pang_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  0:begin
-      main_screen.flip_main_screen:=(valor and 4)<>0;
+  $0:begin
+      main_screen.flip_main_screen:=(valor and $4)<>0;
       pal_bank:=(valor and $20) shl 6;
      end;
-  2:rom_nbank:=valor and $f;
-  3:ym2413_0.write(valor);
-  4:ym2413_0.address(valor);
-  5:oki_6295_0.write(valor);
-  7:video_bank:=valor;
-  8:if valor<>0 then eepromser_0.cs_write(ASSERT_LINE)
-      else eepromser_0.cs_write(CLEAR_LINE);
-  $10:if (valor<>0) then eepromser_0.clk_write(ASSERT_LINE)
-      else eepromser_0.clk_write(CLEAR_LINE);
-  $18:eepromser_0.di_write(valor and 1);
+  $2:rom_nbank:=valor and $f;
+  $5:oki_6295_0.write(valor);
+  $7:video_bank:=valor;
+  $8:if valor<>0 then eeprom_0.set_cs_line(CLEAR_LINE)
+      else eeprom_0.set_cs_line(ASSERT_LINE);   //eeprom_cs_w
+  $10:if (valor<>0) then eeprom_0.set_clock_line(CLEAR_LINE)
+      else eeprom_0.set_clock_line(ASSERT_LINE);  //eeprom_clock_w
+  $18:eeprom_0.write_bit(valor);  //eeprom_serial_w
 end;
 end;
 
 procedure pang_sound_update;
 begin
-  ym2413_0.update;
   oki_6295_0.update;
 end;
 
@@ -207,10 +209,9 @@ end;
 procedure reset_pang;
 begin
  z80_0.reset;
- ym2413_0.reset;
+ reset_audio;
  oki_6295_0.reset;
- eepromser_0.reset;
- frame_main:=z80_0.tframes;
+ eeprom_0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -221,21 +222,17 @@ begin
  irq_source:=0;
 end;
 
-procedure close_pang;
-begin
-if main_vars.tipo_maquina=183 then eepromser_0.write_data('spang.nv')
-end;
-
 function iniciar_pang:boolean;
 var
   f:byte;
   memoria_temp:array[0..$4ffff] of byte;
-  ptemp,mem_temp2,mem_temp3:pbyte;
+  ptemp,mem_temp2,mem_temp3,mem_temp4:pbyte;
 const
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+
 procedure convert_chars;
 begin
   init_gfx(0,8,8,$8000);
@@ -243,6 +240,7 @@ begin
   gfx_set_desc_data(4,0,16*8,$8000*16*8+4,$8000*16*8+0,4,0);
   convert_gfx(0,0,ptemp,@ps_x[0],@ps_y[0],false,false);
 end;
+
 procedure convert_sprites;
 begin
   init_gfx(1,16,16,$800);
@@ -250,12 +248,9 @@ begin
   gfx_set_desc_data(4,0,64*8,$800*64*8+4,$800*64*8+0,4,0);
   convert_gfx(1,0,ptemp,@ps_x[0],@ps_y[0],false,false);
 end;
+
 begin
 iniciar_pang:=false;
-llamadas_maquina.bucle_general:=pang_principal;
-llamadas_maquina.reset:=reset_pang;
-llamadas_maquina.close:=close_pang;
-llamadas_maquina.fps_max:=57.42;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,256,true);
@@ -267,10 +262,10 @@ z80_0.change_ram_calls(pang_getbyte,pang_putbyte);
 z80_0.change_io_calls(pang_inbyte,pang_outbyte);
 z80_0.init_sound(pang_sound_update);
 //eeprom
-eepromser_0:=eepromser_chip.create(E93C46,16);
+eeprom_0:=eeprom_class.create(6,16,'0110','0101','0111');
 //Sound Chips
-ym2413_0:=ym2413_chip.create(16000000 div 4);
-oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.3);
+//YM2413  --> Falta!
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,2);
 getmem(ptemp,$100000);
 getmem(mem_temp2,$50000);
 getmem(mem_temp3,$50000);
@@ -308,16 +303,26 @@ case main_vars.tipo_maquina of
         //convertir sprites
         if not(roms_load(ptemp,spang_sprites)) then exit;
         convert_sprites;
-        if not(eepromser_0.load_data('spang.nv')) then begin
-          if not(roms_load(@memoria_temp,spang_eeprom)) then exit;
-          copymemory(eepromser_0.get_data,@memoria_temp,$80);
-        end;
+        //load eeprom si no lo esta ya...
+        mem_temp4:=eeprom_0.get_rom_addr;
+        inc(mem_temp4);
+        if mem_temp4^<>0 then if not(roms_load(eeprom_0.get_rom_addr,spang_eeprom)) then exit;
       end;
 end;
 freemem(mem_temp3);
 freemem(mem_temp2);
 freemem(ptemp);
 //final
+reset_pang;
 iniciar_pang:=true;
 end;
+
+procedure Cargar_pang;
+begin
+llamadas_maquina.iniciar:=iniciar_pang;
+llamadas_maquina.bucle_general:=pang_principal;
+llamadas_maquina.reset:=reset_pang;
+llamadas_maquina.fps_max:=57.42;
+end;
+
 end.

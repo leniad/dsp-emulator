@@ -28,11 +28,11 @@ const
         gauntlet2_rom:array[0..7] of tipo_roms=(
         (n:'136037-1307.9a';l:$8000;p:0;crc:$46fe8743),(n:'136037-1308.9b';l:$8000;p:$1;crc:$276e15c4),
         (n:'136043-1105.10a';l:$4000;p:$38000;crc:$45dfda47),(n:'136043-1106.10b';l:$4000;p:$38001;crc:$343c029c),
-        (n:'136044-2109.7a';l:$8000;p:$40000;crc:$1102ab96),(n:'136044-2110.7b';l:$8000;p:$40001;crc:$d2203a2b),
-        (n:'136044-2121.6a';l:$8000;p:$50000;crc:$753982d7),(n:'136044-2122.6b';l:$8000;p:$50001;crc:$879149ea));
+        (n:'136043-1109.7a';l:$8000;p:$40000;crc:$58a0a9a3),(n:'136043-1110.7b';l:$8000;p:$40001;crc:$658f0da8),
+        (n:'136043-1121.6a';l:$8000;p:$50000;crc:$ae301bba),(n:'136043-1122.6b';l:$8000;p:$50001;crc:$e94aaa8a));
         gauntlet2_sound:array[0..1] of tipo_roms=(
         (n:'136043-1120.16r';l:$4000;p:$4000;crc:$5c731006),(n:'136043-1119.16s';l:$8000;p:$8000;crc:$dc3591e7));
-        gauntlet2_char:tipo_roms=(n:'136043-1104.6p';l:$4000;p:0;crc:$bddc3dfc);
+        gauntlet2_char:tipo_roms=(n:'136043-1104.6p';l:$2000;p:0;crc:$1343cf6f);
         gauntlet2_back:array[0..15] of tipo_roms=(
         (n:'136043-1111.1a';l:$8000;p:0;crc:$09df6e23),(n:'136037-112.1b';l:$8000;p:$8000;crc:$869330be),
         (n:'136043-1123.1c';l:$4000;p:$10000;crc:$e4c98f01),(n:'136043-1123.1c';l:$4000;p:$14000;crc:$e4c98f01),
@@ -44,38 +44,38 @@ const
         (n:'136043-1126.2p';l:$4000;p:$58000;crc:$a32c732a),(n:'136043-1126.2p';l:$4000;p:$5c000;crc:$a32c732a));
         gauntlet2_proms:array[0..2] of tipo_roms=(
         (n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),(n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),
-        (n:'82s129-136043-1103.4r';l:$100;p:$400;crc:$32ae1fa9));
+        (n:'74s287-136037-103.4r';l:$100;p:$400;crc:$6c5ccf08));
         //DIP
-        gauntlet_dip:array [0..1] of def_dip2=(
-        (mask:8;name:'Service';number:2;val2:(8,0);name2:('Off','On')),());
+        gauntlet_dip:array [0..1] of def_dip=(
+        (mask:$8;name:'Service';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),());
         gauntlet_mo_config:atari_motion_objects_config=(
-        	gfxindex:1;               // index to which gfx system
-	        bankcount:1;              // number of motion object banks
-	        linked:true;              // are the entries linked?
-	        split:true;               // are the entries split?
-	        reverse:false;            // render in reverse order?
-	        swapxy:false;             // render in swapped X/Y order?
-	        nextneighbor:false;       // does the neighbor bit affect the next object?
-	        slipheight:8;             // pixels per SLIP entry (0 for no-slip)
-	        slipoffset:1;             // pixel offset for SLIPs
-	        maxperline:0;             // maximum number of links to visit/scanline (0=all)
-	        palettebase:$100;         // base palette entry
-	        maxcolors:$100;           // maximum number of colors
-	        transpen:0;               // transparent pen index
-	        link_entry:(0,0,0,$03ff); // mask for the link
-	        code_entry:(data_lower:($7fff,0,0,0);data_upper:(0,0,0,0)); // mask for the code index
-	        color_entry:(data_lower:(0,$000f,0,0);data_upper:(0,0,0,0)); // mask for the color
-	        xpos_entry:(0,$ff80,0,0); // mask for the X position
-          ypos_entry:(0,0,$ff80,0); // mask for the Y position
-	        width_entry:(0,0,$0038,0); // mask for the width, in tiles
-	        height_entry:(0,0,$0007,0); // mask for the height, in tiles
-	        hflip_entry:(0,0,$0040,0); // mask for the horizontal flip
-	        vflip_entry:(0,0,0,0);     // mask for the vertical flip
-	        priority_entry:(0,0,0,0); // mask for the priority
-	        neighbor_entry:(0,0,0,0); // mask for the neighbor
-	        absolute_entry:(0,0,0,0);// mask for absolute coordinates
-	        special_entry:(0,0,0,0);  // mask for the special value
-	        specialvalue:0;           // resulting value to indicate "special"
+        	gfxindex:1;               // index to which gfx system */
+	        bankcount:1;              // number of motion object banks */
+	        linked:true;              // are the entries linked? */
+	        split:true;               // are the entries split? */
+	        reverse:false;            // render in reverse order? */
+	        swapxy:false;             // render in swapped X/Y order? */
+	        nextneighbor:false;       // does the neighbor bit affect the next object? */
+	        slipheight:8;             // pixels per SLIP entry (0 for no-slip) */
+	        slipoffset:1;             // pixel offset for SLIPs */
+	        maxperline:0;             // maximum number of links to visit/scanline (0=all) */
+	        palettebase:$100;         // base palette entry */
+	        maxcolors:$100;           // maximum number of colors */
+	        transpen:0;               // transparent pen index */
+	        link_entry:(0,0,0,$03ff); // mask for the link */
+	        code_entry:(data_lower:($7fff,0,0,0);data_upper:(0,0,0,0)); // mask for the code index */
+	        color_entry:(data_lower:(0,$000f,0,0);data_upper:(0,0,0,0)); // mask for the color */
+	        xpos_entry:(0,$ff80,0,0); // mask for the X position */
+          ypos_entry:(0,0,$ff80,0); // mask for the Y position */
+	        width_entry:(0,0,$0038,0); // mask for the width, in tiles*/
+	        height_entry:(0,0,$0007,0); // mask for the height, in tiles */
+	        hflip_entry:(0,0,$0040,0); // mask for the horizontal flip */
+	        vflip_entry:(0,0,0,0);     // mask for the vertical flip */
+	        priority_entry:(0,0,0,0); // mask for the priority */
+	        neighbor_entry:(0,0,0,0); // mask for the neighbor */
+	        absolute_entry:(0,0,0,0);// mask for absolute coordinates */
+	        special_entry:(0,0,0,0);  // mask for the special value */
+	        specialvalue:0;           // resulting value to indicate "special" */
         );
         CPU_SYNC=4;
 
@@ -89,7 +89,7 @@ var
  rom_bank,vblank,sound_to_main_data,main_to_sound_data:byte;
  scroll_x,sound_reset_val:word;
 
-procedure update_video_gauntlet;
+procedure update_video_gauntlet;inline;
 var
   f,color,x,y,nchar,atrib,scroll_y:word;
   tile_bank:byte;
@@ -144,56 +144,56 @@ procedure eventos_gauntlet;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $80);
   //Audio CPU
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
 end;
 end;
 
 procedure gauntlet_principal;
 var
+  frame_m,frame_s:single;
   f:word;
   h:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=m6502_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 261 do begin
-    eventos_gauntlet;
-    case f of
-      0:begin
-          vblank:=$40;
-          m6502_0.change_irq(CLEAR_LINE);
-        end;
-      64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
-      32,96,160,224:m6502_0.change_irq(ASSERT_LINE);
-      240:begin  //VBLANK
-          update_video_gauntlet;
-          vblank:=0;
-          m68000_0.irq[4]:=ASSERT_LINE;
-        end;
-    end;
     for h:=1 to CPU_SYNC do begin
       //main
-      m68000_0.run(frame_main);
-      frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
       //sound
-      m6502_0.run(frame_snd);
-      frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
+      m6502_0.run(frame_s);
+      frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+    end;
+    case f of
+      0,64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
+      32,96,160,224:m6502_0.change_irq(ASSERT_LINE);
+      239:begin  //VBLANK
+          update_video_gauntlet;
+          vblank:=$0;
+          m68000_0.irq[4]:=ASSERT_LINE;
+        end;
+      261:vblank:=$40;
     end;
  end;
+ eventos_gauntlet;
  video_sync;
 end;
 end;
@@ -226,9 +226,7 @@ case direccion of
 end;
 end;
 
-procedure gauntlet_putword(direccion:dword;valor:word);
-
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -242,6 +240,7 @@ begin
   end;
 end;
 
+procedure gauntlet_putword(direccion:dword;valor:word);
 var
   old:word;
 begin
@@ -309,13 +308,13 @@ case direccion of
                   end;
      $1020..$102f:gauntlet_snd_getbyte:=marcade.in2;//COIN
      $1030..$103f:begin //switch_6502_r
-                    temp:=$30;
-                    if main_to_sound_ready then temp:=temp xor $80;
-                    if sound_to_main_ready then temp:=temp xor $40;
-                    //if (!m_tms5220->readyq_r()) temp:=temp xor $20;
-                    if marcade.dswa=8 then temp:=temp xor $10;
-                    gauntlet_snd_getbyte:=temp;
-                  end;
+                  temp:=$30;
+                  if main_to_sound_ready then temp:=temp xor $80;
+                  if sound_to_main_ready then temp:=temp xor $40;
+                  //if (!m_tms5220->readyq_r()) temp:=temp xor $20;
+                  if marcade.dswa=8 then temp:=temp xor $10;
+                  gauntlet_snd_getbyte:=temp;
+              end;
      $1800..$180f:gauntlet_snd_getbyte:=pokey_0.read(direccion and $f);
      $1811:gauntlet_snd_getbyte:=ym2151_0.status;
      $1830..$183f:begin //sound_irq_ack_r
@@ -363,18 +362,17 @@ end;
 //Main
 procedure reset_gauntlet;
 begin
- slapstic_0.reset;
- rom_bank:=slapstic_0.current_bank;
  m68000_0.reset;
  m6502_0.reset;
- ym2151_0.reset;
+ YM2151_0.reset;
  pokey_0.reset;
- frame_main:=m68000_0.tframes;
- frame_snd:=m6502_0.tframes;
+ slapstic_0.reset;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ff;
  scroll_x:=0;
+ rom_bank:=slapstic_0.current_bank;
  main_to_sound_ready:=false;
  sound_to_main_ready:=false;
  sound_to_main_data:=0;
@@ -478,8 +476,8 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'gauntlet.nv',longitud) then read_file(Directory.Arcade_nvram+'gauntlet.nv',@eeprom_ram,longitud)
           else fillchar(eeprom_ram[0],$800,$ff);
         //DIP
-        marcade.dswa:=8;
-        marcade.dswa_val2:=@gauntlet_dip;
+        marcade.dswa:=$8;
+        marcade.dswa_val:=@gauntlet_dip;
       end;
   245:begin //Gauntlet II
         //Slapstic
@@ -506,8 +504,8 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'gaunt2.nv',longitud) then read_file(Directory.Arcade_nvram+'gaunt2.nv',@eeprom_ram,longitud)
           else fillchar(eeprom_ram[0],$800,$ff);
         //DIP
-        marcade.dswa:=8;
-        marcade.dswa_val2:=@gauntlet_dip;
+        marcade.dswa:=$8;
+        marcade.dswa_val:=@gauntlet_dip;
       end;
 end;
 //atari mo
@@ -519,6 +517,7 @@ for f:=0 to $7fff do begin
   inc(temp);
 end;
 //final
+reset_gauntlet;
 iniciar_gauntlet:=true;
 end;
 

@@ -18,12 +18,12 @@ const
         route16_proms:array[0..1] of tipo_roms=(
         (n:'mb7052.59';l:$100;p:0;crc:$08793ef7),(n:'mb7052.61';l:$100;p:$100;crc:$08793ef7));
         //Dip
-        route16_dip_a:array [0..5] of def_dip2=(
-        (mask:$1;name:'Lives';number:2;val2:(0,1);name2:('3','5')),
-        (mask:$18;name:'Coinage';number:4;val4:(8,0,$10,$18);name4:('2C 1C','1C 1C','1C 2C','2C 1C')),
-        (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')),
-        (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
+        route16_dip_a:array [0..5] of def_dip=(
+        (mask:$1;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Coinage';number:4;dip:((dip_val:$8;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$18;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$20;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Speak and rescue
         speakres_cpu1:array[0..5] of tipo_roms=(
         (n:'speakres.1';l:$800;p:0;crc:$6026e4ea),(n:'speakres.2';l:$800;p:$800;crc:$93f0d4da),
@@ -34,13 +34,13 @@ const
         speakres_proms:array[0..1] of tipo_roms=(
         (n:'im5623.f10';l:$100;p:0;crc:$08793ef7),(n:'im5623.f12';l:$100;p:$100;crc:$08793ef7));
         //Dip
-        speakres_dip_a:array [0..6] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
-        (mask:$c;name:'2 Attackers at Wave';number:4;val4:(0,4,8,$c);name4:('2','3','4','5')),
-        (mask:$10;name:'Bonus Life';number:2;val2:(0,$10);name2:('5K','8K')),
-        (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')),
-        (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$80;name:'Demo Voices';number:2;val2:(0,$80);name2:('Off','On')),());
+        speakres_dip_a:array [0..6] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'2 Attackers at Wave';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$4;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$c;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'5000'),(dip_val:$10;dip_name:'8000'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$20;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Voices';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  pal1,pal2:byte;
@@ -71,7 +71,7 @@ for f:=0 to $3fff do begin
       data2:=data2 shr 1;
     end;
 end;
-actualiza_trozo(0,0,255,255,1,0,0,255,255,PANT_TEMP);
+actualiza_trozo_simple(0,0,255,255,1);
 end;
 
 procedure update_video_speakres;
@@ -96,7 +96,7 @@ for f:=0 to $3fff do begin
       data2:=data2 shr 1;
     end;
 end;
-actualiza_trozo(0,0,255,255,1,0,0,255,255,PANT_TEMP);
+actualiza_trozo_simple(0,0,255,255,1);
 end;
 
 procedure eventos_route16;
@@ -122,21 +122,24 @@ end;
 
 procedure route16_hw_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 255 do begin
-    eventos_route16;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=0 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video;
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
+  eventos_route16;
   video_sync;
 end;
 end;
@@ -256,8 +259,7 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  if main_vars.tipo_maquina=259 then dac_0.reset;
- frame_main:=z80_0.tframes;
- frame_snd:=z80_1.tframes;
+ reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  pal1:=0;
@@ -281,6 +283,8 @@ iniciar_video(256,256);
 z80_0:=cpu_z80.create(10000000 div 4,256);
 z80_0.change_io_calls(nil,route16_outbyte);
 z80_1:=cpu_z80.create(10000000 div 4,256);
+//Sound Chips
+AY8910_0:=ay8910_chip.create(10000000 div 8,AY8910,1);
 case main_vars.tipo_maquina of
   258:begin
       z80_0.change_ram_calls(route16_cpu1_getbyte,route16_cpu1_putbyte);
@@ -303,7 +307,7 @@ case main_vars.tipo_maquina of
       if not(roms_load(@proms,route16_proms)) then exit;
       update_video:=update_video_route16;
       marcade.dswa:=$a0;
-      marcade.dswa_val2:=@route16_dip_a;
+      marcade.dswa_val:=@route16_dip_a;
   end;
   259:begin
       z80_0.change_ram_calls(speakres_cpu1_getbyte,speakres_cpu1_putbyte);
@@ -316,11 +320,9 @@ case main_vars.tipo_maquina of
       if not(roms_load(@proms,speakres_proms)) then exit;
       update_video:=update_video_speakres;
       marcade.dswa:=$20;
-      marcade.dswa_val2:=@speakres_dip_a;
+      marcade.dswa_val:=@speakres_dip_a;
   end;
 end;
-//Sound Chips
-ay8910_0:=ay8910_chip.create(10000000 div 8,AY8910);
 //Paleta
 for f:=0 to 7 do begin
 		colores[f].r:=(f and 1)*$ff;
@@ -329,6 +331,7 @@ for f:=0 to 7 do begin
 end;
 set_pal(colores,8);
 //final
+reset_route16_hw;
 iniciar_route16_hw:=true;
 end;
 

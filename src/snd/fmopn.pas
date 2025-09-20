@@ -381,7 +381,7 @@ begin
 end;
 
 //FMCHAN
-function op_calc(phase:dword;env:word;pm:integer):integer;
+function op_calc(phase:dword;env:word;pm:integer):integer;inline;
 var
   tmp:integer;
   p:dword;
@@ -392,7 +392,7 @@ begin
     else op_calc:=tl_tab[p];
 end;
 
-function op_calc1(phase:dword;env:word;pm:integer):integer;
+function op_calc1(phase:dword;env:word;pm:integer):integer;inline;
 var
   p:dword;
   tmp:integer;
@@ -1054,7 +1054,7 @@ var
   tmp:single;
 begin
 	i:=4; // four operators per channel
-  repeat
+  while i<>0 do begin
     swap_flag:=0;
     SLOT:=CH.SLOT[4-i];
 		case SLOT.state of
@@ -1137,7 +1137,7 @@ begin
 		SLOT.vol_out:=out_+slot.tl;
 		SLOT.ssgn:=SLOT.ssgn xor swap_flag;
 		i:=i-1;
-	until (i=0);
+	end;
 end;
 
 procedure FMInitTable;

@@ -24,7 +24,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to 261 do begin
     vdp_5313_0.handle_scanline(f);
     //main
@@ -86,7 +86,7 @@ case direccion of
   $a00000..$a0ffff:if (not(z80_has_bus) and not(z80_is_reset)) then genesis_getword:=memoria[((direccion and $7fff) shl 1) or 1] or memoria[(direccion and $7fff) shl 1]
                     else genesis_getword:=random($10000);
   $a10000..$a1001f:genesis_getword:=io_control[(direccion and $1f) shr 1];
-  $a11100:if m68000_0.read_8bits_hi_dir then
+  $a11100:if m68000_0.access_8bits_hi_dir then
   halt(0)
             else begin
               if (z80_has_bus or z80_is_reset) then genesis_getword:=random($10000) or $100
@@ -103,12 +103,12 @@ begin
 case direccion of
   0..$3fffff:;
   $a00000..$a0ffff:if (not(z80_has_bus) and not(z80_is_reset)) then begin
-                      if m68000_0.write_8bits_hi_dir then memoria[((direccion and $7fff) shl 1) or 1]:=valor and $ff
+                      if m68000_0.access_8bits_hi_dir then memoria[((direccion and $7fff) shl 1) or 1]:=valor and $ff
                         else memoria[(direccion and $7fff) shl 1]:=valor shr 8;
                    end;
   $a10000..$a1001f:halt(0);
   $a11100:begin
-            if (not(m68000_0.write_8bits_hi_dir) and not(m68000_0.write_8bits_lo_dir)) then begin
+            if (not(m68000_0.access_8bits_hi_dir) and not(m68000_0.access_8bits_lo_dir)) then begin
               if (valor and $0100)<>0 then z80_has_bus:=false
                 else z80_has_bus:=true;
             end else
@@ -116,7 +116,7 @@ case direccion of
             check_z80_bus_reset;
           end;
   $a11200:begin
-            if (not(m68000_0.write_8bits_hi_dir) and not(m68000_0.write_8bits_lo_dir)) then begin
+            if (not(m68000_0.access_8bits_hi_dir) and not(m68000_0.access_8bits_lo_dir)) then begin
               if (valor and $0100)<>0 then z80_is_reset:=false
                 else z80_is_reset:=true;
             end else halt(0);  //megadriv_68k_req_z80_reset
@@ -141,10 +141,15 @@ begin
 	  else m68000_0.irq[6]:=CLEAR_LINE;
 end;
 
+procedure genesis_configurar;
+begin
+end;
+
 procedure reset_genesis;
 begin
  m68000_0.reset;
  vdp_5313_0.reset;
+ reset_audio;
  io_control[0]:=$a1;
  io_control[1]:=$7f;
  io_control[2]:=$7f;
@@ -167,7 +172,7 @@ begin
  check_z80_bus_reset;
 end;
 
-procedure abrir_genesis;
+function abrir_genesis:boolean;
 begin
 end;
 
@@ -194,6 +199,8 @@ read_file('D:\Datos\dsp\genesis\Flicky (UE) [!].bin',pbyte(@rom),longitud);
 for f:=0 to ((longitud-1) shr 1) do begin
   rom[f]:=(rom[f] shr 8) or ((rom[f] and $ff) shl 8);
 end;
+reset_genesis;
+iniciar_genesis:=true;
 end;
 
 procedure cerrar_genesis;
@@ -210,6 +217,7 @@ llamadas_maquina.bucle_general:=genesis_principal;
 llamadas_maquina.close:=cerrar_genesis;
 llamadas_maquina.reset:=reset_genesis;
 llamadas_maquina.cartuchos:=abrir_genesis;
+llamadas_maquina.configurar:=genesis_configurar;
 end;
 
 end.

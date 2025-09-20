@@ -34,7 +34,7 @@ var
  adpcm_rom:array[0..1] of pbyte;
  nmk112_bank:array[0..7] of byte;
 
-procedure bank_nmk112(offset,valor:byte);
+procedure bank_nmk112(offset,valor:byte);inline;
 var
   chip,banknum:byte;
   bankaddr:dword;
@@ -43,7 +43,7 @@ begin
   chip:=(offset and 4) shr 2;
   banknum:=offset and 3;
   bankaddr:=((valor and $ff)*$10000) mod $100000;
-  // copy the samples
+  // copy the samples */
   ptemp:=adpcm_rom[chip];
   inc(ptemp,bankaddr+$400);
   if chip=0 then ptemp2:=oki_6295_0.get_rom_addr
@@ -59,7 +59,7 @@ begin
   copymemory(ptemp2,ptemp,$100);
 end;
 
-procedure draw_sprites(priority:byte);
+procedure draw_sprites(priority:byte);inline;
 var
 	f:word;
   sx,sy,code,color,w,h,pri,x:word;
@@ -95,7 +95,7 @@ begin
 	end;
 end;
 
-procedure update_video_sbombers;
+procedure update_video_sbombers;inline;
 var
   f,color,x,y,nchar,atrib:word;
   bank:byte;
@@ -151,7 +151,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
       m68000_0.run(frame_m);
       frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
@@ -181,7 +181,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -239,10 +239,10 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
- reset_game_general;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
  bg_bank:=0;
  for f:=0 to 7 do begin
   nmk112_bank[f]:=0;
@@ -367,7 +367,7 @@ llamadas_maquina.reset:=reset_nmk16;
 llamadas_maquina.fps_max:=56;
 iniciar_nmk16:=false;
 iniciar_audio(false);
-if main_vars.tipo_maquina=71 then main_screen.rot270_screen:=true;
+if main_vars.tipo_maquina=71 then main_screen.rol90_screen:=true;
 screen_init(1,512,512);
 screen_init(2,512,512,false,true);
 iniciar_video(384,224);

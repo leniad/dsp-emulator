@@ -30,7 +30,7 @@ const
         (mask:$20;name:'Demo Music';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-procedure update_video_higemaru;
+procedure update_video_higemaru;inline;
 var
   f,nchar:word;
   color,x,y,attr:byte;
@@ -43,13 +43,11 @@ for f:=$3ff downto 0 do begin
     attr:=memoria[f+$d400];
     color:=(attr and $1f) shl 2;
     nchar:=memoria[f+$d000]+((attr and $80) shl 1);
-    put_gfx_flip(x*8,y*8,nchar,color,1,0,(attr and $40)<>0,(attr and $20)<>0);
-    if (attr and $80)=0 then put_gfx_block_trans(x*8,y*8,2,8,8)
-        else put_gfx_trans_flip(x*8,y*8,nchar,color,2,0,(attr and $40)<>0,(attr and $20)<>0);
+    put_gfx(x*8,y*8,nchar,color,1,0);
     gfx[0].buffer[f]:=false;
   end;
 end;
-actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
+actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
 //sprites
 for f:=$17 downto 0 do begin
     attr:=memoria[$d884+(f*16)];
@@ -58,10 +56,9 @@ for f:=$17 downto 0 do begin
     x:=memoria[$d88c+(f*16)];
     y:=memoria[$d888+(f*16)];
     put_gfx_sprite(nchar,color,(attr and $10)<>0,(attr and $20)<>0,1);
-    actualiza_gfx_sprite(x,y,3,1);
+    actualiza_gfx_sprite(x,y,2,1);
 end;
-actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
-actualiza_trozo_final(0,16,256,224,3);
+actualiza_trozo_final(0,16,256,224,2);
 end;
 
 procedure eventos_higemaru;
@@ -94,7 +91,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
     z80_0.run(frame_m);
@@ -102,10 +99,14 @@ while EmuStatus=EsRunning do begin
     //snd
     case f of
       239:begin
-            z80_0.change_irq_vector(HOLD_LINE,$cf);
+            z80_0.im0:=$cf;  //rst 8
+            z80_0.change_irq(HOLD_LINE);
             update_video_higemaru;
           end;
-      255:z80_0.change_irq_vector(HOLD_LINE,$d7);
+      255:begin
+           z80_0.im0:=$d7;  //rst 10
+           z80_0.change_irq(HOLD_LINE);
+        end;
     end;
   end;
   eventos_higemaru;
@@ -152,9 +153,9 @@ end;
 procedure reset_higemaru;
 begin
  z80_0.reset;
- ay8910_0.reset;
- ay8910_1.reset;
- reset_game_general;
+ AY8910_0.reset;
+ AY8910_1.reset;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -176,22 +177,20 @@ llamadas_maquina.reset:=reset_higemaru;
 iniciar_higemaru:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_init(2,256,256,true);
-screen_init(3,256,256,false,true);
+screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
 z80_0:=cpu_z80.create(3000000,256);
 z80_0.change_ram_calls(higemaru_getbyte,higemaru_putbyte);
 z80_0.init_sound(higemaru_sound);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,AY8910);
-AY8910_1:=ay8910_chip.create(1500000,AY8910);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
 //cargar ROMS
 if not(roms_load(@memoria,higemaru_rom)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,higemaru_char)) then exit;
 init_gfx(0,8,8,$200);
-gfx[0].trans[15]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites

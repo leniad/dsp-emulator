@@ -2,7 +2,7 @@ unit upd7759;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     sound_engine,dialogs;
+     sound_engine;
 
 const
   CLOCK_UPD=640000;
@@ -95,13 +95,12 @@ type
   end;
 
 var
-  upd7759_0,upd7759_1:upd7759_chip;
+  upd7759_0:upd7759_chip;
 
 implementation
 
 constructor upd7759_chip.create(amp:single;slave:byte=1;call_drq:tcall_drq=nil);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
 	// compute the stepping rate based on the chip's clock speed
 	self.step:=4*FRAC_ONE;
 	// compute the ROM base or allocate a timer
@@ -437,11 +436,10 @@ begin
 	// flush the state back */
 	self.clocks_left:= clocks_left;
 	self.pos:=pos;
-  out_:=trunc(out_*self.amp);
-  if out_>$7fff then out_:=$7fff
-    else if out_<-$7fff then out_:=-$7fff;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=out_;
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=out_;
+  if out_>32767 then out_:=32767
+    else if out_<-32768 then out_:=-32768;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(out_*self.amp);
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(out_*self.amp);
 end;
 
 end.

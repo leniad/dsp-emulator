@@ -2,8 +2,8 @@ unit acercade;
 
 interface
 
-uses Forms,StdCtrls,ExtCtrls,lenguaje,main_engine, Vcl.Imaging.GIFImg,
-  Vcl.Graphics, Vcl.Controls, System.Classes;
+uses Classes,Graphics,Forms,Controls,StdCtrls,Buttons,ExtCtrls,lenguaje,
+     main_engine, Vcl.Imaging.GIFImg;
 
 type
   TAboutBox = class(TForm)
@@ -28,7 +28,6 @@ var
   AboutBox: TAboutBox;
 
 implementation
-uses principal;
 {$R *.dfm}
 
 procedure TAboutBox.OKButtonClick(Sender: TObject);
@@ -37,17 +36,9 @@ aboutbox.close;
 end;
 
 procedure TAboutBox.FormShow(Sender: TObject);
-var
-  f:integer;
 begin
-f:=(principal1.left+(principal1.width div 2))-(AboutBox.Width div 2);
-if f<0 then AboutBox.Left:=0
-  else AboutBox.Left:=f;
-f:=(principal1.top+(principal1.Height div 2))-(AboutBox.Height div 2);
-if f<0 then AboutBox.Top:=0
-  else AboutBox.Top:=f;
 label1.Caption:='v'+DSP_VERSION;
-aboutbox.caption:=leng.archivo[3];
+aboutbox.caption:=leng[main_vars.idioma].archivo[3];
 (Image1.Picture.Graphic as TGIFImage).Animate:= True;
 end;
 

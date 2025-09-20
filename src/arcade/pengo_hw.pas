@@ -1,12 +1,9 @@
 unit pengo_hw;
 interface
-
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sega_decrypt;
-
 function iniciar_pengo:boolean;
-
 implementation
 const
         pengo_rom:array[0..7] of tipo_roms=(
@@ -33,8 +30,7 @@ var
  irq_enable:boolean;
  rom_opcode:array[0..$7fff] of byte;
  colortable_bank,gfx_bank,pal_bank:byte;
-
-procedure update_video_pengo;
+procedure update_video_pengo;inline;
 var
   x,y,f,color,nchar,offs:word;
   sx,sy,atrib:byte;
@@ -65,15 +61,14 @@ for f:=7 downto 0 do begin
 end;
 actualiza_trozo_final(0,0,224,288,2);
 end;
-
 procedure eventos_pengo;
 begin
 if event.arcade then begin
   //marcade.in0
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
@@ -82,26 +77,26 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
 end;
 end;
-
 procedure pengo_principal;
 var
+  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    eventos_pengo;
-    if f=224 then begin
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
+    if f=223 then begin
       update_video_pengo;
       if irq_enable then z80_0.change_irq(HOLD_LINE);
     end;
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
+  eventos_pengo;
   video_sync;
 end;
 end;
-
 function pengo_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -114,7 +109,6 @@ case direccion of
    $90c0..$90ff:pengo_getbyte:=marcade.in0;
 end;
 end;
-
 procedure pengo_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -136,25 +130,23 @@ case direccion of
              colortable_bank:=valor;
              fillchar(gfx[0].buffer,$400,1);
          end;
-   $9047:if gfx_bank<>(valor and $1) then begin
+   $9047:if (gfx_bank<>(valor and $1)) then begin
              gfx_bank:=valor and $1;
              fillchar(gfx[0].buffer,$400,1);
          end;
    $9070:; //watchdog
 end;
 end;
-
 procedure pengo_sound_update;
 begin
   namco_snd_0.update;
 end;
-
 //Main
 procedure reset_pengo;
 begin
  z80_0.reset;
  namco_snd_0.reset;
- frame_main:=z80_0.tframes;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  irq_enable:=false;
@@ -162,7 +154,6 @@ begin
  pal_bank:=0;
  colortable_bank:=0;
 end;
-
 function iniciar_pengo:boolean;
 var
   colores:tpaleta;
@@ -217,17 +208,17 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances,@gweights,0,0,
 			2,@resistances[1],@bweights,0,0);
 for f:=0 to $1f do begin
-		// red component
+		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
 		colores[f].r:=combine_3_weights(@rweights, bit0, bit1, bit2);
-		// green component
+		// green component */
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
 		colores[f].g:=combine_3_weights(@gweights, bit0, bit1, bit2);
-		// blue component
+		// blue component */
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
 		colores[f].b:=combine_2_weights(@bweights, bit0, bit1);
@@ -245,7 +236,7 @@ marcade.dswb:=$cc;
 marcade.dswa_val:=@pengo_dip_a;
 marcade.dswb_val:=@pengo_dip_b;
 //final
+reset_pengo;
 iniciar_pengo:=true;
 end;
-
 end.

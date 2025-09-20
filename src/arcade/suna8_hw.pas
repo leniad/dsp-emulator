@@ -73,7 +73,7 @@ var
  dac_pos:word;
 
 //Hard Head
-procedure update_video_hardhead;
+procedure update_video_hardhead;inline;
 var
   x,y,nchar,bank:word;
   f,ty,tx:byte;
@@ -191,7 +191,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -434,7 +434,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_dac:=z80_2.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to 255 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -576,7 +576,7 @@ begin
    dac_2.reset;
    dac_3.reset;
  end;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -638,7 +638,7 @@ case main_vars.tipo_maquina of
         timers.init(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,nil,true);
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(1500000,AY8910);
+        ay8910_0:=ay8910_chip.create(1500000,AY8910,0.8);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
         //Y para el DAC 8Khz
         dac_timer:=timers.init(z80_1.numero_cpu,3000000/8000,dac_sound,nil,false);
@@ -691,7 +691,7 @@ case main_vars.tipo_maquina of
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
         ym3812_0.change_irq_calls(hardhead2_snd);
-        ay8910_0:=ay8910_chip.create(1500000,AY8910);
+        ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
         dac_0:=dac_chip.create(1);
         dac_1:=dac_chip.create(1);
         dac_2:=dac_chip.create(1);

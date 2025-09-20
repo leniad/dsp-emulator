@@ -25,7 +25,7 @@ type
     procedure DirectoryEdit1Change(Sender: TObject);
     procedure FileListBox1Click(Sender: TObject);
     procedure FileListBox1DblClick(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FileListBox1KeyUp(Sender:TObject;var Key:Word;Shift:TShiftState);
     procedure FormShow(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
   private
@@ -74,8 +74,7 @@ end;
 procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
-  crc:dword;
-  longitud:integer;
+  longitud,crc:integer;
   nothing1,nothing2:boolean;
   file_inside_zip:string;
 begin
@@ -127,32 +126,31 @@ end;
 procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
   correcto:boolean;
-  cadena:string;
 begin
 correcto:=false;
 if ((file_extension<>'DSK') and (file_extension<>'IPF')) then exit;
 if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
 if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if correcto then begin
-    cadena:=file_extension+':'+end_file_name;
+    llamadas_maquina.open_file:=file_extension+':'+end_file_name;
     ResetFDC;
     dsk[0].ImageName:=end_file_name;
     load_dsk.Button1Click(self);
 end else begin
   MessageDlg('Error abriendo el disco: "'+end_file_name+'".', mtError,[mbOk], 0);
-  cadena:='';
+  llamadas_maquina.open_file:='';
 end;
-change_caption(cadena);
+change_caption;
 freemem(datos_dsk);
 datos_dsk:=nil;
 end;
 
-procedure Tload_dsk.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
-  );
+procedure Tload_dsk.FileListBox1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
 case key of
-    13:FileListBox1DblClick(self);
-    27:Button1Click(self);
+  13:FileListBox1DblClick(self);
+  27:Button1Click(self);
 end;
 end;
 
@@ -160,10 +158,10 @@ procedure Tload_dsk.FormShow(Sender: TObject);
 begin
 stringgrid1.ColWidths[0]:=stringgrid1.Width-60;
 stringgrid1.ColWidths[1]:=60;
-stringgrid1.Cells[0,0]:=leng.varios[0];
-stringgrid1.Cells[1,0]:=leng.varios[1];
-Button2.Caption:=leng.mensajes[7];
-Button1.Caption:=leng.mensajes[8];
+stringgrid1.Cells[0,0]:=leng[main_vars.idioma].varios[0];
+stringgrid1.Cells[1,0]:=leng[main_vars.idioma].varios[1];
+Button2.Caption:=leng[main_vars.idioma].mensajes[7];
+Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 case main_vars.tipo_maquina of
   2:begin
          FileListBox1.Directory:=Directory.spectrum_disk;
@@ -188,7 +186,7 @@ end;
 
 procedure Tload_dsk.StringGrid1DblClick(Sender: TObject);
 var
-  crc:dword;
+  crc:integer;
   file_inside_zip:string;
 begin
 if stringgrid1.RowCount=1 then exit;

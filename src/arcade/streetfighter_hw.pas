@@ -67,7 +67,7 @@ procedure update_video_sfighter;
 var
   f,x,y,nchar,atrib,color,pos,nchar1,nchar2,nchar3,nchar4:word;
   flipx,flipy:boolean;
-function sf_invert(char:word):word;
+function sf_invert(char:word):word;inline;
 const
   delta:array[0..3] of byte=($00,$18,$18,$00);
 begin
@@ -203,7 +203,7 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_1.tframes;
 frame_a:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main CPU
    m68000_0.run(frame_m);
@@ -241,9 +241,7 @@ case direccion of
 end;
 end;
 
-procedure sfighter_putword(direccion:dword;valor:word);
-
-procedure cambiar_color(tmp_color,numero:word);
+procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
@@ -257,6 +255,7 @@ begin
   end;
 end;
 
+procedure sfighter_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$4ffff:; //ROM
@@ -336,16 +335,16 @@ procedure sf_misc_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:begin
-        msm5205_0.reset_w((valor and $80)<>0);
-        msm5205_0.data_w(valor);
-	      msm5205_0.vclk_w(true);
-	      msm5205_0.vclk_w(false);
+        msm_5205_0.reset_w((valor shr 7) and 1);
+        msm_5205_0.data_w(valor);
+	      msm_5205_0.vclk_w(1);
+	      msm_5205_0.vclk_w(0);
      end;
   1:begin
-        msm5205_1.reset_w((valor and $80)<>0);
-        msm5205_1.data_w(valor);
-	      msm5205_1.vclk_w(true);
-	      msm5205_1.vclk_w(false);
+        msm_5205_1.reset_w((valor shr 7) and 1);
+        msm_5205_1.data_w(valor);
+	      msm_5205_1.vclk_w(1);
+	      msm_5205_1.vclk_w(0);
     end;
   2:misc_bank:=valor+1;
 end;
@@ -359,8 +358,6 @@ end;
 procedure sound_instruccion;
 begin
   ym2151_0.update;
-  msm5205_0.update;
-  msm5205_1.update;
 end;
 
 procedure sf_adpcm_timer;
@@ -375,9 +372,9 @@ begin
  z80_1.reset;
  z80_0.reset;
  ym2151_0.reset;
- msm5205_0.reset;
- msm5205_1.reset;
- reset_game_general;
+ msm_5205_0.reset;
+ msm_5205_1.reset;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ff7f;
@@ -426,10 +423,8 @@ timers.init(z80_0.numero_cpu,3579545/8000,sf_adpcm_timer,nil,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,0);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,0);
-msm5205_0.change_advance(nil);
-msm5205_1.change_advance(nil);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 //cargar roms
 if not(roms_load16w(@rom,sfighter_rom)) then exit;
 //Sound CPUs

@@ -2,24 +2,25 @@ object configgb: Tconfiggb
   Left = 0
   Top = 0
   Caption = 'Config GB/GBC'
-  ClientHeight = 185
-  ClientWidth = 304
+  ClientHeight = 231
+  ClientWidth = 333
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  KeyPreview = True
+  OldCreateOrder = False
   OnKeyUp = FormKeyUp
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 13
   object GroupBox7: TGroupBox
     Left = 47
     Top = 31
     Width = 170
     Height = 64
-    Caption = 'Screen'
+    Caption = 'LensLok'
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 14
@@ -39,8 +40,8 @@ object configgb: Tconfiggb
     end
   end
   object Button1: TButton
-    Left = 24
-    Top = 118
+    Left = 37
+    Top = 134
     Width = 105
     Height = 49
     Caption = 'OK'
@@ -48,8 +49,8 @@ object configgb: Tconfiggb
     OnClick = Button1Click
   end
   object Button2: TButton
-    Left = 167
-    Top = 118
+    Left = 191
+    Top = 134
     Width = 105
     Height = 49
     Caption = 'CANCEL'

@@ -28,10 +28,10 @@ function read_file(nombre_file:string;donde:pbyte;var longitud:integer):boolean;
 function write_file(nombre_file:string;donde:pbyte;longitud:integer):boolean;
 function file_name_only(cadena:string):string;
 //Parte ZIP
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
-function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;var crc:dword;warning:boolean=true):boolean;
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
+function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
+function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
 //Parte ZLIB
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
 procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:pointer;var out_size:integer);
@@ -93,7 +93,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.SG1000:=fich_ini.readString('Dir','SG1000',directory.Base+'sg1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.gg:=fich_ini.readString('Dir','gg',directory.Base+'gg'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.scv:=fich_ini.readString('Dir','scv',directory.Base+'scv'+main_vars.cadena_dir)+main_vars.cadena_dir;
-  Directory.coleco:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.Coleco_snap:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.spectrum_48:=fich_ini.ReadString('Dir','spectrum_rom_48',directory.Base+'roms'+main_vars.cadena_dir+'spectrum.zip');
   Directory.spectrum_128:=fich_ini.ReadString('Dir','spectrum_rom_128',directory.Base+'roms'+main_vars.cadena_dir+'spec128.zip');
   Directory.spectrum_3:=fich_ini.ReadString('Dir','spectrum_rom_plus3',directory.Base+'roms'+main_vars.cadena_dir+'plus3.zip');
@@ -106,15 +106,20 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.amstrad_rom:=fich_ini.readString('dir','Amstrad_ROM_dir',directory.Base+'snap'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_tap:=fich_ini.readString('dir','c64_tap',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_disk:=fich_ini.readString('dir','c64_disk',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
-  Directory.oric_tap:=fich_ini.readString('dir','oric_tap',directory.Base+'oric'+main_vars.cadena_dir)+main_vars.cadena_dir;
-  Directory.pv1000:=fich_ini.readString('dir','pv1000',directory.Base+'pv1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
-  Directory.pv2000:=fich_ini.readString('dir','pv2000',directory.Base+'pv2000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
-  if ((main_vars.idioma>max_idiomas) and (main_vars.idioma<>200)) then main_vars.idioma:=1;
-  sound_status.sonido_activo:=fich_ini.ReadInteger('dsp','sonido_ena',1)=1;
-  if sound_status.sonido_activo then principal1.consonido1.checked:=true
-    else principal1.SinSonido1.Checked:=true;
+  if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
+  sound_status.calidad_audio:=fich_ini.ReadInteger('dsp','sonido',1);
+  if sound_status.calidad_audio>3 then sound_status.calidad_audio:=3;
+  case sound_status.calidad_audio of
+    0:principal1.N110251.Checked:=true;
+    1:principal1.N220501.Checked:=true;
+    2:principal1.N441001.Checked:=true;
+    3:begin
+      principal1.SinSonido1.Checked:=true;
+      sound_status.hay_sonido:=false;
+      end;
+  end;
   main_screen.video_mode:=fich_ini.ReadInteger('dsp','video',1);
   if ((main_screen.video_mode<1) or (main_screen.video_mode>5)) then main_screen.video_mode:=1;
   main_screen.pantalla_completa:=false;
@@ -122,8 +127,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   main_vars.auto_exec:=(fich_ini.ReadInteger('dsp','auto_exec',0)=1);
   main_vars.show_crc_error:=(fich_ini.ReadInteger('dsp','show_crc_error',1)=1);
   main_vars.center_screen:=(fich_ini.ReadInteger('dsp','center_screen',1)=1);
-  main_vars.console_init:=(fich_ini.ReadInteger('dsp','console_init',0)=1);
-  main_vars.sort:=fich_ini.ReadInteger('dsp','sort',0);
+  main_vars.x11:=(fich_ini.ReadInteger('dsp','x11',0)=1);
   //configuracion spectrum
   var_spectrum.issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
   var_spectrum.tipo_joy:=fich_ini.ReadInteger('spectrum','joystick',0);
@@ -135,15 +139,15 @@ if fileexists(directory.Base+'dsp.ini') then begin
   var_spectrum.turbo_sound:=(fich_ini.ReadInteger('spectrum','turbo_sound',0)=1);
   ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
-  for f:=0 to 15 do cpc_rom[f].name:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
+  for f:=0 to 6 do cpc_rom[f].name:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
   cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
   cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
   cpc_crt.color_monitor:=fich_ini.ReadInteger('cpc','cpccolor',1)=1;
   cpc_crt.bright:=fich_ini.ReadInteger('cpc','cpcbright',1);
   //Configuracion SMS
-  sms_0.model:=fich_ini.ReadInteger('sms','model',1);
+  sms_model:=fich_ini.ReadInteger('sms','model',1);
   //Configuracion GB
-  gb_0.palette:=fich_ini.ReadInteger('gb','palette',0);
+  gb_palette:=fich_ini.ReadInteger('gb','palette',0);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
@@ -161,10 +165,6 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3) and $ff;
   arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4) and $ff;
   arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5) and $ff;
-  arcade_input.jcoin[0]:=fich_ini.ReadInteger('keyboard','jcoin_0',6) and $ff;
-  arcade_input.jcoin[1]:=fich_ini.ReadInteger('keyboard','jcoin_1',6) and $ff;
-  arcade_input.jstart[0]:=fich_ini.ReadInteger('keyboard','jstart_0',7) and $ff;
-  arcade_input.jstart[1]:=fich_ini.ReadInteger('keyboard','jstart_1',7) and $ff;
   arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',KEYBOARD_5) and $ff;
   arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',KEYBOARD_6) and $ff;
   arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',KEYBOARD_1) and $ff;
@@ -206,8 +206,10 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
-    arcade_input.joy_x[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
-    arcade_input.joy_y[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
+    arcade_input.joy_left[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
+    arcade_input.joy_right[f]:=fich_ini.ReadInteger('keyboard','joy_right_'+inttostr(f),0);
+    arcade_input.joy_up[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
+    arcade_input.joy_down[f]:=fich_ini.ReadInteger('keyboard','joy_down_'+inttostr(f),0);
   end;
   //Cerrar fichero
   fich_ini.free;
@@ -215,7 +217,7 @@ end else begin
   Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
   Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
   Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
-  Directory.coleco:=directory.Base+'coleco'+main_vars.cadena_dir;
+  Directory.Coleco_snap:=directory.Base+'coleco'+main_vars.cadena_dir;
   Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
   Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
   Directory.gg:=directory.base+'gg'+main_vars.cadena_dir;
@@ -238,17 +240,13 @@ end else begin
   Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
   Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
   Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
-  Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
-  Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
-  Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
-  sound_status.sonido_activo:=true;
+  sound_status.calidad_audio:=1;
   main_screen.pantalla_completa:=false;
   main_vars.show_crc_error:=true;
   main_vars.center_screen:=true;
-  main_vars.console_init:=true;
-  main_vars.sort:=0;
+  main_vars.x11:=false;
   //configuracion basica spectrum
   var_spectrum.audio_128k:=0;
   var_spectrum.audio_load:=true;
@@ -260,15 +258,15 @@ end else begin
   var_spectrum.speaker_oversample:=false;
   var_spectrum.turbo_sound:=false;
   //Configuracion CPC
-  for f:=0 to 15 do cpc_rom[f].name:='';
+  for f:=0 to 6 do cpc_rom[f].name:='';
   cpc_ga.cpc_model:=0;
   cpc_ga.ram_exp:=0;
   cpc_crt.color_monitor:=true;
   cpc_crt.bright:=1;
   //Configuracion basica SMS
-  sms_0.model:=0;
+  sms_model:=0;
   //Config GB
-  gb_0.palette:=0;
+  gb_palette:=0;
   //Teclas
   arcade_input.nup[0]:=KEYBOARD_UP;
   arcade_input.ndown[0]:=KEYBOARD_DOWN;
@@ -286,10 +284,6 @@ end else begin
   arcade_input.jbut3[0]:=3;
   arcade_input.jbut4[0]:=4;
   arcade_input.jbut5[0]:=5;
-  arcade_input.jcoin[0]:=6;
-  arcade_input.jcoin[1]:=6;
-  arcade_input.jstart[0]:=7;
-  arcade_input.jstart[1]:=7;
   arcade_input.ncoin[0]:=KEYBOARD_5;
   arcade_input.ncoin[1]:=KEYBOARD_6;
   arcade_input.nstart[0]:=KEYBOARD_1;
@@ -329,8 +323,10 @@ end else begin
   timers.autofire_on:=false;
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
-    arcade_input.joy_x[f]:=0;
-    arcade_input.joy_y[f]:=0;
+    arcade_input.joy_left[f]:=0;
+    arcade_input.joy_right[f]:=0;
+    arcade_input.joy_up[f]:=0;
+    arcade_input.joy_down[f]:=0;
   end;
 end;
 if ((directory.Nes='') or (directory.Nes=main_vars.cadena_dir)) then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
@@ -340,7 +336,7 @@ if ((Directory.sms='') or (directory.sms=main_vars.cadena_dir)) then Directory.s
 if ((Directory.sg1000='') or (directory.sg1000=main_vars.cadena_dir)) then Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
 if ((Directory.gg='') or (directory.gg=main_vars.cadena_dir)) then Directory.gg:=directory.base+'gg'+main_vars.cadena_dir;
 if ((Directory.scv='') or (directory.scv=main_vars.cadena_dir)) then Directory.scv:=directory.base+'scv'+main_vars.cadena_dir;
-if ((Directory.coleco='') or (directory.coleco=main_vars.cadena_dir)) then Directory.coleco:=directory.base+'coleco'+main_vars.cadena_dir;
+if ((Directory.coleco_snap='') or (directory.coleco_snap=main_vars.cadena_dir)) then Directory.coleco_snap:=directory.base+'coleco'+main_vars.cadena_dir;
 if ((Directory.spectrum_image='') or (directory.spectrum_image=main_vars.cadena_dir)) then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
 if ((Directory.qsnapshot='') or (directory.qsnapshot=main_vars.cadena_dir)) then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
 if ((Directory.spectrum_48='') or (directory.spectrum_48=main_vars.cadena_dir)) then Directory.spectrum_48:=directory.base+'roms'+main_vars.cadena_dir+'spectrum.zip';
@@ -356,12 +352,9 @@ if ((Directory.spectrum_disk='') or (directory.spectrum_disk=main_vars.cadena_di
 if ((Directory.amstrad_tap='') or (directory.amstrad_tap=main_vars.cadena_dir)) then Directory.amstrad_tap:=directory.base+'cdt'+main_vars.cadena_dir;
 if ((Directory.amstrad_disk='') or (directory.amstrad_disk=main_vars.cadena_dir)) then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
 if ((Directory.amstrad_snap='') or (directory.amstrad_snap=main_vars.cadena_dir)) then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
-if ((Directory.amstrad_rom='') or (directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
-if ((Directory.c64_tap='') or (directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
-if ((Directory.c64_disk='') or (directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
-if ((Directory.oric_tap='') or (directory.oric_tap=main_vars.cadena_dir)) then Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
-if ((Directory.pv1000='') or (directory.pv1000=main_vars.cadena_dir)) then Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
-if ((Directory.pv2000='') or (directory.pv2000=main_vars.cadena_dir)) then Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
+if ((Directory.amstrad_rom='') or( directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
+if ((Directory.c64_tap='') or( directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
+if ((Directory.c64_disk='') or( directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
 end;
 
 function test_dir(cadena:string):string;
@@ -397,7 +390,7 @@ fich_ini.Writestring('dir','gg',test_dir(Directory.gg));
 fich_ini.Writestring('dir','scv',test_dir(Directory.scv));
 fich_ini.Writestring('dir','qsnapshot',test_dir(Directory.qsnapshot));
 fich_ini.Writestring('dir','GameBoy',test_dir(Directory.GameBoy));
-fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.coleco));
+fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.coleco_snap));
 fich_ini.Writestring('dir','spectrum_rom_48',test_dir(Directory.spectrum_48));
 fich_ini.Writestring('dir','spectrum_rom_128',test_dir(Directory.spectrum_128));
 fich_ini.Writestring('dir','spectrum_rom_plus3',test_dir(Directory.spectrum_3));
@@ -411,18 +404,14 @@ fich_ini.Writestring('dir','ams_snap',test_dir(Directory.amstrad_snap));
 fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
 fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
-fich_ini.Writestring('dir','oric_tap',test_dir(Directory.oric_tap));
-fich_ini.Writestring('dir','pv1000',test_dir(Directory.pv1000));
-fich_ini.Writestring('dir','pv2000',test_dir(Directory.pv2000));
 //Config general
-fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.sonido_activo));
+fich_ini.WriteInteger('dsp','sonido',sound_status.calidad_audio);
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
 fich_ini.WriteInteger('dsp','maquina',main_vars.tipo_maquina);
 fich_ini.WriteInteger('dsp','auto_exec',byte(main_vars.auto_exec));
 fich_ini.WriteInteger('dsp','show_crc_error',byte(main_vars.show_crc_error));
 fich_ini.WriteInteger('dsp','center_screen',byte(main_vars.center_screen));
-fich_ini.WriteInteger('dsp','console_init',byte(main_vars.console_init));
-fich_ini.WriteInteger('dsp','sort',main_vars.sort);
+fich_ini.WriteInteger('dsp','x11',byte(main_vars.x11));
 //Config Spectrum
 fich_ini.WriteInteger('spectrum','issue',byte(var_spectrum.issue2));
 fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);
@@ -434,15 +423,15 @@ fich_ini.WriteInteger('spectrum','turbo_sound',byte(var_spectrum.turbo_sound));
 fich_ini.WriteInteger('spectrum','audio_128k',var_spectrum.audio_128k);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 //Configuracion CPC
-for f:=0 to 15 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom[f].name);
+for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom[f].name);
 fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
 fich_ini.WriteInteger('cpc','cpccolor',byte(cpc_crt.color_monitor));
 fich_ini.WriteInteger('cpc','cpcbright',cpc_crt.bright);
 //Config SMS
-fich_ini.WriteInteger('sms','model',sms_0.model);
+fich_ini.WriteInteger('sms','model',sms_model);
 //Config GB
-fich_ini.WriteInteger('gb','palette',gb_0.palette);
+fich_ini.WriteInteger('gb','palette',gb_palette);
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);
@@ -465,10 +454,6 @@ fich_ini.WriteInteger('keyboard','coin_0',arcade_input.ncoin[0]);
 fich_ini.WriteInteger('keyboard','coin_1',arcade_input.ncoin[1]);
 fich_ini.WriteInteger('keyboard','start_0',arcade_input.nstart[0]);
 fich_ini.WriteInteger('keyboard','start_1',arcade_input.nstart[1]);
-fich_ini.WriteInteger('keyboard','jcoin_0',arcade_input.jcoin[0]);
-fich_ini.WriteInteger('keyboard','jcoin_1',arcade_input.jcoin[1]);
-fich_ini.WriteInteger('keyboard','jstart_0',arcade_input.jstart[0]);
-fich_ini.WriteInteger('keyboard','jstart_1',arcade_input.jstart[1]);
 //Teclas P2
 fich_ini.WriteInteger('keyboard','up_1',arcade_input.nup[1]);
 fich_ini.WriteInteger('keyboard','down_1',arcade_input.ndown[1]);
@@ -507,8 +492,10 @@ fich_ini.WriteInteger('keyboard','num_joy_0',arcade_input.num_joystick[0]);
 fich_ini.WriteInteger('keyboard','num_joy_1',arcade_input.num_joystick[1]);
 //Joystick calibration
 for f:=0 to NUM_PLAYERS do begin
-  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_y[f]);
-  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_x[f]);
+  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_up[f]);
+  fich_ini.WriteInteger('keyboard','joy_down_'+inttostr(f),arcade_input.joy_down[f]);
+  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_left[f]);
+  fich_ini.WriteInteger('keyboard','joy_right_'+inttostr(f),arcade_input.joy_right[f]);
 end;
 //Cerrar
 fich_ini.Free;
@@ -593,7 +580,7 @@ write_file:=true;
 end;
 
 //Parte ZIP
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
+function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 var
   f:integer;
   extension,extension2:string;
@@ -669,13 +656,10 @@ if not(FileExists(nombre_zip)) then exit;
   ZipFile.Free;
 {$endif}
 search_file_from_zip:=res;
-if (warning and not(res)) then begin
-  MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-  //principal1.Enabled:=true;
-end;
+if (warning and not(res)) then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
 end;
 
-function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
+function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
 var
   f:integer;
   extension,extension2:string;
@@ -745,7 +729,7 @@ find_next_file_zip:=false;
 {$endif}
 end;
 
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;var crc:dword;warning:boolean=true):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
 var
   f:word;
   find:boolean;
@@ -774,14 +758,10 @@ begin
   if not(find) then begin
     ZipFile.Close;
     ZipFile.Free;
-    if warning then begin
-      MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-      //principal1.Enabled:=true;
-    end;
+    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
     exit;
   end;
   longitud:=ZipFile.FileInfos[f].UncompressedSize;
-  crc:=ZipFile.FileInfos[f].CRC32;
   SetLength(buffer,longitud);
   ZipFile.Read(f,buffer);
   copymemory(donde,@buffer[0],longitud);
@@ -800,15 +780,11 @@ begin
   end;
   if not(find) then begin
     ZipFile.Free;
-    if warning then begin
-      MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-      //principal1.Enabled:=true;
-    end;
+    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
     exit;
   end;
   zfile:=unzOpen(pchar(nombre_zip));
   longitud:=ZipFile.Entries[f].Size;
-  crc:=ZipFile.Entries[f].CRC32;
   unzLocateFile(zfile,pchar(ZipFile.Entries[f].ArchiveFileName),0);
   unzOpenCurrentFile(zfile);
   unzReadCurrentFile(zfile,pointer(donde),longitud);
@@ -818,7 +794,7 @@ begin
 load_file_from_zip:=true;
 end;
 
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
 var
   f:word;
   find:boolean;
@@ -833,8 +809,7 @@ begin
   load_file_from_zip_crc:=false;
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
-    if warning then MessageDlg(leng.errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
-    //principal1.Enabled:=true;
+    MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
     exit;
   end;
   find:=false;
@@ -842,7 +817,7 @@ begin
   ZipFile:=TZipFile.Create;
   ZipFile.Open(nombre_zip,zmRead);
   for f:=0 to (ZipFile.FileCount-1) do begin
-    if ZipFile.FileInfos[f].CRC32=crc then begin
+    if ZipFile.FileInfos[f].CRC32=cardinal(crc) then begin
       find:=true;
       break;
     end;

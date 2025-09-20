@@ -89,7 +89,7 @@ for f:=$0 to $3ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-for f:=0 to $1f do scroll_y[f]:=not(memoria[$d000+(32*(f and 3)+(f shr 2))]);
+for f:=0 to $1f do scroll_y[f]:=not(memoria[$d000+(32*(f mod 4)+(f div 4))]);
 scroll__y_part2(2,1,8,@scroll_y);
 for f:=$e downto $2 do begin
   i:=0;
@@ -112,7 +112,7 @@ for f:=$e downto $2 do begin
           flipy:=not(flipy);
           flipx:=not(flipx);
         end;
-        put_gfx_sprite(nchar,color,flipx,flipy,1);
+        put_gfx_sprite(nchar and $7f,color,flipx,flipy,1);
         actualiza_gfx_sprite(x,y,1,1);
       end else begin  //8x8 Parece ser que LB no usa los sprites pequeños!!!
         nchar:=buffer_sprites[$1+(h+i)]+16*(buffer_sprites[$2+(h+i)] and $10);
@@ -122,7 +122,7 @@ for f:=$e downto $2 do begin
           flipy:=not(flipy);
           flipx:=not(flipx);
         end;
-        put_gfx_sprite(nchar,color,flipx,flipy,2);
+        put_gfx_sprite(nchar and $1ff,color,flipx,flipy,2);
         actualiza_gfx_sprite(x,y+8,1,2);
       end;
     end;
@@ -164,7 +164,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -219,7 +219,7 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$7f;
  marcade.in2:=$ff;
@@ -239,28 +239,8 @@ const
 			7*16, 6*16, 5*16, 4*16, 3*16, 2*16, 1*16, 0*16);
   pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
   pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  pss_y:array[0..7] of dword=(7*16, 6*16, 5*16, 4*16, 3*16, 2*16, 1*16, 0*16);
   resistances:array[0..1] of integer=(470,220);
-procedure convert_chars;
-begin
-  init_gfx(0,8,8,512);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(2,0,8*8,0,512*8*8);
-  convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
-end;
-procedure convert_sprites;
-begin
-  init_gfx(1,16,16,128);
-  gfx[1].trans[0]:=true;
-  gfx_set_desc_data(2,0,64*8,1,0);
-  convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
-end;
-procedure convert_small_sprites;
-begin
-  init_gfx(2,8,8,512);
-  gfx[2].trans[0]:=true;
-  gfx_set_desc_data(2,0,16*8,1,0);
-  convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y[8],false,true);
-end;
 begin
 llamadas_maquina.bucle_general:=ladybug_principal;
 llamadas_maquina.reset:=reset_ladybug;
@@ -284,11 +264,21 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria,ladybug_rom)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,ladybug_char)) then exit;
-        convert_chars;
+        init_gfx(0,8,8,512);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(2,0,8*8,0,512*8*8);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
         //convertir sprites
         if not(roms_load(@memoria_temp,ladybug_sprites)) then exit;
-        convert_sprites;
-        convert_small_sprites;
+        init_gfx(1,16,16,128);
+        gfx[1].trans[0]:=true;
+        gfx_set_desc_data(2,0,64*8,1,0);
+        convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
+        //convetir sprites pequeños
+        init_gfx(2,8,8,512);
+        gfx[2].trans[0]:=true;
+        gfx_set_desc_data(2,0,16*8,1,0);
+        convert_gfx(2,0,@memoria_temp,@ps_x,@pss_y,false,true);
         //DIP
         marcade.dswa:=$df;
         marcade.dswb:=$ff;
@@ -302,11 +292,21 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria,snapjack_rom)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,snapjack_char)) then exit;
-        convert_chars;
+        init_gfx(0,8,8,512);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(2,0,8*8,0,512*8*8);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
         //convertir sprites
         if not(roms_load(@memoria_temp,snapjack_sprites)) then exit;
-        convert_sprites;
-        convert_small_sprites;
+        init_gfx(1,16,16,128);
+        gfx[1].trans[0]:=true;
+        gfx_set_desc_data(2,0,64*8,1,0);
+        convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
+        //convetir sprites pequeños
+        init_gfx(2,8,8,512);
+        gfx[2].trans[0]:=true;
+        gfx_set_desc_data(2,0,16*8,1,0);
+        convert_gfx(2,0,@memoria_temp,@ps_x,@pss_y,false,true);
         //DIP
         marcade.dswa:=$c7;
         marcade.dswb:=$ff;
@@ -320,11 +320,21 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria,cavenger_rom)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,cavenger_char)) then exit;
-        convert_chars;
+        init_gfx(0,8,8,512);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(2,0,8*8,0,512*8*8);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
         //convertir sprites
         if not(roms_load(@memoria_temp,cavenger_sprites)) then exit;
-        convert_sprites;
-        convert_small_sprites;
+        init_gfx(1,16,16,128);
+        gfx[1].trans[0]:=true;
+        gfx_set_desc_data(2,0,64*8,1,0);
+        convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
+        //convetir sprites pequeños
+        init_gfx(2,8,8,512);
+        gfx[2].trans[0]:=true;
+        gfx_set_desc_data(2,0,16*8,1,0);
+        convert_gfx(2,0,@memoria_temp,@ps_x,@pss_y,false,true);
         //DIP
         marcade.dswa:=$c7;
         marcade.dswb:=$ff;

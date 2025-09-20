@@ -3,7 +3,7 @@
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      sm510,main_engine,controls_engine,rom_engine,sound_engine,
-     gfx_engine;
+     gfx_engine,pal_engine;//,graphics,sysutils;
 
 type
   video_def=record
@@ -140,7 +140,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=sm510_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   //Main CPU
   sm510_0.run(frame_m);
   frame_m:=frame_m+sm510_0.tframes-sm510_0.contador;

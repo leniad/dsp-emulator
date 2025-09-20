@@ -11,30 +11,30 @@ implementation
 const
         expraid_rom:array[0..1] of tipo_roms=(
         (n:'cz01-2e.16b';l:$4000;p:$4000;crc:$a0ae6756),(n:'cz00-4e.15a';l:$8000;p:$8000;crc:$910f6ccc));
-        expraid_char:tipo_roms=(n:'cz07.5b';l:$4000;p:0;crc:$686bac23);
+        expraid_char:tipo_roms=(n:'cz07.5b';l:$4000;p:$0000;crc:$686bac23);
         expraid_tiles:array[0..2] of tipo_roms=(
-        (n:'cz04.8e';l:$8000;p:0;crc:$643a1bd3),(n:'cz05.8f';l:$8000;p:$10000;crc:$c44570bf),
+        (n:'cz04.8e';l:$8000;p:$0000;crc:$643a1bd3),(n:'cz05.8f';l:$8000;p:$10000;crc:$c44570bf),
         (n:'cz06.8h';l:$8000;p:$18000;crc:$b9bb448b));
         expraid_snd:tipo_roms=(n:'cz02-1.2a';l:$8000;p:$8000;crc:$552e6112);
-        expraid_tiles_mem:tipo_roms=(n:'cz03.12d';l:$8000;p:0;crc:$6ce11971);
+        expraid_tiles_mem:tipo_roms=(n:'cz03.12d';l:$8000;p:$0000;crc:$6ce11971);
         expraid_sprites:array[0..5] of tipo_roms=(
-        (n:'cz09.16h';l:$8000;p:0;crc:$1ed250d1),(n:'cz08.14h';l:$8000;p:$8000;crc:$2293fc61),
+        (n:'cz09.16h';l:$8000;p:$0000;crc:$1ed250d1),(n:'cz08.14h';l:$8000;p:$8000;crc:$2293fc61),
         (n:'cz13.16k';l:$8000;p:$10000;crc:$7c3bfd00),(n:'cz12.14k';l:$8000;p:$18000;crc:$ea2294c8),
         (n:'cz11.13k';l:$8000;p:$20000;crc:$b7418335),(n:'cz10.11k';l:$8000;p:$28000;crc:$2f611978));
         expraid_proms:array[0..3] of tipo_roms=(
-        (n:'cy-17.5b';l:$100;p:0;crc:$da31dfbc),(n:'cy-16.6b';l:$100;p:$100;crc:$51f25b4c),
+        (n:'cy-17.5b';l:$100;p:$000;crc:$da31dfbc),(n:'cy-16.6b';l:$100;p:$100;crc:$51f25b4c),
         (n:'cy-15.7b';l:$100;p:$200;crc:$a6168d7f),(n:'cy-14.9b';l:$100;p:$300;crc:$52aad300));
-        expraid_dip_a:array [0..5] of def_dip2=(
-        (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
-        (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
-        (mask:$10;name:'Coin Mode';number:2;val2:($10,0);name2:('Mode 1','Mode 2')),
-        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
-        expraid_dip_b:array [0..4] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','2','Infinite')),
-        (mask:4;name:'Bonus Life';number:2;val2:(0,4);name2:('50K 80K','50K')),
-        (mask:$18;name:'Difficulty';number:4;val4:($18,$10,8,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),());
+        expraid_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coin Mode';number:2;dip:((dip_val:$10;dip_name:'Mode 1'),(dip_val:$0;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        expraid_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$1;dip_name:'1'),(dip_val:$3;dip_name:'3'),(dip_val:$5;dip_name:'2'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'50K 80K'),(dip_val:$4;dip_name:'50K only'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Difficulty';number:4;dip:((dip_val:$18;dip_name:'Easy'),(dip_val:$10;dip_name:'Normal'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
   vb,prot_val,sound_latch,scroll_x,scroll_y,scroll_x2:byte;
@@ -43,7 +43,7 @@ var
   bg_tiles_cam:array[0..3] of boolean;
   old_val,old_val2:boolean;
 
-procedure update_video_expraid;
+procedure update_video_expraid;inline;
 var
   f,i,nchar,color,atrib:word;
   x,y,pos_ini:word;
@@ -59,7 +59,7 @@ for i:=0 to 3 do begin
     if i>1 then y:=y+256;
     x:=x+(256*(i and 1));
     atrib:=mem_tiles[$4000+pos_ini+f];
-    nchar:=mem_tiles[pos_ini+f]+((atrib and 3) shl 8);
+    nchar:=mem_tiles[pos_ini+f]+((atrib and $03) shl 8);
     color:=atrib and $18;
     put_gfx_flip(x,y,nchar,color,2,2,(atrib and 4)<>0,false);
     if (atrib and $80)<>0 then put_gfx_trans_flip(x,y,nchar,color,4,2,(atrib and 4)<>0,false)
@@ -79,7 +79,7 @@ for f:=0 to $7f do begin
     x:=((248-memoria[$602+(f*4)]) and $ff)-8;
     y:=memoria[$600+(f*4)];
     nchar:=memoria[$603+(f*4)]+((memoria[$601+(f*4)] and $e0) shl 3);
-    color:=((memoria[$601+(f*4)] and 3) + ((memoria[$601+(f*4)] and 8) shr 1)) shl 3;
+    color:=((memoria[$601+(f*4)] and $03) + ((memoria[$601+(f*4)] and $08) shr 1)) shl 3;
     put_gfx_sprite(nchar,64+color,(memoria[$601+(f*4)] and 4)<>0,false,1);
     actualiza_gfx_sprite(x,y,1,1);
     if (memoria[$601+(f*4)] and $10)<>0 then begin
@@ -95,7 +95,7 @@ for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
-    nchar:=memoria[$800+f]+((memoria[$c00+f] and 7) shl 8);
+    nchar:=memoria[$800+f]+((memoria[$c00+f] and $07) shl 8);
     color:=(memoria[$c00+f] and $10) shr 2;
     put_gfx_trans(x*8,y*8,nchar,128+color,6,0);
     gfx[0].buffer[f]:=false;
@@ -135,23 +135,26 @@ end;
 
 procedure principal_expraid;
 var
+  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m6502_0.tframes;
+frame_s:=m6809_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 261 do begin
+   m6502_0.run(frame_m);
+   frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
+   //Sound
+   m6809_0.run(frame_s);
+   frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
    case f of
-      8:vb:=0;
-      248:begin
+      7:vb:=0;
+      247:begin
             update_video_expraid;
-            vb:=2;
+            vb:=$2;
           end;
    end;
-   m6502_0.run(frame_main);
-   frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
-   //Sound
-   m6809_0.run(frame_snd);
-   frame_snd:=frame_snd+m6809_0.tframes-m6809_0.contador;
  end;
  eventos_expraid;
  video_sync;
@@ -167,7 +170,7 @@ case direccion of
    $1802:getbyte_expraid:=marcade.in2;
    $1803:getbyte_expraid:=marcade.dswb;
    $2800:getbyte_expraid:=prot_val;
-   $2801:getbyte_expraid:=2;
+   $2801:getbyte_expraid:=$2;
 end;
 end;
 
@@ -184,10 +187,10 @@ case direccion of
            sound_latch:=valor;
            m6809_0.change_nmi(ASSERT_LINE);
         end;
-  $2002:main_screen.flip_main_screen:=(valor and 1)<>0;
-  $2800..$2803:if bg_tiles[direccion and 3]<>(valor and $3f) then begin
-                  bg_tiles[direccion and 3]:=valor and $3f;
-                  bg_tiles_cam[direccion and 3]:=true;
+  $2002:main_screen.flip_main_screen:=(valor and $1)<>0;
+  $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
+                  bg_tiles[direccion and $3]:=valor and $3f;
+                  bg_tiles_cam[direccion and $3]:=true;
                end;
   $2804:scroll_y:=valor;
   $2805:scroll_x:=valor;
@@ -259,12 +262,12 @@ size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
-savedata_qsnapshot(data,size);
+savedata_com_qsnapshot(data,size);
 size:=ym3812_0.save_snapshot(data);
-savedata_qsnapshot(data,size);
+savedata_com_qsnapshot(data,size);
 //MEM
-savedata_qsnapshot(@memoria[0],$4000);
-savedata_qsnapshot(@mem_snd[0],$8000);
+savedata_com_qsnapshot(@memoria[0],$4000);
+savedata_com_qsnapshot(@mem_snd[0],$8000);
 //MISC
 buffer[0]:=vb;
 buffer[1]:=prot_val;
@@ -334,10 +337,8 @@ procedure reset_expraid;
 begin
 m6502_0.reset;
 m6809_0.reset;
-frame_main:=m6502_0.tframes;
-frame_snd:=m6809_0.tframes;
-ym2203_0.reset;
-ym3812_0.reset;
+YM2203_0.Reset;
+YM3812_0.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
@@ -409,12 +410,12 @@ convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //Cargar tiles
 if not(roms_load(@memoria_temp,expraid_tiles)) then exit;
 //Mover los datos de los tiles para poder usar las rutinas de siempre...
-offs:=$10-1;
-for f:=7 downto 0 do begin
+offs:=$10-$1;
+for f:=$7 downto 0 do begin
   copymemory(@memoria_temp[offs*$1000],@memoria_temp[f*$1000],$1000);
-	offs:=offs-1;
+	offs:=offs-$1;
   copymemory(@memoria_temp[offs*$1000],@memoria_temp[f*$1000],$1000);
-  offs:=offs-1;
+  offs:=offs-$1;
 end;
 init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
@@ -435,9 +436,9 @@ end;
 set_pal(colores,256);
 //DIP
 marcade.dswa:=$bf;
-marcade.dswa_val2:=@expraid_dip_a;
+marcade.dswa_val:=@expraid_dip_a;
 marcade.dswb:=$ff;
-marcade.dswb_val2:=@expraid_dip_b;
+marcade.dswb_val:=@expraid_dip_b;
 //final
 reset_expraid;
 iniciar_expraid:=true;

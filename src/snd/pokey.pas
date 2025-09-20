@@ -1,7 +1,7 @@
 unit pokey;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine,dialogs;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
 
 const
   // POKEY WRITE LOGICALS */
@@ -440,7 +440,6 @@ constructor pokey_chip.Create(clock:dword);
 var
   i:integer;
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   self.number:=chips_total;
   self.buf_pos:=0;
@@ -636,8 +635,8 @@ procedure pokey_chip.write_internal(offset:word;data:byte);
 var
   i:integer;
 begin
-	// determine which address was changed
-	case (offset and $f) of
+	// determine which address was changed */
+	case (offset and 15) of
 	  AUDF1_C:self.channel[CHAN1].AUDF:=data;
 	  AUDC1_C:self.channel[CHAN1].AUDC:=data;
 	  AUDF2_C:self.channel[CHAN2].AUDF:=data;
@@ -703,12 +702,10 @@ begin
     end;
   end;
 end;
-
 procedure pokey_chip.write(offset:word;data:byte);
 begin
   self.write_internal(offset,data);
 end;
-
 procedure pokey_chip.process_channel(ch:integer);
 begin
 	if (((self.channel[ch].AUDC and NOTPOLY5)<>0) or ((self.poly5[self.p5] and 1)<>0)) then begin

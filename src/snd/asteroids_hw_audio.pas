@@ -52,28 +52,28 @@ var
   counter_lif, out_lif:integer;
   tsample_as:byte;
 
-function EXP_ast(charge,n:integer):integer;
+function EXP_ast(charge,n:integer):integer;inline;
 begin
  if charge<>0 then EXP_ast:=$7fff-discharge[$7fff-n]
   else EXP_ast:=discharge[n];
 end;
 
-function NE555_T1(Ra,Rb:integer;C:single):integer;
+function NE555_T1(Ra,Rb:integer;C:single):integer;inline;
 begin
   NE555_T1:=round(VMAX*2/3/(0.639*((Ra)+(Rb))*(C)));
 end;
 
-function NE555_T2(Rb:integer;C:single):integer;
+function NE555_T2(Rb:integer;C:single):integer;inline;
 begin
   NE555_T2:=round(VMAX*2/3/(0.639*(Rb)*(C)));
 end;
 
-function NE555_F(Ra,Rb,C:integer):integer;
+function NE555_F(Ra,Rb,C:integer):integer;inline;
 begin
   NE555_F:=round(1.44/(((Ra)+2*(Rb))*(C)));
 end;
 
-function explosion:integer;
+function explosion:integer;inline;
 begin
 	counter_exp:=counter_exp-12000;
 	while (counter_exp <= 0) do begin
@@ -98,7 +98,7 @@ begin
 explosion:=0;
 end;
 
-function thrust:integer;
+function thrust:integer;inline;
 begin
   if (sound_latch[THRUSTEN]<>0) then begin
 		// SHPSND filter */
@@ -120,7 +120,7 @@ begin
   thrust:=0;
 end;
 
-function thump:integer;
+function thump:integer;inline;
 begin
   if (thump_latch and $10)<>0 then begin
 		counter_thu:=counter_thu-thump_frequency;
@@ -136,7 +136,7 @@ begin
   thump:=0;
 end;
 
-function saucer:integer;
+function saucer:integer;inline;
 var
 	v5:single;
   steps:integer;
@@ -194,7 +194,7 @@ begin
 	saucer:=0;
 end;
 
-function saucerfire:integer;
+function saucerfire:integer;inline;
 const
   C38_CHARGE_TIME=VMAX;
   C39_DISCHARGE_TIME=VMAX;
@@ -254,7 +254,7 @@ begin
 	saucerfire:=0;
 end;
 
-function shipfire:integer;
+function shipfire:integer;inline;
 const
   C47_CHARGE_TIME=(VMAX * 3);
   C48_DISCHARGE_TIME=(VMAX * 3);
@@ -315,7 +315,7 @@ begin
 	shipfire:=0;
 end;
 
-function life:integer;
+function life:integer;inline;
 begin
     if (sound_latch[LIFEEN]<>0) then begin
 		counter_lif:=counter_lif-3000;

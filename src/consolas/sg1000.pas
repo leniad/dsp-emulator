@@ -2,61 +2,52 @@ unit sg1000;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,main_engine,controls_engine,tms99xx,sn_76496,sysutils,misc_functions,
-     sound_engine;
+     nz80,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
+     misc_functions,sound_engine,file_engine;
 
-function iniciar_sg:boolean;
-
-type
-  tsg1000=record
-    ram_8k,mid_8k_ram,push_pause:boolean;
-    keys:array[0..1] of byte;
-  end;
-
-var
-  sg1000_0:tsg1000;
+procedure cargar_sg;
 
 implementation
-uses principal,snapshot;
+uses principal;
+
+var
+  ram_8k,mid_8k_ram:boolean;
 
 procedure eventos_sg;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $fe) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $1);
-  if arcade_input.down[0] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $fd) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $2);
-  if arcade_input.left[0] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $fb) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $4);
-  if arcade_input.right[0] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $f7) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $8);
-  if arcade_input.but0[0] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $ef) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $10);
-  if arcade_input.but1[0] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $df) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $20);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //P2
-  if arcade_input.up[1] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $bf) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $40);
-  if arcade_input.down[1] then sg1000_0.keys[0]:=(sg1000_0.keys[0] and $7f) else sg1000_0.keys[0]:=(sg1000_0.keys[0] or $80);
-  if arcade_input.left[1] then sg1000_0.keys[1]:=(sg1000_0.keys[1] and $fe) else sg1000_0.keys[1]:=(sg1000_0.keys[1] or $1);
-  if arcade_input.right[1] then sg1000_0.keys[1]:=(sg1000_0.keys[1] and $fd) else sg1000_0.keys[1]:=(sg1000_0.keys[1] or $2);
-  if arcade_input.but0[1] then sg1000_0.keys[1]:=(sg1000_0.keys[1] and $fb) else sg1000_0.keys[1]:=(sg1000_0.keys[1] or $4);
-  if arcade_input.but1[1] then sg1000_0.keys[1]:=(sg1000_0.keys[1] and $f7) else sg1000_0.keys[1]:=(sg1000_0.keys[1] or $8);
-  if arcade_input.coin[0] then sg1000_0.push_pause:=true
-    else begin
-      if sg1000_0.push_pause then z80_0.change_nmi(PULSE_LINE);
-      sg1000_0.push_pause:=false;
-    end;
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
 end;
 end;
 
 procedure sg_principal;
 var
+  frame:single;
   f:word;
 begin
-init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
-  eventos_sg;
+init_controls(false,true,true,false);
+frame:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
-      z80_0.run(frame_main);
-      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame);
+      frame:=frame+z80_0.tframes-z80_0.contador;
       tms_0.refresh(f);
   end;
-  actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
+  actualiza_trozo_simple(0,0,284,243,1);
+  eventos_sg;
   video_sync;
 end;
 end;
@@ -73,8 +64,8 @@ procedure sg_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$1fff,$4000..$7fff,$a000..$bfff:; //ROM
-  $2000..$3fff:if sg1000_0.ram_8k then memoria[direccion]:=valor;
-  $8000..$9fff:if sg1000_0.mid_8k_ram then memoria[direccion]:=valor;
+  $2000..$3fff:if ram_8k then memoria[direccion]:=valor;
+  $8000..$9fff:if mid_8k_ram then memoria[direccion]:=valor;
   $c000..$ffff:memoria[$c000+(direccion and $1fff)]:=valor;
 end;
 end;
@@ -85,17 +76,18 @@ begin
   case (puerto and $ff) of
     $80..$bf:if (puerto and $01)<>0 then sg_inbyte:=tms_0.register_r
           else sg_inbyte:=tms_0.vram_r;
-    $c0..$ff:if (puerto and 1)<>0 then sg_inbyte:=sg1000_0.keys[1]
-                  else sg_inbyte:=sg1000_0.keys[0];
+    $dc:sg_inbyte:=marcade.in0;
+    $df:sg_inbyte:=marcade.in1;
   end;
 end;
+
 procedure sg_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $ff) of
     $40..$7f:sn_76496_0.Write(valor);
     $80..$bf:if (puerto and $1)<>0 then tms_0.register_w(valor)
                 else tms_0.vram_w(valor);
-    $c0..$ff:; //mandos
+    $dc,$df:; //mandos
   end;
 end;
 
@@ -116,68 +108,67 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  tms_0.reset;
- reset_game_general;
- frame_main:=z80_0.tframes;
- sg1000_0.keys[0]:=$ff;
- sg1000_0.keys[1]:=$ff;
- sg1000_0.push_pause:=false;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
 end;
 
-procedure sg1000_grabar_snapshot;
+function abrir_sg:boolean;
 var
-  nombre:string;
-begin
-nombre:=snapshot_main_write(SSG1000);
-Directory.sg1000:=ExtractFilePath(nombre);
-end;
-
-procedure abrir_sg;
-var
-  extension,nombre_file,romfile:string;
+  extension,nombre_file,RomFile:string;
   datos:pbyte;
-  longitud:integer;
-  crc_val:dword;
+  crc_val,longitud:integer;
 begin
-  if not(openrom(romfile,SSG1000)) then exit;
-  getmem(datos,$10000);
-  if not(extract_data(romfile,datos,longitud,nombre_file,SSG1000)) then begin
-    freemem(datos);
+  if not(OpenRom(StSG1000,RomFile)) then begin
+    abrir_sg:=true;
+    EmuStatusTemp:=EsRuning;
+    principal1.timer1.Enabled:=true;
     exit;
   end;
-  extension:=extension_fichero(nombre_file);
-  //Resetear variables siempre antes de cargar el snapshot!!!
-  sg1000_0.ram_8k:=false;
-  sg1000_0.mid_8k_ram:=false;
-  if longitud>49152 then longitud:=49152;
-  if (extension='DSP') then snapshot_r(datos,longitud,SSG1000)
-    else begin
-            copymemory(@memoria[0],datos,longitud);
-            reset_sg;
-         end;
-  crc_val:=calc_crc(datos,longitud);
-  freemem(datos);
-  case crc_val of
-    //BomberMan Special (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
-    $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:sg1000_0.ram_8k:=true;
-    //Castle, Othello (2)
-    $92f29d6,$af4f14bc,$1d1a0ca3:sg1000_0.mid_8k_ram:=true;
-    $49e9718b:copymemory(@memoria[$4000],@memoria[0],$4000); //Safari Hunting ¿proteccion?
+  abrir_sg:=false;
+  extension:=extension_fichero(RomFile);
+  if extension='ZIP' then begin
+    if not(search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc_val,true)) then exit;
+    getmem(datos,longitud);
+    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc_val,true)) then begin
+      freemem(datos);
+      exit;
+    end;
+  end else begin
+    if extension<>'SG' then exit;
+    if not(read_file_size(RomFile,longitud)) then exit;
+    getmem(datos,longitud);
+    if not(read_file(RomFile,datos,longitud)) then begin
+      freemem(datos);
+      exit;
+    end;
+    nombre_file:=extractfilename(RomFile);
   end;
-  change_caption(nombre_file);
+  //Abrirlo
+  extension:=extension_fichero(nombre_file);
+  if extension='SG' then copymemory(@memoria,datos,longitud);
+  ram_8k:=false;
+  mid_8k_ram:=false;
+  crc_val:=calc_crc(datos,longitud);
+  case dword(crc_val) of
+    //BomberMan Super (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
+    $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:ram_8k:=true;
+    //Castle, Othello (2)
+    $92f29d6,$af4f14bc,$1d1a0ca3:mid_8k_ram:=true;
+  end;
+  llamadas_maquina.open_file:=nombre_file;
+  abrir_sg:=true;
+  reset_sg;
+  EmuStatusTemp:=EsRuning;
+  principal1.timer1.Enabled:=true;
+  change_caption;
   Directory.sg1000:=ExtractFilePath(romfile);
+  freemem(datos);
 end;
 
-function iniciar_sg:boolean;
-begin
+function iniciar_sg:boolean;
+begin
 iniciar_sg:=false;
-principal1.BitBtn10.Glyph:=nil;
-principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
-principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-llamadas_maquina.bucle_general:=sg_principal;
-llamadas_maquina.reset:=reset_sg;
-llamadas_maquina.cartuchos:=abrir_sg;
-llamadas_maquina.grabar_snapshot:=sg1000_grabar_snapshot;
-llamadas_maquina.fps_max:=59.922743;
 iniciar_audio(false);
 screen_init(1,284,243);
 iniciar_video(284,243);
@@ -191,8 +182,21 @@ tms_0:=tms99xx_chip.create(1,sg_interrupt);
 //Chip Sonido
 sn_76496_0:=sn76496_chip.Create(3579545);
 //final
-if main_vars.console_init then abrir_sg;
+reset_sg;
+abrir_sg;
 iniciar_sg:=true;
+end;
+
+procedure cargar_sg;
+begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+llamadas_maquina.iniciar:=iniciar_sg;
+llamadas_maquina.bucle_general:=sg_principal;
+llamadas_maquina.reset:=reset_sg;
+llamadas_maquina.cartuchos:=abrir_sg;
+llamadas_maquina.fps_max:=59.922743;
 end;
 
 end.

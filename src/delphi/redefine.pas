@@ -113,7 +113,6 @@ type
     procedure Button38Click(Sender: TObject);
     procedure Button39Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
@@ -124,7 +123,7 @@ var
   redefine1: Tredefine1;
 
 implementation
-uses config_general,principal;
+uses config_general;
 {$R *.dfm}
 
 procedure Tredefine1.Button10Click(Sender: TObject);
@@ -433,29 +432,12 @@ tecla_leida:=KEYBOARD_8;
 redefine1.close;
 end;
 
-procedure Tredefine1.FormKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-case key of
-    13:button1Click(nil);
-    27:button2click(nil);
-end;
-end;
-
 procedure Tredefine1.FormShow(Sender: TObject);
-var
-  f:integer;
 begin
-f:=(principal1.left+(principal1.width div 2))-(redefine1.Width div 2);
-if f<0 then redefine1.Left:=0
-  else redefine1.Left:=f;
-f:=(principal1.top+(principal1.Height div 2))-(redefine1.Height div 2);
-if f<0 then redefine1.Top:=0
-  else redefine1.Top:=f;
 redefine1.Button1.Enabled:=false;
 redefine1.SetFocus;
 redefine1.Button1.Enabled:=true;
-redefine1.Button1.Caption:=leng.mensajes[8];
+redefine1.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 end;
 
 procedure Tredefine1.SpeedButton1Click(Sender: TObject);

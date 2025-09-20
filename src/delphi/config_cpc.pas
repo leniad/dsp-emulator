@@ -70,10 +70,10 @@ type
     procedure Button10Click(Sender: TObject);
     procedure Button12Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Button1Click(Sender: TObject);
     procedure RadioButton9Click(Sender: TObject);
     procedure RadioButton10Click(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
@@ -84,7 +84,7 @@ var
   ConfigCPC: TConfigCPC;
 
 implementation
-uses amstrad_cpc,lenslock,principal;
+uses amstrad_cpc,lenslock;
 {$R *.dfm}
 
 procedure TConfigCPC.Button13Click(Sender: TObject);
@@ -136,7 +136,7 @@ procedure put_text_file(number:byte);
 var
   file_name:string;
 begin
-if OpenRom(file_name,SAMSTRADROM) then begin
+if OpenRom(StAmstradROM,file_name) then begin
   case number of
     0:configcpc.Edit7.Text:=file_name;
     1:configcpc.Edit1.Text:=file_name;
@@ -209,44 +209,16 @@ begin
 put_text_file(5);
 end;
 
-procedure TConfigCPC.FormKeyUp(Sender:TObject;var Key:Word;Shift:TShiftState);
+procedure TConfigCPC.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 case key of
     13:button13Click(nil);
     27:button14click(nil);
-end;
+  end;
 end;
 
 procedure TConfigCPC.FormShow(Sender: TObject);
-var
-  f:integer;
 begin
-f:=(principal1.left+(principal1.width div 2))-(ConfigCPC.Width div 2);
-if f<0 then ConfigCPC.Left:=0
-  else ConfigCPC.Left:=f;
-f:=(principal1.top+(principal1.Height div 2))-(ConfigCPC.Height div 2);
-if f<0 then ConfigCPC.Top:=0
-  else ConfigCPC.Top:=f;
-case main_vars.tipo_maquina of
-  7,8:begin
-        groupbox3.enabled:=false;
-        radiobutton5.Enabled:=false;
-        radiobutton6.Enabled:=false;
-        radiobutton7.Enabled:=false;
-        radiobutton5.Checked:=true;
-      end;
-  9:begin
-        groupbox3.enabled:=true;
-        radiobutton5.Enabled:=true;
-        radiobutton6.Enabled:=true;
-        radiobutton7.Enabled:=true;
-        case cpc_ga.ram_exp of
-          0:radiobutton5.Checked:=true;
-          1:radiobutton6.Checked:=true;
-          2:radiobutton7.Checked:=true;
-        end;
-    end;
-end;
 case main_vars.tipo_maquina of
   8:begin //CPC 664
       radiobutton2.Enabled:=false;
@@ -280,6 +252,11 @@ Edit6.Text:=cpc_rom[6].name;
 //Lenslock
 if lenslok.activo then radiobutton12.Checked:=true
   else radiobutton13.Checked:=true;
+case cpc_ga.ram_exp of
+  0:radiobutton5.Checked:=true;
+  1:radiobutton6.Checked:=true;
+  2:radiobutton7.Checked:=true;
+end;
 trackbar1.Position:=cpc_crt.bright;
 if cpc_crt.color_monitor then begin
   radiobutton9.Checked:=true;

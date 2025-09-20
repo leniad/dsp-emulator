@@ -1,8 +1,7 @@
 unit ym_2151;
 
 interface
-uses {$ifdef windows}windows,{$else}main_engine,{$endif}fm_2151,sound_engine,
-     cpu_misc,dialogs;
+uses {$ifdef windows}windows,{$else}main_engine,{$endif}fm_2151,sound_engine,cpu_misc;
 
 type
   ym2151_chip=class(snd_chip_class)
@@ -31,7 +30,6 @@ var
 
 constructor ym2151_chip.create(clock:dword;amp:single=1);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
   self.chip_number:=chips_total;
   YM_2151Init(self.chip_number,clock);
@@ -96,25 +94,16 @@ begin
 end;
 
 procedure ym2151_chip.update;
-function calc_max(val:integer):smallint;
-var
-  tempi:integer;
-begin
-tempi:=trunc(val*self.amp);
-if tempi>$7fff then calc_max:=$7fff
-  else if tempi<-$7fff then calc_max:=-$7fff
-    else calc_max:=tempi;
-end;
 var
   audio:pinteger;
 begin
   audio:=YM_2151UpdateOne(self.chip_number);
   if sound_status.stereo then begin
     inc(audio);
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=calc_max(audio^);
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(audio^*self.amp);
     inc(audio);
-    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=calc_max(audio^);
-  end else tsample[self.tsample_num,sound_status.posicion_sonido]:=calc_max(audio^);
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(audio^*self.amp);
+  end else tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(audio^*self.amp);
 end;
 
 end.

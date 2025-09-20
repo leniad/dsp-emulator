@@ -40,7 +40,7 @@ var
  ram:array[0..$1fff] of word;
  sound_latch:byte;
 
-procedure update_video_wwfsstar;
+procedure update_video_wwfsstar;inline;
 var
   f,x,y,nchar,pos,atrib,atrib2:word;
   a,color:byte;
@@ -102,7 +102,7 @@ procedure eventos_wwfsstar;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
@@ -110,7 +110,7 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //p2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
@@ -125,29 +125,32 @@ end;
 
 procedure wwfsstar_principal;
 var
+  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 271 do begin
-    eventos_wwfsstar;
+    //main
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     case f of
-      0:marcade.in2:=marcade.in2 and $fe;
-      16,32,48,64,80,96,112,128,144,160,176,192,208,224,256:m68000_0.irq[5]:=ASSERT_LINE;
-      240:begin
+      15,31,47,63,79,95,111,127,143,159,175,191,207,223,255:m68000_0.irq[5]:=ASSERT_LINE;
+      239:begin
             m68000_0.irq[5]:=ASSERT_LINE;
             m68000_0.irq[6]:=ASSERT_LINE;
             update_video_wwfsstar;
             marcade.in2:=marcade.in2 or 1;
           end;
+      271:marcade.in2:=marcade.in2 and $fe;
     end;
-    //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_snd);
-    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
+ eventos_wwfsstar;
  video_sync;
 end;
 end;
@@ -168,8 +171,7 @@ case direccion of
 end;
 end;
 
-procedure wwfsstar_putword(direccion:dword;valor:word);
-procedure cambiar_color(pos,data:word);
+procedure cambiar_color(pos,data:word);inline;
 var
   color:tcolor;
 begin
@@ -182,6 +184,8 @@ begin
     $100..$1ff:buffer_color[((pos shr 4) and $7)+$10]:=true;
   end;
 end;
+
+procedure wwfsstar_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:;
@@ -250,8 +254,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
- frame_main:=m68000_0.tframes;
- frame_snd:=z80_0.tframes;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$fe;
@@ -322,6 +325,7 @@ marcade.dswb:=$ff;
 marcade.dswb_val:=@wwfsstar_dip_b;
 //final
 freemem(memoria_temp);
+reset_wwfsstar;
 iniciar_wwfsstar:=true;
 end;
 

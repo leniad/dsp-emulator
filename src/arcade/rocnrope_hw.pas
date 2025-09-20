@@ -24,24 +24,24 @@ const
         (n:'a17_prom.bin';l:$20;p:0;crc:$22ad2c3e),(n:'b16_prom.bin';l:$100;p:$20;crc:$750a9677),
         (n:'rocnrope.pr3';l:$100;p:$120;crc:$b5c75a27));
         //Dip
-        rocnrope_dip_a:array [0..2] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        rocnrope_dip_b:array [0..4] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255')),
-        (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
-        (mask:$78;name:'Difficulty';number:16;val16:($78,$70,$68,$60,$58,$50,$48,$40,$38,$30,$28,$20,$18,$10,8,0);name16:('1 Easy','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16 Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        rocnrope_dip_c:array [0..3] of def_dip2=(
-        (mask:7;name:'First Bonus';number:8;val8:(6,5,4,3,2,1,0,7);name8:('20K','30K','40K','50K','60K','70K','80K','Invalid')),
-        (mask:$38;name:'Repeated Bonus';number:8;val8:($20,$18,$10,8,0,$38,$30,$28);name8:('40K','50K','60K','70K','80K','Invalid','Invalid','Invalid')),
-        (mask:$40;name:'Grant Repeated Bonus';number:2;val2:($40,0);name2:('No','Yes')),());
+        rocnrope_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),())),());
+        rocnrope_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$78;name:'Difficulty';number:16;dip:((dip_val:$78;dip_name:'1 Easy'),(dip_val:$70;dip_name:'2'),(dip_val:$68;dip_name:'3'),(dip_val:$60;dip_name:'4'),(dip_val:$58;dip_name:'5'),(dip_val:$50;dip_name:'6'),(dip_val:$48;dip_name:'7'),(dip_val:$40;dip_name:'8'),(dip_val:$38;dip_name:'9'),(dip_val:$30;dip_name:'10'),(dip_val:$28;dip_name:'11'),(dip_val:$20;dip_name:'12'),(dip_val:$18;dip_name:'13'),(dip_val:$10;dip_name:'14'),(dip_val:$8;dip_name:'15'),(dip_val:$0;dip_name:'16 Difficult'))),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        rocnrope_dip_c:array [0..3] of def_dip=(
+        (mask:$7;name:'First Bonus';number:6;dip:((dip_val:$6;dip_name:'20K'),(dip_val:$5;dip_name:'30K'),(dip_val:$4;dip_name:'40K'),(dip_val:$3;dip_name:'50K'),(dip_val:$2;dip_name:'60K'),(dip_val:$1;dip_name:'70K'),(dip_val:$0;dip_name:'80K'),(),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Repeated Bonus';number:5;dip:((dip_val:$20;dip_name:'40K'),(dip_val:$18;dip_name:'50K'),(dip_val:$10;dip_name:'60K'),(dip_val:$8;dip_name:'70K'),(dip_val:$0;dip_name:'80K'),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Grant Repeated Bonus';number:2;dip:((dip_val:$40;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_ena:boolean;
  mem_opcodes:array[0..$9fff] of byte;
 
-procedure update_video_rocnrope;
+procedure update_video_rocnrope;inline;
 var
   x,y,atrib:byte;
   f:word;
@@ -85,45 +85,47 @@ procedure eventos_rocnrope;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //p2
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //misc
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
 end;
 
 procedure rocnrope_principal;
 var
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m6809_0.tframes;
+while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    eventos_rocnrope;
-    if f=240 then begin
+    //main
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
+    //snd
+    konamisnd_0.run(f);
+    if f=239 then begin
       update_video_rocnrope;
       if irq_ena then m6809_0.change_irq(ASSERT_LINE);
     end;
-    //main
-    m6809_0.run(frame_main);
-    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
-    //snd
-    konamisnd_0.run;
   end;
+  eventos_rocnrope;
   video_sync;
 end;
 end;
@@ -131,12 +133,12 @@ end;
 function rocnrope_getbyte(direccion:word):byte;
 begin
 case direccion of
-    $3000:rocnrope_getbyte:=marcade.dswb;
+    $3000:rocnrope_getbyte:=marcade.dswb; //dsw2
     $3080:rocnrope_getbyte:=marcade.in2;
     $3081:rocnrope_getbyte:=marcade.in0;
     $3082:rocnrope_getbyte:=marcade.in1;
-    $3083:rocnrope_getbyte:=marcade.dswa;
-    $3100:rocnrope_getbyte:=marcade.dswc;
+    $3083:rocnrope_getbyte:=marcade.dswa; //dsw1
+    $3100:rocnrope_getbyte:=marcade.dswc; //dsw3
     $4000..$5fff:rocnrope_getbyte:=memoria[direccion];
     $6000..$ffff:if m6809_0.opcode then rocnrope_getbyte:=mem_opcodes[direccion-$6000]
                     else rocnrope_getbyte:=memoria[direccion];
@@ -152,18 +154,12 @@ case direccion of
                   memoria[direccion]:=valor;
                end;
   $6000..$807f,$8190..$ffff:; //ROM
-  $8080..$8087:begin
-                  valor:=valor and 1;
-                  case (direccion and 7) of
-                    0:main_screen.flip_main_screen:=(valor=0);
-                    1:if valor<>0 then konamisnd_0.pedir_irq:=HOLD_LINE;
-                    2:konamisnd_0.enabled:=(valor=0);
-                    7:begin
-                        irq_ena:=(valor<>0);
-                        if not(irq_ena) then m6809_0.change_irq(CLEAR_LINE);
-                      end;
-                  end;
-               end;
+  $8080:main_screen.flip_main_screen:=(valor and 1)=0;
+  $8081:if valor<>0 then konamisnd_0.pedir_irq:=HOLD_LINE;
+  $8087:begin
+          irq_ena:=(valor and $1)<>0;
+          if not(irq_ena) then m6809_0.change_irq(CLEAR_LINE);
+        end;
   $8100:konamisnd_0.sound_latch:=valor;
   $8182..$818d:memoria[$fff2+(direccion-$8182)]:=valor;
 end;
@@ -173,8 +169,8 @@ end;
 procedure reset_rocnrope;
 begin
  m6809_0.reset;
- frame_main:=m6809_0.tframes;
  konamisnd_0.reset;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -206,12 +202,13 @@ iniciar_video(224,256);
 //Main CPU
 m6809_0:=cpu_m6809.Create(18432000 div 3 div 4,$100,TCPU_M6809);
 m6809_0.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
+//Sound Chip
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+if not(roms_load(@konamisnd_0.memoria,rocnrope_snd)) then exit;
+//cargar roms y desencriptarlas
 if not(roms_load(@memoria,rocnrope_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
 mem_opcodes[$703d-$6000]:=$98;  //Patch
-//Sound Chip
-konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,$100);
-if not(roms_load(@konamisnd_0.memoria,rocnrope_snd)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,rocnrope_chars)) then exit;
 init_gfx(0,8,8,512);
@@ -230,18 +227,18 @@ compute_resistor_weights(0,	255, -1.0,
 			2,@resistances_b,@bweights,1000,0);
 for f:=0 to $1f do begin
 		// red component
-		bit0:=(memoria_temp[f] shr 0) and 1;
-		bit1:=(memoria_temp[f] shr 1) and 1;
-		bit2:=(memoria_temp[f] shr 2) and 1;
+		bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
 		colores[f].r:=combine_3_weights(@rweights, bit0, bit1, bit2);
 		// green component
-		bit0:=(memoria_temp[f] shr 3) and 1;
-		bit1:=(memoria_temp[f] shr 4) and 1;
-		bit2:=(memoria_temp[f] shr 5) and 1;
+		bit0:=(memoria_temp[f] shr 3) and $01;
+		bit1:=(memoria_temp[f] shr 4) and $01;
+		bit2:=(memoria_temp[f] shr 5) and $01;
 		colores[f].g:=combine_3_weights(@gweights, bit0, bit1, bit2);
 		// blue component
-		bit0:=(memoria_temp[f] shr 6) and 1;
-		bit1:=(memoria_temp[f] shr 7) and 1;
+		bit0:=(memoria_temp[f] shr 6) and $01;
+		bit1:=(memoria_temp[f] shr 7) and $01;
 		colores[f].b:=combine_2_weights(@bweights, bit0, bit1);
 end;
 set_pal(colores,$20);
@@ -253,10 +250,11 @@ end;
 marcade.dswa:=$ff;
 marcade.dswb:=$5b;
 marcade.dswc:=$96;
-marcade.dswa_val2:=@rocnrope_dip_a;
-marcade.dswb_val2:=@rocnrope_dip_b;
-marcade.dswc_val2:=@rocnrope_dip_c;
+marcade.dswa_val:=@rocnrope_dip_a;
+marcade.dswb_val:=@rocnrope_dip_b;
+marcade.dswc_val:=@rocnrope_dip_c;
 //final
+reset_rocnrope;
 iniciar_rocnrope:=true;
 end;
 

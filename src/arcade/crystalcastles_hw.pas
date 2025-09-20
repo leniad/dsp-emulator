@@ -139,23 +139,26 @@ end;
 procedure principal_ccastles;
 var
   f:byte;
+  frame:single;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame:=m6502_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to 255 do begin
-    eventos_ccastles;
+    m6502_0.run(frame);
+    frame:=frame+m6502_0.tframes-m6502_0.contador;
+    //video
     case f of
       0:begin
           marcade.in0:=marcade.in0 or $20;
           m6502_0.change_irq(ASSERT_LINE);
-          update_video_ccastles;
         end;
-      24:marcade.in0:=marcade.in0 and $df;
+      23:marcade.in0:=marcade.in0 and $df;
       64,128,192:m6502_0.change_irq(ASSERT_LINE);
     end;
-    m6502_0.run(frame_main);
-    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
  end;
+ update_video_ccastles;
+ eventos_ccastles;
  video_sync;
 end;
 end;
@@ -309,7 +312,7 @@ begin
   m6502_0.reset;
   pokey_0.reset;
   pokey_1.reset;
-  frame_main:=m6502_0.tframes;
+  reset_audio;
   num_bank:=0;
   bitmode_addr[0]:=0;
   bitmode_addr[1]:=0;
@@ -378,6 +381,7 @@ compute_resistor_weights(0, 255, -1.0,
 //cargar NVram
 if read_file_size(Directory.Arcade_nvram+'ccastles.nv',longitud) then read_file(Directory.Arcade_nvram+'ccastles.nv',@memoria[$9000],longitud);
 //final
+reset_ccastles;
 iniciar_ccastles:=true;
 end;
 

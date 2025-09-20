@@ -90,7 +90,7 @@ var
  tune01,tune08,tune09,tune11:byte;
  effect0,effect1,effect2:byte;
 
-procedure update_video_dkong;
+procedure update_video_dkong;inline;
 var
   f,color,nchar:word;
   x,y,atrib,atrib2:byte;
@@ -149,7 +149,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=z80_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
@@ -321,7 +321,7 @@ case direccion of
             stop_all_samples;
             start_sample(0);
         end;
-  $7d82:main_screen.flip_main_screen:=(valor and 1)=0;
+  $7e82:main_screen.flip_main_screen:=(valor and 1)=0;
   $7d83:sprite_bank:=$200*(valor and 1);
   $7d84:haz_nmi:=(valor=1);
   $7d85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
@@ -373,7 +373,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s1:=n2a03_0.m6502.tframes;
 frame_s2:=n2a03_1.m6502.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -491,18 +491,24 @@ procedure reset_dkong;
 begin
  z80_0.reset;
  case main_vars.tipo_maquina of
-    15:marcade.in2:=0;
-
-   168:marcade.in2:=$40;
+    15:begin
+        marcade.in2:=0;
+        reset_samples;
+       end;
+   168:begin
+        marcade.in2:=$40;
+        reset_samples;
+       end;
    169:begin
         marcade.in2:=0;
         n2a03_0.reset;
         n2a03_1.reset;
        end;
  end;
- reset_game_general;
+ reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
+ marcade.in2:=0;
  haz_nmi:=false;
  npaleta:=0;
  sprite_bank:=0;

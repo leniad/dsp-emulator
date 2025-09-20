@@ -113,7 +113,7 @@ var
  //MCU
  cpu_to_mcu,mcu_p0,audiocpu_to_mcu,mcu_p2,mcu_p3,mcu_to_cpu,mcu_to_audiocpu:byte;
 
-procedure draw_sprites(pri:boolean);
+procedure draw_sprites(pri:boolean);inline;
 var
   f,color,nchar,x,y,pos:word;
   atrib:byte;
@@ -249,7 +249,7 @@ end;
 actualiza_trozo_final(16,0,224,256,1);
 end;
 
-procedure eventos_gunsmokehw;
+procedure eventos_gunsmokehw;inline;
 begin
 if event.arcade then begin
   //P1
@@ -284,7 +284,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -304,6 +304,8 @@ end;
 
 //Gun.Smoke
 function gunsmoke_getbyte(direccion:word):byte;
+const
+  prot:array[1..3] of byte=($ff,0,0);
 begin
 case direccion of
   0..$7fff,$d000..$d7ff,$e000..$ffff:gunsmoke_getbyte:=memoria[direccion];
@@ -313,9 +315,7 @@ case direccion of
   $c002:gunsmoke_getbyte:=marcade.in2;
   $c003:gunsmoke_getbyte:=marcade.dswa;
   $c004:gunsmoke_getbyte:=marcade.dswb;
-  $c4c9:gunsmoke_getbyte:=$ff; //Procteccion 1
-  $c4ca:gunsmoke_getbyte:=0;   //Procteccion 2
-  $c4cb:gunsmoke_getbyte:=0;   //Proteccion  3
+  $c4c9..$c4cb:gunsmoke_getbyte:=prot[direccion and $3]; //Proteccion
 end;
 end;
 
@@ -326,9 +326,8 @@ case direccion of
   $c800:sound_command:=valor;
   $c804:begin
           rom_bank:=(valor and $0c) shr 2;
-          z80_1.change_reset((valor and $20) shr 5);
-          main_screen.flip_main_screen:=(valor and $40)<>0;
           chon:=(valor and $80)<>0;
+          main_screen.flip_main_screen:=(valor and $40)<>0;
         end;
   $c806:if (valor and $40)<>0 then begin
           copymemory(@buffer_sprites,@memoria[$f000],$1000);
@@ -388,7 +387,7 @@ init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=mcs51_0.tframes;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
   for linea:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -430,10 +429,9 @@ case direccion of
         0..$bfff:;
         $c800:sound_command:=valor;
         $c804:begin
-                rom_bank:=(valor shr 2) and $7;
-                z80_1.change_reset((valor and $20) shr 5);
-                main_screen.flip_main_screen:=(valor and $40)<>0;
                 chon:=(valor and $80)<>0;
+                rom_bank:=(valor shr 2) and $7;
+                main_screen.flip_main_screen:=(valor and $40)<>0;
               end;
         $c807:cpu_to_mcu:=valor;
         $d000..$d7ff:if memoria[direccion]<>valor then begin
@@ -541,10 +539,19 @@ procedure reset_gunsmokehw;
 begin
  z80_0.reset;
  z80_1.reset;
- if main_vars.tipo_maquina<>80 then mcs51_0.reset;
- ym2203_0.reset;
- ym2203_1.reset;
- reset_game_general;
+ if main_vars.tipo_maquina<>80 then begin
+    mcs51_0.reset;
+    cpu_to_mcu:=0;
+    mcu_p0:=0;
+    audiocpu_to_mcu:=0;
+    mcu_p2:=0;
+    mcu_p3:=0;
+    mcu_to_cpu:=0;
+    mcu_to_audiocpu:=0;
+ end;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -559,13 +566,6 @@ begin
  rom_bank:=0;
  sprite3bank:=0;
  sound_command:=0;
- cpu_to_mcu:=0;
- mcu_p0:=0;
- audiocpu_to_mcu:=0;
- mcu_p2:=0;
- mcu_p3:=0;
- mcu_to_cpu:=0;
- mcu_to_audiocpu:=0;
 end;
 
 function iniciar_gunsmokehw:boolean;
@@ -629,8 +629,8 @@ z80_1:=cpu_z80.create(3000000,262);
 timers.init(z80_1.numero_cpu,384*262/4/2,gunsmoke_snd_irq,nil,true);
 z80_1.init_sound(gunsmoke_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.5,1);
-ym2203_1:=ym2203_chip.create(1500000,0.5,1);
+ym2203_0:=ym2203_chip.create(1500000,0.14,0.22);
+ym2203_1:=ym2203_chip.create(1500000,0.14,0.22);
 case main_vars.tipo_maquina of
   80:begin
        //Main CPU
@@ -680,7 +680,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(I8X51,3000000,262);
+       mcs51_0:=cpu_mcs51.create(6000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars
@@ -727,7 +727,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943kai_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(I8X51,3000000,262);
+       mcs51_0:=cpu_mcs51.create(6000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars

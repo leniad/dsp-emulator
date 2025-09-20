@@ -8,7 +8,7 @@ procedure kabuki_mitchell_decode(rom,dest_op,dest_data:pbyte;banks:byte;swap_key
 
 implementation
 
-function bitswap1(src,key,select:integer):integer;
+function bitswap1(src,key,select:integer):integer;inline;
 begin
 	if (select and (1 shl ((key shr 0) and 7)))<>0 then
 		src:=(src and $fc) or ((src and $01) shl 1) or ((src and $02) shr 1);
@@ -21,7 +21,7 @@ begin
   bitswap1:=src;
 end;
 
-function bitswap2(src,key,select:integer):integer;
+function bitswap2(src,key,select:integer):integer;inline;
 begin
 	if (select and (1 shl ((key shr 12) and 7)))<>0 then
 		src:=(src and $fc) or ((src and $01) shl 1) or ((src and $02) shr 1);
@@ -35,7 +35,7 @@ begin
 end;
 
 
-function bytedecode(src,swap_key1,swap_key2,xor_key,select:integer):byte;
+function bytedecode(src,swap_key1,swap_key2,xor_key,select:integer):byte;inline;
 begin
 	src:= bitswap1(src,swap_key1 and $ffff,select and $ff);
 	src:=((src and $7f) shl 1) or ((src and $80) shr 7);
@@ -48,7 +48,7 @@ begin
 	bytedecode:=src;
 end;
 
-procedure kabuki_decode(rom,dest_op,dest_data:pbyte;base_addr,long:integer;swap_key1,swap_key2:dword;addr_key:word;xor_key:byte);
+procedure kabuki_decode(rom,dest_op,dest_data:pbyte;base_addr,long:integer;swap_key1,swap_key2:dword;addr_key:word;xor_key:byte);inline;
 var
   ptemp1,ptemp2,ptemp3:pbyte;
   f,pos:integer;
@@ -95,4 +95,4 @@ begin
   end;
 end;
 
-end.
+end.

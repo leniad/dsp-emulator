@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, principal, acercade, LoadRom, config_general, redefine, cargar_dsk,
   tape_window, cargar_spec, lenslock, config, arcade_config,
-  config_sms, config_cpc, misc_functions, config_gb;
+  joystick_calibration, config_sms, config_cpc, misc_functions, config_gb;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}
@@ -20,7 +20,6 @@ uses
 {$IFDEF UNIX}{$R dsp.res}{$ENDIF}
 
 begin
-  Application.Scaled:=True;
   Application.Title:='DSP Emulator';
   Application.Initialize;
   Application.CreateForm(Tprincipal1, principal1);
@@ -31,6 +30,7 @@ begin
   Application.CreateForm(Tconfigcpc, configcpc);
   Application.CreateForm(TConfigSP, ConfigSP);
   Application.CreateForm(TFLoadRom, FLoadRom);
+  Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(Tload_dsk, load_dsk);
   Application.CreateForm(Tload_spec, load_spec);
   Application.CreateForm(TMConfig, MConfig);

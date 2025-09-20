@@ -4,22 +4,23 @@ object SMSConfig: TSMSConfig
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'SMS Config'
-  ClientHeight = 214
-  ClientWidth = 279
+  ClientHeight = 232
+  ClientWidth = 291
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  KeyPreview = True
+  OldCreateOrder = False
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 13
   object SpeedButton1: TSpeedButton
     Left = 24
-    Top = 157
+    Top = 152
     Width = 97
     Height = 49
     Caption = 'OK'
@@ -27,18 +28,18 @@ object SMSConfig: TSMSConfig
   end
   object SpeedButton2: TSpeedButton
     Left = 168
-    Top = 157
+    Top = 152
     Width = 89
     Height = 49
     Caption = 'CANCEL'
     OnClick = SpeedButton2Click
   end
   object GroupBox1: TGroupBox
-    Left = 63
+    Left = 24
     Top = 24
     Width = 161
     Height = 113
-    Caption = 'SMS BIOS'
+    Caption = 'Video'
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 16
@@ -51,7 +52,7 @@ object SMSConfig: TSMSConfig
     object RadioButton2: TRadioButton
       Left = 16
       Top = 48
-      Width = 138
+      Width = 121
       Height = 17
       Caption = 'Europe/Australia (PAL)'
       TabOrder = 1

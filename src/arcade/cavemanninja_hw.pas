@@ -26,14 +26,14 @@ const
         cninja_sprites:array[0..3] of tipo_roms=(
         (n:'mag-03.rom';l:$80000;p:0;crc:$2220eb9f),(n:'mag-05.rom';l:$80000;p:$1;crc:$56a53254),
         (n:'mag-04.rom';l:$80000;p:$100000;crc:$144b94cc),(n:'mag-06.rom';l:$80000;p:$100001;crc:$82d44749));
-        cninja_dip:array [0..7] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
-        (mask:$38;name:'Coin B';number:8;val8:(0,8,$38,$30,$28,$20,$18,$10);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
-        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$300;name:'Lives';number:4;val4:($100,0,$300,$200);name4:('1','2','3','4')),
-        (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$1000;name:'Restore Live Meter';number:2;val2:($1000,0);name2:('Off','On')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')),());
+        cninja_dip:array [0..7] of def_dip=(
+        (mask:$0007;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(dip_val:$2;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$0038;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$10;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$0040;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0300;name:'Lives';number:4;dip:((dip_val:$100;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:$000;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Restore Live Meter';number:2;dip:((dip_val:$1000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Demo Sounds';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Robocop 2
         robocop2_rom:array[0..7] of tipo_roms=(
         (n:'gq-03.k1';l:$20000;p:0;crc:$a7e90c28),(n:'gq-07.k3';l:$20000;p:$1;crc:$d2287ec1),
@@ -54,27 +54,27 @@ const
         (n:'mah-05.y9';l:$80000;p:$000000;crc:$6773e613),(n:'mah-08.y12';l:$80000;p:$000001;crc:$88d310a5),
         (n:'mah-06.z9';l:$80000;p:$100000;crc:$27a8808a),(n:'mah-09.z12';l:$80000;p:$100001;crc:$a58c43a7),
         (n:'mah-07.a9';l:$80000;p:$200000;crc:$526f4190),(n:'mah-10.a12';l:$80000;p:$200001;crc:$14b770da));
-        robocop2_dip_a:array [0..8] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
-        (mask:$38;name:'Coin B';number:8;val8:(0,8,$38,$30,$28,$20,$18,$10);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
-        (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$300;name:'Lives';number:4;val4:($100,0,$300,$200);name4:('1','2','3','4')),
-        (mask:$c00;name:'Time';number:4;val4:($800,$c00,$400,0);name4:('400 Seconds','300 Seconds','200 Seconds','100 Seconds')),
-        (mask:$3000;name:'Health';number:4;val4:(0,$1000,$3000,$2000);name4:('17','24','33','40')),
-        (mask:$4000;name:'Continues';number:2;val2:(0,$4000);name2:('Off','On')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')),());
-        robocop2_dip_b:array [0..5] of def_dip2=(
-        (mask:$3;name:'Bullets';number:4;val4:(0,1,3,2);name4:('Least','Less','Normal','More')),
-        (mask:$c;name:'Enemy Movement';number:4;val4:(8,$c,4,0);name4:('Slow','Normal','Fast','Fastest')),
-        (mask:$20;name:'Enemy Strength';number:4;val4:($20,$30,$10,0);name4:('Less','Normal','More','Most')),
-        (mask:$40;name:'Enemy Weapon Speed';number:2;val2:($40,0);name2:('Normal','Fast')),
-        (mask:$80;name:'Game Over Message';number:2;val2:($80,0);name2:('Off','On')),());
+        robocop2_dip_a:array [0..8] of def_dip=(
+        (mask:$0007;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(dip_val:$2;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$0038;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$10;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$0040;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0300;name:'Lives';number:4;dip:((dip_val:$100;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c00;name:'Time';number:4;dip:((dip_val:$800;dip_name:'400 Seconds'),(dip_val:$c00;dip_name:'300 Seconds'),(dip_val:$400;dip_name:'200 Seconds'),(dip_val:$000;dip_name:'100 Seconds'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3000;name:'Health';number:4;dip:((dip_val:$000;dip_name:'17'),(dip_val:$1000;dip_name:'24'),(dip_val:$3000;dip_name:'33'),(dip_val:$2000;dip_name:'40'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Continues';number:2;dip:((dip_val:$000;dip_name:'Off'),(dip_val:$4000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Demo Sounds';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        robocop2_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Bullets';number:4;dip:((dip_val:$0;dip_name:'Least'),(dip_val:$1;dip_name:'Less'),(dip_val:$3;dip_name:'Normal'),(dip_val:$2;dip_name:'More'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Enemy Movement';number:4;dip:((dip_val:$8;dip_name:'Slow'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Fast'),(dip_val:$0;dip_name:'Fastest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Enemy Strength';number:4;dip:((dip_val:$20;dip_name:'Less'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'More'),(dip_val:$0;dip_name:'Most'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Enemy Weapon Speed';number:2;dip:((dip_val:$40;dip_name:'Normal'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Game Over Message';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$7ffff] of word;
  ram:array[0..$1fff] of word;
- irq_mask,irq_line:byte;
- screen_line,prioridad:word;
+ screen_line,irq_mask,irq_line:byte;
+ prioridad:word;
  raster_irq:boolean;
  proc_update_video:procedure;
 
@@ -112,7 +112,7 @@ deco16ic_0.update_pf_1(5,true);
 actualiza_trozo_final(0,8,320,240,5);
 end;
 
-procedure eventos_cninja;
+procedure eventos_cninja;inline;
 begin
 if event.arcade then begin
   //P1
@@ -146,36 +146,34 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
-while EmuStatus=EsRunning do begin
- for screen_line:=0 to 273 do begin
-   case screen_line of
-      0..240:begin
-                if raster_irq then begin
-                  if irq_line=screen_line then begin
-                    if (irq_mask and $10)<>0 then m68000_0.irq[3]:=ASSERT_LINE
-                      else m68000_0.irq[4]:=ASSERT_LINE;
-                    raster_irq:=false;
-                  end;
-                end;
-                if screen_line=8 then marcade.in1:=marcade.in1 and $f7;
-             end;
-      248:begin
-            m68000_0.irq[5]:=HOLD_LINE;
-            proc_update_video;
-            marcade.in1:=marcade.in1 or $8;
-          end;
-   end;
+while EmuStatus=EsRuning do begin
+ for screen_line:=0 to $ff do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    h6280_0.run(trunc(frame_s));
    frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+   case screen_line of
+      1..239:if raster_irq then begin
+               if irq_line=screen_line then begin
+                  if (irq_mask and $10)<>0 then m68000_0.irq[3]:=ASSERT_LINE
+                    else m68000_0.irq[4]:=ASSERT_LINE;
+                  raster_irq:=false;
+               end;
+             end;
+      247:begin
+            m68000_0.irq[5]:=HOLD_LINE;
+            proc_update_video;
+            marcade.in1:=marcade.in1 or $8;
+          end;
+      255:marcade.in1:=marcade.in1 and $f7;
+   end;
  end;
  eventos_cninja;
  video_sync;
 end;
 end;
 
-function cninja_protection_deco_104_r(real_address:word):word;
+function cninja_protection_deco_104_r(real_address:word):word;inline;
 var
   data,deco104_addr:word;
   cs:byte;
@@ -183,7 +181,7 @@ begin
 	//int real_address = 0 + (offset *2);
 	deco104_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
-	data:=deco104_0.read_data(deco104_addr,cs);
+	data:=main_deco104.read_data(deco104_addr,cs);
 	cninja_protection_deco_104_r:=data;
 end;
 
@@ -215,7 +213,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero:word);
+procedure cambiar_color(numero:word);inline;
 var
   color:tcolor;
 begin
@@ -231,7 +229,7 @@ begin
   end;
 end;
 
-procedure cninja_protection_deco_104_w(real_address,data:word);
+procedure cninja_protection_deco_104_w(real_address,data:word);inline;
 var
   deco104_addr:word;
   cs:byte;
@@ -239,7 +237,7 @@ begin
 	//int real_address = 0 + (offset *2);
 	deco104_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
-	deco104_0.write_data(deco104_addr, data,cs);
+	main_deco104.write_data(deco104_addr, data,cs);
 end;
 
 procedure cninja_putword(direccion:dword;valor:word);
@@ -291,7 +289,7 @@ end;
 end;
 
 //Roboop 2
-function robocop2_protection_deco_146_r(real_address:word):word;
+function robocop2_protection_deco_146_r(real_address:word):word;inline;
 var
   deco146_addr,data:word;
   cs:byte;
@@ -299,7 +297,7 @@ begin
 	//int real_address = 0 + (offset *2);
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,   17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
-	data:=deco146_0.read_data(deco146_addr,cs);
+	data:=main_deco146.read_data(deco146_addr,cs);
   robocop2_protection_deco_146_r:=data;
 end;
 
@@ -332,7 +330,7 @@ case direccion of
 end;
 end;
 
-procedure robocop2_protection_deco_146_w(real_address,data:word);
+procedure robocop2_protection_deco_146_w(real_address,data:word);inline;
 var
   deco146_addr:word;
   cs:byte;
@@ -340,7 +338,7 @@ begin
 	//int real_address = 0 + (offset *2);
 	deco146_addr:=BITSWAP32(real_address, 31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,    17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
-	deco146_0.write_data(deco146_addr,data,cs);
+	main_deco146.write_data(deco146_addr,data,cs);
 end;
 
 procedure robocop2_putword(direccion:dword;valor:word);
@@ -427,12 +425,12 @@ begin
  deco16ic_1.reset;
  deco_sprites_0.reset;
  case main_vars.tipo_maquina of
-  162:deco104_0.reset;
-  163:deco146_0.reset;
+  162:main_deco104.reset;
+  163:main_deco146.reset;
  end;
  deco16_snd_double_reset;
  copymemory(oki_6295_1.get_rom_addr,@oki_rom[0],$40000);
- reset_game_general;
+ reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
  irq_mask:=0;
@@ -496,12 +494,12 @@ end;
 screen_init(5,512,512,false,true);
 iniciar_video(tempw,240);
 //Sound CPU
-deco16_snd_double_init(32220000 div 8,32220000,sound_bank_rom,274);
+deco16_snd_double_init(32220000 div 8,32220000,sound_bank_rom);
 getmem(memoria_temp,$300000);
 case main_vars.tipo_maquina of
   162:begin //Caveman Ninja
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,274);
+        m68000_0:=cpu_m68000.create(12000000,$100);
         m68000_0.change_ram16_calls(cninja_getword,cninja_putword);
         proc_update_video:=update_video_cninja;
         //cargar roms
@@ -543,14 +541,15 @@ case main_vars.tipo_maquina of
         if not(roms_load16b(memoria_temp,cninja_sprites)) then exit;
         cninja_convert_sprites($4000);
         //Proteccion deco104
-        deco104_0:=cpu_deco_104.create(USE_MAGIC_ADDRESS_XOR);
+        main_deco104:=cpu_deco_104.create;
+        main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
         //Dip
         marcade.dswa:=$7fff;
-        marcade.dswa_val2:=@cninja_dip;
+        marcade.dswa_val:=@cninja_dip;
   end;
   163:begin //Robocop 2
         //Main CPU
-        m68000_0:=cpu_m68000.create(14000000,274);
+        m68000_0:=cpu_m68000.create(14000000,$100);
         m68000_0.change_ram16_calls(robocop2_getword,robocop2_putword);
         proc_update_video:=update_video_robocop2;
         //cargar roms
@@ -617,12 +616,13 @@ case main_vars.tipo_maquina of
         if not(roms_load16b(memoria_temp,robocop2_sprites)) then exit;
         cninja_convert_sprites($6000);
         //Proteccion deco146
-        deco146_0:=cpu_deco_146.create(USE_MAGIC_ADDRESS_XOR);
+        main_deco146:=cpu_deco_146.create;
+        main_deco146.SET_USE_MAGIC_ADDRESS_XOR;
         //Dip
         marcade.dswa:=$7fbf;
-        marcade.dswa_val2:=@robocop2_dip_a;
+        marcade.dswa_val:=@robocop2_dip_a;
         marcade.dswb:=$ff;
-        marcade.dswb_val2:=@robocop2_dip_b;
+        marcade.dswb_val:=@robocop2_dip_b;
   end;
 end;
 //final

@@ -8,11 +8,9 @@ implementation
 uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496,
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
-     mb88xx,hu6280,tms32010,hd6309,nec_v20_v30,z80_sp,mcs48,k051316,
+     mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
-     deco_common,deco_16ic,sm510,slapstic,upd7810,upd1771,blitter_williams,
-     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526_old,z80ctc,seibu_sound,
-     namcoio_56xx_58xx,gb_sound,eepromser,z80pio,galaxian_stars;
+     deco_common,deco_16ic,sm510,slapstic;
 
 procedure close_all_devices;
 begin
@@ -60,10 +58,6 @@ if m6502_1<>nil then begin
   m6502_1.free;
   m6502_1:=nil;
 end;
-if m6502_2<>nil then begin
-  m6502_2.free;
-  m6502_2:=nil;
-end;
 //Konami
 if konami_0<>nil then begin
   konami_0.free;
@@ -109,10 +103,6 @@ if nec_0<>nil then begin
   nec_0.free;
   nec_0:=nil;
 end;
-if upd7810_0<>nil then begin
-  upd7810_0.free;
-  upd7810_0:=nil;
-end;
 if tms32010_0<>nil then begin
     tms32010_0.free;
     tms32010_0:=nil;
@@ -137,10 +127,6 @@ end;
 if upd7759_0<>nil then begin
   upd7759_0.free;
   upd7759_0:=nil;
-end;
-if upd7759_1<>nil then begin
-  upd7759_1.free;
-  upd7759_1:=nil;
 end;
 if sn_76496_0<>nil then begin
   sn_76496_0.free;
@@ -238,13 +224,13 @@ if dac_3<>nil then begin
   dac_3.free;
   dac_3:=nil;
 end;
-if msm5205_0<>nil then begin
-  msm5205_0.free;
-  msm5205_0:=nil;
+if msm_5205_0<>nil then begin
+  msm_5205_0.free;
+  msm_5205_0:=nil;
 end;
-if msm5205_1<>nil then begin
-  msm5205_1.free;
-  msm5205_1:=nil;
+if msm_5205_1<>nil then begin
+  msm_5205_1.free;
+  msm_5205_1:=nil;
 end;
 if ym2151_0<>nil then begin
   ym2151_0.free;
@@ -257,15 +243,6 @@ end;
 if namco_snd_0<>nil then begin
   namco_snd_0.free;
   namco_snd_0:=nil;
-end;
-if upd1771_0<>nil then begin
-  upd1771_0.free;
-  upd1771_0:=nil;
-end;
-if seibu_snd_0<>nil then begin
-  //Es importante poner aqui esto! Como tiene chips internos hay que borrarlos antes que el resto o falla
-  seibu_snd_0.free;
-  seibu_snd_0:=nil;
 end;
 close_samples;
 //Konami chips
@@ -314,17 +291,13 @@ if vdp_1<>nil then begin
   vdp_1.free;
   vdp_1:=nil;
 end;
-if galaxian_stars_0<>nil then begin
-  galaxian_stars_0.free;
-  galaxian_stars_0:=nil;
+if main_deco104<>nil then begin
+  main_deco104.free;
+  main_deco104:=nil;
 end;
-if deco104_0<>nil then begin
-  deco104_0.free;
-  deco104_0:=nil;
-end;
-if deco146_0<>nil then begin
-  deco146_0.free;
-  deco146_0:=nil;
+if main_deco146<>nil then begin
+  main_deco146.free;
+  main_deco146:=nil;
 end;
 if bac06_0<>nil then begin
   bac06_0.free;
@@ -354,65 +327,9 @@ if pia8255_1<>nil then begin
   pia8255_1.free;
   pia8255_1:=nil;
 end;
-if blitter_0<>nil then begin
-  blitter_0.free;
-  blitter_0:=nil;
-end;
-if pia6821_0<>nil then begin
-  pia6821_0.free;
-  pia6821_0:=nil;
-end;
-if pia6821_1<>nil then begin
-  pia6821_1.free;
-  pia6821_1:=nil;
-end;
-if pia6821_2<>nil then begin
-  pia6821_2.free;
-  pia6821_2:=nil;
-end;
-if s315_5195_0<>nil then begin
-  s315_5195_0.free;
-  s315_5195_0:=nil;
-end;
-if sega_pcm_0<>nil then begin
-  sega_pcm_0.free;
-  sega_pcm_0:=nil;
-end;
-if mos6566_0<>nil then begin
-  mos6566_0.free;
-  mos6566_0:=nil;
-end;
-if mos6526_0<>nil then begin
-  mos6526_0.free;
-  mos6526_0:=nil;
-end;
-if mos6526_1<>nil then begin
-  mos6526_1.free;
-  mos6526_1:=nil;
-end;
-if ctc_0<>nil then begin
-  ctc_0.free;
-  ctc_0:=nil;
-end;
-if pio_0<>nil then begin
-  pio_0.free;
-  pio_0:=nil;
-end;
-if namco_5x_0<>nil then begin
-  namco_5x_0.free;
-  namco_5x_0:=nil;
-end;
-if namco_5x_1<>nil then begin
-  namco_5x_1.free;
-  namco_5x_1:=nil;
-end;
-if gb_snd_0<>nil then begin
-  gb_snd_0.free;
-  gb_snd_0:=nil;
-end;
-if eepromser_0<>nil then begin
-  eepromser_0.free;
-  eepromser_0:=nil;
+if eeprom_0<>nil then begin
+  eeprom_0.free;
+  eeprom_0:=nil;
 end;
 end;
 

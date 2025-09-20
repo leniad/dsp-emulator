@@ -29,7 +29,7 @@ var
   SMSConfig: TSMSConfig;
 
 implementation
-uses sega_vdp,sms,nz80,principal;
+uses sega_vdp,sms,nz80;
 
 {$R *.dfm}
 
@@ -43,16 +43,8 @@ end;
 end;
 
 procedure TSMSConfig.FormShow(Sender: TObject);
-var
-  f:integer;
 begin
-f:=(principal1.left+(principal1.width div 2))-(SMSConfig.Width div 2);
-if f<0 then SMSConfig.Left:=0
-  else SMSConfig.Left:=f;
-f:=(principal1.top+(principal1.Height div 2))-(SMSConfig.Height div 2);
-if f<0 then SMSConfig.Top:=0
-  else SMSConfig.Top:=f;
-case sms_0.model of
+case sms_model of
   0:begin //pal
       radiobutton2.Checked:=true;
       radiobutton1.Checked:=false;
@@ -73,14 +65,65 @@ end;
 
 procedure TSMSConfig.SpeedButton1Click(Sender: TObject);
 var
-  system:byte;
+  dir:string;
 begin
-if radiobutton2.Checked then system:=0; //PAL
-if radiobutton1.Checked then system:=1; //NTSC JP
-if radiobutton3.Checked then system:=2; //NTSC US
-if sms_0.model<>system then begin
-    sms_0.model:=system;
-    change_sms_model(system);
+dir:=directory.arcade_list_roms[find_rom_multiple_dirs('sms.zip')];
+if radiobutton1.Checked then begin //NTSC JP
+  if sms_model<>1 then begin
+    sms_model:=1;
+    carga_rom_zip(dir+'sms.zip',sms_bios_j.n,@mapper_sms.bios[0],sms_bios_j.l,sms_bios_j.crc,false);
+    llamadas_maquina.fps_max:=FPS_NTSC;
+    valor_sync:=(1/FPS_NTSC)*cont_micro;
+    close_audio;
+    iniciar_audio(false);
+    close_video;
+    screen_init(1,284,243);
+    iniciar_video(284,243);
+    z80_0.clock:=CLOCK_NTSC;
+    z80_0.tframes:=(CLOCK_NTSC/LINES_NTSC)/FPS_NTSC;
+    sound_engine_change_clock(CLOCK_NTSC);
+    sn_76496_0.free;
+    sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
+    vdp_0.video_ntsc(vdp_0.video_mode);
+  end;
+end;
+if radiobutton2.Checked then begin //PAL
+  if sms_model<>0 then begin
+    sms_model:=0;
+    carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
+    llamadas_maquina.fps_max:=FPS_PAL;
+    valor_sync:=(1/FPS_PAL)*cont_micro;
+    close_audio;
+    iniciar_audio(false);
+    close_video;
+    screen_init(1,284,294);
+    iniciar_video(284,294);
+    z80_0.clock:=CLOCK_PAL;
+    z80_0.tframes:=(CLOCK_PAL/LINES_PAL)/FPS_PAL;
+    sound_engine_change_clock(CLOCK_PAL);
+    sn_76496_0.change_clock(CLOCK_PAL);
+    vdp_0.video_pal(vdp_0.video_mode);
+    //ym2413_0.change_clock(CLOCK_PAL);
+  end;
+end;
+if radiobutton3.Checked then begin //NTSC JP
+  if sms_model<>2 then begin
+    sms_model:=2;
+    carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
+    llamadas_maquina.fps_max:=FPS_NTSC;
+    valor_sync:=(1/FPS_NTSC)*cont_micro;
+    close_audio;
+    iniciar_audio(false);
+    close_video;
+    screen_init(1,284,243);
+    iniciar_video(284,243);
+    z80_0.clock:=CLOCK_NTSC;
+    z80_0.tframes:=(CLOCK_NTSC/LINES_NTSC)/FPS_NTSC;
+    sound_engine_change_clock(CLOCK_NTSC);
+    sn_76496_0.change_clock(CLOCK_NTSC);
+    vdp_0.video_ntsc(vdp_0.video_mode);
+    //ym2413.change_clock(CLOCK_NTSC);
+  end;
 end;
 close;
 end;

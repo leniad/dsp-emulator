@@ -31,20 +31,20 @@ const
         (n:'b-4c-.bin';l:$2000;p:$10000;crc:$01298885),(n:'b-4e-.bin';l:$2000;p:$12000;crc:$c77b87d4),
         (n:'b-4d-.bin';l:$2000;p:$14000;crc:$6a70615f),(n:'b-4a-.bin';l:$2000;p:$16000;crc:$6189d626));
         //Dip
-        kungfum_dip_a:array [0..4] of def_dip2=(
-        (mask:1;name:'Difficulty';number:2;val2:(1,0);name2:('Easy','Hard')),
-        (mask:2;name:'Energy Loss';number:2;val2:(2,0);name2:('Slow','Fast')),
-        (mask:$c;name:'Lives';number:4;val4:(8,$c,4,0);name4:('2','3','4','5')),
-        (mask:$f0;name:'Coinage';number:16;val16:($90,$a0,$b0,$c0,$d0,$e0,$f0,$70,$60,$50,$40,$30,$20,$10,0,0);name16:('7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C','Free Play','')),());
-        kungfum_dip_b:array [0..8] of def_dip2=(
-        (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),
-        (mask:4;name:'Coin Mode';number:2;val2:(4,0);name2:('Mode 1','Mode 2')),
-        (mask:8;name:'Slow Motion Mode (Cheat)';number:2;val2:(8,0);name2:('Off','On')),
-        (mask:$10;name:'Freeze (Cheat)';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$20;name:'Level Selection Mode (Cheat)';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Invulnerability (Cheat)';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Service';number:2;val2:($80,0);name2:('Off','On')),());
+        kungfum_dip_a:array [0..4] of def_dip=(
+        (mask:$1;name:'Difficulty';number:2;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Energy Loss';number:2;dip:((dip_val:$2;dip_name:'Slow'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$8;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$4;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$f0;name:'Coinage';number:15;dip:((dip_val:$90;dip_name:'7 Coin - 1 Credit'),(dip_val:$a0;dip_name:'6 Coin - 1 Credit'),(dip_val:$b0;dip_name:'5 Coin - 1 Credit'),(dip_val:$c0;dip_name:'4 Coin - 1 Credit'),(dip_val:$d0;dip_name:'3 Coin - 1 Credit'),(dip_val:$e0;dip_name:'2 Coin - 1 Credit'),(dip_val:$f0;dip_name:'1 Coin - 1 Credit'),(dip_val:$70;dip_name:'1 Coin - 2 Credit'),(dip_val:$60;dip_name:'1 Coin - 3 Credit'),(dip_val:$50;dip_name:'1 Coin - 4 Credit'),(dip_val:$40;dip_name:'1 Coin - 5 Credit'),(dip_val:$30;dip_name:'1 Coin - 6 Credit'),(dip_val:$20;dip_name:'1 Coin - 7 Credit'),(dip_val:$10;dip_name:'1 Coin - 8 Credit'),(dip_val:$0;dip_name:'Free Play'),())),());
+        kungfum_dip_b:array [0..8] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$2;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Coin Mode';number:2;dip:((dip_val:$4;dip_name:'Mode 1'),(dip_val:$0;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Slow Motion Mode (Cheat)';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Freeze (Cheat)';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Level Selection Mode (Cheat)';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Invulnerability (Cheat)';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Service';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Spelunker
         spl_rom:array[0..3] of tipo_roms=(
         (n:'spra.4e';l:$4000;p:0;crc:$cf811201),(n:'spra.4d';l:$4000;p:$4000;crc:$bb4faa4f),
@@ -133,63 +133,46 @@ var
  memoria_sprites:array[0..$1f] of byte;
  mem_rom:array[0..3,0..$1fff] of byte;
  mem_rom2:array[0..15,0..$fff] of byte;
- rom_bank,rom_bank2,pal_bank,ldrun2_banksw,old_bank:byte;
+ rom_bank,rom_bank2,pal_bank,ldrun2_banksw:byte;
+ bankcontrol:array[0..1] of byte;
  update_video_m62:procedure;
  calc_nchar_sp:function(color:byte):word;
 
-procedure draw_sprites(pos,col,col_mask,pri_mask,pri:byte);
+procedure draw_sprites(pos,col,col_mask,pri_mask,pri:byte);inline;
 var
-  f,atrib,atrib2:byte;
-  a,b,c,d,nchar,x,y,color:word;
-  flipx,flipy:boolean;
+  f,i,h,atrib:byte;
+  nchar,x,y,color:word;
+  flipy:boolean;
+  incr:integer;
 begin
 for f:=0 to $1f do begin
-  atrib2:=memoria[$c000+(f*8)];
-  if ((atrib2 and pri_mask)=pri) then begin
+  if ((memoria[$c000+(f*8)] and pri_mask)=pri) then begin
     atrib:=memoria[$c005+(f*8)];
-    nchar:=memoria[$c004+(f*8)]+((atrib and 7) shl 8);
-    color:=((atrib2 and col_mask) shl 3)+(256*col);
+    nchar:=memoria[$c004+(f*8)]+((atrib and $07) shl 8);
+    color:=(memoria[$c000+(f*8)] and col_mask) shl 3;
     x:=((memoria[$c007+(f*8)] and 1) shl 8)+memoria[$c006+(f*8)];
     y:=256+(128*pos)-15-(256*(memoria[$c003+(f*8)] and 1)+memoria[$c002+(f*8)]);
-    flipx:=(atrib and $40)<>0;
     flipy:=(atrib and $80)<>0;
-    case (memoria_sprites[(nchar shr 5) and $1f] and 3) of
-      0:begin
-          put_gfx_sprite(nchar,color,flipx,flipy,1);
-          actualiza_gfx_sprite(x,y,2,1);
-        end;
+    i:=memoria_sprites[(nchar shr 5) and $1f];
+    case i of
       1:begin //doble
-          nchar:=nchar and $fffe;
-          if flipy then begin
-            a:=nchar+1;
-            b:=nchar;
-          end else begin
-            a:=nchar;
-            b:=nchar+1;
-          end;
-          put_gfx_sprite_diff(a,color,flipx,flipy,1,0,0);
-          put_gfx_sprite_diff(b,color,flipx,flipy,1,0,16);
-          actualiza_gfx_sprite_size(x,y-16,2,16,32);
+         y:=y-16;
+         //Cojo el sprite base
+         nchar:=nchar and $fffe;
         end;
       2:begin //Cuadruple
-  			  nchar:=nchar and $fffc;
-          if flipy then begin
-            a:=nchar+3;
-            b:=nchar+2;
-            c:=nchar+1;
-            d:=nchar;
-          end else begin
-            a:=nchar;
-            b:=nchar+1;
-            c:=nchar+2;
-            d:=nchar+3;
-          end;
-  			  put_gfx_sprite_diff(a,color,flipx,flipy,1,0,0);
-          put_gfx_sprite_diff(b,color,flipx,flipy,1,0,16);
-          put_gfx_sprite_diff(c,color,flipx,flipy,1,0,32);
-          put_gfx_sprite_diff(d,color,flipx,flipy,1,0,48);
-          actualiza_gfx_sprite_size(x,y-48,2,16,64);
+         i:=3;
+  			 nchar:=nchar and $fffc;
+  			 y:=y-3*16;
         end;
+    end;
+    if flipy then begin
+  				incr:=-1;
+  				nchar:=nchar+i;
+    end else incr:=1;
+    for h:=0 to i do begin
+      put_gfx_sprite(nchar+(h*incr),color+(256*col),(atrib and $40)<>0,flipy,1);
+      actualiza_gfx_sprite(x,y+(16*h),2,1);
     end;
   end;
 end;
@@ -199,7 +182,6 @@ procedure update_video_kungfum;
 var
   f,nchar,y,x:word;
   atrib,color:byte;
-  flipx:boolean;
 begin
 for f:=0 to $7ff do begin
   if gfx[0].buffer[f] then begin
@@ -208,10 +190,9 @@ for f:=0 to $7ff do begin
     atrib:=memoria[$d800+f];
     color:=atrib and $1f;
     nchar:=memoria[$d000+f]+((atrib and $c0) shl 2);
-    flipx:=(atrib and $20)<>0;
-    put_gfx_flip(x*8,y*8,nchar,color shl 3,1,0,flipx,false);
-    if not((y<6) or ((color shr 1)>$c)) then put_gfx_block_trans(x*8,y*8,3,8,8)
-      else put_gfx_flip(x*8,y*8,nchar,color shl 3,3,0,flipx,false);
+    put_gfx_flip(x*8,y*8,nchar,color shl 3,1,0,(atrib and $20)<>0,false);
+    if not((y<6) or ((color shr 1)>$0c)) then put_gfx_block_trans(x*8,y*8,3,8,8)
+      else put_gfx_flip(x*8,y*8,nchar,color shl 3,3,0,(atrib and $20)<>0,false);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -228,7 +209,6 @@ procedure update_video_ldrun;
 var
   f,nchar,y,x:word;
   atrib,color:byte;
-  flipx:boolean;
 begin
 for f:=0 to $7ff do begin
   if gfx[0].buffer[f] then begin
@@ -237,10 +217,9 @@ for f:=0 to $7ff do begin
     atrib:=memoria[$d001+(f*2)];
     color:=atrib and $1f;
     nchar:=memoria[$d000+(f*2)]+((atrib and $c0) shl 2);
-    flipx:=(atrib and $20)<>0;
-    put_gfx_flip(x*8,y*8,nchar,color shl 3,1,0,flipx,false);
+    put_gfx_flip(x*8,y*8,nchar,color shl 3,1,0,(atrib and $20)<>0,false);
     if not((color shr 1)>=ldrun_color) then put_gfx_block_trans(x*8,y*8,3,8,8)
-      else put_gfx_trans_flip(x*8,y*8,nchar,color shl 3,3,0,flipx,false);
+      else put_gfx_trans_flip(x*8,y*8,nchar,color shl 3,3,0,(atrib and $20)<>0,false);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -295,38 +274,39 @@ end;
 procedure eventos_irem_m62;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
 end;
 end;
 
 procedure irem_m62_principal;
 var
-  f:word;
+  frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
-  for f:=0 to 283 do begin
-    eventos_irem_m62;
-    if f=256 then begin
-      z80_0.change_irq(HOLD_LINE);
-      update_video_m62;
-    end;
+frame_m:=z80_0.tframes;
+frame_s:=m6800_0.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
     //main
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    m6800_0.run(frame_snd);
-    frame_snd:=frame_snd+m6800_0.tframes-m6800_0.contador;
+    m6800_0.run(frame_s);
+    frame_s:=frame_s+m6800_0.tframes-m6800_0.contador;
   end;
+  z80_0.change_irq(HOLD_LINE);
+  update_video_m62;
+  eventos_irem_m62;
   video_sync;
 end;
 end;
@@ -334,9 +314,7 @@ end;
 //KungFu Master
 function kungfum_getbyte(direccion:word):byte;
 begin
-  case direccion of
-    0..$7fff,$d000..$efff:kungfum_getbyte:=memoria[direccion];
-  end;
+  kungfum_getbyte:=memoria[direccion];
 end;
 
 procedure kungfum_putbyte(direccion:word;valor:byte);
@@ -356,11 +334,11 @@ end;
 function kungfum_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  0:kungfum_inbyte:=marcade.in0;
-  1:kungfum_inbyte:=marcade.in1;
-  2:kungfum_inbyte:=marcade.in2;
-  3:kungfum_inbyte:=marcade.dswa;
-  4:kungfum_inbyte:=marcade.dswb;
+  $0:kungfum_inbyte:=marcade.in0;
+  $1:kungfum_inbyte:=marcade.in1;
+  $2:kungfum_inbyte:=marcade.in2;
+  $3:kungfum_inbyte:=marcade.dswa;
+  $4:kungfum_inbyte:=marcade.dswb;
 end;
 end;
 
@@ -376,24 +354,18 @@ end;
 function spl_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff,$a000..$bfff,$c800..$cfff,$e000..$efff:spl_getbyte:=memoria[direccion];
   $8000..$9fff:spl_getbyte:=mem_rom[rom_bank,direccion and $1fff];
+  else spl_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure spl_putbyte(direccion:word;valor:byte);
 begin
+if direccion<$a000 then exit;
+memoria[direccion]:=valor;
 case direccion of
-    0..$9fff:;
-    $a000..$bfff:if memoria[direccion]<>valor then begin
-                    gfx[2].buffer[(direccion and $1fff) shr 1]:=true;
-                    memoria[direccion]:=valor;
-                 end;
-    $c000..$c0ff,$e000..$efff:memoria[direccion]:=valor;
-    $c800..$cfff:if memoria[direccion]<>valor then begin
-                    gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-                    memoria[direccion]:=valor;
-                 end;
+    $a000..$bfff:gfx[2].buffer[(direccion and $1fff) shr 1]:=true;
+    $c800..$cfff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
     $d000:scroll_y:=(scroll_y and $100) or valor;
     $d001:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
     $d002:scroll_x:=(scroll_x and $100) or valor;
@@ -411,32 +383,26 @@ end;
 function spl2_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff,$a000..$bfff,$c800..$cfff,$e000..$efff:spl2_getbyte:=memoria[direccion];
   $8000..$8fff:spl2_getbyte:=mem_rom[rom_bank,direccion and $fff];
   $9000..$9fff:spl2_getbyte:=mem_rom2[rom_bank2,direccion and $fff];
+  else spl2_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure spl2_putbyte(direccion:word;valor:byte);
 begin
+if direccion<$a000 then exit;
+memoria[direccion]:=valor;
 case direccion of
-    0..$9fff:;
-    $a000..$bfff:if memoria[direccion]<>valor then begin
-                    gfx[2].buffer[(direccion and $1fff) shr 1]:=true;
-                    memoria[direccion]:=valor;
-                 end;
-    $c000..$c0ff,$e000..$efff:memoria[direccion]:=valor;
-    $c800..$cfff:if memoria[direccion]<>valor then begin
-                    gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-                    memoria[direccion]:=valor;
-                 end;
+    $a000..$bfff:gfx[2].buffer[(direccion and $1fff) shr 1]:=true;
+    $c800..$cfff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
     $d000:scroll_y:=(scroll_y and $100) or valor;
     $d001:scroll_x:=(scroll_x and $100) or valor;
     $d002:begin
             scroll_x:=(scroll_x and $ff) or ((valor and 2) shl 7);
 	          scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
-          	if (pal_bank<>((valor and $c) shl 2)) then begin
-                		pal_bank:=(valor and $c) shl 2;
+          	if (pal_bank<>((valor and $0c) shl 2)) then begin
+                		pal_bank:=(valor and $0c) shl 2;
 		                fillchar(gfx[0].buffer[0],$400,1);
                     fillchar(gfx[2].buffer[0],$1000,1);
             end;
@@ -451,13 +417,10 @@ end;
 //Lode Runner
 procedure ldrun_putbyte(direccion:word;valor:byte);
 begin
+if direccion<$8000 then exit;
+memoria[direccion]:=valor;
 case direccion of
-  0..$7fff:;
-  $c000..$c0ff,$e000..$efff:memoria[direccion]:=valor;
-  $d000..$dfff:if memoria[direccion]<>valor then begin
-                  gfx[0].buffer[(direccion and $fff) shr 1]:=true;
-                  memoria[direccion]:=valor;
-               end;
+  $d000..$dfff:gfx[0].buffer[(direccion and $fff) shr 1]:=true;
 end;
 end;
 
@@ -465,23 +428,23 @@ end;
 function ldrun2_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff,$d000..$dfff,$e000..$efff:ldrun2_getbyte:=memoria[direccion];
   $8000..$9fff:ldrun2_getbyte:=mem_rom[rom_bank,direccion and $1fff];
+  else ldrun2_getbyte:=memoria[direccion];
 end;
 end;
 
 function ldrun2_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  0:ldrun2_inbyte:=marcade.in0;
-  1:ldrun2_inbyte:=marcade.in1;
-  2:ldrun2_inbyte:=marcade.in2;
-  3:ldrun2_inbyte:=marcade.dswa;
-  4:ldrun2_inbyte:=marcade.dswb;
+  $0:ldrun2_inbyte:=marcade.in0;
+  $1:ldrun2_inbyte:=marcade.in1;
+  $2:ldrun2_inbyte:=marcade.in2;
+  $3:ldrun2_inbyte:=marcade.dswa;
+  $4:ldrun2_inbyte:=marcade.dswb;
   $80:begin
         if (ldrun2_banksw<>0) then begin
       		ldrun2_banksw:=ldrun2_banksw-1;
-      		// swap to bank #1 on second read
+      		// swap to bank #1 on second read */
       		if (ldrun2_banksw=0) then rom_bank:=1;
         end;
         ldrun2_inbyte:=0;
@@ -499,12 +462,15 @@ begin
 case (puerto and $ff) of
   0:if ((valor and $80)=0) then sound_command:=valor and $7f
     	else m6800_0.change_irq(ASSERT_LINE);
-  $80:begin
-        rom_bank:=banks[valor];
-        old_bank:=valor;
-      end;
-  $81:if ((old_bank=1) and (valor=$d)) then	ldrun2_banksw:=2
-        else ldrun2_banksw:=0;
+  $80..$81:begin
+             bankcontrol[puerto and 1]:=valor;
+	           if ((puerto and 1)=0) then begin
+		            rom_bank:=banks[valor];
+             end else begin
+		            if ((bankcontrol[0]=$1) and (valor=$0d)) then	ldrun2_banksw:=2
+            		  else ldrun2_banksw:=0;
+	            end;
+           end;
 end;
 end;
 
@@ -512,6 +478,7 @@ end;
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  $0..$ff:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $4000..$ffff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -519,10 +486,11 @@ end;
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $800..$8ff:case direccion and 3 of
+  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
+  $800..$8ff:case direccion and $3 of
                   0:m6800_0.change_irq(CLEAR_LINE);
-                  1:msm5205_0.data_w(valor);
-                  2:msm5205_1.data_w(valor);
+                  1:msm_5205_0.data_w(valor);
+                  2:msm_5205_1.data_w(valor);
                end;
   $4000..$ffff:;
 end;
@@ -535,22 +503,30 @@ end;
 
 procedure out_port2(valor:byte);
 begin
-  if (((val_port2 and 1)<>0) and ((not(valor and 1))<>0)) then begin
-		if (val_port2 and 4)<>0 then begin
-			if (val_port2 and 8)<>0 then ay8910_0.control(val_port1);
+  if (((val_port2 and $01)<>0) and ((not(valor and $01))<>0)) then begin
+		// control or data port? */
+		if (val_port2 and $04)<>0 then begin
+			// PSG 0 or 1? control */
+			if (val_port2 and $08)<>0 then ay8910_0.control(val_port1);
 			if (val_port2 and $10)<>0 then ay8910_1.control(val_port1);
 		end else begin
-			if (val_port2 and 8)<>0 then ay8910_0.write(val_port1);
-			if (val_port2 and $10)<>0 then ay8910_1.write(val_port1);
+			// PSG 0 or 1? data */
+			if (val_port2 and $08)<>0 then AY8910_0.Write(val_port1);
+			if (val_port2 and $10)<>0 then AY8910_1.Write(val_port1);
 		end;
 	end;
   val_port2:=valor;
 end;
 
 function in_port1:byte;
+var
+  ret:byte;
 begin
-	if (val_port2 and 8)<>0 then in_port1:=ay8910_0.read
-    else if (val_port2 and $10)<>0 then in_port1:=ay8910_1.read;
+ ret:=$ff;
+ // PSG 0 or 1? */
+	if (val_port2 and $08)<>0 then ret:=AY8910_0.Read
+    else if (val_port2 and $10)<>0 then ret:=AY8910_1.Read;
+	in_port1:=ret;
 end;
 
 function in_port2:byte;
@@ -565,8 +541,9 @@ end;
 
 procedure ay0_portb_w(valor:byte);
 begin
-	msm5205_0.reset_w((valor and 1)<>0);
-  msm5205_1.reset_w((valor and 2)<>0);
+  // bits 0 and 1 reset the two chips */
+	msm_5205_0.reset_w(valor and 1);
+  msm_5205_1.reset_w(valor and 2);
 end;
 
 procedure adpcm_int;
@@ -578,8 +555,6 @@ procedure irem_m62_play_sound;
 begin
   ay8910_0.update;
   ay8910_1.update;
-  msm5205_0.update;
-  msm5205_1.update;
 end;
 
 //Main
@@ -587,13 +562,11 @@ procedure reset_irem_m62;
 begin
  z80_0.reset;
  m6800_0.reset;
+ reset_audio;
  ay8910_0.reset;
  ay8910_1.reset;
- msm5205_0.reset;
- msm5205_1.reset;
- frame_main:=z80_0.tframes;
- frame_snd:=m6800_0.tframes;
- reset_game_general;
+ msm_5205_0.reset;
+ msm_5205_1.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -606,7 +579,8 @@ begin
  scroll_x:=0;
  scroll_y:=0;
  ldrun2_banksw:=0;
- old_bank:=0;
+ bankcontrol[0]:=0;
+ bankcontrol[1]:=0;
 end;
 
 function iniciar_irem_m62:boolean;
@@ -707,7 +681,7 @@ end;
 begin
 llamadas_maquina.bucle_general:=irem_m62_principal;
 llamadas_maquina.reset:=reset_irem_m62;
-llamadas_maquina.fps_max:=56.338028;
+llamadas_maquina.fps_max:=55;
 iniciar_irem_m62:=false;
 fillchar(memoria_temp[0],$20000,0);
 iniciar_audio(false);
@@ -728,24 +702,22 @@ case main_vars.tipo_maquina of
 end;
 iniciar_video(x,256);
 //Sound CPU
-m6800_0:=cpu_m6800.create(3579545,284,TCPU_M6803);
+m6800_0:=cpu_m6800.create(3579545,$100,TCPU_M6803);
 m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(irem_m62_play_sound);
 //sound chips
-msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,0);
-msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,0);
-msm5205_0.change_advance(adpcm_int);
-msm5205_1.change_advance(nil);
-ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
+ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
-ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910);
+ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910,1);
 marcade.dswa:=$ff;
 marcade.dswb:=$fd;
 case main_vars.tipo_maquina of
   42:begin  //KungFu Master
         //Main CPU
-        z80_0:=cpu_z80.create(3072000,284);
+        z80_0:=cpu_z80.create(3072000,$100);
         z80_0.change_ram_calls(kungfum_getbyte,kungfum_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -765,12 +737,12 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,kungfum_pal)) then exit;
         cargar_paleta;
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
-        marcade.dswa_val2:=@kungfum_dip_a;
-        marcade.dswb_val2:=@kungfum_dip_b;
+        marcade.dswa_val:=@kungfum_dip_a;
+        marcade.dswb_val:=@kungfum_dip_b;
      end;
      72:begin  //Spelunker
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000,$100);
         z80_0.change_ram_calls(spl_getbyte,spl_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -799,7 +771,7 @@ case main_vars.tipo_maquina of
      end;
      73:begin  //Spelunker II
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000,$100);
         z80_0.change_ram_calls(spl2_getbyte,spl2_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -829,12 +801,12 @@ case main_vars.tipo_maquina of
      end;
      74:begin  //Lode Runner
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000,$100);
         z80_0.change_ram_calls(kungfum_getbyte,ldrun_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
         update_video_m62:=update_video_ldrun;
-        ldrun_color:=$c;
+        ldrun_color:=$0c;
         //cargar roms
         if not(roms_load(@memoria,ldrun_rom)) then exit;
         //cargar sonido
@@ -853,12 +825,12 @@ case main_vars.tipo_maquina of
      end;
      75:begin  //Lode Runner II
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000,$100);
         z80_0.change_ram_calls(ldrun2_getbyte,ldrun_putbyte);
         z80_0.change_io_calls(ldrun2_inbyte,ldrun2_outbyte);
         //video
         update_video_m62:=update_video_ldrun;
-        ldrun_color:=4;
+        ldrun_color:=$04;
         //cargar roms y ponerlas en sus bancos
         if not(roms_load(@memoria_temp,ldrun2_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -879,6 +851,7 @@ case main_vars.tipo_maquina of
      end;
 end;
 //final
+reset_irem_m62;
 iniciar_irem_m62:=true;
 end;
 

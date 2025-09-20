@@ -6,11 +6,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      controls_engine,pal_engine,ppi8255,z80pio,qsnapshot,sound_engine;
 
 procedure cargar_system1;
-
 //Video
 procedure update_video_system1;
 procedure update_backgroud(screen:byte);
-procedure cambiar_color_system2(numero:byte;pos:word);
 //Events
 procedure eventos_system1;
 //PPI
@@ -20,14 +18,10 @@ function system1_snd_getbyte_ppi(direccion:word):byte;
 procedure system1_snd_putbyte(direccion:word;valor:byte);
 procedure system1_port_a_write(valor:byte);
 procedure system1_port_b_write(valor:byte);
-procedure system1_port_gardia_write(valor:byte);
 procedure system1_port_c_write(valor:byte);
 //Sound
 procedure system1_sound_update;
 procedure system1_sound_irq;
-procedure system1_ready_cb(state:byte);
-//Misc
-procedure system1_adjust_cycle(instruccion:byte);
 
 const
   system1_dip_credit:array [0..2] of def_dip=(
@@ -43,15 +37,13 @@ var
  sprites_final_screen:array[0..$ffff] of word;
  final_screen:array[0..7,0..$ffff] of word;
  bgpixmaps:array[0..3] of byte;
- sprite_num_banks,sprite_offset,bg_ram_bank:byte;
+ sprite_num_banks,sprite_offset:byte;
  yscroll,mask_char:word;
  xscroll:array[0..$1f] of word;
  //Roms
  memoria_proms:array[0..$2ff] of byte;
  lookup_memory:array[0..$ff] of byte;
  mem_dec:array[0..$7fff] of byte;
- roms:array[0..3,0..$3fff] of byte;
- rom_bank:byte;
  //Colisiones
  sprite_collide:array[0..$3ff] of byte;
  mix_collide:array[0..$3f] of byte;
@@ -63,8 +55,81 @@ var
 
 implementation
 
-procedure update_backgroud(screen:byte);
-procedure put_gfx_system1(pos_x,pos_y,nchar,color:word;screen:byte);
+procedure draw_sprites;inline;
+var
+  spritedata,srcaddr,stride:word;
+  bank,xstart,bottom,top,palettebase:word;
+  x,y,addrdelta:integer;
+  f,color1,color2,data:byte;
+  gfxbankbase:dword;
+  curaddr,destbase,prevpix:word;
+begin
+for f:=0 to 31 do begin
+  spritedata:=$d000+f*$10;
+  srcaddr:=memoria[spritedata+6]+(memoria[spritedata+7] shl 8);
+  stride:=memoria[spritedata+4]+(memoria[spritedata+5] shl 8);
+	bank:=((memoria[spritedata+3] and $80) shr 7) or ((memoria[spritedata+3] and $40) shr 5) or ((memoria[spritedata+3] and $20) shr 3);
+	xstart:=(((memoria[spritedata+2]+(memoria[spritedata+3] shl 8)) and $1ff) div 2)+sprite_offset;
+	bottom:=memoria[spritedata+1]+1;
+	top:=memoria[spritedata+0]+1;
+	palettebase:=f*$10;
+  bank:=bank mod sprite_num_banks;
+  gfxbankbase:=bank*$8000;
+  for y:=top to bottom-1 do begin
+			destbase:=y*256;
+			// advance by the row counter */
+			srcaddr:=srcaddr+stride;
+			// skip if outside of our clipping area
+			if (y<0) or (y>256) then continue;
+			// iterate over X */
+      if (srcaddr and $8000)<>0 then addrdelta:=-1
+        else addrdelta:=1;
+      curaddr:=srcaddr;
+      x:=xstart;
+      while True do begin
+				data:=memoria_sprites[gfxbankbase+(curaddr and $7fff)];
+				// non-flipped case */
+				if (curaddr and $8000)=0 then begin
+					color1:=data shr 4;
+					color2:=data and $f;
+				end else begin
+					color1:=data and $0f;
+					color2:=data shr 4;
+				end;
+				// stop when we see color 0x0f */
+				if (color1=$f) then break;
+				// draw if non-transparent */
+				if (color1<>0) then begin
+					if ((x>=0) and (x<=255)) then begin
+						prevpix:=sprites_final_screen[destbase+x];
+						if ((prevpix and $0f)<>0) then begin
+              sprite_collide[((prevpix shr 4) and $1f)+32*f]:=1;
+              sprite_collide_summary:=1;
+            end;
+						sprites_final_screen[destbase+x]:=color1 or palettebase;
+					end;
+				end;
+        // stop when we see color 0x0f */
+				if (color2=$f) then break;
+				// draw if non-transparent */
+				if (color2<>0) then begin
+					if (((x+1)>=0) and ((x+1)<=255)) then begin
+						prevpix:=sprites_final_screen[destbase+x+1];
+						if ((prevpix and $0f)<>0) then begin
+              sprite_collide[((prevpix shr 4) and $1f)+32*f]:=1;
+              sprite_collide_summary:=1;
+            end;
+						sprites_final_screen[destbase+x+1]:=color2 or palettebase;
+					end;
+        end;
+        curaddr:=curaddr+addrdelta;
+        x:=x+2;
+				end;
+      end;
+  end; //del for f
+end;
+
+procedure put_gfx_system1(pos_x,pos_y,nchar,color:word;screen:byte);inline;
 var
   x,y:byte;
   temp:pword;
@@ -82,6 +147,8 @@ for y:=0 to 7 do begin
   copymemory(@final_screen[screen,pos_x+((pos_y+y)*256)],punbuf,8*2);
 end;
 end;
+
+procedure update_backgroud(screen:byte);
 var
   source,f,color,nchar,atrib:word;
   x,y:word;
@@ -109,80 +176,6 @@ var
   bgx,fgpix,bgpix,sprpix:word;
   bgbase:array[0..1] of byte;
   bit0,bit1,bit2,bit3,bit4:byte;
-procedure draw_sprites;
-var
-  spritedata,srcaddr,stride:word;
-  bank,xstart,bottom,top,palettebase:word;
-  x,y,addrdelta:integer;
-  f,color1,color2,data:byte;
-  gfxbankbase:dword;
-  curaddr,destbase,prevpix:word;
-begin
-for f:=0 to 31 do begin
-  spritedata:=$d000+f*$10;
-  srcaddr:=memoria[spritedata+6]+(memoria[spritedata+7] shl 8);
-  stride:=memoria[spritedata+4]+(memoria[spritedata+5] shl 8);
-	bank:=((memoria[spritedata+3] and $80) shr 7) or ((memoria[spritedata+3] and $40) shr 5) or ((memoria[spritedata+3] and $20) shr 3);
-	xstart:=(((memoria[spritedata+2]+(memoria[spritedata+3] shl 8)) and $1ff) div 2)+sprite_offset;
-	bottom:=memoria[spritedata+1]+1;
-	top:=memoria[spritedata+0]+1;
-	palettebase:=f*$10;
-  bank:=bank mod sprite_num_banks;
-  gfxbankbase:=bank*$8000;
-  for y:=top to bottom-1 do begin
-			destbase:=y*256;
-			// advance by the row counter
-			srcaddr:=srcaddr+stride;
-			// skip if outside of our clipping area
-			if (y<0) or (y>256) then continue;
-			// iterate over X
-      if (srcaddr and $8000)<>0 then addrdelta:=-1
-        else addrdelta:=1;
-      curaddr:=srcaddr;
-      x:=xstart;
-      while True do begin
-				data:=memoria_sprites[gfxbankbase+(curaddr and $7fff)];
-				// non-flipped case
-				if (curaddr and $8000)=0 then begin
-					color1:=data shr 4;
-					color2:=data and $f;
-				end else begin
-					color1:=data and $f;
-					color2:=data shr 4;
-				end;
-				// stop when we see color 0x0f
-				if (color1=$f) then break;
-				// draw if non-transparent
-				if (color1<>0) then begin
-					if ((x>=0) and (x<=255)) then begin
-						prevpix:=sprites_final_screen[destbase+x];
-						if ((prevpix and $f)<>0) then begin
-              sprite_collide[((prevpix shr 4) and $1f)+32*f]:=1;
-              sprite_collide_summary:=1;
-            end;
-						sprites_final_screen[destbase+x]:=color1 or palettebase;
-					end;
-				end;
-        // stop when we see color 0x0f
-				if (color2=$f) then break;
-				// draw if non-transparent
-				if (color2<>0) then begin
-					if (((x+1)>=0) and ((x+1)<=255)) then begin
-						prevpix:=sprites_final_screen[destbase+x+1];
-						if ((prevpix and $f)<>0) then begin
-              sprite_collide[((prevpix shr 4) and $1f)+32*f]:=1;
-              sprite_collide_summary:=1;
-            end;
-						sprites_final_screen[destbase+x+1]:=color2 or palettebase;
-					end;
-        end;
-        curaddr:=curaddr+addrdelta;
-        x:=x+2;
-				end;
-      end;
-  end; //del for f
-end;
-
 begin
 if (system1_videomode and $10)<>0 then begin
   fill_full_screen(0,$800);
@@ -198,16 +191,16 @@ for y:=0 to 255 do begin
 		sprbase:=(y and $ff)*256;
     bgy:=(y+yscroll) and $1ff;
     bgxscroll:=xscroll[y div 8];
-		// get the base of the left and right pixmaps for the effective background Y
+		// get the base of the left and right pixmaps for the effective background Y */
 		bgbase[0]:=bgpixmaps[(bgy shr 8)*2+0];
 		bgbase[1]:=bgpixmaps[(bgy shr 8)*2+1];
-		// iterate over pixels
+		// iterate over pixels */
 		for x:=0 to 255 do begin
 			bgx:=(x-bgxscroll) and $1ff;
 			fgpix:=final_screen[char_screen,fgbase+x];
 			bgpix:=final_screen[bgbase[bgx shr 8],(bgx and $ff)+(bgy and $ff)*256];
 			sprpix:=sprites_final_screen[sprbase+x];
-			//using the sprite, background, and foreground pixels, look up the color behavior
+			//using the sprite, background, and foreground pixels, look up the color behavior */
       if (sprpix and $f)=0 then bit0:=1
         else bit0:=0;
       if (fgpix and 7)=0 then bit1:=2
@@ -218,12 +211,12 @@ for y:=0 to 255 do begin
       bit4:=((bgpix shr 9) and 3) shl 5;
 			lookup_index:=bit0 or bit1 or bit2 or	bit3 or	bit4;
 			lookup_value:=lookup_memory[lookup_index];
-			// compute collisions based on two of the PROM bits
+			// compute collisions based on two of the PROM bits */
 			if (lookup_value and 4)=0 then begin
 				mix_collide[((lookup_value and 8) shl 2) or ((sprpix shr 4) and $1f)]:=1;
         mix_collide_summary:=1;
       end;
-			// the lower 2 PROM bits select the palette and which pixels
+			// the lower 2 PROM bits select the palette and which pixels */
 			lookup_value:=lookup_value and 3;
       if (lookup_value=0) then temp^:=paleta[$000 or (sprpix and $1ff)]
 			    else if (lookup_value=1) then temp^:=paleta[$200 or (fgpix and $1ff)]
@@ -233,22 +226,8 @@ for y:=0 to 255 do begin
     putpixel(ADD_SPRITE,y+ADD_SPRITE,256,punbuf,1);
 end;
 //Pantalla final
-if main_screen.rot270_screen then actualiza_trozo_final(8,0,240,224,1)
+if main_screen.rol90_screen then actualiza_trozo_final(8,0,240,224,1)
   else actualiza_trozo_final(0,0,256,224,1);
-end;
-
-procedure cambiar_color_system2(numero:byte;pos:word);
-var
-  color:tcolor;
-  tmpb:byte;
-begin
-  tmpb:=memoria_proms[numero];
-  color.r:=$0e*(tmpb and 1)+$1f*((tmpb and 2) shr 1)+$43*((tmpb and 4) shr 2)+$8f*((tmpb and 8) shr 3);
-  tmpb:=memoria_proms[numero+$100];
-  color.g:=$0e*(tmpb and 1)+$1f*((tmpb and 2) shr 1)+$43*((tmpb and 4) shr 2)+$8f*((tmpb and 8) shr 3);
-  tmpb:=memoria_proms[numero+$200];
-  color.b:=$0e*(tmpb and 1)+$1f*((tmpb and 2) shr 1)+$43*((tmpb and 4) shr 2)+$8f*((tmpb and 8) shr 3);
-  set_pal_color(color,pos);
 end;
 
 //Main CPU PPI
@@ -313,8 +292,8 @@ procedure eventos_system1;
 begin
 if event.arcade then begin
   //System
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //P1
@@ -343,14 +322,8 @@ begin //soundport_w
 end;
 
 procedure system1_port_b_write(valor:byte);
-begin
+begin //videoport_w
   rom_bank:=(valor and $c) shr 2;
-  system1_videomode:=valor;
-end;
-
-procedure system1_port_gardia_write(valor:byte);
-begin
-  rom_bank:=(((valor and $40) shr 5) or ((valor and 4) shr 2));
   system1_videomode:=valor;
 end;
 
@@ -358,34 +331,28 @@ procedure system1_port_c_write(valor:byte);
 begin //sound_controlw
   if (valor and $80)<>0 then z80_1.change_nmi(CLEAR_LINE)
     else z80_1.change_nmi(ASSERT_LINE);
-  bg_ram_bank:=(valor shr 1) and 3;
-end;
-
-procedure system1_adjust_cycle(instruccion:byte);
-begin
-  z80_0.contador:=z80_0.contador+1;
-end;
-
-procedure system1_ready_cb(state:byte);
-begin
-  if state=CLEAR_LINE then z80_1.change_halt(ASSERT_LINE)
-    else z80_1.change_halt(CLEAR_LINE);
+  bg_ram_bank:=(valor shr 1) and $3;
 end;
 
 //Main
+procedure cerrar_system1;
+begin
+case main_vars.tipo_maquina of
+  27,35,36,153,155:z80pio_close(0);
+end;
+end;
+
 procedure reset_system1;
 begin
 case main_vars.tipo_maquina of
-  27,35,36,153,155,384:pio_0.reset;
+  27,35,36,153,155:z80pio_reset(0);
   37,151,152,154:pia8255_0.reset;
 end;
-z80_0.reset;
-z80_1.reset;
-frame_main:=z80_0.tframes;
-frame_snd:=z80_1.tframes;
 sn_76496_0.reset;
 sn_76496_1.reset;
-reset_game_general;
+z80_0.reset;
+z80_1.reset;
+reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
@@ -427,7 +394,6 @@ case main_vars.tipo_maquina of
   153:open_qsnapshot_save('sninja'+nombre);
   154:open_qsnapshot_save('upanddown'+nombre);
   155:open_qsnapshot_save('flicky'+nombre);
-  384:open_qsnapshot_save('gardia'+nombre);
 end;
 getmem(data,2000);
 //CPU1
@@ -447,17 +413,17 @@ if ((main_vars.tipo_maquina=37) or (main_vars.tipo_maquina=151) or (main_vars.ti
   savedata_qsnapshot(data,size);
 end;
 //MEM
-savedata_qsnapshot(@memoria[$c000],$1800);
-savedata_qsnapshot(@mem_snd[$8000],$800);
-savedata_qsnapshot(@bg_ram[0],$4000);
-savedata_qsnapshot(@sprites_final_screen[0],$10000*2);
-for f:=0 to 7 do savedata_qsnapshot(@final_screen[0,f],$10000*2);
-savedata_qsnapshot(@bgpixmaps[0],4);
-savedata_qsnapshot(@xscroll[0],$20*2);
-savedata_qsnapshot(@sprite_collide,$400);;
-savedata_qsnapshot(@mix_collide,$40);
-savedata_qsnapshot(@memoria_sprites,$20000);
-savedata_qsnapshot(@buffer_paleta,$800*2);
+savedata_com_qsnapshot(@memoria[$c000],$1800);
+savedata_com_qsnapshot(@mem_snd[$8000],$800);
+savedata_com_qsnapshot(@bg_ram[0],$4000);
+savedata_com_qsnapshot(@sprites_final_screen[0],$10000*2);
+for f:=0 to 7 do savedata_com_qsnapshot(@final_screen[0,f],$10000*2);
+savedata_com_qsnapshot(@bgpixmaps[0],4);
+savedata_com_qsnapshot(@xscroll[0],$20*2);
+savedata_com_qsnapshot(@sprite_collide,$400);;
+savedata_com_qsnapshot(@mix_collide,$40);
+savedata_com_qsnapshot(@memoria_sprites,$20000);
+savedata_com_qsnapshot(@buffer_paleta,$800*2);
 //MISC
 buffer[0]:=sound_latch;
 buffer[1]:=bg_ram_bank;
@@ -490,7 +456,6 @@ case main_vars.tipo_maquina of
   153:if not(open_qsnapshot_load('sninja'+nombre)) then exit;
   154:if not(open_qsnapshot_load('upanddown'+nombre)) then exit;
   155:if not(open_qsnapshot_load('flicky'+nombre)) then exit;
-  384:if not(open_qsnapshot_load('gardia'+nombre)) then exit;
 end;
 getmem(data,2000);
 //CPU1
@@ -538,14 +503,14 @@ close_qsnapshot;
 fillchar(bg_ram_w[$0],$2000,1);
 case main_vars.tipo_maquina of
   27,35,36,152,153,154,155:for f:=0 to $7ff do cambiar_color_system1(buffer_paleta[f],f);
-  37,151,384:for f:=0 to $7ff do cambiar_color_system2(buffer_paleta[f],f);
+  37,151:for f:=0 to $7ff do cambiar_color_system2(buffer_paleta[f],f);
 end;
 end;
 
 procedure cargar_system1;
 begin
 case main_vars.tipo_maquina of
-  27,35,36,152,153,154,155,384:begin
+  27,35,36,152,153,154,155:begin
         llamadas_maquina.iniciar:=iniciar_system1;
         llamadas_maquina.bucle_general:=system1_principal;
      end;
@@ -557,8 +522,8 @@ end;
 llamadas_maquina.reset:=reset_system1;
 llamadas_maquina.save_qsnap:=system1_qsave;
 llamadas_maquina.load_qsnap:=system1_qload;
+llamadas_maquina.close:=cerrar_system1;
 llamadas_maquina.fps_max:=60.096154;
 end;
 
 end.
-

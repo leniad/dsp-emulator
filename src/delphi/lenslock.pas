@@ -85,18 +85,11 @@ case main_vars.tipo_maquina of
   2,3:spec_a_pantalla(@memoria_3[var_spectrum.pantalla_128k,0],imagen1);
   7,8,9:begin
           cargar_bmp;
-          x:=200;
+          x:=192;
           case lenslok.indice of
-            1:begin
-                y:=135;
-                x:=199;
-              end;
-            5:y:=112;
-            7:y:=122;
-            8:begin
-                x:=208;
-                y:=98;
-            end;
+            1:y:=115;
+            5:y:=90;
+            7:y:=100;
           end;
         end;
 end;
@@ -138,8 +131,8 @@ end;
 
 procedure Tlenslock1.FormShow(Sender: TObject);
 begin
-lenslock1.Left:=principal1.left+principal1.Width;
-lenslock1.Top:=principal1.top+principal1.Height-lenslock1.Height;
+lenslock1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
+lenslock1.Top:=SCREEN_DIF+tape_window1.top+tape_window1.Height;
 combobox1.Items.Clear;
 combobox1.Items.Add('ACE');
 combobox1.Items.Add('Art Studio');

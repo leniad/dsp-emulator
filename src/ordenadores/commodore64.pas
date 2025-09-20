@@ -1,5 +1,7 @@
 unit commodore64;
-{$DEFINE CIA_OLD}
+
+//{$DEFINE CIA_OLD}
+
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,misc_functions,
@@ -8,7 +10,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      {$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
 
 function iniciar_c64:boolean;
-//CPU
+//Para los snapshots
 procedure c64_putbyte(direccion:word;valor:byte);
 
 var
@@ -24,12 +26,11 @@ const
   c64_kernel:tipo_roms=(n:'901227-03.u4';l:$2000;p:$0;crc:$dbe3e7c7);
   c64_basic:tipo_roms=(n:'901226-01.u3';l:$2000;p:$0;crc:$f833d117);
   c64_char:tipo_roms=(n:'901225-01.u5';l:$1000;p:0;crc:$ec4272ee);
+
 var
   kernel_rom,basic_rom:array[0..$1fff] of byte;
   tape_control,port_bits,port_val:byte;
-  write_ram:boolean;
-  read_ram_a,read_ram_e:boolean;
-  read_ram_d:byte;
+  char_ram,kernel_enabled,basic_enabled,char_enabled:boolean;
 
 procedure eventos_c64;
 begin
@@ -48,13 +49,6 @@ if event.arcade then begin
   if arcade_input.but0[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $ef) else mos6526_0.joystick2:=(mos6526_0.joystick2 or $10);
 end;
 if event.keyboard then begin
-  if keyboard[KEYBOARD_F1] then begin
-      if cinta_tzx.cargada then begin
-        if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
-          else tape_window1.fPlayCinta(nil);
-      end;
-      keyboard[KEYBOARD_F1]:=false;
-  end;
   //Line 0
   if keyboard[KEYBOARD_BACKSPACE] then c64_keyboard[0]:=(c64_keyboard[0] and $fe) else c64_keyboard[0]:=(c64_keyboard[0] or $1);
   if keyboard[KEYBOARD_RETURN] then c64_keyboard[0]:=(c64_keyboard[0] and $fd) else c64_keyboard[0]:=(c64_keyboard[0] or $2);
@@ -149,14 +143,14 @@ var
 begin
 init_controls(false,false,false,true);
 frame:=0;
-while EmuStatus=EsRunning do begin
+while EmuStatus=EsRuning do begin
  for f:=0 to 311 do begin
     frame:=frame+mos6566_0.update(f);
     m6502_0.run(frame);
     frame:=frame-m6502_0.contador;
     if ((f>15) and (f<286)) then putpixel(0,f-16,384,punbuf,1);
  end;
- actualiza_trozo(0,0,384,284,1,0,0,384,284,PANT_TEMP);
+ actualiza_trozo_simple(0,0,384,284,1);
  eventos_c64;
  video_sync;
 end;
@@ -166,14 +160,13 @@ function c64_getbyte(direccion:word):byte;
 begin
 case direccion of
   0:c64_getbyte:=port_bits;
-  1:c64_getbyte:=tape_control or (byte(not(tape_motor))*$20) or (port_val and $7);
+  1:c64_getbyte:=tape_control or (byte(tape_motor)*$20) or (port_val and $7);
   2..$9fff,$c000..$cfff:c64_getbyte:=memoria[direccion];
-  $a000..$bfff:if read_ram_a then c64_getbyte:=memoria[direccion]
-                  else c64_getbyte:=basic_rom[direccion and $1fff];
-  $d000..$dfff:case read_ram_d of
-                  0:c64_getbyte:=memoria[direccion];
-                  1:c64_getbyte:=char_rom[direccion and $fff];
-                  2:case ((direccion shr 8) and $f) of
+  $a000..$bfff:if basic_enabled then c64_getbyte:=basic_rom[direccion and $1fff]
+                  else c64_getbyte:=memoria[direccion];
+  $d000..$dfff:if char_ram then c64_getbyte:=memoria[direccion] else
+                  if char_enabled then c64_getbyte:=char_rom[direccion and $fff]
+                    else case ((direccion shr 8) and $f) of
                       0..3:c64_getbyte:=mos6566_0.read(direccion and $3f);   //VICII
                       4..7:c64_getbyte:=sid_0.read(direccion and $1f); //SID
                       8..$b:c64_getbyte:=color_ram[direccion and $3ff];
@@ -186,9 +179,8 @@ case direccion of
                       {$ENDIF}
                       $e..$f:c64_getbyte:=$ff;//MessageDlg('Leyendo de la expansion...', mtInformation,[mbOk], 0);
                     end;
-               end;
-  $e000..$ffff:if read_ram_e then c64_getbyte:=memoria[direccion]
-                  else c64_getbyte:=kernel_rom[direccion and $1fff];
+  $e000..$ffff:if kernel_enabled then c64_getbyte:=kernel_rom[direccion and $1fff]
+                  else c64_getbyte:=memoria[direccion];
 end;
 end;
 
@@ -197,62 +189,26 @@ var
   res:byte;
 begin
 res:=port_val or not(port_bits);
-tape_motor:=(port_val and $20)=0;
-case (res and 7) of
-  0:begin
-      write_ram:=true;
-      read_ram_d:=0;
-      read_ram_a:=true;
-      read_ram_e:=true;
-    end;
-  1:begin
-      write_ram:=true;
-      read_ram_d:=1;
-      read_ram_a:=true;
-      read_ram_e:=true;
-    end;
-  2:begin
-      write_ram:=true;
-      read_ram_d:=1;
-      read_ram_a:=true;
-      read_ram_e:=false;
-    end;
-  3:begin
-      write_ram:=true;
-      read_ram_d:=1;
-      read_ram_a:=false;
-      read_ram_e:=false;
-    end;
-  4:begin
-      write_ram:=true;
-      read_ram_d:=0;
-      read_ram_a:=true;
-      read_ram_e:=true;
-    end;
-  5:begin
-      write_ram:=false;
-      read_ram_d:=2;
-      read_ram_a:=true;
-      read_ram_e:=true;
-    end;
-  6:begin
-      write_ram:=false;
-      read_ram_d:=2;
-      read_ram_a:=true;
-      read_ram_e:=false;
-    end;
-  7:begin
-      write_ram:=false;
-      read_ram_d:=2;
-      read_ram_a:=false;
-      read_ram_e:=false;
-    end;
+//Casos de los tres primeros bits:
+// X00 --> Todo ram (todos disabled), este caso es especial, ya que ignora el bit de los char y lo desactiva sin mirarlo
+// En el resto de casos, si tiene en cuenta el bit2 de los chars
+if (res and $3)=0 then begin
+  char_ram:=true;
+  char_enabled:=false;
+end else begin
+  char_ram:=false;
+  char_enabled:=(res and 4)=0;
 end;
+kernel_enabled:=(res and 2)<>0;
+basic_enabled:=(res and 3)=3;
+tape_motor:=(port_val and $20)=0;
 end;
 
 procedure c64_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
+    //Aqui escribe los bits de la direccion 1 que se pueden manejar
+    //Si el valor es 0, solo lectura, si el valor es 1 leer/escribir
     0:begin
         port_bits:=valor;
         actualiza_mem;
@@ -261,7 +217,7 @@ case direccion of
         port_val:=valor;
         actualiza_mem;
       end;
-    $d000..$dfff:if write_ram then memoria[direccion]:=valor
+    $d000..$dfff:if (char_ram or char_enabled) then memoria[direccion]:=valor
                   else case ((direccion shr 8) and $f) of
                         0..3:mos6566_0.write(direccion and $3f,valor); //VICII
                         4..7:sid_0.write(direccion and $1f,valor); //SID
@@ -309,20 +265,20 @@ end;
 
 procedure c64_cia_irq(state:byte);
 begin
+  m6502_0.change_irq(state);
   cia_irq:=(state=ASSERT_LINE);
-  if not(cia_irq) then m6502_0.change_irq(CLEAR_LINE);
 end;
 
 procedure c64_vic_irq(state:byte);
 begin
+  m6502_0.change_irq(state);
   vic_irq:=(state=ASSERT_LINE);
-  if not(vic_irq) then m6502_0.change_irq(CLEAR_LINE);
 end;
 
 procedure c64_nmi(state:byte);
 begin
+  m6502_0.change_nmi(state);
   cia_nmi:=(state=ASSERT_LINE);
-  if not(cia_nmi) then m6502_0.change_nmi(CLEAR_LINE);
 end;
 
 procedure c64_despues_instruccion(tstates:word);
@@ -333,7 +289,6 @@ begin
     if cinta_tzx.play_tape then begin
       if tape_motor then begin
         mos6526_0.flag_w(cinta_tzx.value shr 6);
-        //3500/985 =3.5524
         play_cinta_tzx(tstates);
       end;
     end;
@@ -351,6 +306,7 @@ procedure c64_reset;
 var
   f:byte;
 begin
+fillchar(memoria[0],$10000,0);
 //SIEMPRE ESTO PRIMERO PARA PONER LOS VALORES DE RESET DE LA CPU!!!
 port_bits:=$ef;
 port_val:=$ef;
@@ -362,32 +318,26 @@ mos6526_1.reset;
 {$ENDIF}
 mos6566_0.reset;
 sid_0.reset;
-reset_game_general;
+reset_audio;
 for f:=0 to 7 do begin
   c64_keyboard[f]:=$ff;
   c64_keyboard_i[f]:=$ff;
 end;
-tape_control:=$10;
+tape_control:=$30;
 vic_irq:=false;
 cia_irq:=false;
 cia_nmi:=false;
 tape_motor:=false;
-write_ram:=false;
-read_ram_a:=false;
-read_ram_e:=false;
-read_ram_d:=2;
 end;
 
 procedure c64_tape_start;
 begin
-  main_screen.rapido:=true;
   tape_control:=$0;
 end;
 
 procedure c64_tape_stop;
 begin
-  main_screen.rapido:=false;
-  tape_control:=$10;
+  tape_control:=$30;
 end;
 
 procedure c64_sound_update;
@@ -397,39 +347,63 @@ end;
 
 procedure c64_cerrar;
 begin
+
 end;
 
-procedure c64_loaddisk;
+function c64_loaddisk:boolean;
 begin
-load_dsk.showmodal;
+load_dsk.show;
+while load_dsk.Showing do application.ProcessMessages;
+c64_loaddisk:=true;
 end;
 
-procedure c64_tapes;
+function c64_tapes:boolean;
 var
   datos:pbyte;
-  longitud:integer;
-  romfile,nombre_file,extension,cadena:string;
+  file_size,crc:integer;
+  nombre_zip,nombre_file,extension:string;
   resultado,es_cinta:boolean;
 begin
-  if not(openrom(romfile,SC64)) then exit;
-  getmem(datos,$400000);
-  if not(extract_data(romfile,datos,longitud,nombre_file,SC64)) then begin
-    freemem(datos);
+  if not(OpenRom(StC64,nombre_zip)) then begin
+    c64_tapes:=true;
     exit;
+  end;
+  c64_tapes:=false;
+  extension:=extension_fichero(nombre_zip);
+  if extension='ZIP' then begin
+         if not(search_file_from_zip(nombre_zip,'*.tap',nombre_file,file_size,crc,false)) then
+           if not(search_file_from_zip(nombre_zip,'*.prg',nombre_file,file_size,crc,false)) then
+	           if not(search_file_from_zip(nombre_zip,'*.t64',nombre_file,file_size,crc,false)) then
+               if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then
+                  if not(search_file_from_zip(nombre_zip,'*.vsf',nombre_file,file_size,crc,false)) then exit;
+         getmem(datos,file_size);
+         if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then begin
+            freemem(datos);
+            exit;
+         end;
+  end else begin
+      if not(read_file_size(nombre_zip,file_size)) then exit;
+      getmem(datos,file_size);
+      if not(read_file(nombre_zip,datos,file_size)) then exit;
+      nombre_file:=extractfilename(nombre_zip);
   end;
   extension:=extension_fichero(nombre_file);
   resultado:=false;
   es_cinta:=true;
-  if extension='TAP' then resultado:=abrir_c64_tap(datos,longitud);
-  if extension='WAV' then resultado:=abrir_wav(datos,longitud,985248);
-  if extension='T64' then resultado:=abrir_t64(datos,longitud);
+  c64_tapes:=true;
+  if extension='TAP' then resultado:=abrir_c64_tap(datos,file_size);
+  if extension='WAV' then resultado:=abrir_wav(datos,file_size);
   if extension='PRG' then begin
       es_cinta:=false;
-      resultado:=abrir_prg(datos,longitud);
+      resultado:=abrir_prg(datos,file_size);
+   end;
+  if extension='T64' then begin
+     es_cinta:=false;
+     resultado:=abrir_t64(datos,file_size);
    end;
   if extension='VSF' then begin
      es_cinta:=false;
-     resultado:=abrir_vsf(datos,longitud);
+     resultado:=abrir_vsf(datos,file_size);
    end;
   if es_cinta then begin
      if resultado then begin
@@ -438,15 +412,15 @@ begin
         tape_window1.BitBtn1.Enabled:=true;
         tape_window1.BitBtn2.Enabled:=false;
         cinta_tzx.play_tape:=false;
-        cadena:=extension+': '+nombre_file;
+        llamadas_maquina.open_file:=extension+': '+nombre_file;
      end else begin
         MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading tape/WAV.', mtInformation,[mbOk], 0);
-        cadena:='';
+        llamadas_maquina.open_file:='';
      end;
   end;
   freemem(datos);
-  directory.c64_tap:=ExtractFilePath(romfile);
-  change_caption(cadena);
+  directory.c64_tap:=extractfiledir(nombre_zip)+main_vars.cadena_dir;
+  change_caption;
 end;
 
 function iniciar_c64:boolean;
@@ -459,7 +433,7 @@ begin
   llamadas_maquina.cartuchos:=c64_loaddisk;
   iniciar_c64:=false;
   iniciar_audio(true);
-  //Total --> 504x312
+  //Total 5--> 504x312
   //Linea --> 76 HBLANK
   //          48 Borde
   //           7 Borde 38 cols o visible si 40 cols
@@ -500,7 +474,9 @@ begin
   mos6566_0:=mos6566_chip.create(985248);
   mos6566_0.change_calls(c64_vic_irq);
   sid_0:=sid_chip.create(985248,TYPE_6581);
+  c64_reset;
   iniciar_c64:=true;
+  TZX_CLOCK:=985248 div 1000;
   cinta_tzx.tape_start:=c64_tape_start;
   cinta_tzx.tape_stop:=c64_tape_stop;
 end;

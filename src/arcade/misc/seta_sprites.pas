@@ -7,7 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ELSE IF}main_engine,{$ENDIF}
 type
   tfunction=function(code:word;color:word):word;
   tseta_sprites=class
-          constructor create(sprite_gfx,screen_gfx,bank_size:byte;code_cb:tfunction=nil);
+          constructor create(sprite_gfx,screen_gfx,bank_size:byte;sprite_mask:word;code_cb:tfunction=nil);
           destructor free;
         public
           control:array[0..3] of byte;
@@ -15,6 +15,7 @@ type
           spritelow,spritehigh:array[0..$1fff] of byte;
           spritey:array[0..$2ff] of byte;
           bank_size,sprite_gfx,screen_gfx:byte;
+          sprite_mask:word;
           procedure reset;
           procedure draw_sprites;
           procedure tnzs_eof;
@@ -29,11 +30,12 @@ var
 
 implementation
 
-constructor tseta_sprites.create(sprite_gfx,screen_gfx,bank_size:byte;code_cb:tfunction=nil);
+constructor tseta_sprites.create(sprite_gfx,screen_gfx,bank_size:byte;sprite_mask:word;code_cb:tfunction=nil);
 begin
 self.bank_size:=bank_size;
 self.sprite_gfx:=sprite_gfx;
 self.screen_gfx:=screen_gfx;
+self.sprite_mask:=sprite_mask;
 self.code_cb:=code_cb;
 end;
 
@@ -72,7 +74,8 @@ begin
 				f:=$20*((column+startcol) and $f)+2*y+x;
         atrib:=self.spritehigh[bank_inc+$400+f];
 				nchar:=self.spritelow[bank_inc+$400+f]+((atrib and $3f) shl 8);
-        if @self.code_cb<>nil then nchar:=self.code_cb(nchar,self.spritehigh[bank_inc+$600+f]);
+        if @self.code_cb<>nil then nchar:=self.code_cb(nchar,self.spritehigh[bank_inc+$600+f]) and self.sprite_mask
+          else nchar:=nchar and self.sprite_mask;
 				color:=(self.spritehigh[bank_inc+$600+f] and $f8) shl 1;
 				sx:=(x*$10)+self.spritey[$204+(column*$10)]-(256*(upperbits and 1));
         if (ctrl and $40)<>0 then begin
@@ -107,7 +110,7 @@ begin
 	//512 sprites
 	for f:=$1ff downto 0 do begin
     atrib:=self.spritehigh[bank_inc+f];
-		nchar:=self.spritelow[bank_inc+f]+((atrib and $3f) shl 8);
+		nchar:=(self.spritelow[bank_inc+f]+((atrib and $3f) shl 8)) and self.sprite_mask;
 		color:=(self.spritehigh[bank_inc+$200+f] and $f8) shl 1;
 		sx:=self.spritelow[bank_inc+$200+f]-((self.spritehigh[bank_inc+$200+f] and 1) shl 8);
     if (self.control[0] and $40)<>0 then begin

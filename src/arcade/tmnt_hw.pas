@@ -3,10 +3,10 @@ unit tmnt_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,upd7759,ym_2151,k052109,k051960,misc_functions,
-     samples,k053244_k053245,k053260,k053251,eepromser,k007232;
+     pal_engine,sound_engine,upd7759,ym_2151,k052109,k051960,
+     misc_functions,samples,k053244_k053245,k053260,k053251,eepromser,k007232;
 
-function iniciar_tmnt:boolean;
+procedure cargar_tmnt;
 
 implementation
 const
@@ -80,13 +80,9 @@ k052109_0.draw_tiles;
 k051960_0.update_sprites;
 fill_full_screen(4,0);
 k052109_0.draw_layer(2,4);
-if sprites_pri then begin
-  k051960_0.draw_sprites(0,0);
-  k052109_0.draw_layer(1,4);
-end else begin
-  k052109_0.draw_layer(1,4);
-  k051960_0.draw_sprites(0,0);
-end;
+if sprites_pri then k051960_0.draw_sprites(0,0);
+k052109_0.draw_layer(1,4);
+if not(sprites_pri) then k051960_0.draw_sprites(0,0);
 k052109_0.draw_layer(0,4);
 actualiza_trozo_final(96,16,320,224,4);
 end;
@@ -120,23 +116,26 @@ end;
 
 procedure tmnt_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
- for f:=0 to 255 do begin
-    eventos_tmnt;
-    if f=240 then begin
-      update_video_tmnt;
-      if irq5_mask then m68000_0.irq[5]:=HOLD_LINE;
-    end;
-    //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_snd);
-    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to $ff do begin
+  //main
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+  //sound
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+  if f=239 then begin
+    update_video_tmnt;
+    if irq5_mask then m68000_0.irq[5]:=HOLD_LINE;
+  end;
  end;
+ eventos_tmnt;
  video_sync;
 end;
 end;
@@ -157,18 +156,16 @@ case direccion of
     $0a0018:tmnt_getword:=marcade.dswc;
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if m68000_0.read_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
+                        if m68000_0.access_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
                             else tmnt_getword:=k052109_0.read_lsb(((direccion and $3000) shr 1) or (direccion and $07ff)) shl 8;
                      end;
     $140000..$140007:tmnt_getword:=k051960_0.k051937_read(direccion and 7);
-	  $140400..$1407ff:if m68000_0.read_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
+	  $140400..$1407ff:if m68000_0.access_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
                           else tmnt_getword:=k051960_0.read(direccion and $3ff) shl 8;
 end;
 end;
 
-procedure tmnt_putword(direccion:dword;valor:word);
-
-procedure cambiar_color_tmnt(pos:word);
+procedure cambiar_color_tmnt(pos:word);inline;
 var
   color:tcolor;
   data:word;
@@ -181,15 +178,16 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
+procedure tmnt_putword(direccion:dword;valor:word);
 begin
+if direccion<$60000 then exit;
 case direccion of
-    0..$5ffff:;
-    $60000..$63fff:ram[(direccion and $3fff) shr 1]:=valor;
-    $80000..$80fff:if buffer_paleta[(direccion and $fff) shr 1]<>(valor and $ff) then begin
+    $060000..$063fff:ram[(direccion and $3fff) shr 1]:=valor;
+    $080000..$080fff:if buffer_paleta[(direccion and $fff) shr 1]<>(valor and $ff) then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor and $ff;
                         cambiar_color_tmnt((direccion and $fff) shr 1);
                    end;
-    $a0000:begin
+    $0a0000:begin
               if ((last_snd=8) and ((valor and 8)=0)) then z80_0.change_irq(HOLD_LINE);
               last_snd:=valor and 8;
 		          // bit 5 = irq enable
@@ -198,15 +196,15 @@ case direccion of
 		          if (valor and $80)<>0 then k052109_0.rmrd_line:=ASSERT_LINE
                 else k052109_0.rmrd_line:=CLEAR_LINE;
             end;
-    $a0008:sound_latch:=valor and $ff;
-    $c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
+    $0a0008:sound_latch:=valor and $ff;
+    $0c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if m68000_0.write_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
+                        if m68000_0.access_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
                           else k052109_0.write_lsb(((direccion and $3000) shr 1) or (direccion and $07ff),valor shr 8)
                      end;
     $140000..$140007:k051960_0.k051937_write((direccion and $7),valor);
-	  $140400..$1407ff:if m68000_0.write_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
+	  $140400..$1407ff:if m68000_0.access_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
                         else k051960_0.write(direccion and $3ff,valor shr 8)
   end;
 end;
@@ -309,23 +307,26 @@ end;
 
 procedure ssriders_principal;
 var
+  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-while EmuStatus=EsRunning do begin
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-    eventos_tmnt;
-    if f=240 then begin
-      if k052109_0.is_irq_enabled then m68000_0.irq[4]:=HOLD_LINE;
-      update_video_ssriders;
-    end;
-    //main
-    m68000_0.run(frame_main);
-    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_snd);
-    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+  //main
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+  //sound
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+  case f of
+    21:update_video_ssriders;
+    239:if k052109_0.is_irq_enabled then m68000_0.irq[4]:=HOLD_LINE;
+  end;
  end;
+ eventos_tmnt;
  video_sync;
 end;
 end;
@@ -382,7 +383,7 @@ case direccion of
     $1c0006:ssriders_getword:=$ff; //p4
     $1c0100:ssriders_getword:=marcade.in0; //coin
     $1c0102:begin
-              res:=(byte(not(main_vars.service1)) shl 7)+$78+eepromser_0.do_read+(eepromser_0.ready_read shl 1);
+              res:=(byte(not(main_vars.service1)) shl 7)+$78+er5911_do_read+(er5911_ready_read shl 1); //eeprom
               //falta vblank en bit 8
 	            toggle:=toggle xor $04;
 	            ssriders_getword:=res xor toggle;
@@ -395,7 +396,7 @@ case direccion of
                         ssriders_getword:=k053244_read(direccion+1)+(k053244_read(direccion) shl 8);
                       end;
     $5c0600..$5c0603:ssriders_getword:=k053260_0.main_read((direccion and 3) shr 1); //k053260
-    $600000..$603fff:if m68000_0.read_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
+    $600000..$603fff:if m68000_0.access_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
                         else ssriders_getword:=k052109_0.read_lsb((direccion and $3fff) shr 1) shl 8;
 end;
 end;
@@ -421,9 +422,7 @@ begin
 	end;
 end;
 
-procedure ssriders_putword(direccion:dword;valor:word);
-
-procedure cambiar_color_ssriders(pos,valor:word);
+procedure cambiar_color_ssriders(pos,valor:word);inline;
 var
   color:tcolor;
 begin
@@ -434,9 +433,10 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
+procedure ssriders_putword(direccion:dword;valor:word);
 begin
+if direccion<$c0000 then exit;
 case direccion of
-    0..$bffff:;
     $104000..$107fff:ram[(direccion and $3fff) shr 1]:=valor;
     $140000..$140fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor;
@@ -451,9 +451,9 @@ case direccion of
                         end;
                      end;
     $1c0200:begin// eeprom
-              eepromser_0.di_write(valor and 1);
-              eepromser_0.cs_write((valor shr 1) and 1);
-              eepromser_0.clk_write((valor shr 2) and 1);
+              er5911_di_write(valor and 1);
+              er5911_cs_write((valor shr 1) and 1);
+              er5911_clk_write((valor shr 2) and 1);
               k053245_bankselect(((valor and $20) shr 5) shl 2);
             end;
     $1c0300:begin
@@ -467,13 +467,13 @@ case direccion of
     $1c0800..$1c0803:ssriders_protection_w((direccion and $3) shr 1); //proteccion
     $5a0000..$5a001f:begin  //k053244
                         direccion:=((direccion and $1f) shr 1) and $fe;   // handle mirror address
-                        if m68000_0.write_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
+                        if m68000_0.access_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
                           else k053244_write(direccion,valor shr 8);
                      end;
     $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
     $5c0604:z80_0.change_irq(HOLD_LINE); //sound
     $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
-    $600000..$603fff:if m68000_0.write_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
+    $600000..$603fff:if m68000_0.access_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
                         else k052109_0.write_lsb((direccion and $3fff) shr 1,valor shr 8);
   end;
 end;
@@ -518,19 +518,19 @@ begin
         upd7759_0.reset;
         upd7759_0.start_w(0);
         upd7759_0.reset_w(1);
+        reset_samples;
       end;
   215:begin
         k053245_reset;
         k053251_0.reset;
         k053260_0.reset;
-        eepromser_0.reset;
+        eepromser_reset;
       end;
  end;
- frame_main:=m68000_0.tframes;
- frame_snd:=z80_0.tframes;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
  sound_latch:=0;
  sound_latch2:=0;
  irq5_mask:=false;
@@ -539,28 +539,10 @@ begin
  toggle:=0;
 end;
 
-procedure cerrar_tmnt;
-begin
-case main_vars.tipo_maquina of
-  214:if k007232_rom<>nil then freemem(k007232_rom);
-  215:begin
-        //k053245_0.free;
-        if k053260_rom<>nil then freemem(k053260_rom);
-        eepromser_0.write_data('ssriders.nv')
-      end;
-end;
-if char_rom<>nil then freemem(char_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-char_rom:=nil;
-sprite_rom:=nil;
-k053260_rom:=nil;
-k007232_rom:=nil;
-end;
-
 function iniciar_tmnt:boolean;
 var
   f,tempdw:dword;
-  memoria_temp:array[0..$1ff] of byte;
+  mem_temp:array[0..$1ff] of byte;
   ptemp:pbyte;
   ptempw:pword;
 procedure desencriptar_sprites;
@@ -603,7 +585,7 @@ begin
   copymemory(temp,sprite_rom,$200000);
 	for a:=0 to (len-1) do begin
 		// pick the correct entry in the PROM (top 8 bits of the address) */
-		entry:=memoria_temp[(A and $7f800) shr 11] and 7;
+		entry:=mem_temp[(A and $7f800) shr 11] and 7;
 		// the bits to scramble are the low 10 ones */
 		for i:=0 to 9 do bits[i]:=(A shr i) and $1;
 		B:=A and $7fc00;
@@ -615,12 +597,14 @@ begin
 	end;
   freemem(temp);
 end;
+
 function decode_sample(orig:pbyte;dest:pword):dword;
 var
-  i,pos:dword;
+  i:dword;
   val:word;
   expo,cont1,cont2:byte;
   ptemp:pword;
+  pos:dword;
 begin
 	//  Sound sample for TMNT.D05 is stored in the following mode (ym3012 format):
 	//  Bit 15-13:  Exponent (2 ^ x)
@@ -632,8 +616,8 @@ begin
 	for i:=0 to $3ffff do begin
 		val:=orig[2*i]+orig[2*i+1]*256;
 		expo:=val shr 13;
-		val:=(val shr 3) and $3ff; // 10 bit, Max Amplitude 0x400
-		val:=val-$200;             // Centralize value
+		val:=(val shr 3) and $3ff; // 10 bit, Max Amplitude 0x400 */
+		val:=val-$200;                   // Centralize value */
 		val:=val shl (expo-3);
     for cont1:=0 to 1 do begin
       ptemp:=dest;
@@ -652,9 +636,8 @@ begin
   end;
   decode_sample:=pos;
 end;
+
 begin
-llamadas_maquina.close:=cerrar_tmnt;
-llamadas_maquina.reset:=reset_tmnt;
 iniciar_tmnt:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -665,7 +648,6 @@ screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 case main_vars.tipo_maquina of
   214:begin //TMNT
-        llamadas_maquina.bucle_general:=tmnt_principal;
         iniciar_video(320,224,true);
         iniciar_audio(false); //Sonido mono
         //Main CPU
@@ -707,11 +689,11 @@ case main_vars.tipo_maquina of
           char_rom[(f*4)+2]:=(tempdw shr 16) and $ff;
           char_rom[(f*4)+3]:=(tempdw shr 24) and $ff;
         end;
-        k052109_0:=k052109_chip.create(1,2,3,0,tmnt_cb,char_rom,$100000);
+        k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
         //Init sprites
         getmem(sprite_rom,$200000);
         if not(roms_load32b(sprite_rom,tmnt_sprites)) then exit;
-        if not(roms_load(@memoria_temp,tmnt_prom)) then exit;
+        if not(roms_load(@mem_temp,tmnt_prom)) then exit;
         //Ordenar
         for f:=0 to $7ffff do begin
           tempdw:=sprite_rom[(f*4)+0];
@@ -725,7 +707,7 @@ case main_vars.tipo_maquina of
           sprite_rom[(f*4)+3]:=(tempdw shr 24) and $ff;
         end;
         desencriptar_sprites;
-        k051960_0:=k051960_chip.create(4,1,sprite_rom,$200000,tmnt_sprite_cb);
+        k051960_0:=k051960_chip.create(4,sprite_rom,$200000,tmnt_sprite_cb);
         layer_colorbase[0]:=0;
         layer_colorbase[1]:=32;
         layer_colorbase[2]:=40;
@@ -739,7 +721,6 @@ case main_vars.tipo_maquina of
         marcade.dswc_val:=@tmnt_dip_c;
   end;
   215:begin //Sunset Riders
-        llamadas_maquina.bucle_general:=ssriders_principal;
         iniciar_video(288,224,true);
         iniciar_audio(true); //Sonido stereo
         //Main CPU
@@ -761,7 +742,7 @@ case main_vars.tipo_maquina of
         //Iniciar video
         getmem(char_rom,$100000);
         if not(roms_load32b(char_rom,ssriders_char)) then exit;
-        k052109_0:=k052109_chip.create(1,2,3,0,tmnt_cb,char_rom,$100000);
+        k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
         //Init sprites
         getmem(sprite_rom,$200000);
         if not(roms_load32b(sprite_rom,ssriders_sprites)) then exit;
@@ -769,15 +750,43 @@ case main_vars.tipo_maquina of
         //Prioridades
         k053251_0:=k053251_chip.create;
         //eeprom
-        eepromser_0:=eepromser_chip.create(ER5911,8);
-        if not(eepromser_0.load_data('ssriders.nv')) then begin
-          if not(roms_load(@memoria_temp,ssriders_eeprom)) then exit;
-          copymemory(eepromser_0.get_data,@memoria_temp,$80);
-        end;
+        eepromser_init(ER5911,8);
+        if not(roms_load(@mem_temp,ssriders_eeprom)) then exit;
+        eepromser_load_data(@mem_temp[0],$80);
   end;
 end;
 //final
+reset_tmnt;
 iniciar_tmnt:=true;
+end;
+
+procedure cerrar_tmnt;
+begin
+case main_vars.tipo_maquina of
+  214:if k007232_rom<>nil then freemem(k007232_rom);
+  215:begin
+        //k053245_0.free;
+        if k053260_rom<>nil then freemem(k053260_rom);
+        //eeprom free
+      end;
+end;
+if char_rom<>nil then freemem(char_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+char_rom:=nil;
+sprite_rom:=nil;
+k053260_rom:=nil;
+k007232_rom:=nil;
+end;
+
+procedure Cargar_tmnt;
+begin
+llamadas_maquina.iniciar:=iniciar_tmnt;
+llamadas_maquina.close:=cerrar_tmnt;
+llamadas_maquina.reset:=reset_tmnt;
+case main_vars.tipo_maquina of
+  214:llamadas_maquina.bucle_general:=tmnt_principal;
+  215:llamadas_maquina.bucle_general:=ssriders_principal;
+end;
 end;
 
 end.

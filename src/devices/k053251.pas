@@ -82,7 +82,7 @@ begin
 	if (self.ram[direccion]<>valor) then begin
     self.ram[direccion]:=valor;
     case direccion of
-      9:begin // palette base index
+      9:begin // palette base index */
           for i:=0 to 2 do begin
 				    newind:=32*((valor shr (2*i)) and 3);
 				    if (self.palette_index[i]<>newind) then begin
@@ -91,7 +91,7 @@ begin
 				    end;
 			    end;
       end;
-      10:begin // palette base index
+      10:begin // palette base index */
           for i:=0 to 1 do begin
 				    newind:=16*((valor shr (3*i)) and 7);
 				    if (self.palette_index[3+i]<>newind) then begin
