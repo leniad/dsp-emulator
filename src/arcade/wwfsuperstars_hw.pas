@@ -102,7 +102,7 @@ procedure eventos_wwfsstar;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
@@ -110,7 +110,7 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //p2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
@@ -172,7 +172,6 @@ end;
 end;
 
 procedure wwfsstar_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
@@ -186,7 +185,6 @@ begin
     $100..$1ff:buffer_color[((pos shr 4) and $7)+$10]:=true;
   end;
 end;
-
 begin
 case direccion of
     0..$3ffff:;

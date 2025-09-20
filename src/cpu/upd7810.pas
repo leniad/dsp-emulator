@@ -5,10 +5,10 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      cpu_misc,vars_hide,main_engine,timer_engine,dialogs,sysutils,upd7810_tables;
 
 type
-  band_upd7810 = record
+  band_upd7810=record
      zf,f1,f7,sk,hc,l1,l0,cy:boolean;
   end;
-  nreg_upd7810=packed record
+  nreg_upd7810=record
         psw:band_upd7810;
         va,bc,de,hl,va2,bc2,de2,hl2:parejas;
         ea,ea2:word;
@@ -29,6 +29,8 @@ type
                 procedure change_out(ca,cb,cc,cd,cf:upd7810_cb_2);
                 procedure set_input_line(irqline,state:byte);
                 procedure set_input_line_7801(irqline,state:byte);
+                function save_snapshot(data:pbyte):word;
+                procedure load_snapshot(data:pbyte);
               private
                 cpu_type:byte;
                 ppc,pc,sp:word;
@@ -3189,6 +3191,143 @@ begin
     else MessageDlg('Instruccion 74: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
  end;
+end;
+
+function cpu_upd7810.save_snapshot(data:pbyte):word;
+var
+  temp:pbyte;
+  buffer:array[0..75] of byte;
+  size:word;
+begin
+temp:=data;
+copymemory(temp,self.r,sizeof(nreg_upd7810));
+inc(temp,sizeof(nreg_upd7810));
+size:=sizeof(nreg_upd7810);
+copymemory(temp,@ram[0],$100);
+inc(temp,$100);
+size:=size+$100;
+buffer[0]:=self.cpu_type;
+copymemory(@buffer[1],@self.ppc,2);
+copymemory(@buffer[3],@self.pc,2);
+copymemory(@buffer[5],@self.sp,2);
+buffer[7]:=byte(self.iff);
+buffer[8]:=byte(self.iff_pending);
+copymemory(@buffer[9],@self.adcnt,2);
+copymemory(@buffer[11],@self.irr,2);
+buffer[13]:=self.adtot;
+buffer[14]:=self.tmpcr;
+buffer[15]:=self.mkl;
+buffer[16]:=self.mkh;
+copymemory(@buffer[17],@self.tm,2);
+copymemory(@buffer[19],@self.cnt,2);
+copymemory(@buffer[21],@self.ecnt,2);
+buffer[23]:=self.panm;
+buffer[24]:=self.anm;
+buffer[25]:=self.mm;
+buffer[26]:=self.mf;
+buffer[27]:=self.ci;
+buffer[28]:=self.smh;
+buffer[29]:=self.sml;
+buffer[30]:=self.ma;
+buffer[31]:=self.mb;
+buffer[32]:=self.mc;
+buffer[33]:=self.mcc;
+buffer[34]:=self.etmm;
+buffer[35]:=self.tmm;
+buffer[36]:=self.pa_in;
+buffer[37]:=self.pb_in;
+buffer[38]:=self.pc_in;
+buffer[39]:=self.pd_in;
+buffer[40]:=self.pf_in;
+buffer[41]:=self.pa_out;
+buffer[42]:=self.pb_out;
+buffer[43]:=self.pc_out;
+buffer[44]:=self.pd_out;
+buffer[45]:=self.pf_out;
+buffer[46]:=self.txd;
+buffer[47]:=self.rdx;
+buffer[48]:=self.sck;
+buffer[49]:=self.to_;
+buffer[50]:=self.co0;
+buffer[51]:=self.co1;
+copymemory(@buffer[52],@self.adout,4);
+copymemory(@buffer[56],@self.adin,4);
+copymemory(@buffer[60],@self.adrange,4);
+copymemory(@buffer[64],@self.ovc0,4);
+buffer[68]:=byte(self.shdone);
+copymemory(@buffer[69],@self.cr,4);
+buffer[73]:=self.nmi;
+buffer[74]:=self.int1;
+buffer[75]:=self.int2;
+copymemory(temp,@buffer[0],76);
+save_snapshot:=size+76;
+end;
+
+procedure cpu_upd7810.load_snapshot(data:pbyte);
+var
+  temp:pbyte;
+  buffer:array[0..75] of byte;
+  size:word;
+begin
+temp:=data;
+copymemory(self.r,temp,sizeof(nreg_upd7810));
+inc(temp,sizeof(nreg_upd7810));
+copymemory(@ram[0],temp,$100);
+inc(temp,$100);
+copymemory(@buffer[0],temp,76);
+self.cpu_type:=buffer[0];
+copymemory(@self.ppc,@buffer[1],2);
+copymemory(@self.pc,@buffer[3],2);
+copymemory(@self.sp,@buffer[5],2);
+self.iff:=buffer[7]<>0;
+self.iff_pending:=buffer[8]<>0;
+copymemory(@self.adcnt,@buffer[9],2);
+copymemory(@self.irr,@buffer[11],2);
+self.adtot:=buffer[13];
+self.tmpcr:=buffer[14];
+self.mkl:=buffer[15];
+self.mkh:=buffer[16];
+copymemory(@self.tm,@buffer[17],2);
+copymemory(@self.cnt,@buffer[19],2);
+copymemory(@self.ecnt,@buffer[21],2);
+self.panm:=buffer[23];
+self.anm:=buffer[24];
+self.mm:=buffer[25];
+self.mf:=buffer[26];
+self.ci:=buffer[27];
+self.smh:=buffer[28];
+self.sml:=buffer[29];
+self.ma:=buffer[30];
+self.mb:=buffer[31];
+self.mc:=buffer[32];
+self.mcc:=buffer[33];
+self.etmm:=buffer[34];
+self.tmm:=buffer[35];
+self.pa_in:=buffer[36];
+self.pb_in:=buffer[37];
+self.pc_in:=buffer[38];
+self.pd_in:=buffer[39];
+self.pf_in:=buffer[40];
+self.pa_out:=buffer[41];
+self.pb_out:=buffer[42];
+self.pc_out:=buffer[43];
+self.pd_out:=buffer[44];
+self.pf_out:=buffer[45];
+self.txd:=buffer[46];
+self.rdx:=buffer[47];
+self.sck:=buffer[48];
+self.to_:=buffer[49];
+self.co0:=buffer[50];
+self.co1:=buffer[51];
+copymemory(@self.adout,@buffer[52],4);
+copymemory(@self.adin,@buffer[56],4);
+copymemory(@self.adrange,@buffer[60],4);
+copymemory(@self.ovc0,@buffer[64],4);
+self.shdone:=buffer[68]<>0;
+copymemory(@self.cr,@buffer[69],4);
+self.nmi:=buffer[73];
+self.int1:=buffer[74];
+self.int2:=buffer[75];
 end;
 
 end.

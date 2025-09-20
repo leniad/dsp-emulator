@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m6809,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ay_8910,sound_engine,konami_decrypt,mcs48,dac;
 
-procedure cargar_gyruss;
+function gyruss_iniciar:boolean;
 
 implementation
 const
@@ -259,7 +259,7 @@ end;
 
 function gyruss_portar:byte;
 begin
-  gyruss_portar:=gyruss_timer[((z80_1.contador+round(scan_line*z80_1.tframes)) div 1024) mod 10];
+  gyruss_portar:=gyruss_timer[(z80_1.totalt div 1024) mod 10];
 end;
 
 procedure gyruss_sound_update;
@@ -315,6 +315,9 @@ const
   resistances_b:array[0..1] of integer=(470,220);
 begin
 gyruss_iniciar:=false;
+llamadas_maquina.bucle_general:=gyruss_principal;
+llamadas_maquina.reset:=gyruss_reset;
+llamadas_maquina.fps_max:=60.606060606060606060;
 iniciar_audio(true);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
@@ -334,7 +337,7 @@ z80_1.init_sound(gyruss_sound_update);
 //Sound CPU 2
 mcs48_0:=cpu_mcs48.create(8000000,256,I8039);
 mcs48_0.change_ram_calls(gyruss_sound2_getbyte,nil);
-mcs48_0.change_io_calls(gyruss_sound2_inport,gyruss_sound2_outport);
+mcs48_0.change_io_calls(nil,gyruss_sound2_outport,gyruss_sound2_inport,nil);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(14318180 div 8,AY8910,1);
 ay8910_1:=ay8910_chip.create(14318180 div 8,AY8910,1,true);
@@ -363,8 +366,6 @@ gfx_set_desc_data(4,2,64*8,$4000*8+4,$4000*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@pc_x,@ps_y,true,false);
 gfx_set_desc_data(4,2,64*8,($4000+$10)*8+4,($4000+$10)*8+0,($10*8)+4,($10*8)+0);
 convert_gfx(1,$100*8*16,@memoria_temp,@pc_x,@ps_y,true,false);
-gfx[1].x:=16;
-gfx[1].y:=8;
 //paleta de colores
 if not(roms_load(@memoria_temp,gyruss_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
@@ -403,14 +404,6 @@ marcade.dswc_val:=@gyruss_dip_c;
 //Final
 gyruss_reset;
 gyruss_iniciar:=true;
-end;
-
-procedure Cargar_gyruss;
-begin
-llamadas_maquina.iniciar:=gyruss_iniciar;
-llamadas_maquina.bucle_general:=gyruss_principal;
-llamadas_maquina.reset:=gyruss_reset;
-llamadas_maquina.fps_max:=60.606060606060606060;
 end;
 
 end.

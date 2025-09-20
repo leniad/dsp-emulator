@@ -122,10 +122,10 @@ var
   SDL_JoystickEventState:function(state:LongInt):LongInt;cdecl;
   SDL_GetClosestDisplayMode:function(displayIndex:LongInt;const mode:libsdlp_DisplayMode;closest:libsdlp_DisplayMode):libsdlp_DisplayMode;cdecl;
   SDL_SetWindowDisplayMode:function(window:libsdlP_Window;const mode:libsdlp_DisplayMode):LongInt; cdecl;
+  SDL_GetTicks:function:Cardinal;cdecl;
   {$ifdef fpc}
   SDL_SetError:function(const fmt:PAnsiChar):LongInt;cdecl;
   SDL_GetError:function:PAnsiChar;cdecl;
-  SDL_GetTicks:function:Cardinal;cdecl;
   SDL_SetWindowTitle:procedure(window:libsdlP_Window;const title:PAnsiChar);cdecl;
   //Audio
   //SDL_OpenAudio:function(desired:libsdlp_AudioSpec;obtained:libsdlp_AudioSpec):Integer;cdecl;
@@ -208,12 +208,12 @@ end;
 @SDL_MapRGBA:=GetProcAddress(sdl_dll_Handle,'SDL_MapRGBA');
 //keyboard
 @SDL_GetKeyboardState:=GetProcAddress(sdl_dll_Handle,'SDL_GetKeyboardState');
+//timer
+@SDL_GetTicks:=GetProcAddress(sdl_dll_Handle,'SDL_GetTicks');
 {$ifdef fpc}
 //error
 @SDL_SetError:=GetProcAddress(sdl_dll_Handle,'SDL_SetError');
 @SDL_GetError:=GetProcAddress(sdl_dll_Handle,'SDL_GetError');
-//timer
-@SDL_GetTicks:=GetProcAddress(sdl_dll_Handle,'SDL_GetTicks');
 //video
 @SDL_SetWindowTitle:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowTitle');
 //Audio

@@ -34,7 +34,7 @@ var
  rom_bank,rom_bank_dec:array[0..$f,0..$fff] of byte;
  mem_opcodes,blit_mem:array[0..$5fff] of byte;
  irq_enable:boolean;
- i8039_status,frame,xorx,xory,last_snd_val,sound_latch,sound_latch2,rom_nbank,scroll_y:byte;
+ i8039_status,xorx,xory,last_snd_val,sound_latch,sound_latch2,rom_nbank,scroll_y:byte;
  blit_data:array[0..3] of byte;
  mem_snd_sub:array[0..$fff] of byte;
 
@@ -89,6 +89,7 @@ procedure junofrst_principal;
 var
   frame_m,frame_s,frame_s_sub:single;
   irq_req:boolean;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
@@ -96,7 +97,7 @@ frame_s:=z80_0.tframes;
 frame_s_sub:=mcs48_0.tframes;
 irq_req:=false;
 while EmuStatus=EsRuning do begin
-  for frame:=0 to $ff do begin
+  for f:=0 to $ff do begin
     //Main CPU
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
@@ -106,7 +107,7 @@ while EmuStatus=EsRuning do begin
     //snd sub
     mcs48_0.run(frame_s_sub);
     frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
-    if frame=239 then begin
+    if f=239 then begin
       if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_junofrst;
     end;
@@ -239,7 +240,7 @@ function junofrst_portar:byte;
 var
   timer:byte;
 begin
-timer:=((z80_0.contador+trunc(z80_0.tframes*frame)) div (1024 div 2)) and $f;
+timer:=(z80_0.totalt div (1024 div 2)) and $f;
 junofrst_portar:=(timer shl 4) or i8039_status;
 end;
 
@@ -298,7 +299,7 @@ z80_0.init_sound(junofrst_sound_update);
 //Sound CPU 2
 mcs48_0:=cpu_mcs48.create(8000000,$100,I8039);
 mcs48_0.change_ram_calls(junofrst_sound2_getbyte,nil);
-mcs48_0.change_io_calls(junofrst_sound2_inport,junofrst_sound2_outport);
+mcs48_0.change_io_calls(nil,junofrst_sound2_outport,junofrst_sound2_inport,nil);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1789750,AY8910,0.3);
 ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);

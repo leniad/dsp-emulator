@@ -12,6 +12,7 @@ object config_arcade: Tconfig_arcade
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   Position = poDesktopCenter
   OnClose = FormClose
   OnKeyUp = FormKeyUp

@@ -25,7 +25,7 @@ type
     procedure DirectoryEdit1Change(Sender: TObject);
     procedure FileListBox1Click(Sender: TObject);
     procedure FileListBox1DblClick(Sender: TObject);
-    procedure FileListBox1KeyUp(Sender:TObject;var Key:Word;Shift:TShiftState);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
   private
@@ -146,12 +146,12 @@ freemem(datos_dsk);
 datos_dsk:=nil;
 end;
 
-procedure Tload_dsk.FileListBox1KeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure Tload_dsk.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
+  );
 begin
 case key of
-  13:FileListBox1DblClick(self);
-  27:Button1Click(self);
+    13:FileListBox1DblClick(self);
+    27:Button1Click(self);
 end;
 end;
 

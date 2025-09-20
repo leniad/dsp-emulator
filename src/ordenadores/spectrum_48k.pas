@@ -303,8 +303,7 @@ end else begin
     if ulaplus.mode=0 then ulaplus.last_reg:=valor and $3f;
   end;
   if ((puerto=$ff3b) and ulaplus.enabled) then begin
-    fillchar(var_spectrum.buffer_video[0],6144,1);
-    fillchar(borde.buffer[0],78000,$80);
+    spectrum_reset_video;
     case ulaplus.mode of
       0:begin
           ulaplus.paleta[ulaplus.last_reg]:=valor;
@@ -312,7 +311,6 @@ end else begin
           color.r:=$21*((valor shr 2) and 1)+$47*((valor shr 3) and 1)+$97*((valor shr 4) and 1);
           color.g:=$21*((valor shr 5) and 1)+$47*((valor shr 6) and 1)+$97*((valor shr 7) and 1);
           set_pal_color(color,ulaplus.last_reg+16);
-          fillchar(var_spectrum.buffer_video[0],6144,1);
         end;
       1:ulaplus.activa:=(valor and 1)<>0;
     end;
@@ -337,12 +335,8 @@ begin
 if main_vars.tipo_maquina=0 then spec_16k:=false
   else spec_16k:=true;
 llamadas_maquina.bucle_general:=spectrum48_main;
-llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.reset:=spec48k_reset;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=3500000/69888;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
 interface2.hay_if2:=false;
 iniciar_48k:=false;
 //Iniciar el Z80 y pantalla

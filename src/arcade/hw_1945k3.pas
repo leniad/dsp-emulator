@@ -4,7 +4,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine;
 
-procedure cargar_k31945;
+function iniciar_k31945:boolean;
 
 implementation
 const
@@ -312,15 +312,22 @@ begin
 end;
 begin
 iniciar_k31945:=false;
+llamadas_maquina.bucle_general:=k31945_principal;
+llamadas_maquina.iniciar:=iniciar_k31945;
+llamadas_maquina.reset:=reset_k31945;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,512,511);
 screen_init(2,512,512,false,true);
 screen_mod_sprites(2,512,256,511,255);
 if main_vars.tipo_maquina=283 then begin
-  main_screen.rol90_screen:=true;
+  main_screen.rot270_screen:=true;
   y_size:=224;
-end else y_size:=240;
+  llamadas_maquina.fps_max:=59.637405;
+end else begin
+  y_size:=240;
+  llamadas_maquina.fps_max:=49.603176;
+end;
 iniciar_video(320,y_size);
 //mem aux
 getmem(memoria_temp,$400000);
@@ -395,15 +402,6 @@ end;
 freemem(memoria_temp);
 reset_k31945;
 iniciar_k31945:=true;
-end;
-
-procedure cargar_k31945;
-begin
-llamadas_maquina.bucle_general:=k31945_principal;
-llamadas_maquina.iniciar:=iniciar_k31945;
-llamadas_maquina.reset:=reset_k31945;
-if main_vars.tipo_maquina=283 then llamadas_maquina.fps_max:=59.637405
-  else llamadas_maquina.fps_max:=49.603176;
 end;
 
 end.

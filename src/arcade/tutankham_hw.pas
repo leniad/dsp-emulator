@@ -99,7 +99,7 @@ while EmuStatus=EsRuning do begin
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    konamisnd_0.run(f);
+    konamisnd_0.run;
     if f=239 then begin
       if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_tutankham;
@@ -144,10 +144,8 @@ case direccion of
                       irq_enable:=(valor and 1)<>0;
                       if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
                     end;
-                  6:if (valor and 1)<>0 then xory:=255
-                      else xory:=0;
-                  7:if (valor and 1)<>0 then xorx:=0
-                      else xorx:=255;  //La x esta invertida...
+                  6:xory:=255*(valor and 1);
+                  7:xorx:=255*(not(valor) and 1); //La x esta invertida...
                end;
   $8300..$83ff:rom_nbank:=valor and $f;
   $8600..$86ff:konamisnd_0.pedir_irq:=HOLD_LINE;

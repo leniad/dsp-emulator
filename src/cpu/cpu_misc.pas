@@ -30,6 +30,7 @@ type
             numero_cpu:byte;
             tframes:single;
             estados_demas:word;
+            totalt:uint64;
             procedure change_ram_calls(getbyte:tgetbyte;putbyte:tputbyte);
             procedure change_despues_instruccion(despues_instruccion:tdespues_instruccion);
             procedure init_sound(update_call:exec_type_simple);

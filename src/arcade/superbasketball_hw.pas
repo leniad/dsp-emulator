@@ -35,7 +35,7 @@ const
 
 var
  pedir_snd_irq,irq_ena:boolean;
- frame,sound_latch,chip_latch,scroll_x,sbasketb_palettebank,sprite_select:byte;
+ sound_latch,chip_latch,scroll_x,sbasketb_palettebank,sprite_select:byte;
  mem_opcodes:array[0..$9fff] of byte;
  last_addr:word;
 
@@ -101,19 +101,20 @@ end;
 procedure sbasketb_principal;
 var
   frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for frame:=0 to $ff do begin
+  for f:=0 to $ff do begin
       //main
       m6809_0.run(frame_m);
       frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
       //sound
       z80_0.run(frame_s);
       frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-      if frame=239 then begin
+      if f=239 then begin
           if irq_ena then m6809_0.change_irq(HOLD_LINE);
           update_video_sbasketb;
       end;
@@ -158,16 +159,11 @@ end;
 end;
 
 function sbasketb_snd_getbyte(direccion:word):byte;
-var
-  clock:byte;
 begin
 case direccion of
   0..$1fff,$4000..$43ff:sbasketb_snd_getbyte:=mem_snd[direccion];
   $6000:sbasketb_snd_getbyte:=sound_latch;
-  $8000:begin
-          clock:=(z80_0.contador+trunc(z80_0.tframes*frame)) shr 10;
-          sbasketb_snd_getbyte:=(clock and $3) or ((vlm5030_0.get_bsy and 1) shl 2);
-        end;
+  $8000:sbasketb_snd_getbyte:=((z80_0.totalt shr 10) and $3) or ((vlm5030_0.get_bsy and 1) shl 2);
 end;
 end;
 

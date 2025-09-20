@@ -189,9 +189,10 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,260);
+z80_0:=cpu_z80.create(20000000,260);
 z80_0.change_ram_calls(system2_getbyte,system2_putbyte);
 z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
+z80_0.change_timmings(@z80t_a,@z80t_cb_a,@z80t_dd_a,@z80t_ddcb_a,@z80t_ed_a,@z80t_ex_a);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);

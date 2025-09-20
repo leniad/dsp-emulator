@@ -6,16 +6,21 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,sound_engine,file_engine,m6502,mos6566,gfx_engine,
      tape_window,sid_sound,cargar_dsk,forms,
      {$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
+
 function iniciar_c64:boolean;
+
 //Para los snapshots
 procedure c64_putbyte(direccion:word;valor:byte);
+
 var
     char_rom:array[0..$fff] of byte;
     color_ram:array[0..$3ff] of byte;
     cia_nmi,cia_irq,vic_irq,tape_motor:boolean;
     c64_keyboard,c64_keyboard_i:array[0..7] of byte;
+
 implementation
 uses tap_tzx,snapshot;
+
 const
   c64_kernel:tipo_roms=(n:'901227-03.u4';l:$2000;p:$0;crc:$dbe3e7c7);
   c64_basic:tipo_roms=(n:'901226-01.u3';l:$2000;p:$0;crc:$f833d117);
@@ -24,23 +29,31 @@ var
   kernel_rom,basic_rom:array[0..$1fff] of byte;
   tape_control,port_bits,port_val:byte;
   char_ram,kernel_enabled,basic_enabled,char_enabled:boolean;
+
 procedure eventos_c64;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fe) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 1);
-  if arcade_input.down[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fd) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 2);
-  if arcade_input.left[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fb) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 4);
-  if arcade_input.right[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $f7) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $8);
-  if arcade_input.but0[0] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $ef) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $10);
+  if arcade_input.up[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fe) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 1);
+  if arcade_input.down[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fd) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 2);
+  if arcade_input.left[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $fb) else mos6526_0.joystick1:=(mos6526_0.joystick1 or 4);
+  if arcade_input.right[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $f7) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $8);
+  if arcade_input.but0[1] then mos6526_0.joystick1:=(mos6526_0.joystick1 and $ef) else mos6526_0.joystick1:=(mos6526_0.joystick1 or $10);
   //P2
-  if arcade_input.up[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fe) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 1);
-  if arcade_input.down[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fd) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 2);
-  if arcade_input.left[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fb) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 4);
-  if arcade_input.right[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $f7) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 8);
-  if arcade_input.but0[1] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $ef) else mos6526_0.joystick2:=(mos6526_0.joystick2 or $10);
+  if arcade_input.up[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fe) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 1);
+  if arcade_input.down[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fd) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 2);
+  if arcade_input.left[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $fb) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 4);
+  if arcade_input.right[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $f7) else mos6526_0.joystick2:=(mos6526_0.joystick2 or 8);
+  if arcade_input.but0[0] then mos6526_0.joystick2:=(mos6526_0.joystick2 and $ef) else mos6526_0.joystick2:=(mos6526_0.joystick2 or $10);
 end;
 if event.keyboard then begin
+  if keyboard[KEYBOARD_F1] then begin
+      if cinta_tzx.cargada then begin
+        if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
+          else tape_window1.fPlayCinta(nil);
+      end;
+      keyboard[KEYBOARD_F1]:=false;
+  end;
   //Line 0
   if keyboard[KEYBOARD_BACKSPACE] then c64_keyboard[0]:=(c64_keyboard[0] and $fe) else c64_keyboard[0]:=(c64_keyboard[0] or $1);
   if keyboard[KEYBOARD_RETURN] then c64_keyboard[0]:=(c64_keyboard[0] and $fd) else c64_keyboard[0]:=(c64_keyboard[0] or $2);
@@ -127,6 +140,7 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_ESCAPE] then c64_keyboard[7]:=(c64_keyboard[7] and $7f) else c64_keyboard[7]:=(c64_keyboard[7] or $80);
 end;
 end;
+
 procedure c64_principal;
 var
   f:word;
@@ -146,6 +160,7 @@ while EmuStatus=EsRuning do begin
  video_sync;
 end;
 end;
+
 function c64_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -173,6 +188,7 @@ case direccion of
                   else c64_getbyte:=memoria[direccion];
 end;
 end;
+
 procedure actualiza_mem;
 var
   res:byte;
@@ -192,6 +208,7 @@ kernel_enabled:=(res and 2)<>0;
 basic_enabled:=(res and 3)=3;
 tape_motor:=(port_val and $20)=0;
 end;
+
 procedure c64_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -222,6 +239,7 @@ case direccion of
     2..$cfff,$e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
+
 {$IFDEF CIA_OLD}
 function cia1_portb_r:byte;
 var
@@ -247,21 +265,25 @@ procedure cia2_portb_w(valor:byte);
 begin
 end;
 {$ENDIF}
+
 procedure c64_cia_irq(state:byte);
 begin
   m6502_0.change_irq(state);
   cia_irq:=(state=ASSERT_LINE);
 end;
+
 procedure c64_vic_irq(state:byte);
 begin
   m6502_0.change_irq(state);
   vic_irq:=(state=ASSERT_LINE);
 end;
+
 procedure c64_nmi(state:byte);
 begin
   m6502_0.change_nmi(state);
   cia_nmi:=(state=ASSERT_LINE);
 end;
+
 procedure c64_despues_instruccion(tstates:word);
 begin
   if (cia_irq or vic_irq) then m6502_0.change_irq(ASSERT_LINE);
@@ -282,6 +304,7 @@ begin
   mos6526_0.EmulateLine2(tstates);
   {$ENDIF}
 end;
+
 procedure c64_reset;
 var
   f:byte;
@@ -309,14 +332,19 @@ cia_irq:=false;
 cia_nmi:=false;
 tape_motor:=false;
 end;
+
 procedure c64_tape_start;
 begin
+  main_screen.rapido:=true;
   tape_control:=$0;
 end;
+
 procedure c64_tape_stop;
 begin
+  main_screen.rapido:=false;
   tape_control:=$30;
 end;
+
 procedure c64_sound_update;
 begin
   sid_0.update;
@@ -335,53 +363,32 @@ end;
 procedure c64_tapes;
 var
   datos:pbyte;
-  file_size,crc:integer;
-  nombre_zip,nombre_file,extension,cadena:string;
+  longitud:integer;
+  romfile,nombre_file,extension,cadena:string;
   resultado,es_cinta:boolean;
 begin
-  if not(OpenRom(StC64,nombre_zip)) then exit;
-  extension:=extension_fichero(nombre_zip);
-  resultado:=false;
-  if extension='ZIP' then begin
-      if not(search_file_from_zip(nombre_zip,'*.tap',nombre_file,file_size,crc,false)) then
-        if not(search_file_from_zip(nombre_zip,'*.prg',nombre_file,file_size,crc,false)) then
-          if not(search_file_from_zip(nombre_zip,'*.t64',nombre_file,file_size,crc,false)) then
-            if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then
-              if not(search_file_from_zip(nombre_zip,'*.vsf',nombre_file,file_size,crc,false)) then begin
-                MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading tape/WAV.', mtInformation,[mbOk], 0);
-                exit;
-              end;
-      getmem(datos,file_size);
-      if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then freemem(datos)
-        else resultado:=true;
-  end else begin
-      if read_file_size(nombre_zip,file_size) then begin
-        getmem(datos,file_size);
-        if not(read_file(nombre_zip,datos,file_size)) then freemem(datos)
-          else resultado:=true;
-        nombre_file:=extractfilename(nombre_zip);
-      end;
-  end;
-  if not(resultado) then begin
-    MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading the tape/WAV.', mtInformation,[mbOk], 0);
+  if not(openrom(romfile)) then exit;
+  getmem(datos,$400000);
+  if not(extract_data(romfile,datos,longitud,nombre_file)) then begin
+    freemem(datos);
     exit;
   end;
   extension:=extension_fichero(nombre_file);
   resultado:=false;
   es_cinta:=true;
-  if extension='TAP' then resultado:=abrir_c64_tap(datos,file_size);
-  if extension='WAV' then resultado:=abrir_wav(datos,file_size);
+  if extension='TAP' then resultado:=abrir_c64_tap(datos,longitud);
+  if extension='WAV' then resultado:=abrir_wav(datos,longitud,985248);
   if extension='PRG' then begin
       es_cinta:=false;
-      resultado:=abrir_prg(datos,file_size);
+      resultado:=abrir_prg(datos,longitud);
    end;
   if extension='T64' then begin
      es_cinta:=false;
-     resultado:=abrir_t64(datos,file_size);
+     resultado:=abrir_t64(datos,longitud);
    end;
   if extension='VSF' then begin
      es_cinta:=false;
-     resultado:=abrir_vsf(datos,file_size);
+     resultado:=abrir_vsf(datos,longitud);
    end;
   if es_cinta then begin
      if resultado then begin
@@ -397,7 +404,7 @@ begin
      end;
   end;
   freemem(datos);
-  directory.c64_tap:=ExtractFilePath(nombre_zip);
+  directory.c64_tap:=ExtractFilePath(romfile);
   change_caption(cadena);
 end;
 
@@ -454,7 +461,6 @@ begin
   sid_0:=sid_chip.create(985248,TYPE_6581);
   c64_reset;
   iniciar_c64:=true;
-  TZX_CLOCK:=985248 div 1000;
   cinta_tzx.tape_start:=c64_tape_start;
   cinta_tzx.tape_stop:=c64_tape_stop;
 end;

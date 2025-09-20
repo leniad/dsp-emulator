@@ -489,8 +489,8 @@ case direccion of
   $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $800..$8ff:case direccion and $3 of
                   0:m6800_0.change_irq(CLEAR_LINE);
-                  1:msm_5205_0.data_w(valor);
-                  2:msm_5205_1.data_w(valor);
+                  1:msm5205_0.data_w(valor);
+                  2:msm5205_1.data_w(valor);
                end;
   $4000..$ffff:;
 end;
@@ -541,9 +541,9 @@ end;
 
 procedure ay0_portb_w(valor:byte);
 begin
-  // bits 0 and 1 reset the two chips */
-	msm_5205_0.reset_w(valor and 1);
-  msm_5205_1.reset_w(valor and 2);
+  // bits 0 and 1 reset the two chips
+	msm5205_0.reset_w(valor and 1);
+  msm5205_1.reset_w(valor and 2);
 end;
 
 procedure adpcm_int;
@@ -565,8 +565,8 @@ begin
  reset_audio;
  ay8910_0.reset;
  ay8910_1.reset;
- msm_5205_0.reset;
- msm_5205_1.reset;
+ msm5205_0.reset;
+ msm5205_1.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -707,8 +707,8 @@ m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(irem_m62_play_sound);
 //sound chips
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
 ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
 ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910,1);

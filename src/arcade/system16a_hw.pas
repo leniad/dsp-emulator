@@ -104,7 +104,7 @@ const
         (mask:$c;name:'Lives';number:4;dip:((dip_val:$8;dip_name:'2 Lives'),(dip_val:$c;dip_name:'3 Lives'),(dip_val:$4;dip_name:'5 Lives'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Difficulty';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Enemy''s Bullet Speed';number:2;dip:((dip_val:$40;dip_name:'Slow'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Lenguage';number:2;dip:((dip_val:$80;dip_name:'Japanese'),(dip_val:$0;dip_name:'English'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        (mask:$80;name:'Language';number:2;dip:((dip_val:$80;dip_name:'Japanese'),(dip_val:$0;dip_name:'English'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         alexkidd_dip_b:array [0..5] of def_dip=(
         (mask:$1;name:'Continue';number:2;dip:((dip_val:$1;dip_name:'Only before level 5'),(dip_val:$0;dip_name:'Unlimited'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -824,7 +824,7 @@ if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.t
   ym2151_0.change_port_func(ym2151_snd_port);
   //Creo el segundo chip de sonido
   mcs48_0:=cpu_mcs48.create(6000000,262*CPU_SYNC,N7751);
-  mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport);
+  mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport,nil,nil);
   mcs48_0.i8243.change_calls(nil,n7751_rom_offset_w);
   dac_0:=dac_chip.Create(1);
 end else begin

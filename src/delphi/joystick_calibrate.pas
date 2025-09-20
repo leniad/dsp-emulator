@@ -18,6 +18,7 @@ type
     Label5: TLabel;
     procedure Button1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
@@ -74,6 +75,14 @@ end;
 procedure Tjoy_calibration.Button1Click(Sender: TObject);
 begin
 salir:=true;
+end;
+
+procedure Tjoy_calibration.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+case key of
+    13,27:button1Click(nil);
+end;
 end;
 
 procedure Tjoy_calibration.FormShow(Sender: TObject);

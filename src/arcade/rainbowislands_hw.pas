@@ -7,7 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2151,
      taitosnd,rom_engine,pal_engine,sound_engine{$IFDEF MCU},taito_cchip{$ELSE IF},rainbow_cchip{$ENDIF};
 
-procedure cargar_rainbow;
+function iniciar_rainbow:boolean;
 
 implementation
 const
@@ -113,7 +113,7 @@ end;
 
 procedure rainbow_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
+  frame_m,frame_s{$IFDEF MCU},frame_mcu{$ENDIF}:single;
   h,f:byte;
 begin
 init_controls(false,false,false,true);
@@ -321,6 +321,8 @@ end;
 
 begin
 iniciar_rainbow:=false;
+llamadas_maquina.bucle_general:=rainbow_principal;
+llamadas_maquina.reset:=reset_rainbow;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,256,511);
@@ -406,13 +408,6 @@ marcade.dswb_val:=@rainbow_dip2;
 freemem(memoria_temp);
 reset_rainbow;
 iniciar_rainbow:=true;
-end;
-
-procedure Cargar_rainbow;
-begin
-llamadas_maquina.iniciar:=iniciar_rainbow;
-llamadas_maquina.bucle_general:=rainbow_principal;
-llamadas_maquina.reset:=reset_rainbow;
 end;
 
 end.

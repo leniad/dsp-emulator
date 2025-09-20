@@ -267,7 +267,7 @@ begin
 case direccion of
   0..$fff:mem_snd[direccion]:=valor;
   $1800:begin //adpcm start
-           msm_5205_0.reset_w(0);
+           msm5205_0.reset_w(0);
            adpcm_play:=true;
         end;
   $2000:begin //adpcm addr
@@ -289,7 +289,7 @@ case direccion of
   $2800:ym3812_0.control(valor);
   $2801:ym3812_0.write(valor);
   $3000:begin //adpcm stop
-          msm_5205_0.reset_w(1);
+          msm5205_0.reset_w(1);
           adpcm_play:=false;
         end;
   $8000..$ffff:; //ROM
@@ -352,13 +352,13 @@ var
 begin
   if not(adpcm_play) then exit;
   if (adpcm_pos>=adpcm_end) then begin
-    msm_5205_0.reset_w(1);
+    msm5205_0.reset_w(1);
 		adpcm_play:=false;
     m6809_0.change_nmi(PULSE_LINE);
 	end else begin
 		data:=adpcm_rom[adpcm_pos shr 1];
-    if (adpcm_pos and 1)<>0 then msm_5205_0.data_w(data and $f)
-      else msm_5205_0.data_w(data shr 4);
+    if (adpcm_pos and 1)<>0 then msm5205_0.data_w(data and $f)
+      else msm5205_0.data_w(data shr 4);
 		adpcm_pos:=adpcm_pos+1;
 	end;
 end;
@@ -370,7 +370,7 @@ m6502_0.reset;
 m6809_0.reset;
 m6805_0.reset;
 ym3812_0.reset;
-msm_5205_0.reset_w(1);
+msm5205_0.reset_w(1);
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 rom_bank:=0;
@@ -428,7 +428,7 @@ m6805_0.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
-msm_5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,1,snd_adpcm);
+msm5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,1,snd_adpcm);
 if not(roms_load(@adpcm_rom,renegade_adpcm)) then exit;
 //cargar roms
 if not(roms_load(@memoria_temp,renegade_rom)) then exit;

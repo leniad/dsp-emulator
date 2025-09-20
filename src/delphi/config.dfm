@@ -3,15 +3,16 @@ object ConfigSP: TConfigSP
   Top = 154
   BorderIcons = []
   BorderStyle = bsSingle
-  Caption = 'Configurar'
-  ClientHeight = 480
-  ClientWidth = 504
+  Caption = 'Config Spectrum'
+  ClientHeight = 462
+  ClientWidth = 492
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
+  KeyPreview = True
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
@@ -55,7 +56,7 @@ object ConfigSP: TConfigSP
       Width = 109
       Height = 73
       Caption = 'Spectrum 48K Issue'
-      TabOrder = 1
+      TabOrder = 6
       object RadioButton1: TRadioButton
         Left = 13
         Top = 20
@@ -81,7 +82,7 @@ object ConfigSP: TConfigSP
       Width = 109
       Height = 90
       Caption = 'Border Emulation'
-      TabOrder = 2
+      TabOrder = 1
       object RadioButton7: TRadioButton
         Left = 13
         Top = 17
@@ -116,7 +117,7 @@ object ConfigSP: TConfigSP
       Width = 109
       Height = 66
       Caption = 'LensLok'
-      TabOrder = 3
+      TabOrder = 2
       object RadioButton12: TRadioButton
         Left = 13
         Top = 17
@@ -142,7 +143,7 @@ object ConfigSP: TConfigSP
       Width = 348
       Height = 178
       Caption = 'Audio'
-      TabOrder = 4
+      TabOrder = 3
       object GroupBox8: TGroupBox
         Left = 3
         Top = 15
@@ -263,7 +264,7 @@ object ConfigSP: TConfigSP
       Width = 222
       Height = 129
       Caption = 'Input'
-      TabOrder = 5
+      TabOrder = 4
       object GroupBox4: TGroupBox
         Left = 12
         Top = 13
@@ -368,7 +369,7 @@ object ConfigSP: TConfigSP
       Width = 111
       Height = 77
       Caption = 'ULA +'
-      TabOrder = 6
+      TabOrder = 5
       object RadioButton23: TRadioButton
         Left = 13
         Top = 20

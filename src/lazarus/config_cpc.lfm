@@ -9,8 +9,10 @@ object configcpc: Tconfigcpc
   ClientHeight = 565
   ClientWidth = 776
   DesignTimePPI = 120
+  KeyPreview = True
+  OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.0.4'
+  LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
     Left = 25
     Height = 204
@@ -242,6 +244,7 @@ object configcpc: Tconfigcpc
       Top = 16
       Width = 44
       Caption = 'SLOT 1'
+      ParentColor = False
     end
     object Label2: TLabel
       Left = 16
@@ -249,6 +252,7 @@ object configcpc: Tconfigcpc
       Top = 50
       Width = 44
       Caption = 'SLOT 2'
+      ParentColor = False
     end
     object Label3: TLabel
       Left = 16
@@ -256,6 +260,7 @@ object configcpc: Tconfigcpc
       Top = 86
       Width = 44
       Caption = 'SLOT 3'
+      ParentColor = False
     end
     object Label4: TLabel
       Left = 16
@@ -263,6 +268,7 @@ object configcpc: Tconfigcpc
       Top = 118
       Width = 44
       Caption = 'SLOT 4'
+      ParentColor = False
     end
     object Label5: TLabel
       Left = 16
@@ -270,6 +276,7 @@ object configcpc: Tconfigcpc
       Top = 151
       Width = 44
       Caption = 'SLOT 5'
+      ParentColor = False
     end
     object Label6: TLabel
       Left = 16
@@ -277,6 +284,7 @@ object configcpc: Tconfigcpc
       Top = 185
       Width = 44
       Caption = 'SLOT 6'
+      ParentColor = False
     end
   end
   object Button13: TButton

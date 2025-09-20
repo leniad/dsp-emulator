@@ -1,38 +1,41 @@
 object load_dsk: Tload_dsk
   Left = 319
-  Height = 407
+  Height = 509
   Top = 279
-  Width = 593
+  Width = 741
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Open/Abrir DSK'
-  ClientHeight = 407
-  ClientWidth = 593
+  ClientHeight = 509
+  ClientWidth = 741
+  DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
+  KeyPreview = True
+  OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '1.8.0.6'
+  LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
-    Left = 8
-    Height = 192
-    Top = 208
-    Width = 576
+    Left = 10
+    Height = 240
+    Top = 260
+    Width = 720
     Caption = 'Contenido ZIP / Inside ZIP'
-    ClientHeight = 178
-    ClientWidth = 574
+    ClientHeight = 218
+    ClientWidth = 716
     TabOrder = 0
     object StringGrid1: TStringGrid
-      Left = 6
-      Height = 169
+      Left = 8
+      Height = 211
       Top = -1
-      Width = 562
+      Width = 702
       ColCount = 2
-      DefaultColWidth = 20
-      DefaultRowHeight = 15
+      DefaultColWidth = 25
+      DefaultRowHeight = 19
       FixedCols = 0
       GridLineWidth = 0
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
@@ -42,58 +45,51 @@ object load_dsk: Tload_dsk
       TabStop = False
       TitleFont.CharSet = ANSI_CHARSET
       TitleFont.Color = clBlack
-      TitleFont.Height = -11
+      TitleFont.Height = -14
       TitleFont.Name = 'Tahoma'
       TitleFont.Pitch = fpVariable
       TitleFont.Quality = fqDraft
       OnDblClick = StringGrid1DblClick
-      OnKeyUp = FileListBox1KeyUp
-      ColWidths = (
-        202
-        49
-      )
     end
   end
   object FileListBox1: TFileListBox
-    Left = 8
-    Height = 163
-    Top = 40
-    Width = 468
+    Left = 10
+    Height = 204
+    Top = 50
+    Width = 585
     Directory = 'C:\Users\Dani\Desktop'
     ItemHeight = 0
     Mask = '*.zip;*.dsk;*.ipf'
     OnClick = FileListBox1Click
     OnDblClick = FileListBox1DblClick
-    OnKeyUp = FileListBox1KeyUp
     TabOrder = 1
     TabStop = False
-    TopIndex = -1
   end
   object Button1: TButton
-    Left = 487
-    Height = 33
-    Top = 136
-    Width = 97
+    Left = 609
+    Height = 41
+    Top = 170
+    Width = 121
     Caption = 'CANCELAR'
     OnClick = Button1Click
     TabOrder = 2
   end
   object Button2: TButton
-    Left = 487
-    Height = 33
-    Top = 64
-    Width = 97
+    Left = 609
+    Height = 41
+    Top = 80
+    Width = 121
     Caption = 'CARGAR'
     OnClick = Button2Click
     TabOrder = 3
   end
   object DirectoryEdit1: TDirectoryEdit
-    Left = 8
-    Height = 30
-    Top = 8
-    Width = 468
+    Left = 10
+    Height = 25
+    Top = 10
+    Width = 585
     ShowHidden = False
-    ButtonWidth = 23
+    ButtonWidth = 29
     NumGlyphs = 1
     MaxLength = 0
     TabOrder = 4

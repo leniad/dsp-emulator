@@ -242,7 +242,7 @@ begin
 case direccion of
   0..$3fff:;
   $4000..$47ff:mem_snd[direccion]:=valor;
-  $8001:msm_5205_0.reset_w((valor xor $1) and 1);
+  $8001:msm5205_0.reset_w((valor xor $1) and 1);
   $8003:z80_2.change_nmi(CLEAR_LINE);
   $c000:sound_latch2:=valor;
 end;
@@ -289,12 +289,12 @@ end;
 procedure msm5205_sound;
 begin
 if (adpcm_data and $100)=0 then begin
-   msm_5205_0.data_w((adpcm_data and $f0) shr 4);
+   msm5205_0.data_w((adpcm_data and $f0) shr 4);
    adpcm_pos:=adpcm_pos+1;
    adpcm_data:=$100;
 end else begin
     adpcm_data:=mem_adpcm[adpcm_pos and $7fff];
-    msm_5205_0.data_w(adpcm_data and $0f);
+    msm5205_0.data_w(adpcm_data and $0f);
 end;
 end;
 
@@ -312,7 +312,7 @@ begin
  z80_2.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- msm_5205_0.reset;
+ msm5205_0.reset;
  reset_audio;
  marcade.in0:=$20;
  marcade.in1:=$20;
@@ -363,7 +363,7 @@ ay8910_0:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
 ay8910_1:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.2,msm5205_sound);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.2,msm5205_sound);
 //cargar roms
 if not(roms_load(@memoria,tehkanwc_rom)) then exit;
 //cargar cpu 2

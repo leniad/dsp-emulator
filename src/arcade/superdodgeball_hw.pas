@@ -203,14 +203,14 @@ case direccion of
   0..$fff:mem_snd[direccion]:=valor;
   $2800:ym3812_0.control(valor);
   $2801:ym3812_0.write(valor);
-  $3800:msm_5205_0.reset_w(0);
-  $3801:msm_5205_1.reset_w(0);
+  $3800:msm5205_0.reset_w(0);
+  $3801:msm5205_1.reset_w(0);
   $3802:adpcm_end[0]:=(valor and $7f)*$200;
   $3803:adpcm_end[1]:=(valor and $7f)*$200;
   $3804:adpcm_pos[0]:=(valor and $7f)*$200;
   $3805:adpcm_pos[1]:=(valor and $7f)*$200;
-  $3806:msm_5205_0.reset_w(1);
-  $3807:msm_5205_1.reset_w(1);
+  $3806:msm5205_0.reset_w(1);
+  $3807:msm5205_1.reset_w(1);
   $8000..$ffff:;
 end;
 end;
@@ -218,28 +218,28 @@ end;
 procedure msm5205_sound1;
 begin
 if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
-		msm_5205_0.reset_w(1);
+		msm5205_0.reset_w(1);
 	end	else if (adpcm_data[0]<>-1) then begin
-		        msm_5205_0.data_w(adpcm_data[0] and $0f);
+		        msm5205_0.data_w(adpcm_data[0] and $0f);
 		        adpcm_data[0]:=-1;
            end else begin
 		                  adpcm_data[0]:=adpcm_rom[0,adpcm_pos[0]];
                       adpcm_pos[0]:=adpcm_pos[0]+1;
-		                  msm_5205_0.data_w(adpcm_data[0] shr 4);
+		                  msm5205_0.data_w(adpcm_data[0] shr 4);
                     end;
 end;
 
 procedure msm5205_sound2;
 begin
 if ((adpcm_pos[1]>=adpcm_end[1]) or (adpcm_pos[1]>=$10000)) then begin
-		msm_5205_1.reset_w(1);
+		msm5205_1.reset_w(1);
 	end	else if (adpcm_data[1]<>-1) then begin
-		        msm_5205_1.data_w(adpcm_data[1] and $0f);
+		        msm5205_1.data_w(adpcm_data[1] and $0f);
 		        adpcm_data[1]:=-1;
            end else begin
 		                  adpcm_data[1]:=adpcm_rom[1,adpcm_pos[1]];
                       adpcm_pos[1]:=adpcm_pos[1]+1;
-		                  msm_5205_1.data_w(adpcm_data[1] shr 4);
+		                  msm5205_1.data_w(adpcm_data[1] shr 4);
                     end;
 
 end;
@@ -301,8 +301,8 @@ m6502_0.reset;
 m6809_0.reset;
 m6800_0.reset;
 ym3812_0.reset;
-msm_5205_0.reset;
-msm_5205_1.reset;
+msm5205_0.reset;
+msm5205_1.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 nrom_bank:=0;
@@ -363,8 +363,8 @@ if not(roms_load(@mem_misc,sdodgeball_mcu)) then exit;
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.6);
 ym3812_0.change_irq_calls(snd_irq);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,msm5205_sound1);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,msm5205_sound2);
+msm5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,msm5205_sound1);
+msm5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,0.5,msm5205_sound2);
 if not(roms_load(@memoria_temp,sdodgeball_adpcm)) then exit;
 copymemory(@adpcm_rom[0,0],@memoria_temp[0],$10000);
 copymemory(@adpcm_rom[1,0],@memoria_temp[$10000],$10000);

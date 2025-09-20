@@ -635,8 +635,8 @@ procedure pokey_chip.write_internal(offset:word;data:byte);
 var
   i:integer;
 begin
-	// determine which address was changed */
-	case (offset and 15) of
+	// determine which address was changed
+	case (offset and $f) of
 	  AUDF1_C:self.channel[CHAN1].AUDF:=data;
 	  AUDC1_C:self.channel[CHAN1].AUDC:=data;
 	  AUDF2_C:self.channel[CHAN2].AUDF:=data;

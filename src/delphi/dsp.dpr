@@ -209,7 +209,6 @@ uses
   operationwolf_hw in '..\arcade\operationwolf_hw.pas',
   opwolf_cchip in '..\arcade\misc\opwolf_cchip.pas',
   joystick_calibrate in 'joystick_calibrate.pas' {joy_calibration},
-  eeprom in '..\devices\eeprom.pas',
   outrun_hw in '..\arcade\outrun_hw.pas',
   taitosj_hw in '..\arcade\taitosj_hw.pas',
   fd1089 in '..\devices\fd1089.pas',
@@ -233,7 +232,6 @@ uses
   config_sms in 'config_sms.pas' {SMSConfig},
   lib_sdl2 in '..\misc\lib_sdl2.pas',
   renegade_hw in '..\arcade\renegade_hw.pas',
-  generic_adpcm in '..\snd\generic_adpcm.pas',
   tmnt_hw in '..\arcade\tmnt_hw.pas',
   eepromser in '..\devices\eepromser.pas',
   gradius3_hw in '..\arcade\gradius3_hw.pas',
@@ -338,7 +336,22 @@ uses
   magmax_hw in '..\arcade\magmax_hw.pas',
   ambush_hw in '..\arcade\ambush_hw.pas',
   superduck_hw in '..\arcade\superduck_hw.pas',
-  hangon_hw in '..\arcade\hangon_hw.pas';
+  hangon_hw in '..\arcade\hangon_hw.pas',
+  shadow_warriors_hw in '..\arcade\shadow_warriors_hw.pas',
+  raiden_hw in '..\arcade\raiden_hw.pas',
+  twins_hw in '..\arcade\twins_hw.pas',
+  i2cmem in '..\devices\i2cmem.pas',
+  oric_hw in '..\ordenadores\oric_hw.pas',
+  oric_disc in '..\ordenadores\misc\oric_disc.pas',
+  via6522 in '..\devices\via6522.pas',
+  missilecommand_hw in '..\arcade\missilecommand_hw.pas',
+  gaplus_hw in '..\arcade\gaplus_hw.pas',
+  pv1000 in '..\consolas\pv1000.pas',
+  pv2000 in '..\consolas\pv2000.pas',
+  m63_hw in '..\arcade\m63_hw.pas',
+  diverboy_hw in '..\arcade\diverboy_hw.pas',
+  mugsmashers_hw in '..\arcade\mugsmashers_hw.pas',
+  steelforce_hw in '..\arcade\steelforce_hw.pas';
 
 {$R *.res}
 begin

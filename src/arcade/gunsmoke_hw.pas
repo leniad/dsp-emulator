@@ -304,8 +304,6 @@ end;
 
 //Gun.Smoke
 function gunsmoke_getbyte(direccion:word):byte;
-const
-  prot:array[1..3] of byte=($ff,0,0);
 begin
 case direccion of
   0..$7fff,$d000..$d7ff,$e000..$ffff:gunsmoke_getbyte:=memoria[direccion];
@@ -315,7 +313,9 @@ case direccion of
   $c002:gunsmoke_getbyte:=marcade.in2;
   $c003:gunsmoke_getbyte:=marcade.dswa;
   $c004:gunsmoke_getbyte:=marcade.dswb;
-  $c4c9..$c4cb:gunsmoke_getbyte:=prot[direccion and $3]; //Proteccion
+  $c4c9:gunsmoke_getbyte:=$ff; //Procteccion 1
+  $c4ca:gunsmoke_getbyte:=0;   //Procteccion 2
+  $c4cb:gunsmoke_getbyte:=0;   //Proteccion  3
 end;
 end;
 
@@ -326,8 +326,9 @@ case direccion of
   $c800:sound_command:=valor;
   $c804:begin
           rom_bank:=(valor and $0c) shr 2;
-          chon:=(valor and $80)<>0;
+          z80_1.change_reset((valor and $20) shr 5);
           main_screen.flip_main_screen:=(valor and $40)<>0;
+          chon:=(valor and $80)<>0;
         end;
   $c806:if (valor and $40)<>0 then begin
           copymemory(@buffer_sprites,@memoria[$f000],$1000);
@@ -429,9 +430,10 @@ case direccion of
         0..$bfff:;
         $c800:sound_command:=valor;
         $c804:begin
-                chon:=(valor and $80)<>0;
                 rom_bank:=(valor shr 2) and $7;
+                z80_1.change_reset((valor and $20) shr 5);
                 main_screen.flip_main_screen:=(valor and $40)<>0;
+                chon:=(valor and $80)<>0;
               end;
         $c807:cpu_to_mcu:=valor;
         $d000..$d7ff:if memoria[direccion]<>valor then begin
@@ -680,7 +682,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(6000000,262);
+       mcs51_0:=cpu_mcs51.create(3000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars
@@ -727,7 +729,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943kai_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(6000000,262);
+       mcs51_0:=cpu_mcs51.create(3000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars

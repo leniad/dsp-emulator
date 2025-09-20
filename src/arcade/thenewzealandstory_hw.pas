@@ -72,7 +72,8 @@ const
         (n:'b08-03.7a';l:$20000;p:$40000;crc:$274a795f),(n:'b08-04.4a';l:$20000;p:$60000;crc:$9754f703));
         arknoid2_pal:array[0..1] of tipo_roms=(
         (n:'b08-08.15f';l:$200;p:0;crc:$a4f7ebd9),(n:'b08-07.16f';l:$200;p:$200;crc:$ea34d9f7));}
-        CPU_SYNC=8;
+        //Madre mia!!
+        CPU_SYNC=32;
 
 var
  main_bank,misc_bank,sound_latch:byte;
@@ -532,7 +533,7 @@ llamadas_maquina.reset:=reset_tnzs;
 iniciar_tnzs:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
-if main_vars.tipo_maquina=306 then main_screen.rol90_screen:=true;
+if main_vars.tipo_maquina=306 then main_screen.rot270_screen:=true;
 iniciar_video(256,224);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);
@@ -620,7 +621,7 @@ case main_vars.tipo_maquina of
         //MCU
         mcs48_0:=cpu_mcs48.create(6000000,$100*CPU_SYNC,I8042);
         if not(roms_load(mcs48_0.get_rom_addr,extrmatn_mcu)) then exit;
-        mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport);
+        mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport,nil,nil);
         //Sound chip
         ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);

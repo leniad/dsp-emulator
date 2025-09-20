@@ -30,7 +30,6 @@ var
   ram:array[0..1,0..$ff] of byte;
   x_actual,y_actual:integer;
   ram_bank:byte;
-  linea:word;
 
 procedure update_video_as;
 var
@@ -150,14 +149,15 @@ end;
 procedure principal_as;
 var
   frame:single;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
- for linea:=0 to 299 do begin
+ for f:=0 to 299 do begin
     m6502_0.run(frame);
     frame:=frame+m6502_0.tframes-m6502_0.contador;
-    if ((linea=282) and dibujar) then update_video_as;
+    if ((f=282) and dibujar) then update_video_as;
  end;
  eventos_as;
  video_sync;
@@ -174,7 +174,7 @@ case direccion of
   0..$1ff,$4000..$47ff,$5000..$57ff,$6800..$7fff:getbyte_as:=memoria[direccion];
   $200..$2ff:getbyte_as:=ram[ram_bank,direccion and $ff];
   $300..$3ff:getbyte_as:=ram[1-ram_bank,direccion and $ff];
-  $2001:getbyte_as:=((trunc(linea*m6502_0.tframes)+m6502_0.contador) and $100) shr 8;
+  $2001:getbyte_as:=(m6502_0.totalt and $100) shr 8;
   $2000,$2002..$2007:begin
                         mascara:=1 shl (direccion and $7);
                         if (marcade.in0 and mascara)<>0 then getbyte_as:=$80
@@ -219,7 +219,7 @@ begin
 direccion:=direccion and $7fff;
 case direccion of
   0..$1fff:getbyte_llander:=memoria[direccion and $ff];
-  $2000:getbyte_llander:=$bf or (((trunc(linea*m6502_0.tframes)+m6502_0.contador) and $100) shr 2);
+  $2000:getbyte_llander:=$bf or ((m6502_0.totalt and $100) shr 2);
   $2400..$2407:begin
                   mascara:=1 shl (direccion and $7);
                   if ($50 and mascara)<>0 then getbyte_llander:=$80

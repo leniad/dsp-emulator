@@ -113,7 +113,6 @@ procedure TFLoadRom.init_game_desc(sort:word);
 var
   f:word;
   sitio,cantidad:integer;
-  myRect:TGridRect;
 procedure poner;
 var
   test:string;
@@ -177,6 +176,7 @@ case key of
     FLoadRom.RomListDblClick(nil);
   end;
   38,40:show_picture;
+  27:floadrom.BitBtn1Click(nil);
 end;
 end;
 

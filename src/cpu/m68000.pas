@@ -1635,7 +1635,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 self.contador:=self.contador+12+calc_ea_t_bw(dir);
                 tempw:=self.leerdir_w(dir);
                 self.poner_band(tempw);
-              end else MessageDlg('Mierda error de privilegio MOVE TO SR'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+              end else MessageDlg('Mierda error de privilegio MOVE TO SR '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
           $21:begin // # pea
                 case dir of
                    $0..$7:begin  // # swap!!!
@@ -2288,7 +2288,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                           self.poner_band(tempw);
                         end else MessageDlg('Mierda error de format word en rte'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
                       end;
-                    end else MessageDlg('Mierda error de privilegio rte'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                    end else MessageDlg('Mierda error de privilegio rte '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
                   end;
               $35:begin // # rts
                     self.prefetch:=false;

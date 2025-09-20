@@ -312,7 +312,7 @@ if (arcade_input.down[player]<>(keyboard[arcade_input.ndown[player]])) then begi
     arcade_input.down[player]:=keyboard[arcade_input.ndown[player]];
     event.arcade:=true;
 end;
-if (arcade_input.up[player] and arcade_input.down[player]) then arcade_input.down[player]:=false;
+if (arcade_input.up[player] and arcade_input.down[player] and (main_vars.system_type=0)) then arcade_input.up[player]:=false;
 if (arcade_input.left[player]<>(keyboard[arcade_input.nleft[player]])) then begin
     arcade_input.left[player]:=keyboard[arcade_input.nleft[player]];
     event.arcade:=true;
@@ -321,7 +321,7 @@ if (arcade_input.right[player]<>(keyboard[arcade_input.nright[player]])) then be
     arcade_input.right[player]:=keyboard[arcade_input.nright[player]];
     event.arcade:=true;
 end;
-if (arcade_input.left[player] and arcade_input.right[player]) then arcade_input.right[player]:=false;
+if (arcade_input.left[player] and arcade_input.right[player] and (main_vars.system_type=0)) then arcade_input.left[player]:=false;
 //Botones
 if timers.autofire_enabled[0+(player*6)] then begin
   timers.autofire_status[0+(player*6)]:=keyboard[arcade_input.nbut0[player]];
@@ -528,10 +528,22 @@ begin
         keystate[KEYBOARD_F4]:=0; //Cuando tiene que poner a 0 la tecla esta en el menu... Tengo que ponerla a 0 yo o cree que esta todo el rato pulsada!
      end;
      if keyboard[KEYBOARD_F6] then pasar_pantalla_completa;
-     if keyboard[KEYBOARD_F7] then if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-01');
-     if keyboard[KEYBOARD_F8] then if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-02');
-     if keyboard[KEYBOARD_F9] then if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-01');
-     if keyboard[KEYBOARD_F10] then if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
+     if keyboard[KEYBOARD_F7] then begin
+        if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-01');
+        keystate[KEYBOARD_F7]:=0;
+     end;
+     if keyboard[KEYBOARD_F8] then begin
+        if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-02');
+        keystate[KEYBOARD_F8]:=0;
+     end;
+     if keyboard[KEYBOARD_F9] then begin
+        if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-01');
+        keystate[KEYBOARD_F9]:=0;
+     end;
+     if keyboard[KEYBOARD_F10] then begin
+        if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
+        keystate[KEYBOARD_F10]:=0;
+     end;
      if keyboard[KEYBOARD_F11] then principal1.fSlow(nil);
   end;
   //Joy Stick

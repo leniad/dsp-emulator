@@ -467,7 +467,7 @@ llamadas_maquina.close:=close_williams;
 llamadas_maquina.fps_max:=60.096154;
 iniciar_williams:=false;
 iniciar_audio(false);
-if main_vars.tipo_maquina=249 then main_screen.rol90_screen:=true;
+if main_vars.tipo_maquina=249 then main_screen.rot270_screen:=true;
 screen_init(1,304,247,false,true);
 iniciar_video(292,240);
 //Main CPU

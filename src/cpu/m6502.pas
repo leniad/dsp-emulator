@@ -1,5 +1,5 @@
 unit M6502;
-{$define DEBUG}
+//{$define DEBUG}
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,cpu_misc;
@@ -234,17 +234,18 @@ end;
 r.a:=0;
 r.x:=0;
 r.y:=0;
-r.sp:=$FD;
+r.sp:=$fd;
 r.z:=0;
 self.contador:=0;
 r.p.n:=false;
 r.p.o_v:=false;
-r.p.t:=true;
+r.p.t:=false;
 r.p.brk:=false;
 r.p.dec:=false;
 r.p.int:=true;
 r.p.z:=false;
 r.p.c:=false;
+self.totalt:=0;
 self.after_ei:=false;
 self.change_nmi(CLEAR_LINE);
 self.change_irq(CLEAR_LINE);
@@ -353,7 +354,8 @@ end;
 procedure cpu_m6502.run(maximo:single);
 var
     instruccion,numero,tempb,carry:byte;
-    tempw,posicion,old_contador:word;
+    tempw,posicion:word;
+    old_contador:integer;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
@@ -502,7 +504,7 @@ case instruccion of
             self.putbyte(posicion,tempb);
           end;
       $04,$0c,$14,$1c,$3a,$3c,$44,$54,$5c,$7c,$82,$89,$c2,$d4,$dc,$e2,$f4,$fc://if self.tipo_cpu=TCPU_M65C02 then
-          {$ifdef DEBUG}
+          {$ifdef DEBUG}  //nop dobles y triples
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif};
           //else self.getbyte(r.pc);  // <-- Fallo CPU NOP
@@ -794,11 +796,8 @@ case instruccion of
           end;
       $80:if self.tipo_cpu=TCPU_M65C02 then begin //bra
             r.pc:=r.pc+shortint(numero);
-          end else begin
+          end else begin  //nop doble
             self.getbyte(r.pc);  // <-- Fallo CPU
-            {$ifdef DEBUG}
-            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
-            {$endif}
           end;
       $81,$85,$8d,$91,$92,$95,$99,$9d:self.putbyte(posicion,r.a); //STA
       $83,$87,$8f,$97:self.putbyte(posicion,r.a and r.x); //sax
@@ -833,7 +832,7 @@ case instruccion of
              r.p.z:=(r.a=0);
              r.p.n:=(r.a and $80)<>0;
            end;
-      $9A:begin  //TXS
+      $9a:begin  //TXS
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.sp:=r.x;
           end;
@@ -842,34 +841,34 @@ case instruccion of
                 {$ifdef DEBUG}
                 MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
                 {$endif};
-      $A0,$a4,$ac,$b4,$bc:begin //LDY
+      $a0,$a4,$ac,$b4,$bc:begin //LDY
              r.y:=self.getbyte(posicion);
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
-      $A1,$a5,$a9,$ad,$b1,$b5,$b9,$bd:begin //LDA
+      $a1,$a5,$a9,$ad,$b1,$b5,$b9,$bd:begin //LDA
             r.a:=self.getbyte(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $A2,$a6,$ae,$b6,$be:begin //LDX
+      $a2,$a6,$ae,$b6,$be:begin //LDX
              r.x:=self.getbyte(posicion);
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $A8:begin  //TAY
+      $a8:begin  //TAY
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.y:=r.a;
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
-      $AA:begin  //TAX
+      $aa:begin  //TAX
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.x:=r.a;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $B0:if r.p.c then begin  //BCS salta si c true
+      $b0:if r.p.c then begin  //BCS salta si c true
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
@@ -889,17 +888,17 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $B8:begin  //CLV
+      $b8:begin  //CLV
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.o_v:=false;
           end;
-      $BA:begin  //TSX
+      $ba:begin  //TSX
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.x:=r.sp;
             r.p.z:=(r.x=0);
             r.p.n:=(r.x and $80)<>0;
           end;
-      $C0,$C4,$CC:begin //CPY
+      $c0,$c4,$cc:begin //CPY
             tempw:=r.y-self.getbyte(posicion);
             r.p.c:=(tempw and $100)=0;
             r.p.z:=(tempw and $ff)=0;
@@ -987,7 +986,7 @@ case instruccion of
              sbc(self.r,tempb,self.tipo_cpu);
              self.putbyte(posicion,tempb);
           end;
-      $E6,$ee,$F6,$fe:begin  //INC
+      $e6,$ee,$f6,$fe:begin  //INC
              tempb:=self.getbyte(posicion);
              self.putbyte(posicion,tempb);  // <-- Fallo CPU
              tempb:=tempb+1;
@@ -995,18 +994,18 @@ case instruccion of
              r.p.n:=(tempb and $80)<>0;
              self.putbyte(posicion,tempb);
            end;
-      $E8:begin  //INX
+      $e8:begin  //INX
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.x:=r.x+1;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $F0:if r.p.z then begin  //BEQ salta si z true
+      $f0:if r.p.z then begin  //BEQ salta si z true
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
-      $F8:begin  //SED
+      $f8:begin  //SED
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.dec:=true;
           end;
@@ -1029,8 +1028,11 @@ case instruccion of
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-timers.update(self.contador-old_contador,self.numero_cpu);
+//Ojo!! el contador se puede incrementar en la funcion siguiente!!
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
+tempw:=self.contador-old_contador;
+timers.update(tempw,self.numero_cpu);
+self.totalt:=self.totalt+tempw;
 end; //del while!!
 end;
 end.

@@ -1016,7 +1016,7 @@ screen_init(6,1024,512,true);
 screen_mod_scroll(6,1024,512,1023,512,256,511);
 //Final
 screen_init(7,512,256,false,true);
-if main_vars.tipo_maquina=296 then main_screen.rol90_screen:=true;
+if main_vars.tipo_maquina=296 then main_screen.rot270_screen:=true;
 iniciar_video(320,224);
 //Main CPU
 m68000_0:=cpu_m68000.create(10000000,262);

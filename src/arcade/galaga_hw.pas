@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,namcoio_06xx_5xxx,
      rom_engine,pal_engine,sound_engine,galaga_stars_const,samples,misc_functions;
 
-procedure cargar_galagahw;
+function iniciar_galagahw:boolean;
 
 implementation
 const
@@ -24,6 +24,16 @@ const
         (n:'gg1_11.4d';l:$1000;p:0;crc:$ad447c80),(n:'gg1_10.4f';l:$1000;p:$1000;crc:$dd6f1afc));
         galaga_samples:array[0..1] of tipo_nombre_samples=(
         (nombre:'bang.wav'),(nombre:'init.wav'));
+        galaga_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'Easy'),(dip_val:$0;dip_name:'Medium'),(dip_val:$1;dip_name:'Hard'),(dip_val:$2;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Freeze';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Rack test';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        galaga_dip_b:array [0..3] of def_dip=(
+        (mask:$7;name:'Coinage';number:8;dip:((dip_val:$4;dip_name:'4C 1C'),(dip_val:$2;dip_name:'3C 1C'),(dip_val:$6;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$1;dip_name:'2C 3C'),(dip_val:$3;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Bonus Life';number:8;dip:((dip_val:$20;dip_name:'20K 60K 60K+'),(dip_val:$18;dip_name:'20K 60K'),(dip_val:$10;dip_name:'20K 70K 70K+'),(dip_val:$30;dip_name:'20K 80K 80K+'),(dip_val:$38;dip_name:'20K 80K'),(dip_val:$8;dip_name:'30K 100K 100K+'),(dip_val:$28;dip_name:'30K 120K 120K+'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$80;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$c0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Dig Dug
         digdug_rom:array[0..3] of tipo_roms=(
         (n:'dd1a.1';l:$1000;p:0;crc:$a80ec984),(n:'dd1a.2';l:$1000;p:$1000;crc:$559f00bd),
@@ -41,6 +51,17 @@ const
         (n:'dd1.13';l:$1000;p:$2000;crc:$458499e9),(n:'dd1.12';l:$1000;p:$3000;crc:$c58252a0));
         digdug_chars2:tipo_roms=(n:'dd1.11';l:$1000;p:0;crc:$7b383983);
         digdug_background:tipo_roms=(n:'dd1.10b';l:$1000;p:0;crc:$2cf399c2);
+        digdug_dip_a:array [0..3] of def_dip=(
+        (mask:$7;name:'Coin B';number:8;dip:((dip_val:$7;dip_name:'3C 1C'),(dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$5;dip_name:'2C 3C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 6C'),(dip_val:$0;dip_name:'1C 7C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Bonus Life';number:8;dip:((dip_val:$20;dip_name:'10K 40K 40K+'),(dip_val:$10;dip_name:'10K 50K 50K+'),(dip_val:$30;dip_name:'20K 60K 60K+'),(dip_val:$8;dip_name:'20K 70K 70K+'),(dip_val:$28;dip_name:'10K 40K'),(dip_val:$18;dip_name:'20K 60K'),(dip_val:$38;dip_name:'10K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$40;dip_name:'2'),(dip_val:$80;dip_name:'3'),(dip_val:$c0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        digdug_dip_b:array [0..6] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$2;dip_name:'Medium'),(dip_val:$1;dip_name:'Hard'),(dip_val:$3;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$4;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Allow Continue';number:2;dip:((dip_val:$8;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Freeze';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin A';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$c0;dip_name:'2C 3C'),(dip_val:$80;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Xevious
         xevious_rom:array[0..3] of tipo_roms=(
         (n:'xvi_1.3p';l:$1000;p:0;crc:$09964dda),(n:'xvi_2.3m';l:$1000;p:$1000;crc:$60ecce84),
@@ -65,6 +86,16 @@ const
         (n:'xvi_11.2c';l:$1000;p:$3000;crc:$31e244dd));
         xevious_samples:array[0..1] of tipo_nombre_samples=(
         (nombre:'explo2.wav'),(nombre:'explo1.wav'));
+        xevious_dip_a:array [0..4] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1c;name:'Bonus Life';number:8;dip:((dip_val:$18;dip_name:'10K 40K 40K+'),(dip_val:$14;dip_name:'10K 50K 50K+'),(dip_val:$10;dip_name:'20K 50K 50K+'),(dip_val:$1c;dip_name:'20K 60K 60K+'),(dip_val:$c;dip_name:'20K 70K 70+'),(dip_val:$8;dip_name:'20K 80K 80K+'),(dip_val:$4;dip_name:'20K 60K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Lives';number:4;dip:((dip_val:$40;dip_name:'1'),(dip_val:$20;dip_name:'2'),(dip_val:$60;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        xevious_dip_b:array [0..4] of def_dip=(
+        (mask:$2;name:'Flags Award Bonus Life';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$2;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$60;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Freeze';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Bosconian
         bosco_rom:array[0..3] of tipo_roms=(
         (n:'bos3_1.3n';l:$1000;p:0;crc:$96021267),(n:'bos1_2.3m';l:$1000;p:$1000;crc:$2d8f3ebe),
@@ -84,6 +115,27 @@ const
         (n:'bos1_11.5k';l:$1000;p:$2000;crc:$17ac9511));
         bosco_samples:array[0..2] of tipo_nombre_samples=(
         (nombre:'bigbang.wav'),(nombre:'midbang.wav'),(nombre:'shot.wav';restart:true;loop:false));
+        bosco_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$3;dip_name:'Medium'),(dip_val:$2;dip_name:'Hardest'),(dip_val:$0;dip_name:'Auto'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$4;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Freeze';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bosco_dip_b:array [0..3] of def_dip=(
+        (mask:$7;name:'Coinage';number:8;dip:((dip_val:$1;dip_name:'4C 1C'),(dip_val:$2;dip_name:'3C 1C'),(dip_val:$3;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$4;dip_name:'2C 3C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Bonus Fighter';number:8;dip:((dip_val:$30;dip_name:'15K 50K'),(dip_val:$38;dip_name:'20K 70K'),(dip_val:$8;dip_name:'10K 50K 50K+'),(dip_val:$10;dip_name:'15K 50K 50K+'),(dip_val:$18;dip_name:'15K 70K 70+'),(dip_val:$20;dip_name:'20K 70K 70K+'),(dip_val:$28;dip_name:'30K 100K 100K+'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$80;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$c0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //Xevious
+        sxevious_rom:array[0..3] of tipo_roms=(
+        (n:'cpu_3p.rom';l:$1000;p:0;crc:$1c8d27d5),(n:'cpu_3m.rom';l:$1000;p:$1000;crc:$fd04e615),
+        (n:'xv3_3.2m';l:$1000;p:$2000;crc:$294d5404),(n:'xv3_4.2l';l:$1000;p:$3000;crc:$6a44bf92));
+        sxevious_sub:array[0..1] of tipo_roms=(
+        (n:'xv3_5.3f';l:$1000;p:$0;crc:$d4bd3d81),(n:'xv3_6.3j';l:$1000;p:$1000;crc:$af06be5f));
+        sxevious_dip_b:array [0..4] of def_dip=(
+        (mask:$2;name:'Flags Award Bonus Life';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$2;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(dip_val:$0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$60;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Freeze';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         MAX_STARS=252;
 
 var
@@ -93,16 +145,17 @@ var
  galaga_starcontrol:array[0..5] of byte;
  //Dig Dug
  digdug_bg:array[0..$fff] of byte;
- custom_mod,bg_select,bg_color_bank,bg_disable,tx_color_mode:byte;
- bg_repaint:boolean;
+ custom_mod,bg_select,bg_color_bank,tx_color_mode:byte;
+ bg_disable,bg_repaint:boolean;
  //Xevious
  xevious_tiles:array[0..$3fff] of byte;
  xevious_bs:array[0..1] of byte;
  scrollx_fg,scrolly_fg:word;
 
+procedure update_video_galaga;
 procedure draw_sprites_galaga;
 var
-  nchar,f,atrib,a,b,c,d,flipx_v,flipy_v:byte;
+  nchar,f,atrib,a,b,c,d:byte;
   color,x,y:word;
   flipx,flipy:boolean;
 begin
@@ -114,32 +167,30 @@ for f:=0 to $3f do begin
     atrib:=memoria[$9b80+(f*2)];
     flipx:=(atrib and $02)<>0;
     flipy:=(atrib and $01)<>0;
-    flipx_v:=atrib and $02;
-    flipy_v:=atrib and $01;
 		case (atrib and $0c) of
         0:begin  //16x16
             put_gfx_sprite_mask(nchar,color,flipx,flipy,1,$f,$f);
             actualiza_gfx_sprite(x,y,2,1);
           end;
         4:begin  //16x32
-            a:=0 xor flipy_v;
-            b:=1 xor flipy_v;
+            a:=0 xor byte(flipy);
+            b:=1 xor byte(flipy);
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,$f,$f,0,16);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,$f,$f,0,0);
             actualiza_gfx_sprite_size(x,y,2,16,32);
           end;
         8:begin  //32x16
-            a:=0 xor flipx_v;
-            b:=2 xor flipx_v;
+            a:=0 xor (byte(flipx) shl 1);
+            b:=2 xor (byte(flipx) shl 1);
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,$f,$f,16,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,$f,$f,0,0);
             actualiza_gfx_sprite_size(x,y,2,32,16);
           end;
        $c:begin  //32x32
-            a:=0 xor flipy_v xor flipx_v;
-            b:=1 xor flipy_v xor flipx_v;
-            c:=2 xor flipy_v xor flipx_v;
-            d:=3 xor flipy_v xor flipx_v;
+            a:=0 xor byte(flipy) xor (byte(flipx) shl 1);
+            b:=1 xor byte(flipy) xor (byte(flipx) shl 1);
+            c:=2 xor byte(flipy) xor (byte(flipx) shl 1);
+            d:=3 xor byte(flipy) xor (byte(flipx) shl 1);
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,$f,$f,16,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,$f,$f,16,16);
             put_gfx_sprite_mask_diff(nchar+c,color,flipx,flipy,1,$f,$f,0,0);
@@ -168,7 +219,7 @@ var
   x,y,color:word;
 begin
 if (galaga_starcontrol[5] and 1)=1 then begin
-		// two sets of stars controlled by these bits */
+		// two sets of stars controlled by these bits
 		set_a:=galaga_starcontrol[3] and 1;
 		set_b:=(galaga_starcontrol[4] and 1) or $2;
 		for star_cntr:=0 to (MAX_STARS-1) do begin
@@ -182,7 +233,6 @@ if (galaga_starcontrol[5] and 1)=1 then begin
 end;
 end;
 
-procedure update_video_galaga;
 var
   color,nchar,pos:word;
   sx,sy,x,y:byte;
@@ -212,23 +262,26 @@ end;
 procedure eventos_galaga;
 begin
 if event.arcade then begin
+  //P1 & P2
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  //System
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  //Extra P1 & P2 (Xevious solo)
   if arcade_input.but1[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
-end;
-
-procedure galaga_sound_update;
-begin
-  samples_update;
-  namco_snd_0.update;
 end;
 
 procedure galaga_principal;
@@ -259,7 +312,7 @@ while EmuStatus=EsRuning do begin
             if sub_irq then z80_2.change_irq(ASSERT_LINE);
             update_video_galaga;
             copymemory(@buffer_sprites,@memoria[$fe00],$200);
-      end;
+          end;
     end;
   end;
   eventos_galaga;
@@ -273,16 +326,16 @@ var
 begin
 bit:=val and 1;
 case dir of
-		$0:begin	// IRQ1 */
+		$0:begin	// IRQ1
         main_irq:=bit<>0;
 			  if not(main_irq) then z80_0.change_irq(CLEAR_LINE);
 			 end;
-		$1:begin	// IRQ2 */
+		$1:begin	// IRQ2
 			    sub_irq:=bit<>0;
   			  if not(sub_irq) then z80_2.change_irq(CLEAR_LINE);
 			 end;
-		$2:sub2_nmi:=(bit=0);	// NMION */
-		$3:if (bit<>0) then begin  // RESET */
+		$2:sub2_nmi:=(bit=0);	// NMION
+		$3:if (bit<>0) then begin  // RESET
           z80_1.change_reset(CLEAR_LINE);
           z80_2.change_reset(CLEAR_LINE);
        end else begin
@@ -293,6 +346,25 @@ case dir of
     $05:custom_mod:=(custom_mod and $fe) or (bit shl 0);	// MOD 0
 		$06:custom_mod:=(custom_mod and $fd) or (bit shl 1);	// MOD 1
     $07:custom_mod:=(custom_mod and $fb) or (bit shl 2);	// MOD 2
+end;
+end;
+
+function galaxian_dip(direccion:byte):byte;
+var
+  bit0,bit1:byte;
+begin
+bit0:=(marcade.dswb shr direccion) and 1;
+bit1:=(marcade.dswa shr direccion) and 1;
+galaxian_dip:=bit0 or (bit1 shl 1);
+end;
+
+function galaga_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$3fff,$8000..$8bff,$9000..$93ff,$9800..$9bff:galaga_getbyte:=memoria[direccion];
+  $6800..$6807:galaga_getbyte:=galaxian_dip(direccion and $7);
+  $7000..$70ff:galaga_getbyte:=namco_06xx_data_r(direccion and $ff,0);
+  $7100:galaga_getbyte:=namco_06xx_ctrl_r(0);
 end;
 end;
 
@@ -314,38 +386,36 @@ case direccion of
 end;
 end;
 
-function galaga_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$3fff,$8000..$8bff,$9000..$93ff,$9800..$9bff:galaga_getbyte:=memoria[direccion];
-  $6800..$6802,$6804,$6807:galaga_getbyte:=$3; //Leer DSW A y B
-  $6803:galaga_getbyte:=$0;
-  $6805,$6806:galaga_getbyte:=$2;
-  $7000..$70ff:galaga_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100:galaga_getbyte:=namco_06xx_ctrl_r(0);
-end;
-end;
-
 function galaga_sub_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then galaga_sub_getbyte:=mem_snd[direccion]
-  else galaga_sub_getbyte:=galaga_getbyte(direccion);
+case direccion of
+  0..$3fff:galaga_sub_getbyte:=mem_snd[direccion];
+  $4000..$ffff:galaga_sub_getbyte:=galaga_getbyte(direccion);
+end;
 end;
 
 function galaga_sub2_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then galaga_sub2_getbyte:=mem_misc[direccion]
-  else galaga_sub2_getbyte:=galaga_getbyte(direccion);
+case direccion of
+  0..$3fff:galaga_sub2_getbyte:=mem_misc[direccion];
+  $4000..$ffff:galaga_sub2_getbyte:=galaga_getbyte(direccion);
+end;
+end;
+
+procedure galaga_sound_update;
+begin
+  samples_update;
+  namco_snd_0.update;
 end;
 
 //DigDug
 function namco_53xx_r_r(port:byte):byte;
 begin
-case port of //DSW A+B
-  0:namco_53xx_r_r:=$9; // DIP A low
-  1:namco_53xx_r_r:=$9; // DIP A high
-  2:namco_53xx_r_r:=$4; // DIP B low
-  3:namco_53xx_r_r:=$2; // DIP B high
+case port of
+  0:namco_53xx_r_r:=marcade.dswa and $f;
+  1:namco_53xx_r_r:=marcade.dswa shr 4;
+  2:namco_53xx_r_r:=marcade.dswb and $f;
+  3:namco_53xx_r_r:=marcade.dswb shr 4;
 end;
 end;
 
@@ -354,9 +424,11 @@ begin
   namco_53xx_k_r:=custom_mod shl 1;
 end;
 
+procedure update_video_digdug;
+
 procedure draw_sprites_digdug;
 var
-  nchar,f,atrib,a,b,c,d,flipx_v,flipy_v:byte;
+  nchar,f,atrib,a,b,c,d:byte;
   color,x:word;
   y:integer;
   flipx,flipy:boolean;
@@ -374,12 +446,10 @@ for f:=0 to $3f do begin
             put_gfx_sprite_mask(nchar,color,flipx,flipy,1,$1f,$1f);
             actualiza_gfx_sprite(x,y,2,1);
       end else begin  //32x32
-            flipx_v:=atrib and $02;
-            flipy_v:=atrib and $01;
-            a:=0 xor flipy_v xor flipx_v;
-            b:=1 xor flipy_v xor flipx_v;
-            c:=2 xor flipy_v xor flipx_v;
-            d:=3 xor flipy_v xor flipx_v;
+            a:=0 xor byte(flipy) xor (byte(flipx) shl 1);
+            b:=1 xor byte(flipy) xor (byte(flipx) shl 1);
+            c:=2 xor byte(flipy) xor (byte(flipx) shl 1);
+            d:=3 xor byte(flipy) xor (byte(flipx) shl 1);
             nchar:=(nchar and $c0) or ((nchar and $3f) shl 2);
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,$1f,$1f,16,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,$1f,$1f,16,16);
@@ -390,11 +460,11 @@ for f:=0 to $3f do begin
 end;
 end;
 
-procedure update_video_digdug;
 var
   color,nchar,pos:word;
   sx,sy,x,y:byte;
 begin
+if bg_disable then fill_full_screen(3,$100);
 for x:=0 to 27 do begin
   for y:=0 to 35 do begin
       sx:=29-x;
@@ -402,10 +472,9 @@ for x:=0 to 27 do begin
 	    if (sy and $20)<>0 then pos:=sx+((sy and $1f) shl 5)
   	    else pos:=sy+(sx shl 5);
       //Background
-      if bg_repaint then begin
+      if not(bg_disable) and bg_repaint then begin
         nchar:=digdug_bg[pos or (bg_select shl 10)];
-        if bg_disable<>0 then color:=$f
-          else color:=(nchar shr 4);
+        color:=(nchar shr 4);
         put_gfx(x*8,y*8,nchar,(color or bg_color_bank) shl 2,3,2);
       end;
       //Chars
@@ -421,6 +490,7 @@ actualiza_trozo(0,0,224,288,3,0,0,224,288,2);
 actualiza_trozo(0,0,224,288,1,0,0,224,288,2);
 draw_sprites_digdug;
 actualiza_trozo_final(0,0,224,288,2);
+bg_repaint:=false;
 end;
 
 procedure digdug_principal;
@@ -485,9 +555,9 @@ case direccion of
                           end;
                         end;
 		                2:if (tx_color_mode<>(valor and 1)) then tx_color_mode:=valor and 1;	// select alpha layer color mode
-		                3:if (bg_disable<>(valor and 1)) then begin // "disable" background
-				                    bg_disable:=valor and 1;
-                            bg_repaint:=true;
+		                3:if bg_disable<>((valor and 1)<>0) then begin // disable background
+				                 bg_disable:=(valor and 1)<>0;
+                         if not(bg_disable) then bg_repaint:=true;
                         end;
 		                4,5:begin //background color bank
 				                  shift:=direccion and $7;
@@ -497,8 +567,8 @@ case direccion of
                             bg_repaint:=true;
                           end;
                         end;
-		              6:;	// n.c. */
-		              7:main_screen.flip_main_screen:=(valor and 1)<>0;	// FLIP */
+		              6:;	// n.c.
+		              7:main_screen.flip_main_screen:=(valor and 1)<>0;	// FLIP
                  end;
     $b800..$b840:memoria[direccion]:=valor; //eeprom
 end;
@@ -517,15 +587,19 @@ end;
 //Sub1 CPU
 function digdug_sub_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then digdug_sub_getbyte:=mem_snd[direccion]
-  else digdug_sub_getbyte:=digdug_getbyte(direccion);
+case direccion of
+  0..$3fff:digdug_sub_getbyte:=mem_snd[direccion];
+  $4000..$ffff:digdug_sub_getbyte:=digdug_getbyte(direccion);
+end;
 end;
 
 //Sub2 CPU
 function digdug_sub2_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then digdug_sub2_getbyte:=mem_misc[direccion]
-  else digdug_sub2_getbyte:=digdug_getbyte(direccion);
+case direccion of
+  0..$3fff:digdug_sub2_getbyte:=mem_misc[direccion];
+  $4000..$ffff:digdug_sub2_getbyte:=digdug_getbyte(direccion);
+end;
 end;
 
 procedure digdug_sound_update;
@@ -533,8 +607,8 @@ begin
   namco_snd_0.update;
 end;
 
-
 //Xevious
+procedure update_video_xevious;
 procedure draw_sprites_xevious;
 var
   f:byte;
@@ -556,7 +630,7 @@ for f:=0 to $3f do begin
             actualiza_gfx_sprite(x,y,3,2);
           end;
         1:begin // double width
-            code:=code and not(1);
+            code:=code and $1fe;
             sx1:=16*byte(flipx);
             sx2:=16*byte(not(flipx));
             put_gfx_sprite_mask_diff(code,color,flipx,flipy,2,0,$f,sx1,0);
@@ -564,7 +638,7 @@ for f:=0 to $3f do begin
             actualiza_gfx_sprite_size(x,y,3,32,16);
           end;
         2:begin //double height
-            code:=code and not(2);
+            code:=code and $1fd;
             sy1:=16*byte(flipy);
             sy2:=16*byte(not(flipy));
             put_gfx_sprite_mask_diff(code+2,color,flipx,flipy,2,0,$f,0,sy1);
@@ -576,7 +650,7 @@ for f:=0 to $3f do begin
             sx2:=16*byte(not(flipx));
             sy1:=16*byte(flipy);
             sy2:=16*byte(not(flipy));
-            code:=code and not(3);
+            code:=code and $1fc;
             put_gfx_sprite_mask_diff(code+3,color,flipx,flipy,2,0,$f,sx1,sy2);
             put_gfx_sprite_mask_diff(code+1,color,flipx,flipy,2,0,$f,sx2,sy2);
             put_gfx_sprite_mask_diff(code+2,color,flipx,flipy,2,0,$f,sx1,sy1);
@@ -588,7 +662,6 @@ for f:=0 to $3f do begin
 end;
 end;
 
-procedure update_video_xevious;
 var
   f,color,nchar:word;
   x,y,atrib:byte;
@@ -628,33 +701,76 @@ frame_s1:=z80_2.tframes;
 frame_s2:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
-  //Main CPU
-  z80_0.run(frame_m);
-  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-  //Sub CPU
-  z80_2.run(frame_s1);
-  frame_s1:=frame_s1+z80_2.tframes-z80_2.contador;
-  //Sub 2 CPU
-  z80_1.run(frame_s2);
-  frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
-  //IO's
-  run_namco_50xx(0);
-  run_namco_54xx;
-  case f of
-    63,191:if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
-    223:begin
+    //Main CPU
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //Sub CPU
+    z80_2.run(frame_s1);
+    frame_s1:=frame_s1+z80_2.tframes-z80_2.contador;
+    //Sub 2 CPU
+    z80_1.run(frame_s2);
+    frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
+    //IO's
+    run_namco_50xx(0);
+    run_namco_54xx;
+    case f of
+      63,191:if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
+      223:begin
           if main_irq then z80_0.change_irq(ASSERT_LINE);
           if sub_irq then z80_2.change_irq(ASSERT_LINE);
           update_video_xevious;
+      end;
     end;
-  end;
  end;
  eventos_galaga;
  video_sync;
 end;
 end;
 
-//Main CPU
+function xevious_getbyte(direccion:word):byte;
+function xevious_dip(direccion:byte):byte;
+var
+  bit0,bit1:byte;
+begin
+bit0:=((marcade.dswb or marcade.in2) shr direccion) and 1;
+bit1:=(marcade.dswa shr direccion) and 1;
+xevious_dip:=bit0 or (bit1 shl 1);
+end;
+
+function xevious_bb_r(direccion:byte):byte;
+var
+  dat1,adr_2b,adr_2c:word;
+  dat2:byte;
+begin
+// get BS to 12 bit data from 2A,2B
+adr_2b:=((xevious_bs[1] and $7e) shl 6) or ((xevious_bs[0] and $fe) shr 1);
+if (adr_2b and 1)<>0 then dat1:=((xevious_tiles[0+(adr_2b shr 1)] and $f0) shl 4) or xevious_tiles[$1000+adr_2b] // high bits select
+  else dat1:=((xevious_tiles[0+(adr_2b shr 1)] and $0f) shl 8) or xevious_tiles[$1000+adr_2b]; // low bits select
+adr_2c:=((dat1 and $1ff) shl 2) or ((xevious_bs[1] and 1) shl 1) or (xevious_bs[0] and 1);
+if (dat1 and $400)<>0 then adr_2c:=adr_2c xor 1;
+if (dat1 and $200)<>0 then adr_2c:=adr_2c xor 2;
+if (direccion<>0) then dat2:=xevious_tiles[$3000+(adr_2c or $800)] // return BB1
+else begin // return BB0
+  dat2:=xevious_tiles[$3000+adr_2c];
+  // swap bit 6 & 7
+  dat2:=BITSWAP8(dat2,6,7,5,4,3,2,1,0);
+  // flip x & y
+  if (dat1 and $400)<>0 then dat2:=dat2 xor $40;
+  if (dat1 and $200)<>0 then dat2:=dat2 xor $80;
+end;
+xevious_bb_r:=dat2;
+end;
+
+begin
+case direccion of
+  0..$3fff,$7800..$87ff,$9000..$97ff,$a000..$a7ff,$b000..$cfff:xevious_getbyte:=memoria[direccion];
+  $6800..$6807:xevious_getbyte:=xevious_dip(direccion and 7);
+  $7000..$70ff:xevious_getbyte:=namco_06xx_data_r(direccion and $ff,0);
+  $7100:xevious_getbyte:=namco_06xx_ctrl_r(0);
+  $f000..$ffff:xevious_getbyte:=xevious_bb_r(direccion and 1);
+end;
+end;
+
 procedure xevious_putbyte(direccion:word;valor:byte);
 var
   scroll:word;
@@ -668,89 +784,47 @@ case direccion of
     $7100:namco_06xx_ctrl_w(0,valor);
     $7800..$87ff,$9000..$97ff,$a000..$a7ff:memoria[direccion]:=valor;
     $b000..$b7ff,$c000..$c7ff:if memoria[direccion]<>valor then begin
-                    gfx[0].buffer[direccion and $7ff]:=true;
-                    memoria[direccion]:=valor;
-                 end;
+                                gfx[0].buffer[direccion and $7ff]:=true;
+                                memoria[direccion]:=valor;
+                              end;
     $b800..$bfff,$c800..$cfff:if memoria[direccion]<>valor then begin
-                    gfx[1].buffer[direccion and $7ff]:=true;
-                    memoria[direccion]:=valor;
-                 end;
+                                gfx[1].buffer[direccion and $7ff]:=true;
+                                memoria[direccion]:=valor;
+                              end;
     $d000..$d07f:begin
-                 scroll:=valor+((direccion and 1) shl 8);   // A0 -> D8
-                 case ((direccion and $f0) shr 4) of
+                  scroll:=valor+((direccion and 1) shl 8);   // A0 -> D8
+                  case ((direccion and $f0) shr 4) of
                     0:scrollx_bg:=scroll;
                     1:scrollx_fg:=scroll;
                     2:scrolly_bg:=scroll;
                     3:scrolly_fg:=scroll;
                     7:main_screen.flip_main_screen:=(scroll and 1)<>0;
-                 end;
+                  end;
                  end;
     $f000..$ffff:xevious_bs[direccion and 1]:=valor;
-end;
-end;
-
-function xevious_dip(direccion:word):byte;
-var
-  bit0,bit1:byte;
-begin
-bit0:=($fe+(marcade.in2 and 1)) shr (direccion and 7) and 1;
-bit1:=$ff shr (direccion and 7) and 1;
-xevious_dip:=bit0 or (bit1 shl 1);
-end;
-
-function xevious_bb_r(direccion:word):byte;
-var
-  dat1,adr_2b,adr_2c:word;
-  dat2:byte;
-begin
-// get BS to 12 bit data from 2A,2B */
-adr_2b:=((xevious_bs[1] and $7e) shl 6) or ((xevious_bs[0] and $fe) shr 1);
-if (adr_2b and 1)<>0 then // high bits select
-  dat1:=((xevious_tiles[0+(adr_2b shr 1)] and $f0) shl 4) or xevious_tiles[$1000+adr_2b]
-else	// low bits select */
-  dat1:=((xevious_tiles[0+(adr_2b shr 1)] and $0f) shl 8) or xevious_tiles[$1000+adr_2b];
-adr_2c:=((dat1 and $1ff) shl 2) or ((xevious_bs[1] and 1) shl 1) or (xevious_bs[0] and 1);
-if (dat1 and $400)<>0 then adr_2c:=adr_2c xor 1;
-if (dat1 and $200)<>0 then adr_2c:=adr_2c xor 2;
-if (direccion and 1)<>0 then // return BB1
-  dat2:=xevious_tiles[$3000+(adr_2c or $800)]
-else begin // return BB0
-  dat2:=xevious_tiles[$3000+adr_2c];
-  // swap bit 6 & 7
-  dat2:=BITSWAP8(dat2,6,7,5,4,3,2,1,0);
-  // flip x & y
-  if (dat1 and $400)<>0 then dat2:=dat2 xor $40;
-  if (dat1 and $200)<>0 then dat2:=dat2 xor $80;
-end;
-xevious_bb_r:=dat2;
-end;
-
-function xevious_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$3fff,$7800..$87ff,$9000..$97ff,$a000..$a7ff,$b000..$cfff:xevious_getbyte:=memoria[direccion];
-  $6800..$6807:xevious_getbyte:=xevious_dip(direccion);
-  $7000..$70ff:xevious_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100:xevious_getbyte:=namco_06xx_ctrl_r(0);
-  $f000..$ffff:xevious_getbyte:=xevious_bb_r(direccion);
 end;
 end;
 
 //Sub1 CPU
 function xevious_sub_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then xevious_sub_getbyte:=mem_snd[direccion]
-  else xevious_sub_getbyte:=xevious_getbyte(direccion);
+case direccion of
+  0..$3fff:xevious_sub_getbyte:=mem_snd[direccion];
+  $4000..$ffff:xevious_sub_getbyte:=xevious_getbyte(direccion);
+end;
 end;
 
 //Sub2 CPU
 function xevious_sub2_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then xevious_sub2_getbyte:=mem_misc[direccion]
-  else xevious_sub2_getbyte:=xevious_getbyte(direccion);
+case direccion of
+  0..$3fff:xevious_sub2_getbyte:=mem_misc[direccion];
+  $4000..$ffff:xevious_sub2_getbyte:=xevious_getbyte(direccion);
+end;
 end;
 
 //Bosconian
+procedure update_video_bosco;
 procedure update_stars_bosco;
 const
   speedsx:array[0..7] of integer=(-1, -2, -3, 0, 3, 2, 1, 0 );
@@ -769,15 +843,14 @@ set_a:=galaga_starcontrol[1] and 1;
 set_b:=(galaga_starcontrol[2] and 1) or $2;
 for star_cntr:=0 to (MAX_STARS-1) do begin
   if ((set_a=star_seed_tab[star_cntr].set_) or (set_b=star_seed_tab[star_cntr].set_)) then begin
-    y:=(star_seed_tab[star_cntr].y+scrolly_bg) mod 256;
-    x:=(star_seed_tab[star_cntr].x+scrollx_bg) mod 256;
+    y:=(star_seed_tab[star_cntr].y+scrolly_bg) and $ff;
+    x:=(star_seed_tab[star_cntr].x+scrollx_bg) and $ff;
     color:=paleta[32+star_seed_tab[star_cntr].col];
     putpixel(x,y,1,@color,4);
   end;
 end;
 end;
 
-procedure update_video_bosco;
 var
   f,pos,x,y:word;
   color,nchar,atrib:byte;
@@ -838,28 +911,6 @@ actualiza_trozo_final(0,16,285,224,3);
 update_stars_bosco;
 end;
 
-procedure eventos_bosco;
-begin
-if event.arcade then begin
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but1[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-end;
-end;
-
-procedure bosco_sound_update;
-begin
-  samples_update;
-  namco_snd_0.update;
-end;
-
 procedure bosco_principal;
 var
   frame_m,frame_s1,frame_s2:single;
@@ -892,9 +943,21 @@ while EmuStatus=EsRuning do begin
           end;
     end;
   end;
-  eventos_bosco;
+  eventos_galaga;
   video_sync;
 end;
+end;
+
+function bosco_getbyte(direccion:word):byte;
+begin
+  case direccion of
+      0..$3fff,$7800..$8fff:bosco_getbyte:=memoria[direccion];
+      $6800..$6807:bosco_getbyte:=galaxian_dip(direccion and $7);
+      $7000..$70ff:bosco_getbyte:=namco_06xx_data_r(direccion and $ff,0);
+      $7100:bosco_getbyte:=namco_06xx_ctrl_r(0);
+      $9000..$90ff:bosco_getbyte:=namco_06xx_data_r(direccion and $ff,1);
+      $9100:bosco_getbyte:=namco_06xx_ctrl_r(1);
+  end;
 end;
 
 procedure bosco_putbyte(direccion:word;valor:byte);
@@ -914,37 +977,27 @@ case direccion of
     $9100:namco_06xx_ctrl_w(1,valor);
     $9810:scrollx_bg:=valor;
     $9820:scrolly_bg:=valor;
-    $9830:galaga_starcontrol[0]:=valor; //starcontrol
+    $9830:galaga_starcontrol[0]:=valor;
     $9870:main_screen.flip_main_screen:=(valor and 1)=0;
-    $9874:galaga_starcontrol[1]:=valor; //bosco_starblink 0
-    $9875:galaga_starcontrol[2]:=valor; //bosco_starblink 1
+    $9874:galaga_starcontrol[1]:=valor;
+    $9875:galaga_starcontrol[2]:=valor;
 end;
-end;
-
-function bosco_getbyte(direccion:word):byte;
-begin
-  case direccion of
-      0..$3fff,$7800..$8fff:bosco_getbyte:=memoria[direccion];
-      $6800..$6802,$6805,$6807:bosco_getbyte:=$3; //Leer DSW A y B
-      $6803:bosco_getbyte:=$0;
-      $6804,$6806:bosco_getbyte:=$2;
-      $7000..$70ff:bosco_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-      $7100:bosco_getbyte:=namco_06xx_ctrl_r(0);
-      $9000..$90ff:bosco_getbyte:=namco_06xx_data_r(direccion and $ff,1);
-      $9100:bosco_getbyte:=namco_06xx_ctrl_r(1);
-  end;
 end;
 
 function bosco_sub_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then bosco_sub_getbyte:=mem_snd[direccion]
-  else bosco_sub_getbyte:=bosco_getbyte(direccion);
+case direccion of
+  0..$3fff:bosco_sub_getbyte:=mem_snd[direccion];
+  $4000..$ffff:bosco_sub_getbyte:=bosco_getbyte(direccion);
+end;
 end;
 
 function bosco_sub2_getbyte(direccion:word):byte;
 begin
-if direccion<$4000 then bosco_sub2_getbyte:=mem_misc[direccion]
-  else bosco_sub2_getbyte:=bosco_getbyte(direccion);
+case direccion of
+  0..$3fff:bosco_sub2_getbyte:=mem_misc[direccion];
+  $4000..$ffff:bosco_sub2_getbyte:=bosco_getbyte(direccion);
+end;
 end;
 
 //Namco IO
@@ -974,7 +1027,7 @@ begin
           namcoio_51xx_reset(false);
           namcoio_54xx_reset;
           reset_samples;
-          for f:=0 to 5 do galaga_starcontrol[f]:=0;
+          fillchar(galaga_starcontrol,6,0);
           scrollx_bg:=0;
           scrolly_bg:=0;
        end;
@@ -984,11 +1037,11 @@ begin
           custom_mod:=0;
           bg_select:=0;
           bg_color_bank:=0;
-          bg_disable:=0;
+          bg_disable:=false;
           tx_color_mode:=0;
           bg_repaint:=true;
        end;
-   231:begin
+   231,350:begin
           namcoio_50xx_reset(0);
           namcoio_51xx_reset(true);
           namcoio_54xx_reset;
@@ -1005,7 +1058,7 @@ begin
           namcoio_51xx_reset(false);
           namcoio_54xx_reset;
           reset_samples;
-          for f:=0 to 5 do galaga_starcontrol[f]:=0;
+          fillchar(galaga_starcontrol,6,0);
           scrollx_bg:=0;
           scrolly_bg:=0;
           namcoio_06xx_reset(1);
@@ -1016,8 +1069,25 @@ begin
  sub2_nmi:=false;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
- marcade.in2:=$ff;
+ marcade.in2:=$11;
  for f:=0 to 7 do galaga_latch(f,0);
+end;
+
+procedure cerrar_galagahw;
+begin
+case main_vars.tipo_maquina of
+  65:namco_54xx_close;
+  167:namco_53xx_close;
+  231,350:begin
+        namco_50xx_close(0);
+        namco_54xx_close;
+      end;
+  250:begin
+        namco_50xx_close(0);
+        namco_50xx_close(1);
+        namco_54xx_close;
+      end;
+end;
 end;
 
 function iniciar_galagahw:boolean;
@@ -1057,18 +1127,24 @@ end;
 begin
 iniciar_galagahw:=false;
 iniciar_audio(false);
+llamadas_maquina.close:=cerrar_galagahw;
+llamadas_maquina.reset:=reset_galagahw;
+llamadas_maquina.fps_max:=60.6060606060;
 case main_vars.tipo_maquina of
   65,167:begin
           screen_init(1,224,288,true);
           screen_init(2,256,512,false,true);
           screen_init(3,224,288);
+          if main_vars.tipo_maquina=65 then llamadas_maquina.bucle_general:=galaga_principal
+            else llamadas_maquina.bucle_general:=digdug_principal;
         end;
-  231:begin
+  231,350:begin
             screen_init(1,256,512,true);
             screen_mod_scroll(1,256,256,255,512,512,511);
             screen_init(2,256,512,true);
             screen_mod_scroll(2,256,256,255,512,512,511);
             screen_init(3,256,512,false,true);
+            llamadas_maquina.bucle_general:=xevious_principal;
           end;
   250:begin
             screen_init(1,256,256,true);
@@ -1077,6 +1153,7 @@ case main_vars.tipo_maquina of
             screen_init(3,512,512,false,true);
             screen_init(4,256,256);
             screen_mod_scroll(4,256,256,255,256,256,255);
+            llamadas_maquina.bucle_general:=bosco_principal;
           end;
 end;
 if main_vars.tipo_maquina<>250 then iniciar_video(224,288)
@@ -1091,7 +1168,6 @@ z80_1:=cpu_z80.create(3072000,264);
 namcoio_51xx_init(@marcade.in0,@marcade.in1);
 case main_vars.tipo_maquina of
     65:begin  //Galaga
-          //CPU's
           //Main
           z80_0.change_ram_calls(galaga_getbyte,galaga_putbyte);
           z80_0.init_sound(galaga_sound_update);
@@ -1141,6 +1217,11 @@ case main_vars.tipo_maquina of
             gfx[0].colores[f]:=memoria_temp[$20+f]+$10;
             gfx[1].colores[f]:=memoria_temp[$120+f];
           end;
+          //Dip
+          marcade.dswa:=$f7;
+          marcade.dswa_val:=@galaga_dip_a;
+          marcade.dswb:=$97;
+          marcade.dswb_val:=@galaga_dip_b;
        end;
     167:begin //DigDug
           //Main
@@ -1193,9 +1274,13 @@ case main_vars.tipo_maquina of
             gfx[1].colores[f]:=memoria_temp[$20+f]+$10; //sprites
             gfx[2].colores[f]:=memoria_temp[$120+f];    //background
           end;
+          //Dip
+          marcade.dswa:=$99;
+          marcade.dswa_val:=@digdug_dip_a;
+          marcade.dswb:=$24;
+          marcade.dswb_val:=@digdug_dip_b;
         end;
-    231:begin  //Xevious
-          //CPU's
+    231,350:begin  //Xevious
           //Main
           z80_0.change_ram_calls(xevious_getbyte,xevious_putbyte);
           //Sub1
@@ -1208,36 +1293,41 @@ case main_vars.tipo_maquina of
           if not(namcoio_50xx_init(0,'xevious.zip')) then exit;
           if not(namcoio_54xx_init('xevious.zip')) then exit;
           z80_0.init_sound(galaga_sound_update);
-          load_samples(xevious_samples);
+          load_samples(xevious_samples,1,true,'xevious.zip');
           //Sound
           namco_snd_0:=namco_snd_chip.create(3);
           //cargar roms
-          if not(roms_load(@memoria,xevious_rom)) then exit;
-          if not(roms_load(@mem_snd,xevious_sub)) then exit;
-          if not(roms_load(@mem_misc,xevious_sub2)) then exit;
+          if not(roms_load(@mem_misc,xevious_sub2,true,true,'xevious.zip')) then exit;
+          if main_vars.tipo_maquina=231 then begin
+            if not(roms_load(@memoria,xevious_rom)) then exit;
+            if not(roms_load(@mem_snd,xevious_sub)) then exit;
+          end else begin
+            if not(roms_load(@memoria,sxevious_rom)) then exit;
+            if not(roms_load(@mem_snd,sxevious_sub)) then exit;
+          end;
           //cargar sonido & iniciar_sonido
-          if not(roms_load(namco_snd_0.get_wave_dir,xevious_sound)) then exit;
+          if not(roms_load(namco_snd_0.get_wave_dir,xevious_sound,true,true,'xevious.zip')) then exit;
           //chars
-          if not(roms_load(@memoria_temp,xevious_char)) then exit;
+          if not(roms_load(@memoria_temp,xevious_char,true,true,'xevious.zip')) then exit;
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(1,0,8*8,0);
           convert_gfx(0,0,@memoria_temp,@pc_x_xevious,@ps_y,true,false);
           //convertir sprites
           fillchar(memoria_temp,$a000,0);
-          if not(roms_load(@memoria_temp,xevious_sprites)) then exit;
-          for f:=0 to $1fff do memoria_temp[f+$7000]:=memoria_temp[f+$5000] shr 4;
+          if not(roms_load(@memoria_temp,xevious_sprites,true,true,'xevious.zip')) then exit;
+          for f:=$5000 to $6fff do memoria_temp[f+$2000]:=memoria_temp[f] shr 4;
           init_gfx(2,16,16,$140);
           gfx_set_desc_data(3,0,64*8,($140*64*8)+4,0,4);
           convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
           //tiles
-          if not(roms_load(@xevious_tiles,xevious_bg_tiles)) then exit;
-          if not(roms_load(@memoria_temp,xevious_bg)) then exit;
+          if not(roms_load(@xevious_tiles,xevious_bg_tiles,true,true,'xevious.zip')) then exit;
+          if not(roms_load(@memoria_temp,xevious_bg,true,true,'xevious.zip')) then exit;
           init_gfx(1,8,8,$200);
           gfx_set_desc_data(2,0,8*8,0,$200*8*8);
           convert_gfx(1,0,@memoria_temp,@pc_x_xevious,@ps_y,true,false);
           //poner la paleta
-          if not(roms_load(@memoria_temp,xevious_prom)) then exit;
+          if not(roms_load(@memoria_temp,xevious_prom,true,true,'xevious.zip')) then exit;
           for f:=0 to $ff do begin
               ctemp0:=(memoria_temp[f] shr 0) and 1;
               ctemp1:=(memoria_temp[f] shr 1) and 1;
@@ -1265,9 +1355,20 @@ case main_vars.tipo_maquina of
             if (ctemp0 and $80)<>0 then gfx[2].colores[f]:=ctemp0 and $7f
               else gfx[2].colores[f]:=$80;
           end;
+          //Dip
+          marcade.dswa:=$ff;
+          if main_vars.tipo_maquina=231 then begin
+            marcade.dswa_val:=@xevious_dip_a;
+            marcade.dswb:=$ee;
+            marcade.dswb_val:=@xevious_dip_b;
+          end else begin
+            //Dip
+            marcade.dswa_val:=@xevious_dip_a;
+            marcade.dswb:=$62;
+            marcade.dswb_val:=@xevious_dip_b;
+          end;
        end;
     250:begin  //Bosconian
-          //CPU's
           //Main
           z80_0.change_ram_calls(bosco_getbyte,bosco_putbyte);
           //Sub1
@@ -1337,42 +1438,16 @@ case main_vars.tipo_maquina of
             gfx[1].colores[f]:=memoria_temp[f+$20] and $f;
           end;
           for f:=0 to 3 do gfx[2].colores[f]:=31-f;
+          //Dip
+          marcade.dswa:=$f7;
+          marcade.dswa_val:=@bosco_dip_a;
+          marcade.dswb:=$a7;
+          marcade.dswb_val:=@bosco_dip_b;
        end;
 end;
 //final
 reset_galagahw;
 iniciar_galagahw:=true;
-end;
-
-procedure cerrar_galagahw;
-begin
-case main_vars.tipo_maquina of
-  65:namco_54xx_close;
-  167:namco_53xx_close;
-  231:begin
-        namco_50xx_close(0);
-        namco_54xx_close;
-      end;
-  250:begin
-        namco_50xx_close(0);
-        namco_50xx_close(1);
-        namco_54xx_close;
-      end;
-end;
-end;
-
-procedure cargar_galagahw;
-begin
-llamadas_maquina.iniciar:=iniciar_galagahw;
-case main_vars.tipo_maquina of
-  65:llamadas_maquina.bucle_general:=galaga_principal;
-  167:llamadas_maquina.bucle_general:=digdug_principal;
-  231:llamadas_maquina.bucle_general:=xevious_principal;
-  250:llamadas_maquina.bucle_general:=bosco_principal;
-end;
-llamadas_maquina.close:=cerrar_galagahw;
-llamadas_maquina.reset:=reset_galagahw;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

@@ -1,7 +1,6 @@
 unit sega_vdp;
 
 interface
-
 uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
      main_engine,pal_engine,tms99xx,dialogs,timer_engine;
 
@@ -24,7 +23,6 @@ const
 	  $90,$91,$92,$92,$93,$E9,$EA,$EA,$EB,$EC,$ED,$ED,$EE,$EF,$F0,$F0,
 	  $F1,$F2,$F3,$F3,$F4,$F5,$F6,$F6,$F7,$F8,$F9,$F9,$FA,$FB,$FC,$FC,
 	  $FD,$FE,$FF,$FF);
-
   type
     read_mem_type=function(direccion:word):byte;
     write_mem_type=procedure(direccion:word;valor:byte);
@@ -46,6 +44,8 @@ const
         procedure video_ntsc(mode:byte);
         procedure set_hpos(estados:word);
         procedure set_gg(is_gg:boolean);
+        function save_snapshot(data:pbyte):word;
+        procedure load_snapshot(data:pbyte);
       private
         SMS_IRQ_Handler:procedure(int:boolean);
         hint,display_disabled:boolean;
@@ -53,8 +53,7 @@ const
         cram:array[0..$3f] of byte; //GG tiene 64 bytes de CRAM
         addr_mode,cram_mask,reg8tmp,reg9tmp:byte;
         line_counter,sprite_count,sprite_zoom:byte;
-        sprite_x:array[0..7] of integer;
-        sprite_tile_selected,sprite_pattern_line:array[0..7] of word;
+        sprite_x,sprite_tile_selected,sprite_pattern_line:array[0..7] of word;
         LINEAS_TOP_BORDE:byte;
         Y_PIXELS,LINEA_BORDE_DOWN:word;
         procedure select_sprites(linea:word);
@@ -68,7 +67,6 @@ var
   vdp_0,vdp_1:vdp_chip;
 
 implementation
-
 var
   priority_selected:array[0..255] of word;
   chips_total:integer=-1;
@@ -139,10 +137,10 @@ end;
 procedure vdp_chip.set_gg(is_gg:boolean);
 const
     tms992X_palete:array[0..15, 0..2] of byte =(
-    (0,0,0),(0,0,0),(0, 160, 0),(0, 238, 0),
-	  (0, 0, 98),(0, 0, 238),(78, 0, 0),(0, 238, 238),
-    (160, 0, 0),(238, 0, 0),(78, 78, 0),(238, 238, 0),
-	  (0, 78, 0),(238, 0, 238),(78, 78, 98),(238,238,238));
+    (0,0,0),(0,0,0),(0,160,0),(0,238,0),
+	  (0,0,98),(0,0,238),(78,0,0),(0, 238,238),
+    (160,0,0),(238,0,0),(78,78,0),(238,238,0),
+	  (0,78,0),(238,0,238),(78,78,98),(238,238,238));
 var
   f:word;
   colores:tpaleta;
@@ -178,7 +176,8 @@ procedure vdp_chip.select_sprites(linea:word);
 var
   sprite_y,max_sprites,sprite_index:byte;
   parse_line,sprite_tile_selected,sprite_height,sprite_base:word;
-  sprite_x,sprite_line:integer;
+  sprite_x:word;
+  sprite_line:integer;
 begin
 	// 8x8 o 8x16
 	if (self.tms.regs[1] and 2)<>0 then sprite_height:=16
@@ -234,7 +233,8 @@ var
   bit_plane_0,bit_plane_1,bit_plane_2,bit_plane_3,pixel_x:byte;
   pen_bit_0,pen_bit_1,pen_bit_2,pen_bit_3,pen_selected:byte;
   ptemp:pword;
-  sprite_x,pixel_plot_x:integer;
+  sprite_x:word;
+  pixel_plot_x:integer;
 begin
 	sprite_col_occurred:=false;
 	sprite_col_x:=255;
@@ -623,6 +623,84 @@ end;
 procedure vdp_chip.set_hpos(estados:word);
 begin
   self.hpos_temp:=hpos_conv[estados];
+end;
+
+function vdp_chip.save_snapshot(data:pbyte):word;
+var
+  temp:pbyte;
+  buffer:array[0..201] of byte;
+  size:word;
+begin
+temp:=data;
+size:=self.tms.save_snapshot(temp);
+inc(temp,size);
+//buffer[0]:=self.irq_timer;
+buffer[1]:=self.linea_back;
+buffer[2]:=self.video_mode;
+buffer[3]:=self.hpos;
+buffer[4]:=self.hpos_temp;
+copymemory(@buffer[5],@self.VIDEO_VISIBLE_Y_TOTAL,2);
+copymemory(@buffer[7],@self.VIDEO_Y_TOTAL,2);
+buffer[9]:=byte(self.gg_set);
+buffer[10]:=byte(self.trans);
+buffer[11]:=byte(self.is_pal);
+buffer[12]:=byte(self.hint);
+buffer[13]:=byte(self.display_disabled);
+copymemory(@buffer[14],@self.current_pal,32*2);
+copymemory(@buffer[78],@self.cram,64);
+buffer[142]:=self.addr_mode;
+buffer[143]:=self.cram_mask;
+buffer[144]:=self.reg8tmp;
+buffer[145]:=self.reg9tmp;
+buffer[146]:=self.line_counter;
+buffer[147]:=self.sprite_count;
+buffer[148]:=self.sprite_zoom;
+copymemory(@buffer[149],@self.sprite_x,8*2);
+copymemory(@buffer[165],@self.sprite_tile_selected,8*2);
+copymemory(@buffer[181],@self.sprite_pattern_line,8*2);
+buffer[197]:=self.LINEAS_TOP_BORDE;
+copymemory(@buffer[198],@self.Y_PIXELS,2);
+copymemory(@buffer[200],@self.LINEA_BORDE_DOWN,2);
+copymemory(temp,@buffer[0],202);
+save_snapshot:=size+202;
+end;
+
+procedure vdp_chip.load_snapshot(data:pbyte);
+var
+  temp:pbyte;
+  buffer:array[0..201] of byte;
+begin
+temp:=data;
+self.tms.load_snapshot(temp);
+inc(temp,TMS99X8_SNAPSHOT_SIZE);
+copymemory(@buffer[0],temp,202);
+//self.irq_timer:=buffer[0];
+self.linea_back:=buffer[1];
+self.video_mode:=buffer[2];
+self.hpos:=buffer[3];
+self.hpos_temp:=buffer[4];
+copymemory(@self.VIDEO_VISIBLE_Y_TOTAL,@buffer[5],2);
+copymemory(@self.VIDEO_Y_TOTAL,@buffer[7],2);
+self.gg_set:=buffer[9]<>0;
+self.trans:=buffer[10]<>0;
+self.is_pal:=buffer[11]<>0;
+self.hint:=buffer[12]<>0;
+self.display_disabled:=buffer[13]<>0;
+copymemory(@self.current_pal,@buffer[14],32*2);
+copymemory(@self.cram,@buffer[78],64);
+self.addr_mode:=buffer[142];
+self.cram_mask:=buffer[143];
+self.reg8tmp:=buffer[144];
+self.reg9tmp:=buffer[145];
+self.line_counter:=buffer[146];
+self.sprite_count:=buffer[147];
+self.sprite_zoom:=buffer[148];
+copymemory(@self.sprite_x,@buffer[149],8*2);
+copymemory(@self.sprite_tile_selected,@buffer[165],8*2);
+copymemory(@self.sprite_pattern_line,@buffer[181],8*2);
+self.LINEAS_TOP_BORDE:=buffer[197];
+copymemory(@self.Y_PIXELS,@buffer[198],2);
+copymemory(@self.LINEA_BORDE_DOWN,@buffer[200],2);
 end;
 
 end.

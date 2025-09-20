@@ -1,11 +1,10 @@
 unit pang_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,kabuki_decript,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,oki6295,sound_engine,eeprom;
+     pal_engine,oki6295,sound_engine,eepromser;
 
-procedure cargar_pang;
+function iniciar_pang:boolean;
 
 implementation
 const
@@ -29,7 +28,6 @@ const
         (n:'spe_02.rom';l:$20000;p:0;crc:$63c9dfd2),(n:'03.f2';l:$20000;p:$20000;crc:$3ae28bc1),
         (n:'spe_04.rom';l:$20000;p:$80000;crc:$9d7b225b),(n:'05.g2';l:$20000;p:$a0000;crc:$4a060884));
         spang_eeprom:tipo_roms=(n:'eeprom-spang.bin';l:$80;p:0;crc:$deae1291);
-
 var
  mem_rom_op,mem_rom_dat:array[0..$f,0..$3fff] of byte;
  mem_dat:array[0..$7fff] of byte;
@@ -138,7 +136,6 @@ end;
 end;
 
 procedure pang_putbyte(direccion:word;valor:byte);
-
 procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
@@ -152,7 +149,6 @@ begin
   set_pal_color(color,pos shr 1);
   buffer_color[(pos shr 5) and $7f]:=true;
 end;
-
 begin
 case direccion of
   0..$bfff:;
@@ -179,7 +175,7 @@ case (puerto and $ff) of
   0:pang_inbyte:=marcade.in0;
   1:pang_inbyte:=marcade.in1;
   2:pang_inbyte:=marcade.in2;
-  5:pang_inbyte:=(eeprom_0.readbit shl 7) or vblank or 2 or irq_source;
+  5:pang_inbyte:=(eepromser_0.do_read shl 7) or vblank or 2 or irq_source;
 end;
 end;
 
@@ -193,11 +189,11 @@ case (puerto and $ff) of
   $2:rom_nbank:=valor and $f;
   $5:oki_6295_0.write(valor);
   $7:video_bank:=valor;
-  $8:if valor<>0 then eeprom_0.set_cs_line(CLEAR_LINE)
-      else eeprom_0.set_cs_line(ASSERT_LINE);   //eeprom_cs_w
-  $10:if (valor<>0) then eeprom_0.set_clock_line(CLEAR_LINE)
-      else eeprom_0.set_clock_line(ASSERT_LINE);  //eeprom_clock_w
-  $18:eeprom_0.write_bit(valor);  //eeprom_serial_w
+  $8:if valor<>0 then eepromser_0.cs_write(ASSERT_LINE)
+      else eepromser_0.cs_write(CLEAR_LINE);
+  $10:if (valor<>0) then eepromser_0.clk_write(ASSERT_LINE)
+      else eepromser_0.clk_write(CLEAR_LINE);
+  $18:eepromser_0.di_write(valor and 1);
 end;
 end;
 
@@ -212,7 +208,7 @@ begin
  z80_0.reset;
  reset_audio;
  oki_6295_0.reset;
- eeprom_0.reset;
+ eepromser_0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -223,17 +219,21 @@ begin
  irq_source:=0;
 end;
 
+procedure close_pang;
+begin
+if main_vars.tipo_maquina=183 then eepromser_0.write_data('spang.nv')
+end;
+
 function iniciar_pang:boolean;
 var
   f:byte;
   memoria_temp:array[0..$4ffff] of byte;
-  ptemp,mem_temp2,mem_temp3,mem_temp4:pbyte;
+  ptemp,mem_temp2,mem_temp3:pbyte;
 const
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-
 procedure convert_chars;
 begin
   init_gfx(0,8,8,$8000);
@@ -241,7 +241,6 @@ begin
   gfx_set_desc_data(4,0,16*8,$8000*16*8+4,$8000*16*8+0,4,0);
   convert_gfx(0,0,ptemp,@ps_x[0],@ps_y[0],false,false);
 end;
-
 procedure convert_sprites;
 begin
   init_gfx(1,16,16,$800);
@@ -249,9 +248,12 @@ begin
   gfx_set_desc_data(4,0,64*8,$800*64*8+4,$800*64*8+0,4,0);
   convert_gfx(1,0,ptemp,@ps_x[0],@ps_y[0],false,false);
 end;
-
 begin
 iniciar_pang:=false;
+llamadas_maquina.bucle_general:=pang_principal;
+llamadas_maquina.reset:=reset_pang;
+llamadas_maquina.close:=close_pang;
+llamadas_maquina.fps_max:=57.42;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,256,true);
@@ -263,7 +265,7 @@ z80_0.change_ram_calls(pang_getbyte,pang_putbyte);
 z80_0.change_io_calls(pang_inbyte,pang_outbyte);
 z80_0.init_sound(pang_sound_update);
 //eeprom
-eeprom_0:=eeprom_class.create(6,16,'0110','0101','0111');
+eepromser_0:=eepromser_chip.create(E93C46,16);
 //Sound Chips
 //YM2413  --> Falta!
 oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,2);
@@ -304,10 +306,10 @@ case main_vars.tipo_maquina of
         //convertir sprites
         if not(roms_load(ptemp,spang_sprites)) then exit;
         convert_sprites;
-        //load eeprom si no lo esta ya...
-        mem_temp4:=eeprom_0.get_rom_addr;
-        inc(mem_temp4);
-        if mem_temp4^<>0 then if not(roms_load(eeprom_0.get_rom_addr,spang_eeprom)) then exit;
+        if not(eepromser_0.load_data('spang.nv')) then begin
+          if not(roms_load(@memoria_temp,spang_eeprom)) then exit;
+          copymemory(eepromser_0.get_data,@memoria_temp,$80);
+        end;
       end;
 end;
 freemem(mem_temp3);
@@ -317,13 +319,4 @@ freemem(ptemp);
 reset_pang;
 iniciar_pang:=true;
 end;
-
-procedure Cargar_pang;
-begin
-llamadas_maquina.iniciar:=iniciar_pang;
-llamadas_maquina.bucle_general:=pang_principal;
-llamadas_maquina.reset:=reset_pang;
-llamadas_maquina.fps_max:=57.42;
-end;
-
 end.

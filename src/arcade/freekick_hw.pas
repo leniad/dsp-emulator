@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      timer_engine,pal_engine,sound_engine,ppi8255,mc8123;
 
-procedure cargar_freekick;
+function iniciar_freekick:boolean;
 
 implementation
 const
@@ -475,6 +475,8 @@ begin
 end;
 begin
 iniciar_freekick:=false;
+llamadas_maquina.bucle_general:=freekick_principal;
+llamadas_maquina.reset:=reset_freekick;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
@@ -482,8 +484,13 @@ if main_vars.tipo_maquina=274 then begin
   iniciar_video(256,224);
   main_screen.rot90_screen:=true;
 end else iniciar_video(224,256);
-if main_vars.tipo_maquina=273 then clock:=3072000
-  else clock:=3000000;
+if main_vars.tipo_maquina=273 then begin
+  clock:=3072000;
+  llamadas_maquina.fps_max:=60.836502
+end else begin
+  clock:=3000000;
+  llamadas_maquina.fps_max:=59.410646;
+end;
 //Main CPU
 z80_0:=cpu_z80.create(clock,263);
 z80_0.init_sound(freekick_sound_update);
@@ -655,15 +662,6 @@ set_pal(colores,$200);
 //final
 reset_freekick;
 iniciar_freekick:=true;
-end;
-
-procedure cargar_freekick;
-begin
-  llamadas_maquina.iniciar:=iniciar_freekick;
-  llamadas_maquina.bucle_general:=freekick_principal;
-  llamadas_maquina.reset:=reset_freekick;
-  if main_vars.tipo_maquina=273 then llamadas_maquina.fps_max:=60.836502
-    else llamadas_maquina.fps_max:=59.410646;
 end;
 
 end.

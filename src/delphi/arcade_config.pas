@@ -205,7 +205,7 @@ begin
 case key of
     13:button1Click(nil);
     27:button2click(nil);
-  end;
+end;
 end;
 
 end.

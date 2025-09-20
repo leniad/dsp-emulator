@@ -119,7 +119,7 @@ while EmuStatus=EsRuning do begin
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
-    konamisnd_0.run(f);
+    konamisnd_0.run;
     if f=239 then begin
       update_video_rocnrope;
       if irq_ena then m6809_0.change_irq(ASSERT_LINE);

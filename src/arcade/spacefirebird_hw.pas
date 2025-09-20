@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,mcs48,pal_engine,
      sound_engine,dac,samples;
 
-procedure cargar_spacefb;
+function iniciar_spacefb:boolean;
 
 implementation
 const
@@ -358,6 +358,9 @@ var
   color:tcolor;
 begin
 iniciar_spacefb:=false;
+llamadas_maquina.bucle_general:=spacefb_principal;
+llamadas_maquina.reset:=reset_spacefb;
+llamadas_maquina.fps_max:=61.523438;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
@@ -368,7 +371,7 @@ z80_0.change_io_calls(spacefb_inbyte,spacefb_outbyte);
 //MCU
 mcs48_0:=cpu_mcs48.create(6000000,256,I8035);
 mcs48_0.change_ram_calls(spacefb_snd_getbyte,nil);
-mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport);
+mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport,nil,nil);
 mcs48_0.init_sound(spacefb_sound_update);
 //cargar roms
 if not(roms_load(@memoria,spacefb_rom)) then exit;
@@ -397,14 +400,6 @@ set_pal_color(color,$40);
 //final
 reset_spacefb;
 iniciar_spacefb:=true;
-end;
-
-procedure Cargar_spacefb;
-begin
-llamadas_maquina.iniciar:=iniciar_spacefb;
-llamadas_maquina.bucle_general:=spacefb_principal;
-llamadas_maquina.reset:=reset_spacefb;
-llamadas_maquina.fps_max:=61.523438;
 end;
 
 end.

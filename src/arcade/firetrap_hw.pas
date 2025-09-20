@@ -281,7 +281,7 @@ case direccion of
           msm5205_data:=valor;
         end;
   $2400:begin //sound_flip_flop_w
-          msm_5205_0.reset_w((not(valor) and 1));
+          msm5205_0.reset_w((not(valor) and 1));
 	        sound_irq_enable:=(valor and 2)<>0;
 	        if not(sound_irq_enable) then m6502_0.change_irq(CLEAR_LINE);
         end;
@@ -292,7 +292,7 @@ end;
 
 procedure snd_adpcm;
 begin
-  msm_5205_0.data_w(msm5205_data shr 4);
+  msm5205_0.data_w(msm5205_data shr 4);
 	msm5205_data:=msm5205_data shl 4;
   msm5205_toggle:=msm5205_toggle xor 1;
 	if (sound_irq_enable and (msm5205_toggle=1)) then m6502_0.change_irq(ASSERT_LINE);
@@ -424,7 +424,7 @@ mcs51_0.change_io_calls(in_port0,nil,in_port2,nil,nil,out_port1,nil,out_port3);
 if not(roms_load(mcs51_0.get_rom_addr,firetrap_mcu)) then exit;
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-msm_5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.3,snd_adpcm);
+msm5205_0:=MSM5205_chip.create(12000000 div 32,MSM5205_S48_4B,0.3,snd_adpcm);
 //convertir chars
 if not(roms_load(@memoria_temp,firetrap_char)) then exit;
 init_gfx(0,8,8,$200);

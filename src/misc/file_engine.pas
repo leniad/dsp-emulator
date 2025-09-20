@@ -28,10 +28,10 @@ function read_file(nombre_file:string;donde:pbyte;var longitud:integer):boolean;
 function write_file(nombre_file:string;donde:pbyte;longitud:integer):boolean;
 function file_name_only(cadena:string):string;
 //Parte ZIP
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
-function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
+function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
+function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
 //Parte ZLIB
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
 procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:pointer;var out_size:integer);
@@ -93,7 +93,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.SG1000:=fich_ini.readString('Dir','SG1000',directory.Base+'sg1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.gg:=fich_ini.readString('Dir','gg',directory.Base+'gg'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.scv:=fich_ini.readString('Dir','scv',directory.Base+'scv'+main_vars.cadena_dir)+main_vars.cadena_dir;
-  Directory.Coleco_snap:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.coleco:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.spectrum_48:=fich_ini.ReadString('Dir','spectrum_rom_48',directory.Base+'roms'+main_vars.cadena_dir+'spectrum.zip');
   Directory.spectrum_128:=fich_ini.ReadString('Dir','spectrum_rom_128',directory.Base+'roms'+main_vars.cadena_dir+'spec128.zip');
   Directory.spectrum_3:=fich_ini.ReadString('Dir','spectrum_rom_plus3',directory.Base+'roms'+main_vars.cadena_dir+'plus3.zip');
@@ -106,6 +106,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.amstrad_rom:=fich_ini.readString('dir','Amstrad_ROM_dir',directory.Base+'snap'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_tap:=fich_ini.readString('dir','c64_tap',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_disk:=fich_ini.readString('dir','c64_disk',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.oric_tap:=fich_ini.readString('dir','oric_tap',directory.Base+'oric'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.pv1000:=fich_ini.readString('dir','pv1000',directory.Base+'pv1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.pv2000:=fich_ini.readString('dir','pv2000',directory.Base+'pv2000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
@@ -138,9 +141,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   cpc_crt.color_monitor:=fich_ini.ReadInteger('cpc','cpccolor',1)=1;
   cpc_crt.bright:=fich_ini.ReadInteger('cpc','cpcbright',1);
   //Configuracion SMS
-  sms_model:=fich_ini.ReadInteger('sms','model',1);
+  sms_0.model:=fich_ini.ReadInteger('sms','model',1);
   //Configuracion GB
-  gb_palette:=fich_ini.ReadInteger('gb','palette',0);
+  gb_0.palette:=fich_ini.ReadInteger('gb','palette',0);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
@@ -214,7 +217,7 @@ end else begin
   Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
   Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
   Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
-  Directory.Coleco_snap:=directory.Base+'coleco'+main_vars.cadena_dir;
+  Directory.coleco:=directory.Base+'coleco'+main_vars.cadena_dir;
   Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
   Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
   Directory.gg:=directory.base+'gg'+main_vars.cadena_dir;
@@ -237,6 +240,9 @@ end else begin
   Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
   Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
   Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
+  Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
+  Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
+  Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
   sound_status.hay_sonido:=true;
@@ -262,9 +268,9 @@ end else begin
   cpc_crt.color_monitor:=true;
   cpc_crt.bright:=1;
   //Configuracion basica SMS
-  sms_model:=0;
+  sms_0.model:=0;
   //Config GB
-  gb_palette:=0;
+  gb_0.palette:=0;
   //Teclas
   arcade_input.nup[0]:=KEYBOARD_UP;
   arcade_input.ndown[0]:=KEYBOARD_DOWN;
@@ -338,7 +344,7 @@ if ((Directory.sms='') or (directory.sms=main_vars.cadena_dir)) then Directory.s
 if ((Directory.sg1000='') or (directory.sg1000=main_vars.cadena_dir)) then Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
 if ((Directory.gg='') or (directory.gg=main_vars.cadena_dir)) then Directory.gg:=directory.base+'gg'+main_vars.cadena_dir;
 if ((Directory.scv='') or (directory.scv=main_vars.cadena_dir)) then Directory.scv:=directory.base+'scv'+main_vars.cadena_dir;
-if ((Directory.coleco_snap='') or (directory.coleco_snap=main_vars.cadena_dir)) then Directory.coleco_snap:=directory.base+'coleco'+main_vars.cadena_dir;
+if ((Directory.coleco='') or (directory.coleco=main_vars.cadena_dir)) then Directory.coleco:=directory.base+'coleco'+main_vars.cadena_dir;
 if ((Directory.spectrum_image='') or (directory.spectrum_image=main_vars.cadena_dir)) then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
 if ((Directory.qsnapshot='') or (directory.qsnapshot=main_vars.cadena_dir)) then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
 if ((Directory.spectrum_48='') or (directory.spectrum_48=main_vars.cadena_dir)) then Directory.spectrum_48:=directory.base+'roms'+main_vars.cadena_dir+'spectrum.zip';
@@ -354,9 +360,12 @@ if ((Directory.spectrum_disk='') or (directory.spectrum_disk=main_vars.cadena_di
 if ((Directory.amstrad_tap='') or (directory.amstrad_tap=main_vars.cadena_dir)) then Directory.amstrad_tap:=directory.base+'cdt'+main_vars.cadena_dir;
 if ((Directory.amstrad_disk='') or (directory.amstrad_disk=main_vars.cadena_dir)) then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
 if ((Directory.amstrad_snap='') or (directory.amstrad_snap=main_vars.cadena_dir)) then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
-if ((Directory.amstrad_rom='') or( directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
-if ((Directory.c64_tap='') or( directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
-if ((Directory.c64_disk='') or( directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
+if ((Directory.amstrad_rom='') or (directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
+if ((Directory.c64_tap='') or (directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
+if ((Directory.c64_disk='') or (directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
+if ((Directory.oric_tap='') or (directory.oric_tap=main_vars.cadena_dir)) then Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
+if ((Directory.pv1000='') or (directory.pv1000=main_vars.cadena_dir)) then Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
+if ((Directory.pv2000='') or (directory.pv2000=main_vars.cadena_dir)) then Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
 end;
 
 function test_dir(cadena:string):string;
@@ -392,7 +401,7 @@ fich_ini.Writestring('dir','gg',test_dir(Directory.gg));
 fich_ini.Writestring('dir','scv',test_dir(Directory.scv));
 fich_ini.Writestring('dir','qsnapshot',test_dir(Directory.qsnapshot));
 fich_ini.Writestring('dir','GameBoy',test_dir(Directory.GameBoy));
-fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.coleco_snap));
+fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.coleco));
 fich_ini.Writestring('dir','spectrum_rom_48',test_dir(Directory.spectrum_48));
 fich_ini.Writestring('dir','spectrum_rom_128',test_dir(Directory.spectrum_128));
 fich_ini.Writestring('dir','spectrum_rom_plus3',test_dir(Directory.spectrum_3));
@@ -406,6 +415,9 @@ fich_ini.Writestring('dir','ams_snap',test_dir(Directory.amstrad_snap));
 fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
 fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
+fich_ini.Writestring('dir','oric_tap',test_dir(Directory.oric_tap));
+fich_ini.Writestring('dir','pv1000',test_dir(Directory.pv1000));
+fich_ini.Writestring('dir','pv2000',test_dir(Directory.pv2000));
 //Config general
 fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.hay_sonido));
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
@@ -432,9 +444,9 @@ fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
 fich_ini.WriteInteger('cpc','cpccolor',byte(cpc_crt.color_monitor));
 fich_ini.WriteInteger('cpc','cpcbright',cpc_crt.bright);
 //Config SMS
-fich_ini.WriteInteger('sms','model',sms_model);
+fich_ini.WriteInteger('sms','model',sms_0.model);
 //Config GB
-fich_ini.WriteInteger('gb','palette',gb_palette);
+fich_ini.WriteInteger('gb','palette',gb_0.palette);
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);
@@ -587,7 +599,7 @@ write_file:=true;
 end;
 
 //Parte ZIP
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
+function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud:integer;crc:dword;warning:boolean):boolean;
 var
   f:integer;
   extension,extension2:string;
@@ -669,7 +681,7 @@ if (warning and not(res)) then begin
 end;
 end;
 
-function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
+function find_next_file_zip(var nombre_file:string;var longitud:integer;crc:dword):boolean;
 var
   f:integer;
   extension,extension2:string;
@@ -739,7 +751,7 @@ find_next_file_zip:=false;
 {$endif}
 end;
 
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
+function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
 var
   f:word;
   find:boolean;
@@ -810,7 +822,7 @@ begin
 load_file_from_zip:=true;
 end;
 
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword;warning:boolean=true):boolean;
 var
   f:word;
   find:boolean;
@@ -825,7 +837,7 @@ begin
   load_file_from_zip_crc:=false;
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
-    MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
+    if warning then MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
     principal1.Enabled:=true;
     exit;
   end;

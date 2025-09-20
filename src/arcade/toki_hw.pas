@@ -2,8 +2,8 @@ unit toki_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,m68000,main_engine,controls_engine,gfx_engine,ym_3812,oki6295,
-     seibu_sound,rom_engine,pal_engine,sound_engine,misc_functions;
+     m68000,main_engine,controls_engine,gfx_engine,seibu_sound,rom_engine,
+     pal_engine,sound_engine,misc_functions;
 
 function iniciar_toki:boolean;
 
@@ -36,9 +36,6 @@ var
  rom:array[0..$2ffff] of word;
  ram:array[0..$7fff] of word;
  sprite_ram:array[0..$3ff] of word;
- sound_rom:array[0..1,0..$7fff] of byte;
- decrypt:array[0..$1fff] of byte;
- snd_bank:byte;
  scroll_x2_tmp,scroll_x1,scroll_y1,scroll_y2:word;
  scroll_x2:array[0..$ff] of word;
  prioridad_pant:boolean;
@@ -122,8 +119,8 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $0800);
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or $1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
+  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or $2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
 end;
@@ -136,16 +133,15 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
-///PRECAUCION EL Z80 ES EL 1, PORQUE EL SISTEMA DE SONIDO LO COGE ASI, HAY QUE CAMBIARLO...
-frame_s:=z80_1.tframes;
+frame_s:=seibu_snd_0.z80.tframes;
 while EmuStatus=EsRuning do begin
    for f:=0 to $ff do begin
      //Main CPU
      m68000_0.run(frame_m);
      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      //Sound CPU
-     z80_1.run(frame_s);
-     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+     seibu_snd_0.z80.run(frame_s);
+     frame_s:=frame_s+seibu_snd_0.z80.tframes-seibu_snd_0.z80.contador;
      if f=239 then begin
         m68000_0.irq[1]:=HOLD_LINE;
         update_video_toki;
@@ -164,7 +160,7 @@ case direccion of
     $0..$5ffff:toki_getword:=rom[direccion shr 1];
     $60000..$6dfff,$6e800..$6ffff:toki_getword:=ram[(direccion and $ffff) shr 1];
     $6e000..$6e7ff:toki_getword:=buffer_paleta[(direccion and $7ff) shr 1];
-    $80000..$8000d:toki_getword:=seibu_get(direccion and $e);
+    $80000..$8000d:toki_getword:=seibu_snd_0.get((direccion and $e) shr 1);
     $c0000:toki_getword:=marcade.dswa;
     $c0002:toki_getword:=marcade.in0;
     $c0004:toki_getword:=marcade.in1;
@@ -172,7 +168,6 @@ end;
 end;
 
 procedure toki_putword(direccion:dword;valor:word);
-
 procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
@@ -187,7 +182,6 @@ begin
     768..1023:buffer_color[((numero shr 4) and $f)+$20]:=true;
   end;
 end;
-
 begin
 case direccion of
   0..$5ffff:; //ROM
@@ -208,7 +202,7 @@ case direccion of
                     ram[(direccion and $ffff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
-  $80000..$8000d:seibu_put(direccion and $e,valor);
+  $80000..$8000d:seibu_snd_0.put((direccion and $e) shr 1,valor);
   $a0000..$a005f:case (direccion and $ff) of
                     $0a:scroll_x1:=(scroll_x1 and $ff) or ((valor and $10) shl 4);
                     $0c:scroll_x1:=(scroll_x1 and $100) or ((valor and $7f) shl 1) or ((valor and $80) shr 7);
@@ -230,73 +224,20 @@ case direccion of
 end;
 end;
 
-function toki_snd_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$1fff:if z80_1.opcode then toki_snd_getbyte:=decrypt[direccion]
-              else toki_snd_getbyte:=mem_snd[direccion];
-  $2000..$27ff:toki_snd_getbyte:=mem_snd[direccion];
-  $4008:toki_snd_getbyte:=ym3812_0.status;
-  $4010:toki_snd_getbyte:=sound_latch[0];
-  $4011:toki_snd_getbyte:=sound_latch[1];
-  $4012:toki_snd_getbyte:=byte(sub2main_pending);
-  $4013:toki_snd_getbyte:=marcade.in2;
-  $6000:toki_snd_getbyte:=oki_6295_0.read;
-  $8000..$ffff:toki_snd_getbyte:=sound_rom[snd_bank,direccion and $7fff];
-end;
-end;
-
-procedure toki_snd_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-  0..$1fff,$8000..$ffff:; //ROM
-  $2000..$27ff:mem_snd[direccion]:=valor;
-  $4000:begin
-          main2sub_pending:=false;
-        	sub2main_pending:=true;
-        end;
-  $4001:;//seibu_update_irq_lines(RESET_ASSERT);
-  $4002:;
-  $4003:seibu_update_irq_lines(RST18_CLEAR);
-  $4007:snd_bank:=valor and 1;
-  $4008:ym3812_0.control(valor);
-  $4009:ym3812_0.write(valor);
-  $4018:sub2main[0]:=valor;
-  $4019:sub2main[1]:=valor;
-  $6000:oki_6295_0.write(valor);
-end;
-end;
-
-procedure toki_sound_update;
-begin
-  ym3812_0.update;
-  oki_6295_0.update;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  if irqstate=0 then seibu_update_irq_lines(RST10_CLEAR)
-    else seibu_update_irq_lines(RST10_ASSERT);
-end;
-
 //Main
 procedure reset_toki;
 begin
  m68000_0.reset;
- z80_1.reset;
- ym3812_0.Reset;
- oki_6295_0.reset;
- seibu_reset;
+ seibu_snd_0.reset;
  reset_audio;
  marcade.in0:=$ffff;
- marcade.in1:=$ff;
- marcade.in2:=0;
+ marcade.in1:=$ffff;
+ seibu_snd_0.input:=0;
  scroll_x1:=0;
  scroll_y1:=0;
  scroll_x2_tmp:=0;
  fillchar(scroll_x2,$100,0);
  scroll_y2:=0;
- snd_bank:=0;
 end;
 
 function iniciar_toki:boolean;
@@ -310,7 +251,6 @@ const
 var
    memoria_temp,ptemp:pbyte;
    f:dword;
-   memoria_temp2:array[0..$1ffff] of byte;
 begin
 llamadas_maquina.bucle_general:=toki_principal;
 llamadas_maquina.reset:=reset_toki;
@@ -328,28 +268,16 @@ getmem(memoria_temp,$100000);
 //Main CPU
 m68000_0:=cpu_m68000.create(10000000,256);
 m68000_0.change_ram16_calls(toki_getword,toki_putword);
-//Sound CPU
-z80_1:=cpu_z80.create(3579545,256);
-z80_1.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
-z80_1.init_sound(toki_sound_update);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,3579545);
-ym3812_0.change_irq_calls(snd_irq);
-oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.40);
-if not(roms_load(@memoria_temp2,toki_adpcm)) then exit;
-ptemp:=oki_6295_0.get_rom_addr;
-for f:=0 to $1ffff do begin
-  ptemp^:=memoria_temp2[BITSWAP24(f,23,22,21,20,19,18,17,16,13,14,15,12,11,10,9,8,7,6,5,4,3,2,1,0)];
-  inc(ptemp);
-end;
-//cargar roms
 if not(roms_load16w(@rom,toki_rom)) then exit;
-//cargar sonido, desencriptar y poner bancos
+//sound
 if not(roms_load(memoria_temp,toki_sound)) then exit;
-decript_seibu_sound(memoria_temp,@decrypt,@mem_snd);
-ptemp:=memoria_temp;
-inc(ptemp,$10000);copymemory(@sound_rom[0,0],ptemp,$8000);
-inc(ptemp,$8000);copymemory(@sound_rom[1,0],ptemp,$8000);
+seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,3579545,256,memoria_temp,true);
+copymemory(@seibu_snd_0.sound_rom[0,0],@memoria_temp[$10000],$8000);
+copymemory(@seibu_snd_0.sound_rom[1,0],@memoria_temp[$18000],$8000);
+if not(roms_load(memoria_temp,toki_adpcm)) then exit;
+ptemp:=seibu_snd_0.oki_6295_get_rom_addr;
+for f:=0 to $1ffff do
+  ptemp[f]:=memoria_temp[BITSWAP24(f,23,22,21,20,19,18,17,16,13,14,15,12,11,10,9,8,7,6,5,4,3,2,1,0)];
 //convertir chars
 if not(roms_load(memoria_temp,toki_char)) then exit;
 init_gfx(0,8,8,4096);

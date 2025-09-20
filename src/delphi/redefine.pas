@@ -113,6 +113,7 @@ type
     procedure Button38Click(Sender: TObject);
     procedure Button39Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
   public
@@ -430,6 +431,15 @@ procedure Tredefine1.Button9Click(Sender: TObject);
 begin
 tecla_leida:=KEYBOARD_8;
 redefine1.close;
+end;
+
+procedure Tredefine1.FormKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+case key of
+    13:button1Click(nil);
+    27:button2click(nil);
+end;
 end;
 
 procedure Tredefine1.FormShow(Sender: TObject);

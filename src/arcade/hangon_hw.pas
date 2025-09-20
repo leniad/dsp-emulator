@@ -395,8 +395,7 @@ begin
 	end;
 end;
 var
-  f,nchar,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
-  color:byte;
+  scroll_x1,scroll_x2,scroll_y1,scroll_y2:word;
 begin
 if not(s16_info.screen_enabled) then begin
   fill_full_screen(5,$2000);

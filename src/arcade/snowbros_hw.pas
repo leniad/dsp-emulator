@@ -43,9 +43,9 @@ procedure eventos_snowbros;
 begin
 if event.arcade then begin
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $feff) else marcade.in1:=(marcade.in1 or $0100);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $Fdff) else marcade.in1:=(marcade.in1 or $0200);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fdff) else marcade.in1:=(marcade.in1 or $0200);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fbff) else marcade.in1:=(marcade.in1 or $0400);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $F7ff) else marcade.in1:=(marcade.in1 or $0800);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7ff) else marcade.in1:=(marcade.in1 or $0800);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $efff) else marcade.in1:=(marcade.in1 or $1000);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
@@ -54,9 +54,9 @@ if event.arcade then begin
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $0100);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $0200);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $feff) else marcade.in2:=(marcade.in2 or $0100);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $Fdff) else marcade.in2:=(marcade.in2 or $0200);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fdff) else marcade.in2:=(marcade.in2 or $0200);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fbff) else marcade.in2:=(marcade.in2 or $400);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7ff) else marcade.in2:=(marcade.in2 or $0800);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7ff) else marcade.in2:=(marcade.in2 or $0800);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $efff) else marcade.in2:=(marcade.in2 or $1000);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $dfff) else marcade.in2:=(marcade.in2 or $2000);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bfff) else marcade.in2:=(marcade.in2 or $4000);

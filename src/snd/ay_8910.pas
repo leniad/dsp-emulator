@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc;
 
 type
   ay8910_chip=class(snd_chip_class)
-        constructor create(clock:integer;type_:byte;amp:single;internal:boolean=false);
+        constructor create(clock:integer;type_:byte;amp:single=1;internal:boolean=false);
         destructor free;
       public
         procedure Write(v:byte);
@@ -99,7 +99,7 @@ begin
   self.UpdateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
 end;
 
-constructor ay8910_chip.create(clock:integer;type_:byte;amp:single;internal:boolean=false);
+constructor ay8910_chip.create(clock:integer;type_:byte;amp:single=1;internal:boolean=false);
 begin
   init_table;
   self.clock:=clock;

@@ -463,7 +463,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@brkthru_dip_b;
      end;
   90:begin
-        main_screen.rol90_screen:=true;
+        main_screen.rot270_screen:=true;
         m6809_0.change_ram_calls(darwin_getbyte,darwin_putbyte);
         //cargar roms y ponerlas en su sitio
         if not(roms_load(@memoria_temp,darwin_rom)) then exit;

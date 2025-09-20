@@ -1,31 +1,33 @@
 object load_spec: Tload_spec
   Left = 263
-  Height = 471
+  Height = 589
   Top = 161
-  Width = 611
+  Width = 764
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Spectrum Tape/Snapshot Load'
-  ClientHeight = 471
-  ClientWidth = 611
+  ClientHeight = 589
+  ClientWidth = 764
+  DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
+  KeyPreview = True
   OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
-  LCLVersion = '1.7'
+  LCLVersion = '2.2.6.0'
   object FileListBox1: TFileListBox
-    Left = 24
-    Height = 410
-    Top = 48
-    Width = 283
+    Left = 30
+    Height = 512
+    Top = 60
+    Width = 354
     Directory = 'C:\Users\Dani\Desktop'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -37,14 +39,14 @@ object load_spec: Tload_spec
     TabOrder = 0
   end
   object Button1: TButton
-    Left = 472
-    Height = 39
-    Top = 416
-    Width = 121
+    Left = 590
+    Height = 49
+    Top = 520
+    Width = 151
     Caption = 'Button1'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -53,14 +55,14 @@ object load_spec: Tload_spec
     TabOrder = 1
   end
   object Button2: TButton
-    Left = 328
-    Height = 39
-    Top = 416
-    Width = 121
+    Left = 410
+    Height = 49
+    Top = 520
+    Width = 151
     Caption = 'Button2'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -69,23 +71,23 @@ object load_spec: Tload_spec
     TabOrder = 2
   end
   object GroupBox1: TGroupBox
-    Left = 313
-    Height = 265
-    Top = 48
-    Width = 292
+    Left = 391
+    Height = 331
+    Top = 60
+    Width = 365
     Caption = 'Info'
-    ClientHeight = 247
-    ClientWidth = 288
+    ClientHeight = 309
+    ClientWidth = 361
     TabOrder = 3
     object Label1: TLabel
-      Left = 26
-      Height = 13
+      Left = 32
+      Height = 17
       Top = -2
-      Width = 49
+      Width = 61
       Caption = 'FORMAT: '
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -93,14 +95,14 @@ object load_spec: Tload_spec
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 26
-      Height = 13
-      Top = 13
-      Width = 41
+      Left = 32
+      Height = 17
+      Top = 16
+      Width = 54
       Caption = 'MODEL: '
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -108,14 +110,14 @@ object load_spec: Tload_spec
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 81
-      Height = 13
+      Left = 101
+      Height = 16
       Top = -2
-      Width = 150
+      Width = 188
       AutoSize = False
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -123,14 +125,14 @@ object load_spec: Tload_spec
       ParentFont = False
     end
     object Label4: TLabel
-      Left = 81
-      Height = 13
-      Top = 13
-      Width = 156
+      Left = 101
+      Height = 16
+      Top = 16
+      Width = 195
       AutoSize = False
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -138,33 +140,33 @@ object load_spec: Tload_spec
       ParentFont = False
     end
     object GroupBox2: TGroupBox
-      Left = 7
-      Height = 219
-      Top = 25
-      Width = 278
+      Left = 9
+      Height = 274
+      Top = 31
+      Width = 348
       Caption = 'Screen View'
-      ClientHeight = 201
-      ClientWidth = 274
+      ClientHeight = 252
+      ClientWidth = 344
       TabOrder = 0
       object Image1: TImage
-        Left = 3
-        Height = 197
+        Left = 4
+        Height = 246
         Top = 0
-        Width = 264
+        Width = 330
       end
     end
   end
   object DirectoryEdit1: TDirectoryEdit
-    Left = 24
-    Height = 21
-    Top = 16
-    Width = 283
+    Left = 30
+    Height = 25
+    Top = 20
+    Width = 354
     ShowHidden = False
-    ButtonWidth = 23
+    ButtonWidth = 29
     NumGlyphs = 1
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft

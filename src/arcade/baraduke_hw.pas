@@ -220,10 +220,11 @@ end;
 procedure baraduke_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$1fff:begin
-              memoria[direccion]:=valor;
-              if direccion=$1ff2 then copy_sprites:=true;
-           end;
+  0..$1ff1,$1ff3..$1fff:memoria[direccion]:=valor;
+  $1ff2:begin
+             memoria[direccion]:=valor;
+             copy_sprites:=true;
+        end;
   $2000..$2fff:if memoria[direccion]<>valor then begin
               gfx[1].buffer[(direccion and $fff) shr 1]:=true;
               memoria[direccion]:=valor;

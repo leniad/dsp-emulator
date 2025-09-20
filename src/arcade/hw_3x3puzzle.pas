@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine;
 
-procedure cargar_puzz3x3;
+function iniciar_puzz3x3:boolean;
 
 implementation
 const
@@ -269,6 +269,8 @@ begin
 end;
 begin
 iniciar_puzz3x3:=false;
+llamadas_maquina.bucle_general:=puzz3x3_principal;
+llamadas_maquina.reset:=reset_puzz3x3;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_mod_scroll(1,512,512,511,512,512,511);
@@ -337,13 +339,6 @@ end;
 freemem(memoria_temp);
 reset_puzz3x3;
 iniciar_puzz3x3:=true;
-end;
-
-procedure cargar_puzz3x3;
-begin
-llamadas_maquina.bucle_general:=puzz3x3_principal;
-llamadas_maquina.iniciar:=iniciar_puzz3x3;
-llamadas_maquina.reset:=reset_puzz3x3;
 end;
 
 end.

@@ -1,5 +1,4 @@
 unit lr35902;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,timer_engine,dialogs,sysutils,vars_hide,cpu_misc;
@@ -14,7 +13,6 @@ type
         bc,de,hl:parejas;
         f:band_lr;
   end;
-  preg_lr=^reg_lr;
   cpu_lr=class(cpu_class)
         constructor Create(clock:dword;frames_div:word);
         destructor free;
@@ -25,9 +23,11 @@ type
         vblank_req,lcdstat_req,timer_req,joystick_req,serial_req:boolean;
         procedure reset;
         procedure run(maximo:single);
-        procedure set_internal_r(reg:preg_lr);
+        procedure set_internal_r(reg:reg_lr);
+        function save_snapshot(datos:pbyte):word;
+        procedure load_snapshot(datos:pbyte);
       private
-        r:preg_lr;
+        r:reg_lr;
         after_ei,halt:boolean;
         function read_word(direccion:word):word;
         function inc_8bit(val:byte):byte;
@@ -56,6 +56,7 @@ var
   lr35902_0:cpu_lr;
 
 implementation
+uses gb;
 
 const
   gb_t:array[0..255] of byte=(
@@ -95,8 +96,7 @@ const
 
 constructor cpu_lr.create(clock:dword;frames_div:word);
 begin
-getmem(self.r,sizeof(reg_lr));
-fillchar(self.r^,sizeof(reg_lr),0);
+fillchar(self.r,sizeof(reg_lr),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
@@ -104,19 +104,20 @@ end;
 
 destructor cpu_lr.free;
 begin
-freemem(self.r);
 end;
 
 procedure cpu_lr.reset;
 begin
   self.speed:=0;
   self.change_speed:=false;
+  self.tframes:=(GB_CLOCK/154)/llamadas_maquina.fps_max;
   r.sp:=0;
   r.pc:=0;
   r.bc.w:=0;
   r.de.w:=0;
   r.hl.w:=0;
-  self.ime:=true;
+  //Es es importante! Hook depede de ello
+  self.ime:=false;
   self.change_irq(CLEAR_LINE);
   self.after_ei:=false;
   r.a:=0;
@@ -137,9 +138,66 @@ begin
   self.serial_req:=false;
 end;
 
-procedure cpu_lr.set_internal_r(reg:preg_lr);
+function cpu_lr.save_snapshot(datos:pbyte):word;
+var
+  temp:pbyte;
+  buffer:array[0..15] of byte;
+  size:dword;
 begin
-  copymemory(self.r,reg,sizeof(reg_lr));
+  temp:=datos;
+  copymemory(temp,@self.r,sizeof(reg_lr));
+  size:=sizeof(reg_lr);
+  inc(temp,sizeof(reg_lr));
+  buffer[0]:=byte(self.after_ei);
+  buffer[1]:=byte(self.halt);
+  buffer[2]:=self.speed;
+  buffer[3]:=byte(self.ime);
+  buffer[4]:=byte(self.change_speed);
+  buffer[5]:=byte(self.changed_speed);
+  buffer[6]:=byte(self.vblank_ena);
+  buffer[7]:=byte(self.lcdstat_ena);
+  buffer[8]:=byte(self.timer_ena);
+  buffer[9]:=byte(self.joystick_ena);
+  buffer[10]:=byte(self.serial_ena);
+  buffer[11]:=byte(self.vblank_req);
+  buffer[12]:=byte(self.lcdstat_req);
+  buffer[13]:=byte(self.timer_req);
+  buffer[14]:=byte(self.joystick_req);
+  buffer[15]:=byte(self.serial_req);
+  copymemory(temp,@buffer[0],16);
+  save_snapshot:=size+16;
+end;
+
+procedure cpu_lr.load_snapshot(datos:pbyte);
+var
+  temp:pbyte;
+  buffer:array[0..15] of byte;
+begin
+  temp:=datos;
+  copymemory(@self.r,temp,sizeof(reg_lr));
+  inc(temp,sizeof(reg_lr));
+  copymemory(@buffer[0],temp,16);
+  self.after_ei:=buffer[0]<>0;
+  self.halt:=buffer[1]<>0;
+  self.speed:=buffer[2];
+  self.ime:=buffer[3]<>0;
+  self.change_speed:=buffer[4]<>0;
+  self.changed_speed:=buffer[5]<>0;
+  self.vblank_ena:=buffer[6]<>0;
+  self.lcdstat_ena:=buffer[7]<>0;
+  self.timer_ena:=buffer[8]<>0;
+  self.joystick_ena:=buffer[9]<>0;
+  self.serial_ena:=buffer[10]<>0;
+  self.vblank_req:=buffer[11]<>0;
+  self.lcdstat_req:=buffer[12]<>0;
+  self.timer_req:=buffer[13]<>0;
+  self.joystick_req:=buffer[14]<>0;
+  self.serial_req:=buffer[15]<>0;
+end;
+
+procedure cpu_lr.set_internal_r(reg:reg_lr);
+begin
+  copymemory(@self.r,@reg,sizeof(reg_lr));
 end;
 
 function cpu_lr.read_word(direccion:word):word;
@@ -491,7 +549,7 @@ case instruccion of
   $02:self.putbyte(r.bc.w,r.a);  //ld (bc),a
   $03:r.bc.w:=r.bc.w+1; //inc bc
   $04:r.bc.h:=inc_8bit(r.bc.h); //inc b
-    $05:r.bc.h:=dec_8bit(r.bc.h); //dec b
+  $05:r.bc.h:=dec_8bit(r.bc.h); //dec b
   $06:begin //ld b,nn
         r.bc.h:=self.getbyte(r.pc);
         r.pc:=r.pc+1;
@@ -525,10 +583,14 @@ case instruccion of
         r.f.h:=false;
         r.f.n:=false;
       end;
-  $10:if self.change_speed then begin  //stop
-        self.speed:=self.speed xor 1;
-        self.change_speed:=false;
-        self.changed_speed:=true;
+  $10:begin
+        self.getbyte(self.r.pc);
+        r.pc:=r.pc+1;
+        if self.change_speed then begin  //stop
+          self.speed:=self.speed xor 1;
+          self.change_speed:=false;
+          self.changed_speed:=true;
+        end;
       end;
   $11:begin //ld de,nnnn
         r.de.w:=read_word(r.pc);
@@ -1444,7 +1506,7 @@ case instruccion of
         self.putbyte(r.sp+1,r.pc shr 8);
         r.pc:=$38;
       end;
-    else MessageDlg('Instruccion desconocida LR35902. PC= '+inttohex(oldpc,4)+' - '+inttohex(instruccion,2), mtInformation,[mbOk], 0);
+    else MessageDlg('Instruccion desconocida LR35902. oldPC= '+inttohex(oldpc,4)+' - PC= '+inttohex(r.pc,4)+' - '+inttohex(instruccion,2), mtInformation,[mbOk], 0);
 end; //Del case
 tempw:=gb_t[instruccion]+self.estados_demas;
 for tempb:=1 to (tempw div 4) do begin
@@ -1454,5 +1516,4 @@ end;
 timers.update(self.contador-old_contador,self.numero_cpu);
 end; //Del while
 end;
-
 end.

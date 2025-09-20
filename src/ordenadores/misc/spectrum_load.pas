@@ -26,6 +26,7 @@ procedure spectrum_load_exit;
 procedure spectrum_load_close;
 
 implementation
+uses principal;
 
 procedure spectrum_load_init;
 begin
@@ -521,7 +522,7 @@ if extension='CSW' then begin
   cinta:=true;
 end;
 if extension='WAV' then begin
-  resultado:=abrir_wav(datos,file_size);
+  resultado:=abrir_wav(datos,file_size,3500000);
   cinta:=true;
 end;
 if ((extension='Z80') or (extension='DSP')) then resultado:=abrir_z80(datos,file_size,extension='DSP');
@@ -535,6 +536,7 @@ if not(resultado) then begin
 end else begin
     //Si todo ha ido bien y no hay ROM, devolver la original!
     if not(rom_cambiada_48) then copymemory(@memoria[0],@mem_snd[0],$4000);
+    principal1.BitBtn14.Enabled:=false;
     if cinta then begin
       tape_window1.edit1.Text:=nombre;
       tape_window1.show;
@@ -542,6 +544,15 @@ end else begin
       tape_window1.BitBtn2.Enabled:=false;
       cadena:=extension+': '+nombre;
       cinta_tzx.name:=cadena;
+      principal1.BitBtn14.Enabled:=true;
+      principal1.BitBtn14.Glyph:=nil;
+      if extension='TAP' then begin
+        principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
+        var_spectrum.fastload:=true;
+      end else if ((extension='TZX') or (extension='PZX')) then begin
+                  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+                  var_spectrum.fastload:=false;
+               end;
     end else begin  //Snapshot
       main_screen.rapido:=false;
       cadena:=extension+': '+nombre;

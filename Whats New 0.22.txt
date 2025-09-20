@@ -1,0 +1,255 @@
+What's New!!! DSP Emulator
+
+DSP 0.22 15/11/23
+********
+-General
+    +Addeded documentation, 'DSP small guide' and 'DSP how to compile'
+    +New main Snapshot system
+        -New unified ROM/game/snapshot/tape load/save system
+        -New unified snapshot data extractor system
+    +CPU
+        -Added a new counter to count all timings of the CPU, used in Asteroids, Circus Charlie, Gyruss, Hypersports, and many others...
+        -M6502
+            +Fixed timings before internal timer call
+            +Added some opcodes for 2xNOP and 3xNOP
+        -NEC V20/V30/V33
+            +Implemented sound timers
+            +Added NMI
+            +Added many EA types
+            +Fixed PUSH/POP CPU flags
+            +Added opcodes $0f18, $0f19, $0f1a, $0f1b, $0f1c, $0f1d, $31, $34, $68, $6a, $6b, $82, $8308, $8320, $8330, $8d, $91, $92, $93, $94, $95, $97, $c008, $c020, $c028, $c120, $c128, $c8, $c9, $d110, $d200, $d220, $d228, $d3, $e3, $e4, $ec, $ee, $ef, $f2a4, $f2a5, $f2af, $f618, $f620, $f630, $f720, $f728, $f730 and $f738
+        -Z80
+            +Added (again) functions to change CPU timmings
+            +Fixed some timmings and timming calculation
+            +Fixed timings before internal timer call
+            +Some updates to internal procedures
+        -LR35902: 
+            +Added snapshots
+            +Change ime flag to 'disabled' on reset (Fixes Hook)
+            +Fixed HALT opcode, fixes many Gameboy Color Konami games
+        -MCS48
+            +Added external IO, and fixed internal IO
+            +Fixed conditional jumps
+            +Fixed ROM reads with and without PC increment
+            +Fixed CPU clock init
+            +Fixed IRQs
+            +Added opcodes $25, $45, $70, $71 and $90
+            +Fixed opcodes $80, $81, $a3, $b3 and $e3
+        -NA2A03
+            +Added snapshots
+            +Rewrited sound part
+            +Fixed audio buffer
+            +Fixed dpcm sound... But clicks a lot
+        -UPD7810: Added snapshots
+    +Video
+        -Sega VDP (SMS/GG): Added snapshots
+        -Changed function rol90 name to rot270
+        -Added rot180 to rotate screen 180 degrees
+        -Fixed main screen flip x and flip y, now can be used both
+    +Sound
+        -UPD1771: Added snapshots 
+        -Konami Sound: video line not needed any more
+        -Samples: 
+            +Added volume
+            +Uploaded samples for Bosconian and Gaplus
+        -Seibu sound
+            +Rewrited and converted to class
+            +Added internal Z80, ADPCM, sound chip and controls
+            +Changed CPU mappers to internal
+            +Removed fake adpcm, using standar MSM5205
+        -MSM5205: converted to class
+        -OKI6295: Fixed playing voices
+    +Devices
+        -VIA6522: Added device
+        -Namco IO 56XX-58XX-59XX
+            +Changed to classes
+            +Added IO 59XX
+            +Implemented timers to internal
+        -I2Cmem: added i2c eeproms, with snapshots support
+        -Eeprom: 
+            +Mix two source files
+            +Converted to classes
+            +Fixed 16bits writes
+            +Added functions to load/save content
+            +Added E93CXX devices
+    +Tape System
+        -Added procedures to call before play and after stop tape
+        -Fixed WAV format tapes loading
+        -Added Oric TAP file format support
+        -Fixed main speed changes when a tape is playing
+    +Disk: added DSK format for Oric disks
+    +GFX: fixed gfx rotate when graphics are not square
+    +File engine: changed CRC variable to unsigned 32bits
+    +Misc
+        +Fixed press 'ESC' for close pop-up windows
+        +Fixed some spellings
+        +Some cosmetical changes
+        +Fixed controls, when pressing left+right or up+down at the same time
+        +Started to implement parent drivers (ROMs loading and ROMs export), for example Xevious and Super Xevious, they share ROMs, but they are not the same arcade.
+        +Updated Preview Images
+-Spectrum
+    +Fixed screen refresh when changed screen resolution
+    +Changed 'fast load' button
+        -Disabled if no tape is loaded
+        -Set 'on' by default when 'TAP' file is loaded
+        -Set 'off' by default when 'TXZ' file is loaded
+-Amstrad CPC
+    +Added the new ROM/tape/snapshot load system
+    +Enabled Z80 timings (fixes Saboteur II and many others)
+    +Rewrited video to update screen pixel by pixel
+    +Fixed tape loading with new Z80 timings
+    +Fixed keyboard matrix reads (Fixes 'Night Shade')
+-Commodore 64
+    +Added the new ROM/tape/snapshot load system
+    +Swapped joystick 0 and joystick 1
+    +Added F1 to start/stop tape loading
+-Chip 8
+    +Added the new ROM load game system
+    +Added snapshots
+-Coleco
+    +Moved to new snapshot system
+    +Added eeprom to snapshot (if present)
+    +Black Onix: Added 24C08 eeprom
+    +Boxxled: Added 24C256 eeprom
+-GameBoy/GameBoy Color
+    +Added the new ROM load game system
+    +Added snapshots
+    +Modernized mappers, better mapper reset
+    +Changed a bit screen timings
+    +Added 'Wisdom Treee' mapper
+    +Added partial mapper MBC6
+-NES
+    +Added snapshots
+    +Modernized mappers
+    +Added black&white palette
+    +Changed a bit screen timings
+    +Added the new ROM load game system
+    +Fixed mapper 9
+    +Added partial mapper 10 (thanks to Neville)
+-Sega SG-1000
+    +Added the new ROM load game system
+    +Added snapshots
+    +Added a new game file format '.MV'
+    +Safari Hunting: Fixed cartridge mirroring, not works
+-Sega GameGear
+    +Added the new ROM load game system
+    +Fixed CPU and sound creation order (emulator can crash)
+    +Added snapshots
+-Sega Master System
+    +Added the new ROM load game system
+    +Added snapshots
+    +Fixed BIOS+Game loading, now supports all extra BIOS+Game for all systems
+    +Fixed international detection, now detects the system via $3F port
+    +Fixed model change NTSC/PAL
+    +Fixed CPU and sound creation order (emulator can crash)
+-SuperCassete Vision
+    +Added the new ROM load game system
+    +Added snapshots
+    +Fixed ROM loading, all available games now works
+-Casio PV-1000
+    +Added new console, supports sound, controls
+    +Added snapshots
+    +All available games working
+-Casio PV-2000
+    +Added new console, supports sound, controls, keyboard...
+    +Added snapshots
+    +All available games working
+-Oric HW
+    +Added support for tape loading, AY-8910 sound and keyboard
+        -Oric 1: added driver with sound
+        -Oric Atmos: added driver with sound
+    +Added preliminary disc support, not working
+-Bloodbros HW
+    +Added new seibu sound system
+-Cabal
+    +Added new seibu sound system
+-Centipede HW
+    +Centipede
+        -Fixed dip
+        -Fixed video
+        -Fixed controls
+        -Fixed colors, now using indirect palette
+    +Millipede: added driver with sound
+-Circus Charlie
+    +Fixed sprites
+-Diverboy
+    +Added driver with sound
+-Donkey Kong HW
+    +Fixed screen flip
+-Flower
+    +Enhanced IRQs
+-Galaga HW
+    +Added DIPs to all drivers
+    +Added all remain controls to all drivers
+    +DigDug: Simplified background render 
+    +Super Xevious: Added driver with sound
+-Galaxian HW
+    +Added DIPs to all drivers
+    +Added all remain controls to all drivers
+    +Amidar
+        -Updated ROMs
+        -Added background color
+-Gaplus
+    +Added driver with sound and samples
+-Gun.Smoke HW
+    +Added sound CPU reset line
+-Irem M63 HW
+    +Wily Tower: added driver with sound
+    +Fighting Basketball: added driver with sound
+-Legendary Wings HW
+    +Section Z: fixed audio
+-Mappy HW
+    +Added DIPs to all drivers
+    +Added all remain controls to all drivers
+    +Changed to new Namco 5X IO driver
+    +Grobda: added driver with sound
+    +Pac & Pal: Added driver with sound
+-Mega Sys 1 HW
+    +64th Street: fixed sprites
+-Missile Command HW
+    +Missile Command: added driver with sound
+    +Super Missile Attack: added driver with sound
+-Mug Smashers
+    +Added driver with sound
+-Pacland
+    +Added DIPs switches
+    +Fixed a stupid bug with palette change
+    +Change screen parameters
+-Pacman HW
+    +Birdiy: added driver with sound
+-Raiden
+    +Added new driver, but have some CPU bugs, sounds fails and controls are not working
+-Sega System 1/2 HW
+    +Changed Z80 timings, fixes Pitfall II intro
+-Shadow Warriors HW
+    +Shadow Warriors: added driver with sound
+    +Wild Fang/Tecmo knight: added driver with sound
+-Steel Force HW
+    +Steel Force: added driver with sound
+    +Twin Brats: added driver with sound
+-Taito SJ HW
+    +Added DIPs
+    +Updated to use gfx buffers
+    +Fixed controls, added buttons
+    +Optimized maps
+    +Fixed sound NMI
+    +Fixed DAC
+    +Elevator Action: updated ROMs
+-Time Pilot
+    +Added DIPs
+    +Added video enable
+-Toki
+    +Added new seibu sound system
+-Twins HW
+    +Twins: added driver with sound
+    +Twins (Electronic Devices): added driver with sound
+    +Hot Block - Tetrix II: added driver with sound
+-Wardner
+    +Fixed DIPs
+-Zaxxon HW
+    +Fixed sound
+    +Fixed DIPs
+    +Fixed video
+    +Added samples volume
+    +Super Zaxxon: added driver with sound
+    +Future Spy: added driver with sound

@@ -246,8 +246,12 @@ end;
 procedure TConfigSP.Button3Click(Sender: TObject);
 var
   file_name:string;
+  tempb:byte;
 begin
-if OpenRom(StROM,file_name) then Edit1.Text:=file_name;
+tempb:=main_vars.system_type;
+main_vars.system_type:=SROM;
+if OpenRom(file_name) then Edit1.Text:=file_name;
+main_vars.system_type:=tempb;
 end;
 
 end.

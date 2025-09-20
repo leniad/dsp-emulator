@@ -47,11 +47,7 @@ begin
 principal1.panel2.Visible:=true;
 llamadas_maquina.bucle_general:=spectrum128_main;
 llamadas_maquina.reset:=spec128k_reset;
-llamadas_maquina.cintas:=spectrum_tapes;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=17734475/5/70908;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
 iniciar_128k:=false;
 //Iniciar el Z80 y pantalla
 if not(spec_comun(17734475 div 5)) then exit;
@@ -370,8 +366,7 @@ end else begin //resto
       if ulaplus.mode=0 then ulaplus.last_reg:=valor and $3f;
   end;
   if ((puerto=$ff3b) and ulaplus.enabled) then begin
-      fillchar(var_spectrum.buffer_video[0],6144,1);
-      fillchar(borde.buffer[0],78000,$80);
+      spectrum_reset_video;
       case ulaplus.mode of
           0:begin
                 ulaplus.paleta[ulaplus.last_reg]:=valor;
@@ -399,7 +394,7 @@ end else begin //resto
                   old_pant:=((valor and 8) shr 2)+5;
                   if old_pant<>var_spectrum.pantalla_128k then begin
                     var_spectrum.pantalla_128k:=old_pant;
-                    fillchar(var_spectrum.buffer_video[0],6144,1);
+                    spectrum_reset_video;
                   end;
                   var_spectrum.old_7ffd:=valor;
                   if paginacion_activa then begin

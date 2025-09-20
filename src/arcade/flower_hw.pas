@@ -38,6 +38,7 @@ const
         (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Bonus Life';number:2;dip:((dip_val:$80;dip_name:'30K 50K+'),(dip_val:$0;dip_name:'50K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         CPU_SYNC=4;
+        CPU_DIV=5;
 
 var
  sound_latch,scrollfg,scrollbg:byte;
@@ -177,8 +178,8 @@ while EmuStatus=EsRuning do begin
     frame_sound:=frame_sound+z80_2.tframes-z80_2.contador;
    end;
    if f=239 then begin
-      z80_0.change_irq(HOLD_LINE);
-      z80_1.change_irq(HOLD_LINE);
+      z80_0.change_irq(ASSERT_LINE);
+      z80_1.change_irq(ASSERT_LINE);
       update_video_flower;
    end;
   end;
@@ -205,7 +206,13 @@ begin
 case direccion of
    0..$7fff:; //ROM
    $c000..$dfff,$e800..$efff:memoria[direccion]:=valor;
-   $a001:; //screen_flip
+   $a000..$a007:case (direccion and 7) of
+                  0,5..7:;
+                  1:main_screen.flip_main_screen:=(valor and 1)<>0;
+                  2:if (valor and 1)=0 then z80_0.change_irq(CLEAR_LINE);
+                  3:if (valor and 1)=0 then z80_1.change_irq(CLEAR_LINE);
+                  4:; //Coin Counter
+                end;
    $a400:begin
             sound_latch:=valor;
             if nmi_audio then z80_2.change_nmi(PULSE_LINE);
@@ -270,6 +277,7 @@ begin
 z80_0.reset;
 z80_1.reset;
 z80_2.reset;
+flower_0.reset;
 reset_audio;
 nmi_audio:=false;
 sound_latch:=0;
@@ -304,16 +312,17 @@ screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-z80_0:=cpu_z80.create(4608000,264*CPU_SYNC);
+//Si pongo 3Mhz, a veces en la demo la nave muere, pero no se da cuenta y entra en un bucle sin fin y ya no responde a nada
+z80_0:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_0.change_ram_calls(flower_getbyte,flower_putbyte);
 //Sub CPU
-z80_1:=cpu_z80.create(4608000,264*CPU_SYNC);
+z80_1:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_1.change_ram_calls(flower_getbyte_sub,flower_putbyte);
 //Sound CPU
-z80_2:=cpu_z80.create(4608000,264*CPU_SYNC);
+z80_2:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.init_sound(flower_update_sound);
-timers.init(z80_2.numero_cpu,4608000/90,flower_snd_irq,nil,true);
+timers.init(z80_2.numero_cpu,18432000/CPU_DIV/90,flower_snd_irq,nil,true);
 //Sound
 //cargar roms
 if not(roms_load(@memoria,flower_rom)) then exit;

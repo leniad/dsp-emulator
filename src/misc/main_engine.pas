@@ -1,13 +1,11 @@
 ﻿unit main_engine;
-
 interface
 uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
      controls,forms,sysutils,misc_functions,pal_engine,sound_engine,
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
-
 const
-        DSP_VERSION='0.21F';
+        DSP_VERSION='0.22F';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -15,7 +13,6 @@ const
         PANT_SPRITES_ALPHA=24;
         MAX_PANT_VISIBLE=19;
         MAX_PANT_SPRITES=256;
-
         MAX_DIP_VALUES=$f;
         MAX_PUNBUF=768;
         SCREEN_DIF=20;
@@ -34,7 +31,6 @@ const
         FORM_POS_LAZARUS=20;
         {$endif}
         {$endif}
-
 type
         TMain_vars=record
             mensaje_principal,cadena_dir,caption:string;
@@ -43,18 +39,19 @@ type
             vactual:byte;
             service1,driver_ok,auto_exec,show_crc_error,center_screen,console_init:boolean;
             sort:word;
+            system_type:byte;
         end;
         TDirectory=record
             Base:string;
             Nes:string;
-            GameBoy:string;
-            Chip8:string;
+            gameboy:string;
+            chip8:string;
             sms:string;
             sg1000:string;
             gg:string;
             scv:string;
             //Coleco
-            coleco_snap:string;
+            coleco:string;
             //Dirs Arcade
             Arcade_hi:string;
             Arcade_samples:string;
@@ -75,8 +72,14 @@ type
             //Dirs C64
             c64_tap:string;
             c64_disk:string;
+            //Oric
+            oric_tap:string;
+            //PV1000
+            pv1000:string;
+            //PV2000
+            pv2000:string;
             //Misc
-            Preview:string;
+            preview:string;
             qsnapshot:string;
         end;
         tllamadas_globales = record
@@ -88,7 +91,7 @@ type
            end;
         tmain_screen=record
           video_mode,old_video_mode:byte;
-          flip_main_screen,flip_main_x,flip_main_y,rot90_screen,rol90_screen,pantalla_completa,rapido:boolean;
+          flip_main_screen,flip_main_x,flip_main_y,rot90_screen,rot180_screen,rot270_screen,pantalla_completa,rapido:boolean;
         end;
         def_dip_value=record
           dip_val:word;
@@ -102,12 +105,12 @@ type
         end;
         pdef_dip=^def_dip;
         TEmuStatus=(EsPause,EsRuning,EsStoped);
-
 //Video
 procedure iniciar_video(x,y:word;alpha:boolean=false);
 procedure close_video;
 procedure cambiar_video;
 procedure change_video_size(x,y:word);
+procedure change_video_clock(fps:single);
 procedure pasar_pantalla_completa;
 procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false;alpha:boolean=false);
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
@@ -130,7 +133,6 @@ function get_all_dirs:string;
 //linux misc
 procedure copymemory(dest,source:pointer;size:integer);
 {$endif}
-
 var
         //video
         pantalla:array[0..max_pantalla] of libsdlP_Surface;
@@ -152,9 +154,8 @@ var
         EmuStatus:TEmuStatus;
         //Basic memory...
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
-
 implementation
-uses principal,controls_engine,cpu_misc,tap_tzx;
+uses principal,controls_engine,cpu_misc,tap_tzx,spectrum_misc;
 
 function find_rom_multiple_dirs(rom_name:string):byte;
 var
@@ -184,7 +185,6 @@ begin
        if cadena[f]<>main_vars.cadena_dir then break;
     test_dir:=system.copy(cadena,1,f);
 end;
-
 procedure split_dirs(dir:string);
 var
    f,long,old_pos:word;
@@ -213,7 +213,6 @@ long:=long-1;
 //Comprobar si he llegado al final y debo pasarlo
 if long<>0 then directory.arcade_list_roms[total]:=test_dir(copy(dir,old_pos,long))+main_vars.cadena_dir;
 end;
-
 function get_all_dirs:string;
 var
    f:byte;
@@ -226,7 +225,6 @@ for f:=0 to $ff do begin
 end;
 get_all_dirs:=res;
 end;
-
 procedure cambiar_video;
 //Si el sistema usa la pantalla SDL arreglos visuales
 procedure uses_sdl_window;
@@ -240,7 +238,6 @@ case main_vars.tipo_maquina of
      else fix_screen_pos(400,70);
 end;
 end;
-
 var
   x,y:word;
 begin
@@ -295,11 +292,12 @@ pantalla[PANT_TEMP]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0
 //Si el video el *2 necesito una temporal
 if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
 pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
+//EL spectrum hay que forzarlo tambien
+spectrum_reset_video;
 end;
-
 procedure change_video_size(x,y:word);
 begin
-if main_screen.rot90_screen or main_screen.rol90_screen then begin
+if main_screen.rot90_screen or main_screen.rot270_screen then begin
     p_final[0].x:=y;
     p_final[0].y:=x;
 end else begin
@@ -308,7 +306,10 @@ end else begin
 end;
 cambiar_video;
 end;
-
+procedure change_video_clock(fps:single);
+begin
+  valor_sync:=(1/fps)*cont_micro;
+end;
 procedure iniciar_video(x,y:word;alpha:boolean=false);
 var
   f:word;
@@ -319,7 +320,7 @@ begin
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF*2);
 //creo la pantalla general
-if main_screen.rot90_screen or main_screen.rol90_screen then begin
+if main_screen.rot90_screen or main_screen.rot270_screen then begin
     p_final[0].x:=y;
     p_final[0].y:=x;
 end else begin
@@ -361,7 +362,6 @@ for f:=1 to MAX_PANT_VISIBLE do
     if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,SET_TRANS_COLOR);
 end;
 end;
-
 //funciones de creacion de pantallas de video
 procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false;alpha:boolean=false);
 begin
@@ -371,7 +371,6 @@ begin
   p_final[num].final_mix:=final_mix;
   p_final[num].alpha:=alpha;
 end;
-
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
 begin
   p_final[num].scroll.long_x:=long_x;
@@ -381,7 +380,6 @@ begin
   p_final[num].scroll.max_y:=max_y;
   p_final[num].scroll.mask_y:=mask_y;
 end;
-
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
 begin
   p_final[num].sprite_end_x:=sprite_end_x;
@@ -389,7 +387,6 @@ begin
   p_final[num].sprite_mask_x:=sprite_mask_x;
   p_final[num].sprite_mask_y:=sprite_mask_y;
 end;
-
 procedure pasar_pantalla_completa;
 var
   i:integer;
@@ -440,7 +437,6 @@ end else begin
 end;
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 end;
-
 procedure close_video;
 var
   h:byte;
@@ -461,7 +457,6 @@ if punbuf_alpha<>nil then freemem(punbuf_alpha);
 punbuf:=nil;
 punbuf_alpha:=nil;
 end;
-
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 var
   origen:libsdl_rect;
@@ -497,7 +492,6 @@ end else begin
     SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@origen);
 end;
 end;
-
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
 var
   origen,destino:libsdl_rect;
@@ -516,7 +510,6 @@ if p_final[dest].final_mix then begin
 end;
 SDL_UpperBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
 end;
-
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 var
   origen,destino:libsdl_rect;
@@ -544,39 +537,58 @@ if main_screen.rot90_screen then begin
       inc(pdest,dest_p);
     end;
   end;
-end else if main_screen.rol90_screen then begin
-             //Muevo desde la normal a la final rotada
-             orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
-             dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
-             for y:=0 to (o_y2-1) do begin
-                 //Origen
-                 porig:=pantalla[sitio].pixels; //Apunto a los pixels
-                 inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
-                 //Destino
-                 pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
-                 inc(pdest,(dest_p*(pantalla[PANT_TEMP].h-1))+y);  //Muevo el cursor al ultimo punto de la columna
-                 for x:=0 to (o_x2-1) do begin
-                     //Pongo el pixel
-                     pdest^:=porig^;
-                     //Avanzo en la fila de origen
-                     inc(porig);
-                     //Avanzo la columna de origen
-                     dec(pdest,dest_p);
-                 end;
-             end;
-         end else begin
-           origen.x:=o_x1+ADD_SPRITE;
-           origen.y:=o_y1+ADD_SPRITE;
-           origen.w:=o_x2;
-           origen.h:=o_y2;
-           destino.x:=0;
-           destino.y:=0;
-           destino.w:=pantalla[PANT_TEMP].w;
-           destino.h:=pantalla[PANT_TEMP].h;
-           SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
-         end;
+end else if main_screen.rot180_screen then begin
+            //Muevo desde la normal a la final rotada
+            orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+            dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
+            for y:=0 to (o_y2-1) do begin
+            //Origen
+              porig:=pantalla[sitio].pixels; //Apunto a los pixels
+              inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
+              //Destino
+              pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
+              inc(pdest,dest_p*(o_y2-y-1)+o_x2-1);  //Muevo el cursor al ultimo punto de la columna
+              for x:=0 to (o_x2-1) do begin
+                //Pongo el pixel
+                pdest^:=porig^;
+                //Avanzo en la fila de origen
+                inc(porig);
+                //Avanzo la columna de origen
+                dec(pdest);
+              end;
+            end;
+         end else if main_screen.rot270_screen then begin
+                    //Muevo desde la normal a la final rotada
+                    orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+                    dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
+                    for y:=0 to (o_y2-1) do begin
+                      //Origen
+                      porig:=pantalla[sitio].pixels; //Apunto a los pixels
+                      inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
+                      //Destino
+                      pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
+                      inc(pdest,(dest_p*(pantalla[PANT_TEMP].h-1))+y);  //Muevo el cursor al ultimo punto de la columna
+                      for x:=0 to (o_x2-1) do begin
+                        //Pongo el pixel
+                        pdest^:=porig^;
+                        //Avanzo en la fila de origen
+                        inc(porig);
+                        //Avanzo la columna de origen
+                        dec(pdest,dest_p);
+                      end;
+                    end;
+                  end else begin
+                              origen.x:=o_x1+ADD_SPRITE;
+                              origen.y:=o_y1+ADD_SPRITE;
+                              origen.w:=o_x2;
+                              origen.h:=o_y2;
+                              destino.x:=0;
+                              destino.y:=0;
+                              destino.w:=pantalla[PANT_TEMP].w;
+                              destino.h:=pantalla[PANT_TEMP].h;
+                              SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
+                           end;
 end;
-
 procedure flip_surface(pant:byte;flipx,flipy:boolean);
 var
   f,i,h:word;
@@ -632,7 +644,6 @@ end else if flipx then begin
                       SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[pant],@origen);
                   end;
 end;
-
 procedure actualiza_video;
 var
   punt,punt2,punt3,punt4:pword;
@@ -658,39 +669,41 @@ if main_screen.flip_main_screen then begin
   origen.w:=p_final[0].x;
   origen.h:=p_final[0].y;
   SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
-end else if main_screen.flip_main_x then begin
-            for i:=0 to p_final[0].y-1 do begin
-              punt:=pantalla[PANT_TEMP].pixels;
-              inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-              punt2:=pantalla[PANT_DOBLE].pixels;
-              inc(punt2,((i*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[0].x-1));
-              for f:=p_final[0].x-1 downto 0 do begin
-                punt2^:=punt^;
-                inc(punt);
-                dec(punt2);
-              end;
-            end;
-            origen.w:=p_final[0].x;
-            origen.h:=p_final[0].y;
-            SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
-         end else if main_screen.flip_main_y then begin
-                      h:=0;
-                      for i:=p_final[0].y-1 downto 0 do begin
-                        punt:=pantalla[PANT_TEMP].pixels;
-                        inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-                        punt2:=pantalla[PANT_DOBLE].pixels;
-                        inc(punt2,(h*pantalla[PANT_DOBLE].pitch) shr 1);
-                        h:=h+1;
-                        for f:=0 to p_final[0].x-1 do begin
-                          punt2^:=punt^;
-                          inc(punt);
-                          inc(punt2);
-                        end;
-                      end;
-                      origen.w:=p_final[0].x;
-                      origen.h:=p_final[0].y;
-                      SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
-                  end;
+end;
+if main_screen.flip_main_x then begin
+  for i:=0 to p_final[0].y-1 do begin
+    punt:=pantalla[PANT_TEMP].pixels;
+    inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
+    punt2:=pantalla[PANT_DOBLE].pixels;
+    inc(punt2,((i*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[0].x-1));
+    for f:=p_final[0].x-1 downto 0 do begin
+      punt2^:=punt^;
+      inc(punt);
+      dec(punt2);
+    end;
+  end;
+  origen.w:=p_final[0].x;
+  origen.h:=p_final[0].y;
+  SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
+end;
+if main_screen.flip_main_y then begin
+  h:=0;
+  for i:=p_final[0].y-1 downto 0 do begin
+    punt:=pantalla[PANT_TEMP].pixels;
+    inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
+    punt2:=pantalla[PANT_DOBLE].pixels;
+    inc(punt2,(h*pantalla[PANT_DOBLE].pitch) shr 1);
+    h:=h+1;
+    for f:=0 to p_final[0].x-1 do begin
+      punt2^:=punt^;
+      inc(punt);
+      inc(punt2);
+    end;
+  end;
+  origen.w:=p_final[0].x;
+  origen.h:=p_final[0].y;
+  SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
+end;
 case main_screen.video_mode of
   0:exit;
   1,6:begin
@@ -782,7 +795,6 @@ case main_screen.video_mode of
 SDL_UpperBlit(pantalla[pant_final],@origen,pantalla[0],@origen);
 SDL_UpdateWindowSurface(window_render);
 end;
-
 procedure change_caption(nombre:string);
 var
   cadena:ansistring;
@@ -795,7 +807,6 @@ child.Caption:=cadena;
 SDL_SetWindowTitle(window_render,pointer(cadena));
 {$endif}
 end;
-
 procedure video_sync;
 var
 {$ifndef fpc}
@@ -826,14 +837,12 @@ valor_sync:=cont_micro-(res-valor_sync);
 cont_sincroniza:=sdl_getticks();
 {$endif}
 end;
-
 {$ifndef windows}
 procedure copymemory(dest,source:pointer;size:integer);
 begin
 move(source^,dest^,size);
 end;
 {$endif}
-
 procedure reset_dsp;
 begin
 fillchar(paleta[0],MAX_COLORES*2,0);
@@ -865,7 +874,8 @@ main_vars.frames_sec:=0;
 sound_status.canales_usados:=-1;
 principal1.timer1.Enabled:=false;
 main_screen.rot90_screen:=false;
-main_screen.rol90_screen:=false;
+main_screen.rot180_screen:=false;
+main_screen.rot270_screen:=false;
 main_screen.flip_main_screen:=false;
 main_screen.flip_main_x:=false;
 main_screen.flip_main_y:=false;
@@ -884,5 +894,4 @@ cont_sincroniza:=sdl_getticks();
 close_audio;
 close_video;
 end;
-
 end.

@@ -38,7 +38,7 @@ const
 var
  irq_ena:boolean;
  mem_opcodes:array[0..$9fff] of byte;
- sound_latch,scroll_x,linea:byte;
+ sound_latch,scroll_x:byte;
  spritebank:word;
 
 procedure update_video_circusc;
@@ -68,7 +68,7 @@ scroll__x_part(2,3,scroll_x,0,80,176);
 //Sprites
 for f:=0 to $3f do begin
   atrib:=memoria[spritebank+1+(f*4)];
-  nchar:=memoria[spritebank+(f*4)]+((atrib and $20) shl 3);
+  nchar:=(memoria[spritebank+(f*4)]+((atrib and $20) shl 3)) mod 384;
   color:=(atrib and $f) shl 4;
   x:=240-memoria[spritebank+3+(f*4)];
   y:=memoria[spritebank+2+(f*4)];
@@ -102,19 +102,20 @@ end;
 procedure circusc_principal;
 var
   frame_m,frame_s:single;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for linea:=0 to $ff do begin
+  for f:=0 to $ff do begin
     //main
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if linea=239 then begin
+    if f=239 then begin
       if irq_ena then m6809_0.change_irq(HOLD_LINE);
       update_video_circusc;
     end;
@@ -167,7 +168,7 @@ case direccion of
  $0..$3fff:circusc_snd_getbyte:=mem_snd[direccion];
  $4000..$5fff:circusc_snd_getbyte:=mem_snd[$4000+(direccion and $3ff)];
  $6000..$7fff:circusc_snd_getbyte:=sound_latch;
- $8000..$9fff:circusc_snd_getbyte:=((trunc(z80_0.tframes*linea)+z80_0.contador) shr 9 and $1e);
+ $8000..$9fff:circusc_snd_getbyte:=(z80_0.totalt shr 9) and $1e;
 end;
 end;
 

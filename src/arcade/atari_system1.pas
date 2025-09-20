@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pokey,
      pal_engine,sound_engine,slapstic,ym_2151,atari_mo;
 
-procedure cargar_atari_sys1;
+function iniciar_atari_sys1:boolean;
 
 implementation
 const
@@ -491,6 +491,9 @@ end;
 end;
 begin
 iniciar_atari_sys1:=false;
+llamadas_maquina.bucle_general:=atari_sys1_principal;
+llamadas_maquina.reset:=reset_atari_sys1;
+llamadas_maquina.fps_max:=59.922743;
 iniciar_audio(true);
 screen_init(1,512,256,true);
 screen_init(2,512,512);
@@ -594,14 +597,6 @@ end;
 //final
 reset_atari_sys1;
 iniciar_atari_sys1:=true;
-end;
-
-procedure cargar_atari_sys1;
-begin
-llamadas_maquina.iniciar:=iniciar_atari_sys1;
-llamadas_maquina.bucle_general:=atari_sys1_principal;
-llamadas_maquina.reset:=reset_atari_sys1;
-llamadas_maquina.fps_max:=59.922743;
 end;
 
 end.

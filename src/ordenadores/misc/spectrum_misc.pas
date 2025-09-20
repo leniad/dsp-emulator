@@ -133,6 +133,7 @@ procedure reset_misc;
 procedure spectrum_despues_instruccion(estados_t:byte);
 procedure evalua_gunstick;
 procedure spec_a_pantalla(posicion_memoria:pbyte;imagen1:Tbitmap);
+procedure spectrum_reset_video;
 //AMX Mouse
 procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
@@ -166,8 +167,8 @@ end;
 
 procedure spectrum_reset_video;
 begin
-fillchar(var_spectrum.buffer_video[0],6144,1);
-fillchar(borde.buffer[0],78000,$80);
+fillchar(var_spectrum.buffer_video,6144,1);
+fillchar(borde.buffer,78000,$80);
 end;
 
 procedure borde_normal(linea:word);
@@ -468,7 +469,10 @@ var
   f:byte;
 begin
 spec_comun:=false;
-TZX_CLOCK:=clock div 1000;
+llamadas_maquina.cintas:=spectrum_tapes;
+llamadas_maquina.close:=spec_cerrar_comun;
+llamadas_maquina.configurar:=spectrum_config;
+llamadas_maquina.grabar_snapshot:=grabar_spec;
 spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
@@ -484,11 +488,16 @@ case main_vars.tipo_maquina of
   1,2,3,4:timers.init(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,nil,true);
 end;
 principal1.BitBtn10.Glyph:=nil;
+principal1.BitBtn12.Enabled:=false;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
-principal1.BitBtn14.Glyph:=nil;
-principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
-//Tape Stop and Fastload enabled
-var_spectrum.fastload:=true;
+if not(cinta_tzx.cargada) then begin
+  principal1.BitBtn14.Glyph:=nil;
+  principal1.BitBtn14.Enabled:=false;
+  principal1.imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
+  //Fastload disabled
+  var_spectrum.fastload:=false;
+end;
+//Tape Stop
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
@@ -515,6 +524,7 @@ if mouse.tipo<>MNONE then show_mouse_cursor
 //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;
+
 if cinta_tzx.cargada then tape_window1.Show;
 end;
 
@@ -603,7 +613,7 @@ var
   correcto:boolean;
   indice:byte;
 begin
-if SaveRom(StSpectrum,nombre,indice) then begin
+if saverom(nombre,indice) then begin
         case indice of
           1:nombre:=changefileext(nombre,'.szx');
           2:nombre:=changefileext(nombre,'.z80');

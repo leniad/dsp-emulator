@@ -146,9 +146,8 @@ end;
 function iniciar_epos_hw:boolean;
 var
   colores:tpaleta;
-  f:word;
   memoria_temp:array[0..$1f] of byte;
-  bit0,bit1,bit2:byte;
+  f,bit0,bit1,bit2:byte;
 begin
 llamadas_maquina.bucle_general:=epos_hw_principal;
 llamadas_maquina.reset:=reset_epos_hw;

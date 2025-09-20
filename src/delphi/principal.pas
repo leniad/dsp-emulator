@@ -346,7 +346,7 @@ type
     Gradius31: TMenuItem;
     BitBtn1: TBitBtn;
     SpaceInvaders1: TMenuItem;
-    Centipede1: TMenuItem;
+    CentipedeHW1: TMenuItem;
     KarnovHW1: TMenuItem;
     Karnov1: TMenuItem;
     Chelnov1: TMenuItem;
@@ -506,6 +506,39 @@ type
     EnduroRacer1: TMenuItem;
     SpaceHarrier1: TMenuItem;
     N64thStreet1: TMenuItem;
+    ShadowWarriorsHW1: TMenuItem;
+    ShadowWarriors1: TMenuItem;
+    wildfang1: TMenuItem;
+    Raiden1: TMenuItem;
+    winsHW1: TMenuItem;
+    twins1: TMenuItem;
+    twinsed1: TMenuItem;
+    HotBlock1: TMenuItem;
+    angerine1: TMenuItem;
+    Oric1_1: TMenuItem;
+    OricAtmos1: TMenuItem;
+    MissileCommandHW1: TMenuItem;
+    MissileCommand1: TMenuItem;
+    SuperMissileAttack1: TMenuItem;
+    SuperZaxxon1: TMenuItem;
+    FutureSpy1: TMenuItem;
+    Centipede1: TMenuItem;
+    Millipede1: TMenuItem;
+    Gaplus1: TMenuItem;
+    SuperXevious1: TMenuItem;
+    Grobda1: TMenuItem;
+    PacnPal1: TMenuItem;
+    pv1000: TMenuItem;
+    pv2000: TMenuItem;
+    Birdiy1: TMenuItem;
+    M63HW1: TMenuItem;
+    WilyTower1: TMenuItem;
+    FightingBasketball1: TMenuItem;
+    Diverboy1: TMenuItem;
+    MugSmashers1: TMenuItem;
+    SteelForceHW1: TMenuItem;
+    SteelForce1: TMenuItem;
+    twinbrats1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -814,7 +847,7 @@ procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice:byte;
+  indice,tempb:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;
@@ -826,7 +859,9 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-if SaveRom(StBitmap,nombre,indice) then begin
+tempb:=main_vars.system_type;
+main_vars.system_type:=SBITMAP;
+if saverom(nombre,indice) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -835,6 +870,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
+      main_vars.system_type:=tempb;
       restart_emu;
       exit;
     end;
@@ -888,6 +924,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
+main_vars.system_type:=tempb;
 restart_emu;
 end;
 

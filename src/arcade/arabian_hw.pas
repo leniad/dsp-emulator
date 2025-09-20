@@ -43,7 +43,7 @@ for x:=0 to 255 do
   for y:=0 to 255 do
     punt[y+((255-x)*256)]:=paleta[(video_ram[y*256+x]+(video_control shl 8))];
 putpixel(0,0,$10000,@punt,1);
-actualiza_trozo(11,0,234,256,1,0,0,234,256,pant_temp);
+actualiza_trozo(11,0,234,256,1,0,0,234,256,PANT_TEMP);
 end;
 
 procedure eventos_arabian;

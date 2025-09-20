@@ -180,7 +180,7 @@ type
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
     Gradius31: TMenuItem;
-    centipede1: TMenuItem;
+    centipedehw1: TMenuItem;
     MenuItem29: TMenuItem;
     karnov1: TMenuItem;
     chelnov1: TMenuItem;
@@ -276,6 +276,39 @@ type
     MenuItem46: TMenuItem;
     hangon1: TMenuItem;
     enduroracer1: TMenuItem;
+    MenuItem47: TMenuItem;
+    MenuItem48: TMenuItem;
+    hotblock1: TMenuItem;
+    MenuItem49: TMenuItem;
+    MenuItem50: TMenuItem;
+    centipede1: TMenuItem;
+    Gaplus1: TMenuItem;
+    grobda1: TMenuItem;
+    birdiy1: TMenuItem;
+    MenuItem51: TMenuItem;
+    FightingBasketball1: TMenuItem;
+    diverboy1: TMenuItem;
+    MenuItem52: TMenuItem;
+    twinbrats1: TMenuItem;
+    steelforce1: TMenuItem;
+    mugsmashers1: TMenuItem;
+    wilytower1: TMenuItem;
+    pv2000: TMenuItem;
+    pv1000: TMenuItem;
+    pacnpal1: TMenuItem;
+    superxevious1: TMenuItem;
+    millipede1: TMenuItem;
+    superzaxxon1: TMenuItem;
+    futurespy1: TMenuItem;
+    missilecommand1: TMenuItem;
+    supermissileattack1: TMenuItem;
+    oric1_1: TMenuItem;
+    oricatmos1: TMenuItem;
+    twinsed1: TMenuItem;
+    Twins1: TMenuItem;
+    raiden1: TMenuItem;
+    ShadowWarriors1: TMenuItem;
+    wildfang1: TMenuItem;
     n64thstreet1: TMenuItem;
     spaceharrier1: TMenuItem;
     superduck1: TMenuItem;
@@ -597,7 +630,7 @@ procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
   r:integer;
   nombre:string;
-  indice:byte;
+  indice,tempb:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlp_Surface;
@@ -609,7 +642,9 @@ begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
-if SaveRom(StBitmap,nombre,indice) then begin
+tempb:=main_vars.system_type;
+main_vars.system_type:=SBITMAP;
+if saverom(nombre,indice) then begin
   case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
@@ -619,6 +654,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
     r:=application.messagebox(pansichar(leng[main_vars.idioma].mensajes[3]),pansichar(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
        principal1.Enabled:=true;
+       main_vars.system_type:=tempb;
        sync_all;
        exit;
     end;
@@ -671,6 +707,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
+main_vars.system_type:=tempb;
 restart_emu;
 end;
 

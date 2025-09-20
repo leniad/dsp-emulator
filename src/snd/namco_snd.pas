@@ -28,7 +28,7 @@ type
         destructor free;
       public
         enabled:boolean;
-        regs:array[0..$3F] of byte;
+        regs:array[0..$3f] of byte;
         procedure update;
         procedure reset;
         function get_wave_dir:pbyte;
@@ -144,7 +144,7 @@ begin
     // Registro $3 --> Elegir la onda a reproducir
     namco_snd_0.voice[numero_voz].numero_onda:=namco_snd_0.regs[$3+base] shr 4;
     // Registro $0 --> Volumen de la onda
-    namco_snd_0.voice[numero_voz].volume:=(namco_snd_0.regs[$0+base] and $F) shr 1;
+    namco_snd_0.voice[numero_voz].volume:=(namco_snd_0.regs[$0+base] and $f) shr 1;
     // Resgistros $1, $2 y $3 --> Frecuencia
     f:=namco_snd_0.regs[$1+base];
     f:=f or (namco_snd_0.regs[$2+base] shl 8);
@@ -189,7 +189,7 @@ begin
 	// set the register */
   self.regs[direccion]:=valor;
 	ch:=direccion div 8;
-	// recompute the voice parameters */
+	// recompute the voice parameters
 	case (direccion-ch*8) of
 	$00:self.voice[ch].volume:=valor and $0f;
 	$01:self.voice[ch].numero_onda:=(valor shr 4) and $f;
@@ -219,7 +219,7 @@ begin
     0..$ff:begin
         	  	if (self.ram[direccion]<>valor) then begin
         		  	self.ram[direccion]:=valor;
-        		  	// update the decoded waveform table */
+        		  	// update the decoded waveform table
         		  	self.update_waveform(direccion,valor);
              end;
            end;

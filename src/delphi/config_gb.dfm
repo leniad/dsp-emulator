@@ -2,14 +2,15 @@ object configgb: Tconfiggb
   Left = 0
   Top = 0
   Caption = 'Config GB/GBC'
-  ClientHeight = 231
-  ClientWidth = 333
+  ClientHeight = 185
+  ClientWidth = 304
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   TextHeight = 13

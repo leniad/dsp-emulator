@@ -171,8 +171,16 @@ var
   SpriteNbr,ind:dword;
   temp_cx,temp_cy:pdword;
   ngfx:pgfx;
+  change_again:boolean;
 begin
 ngfx:=@gfx[num_gfx];
+change_again:=false;
+if ((rot90 or rol90) and (increment<>0)) then begin
+  b0:=ngfx.x;
+  ngfx.x:=ngfx.y;
+  ngfx.y:=b0;
+  change_again:=true;
+end;
 ind:=0;
 temp_cx:=cx;
 temp_cy:=cy;
@@ -198,7 +206,13 @@ for n:=0 to elements do begin
 	if rot90 then Rotater(n,ngfx,increment);
   if rol90 then Rotatel(n,ngfx,increment);
 end;
+  if (((rot90 or rol90) and (increment=0)) or change_again) then begin
+      b0:=ngfx.x;
+      ngfx.x:=ngfx.y;
+      ngfx.y:=b0;
+  end;
 end;
+
 procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 var
   oct,b0,o,i,bit_pixel:byte;
@@ -526,6 +540,7 @@ for y:=0 to (gfx[ngfx].y-1) do begin
   putpixel_gfx_int(pos_x,pos_y+y,gfx[ngfx].x,screen);
 end;
 end;
+
 procedure put_gfx_mask_flip(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:byte;flipx,flipy:boolean);
 var
   x,y,py,cant_x,cant_y,punto:byte;
@@ -537,6 +552,7 @@ pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
 inc(pos,nchar*cant_x*gfx[ngfx].y);
+temp2:=punbuf;
 if flipy then begin
   py:=cant_y-1;
   dir_y:=-1;
@@ -545,13 +561,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -577,6 +589,7 @@ pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
 inc(pos,nchar*cant_x*gfx[ngfx].y);
+temp2:=punbuf;
 if flipy then begin
   py:=cant_y-1;
   dir_y:=-1;
@@ -585,13 +598,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -615,6 +624,7 @@ pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
 inc(pos,nchar*cant_x*gfx[ngfx].y);
+temp2:=punbuf;
 if flipy then begin
   py:=cant_y-1;
   dir_y:=-1;
@@ -623,13 +633,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -654,6 +660,7 @@ pos:=gfx[ngfx].datos;
 cant_y:=gfx[ngfx].y;
 cant_x:=gfx[ngfx].x;
 inc(pos,nchar*cant_x*gfx[ngfx].y);
+temp2:=punbuf;
 if flipy then begin
   py:=cant_y-1;
   dir_y:=-1;
@@ -662,13 +669,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -691,24 +694,21 @@ var
 begin
 pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
-cant_y:=gfx[ngfx].y;
-inc(pos,nchar*cant_x*cant_y);
+cant_y:=gfx[ngfx].y-1;
+inc(pos,nchar*cant_x*(cant_y+1));
+temp2:=punbuf;
 if flipy then begin
-  pos_y:=cant_y-1;
+  pos_y:=cant_y;
   dir_y:=-1;
 end else begin
   pos_y:=0;
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
-for y:=0 to (cant_y-1) do begin
+end else dir_x:=1;
+for y:=0 to cant_y do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
     if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
@@ -732,6 +732,7 @@ pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
 inc(pos,nchar*cant_x*cant_y);
+temp2:=punbuf;
 if flipy then begin
   pos_y:=cant_y-1;
   dir_y:=-1;
@@ -740,13 +741,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -771,6 +768,7 @@ pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
 inc(pos,nchar*cant_x*cant_y);
+temp2:=punbuf;
 if flipy then begin
   pos_y:=cant_y-1;
   dir_y:=-1;
@@ -779,13 +777,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -811,6 +805,7 @@ pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
 inc(pos,nchar*cant_x*cant_y);
+temp2:=punbuf;
 if flipy then begin
   pos_y:=cant_y-1;
   dir_y:=-1;
@@ -819,13 +814,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -855,6 +846,7 @@ inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 cant_x:=round(gfx[ngfx].x*zx);
 if ((gfx[ngfx].x*zx)-cant_x)>0 then cant_x:=cant_x+1;
 if cant_x>pantalla[PANT_SPRITES].w then exit;
+temp2:=punbuf;
 if flipy then begin
   pos_y:=round(gfx[ngfx].y*zy);
   if ((gfx[ngfx].y*zy)-pos_y)>0 then pos_y:=pos_y+1;
@@ -864,13 +856,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 zoom_y:=0;
 for y:=0 to (gfx[ngfx].y-1) do begin
   temp:=temp2;
@@ -905,6 +893,7 @@ pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
 inc(pos,nchar*cant_x*cant_y);
+temp2:=punbuf;
 if flipy then begin
   pos_y:=cant_y-1;
   dir_y:=-1;
@@ -913,13 +902,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -945,6 +930,7 @@ pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 cant_y:=gfx[ngfx].y;
 inc(pos,nchar*cant_x*cant_y);
+temp2:=punbuf_alpha;
 if flipy then begin
   pos_y:=cant_y-1;
   dir_y:=-1;
@@ -953,13 +939,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf_alpha;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf_alpha;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
@@ -991,6 +973,7 @@ zoom_y:=0;
 cant_x:=round(gfx[ngfx].x*zx);
 if ((gfx[ngfx].x*zx)-cant_x)>0 then cant_x:=cant_x+1;
 if cant_x>pantalla[PANT_SPRITES_ALPHA].w then exit;
+temp2:=punbuf_alpha;
 if flipy then begin
   pos_y:=round(gfx[ngfx].y*zy);
   if ((gfx[ngfx].y*zy)-pos_y)>0 then pos_y:=pos_y+1;
@@ -1000,13 +983,9 @@ end else begin
   dir_y:=1;
 end;
 if flipx then begin
-  temp2:=punbuf_alpha;
   inc(temp2,cant_x-1);
   dir_x:=-1;
-end else begin
-  temp2:=punbuf_alpha;
-  dir_x:=1;
-end;
+end else dir_x:=1;
 for y:=0 to (gfx[ngfx].y-1) do begin
   temp:=temp2;
   zoom_x:=0;
@@ -1239,4 +1218,5 @@ procedure fill_full_screen(screen:byte;color:word);
 begin
 fillword(pantalla[screen].pixels,pantalla[screen].w*pantalla[screen].h,paleta[color]);
 end;
+
 end.

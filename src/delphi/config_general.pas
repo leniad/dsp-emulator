@@ -471,10 +471,10 @@ end;
 
 procedure TMConfig.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 begin
-  case key of
+case key of
     13:button1Click(nil);
     27:button2click(nil);
-  end;
+end;
 end;
 
 procedure cambiar_texto_idioma(idioma:byte);

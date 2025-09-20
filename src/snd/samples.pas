@@ -19,6 +19,7 @@ type
              pos:dword;
              restart,loop:boolean;
              tsample:byte;
+             amp:single;
         end;
   ptipo_audio=^tipo_audio;
   tipo_samples=record
@@ -44,6 +45,7 @@ procedure close_samples;
 procedure reset_samples;
 procedure stop_all_samples;
 function sample_status(num:byte):boolean;
+procedure change_vol_sample(num_sample:byte;amp:single);
 
 implementation
 uses init_games;
@@ -215,8 +217,9 @@ function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:sing
 var
   f,sample_size:word;
   ptemp:pbyte;
-  longitud,crc:integer;
+  longitud:integer;
   nombre_zip:string;
+  crc:dword;
 begin
 if parent then begin
     nombre_zip:=name;
@@ -256,6 +259,7 @@ for f:=0 to (sample_size-1) do begin
     end;
     data_samples.audio[f].restart:=nombre_samples[f].restart;
     data_samples.audio[f].loop:=nombre_samples[f].loop;
+    data_samples.audio[f].amp:=1;
 end;
 freemem(ptemp);
 data_samples.num_samples:=sample_size;
@@ -348,7 +352,7 @@ for f:=0 to (data_samples.num_samples-1) do begin
     ptemp:=data_samples.audio[f].data;
     inc(ptemp,data_samples.audio[f].pos);
     data_samples.audio[f].pos:=data_samples.audio[f].pos+1;
-    tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=trunc(smallint(ptemp^)*data_samples.amp);
+    tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=trunc(smallint(ptemp^)*data_samples.amp*data_samples.audio[f].amp);
     if data_samples.audio[f].pos=data_samples.audio[f].long then begin
       if data_samples.audio[f].loop then begin
         data_samples.audio[f].pos:=0;
@@ -374,6 +378,11 @@ for f:=0 to data_samples.num_samples-1 do begin
 end;
 freemem(data_samples);
 data_samples:=nil;
+end;
+
+procedure change_vol_sample(num_sample:byte;amp:single);
+begin
+  data_samples.audio[num_sample].amp:=amp;
 end;
 
 end.

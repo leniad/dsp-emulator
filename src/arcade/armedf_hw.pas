@@ -76,6 +76,7 @@ var
  update_video:procedure;
  calc_pos_txt:function(x,y:byte):word;
 
+procedure draw_sprites(prio:byte);
 procedure armedf_put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx,clut:byte);
 var
   x,y,pos_y:byte;
@@ -115,7 +116,6 @@ for y:=0 to 15 do begin
 end;
 end;
 
-procedure draw_sprites(prio:byte);
 var
   atrib,f,nchar,sx,sy:word;
   flip_x,flip_y:boolean;
@@ -546,7 +546,7 @@ screen_mod_scroll(3,1024,512,1023,512,256,511);
 screen_init(4,1024,512,true);
 screen_mod_scroll(4,1024,512,1023,512,256,511);
 screen_init(5,512,512,false,true);
-if ((main_vars.tipo_maquina=275) or (main_vars.tipo_maquina=278)) then main_screen.rol90_screen:=true;
+if ((main_vars.tipo_maquina=275) or (main_vars.tipo_maquina=278)) then main_screen.rot270_screen:=true;
 size_x:=0;
 size_y:=0;
 case main_vars.tipo_maquina of
