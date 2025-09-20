@@ -29,6 +29,7 @@ type
 function iniciar_gb:boolean;
 procedure gb_change_model(gbc,unlicensed:boolean);
 procedure gb_change_timer;
+procedure gb_set_pal;
 
 const
   GB_CLOCK=4194304;
@@ -607,7 +608,7 @@ case direccion of
   $49:leer_io:=gb_0.sprt1_pal;
   $4a:leer_io:=gb_0.window_y;
   $4b:leer_io:=gb_0.window_x;
-  //$80..$fe:leer_io:=io_ram[direccion];  //high memory
+  // $80..$fe:leer_io:=io_ram[direccion];  //high memory
   $ff:leer_io:=gb_0.irq_ena;
   else leer_io:=gb_0.io_ram[direccion];
 end;
@@ -703,7 +704,7 @@ case direccion of
   $4a:gb_0.window_y:=valor;
   $4b:gb_0.window_x:=valor;
   $50:gb_0.enable_bios:=false;  //disable ROM
-  //$80..$fe:io_ram[direccion]:=valor;  //high memory
+  // $80..$fe:io_ram[direccion]:=valor;  //high memory
   $ff:begin  //irq enable
         gb_0.irq_ena:=valor;
         lr35902_0.vblank_ena:=(valor and $1)<>0;
@@ -786,7 +787,7 @@ for f:=1 to size do begin
   temp:=$ff;
   case gb_0.dma_src of
     $0000..$7fff:temp:=memoria[gb_0.dma_src];
-    //$8000..$9fff:temp:=$ff;
+    // $8000..$9fff:temp:=$ff;
     $a000..$bfff:if @gb_mapper_0.calls.ext_ram_getbyte<>nil then temp:=gb_mapper_0.calls.ext_ram_getbyte(gb_0.dma_src and $1fff);
     $c000..$cfff:temp:=gb_0.wram_bank[0,gb_0.dma_src and $fff];
     $d000..$dfff:temp:=gb_0.wram_bank[gb_0.wram_nbank,gb_0.dma_src and $fff];
@@ -830,7 +831,7 @@ case direccion of
         lr35902_0.joystick_req:=(valor and $10)<>0;
       end;
   $10..$26:gb_snd_0.sound_w(direccion-$10,valor); //Sound
-  //$27..$2f:io_ram[direccion]:=valor;
+  // $27..$2f:io_ram[direccion]:=valor;
   $30..$3f:gb_snd_0.wave_w(direccion and $f,valor); //Sound Wav
   $40:begin
         gb_0.lcd_control:=valor;
@@ -1131,9 +1132,9 @@ var
   f:byte;
 begin
  lr35902_0.reset;
- reset_audio;
  gb_snd_0.reset;
  sound_engine_change_clock(GB_CLOCK);
+ reset_game_general;
  gb_0.scroll_x:=0;
  gb_0.linea_actual:=0;
  fillchar(gb_0.scroll_y[0],$ff,0);
@@ -1398,13 +1399,6 @@ begin
   directory.GameBoy:=ExtractFilePath(romfile);
 end;
 
-procedure gb_config_call;
-begin
-  configgb.show;
-  while configgb.Showing do application.ProcessMessages;
-  gb_set_pal;
-end;
-
 procedure grabar_gb;
 var
   nombre:string;
@@ -1425,7 +1419,6 @@ llamadas_maquina.reset:=reset_gb;
 llamadas_maquina.grabar_snapshot:=grabar_gb;
 llamadas_maquina.fps_max:=59.727500569605832763727500569606;
 llamadas_maquina.cartuchos:=abrir_gb;
-llamadas_maquina.configurar:=gb_config_call;
 //Pantallas:  principal+char y sprites
 screen_init(1,256,1,true);
 screen_init(2,256+166+7,154);  //256 pantalla normal + 166 window + 7 de desplazamiento

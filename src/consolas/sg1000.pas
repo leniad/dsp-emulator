@@ -46,19 +46,17 @@ end;
 
 procedure sg_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
+  eventos_sg;
   for f:=0 to 261 do begin
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
       tms_0.refresh(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
-  eventos_sg;
   video_sync;
 end;
 end;
@@ -70,6 +68,7 @@ case direccion of
   $c000..$ffff:sg_getbyte:=memoria[$c000+direccion and $1fff];
 end;
 end;
+
 procedure sg_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -117,7 +116,8 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  tms_0.reset;
- reset_audio;
+ reset_game_general;
+ frame_main:=z80_0.tframes;
  sg1000_0.keys[0]:=$ff;
  sg1000_0.keys[1]:=$ff;
  sg1000_0.push_pause:=false;
@@ -191,7 +191,6 @@ tms_0:=tms99xx_chip.create(1,sg_interrupt);
 //Chip Sonido
 sn_76496_0:=sn76496_chip.Create(3579545);
 //final
-reset_sg;
 if main_vars.console_init then abrir_sg;
 iniciar_sg:=true;
 end;

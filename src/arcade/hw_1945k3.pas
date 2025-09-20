@@ -131,21 +131,19 @@ end;
 
 procedure k31945_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=m68000_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to y_count do begin
-   m68000_0.run(frame);
-   frame:=frame+m68000_0.tframes-m68000_0.contador;
+   eventos_k31945;
    if f=y_size then begin
       m68000_0.irq[4]:=HOLD_LINE;
       update_video_k31945;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
  end;
- eventos_k31945;
  video_sync;
 end;
 end;
@@ -286,8 +284,7 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  if main_vars.tipo_maquina=283 then oki_6295_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
  oki1_bank:=0;
  oki2_bank:=0;
  t1scroll_x:=0;
@@ -397,7 +394,6 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
-reset_k31945;
 iniciar_k31945:=true;
 end;
 

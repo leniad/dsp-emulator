@@ -168,8 +168,7 @@ procedure reset_pooyan;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
- reset_video;
- reset_audio;
+ reset_game_general;
  konamisnd_0.reset;
  nmi_vblank:=false;
  last:=0;
@@ -203,7 +202,7 @@ iniciar_video(224,256);
 z80_0:=cpu_z80.create(3072000,256);
 z80_0.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
 //Sound Chip
-konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,256);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
 if not(roms_load(@konamisnd_0.memoria,pooyan_sound)) then exit;
 //cargar roms
 if not(roms_load(@memoria,pooyan_rom)) then exit;

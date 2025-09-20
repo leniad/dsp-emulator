@@ -36,8 +36,8 @@ for x:=0 to 31 do begin
   atrib:=memoria[$5800+pos_video];
   if ((spec_z80_reg.i>=$40) and (spec_z80_reg.i<=$7f)) then video:=memoria[$4000+tabla_scr[linea]+x+spec_z80_reg.r]
     else video:=memoria[$4000+tabla_scr[linea]+x];
-  if (var_spectrum.buffer_video[tabla_scr[linea]+x] or ((atrib and $80)<>0)) then begin
-    var_spectrum.buffer_video[tabla_scr[linea]+x]:=false;
+  if (gfx[1].buffer[tabla_scr[linea]+x] or ((atrib and $80)<>0)) then begin
+    gfx[1].buffer[tabla_scr[linea]+x]:=false;
     poner_linea:=true;
     pant_x:=48+(x shl 3);
     if (ulaplus.activa and ulaplus.enabled) then begin
@@ -140,6 +140,8 @@ begin
 init_controls(true,true,true,false);
 while EmuStatus=EsRunning do begin
   for linea_48:=0 to 311 do begin
+    if mouse.tipo=MGUNSTICK then evalua_gunstick;
+    eventos_spectrum;
     spec_z80.run(224);
     borde.borde_spectrum(linea_48);
     video48k(linea_48);
@@ -151,8 +153,6 @@ while EmuStatus=EsRunning do begin
   end;
   var_spectrum.flash:=(var_spectrum.flash+1) and $f;
   if var_spectrum.flash=0 then var_spectrum.haz_flash:=not(var_spectrum.haz_flash);
-  if mouse.tipo=MGUNSTICK then evalua_gunstick;
-  eventos_spectrum;
   video_sync;
 end;
 end;
@@ -200,11 +200,11 @@ if spec_16k then direccion:=direccion and $7fff;
 if ((memoria[direccion]=valor) or (direccion<$4000)) then exit; //Si es igual me salgo
 memoria[direccion]:=valor;
 case direccion of
-        $4000..$57ff:var_spectrum.buffer_video[direccion and $1fff]:=true;
+        $4000..$57ff:gfx[1].buffer[direccion and $1fff]:=true;
         $5800..$5aff:begin
                         temp:=((direccion and $3ff) shr 5) shl 3;
                         temp2:=direccion and $1f;
-                        for f:=0 to 7 do var_spectrum.buffer_video[tabla_scr[temp+f]+temp2]:=true;
+                        for f:=0 to 7 do gfx[1].buffer[tabla_scr[temp+f]+temp2]:=true;
                      end;
 end;
 end;
@@ -305,7 +305,7 @@ end else begin
     if ulaplus.mode=0 then ulaplus.last_reg:=valor and $3f;
   end;
   if ((puerto=$ff3b) and ulaplus.enabled) then begin
-    spectrum_reset_video;
+    reset_gfx;
     case ulaplus.mode of
       0:begin
           ulaplus.paleta[ulaplus.last_reg]:=valor;
@@ -357,7 +357,7 @@ if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zi
   end;
 //Si ha ido mal me quejo, si ha ido bien copio la ROM a la memoria
 if not(rom_cargada) then begin
-  MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
+  MessageDlg(leng.errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
   exit;
 end else copymemory(@memoria,@mem_snd,$4000);
 fillchar(var_spectrum.retraso,70000,0);
@@ -366,7 +366,6 @@ for h:=0 to 191 do begin
   copymemory(@var_spectrum.retraso[f],@cmemory,128);
   inc(f,224);
 end;
-spec48k_reset;
 iniciar_48k:=true;
 end;
 

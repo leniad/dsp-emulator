@@ -191,28 +191,22 @@ end;
 procedure principal_lasso;
 var
   f:byte;
-  frame_m,frame_sub,frame_snd:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6502_0.tframes;
-frame_snd:=m6502_1.tframes;
-frame_sub:=m6502_2.tframes;
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-    case f of
-      240:begin
-            update_video_lasso;
-            m6502_0.change_irq(HOLD_LINE);
-          end;
+ for f:=0 to 255 do begin
+    eventos_lasso;
+    if f=240 then begin
+      update_video_lasso;
+      m6502_0.change_irq(HOLD_LINE);
     end;
-    m6502_0.run(frame_m);
-    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
     m6502_1.run(frame_snd);
     frame_snd:=frame_snd+m6502_1.tframes-m6502_1.contador;
     m6502_2.run(frame_sub);
     frame_sub:=frame_sub+m6502_2.tframes-m6502_2.contador;
  end;
- eventos_lasso;
  video_sync;
 end;
 end;
@@ -220,25 +214,20 @@ end;
 procedure principal_chameleon;
 var
   f:byte;
-  frame_m,frame_snd:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6502_0.tframes;
-frame_snd:=m6502_1.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-    case f of
-      240:begin
-            update_video_chameleon;
-            m6502_0.change_irq(HOLD_LINE);
-          end;
+    eventos_lasso;
+    if f=240 then begin
+      update_video_chameleon;
+      m6502_0.change_irq(HOLD_LINE);
     end;
-    m6502_0.run(frame_m);
-    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
     m6502_1.run(frame_snd);
     frame_snd:=frame_snd+m6502_1.tframes-m6502_1.contador;
  end;
- eventos_lasso;
  video_sync;
 end;
 end;
@@ -412,11 +401,14 @@ procedure reset_lasso;
 begin
 m6502_0.reset;
 m6502_1.reset;
-if main_vars.tipo_maquina=390 then m6502_2.reset;
+if main_vars.tipo_maquina=390 then begin
+  m6502_2.reset;
+  frame_sub:=m6502_2.tframes;
+end;
+frame_main:=m6502_0.tframes;
+frame_snd:=m6502_1.tframes;
 sn_76496_0.reset;
 sn_76496_1.reset;
-reset_video;
-reset_audio;
 soundlatch:=0;
 back_color:=0;
 chip_data:=0;
@@ -525,7 +517,6 @@ end;
 for f:=0 to $3f do colores[f]:=lasso_set_color(memoria_temp[f]);
 set_pal(colores,$40);
 //final
-reset_lasso;
 iniciar_lasso:=true;
 end;
 

@@ -459,6 +459,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+     eventos_system16b;
      if f=224 then begin
        mcs51_0.change_irq0(HOLD_LINE);
        update_video_system16b;
@@ -473,7 +474,6 @@ while EmuStatus=EsRunning do begin
      mcs51_0.run(frame_mcu);
      frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
   end;
-  eventos_system16b;
   video_sync;
 end;
 end;
@@ -485,6 +485,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+     eventos_system16b;
      if f=224 then begin
        m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16b;
@@ -496,7 +497,6 @@ while EmuStatus=EsRunning do begin
      z80_0.run(frame_snd);
      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
-  eventos_system16b;
   video_sync;
 end;
 end;
@@ -1069,8 +1069,6 @@ begin
  frame_mcu:=mcs51_0.tframes;
  upd7759_0.reset;
  ym2151_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;
@@ -1091,7 +1089,6 @@ begin
  sound_bank_num:=0;
  sound_latch:=0;
  s315_5250_bit:=0;
- if main_vars.tipo_maquina=409 then reset_analog;
 end;
 
 function iniciar_system16b:boolean;
@@ -1447,7 +1444,6 @@ for f:=0 to 31 do begin
   s16_info.hilight[f]:=combine_6_weights(@weights[1],i0,i1,i2,i3,i4,1);
 end;
 //final
-reset_system16b;
 iniciar_system16b:=true;
 end;
 

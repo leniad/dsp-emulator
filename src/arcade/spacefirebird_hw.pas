@@ -23,11 +23,11 @@ const
         spacefb_samples:array[0..3] of tipo_nombre_samples=(
         (nombre:'ekilled.wav';restart:true),(nombre:'explode1.wav'),(nombre:'explode2.wav'),(nombre:'shipfire.wav';restart:true));
         //Dip
-        spacefb_dip:array [0..4] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Coinage';number:4;dip:((dip_val:$8;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$c;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'5K'),(dip_val:$10;dip_name:'8K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$20;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        spacefb_dip:array [0..4] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
+        (mask:$c;name:'Coinage';number:4;val4:(8,4,0,$c);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:$10;name:'Bonus Life';number:2;val2:(0,$10);name2:('5K','8K')),
+        (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')),());
 
 var
  mem_snd_mcu:array[0..$3ff] of byte;
@@ -50,18 +50,18 @@ var
   sy,code,color_base,y,sx,dy,x,data,data1,data2,dx:byte;
 begin
 	code:=not(memoria[offs+$8200]);
-	color_base:=(not(memoria[offs+$8300]) and $0f) shl 2;
+	color_base:=(not(memoria[offs+$8300]) and $f) shl 2;
 	y:=not(memoria[offs+$8100])-2;
 	for sy:=0 to 7 do begin
-		data1:=gfx1[$000 or (code shl 3) or (sy xor $07)];
-		data2:=gfx1[$800 or (code shl 3) or (sy xor $07)];
+		data1:=gfx1[0 or (code shl 3) or (sy xor 7)];
+		data2:=gfx1[$800 or (code shl 3) or (sy xor 7)];
 		x:=memoria[offs+$8000]-3;
 		if flip then dy:=not(y)
 		  else dy:=y;
     for sx:=0 to 7 do begin
       if not(flip) then dx:=(255-x)
         else dx:=x;
-      data:=((data1 shl 1) and $02) or (data2 and $01);
+      data:=((data1 shl 1) and 2) or (data2 and 1);
       if data<>0 then punt[dy+(dx*256)]:=paleta[color_base or data];
       x:=x+1;
       data1:=data1 shr 1;
@@ -83,7 +83,7 @@ begin
 		if flip then dy:=not(y)
 		  else dy:=y;
     for sx:=0 to 3 do begin
-				if (data and $01)<>0 then begin
+				if (data and 1)<>0 then begin
 					if not(flip) then dx:=(255-x)
             else dx:=x;
           punt[dy+(dx*256)]:=paleta[$40];
@@ -112,7 +112,7 @@ end;
 
 procedure shift_star_generator;
 begin
-  star_shift_reg:=((star_shift_reg shl 1) or (((not(star_shift_reg) shr 16) and 01) xor ((star_shift_reg shr 4) and $01))) and $1ffff;
+  star_shift_reg:=((star_shift_reg shl 1) or (((not(star_shift_reg) shr 16) and 1) xor ((star_shift_reg shr 4) and 1))) and $1ffff;
 end;
 
 procedure draw_stars(y:byte);
@@ -135,48 +135,45 @@ procedure eventos_spacefb;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $80) else marcade.in1:=(marcade.in1 and $7f);
   //p2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $80) else marcade.in2:=(marcade.in2 and $7f);
   //system
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
 end;
 end;
 
 procedure spacefb_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=mcs48_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
-    //Main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //MCU
-    mcs48_0.run(frame_s);
-    frame_s:=frame_s+mcs48_0.tframes-mcs48_0.contador;
+    eventos_spacefb;
     case f of
-      127:z80_0.change_irq_vector(HOLD_LINE,$cf);
-      239:begin
+      128:z80_0.change_irq_vector(HOLD_LINE,$cf);
+      240:begin
             z80_0.change_irq_vector(HOLD_LINE,$d7);
             update_video_spacefb;
           end;
     end;
+    //Main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //MCU
+    mcs48_0.run(frame_snd);
+    frame_snd:=frame_snd+mcs48_0.tframes-mcs48_0.contador;
     draw_stars(f);
   end;
-  eventos_spacefb;
   video_sync;
 end;
 end;
@@ -190,15 +187,15 @@ var
   color:tcolor;
 begin
 	for i:=0 to $3f do begin
-		data:=prom[((port_0 and $40) shr 2) or (i and $0f)];
-		r0:=(data shr 0) and $01;
-		r1:=(data shr 1) and $01;
-		r2:=(data shr 2) and $01;
-		g0:=(data shr 3) and $01;
-		g1:=(data shr 4) and $01;
-		g2:=(data shr 5) and $01;
-		b1:=(data shr 6) and $01;
-		b2:=(data shr 7) and $01;
+		data:=prom[((port_0 and $40) shr 2) or (i and $f)];
+		r0:=(data shr 0) and 1;
+		r1:=(data shr 1) and 1;
+		r2:=(data shr 2) and 1;
+		g0:=(data shr 3) and 1;
+		g1:=(data shr 4) and 1;
+		g2:=(data shr 5) and 1;
+		b1:=(data shr 6) and 1;
+		b2:=(data shr 7) and 1;
 		color.r:=combine_3_weights(@rgweights[0],r0,r1,r2);
 		color.g:=combine_3_weights(@rgweights[0],g0,g1,g2);
 		color.b:=combine_2_weights(@bweights[0],b1,b2);
@@ -219,19 +216,19 @@ var
   color:tcolor;
 begin
 	// generate the pens based on the various enable bits */
-	color_contrast_r  :=port_2 and $01;
-	color_contrast_g  :=(port_2 and $02) shr 1;
-	color_contrast_b  :=(port_2 and $04) shr 2;
-	background_red    :=(port_2 and $08) shr 3;
+	color_contrast_r  :=port_2 and 1;
+	color_contrast_g  :=(port_2 and 2) shr 1;
+	color_contrast_b  :=(port_2 and 4) shr 2;
+	background_red    :=(port_2 and 8) shr 3;
 	background_blue   :=(port_2 and $10) shr 4;
 	disable_star_field:=(port_2 and $80) shr 7;
 	for i:=0 to $3f do begin
-		gb:=((i shr 0) and $01) and color_contrast_g and not(disable_star_field);
-		ga:=((i shr 1) and $01) and not(disable_star_field);
-		bb:=((i shr 2) and $01) and color_contrast_b and not(disable_star_field);
-		ba:=(((i shr 3) and $01) or background_blue) and not(disable_star_field);
-		ra:=(((i shr 4) and $01) or background_red) and not(disable_star_field);
-		rb:=((i shr 5) and $01) and color_contrast_r and not(disable_star_field);
+		gb:=((i shr 0) and 1) and color_contrast_g and not(disable_star_field);
+		ga:=((i shr 1) and 1) and not(disable_star_field);
+		bb:=((i shr 2) and 1) and color_contrast_b and not(disable_star_field);
+		ba:=(((i shr 3) and 1) or background_blue) and not(disable_star_field);
+		ra:=(((i shr 4) and 1) or background_red) and not(disable_star_field);
+		rb:=((i shr 5) and 1) and color_contrast_r and not(disable_star_field);
 		color.r:=combine_3_weights(@rgweights[0], 0, rb, ra);
 		color.g:=combine_3_weights(@rgweights[0], 0, gb, ga);
 		color.b:=combine_2_weights(@bweights[0],     bb, ba);
@@ -266,7 +263,7 @@ end;
 
 function spacefb_inbyte(puerto:word):byte;
 begin
-case (puerto and $7) of
+case (puerto and 7) of
   0:spacefb_inbyte:=marcade.in1; //P1
   1:spacefb_inbyte:=marcade.in2; //P2
   2:spacefb_inbyte:=marcade.in0; //SYSTEM
@@ -277,7 +274,7 @@ end;
 
 procedure spacefb_outbyte(puerto:word;valor:byte);
 begin
-case (puerto and $7) of
+case (puerto and 7) of
   0,4:begin
         port_0:=valor;
         get_sprite_pens;
@@ -286,7 +283,7 @@ case (puerto and $7) of
         if (valor and 2)<>0 then mcs48_0.change_irq(CLEAR_LINE)
           else mcs48_0.change_irq(ASSERT_LINE);
         // enemy killed
-	      if (((valor and $01)=0) and ((sound_latch and $01)<>0)) then  start_sample(0);
+	      if (((valor and 1)=0) and ((sound_latch and 1)<>0)) then  start_sample(0);
 	      // ship fire
 	      if (((valor and $40)=0) and ((sound_latch and $40)<>0)) then start_sample(3);
         if ((valor and $80)<>(sound_latch and $80)) then begin
@@ -314,7 +311,7 @@ begin
 case puerto of
   MCS48_PORT_P2:spacefb_snd_inport:=(sound_latch and $18) shl 1;
   MCS48_PORT_T0:spacefb_snd_inport:=sound_latch and $20;
-  MCS48_PORT_T1:spacefb_snd_inport:=sound_latch and $04;
+  MCS48_PORT_T1:spacefb_snd_inport:=sound_latch and 4;
 end;
 end;
 
@@ -335,9 +332,8 @@ begin
  z80_0.reset;
  mcs48_0.reset;
  dac_0.reset;
- reset_samples;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=mcs48_0.tframes;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -383,7 +379,7 @@ if not(roms_load(@gfx2,spacefb_bullet)) then exit;
 if not(roms_load(@prom,spacefb_prom)) then exit;
 //DIP
 marcade.dswa:=$20;
-marcade.dswa_val:=@spacefb_dip;
+marcade.dswa_val2:=@spacefb_dip;
 //Calcular paleta
 compute_resistor_weights(0,	255, -1.0,
 			3,@resistances_rg[0],@rgweights[0],470,0,
@@ -395,7 +391,6 @@ color.g:=0;
 color.b:=0;
 set_pal_color(color,$40);
 //final
-reset_spacefb;
 iniciar_spacefb:=true;
 end;
 

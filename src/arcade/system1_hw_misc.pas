@@ -186,24 +186,21 @@ end;
 procedure system1_principal;
 var
   f:word;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=223 then begin
+    eventos_system1;
+    if f=224 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video;
-      eventos_system1;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
   video_sync;
 end;
@@ -345,9 +342,9 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 case main_vars.tipo_maquina of
   152,154,384:begin
-             main_screen.rot270_screen:=true;
-             iniciar_video(240,224);
-          end;
+                main_screen.rot270_screen:=true;
+                iniciar_video(240,224);
+              end;
   else iniciar_video(256,224);
 end;
 //Main CPU
@@ -359,8 +356,8 @@ z80_1:=cpu_z80.create(4000000,260);
 z80_1.init_sound(system1_sound_update);
 timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,nil,true);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(2000000,0.5);
-sn_76496_1:=sn76496_chip.Create(4000000);
+sn_76496_0:=sn76496_chip.Create(2000000,system1_ready_cb,0.5);
+sn_76496_1:=sn76496_chip.Create(4000000,system1_ready_cb,1);
 sprite_num_banks:=1;
 marcade.dswa:=$ff;
 marcade.dswa_val:=@system1_dip_credit;
@@ -532,7 +529,8 @@ case main_vars.tipo_maquina of
     z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
     //Z80 PIO
     pio_0:=tz80pio.create;
-    pio_0.change_calls(nil,nil,system1_port_a_write,system1_pio_porta_nmi,nil,system1_port_b_write,nil);
+    if main_vars.tipo_maquina<>384 then pio_0.change_calls(nil,nil,system1_port_a_write,system1_pio_porta_nmi,nil,system1_port_b_write,nil)
+      else pio_0.change_calls(nil,nil,system1_port_a_write,system1_pio_porta_nmi,nil,system1_port_gardia_write,nil)
   end;
 end;
 char_screen:=1;

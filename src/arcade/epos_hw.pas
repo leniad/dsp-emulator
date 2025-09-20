@@ -136,8 +136,7 @@ procedure reset_epos_hw;
 begin
  z80_0.reset;
  ay8910_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$be;
  palette:=0;
@@ -162,7 +161,7 @@ z80_0.change_ram_calls(epos_getbyte,epos_putbyte);
 z80_0.change_io_calls(epos_inbyte,epos_outbyte);
 z80_0.init_sound(epos_sound_update);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(687500,AY8910,1);
+AY8910_0:=ay8910_chip.create(687500,AY8910);
 case main_vars.tipo_maquina of
   94:begin
       //cargar roms

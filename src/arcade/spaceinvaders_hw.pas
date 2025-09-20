@@ -80,6 +80,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+    eventos_spaceinv;
     case f of
     96:z80_0.change_irq_vector(HOLD_LINE,$cf);
     224:begin
@@ -90,7 +91,6 @@ while EmuStatus=EsRunning do begin
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  eventos_spaceinv;
   video_sync;
 end;
 end;
@@ -204,8 +204,6 @@ procedure reset_spaceinv;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
- reset_video;
- reset_audio;
  shift_data:=0;
  shift_count:=0;
  sound1:=0;
@@ -252,7 +250,6 @@ colores[3].g:=0;
 colores[3].b:=0;
 set_pal(colores,4);
 //final
-reset_spaceinv;
 iniciar_spaceinv:=true;
 end;
 

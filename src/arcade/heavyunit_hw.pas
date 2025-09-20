@@ -99,30 +99,30 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
- case f of
-    64:begin
-         z80_0.change_irq_vector(HOLD_LINE,$ff);
-       end;
-    240:begin
-         z80_0.change_irq_vector(HOLD_LINE,$fd);
-         z80_1.change_irq(HOLD_LINE);
-         update_video_hvyunit;
+    eventos_hvyunit;
+    case f of
+      64:begin
+          z80_0.change_irq_vector(HOLD_LINE,$ff);
         end;
-  end;
-  //CPU 1
-  z80_0.run(frame_main);
-  frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-  //CPU 2
-  z80_1.run(frame_sub);
-  frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
-  //CPU Sound
-  z80_2.run(frame_snd);
-  frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
-  //MCU
-  mcs51_0.run(frame_mcu);
-  frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
+      240:begin
+            z80_0.change_irq_vector(HOLD_LINE,$fd);
+            z80_1.change_irq(HOLD_LINE);
+            update_video_hvyunit;
+          end;
+    end;
+    //CPU 1
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //CPU 2
+    z80_1.run(frame_sub);
+    frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
+    //CPU Sound
+    z80_2.run(frame_snd);
+    frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
+    //MCU
+    mcs51_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
  end;
- eventos_hvyunit;
  video_sync;
 end;
 end;
@@ -357,8 +357,6 @@ begin
  frame_mcu:=mcs51_0.tframes;
  pandora_0.reset;
  ym2203_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -443,7 +441,6 @@ marcade.dswb:=$f7;
 marcade.dswa_val2:=@hvyunit_dip_a;
 marcade.dswb_val2:=@hvyunit_dip_b;
 //reset
-reset_hvyunit;
 iniciar_hvyunit:=true;
 end;
 

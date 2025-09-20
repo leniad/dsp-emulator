@@ -365,22 +365,22 @@ procedure eventos_upl;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //COIN
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
@@ -388,26 +388,23 @@ end;
 
 procedure upl_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //snd
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=223 then begin
+  for f:=0 to 255 do begin
+    eventos_upl;
+    if f=224 then begin
       z80_0.change_irq_vector(HOLD_LINE,$d7);
       update_video_upl;
     end;
+    //main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //snd
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_upl;
   video_sync;
 end;
 end;
@@ -570,8 +567,8 @@ end;
 
 procedure ninjakid2_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
   dac_0.update;
 end;
 
@@ -689,19 +686,19 @@ function upl_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
   $00:upl_snd_inbyte:=ym2203_0.status;
-  $01:upl_snd_inbyte:=ym2203_0.Read;
+  $01:upl_snd_inbyte:=ym2203_0.read;
   $80:upl_snd_inbyte:=ym2203_1.status;
-  $81:upl_snd_inbyte:=ym2203_1.Read;
+  $81:upl_snd_inbyte:=ym2203_1.read;
 end;
 end;
 
 procedure upl_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $00:ym2203_0.Control(valor);
-  $01:ym2203_0.Write(valor);
-  $80:ym2203_1.Control(valor);
-  $81:ym2203_1.Write(valor);
+  $00:ym2203_0.control(valor);
+  $01:ym2203_0.write(valor);
+  $80:ym2203_1.control(valor);
+  $81:ym2203_1.write(valor);
 end;
 end;
 
@@ -712,8 +709,8 @@ end;
 
 procedure upl_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 procedure reset_upl;
@@ -722,11 +719,11 @@ var
 begin
  z80_0.reset;
  z80_1.reset;
- YM2203_0.reset;
- YM2203_1.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
  if main_vars.tipo_maquina=120 then dac_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -951,7 +948,6 @@ end;
 gfx[0].trans[15]:=true;
 gfx[2].trans[15]:=true;
 //final
-reset_upl;
 iniciar_upl:=true;
 end;
 

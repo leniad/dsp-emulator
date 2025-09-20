@@ -172,7 +172,6 @@ end;
 procedure baraduke_principal;
 var
   f:word;
-  frame_m,frame_mcu:single;
 
 procedure copy_sprites_hw;
 var
@@ -186,24 +185,22 @@ end;
 
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    //Main CPU
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //Sound CPU
-    m6800_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
-    if f=239 then begin
+    eventos_baraduke;
+    if f=240 then begin
         update_video_baraduke;
         m6809_0.change_irq(ASSERT_LINE);
         m6800_0.change_irq(HOLD_LINE);
         if copy_sprites then copy_sprites_hw;
     end;
+    //Main CPU
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+    //Sound CPU
+    m6800_0.run(frame_snd);
+    frame_snd:=frame_snd+m6800_0.tframes-m6800_0.contador;
   end;
-  eventos_baraduke;
   video_sync;
 end;
 end;
@@ -305,8 +302,8 @@ begin
  m6809_0.reset;
  m6800_0.reset;
  namco_snd_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=m6800_0.tframes;
  marcade.in0:=$1f;
  marcade.in1:=$1f;
  marcade.in2:=$1f;
@@ -452,7 +449,6 @@ for f:=0 to $7ff do begin
 end;
 set_pal(colores,$800);
 //final
-reset_baraduke;
 iniciar_baraduke:=true;
 end;
 

@@ -301,14 +301,16 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
+    read_events;
     //Si no pinto la pantalla aqui, Ms Pac Man Twin no hace el efecto de la pantalla...
     //Los timings del Z80 estan bien, supongo que es correcto (parece que no hay daños colaterales!)
-    if f=96 then update_video_pacman;
-    if ((f=224) and irq_vblank) then z80_0.change_irq_vector(ASSERT_LINE,irq_vector);
+    case f of
+      96:update_video_pacman;
+      224:if irq_vblank then z80_0.change_irq_vector(ASSERT_LINE,irq_vector);
+    end;
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  read_events;
   video_sync;
 end;
 end;
@@ -689,8 +691,6 @@ begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
  namco_snd_0.reset;
- reset_video;
- reset_audio;
  irq_vblank:=false;
  irq_vector:=$ff;
  dec_enable:=false;
@@ -1097,7 +1097,6 @@ for f:=0 to 255 do begin
   gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
 end;
 //final
-reset_pacman;
 iniciar_pacman:=true;
 end;
 

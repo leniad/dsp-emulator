@@ -81,6 +81,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to 311 do begin
+    eventos_twins;
     if f=204 then begin
       nec_0.set_input(NMI_IRQ,HOLD_LINE);
       video_render;
@@ -89,7 +90,6 @@ while EmuStatus=EsRunning do begin
     nec_0.run(frame_main);
     frame_main:=frame_main+nec_0.tframes-nec_0.contador;
  end;
- eventos_twins;
  video_sync;
 end;
 end;
@@ -270,8 +270,6 @@ begin
  nec_0.reset;
  frame_main:=nec_0.tframes;
  ay8910_0.reset;
- reset_video;
- reset_audio;
  i2cmem_0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -355,7 +353,6 @@ case main_vars.tipo_maquina of
         end;
       end;
 end;
-reset_twins;
 iniciar_twins:=true;
 end;
 

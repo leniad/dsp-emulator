@@ -96,21 +96,19 @@ end;
 
 procedure jailbreak_principal;
 var
-  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=m6809_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-      if f=240 then begin
-        if irq_ena then m6809_0.change_irq(HOLD_LINE);
-        update_video_jailbreak;
-      end;
-      m6809_0.run(frame);
-      frame:=frame+m6809_0.tframes-m6809_0.contador;
+    eventos_jailbreak;
+    if f=240 then begin
+      if irq_ena then m6809_0.change_irq(HOLD_LINE);
+      update_video_jailbreak;
+    end;
+    m6809_0.run(frame_main);
+    frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
   end;
-  eventos_jailbreak;
   video_sync;
 end;
 end;
@@ -180,8 +178,8 @@ begin
  m6809_0.reset;
  sn_76496_0.reset;
  vlm5030_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -258,7 +256,6 @@ marcade.dswa_val:=@jailbreak_dip_a;
 marcade.dswb_val:=@jailbreak_dip_b;
 marcade.dswc_val:=@jailbreak_dip_c;
 //final
-reset_jailbreak;
 iniciar_jailbreak:=true;
 end;
 

@@ -174,6 +174,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
    for f:=0 to $ff do begin
+     eventos_bloodbros;
      if f=240 then begin
         m68000_0.irq[irq_level]:=HOLD_LINE;
         update_video_bloodbros;
@@ -184,7 +185,6 @@ while EmuStatus=EsRunning do begin
      //Sound CPU
      seibu_snd_0.run;
    end;
-   eventos_bloodbros;
    video_sync;
 end;
 end;
@@ -278,8 +278,6 @@ begin
  m68000_0.reset;
  frame_main:=m68000_0.tframes;
  seibu_snd_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  seibu_snd_0.input:=0;
@@ -383,7 +381,6 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
-reset_bloodbros;
 iniciar_bloodbros:=true;
 end;
 

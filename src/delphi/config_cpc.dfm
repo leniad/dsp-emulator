@@ -5,7 +5,7 @@ object ConfigCPC: TConfigCPC
   BorderStyle = bsSingle
   Caption = 'Config CPC'
   ClientHeight = 419
-  ClientWidth = 568
+  ClientWidth = 586
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -377,7 +377,6 @@ object ConfigCPC: TConfigCPC
       Width = 64
       Height = 17
       Caption = '4Mb'
-      Enabled = False
       TabOrder = 1
     end
   end

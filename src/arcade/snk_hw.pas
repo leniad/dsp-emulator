@@ -501,19 +501,21 @@ end;
 
 procedure snk_principal;
 var
-  frame_m,frame_sub,frame_snd:single;
   h,f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_sub:=z80_1.tframes;
-frame_snd:=z80_2.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 223 do begin
+    update_events_snk;
+    if f=0 then begin
+      z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
+      update_video_snk;
+    end;
     for h:=1 to CPU_SYNC do begin
         //Main
-        z80_0.run(frame_m);
-        frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+        z80_0.run(frame_main);
+        frame_main:=frame_main+z80_0.tframes-z80_0.contador;
         //Sub
         z80_1.run(frame_sub);
         frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
@@ -521,13 +523,7 @@ while EmuStatus=EsRunning do begin
         z80_2.run(frame_snd);
         frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
     end;
-    if f=0 then begin
-      z80_0.change_irq(HOLD_LINE);
-      z80_1.change_irq(HOLD_LINE);
-      update_video_snk;
-    end;
   end;
-  update_events_snk;
   video_sync;
 end;
 end;
@@ -1032,7 +1028,7 @@ end;
 
 procedure tnk3_sound_update;
 begin
-  YM3812_0.update;
+  ym3812_0.update;
 end;
 
 //Main
@@ -1041,9 +1037,10 @@ begin
  z80_0.reset;
  z80_1.reset;
  z80_2.reset;
- reset_video;
- reset_audio;
- YM3812_0.reset;
+ ym3812_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_sub:=z80_1.tframes;
+ frame_snd:=z80_2.tframes;
  txt_offset:=0;
  bg_offset:=0;
  bg_pal_offset:=0;
@@ -1351,7 +1348,6 @@ case main_vars.tipo_maquina of
       end;
 end;
 //final
-reset_snk;
 iniciar_snk:=true;
 end;
 

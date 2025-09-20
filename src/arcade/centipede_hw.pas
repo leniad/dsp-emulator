@@ -15,13 +15,13 @@ const
         centipede_chars:array[0..1] of tipo_roms=(
         (n:'136001-211.f7';l:$800;p:0;crc:$880acfb9),(n:'136001-212.hj7';l:$800;p:$800;crc:$b1397029));
         centipede_dip_a:array [0..5] of def_dip2=(
-        (mask:$3;name:'Language';number:4;val4:(0,1,2,3);name4:('English','German','French','Spanish')),
+        (mask:3;name:'Language';number:4;val4:(0,1,2,3);name4:('English','German','French','Spanish')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('2','3','4','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','12K','15K','20K')),
         (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Easy','Hard')),
         (mask:$80;name:'Credit Minimum';number:2;val2:(0,$80);name2:('1','2')),());
         centipede_dip_b:array [0..3] of def_dip2=(
-        (mask:$3;name:'Coinage';number:4;val4:(3,2,1,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
+        (mask:3;name:'Coinage';number:4;val4:(3,2,1,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$1c;name:'Game Time';number:8;val8:(0,4,8,$c,$10,$14,$18,$1c);name8:('Untimed','1 Minute','2 Minutes','3 Minutes','4 Minutes','5 Minutes','6 Minutes','7 Minutes')),
         (mask:$e0;name:'Bonus Coin';number:8;val8:(0,$20,$40,$60,$80,$a0,$c0,$e0);name8:('None','3C 2C','5C 4C','6C 4C','6C 5C','4C 3C','Invalid','Invalid')),());
         centipede_dip_c:array [0..1] of def_dip2=(
@@ -32,19 +32,19 @@ const
         milliped_chars:array[0..1] of tipo_roms=(
         (n:'136013-107.r5';l:$800;p:0;crc:$68c3437a),(n:'136013-106.p5';l:$800;p:$800;crc:$f4468045));
         milliped_dip_a:array [0..6] of def_dip2=(
-        (mask:$1;name:'Millipede Head';number:2;val2:(0,1);name2:('Easy','Hard')),
-        (mask:$2;name:'Beetle';number:2;val2:(0,2);name2:('Easy','Hard')),
+        (mask:1;name:'Millipede Head';number:2;val2:(0,1);name2:('Easy','Hard')),
+        (mask:2;name:'Beetle';number:2;val2:(0,2);name2:('Easy','Hard')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('2','3','4','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('12K','15K','20K','None')),
         (mask:$40;name:'Spider';number:2;val2:(0,$40);name2:('Easy','Hard')),
         (mask:$80;name:'Starting Score Select';number:2;val2:($80,0);name2:('Off','On')),());
         milliped_dip_b:array [0..4] of def_dip2=(
-        (mask:$3;name:'Coinage';number:4;val4:(3,2,1,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
+        (mask:3;name:'Coinage';number:4;val4:(3,2,1,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Right Coin';number:4;val4:(0,4,8,$c);name4:('*1','*4','*5','*6')),
         (mask:$10;name:'Left Coin';number:2;val2:(0,$10);name2:('*1','*2')),
         (mask:$e0;name:'Bonus Coin';number:8;val8:(0,$20,$40,$60,$80,$a0,$c0,$e0);name8:('None','3C 2C','5C 4C','6C 4C','6C 5C','4C 3C','Demo Mode','Invalid')),());
         milliped_dip_c:array [0..2] of def_dip2=(
-        (mask:$3;name:'Language';number:4;val4:(0,1,2,3);name4:('English','German','French','Spanish')),
+        (mask:3;name:'Language';number:4;val4:(0,1,2,3);name4:('English','German','French','Spanish')),
         (mask:$c;name:'Bonus';number:4;val4:(0,4,8,$c);name4:('0','0 1X','0 1X 2X','0 1X 2X 3X')),());
 
 var
@@ -117,17 +117,17 @@ procedure eventos_centipede;
 begin
 if event.arcade then begin
   //system
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   //P1+P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
@@ -142,28 +142,27 @@ if event.arcade then begin
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.right[1] then marcade.in3:=(marcade.in3 and $fe) else marcade.in3:=(marcade.in3 or $1);
-  if arcade_input.left[1] then marcade.in3:=(marcade.in3 and $fd) else marcade.in3:=(marcade.in3 or $2);
-  if arcade_input.down[1] then marcade.in3:=(marcade.in3 and $fb) else marcade.in3:=(marcade.in3 or $4);
-  if arcade_input.up[1] then marcade.in3:=(marcade.in3 and $f7) else marcade.in3:=(marcade.in3 or $8);
+  if arcade_input.right[1] then marcade.in3:=(marcade.in3 and $fe) else marcade.in3:=(marcade.in3 or 1);
+  if arcade_input.left[1] then marcade.in3:=(marcade.in3 and $fd) else marcade.in3:=(marcade.in3 or 2);
+  if arcade_input.down[1] then marcade.in3:=(marcade.in3 and $fb) else marcade.in3:=(marcade.in3 or 4);
+  if arcade_input.up[1] then marcade.in3:=(marcade.in3 and $f7) else marcade.in3:=(marcade.in3 or 8);
 end;
 end;
 
 procedure centipede_principal;
 var
-  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+    eventos_centipede_hw;
     case f of
       0:marcade.dswc:=marcade.dswc and $bf;
       16,80,144,208:m6502_0.change_irq(CLEAR_LINE);
@@ -174,10 +173,9 @@ while EmuStatus=EsRunning do begin
             marcade.dswc:=marcade.dswc or $40;
           end;
     end;
-    m6502_0.run(frame_m);
-    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
+    m6502_0.run(frame_main);
+    frame_main:=frame_main+m6502_0.tframes-m6502_0.contador;
  end;
- eventos_centipede_hw;
  video_sync;
 end;
 end;
@@ -354,6 +352,7 @@ procedure reset_centipede;
 begin
  m6502_0.reset;
  pokey_0.reset;
+ frame_main:=m6502_0.tframes;
  case main_vars.tipo_maquina of
   218:begin
         fillchar(memoria[$1400],$10,$ff); //Resetear la paleta...
@@ -369,8 +368,6 @@ begin
         marcade.in3:=$ff;
       end;
  end;
- reset_video;
- reset_audio;
 end;
 
 procedure cerrar_centipede;
@@ -463,7 +460,6 @@ case main_vars.tipo_maquina of
     end;
 end;
 //final
-reset_centipede;
 iniciar_centipede:=true;
 end;
 

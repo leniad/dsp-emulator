@@ -107,8 +107,8 @@ end;
 
 procedure gbusters_videobank(valor:byte);
 begin
-  bank0_bank:=valor and $1;
-  priority:=valor and $8;
+  bank0_bank:=valor and 1;
+  priority:=valor and 8;
 end;
 
 procedure thunderx_videobank(valor:byte);
@@ -261,18 +261,18 @@ frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_thunderx;
+    if f=240 then begin
+        update_video_thunderx;
+        if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
+    end;
     //main
     konami_0.run(frame_m);
     frame_m:=frame_m+konami_0.tframes-konami_0.contador;
     //sound
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
-                    update_video_thunderx;
-                    if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
-                  end;
   end;
-  eventos_thunderx;
   video_sync;
 end;
 end;
@@ -417,8 +417,6 @@ begin
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -481,7 +479,6 @@ case main_vars.tipo_maquina of
             z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
             z80_0.init_sound(scontra_sound_update);
             //Sound Chips
-            ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$80000);
             if not(roms_load(k007232_rom,scontra_k007232)) then exit;
             k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,scontra_k007232_cb);
@@ -518,7 +515,6 @@ case main_vars.tipo_maquina of
             z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
             z80_0.init_sound(scontra_sound_update);
             //Sound Chips
-            ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$40000);
             if not(roms_load(k007232_rom,gbusters_k007232)) then exit;
             k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,scontra_k007232_cb);
@@ -556,8 +552,6 @@ case main_vars.tipo_maquina of
             //Sound CPU
             z80_0.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
             z80_0.init_sound(thunderx_sound_update);
-            //Sound Chips
-            ym2151_0:=ym2151_chip.create(3579545);
             //Iniciar video
             video_bank_call:=thunderx_videobank;
             getmem(tiles_rom,$80000);
@@ -575,9 +569,10 @@ case main_vars.tipo_maquina of
             marcade.dswc_val:=@gbusters_dip_c;
      end;
 end;
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
 sprite_colorbase:=32;
 //final
-reset_thunderx;
 iniciar_thunderx:=true;
 end;
 

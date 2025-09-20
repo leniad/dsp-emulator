@@ -208,23 +208,12 @@ end;
 
 procedure williams_principal;
 var
-  frame_m,frame_s:single;
   h:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m6809_0.tframes;
-frame_s:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
   for linea:=0 to 259 do begin
-    for h:=1 to CPU_SYNC do begin
-      //main
-      m6809_0.run(frame_m);
-      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-      //snd
-      m6800_0.run(frame_s);
-      frame_s:=frame_s+m6800_0.tframes-m6800_0.contador;
-    end;
-    update_video_williams(linea);
+    events_call;
     case linea of
          0,32,64,96,128,160,192,224:pia6821_1.cb1_w((linea and $20)<>0);
          239:begin
@@ -233,8 +222,16 @@ while EmuStatus=EsRunning do begin
              end;
          240:pia6821_1.ca1_w(false);
     end;
+    for h:=1 to CPU_SYNC do begin
+      //main
+      m6809_0.run(frame_main);
+      frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
+      //snd
+      m6800_0.run(frame_snd);
+      frame_snd:=frame_snd+m6800_0.tframes-m6800_0.contador;
+    end;
+    update_video_williams(linea);
   end;
-  events_call;
   video_sync;
 end;
 end;
@@ -425,8 +422,8 @@ begin
  pia6821_2.reset;
  if (main_vars.tipo_maquina=321) or (main_vars.tipo_maquina=322) or (main_vars.tipo_maquina=323) then blitter_0.reset;
  dac_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m6809_0.tframes;
+ frame_snd:=m6800_0.tframes;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -586,7 +583,6 @@ for f:=0 to $ff do begin
     pal_lookup[f]:=convert_pal_color(color);
 end;
 //final
-reset_williams;
 iniciar_williams:=true;
 end;
 

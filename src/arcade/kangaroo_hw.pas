@@ -18,15 +18,15 @@ const
         (n:'tvg_84.v1';l:$1000;p:$2000;crc:$e4cb26c2),(n:'tvg_86.v3';l:$1000;p:$3000;crc:$9e6a599f));
         kangaroo_sound:tipo_roms=(n:'tvg_81.8';l:$1000;p:0;crc:$fb449bfd);
         //DIP
-        kangaroo_dipa:array [0..3] of def_dip=(
-        (mask:$20;name:'Music';number:2;dip:((dip_val:$0;dip_name:'On'),(dip_val:$20;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        kangaroo_dipb:array [0..4] of def_dip=(
-        (mask:$1;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Difficulty';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$2;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$8;dip_name:'10000 30000'),(dip_val:$c;dip_name:'20000 40000'),(dip_val:$4;dip_name:'10000'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$f0;name:'Coinage';number:16;dip:((dip_val:$10;dip_name:'2C/1C'),(dip_val:$20;dip_name:'A 2C/1C B 1C/3C'),(dip_val:$0;dip_name:'1C/1C'),(dip_val:$30;dip_name:'A 1C/1C B 1C/2C'),(dip_val:$40;dip_name:'A 1C/1C B 1C/3C'),(dip_val:$50;dip_name:'A 1C/1C B 1C/4C'),(dip_val:$60;dip_name:'A 1C/1C B 1C/5C'),(dip_val:$70;dip_name:'A 1C/1C B 1C/6C'),(dip_val:$80;dip_name:'1C/2C'),(dip_val:$90;dip_name:'A 1C/2C B 1C/4C'),(dip_val:$a0;dip_name:'A 1C/2C B 1C/5C'),(dip_val:$e0;dip_name:'A 1C/2C B 1C/6C'),(dip_val:$b0;dip_name:'A 1C/2C B 1C/10C'),(dip_val:$c0;dip_name:'A 1C/2C B 1C/11C'),(dip_val:$d0;dip_name:'A 1C/2C B 1C/12C'),(dip_val:$f0;dip_name:'Free Play'))),());
+        kangaroo_dipa:array [0..3] of def_dip2=(
+        (mask:$20;name:'Music';number:2;val2:(0,$20);name2:('On','Off')),
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
+        (mask:$80;name:'Flip Screen';number:2;val2:(0,$80);name2:('Off','On')),());
+        kangaroo_dipb:array [0..4] of def_dip2=(
+        (mask:1;name:'Lives';number:2;val2:(0,1);name2:('3','5')),
+        (mask:2;name:'Difficulty';number:2;val2:(0,2);name2:('Easy','Hard')),
+        (mask:$c;name:'Bonus Life';number:4;val4:(8,$c,4,0);name4:('10K 30K','20K 40K','10K','None')),
+        (mask:$f0;name:'Coinage';number:16;val16:($10,$20,0,$30,$40,$50,$60,$70,$80,$90,$a0,$e0,$b0,$c0,$d0,$f0);name16:('2C/1C','A 2C/1C B 1C/3C','1C/1C','A 1C/1C B 1C/2C','A 1C/1C B 1C/3C','A 1C/1C B 1C/4C','A 1C/1C B 1C/5C','A 1C/1C B 1C/6C','1C/2C','A 1C/2C B 1C/4C','A 1C/2C B 1C/5C','A 1C/2C B 1C/6C','A 1C/2C B 1C/10C','A 1C/2C B 1C/11C','A 1C/2C B 1C/12C','Free Play')),());
 
 var
  video_control:array[0..$f] of byte;
@@ -45,13 +45,13 @@ begin
 	scrolly:=video_control[6];
 	scrollx:=video_control[7];
 	maska:=(video_control[10] and $28) shr 3;
-	maskb:=(video_control[10] and $07);
+	maskb:=(video_control[10] and 7);
   xora:=$ff*((video_control[9] and $20) shr 5);
   xorb:=$ff*((video_control[9] and $10) shr 4);
-	enaa:=(video_control[9] and $08)<>0;
-	enab:=(video_control[9] and $04)<>0;
-	pria:=(not(video_control[9]) and $02)<>0;
-	prib:=(not(video_control[9]) and $01)<>0;
+	enaa:=(video_control[9] and 8)<>0;
+	enab:=(video_control[9] and 4)<>0;
+	pria:=(not(video_control[9]) and 2)<>0;
+	prib:=(not(video_control[9]) and 1)<>0;
 	// iterate over pixels */
 	for y:=0 to 255 do begin
     sy:=0;
@@ -74,11 +74,11 @@ begin
       // when 0, it enables the color mask for pixels with Z = 0 */
       finalpens:=0;
       if (enaa and (pria or (pixb=0))) then begin
-        if ((pixa and $08)=0) then pixa:=pixa and maska;
+        if ((pixa and 8)=0) then pixa:=pixa and maska;
         finalpens:=finalpens or pixa;
       end;
       if (enab and (prib or (pixa=0))) then begin
-        if ((pixb and $08)=0) then pixb:=pixb and maskb;
+        if ((pixb and 8)=0) then pixb:=pixb and maskb;
         finalpens:=finalpens or pixb;
       end;
       // store the second of two pixels, which is affected by KOS1 and the A/B masks */
@@ -94,48 +94,45 @@ procedure eventos_kangaroo;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   //P2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
   //System
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
 end;
 end;
 
 procedure kangaroo_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
-    //Main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=247 then begin
+    eventos_kangaroo;
+    if f=248 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
       update_video_kangaroo;
     end;
+    //Main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_kangaroo;
   video_sync;
 end;
 end;
@@ -144,23 +141,23 @@ procedure videoram_write(offset:word;data,mask:byte);
 var
   expdata,layermask:dword;
 begin
-	// data contains 4 2-bit values packed as DCBADCBA; expand these into 4 8-bit values */
+	// data contains 4 2-bit values packed as DCBADCBA; expand these into 4 8-bit values
 	expdata:=0;
-	if (data and $01)<>0 then expdata:=expdata or $00000055;
+	if (data and 1)<>0 then expdata:=expdata or $00000055;
 	if (data and $10)<>0 then expdata:=expdata or $000000aa;
-	if (data and $02)<>0 then expdata:=expdata or $00005500;
+	if (data and 2)<>0 then expdata:=expdata or $00005500;
 	if (data and $20)<>0 then expdata:=expdata or $0000aa00;
-	if (data and $04)<>0 then expdata:=expdata or $00550000;
+	if (data and 4)<>0 then expdata:=expdata or $00550000;
 	if (data and $40)<>0 then expdata:=expdata or $00aa0000;
-	if (data and $08)<>0 then expdata:=expdata or $55000000;
+	if (data and 8)<>0 then expdata:=expdata or $55000000;
 	if (data and $80)<>0 then expdata:=expdata or $aa000000;
-	// determine which layers are enabled */
+	// determine which layers are enabled
 	layermask:=0;
-	if (mask and $08)<>0 then layermask:=layermask or $30303030;
-	if (mask and $04)<>0 then layermask:=layermask or $c0c0c0c0;
-	if (mask and $02)<>0 then layermask:=layermask or $03030303;
-	if (mask and $01)<>0 then layermask:=layermask or $0c0c0c0c;
-	// update layers */
+	if (mask and 8)<>0 then layermask:=layermask or $30303030;
+	if (mask and 4)<>0 then layermask:=layermask or $c0c0c0c0;
+	if (mask and 2)<>0 then layermask:=layermask or $03030303;
+	if (mask and 1)<>0 then layermask:=layermask or $0c0c0c0c;
+	// update layers
 	video_ram[offset]:=(video_ram[offset] and not(layermask)) or (expdata and layermask);
 end;
 
@@ -174,18 +171,18 @@ begin
 	height:=video_control[5];
 	width:=video_control[4];
 	mask:=video_control[8];
-	// during DMA operations, the top 2 bits are ORed together, as well as the bottom 2 bits */
-	// adjust the mask to account for this */
-	if (mask and $0c)<>0 then mask:=mask or $0c;
-	if (mask and $03)<>0 then mask:=mask or $03;
-	// loop over height, then width */
+	// during DMA operations, the top 2 bits are ORed together, as well as the bottom 2 bits
+	// adjust the mask to account for this
+	if (mask and $c)<>0 then mask:=mask or $c;
+	if (mask and 3)<>0 then mask:=mask or 3;
+	// loop over height, then width
 	for y:=0 to height do begin
 		for x:=0 to width do begin
 			effdst:=(dst+x) and $3fff;
 			effsrc:=src and $1fff;
       src:=src+1;
-			videoram_write(effdst,gfx_data[0,effsrc],mask and $05);
-			videoram_write(effdst,gfx_data[1,effsrc],mask and $0a);
+			videoram_write(effdst,gfx_data[0,effsrc],mask and 5);
+			videoram_write(effdst,gfx_data[1,effsrc],mask and $a);
 		end;
     dst:=dst+256;
   end;
@@ -314,8 +311,8 @@ begin
  z80_0.change_nmi(PULSE_LINE);
  z80_1.reset;
  ay8910_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -344,17 +341,15 @@ iniciar_video(240,512);
 //Main CPU
 z80_0:=cpu_z80.create(10000000 div 4,260);
 z80_0.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
+if not(roms_load(@memoria,kangaroo_rom)) then exit;
 //Sound CPU
 z80_1:=cpu_z80.create(10000000 div 8,260);
 z80_1.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.change_io_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.init_sound(kangaroo_sound_update);
-//Sound chip
-ay8910_0:=ay8910_chip.create(10000000 div 8,AY8910,0.5);
-//cargar roms
-if not(roms_load(@memoria,kangaroo_rom)) then exit;
-//cargar roms snd
 if not(roms_load(@mem_snd,kangaroo_sound)) then exit;
+//Sound chip
+ay8910_0:=ay8910_chip.create(10000000 div 8,AY8910);
 //cargar gfx
 if not(roms_load(@mem_temp,kangaroo_gfx)) then exit;
 copymemory(@gfx_data[0,0],@mem_temp[0],$2000);
@@ -365,12 +360,11 @@ for f:=0 to 7 do begin
   colores[f].b:=pal1bit(f shr 0);
 end;
 set_pal(colores,8);
-marcade.dswa:=$0;
-marcade.dswa_val:=@kangaroo_dipa;
-marcade.dswb:=$0;
-marcade.dswb_val:=@kangaroo_dipb;
+marcade.dswa:=0;
+marcade.dswa_val2:=@kangaroo_dipa;
+marcade.dswb:=0;
+marcade.dswb_val2:=@kangaroo_dipb;
 //final
-reset_kangaroo;
 iniciar_kangaroo:=true;
 end;
 

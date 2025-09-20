@@ -163,26 +163,23 @@ end;
 
 procedure irem_m63_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=mcs48_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_func;
     if f=240 then begin
         if nmi_enabled then z80_0.change_nmi(PULSE_LINE);
         update_video_m63;
     end;
     //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
     //snd
-    mcs48_0.run(frame_s);
-    frame_s:=frame_s+mcs48_0.tframes-mcs48_0.contador;
+    mcs48_0.run(frame_snd);
+    frame_snd:=frame_snd+mcs48_0.tframes-mcs48_0.contador;
   end;
-  eventos_func;
   video_sync;
 end;
 end;
@@ -348,11 +345,11 @@ procedure reset_irem_m63;
 begin
  z80_0.reset;
  mcs48_0.reset;
- reset_video;
- reset_audio;
  ay8910_0.reset;
  if main_vars.tipo_maquina=354 then ay8910_1.reset
   else dac_0.reset;
+ frame_main:=z80_0.tframes;
+ frame_snd:=mcs48_0.tframes;
  marcade.in0:=0;
  marcade.in1:=0;
  pal_bank:=0;
@@ -425,8 +422,8 @@ case main_vars.tipo_maquina of
         mcs48_0.change_io_calls(m63_snd_inport,m63_snd_outport,m63_snd_ext_inport,m63_snd_ext_outport);
         mcs48_0.init_sound(irem_m63_play_sound);
         //sound chips
-        ay8910_0:=ay8910_chip.create(12000000 div 8,AY8910,1);
-        ay8910_1:=ay8910_chip.create(12000000 div 8,AY8910,1);
+        ay8910_0:=ay8910_chip.create(12000000 div 8,AY8910);
+        ay8910_1:=ay8910_chip.create(12000000 div 8,AY8910);
         if not(roms_load(@mem_snd,wilytower_sound)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp,wilytower_char)) then exit;
@@ -492,7 +489,7 @@ case main_vars.tipo_maquina of
         mcs48_0.change_io_calls(m63_snd_inport,m63_snd_outport,m63_snd_ext_inport,fb_snd_ext_outport);
         mcs48_0.init_sound(irem_fb_play_sound);
         //sound chips
-        ay8910_0:=ay8910_chip.create(12000000 div 8,AY8910,1);
+        ay8910_0:=ay8910_chip.create(12000000 div 8,AY8910);
         if not(roms_load(@mem_snd,fightbasket_sound)) then exit;
         //samples
         if not(roms_load(@sample_data,fightbasket_samples)) then exit;
@@ -525,7 +522,6 @@ case main_vars.tipo_maquina of
       end;
 end;
 //final
-reset_irem_m63;
 iniciar_irem_m63:=true;
 end;
 

@@ -164,6 +164,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+    eventos_magmax;
     case f of
        64,192:if (ls74_clr<>0) then ls74_q:=1;
        240:begin
@@ -178,7 +179,6 @@ while EmuStatus=EsRunning do begin
     z80_0.run(frame_snd);
     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_magmax;
  video_sync;
 end;
 end;
@@ -304,8 +304,6 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  ay8910_2.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -350,10 +348,10 @@ z80_0.change_io_calls(magmax_snd_inbyte,magmax_snd_outbyte);
 z80_0.init_sound(magmax_sound_update);
 if not(roms_load(@mem_snd,magmax_sound)) then exit;
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1250000,AY8910,1);
+ay8910_0:=ay8910_chip.create(1250000,AY8910);
 ay8910_0.change_io_calls(nil,nil,magmax_porta_w,magmax_portb_w);
-ay8910_1:=ay8910_chip.create(1250000,AY8910,1);
-ay8910_2:=ay8910_chip.create(1250000,AY8910,1);
+ay8910_1:=ay8910_chip.create(1250000,AY8910);
+ay8910_2:=ay8910_chip.create(1250000,AY8910);
 //poner los datos de bg
 if not(roms_load16b(@rom18b,magmax_fondo1)) then exit;
 if not(roms_load(@rom18b,magmax_fondo2)) then exit;
@@ -387,7 +385,6 @@ for f:=0 to $ff do gfx[1].colores[f]:=(memoria_temp[$300+f] and $f) or $10;
 marcade.dswa:=$ffdf;
 marcade.dswa_val2:=@magmax_dip;
 //final
-reset_magmax;
 iniciar_magmax:=true;
 end;
 

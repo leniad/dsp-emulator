@@ -35,7 +35,6 @@ const
     (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
     gyruss_dip_c:array [0..1] of def_dip2=(
     (mask:1;name:'Demo Music';number:2;val2:(1,0);name2:('Off','On')),());
-    gyruss_timer:array[0..9] of byte=(0,1,2,3,4,9,$a,$b,$a,$d);
 
 var
   scan_line,sound_latch,sound_latch2:byte;
@@ -47,7 +46,7 @@ procedure update_video_gyruss;
 var
     x,y,atrib:byte;
     f,nchar,color:word;
-    flip_y:boolean;
+    flipx,flipy:boolean;
 begin
 for f:=0 to $3ff do begin
  if gfx[0].buffer[f] then begin
@@ -56,8 +55,10 @@ for f:=0 to $3ff do begin
     atrib:=memoria[$8000+f];
     color:=(atrib and $f) shl 2;
     nchar:=memoria[$8400+f]+((atrib and $20) shl 3);
-    put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
-    if (atrib and $10)<>0 then put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $80)<>0,(atrib and $40)<>0)
+    flipx:=(atrib and $80)<>0;
+    flipy:=(atrib and $40)<>0;
+    put_gfx_flip(x*8,y*8,nchar,color,1,0,flipx,flipy);
+    if (atrib and $10)<>0 then put_gfx_flip(x*8,y*8,nchar,color,2,0,flipx,flipy)
       else put_gfx_block_trans(x*8,y*8,2,8,8);
     gfx[0].buffer[f]:=false;
   end;
@@ -68,13 +69,13 @@ for f:=$2f downto 0 do begin
   nchar:=(mem_misc[$4041+(f*4)] shr 1)+((atrib and $20) shl 2)+((mem_misc[$4041+(f*4)] and 1) shl 8);
   color:=(atrib and $f) shl 4;
   y:=mem_misc[$4040+(f*4)];
-  flip_y:=(atrib and $40)=0;
+  flipy:=(atrib and $40)=0;
   if main_screen.flip_main_screen then begin
-    flip_y:=not(flip_y);
+    flipy:=not(flipy);
     y:=not(y);
   end;
   x:=mem_misc[$4043+(f*4)]-1;
-  put_gfx_sprite_mask(nchar,color,(atrib and $80)<>0,flip_y,1,0,$f);
+  put_gfx_sprite_mask(nchar,color,(atrib and $80)<>0,flipy,1,0,$f);
   actualiza_gfx_sprite(x,y,3,1);
 end;
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
@@ -108,8 +109,9 @@ procedure gyruss_principal;
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
-  for scan_line:=0 to $ff do begin
-    if (scan_line=240) then begin
+  for scan_line:=0 to 255 do begin
+    eventos_gyruss;
+    if scan_line=240 then begin
       if main_nmi then z80_0.change_nmi(ASSERT_LINE);
       if sub_irq then m6809_0.change_irq(ASSERT_LINE);
       update_video_gyruss;
@@ -127,7 +129,6 @@ while EmuStatus=EsRunning do begin
     mcs48_0.run(frame_snd2);
     frame_snd2:=frame_snd2+mcs48_0.tframes-mcs48_0.contador;
   end;
-  eventos_gyruss;
   video_sync;
 end;
 end;
@@ -252,6 +253,8 @@ end;
 end;
 
 function gyruss_portar:byte;
+const
+  gyruss_timer:array[0..9] of byte=(0,1,2,3,4,9,$a,$b,$a,$d);
 begin
   gyruss_portar:=gyruss_timer[(z80_1.totalt div 1024) mod 10];
 end;
@@ -260,12 +263,12 @@ procedure gyruss_sound_update;
 var
   out_left,out_right:integer;
 begin
-  out_right:=ay8910_0.update_internal^;
-  out_left:=ay8910_1.update_internal^;
-  out_right:=out_right+ay8910_2.update_internal^;
-  out_right:=(out_right+ay8910_3.update_internal^) div 3;
-  out_left:=out_left+ay8910_4.update_internal^;
-  out_left:=(out_left+dac_0.internal_update) div 3;
+  out_right:=ay8910_0.update_internal^+ay8910_2.update_internal^+ay8910_3.update_internal^;
+  out_left:=ay8910_1.update_internal^+ay8910_4.update_internal^+dac_0.internal_update;
+  if out_right>$7fff then out_right:=$7fff
+      else if out_right<-$7fff then out_right:=-$7fff;
+  if out_left>$7fff then out_left:=$7fff
+      else if out_right<-$7fff then out_left:=-$7fff;
   tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=out_left;
   tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido+1]:=out_right;
 end;
@@ -287,8 +290,6 @@ ay8910_2.reset;
 ay8910_3.reset;
 ay8910_4.reset;
 dac_0.reset;
-reset_video;
-reset_audio;
 main_nmi:=false;
 sub_irq:=false;
 sound_latch:=0;
@@ -343,7 +344,7 @@ mcs48_0.change_ram_calls(gyruss_sound2_getbyte,nil);
 mcs48_0.change_io_calls(nil,gyruss_sound2_outport,gyruss_sound2_inport,nil);
 if not(roms_load(@mem_sound_sub,gyruss_sound_sub)) then exit;
 //Sound Chip
-ay8910_0:=ay8910_chip.create(14318180 div 8,AY8910,1);
+ay8910_0:=ay8910_chip.create(14318180 div 8,AY8910,0.5);
 ay8910_1:=ay8910_chip.create(14318180 div 8,AY8910,1,true);
 ay8910_2:=ay8910_chip.create(14318180 div 8,AY8910,1,true);
 ay8910_2.change_io_calls(gyruss_portar,nil,nil,nil);
@@ -398,7 +399,6 @@ marcade.dswa_val2:=@gyruss_dip_a;
 marcade.dswb_val2:=@gyruss_dip_b;
 marcade.dswc_val2:=@gyruss_dip_c;
 //Final
-gyruss_reset;
 gyruss_iniciar:=true;
 end;
 

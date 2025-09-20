@@ -383,11 +383,9 @@ begin
   50,70:begin
         marcade.in1:=$fe;
         namco_snd_0.reset;
-        reset_samples;
   end;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  last:=0;
  hacer_int:=false;
  scroll_x:=0;
@@ -468,7 +466,7 @@ begin
    29:begin //jungler
          z80_0.change_ram_calls(jungler_getbyte,jungler_putbyte);
          //Sound Chip
-         konamisnd_0:=konamisnd_chip.create(1,TIPO_JUNGLER,1789772,$100);
+         konamisnd_0:=konamisnd_chip.create(2,TIPO_JUNGLER,1789772,$100);
          if not(roms_load(@konamisnd_0.memoria,jungler_sound)) then exit;
          //cargar roms
          if not(roms_load(@memoria,jungler_rom)) then exit;

@@ -464,10 +464,8 @@ procedure cpu_m6809.trf(valor:byte);
 var
   temp:word;
 begin
-if ((valor xor (valor shr 4)) and $08)<>0 then begin
-  temp:=$ff
-end else begin
-  case (valor shr 4) of
+temp:=$ffff;
+case (valor shr 4) of
     $0:temp:=r.d.w; //D
     $1:temp:=r.x;  //X
     $2:temp:=r.y; //Y
@@ -478,7 +476,6 @@ end else begin
     $9:temp:=r.d.b; //b
     $a:temp:=self.dame_pila;  //cc
     $b:temp:=r.dp; //dp
-  end;
 end;
 case (valor and 15) of
     $0:r.d.w:=temp; //D
@@ -498,11 +495,9 @@ procedure cpu_m6809.trf_ex(valor:byte);
 var
   temp1,temp2:word;
 begin
-if ((valor xor (valor shr 4)) and $08)<>0 then begin
-    temp1:=$ff;
-    temp2:=$ff;
-end else begin
-  case (valor shr 4) of
+temp1:=$ffff;
+temp2:=$ffff;
+case (valor shr 4) of
     $0:temp1:=r.d.w; //D
     $1:temp1:=r.x;  //X
     $2:temp1:=r.y; //Y
@@ -513,8 +508,8 @@ end else begin
     $9:temp1:=r.d.b; //b
     $a:temp1:=self.dame_pila;  //cc
     $b:temp1:=r.dp; //dp
-  end;
-  case (valor and 15) of
+end;
+case (valor and $f) of
     $0:temp2:=r.d.w; //D
     $1:temp2:=r.x;  //X
     $2:temp2:=r.y; //Y
@@ -525,7 +520,6 @@ end else begin
     $9:temp2:=r.d.b; //b
     $a:temp2:=self.dame_pila;  //cc
     $b:temp2:=r.dp; //dp
-  end;
 end;
 case (valor shr 4) of
     $0:r.d.w:=temp2; //D
@@ -539,7 +533,7 @@ case (valor shr 4) of
     $a:self.pon_pila(temp2);  //cc
     $b:r.dp:=temp2; //dp
 end;
-case (valor and 15) of
+case (valor and $f) of
     $0:r.d.w:=temp1; //D
     $1:r.x:=temp1;  //X
     $2:r.y:=temp1; //Y

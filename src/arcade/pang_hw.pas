@@ -71,52 +71,50 @@ procedure eventos_pang;
 begin
 if event.arcade then begin
   //IN1
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
   //IN2
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
   //IN0
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
 end;
 
 procedure pang_principal;
 var
-  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+  for f:=0 to 255 do begin
+    eventos_pang;
     case f of
-      $ef:begin
-            z80_0.change_irq(HOLD_LINE);
-            irq_source:=1;
-          end;
-      $f7:vblank:=8;
-      $ff:begin
+      0:begin
           z80_0.change_irq(HOLD_LINE);
           vblank:=0;
           irq_source:=0;
       end;
+      240:begin
+            z80_0.change_irq(HOLD_LINE);
+            irq_source:=1;
+            update_video_pang;
+          end;
+      248:vblank:=8;
     end;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  update_video_pang;
-  eventos_pang;
   video_sync;
 end;
 end;
@@ -182,16 +180,16 @@ end;
 procedure pang_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:begin
-      main_screen.flip_main_screen:=(valor and $4)<>0;
+  0:begin
+      main_screen.flip_main_screen:=(valor and 4)<>0;
       pal_bank:=(valor and $20) shl 6;
      end;
-  $2:rom_nbank:=valor and $f;
-  $3:ym2413_0.write(valor);
-  $4:ym2413_0.address(valor);
-  $5:oki_6295_0.write(valor);
-  $7:video_bank:=valor;
-  $8:if valor<>0 then eepromser_0.cs_write(ASSERT_LINE)
+  2:rom_nbank:=valor and $f;
+  3:ym2413_0.write(valor);
+  4:ym2413_0.address(valor);
+  5:oki_6295_0.write(valor);
+  7:video_bank:=valor;
+  8:if valor<>0 then eepromser_0.cs_write(ASSERT_LINE)
       else eepromser_0.cs_write(CLEAR_LINE);
   $10:if (valor<>0) then eepromser_0.clk_write(ASSERT_LINE)
       else eepromser_0.clk_write(CLEAR_LINE);
@@ -210,10 +208,9 @@ procedure reset_pang;
 begin
  z80_0.reset;
  ym2413_0.reset;
- reset_video;
- reset_audio;
  oki_6295_0.reset;
  eepromser_0.reset;
+ frame_main:=z80_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -321,7 +318,6 @@ freemem(mem_temp3);
 freemem(mem_temp2);
 freemem(ptemp);
 //final
-reset_pang;
 iniciar_pang:=true;
 end;
 end.

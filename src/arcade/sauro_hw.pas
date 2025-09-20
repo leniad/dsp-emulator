@@ -90,8 +90,8 @@ procedure eventos_sauro;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
@@ -99,8 +99,8 @@ if event.arcade then begin
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
   //P2
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
@@ -116,7 +116,8 @@ var
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 255 do begin
+    eventos_sauro;
     if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_sauro;
@@ -128,7 +129,6 @@ while EmuStatus=EsRunning do begin
     z80_1.run(frame_snd);
     frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_sauro;
   video_sync;
 end;
 end;
@@ -223,8 +223,6 @@ begin
  frame_main:=z80_0.tframes;
  frame_snd:=z80_1.tframes;
  ym3812_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  scroll_bg:=0;
@@ -302,7 +300,6 @@ marcade.dswb:=$2f;
 marcade.dswa_val2:=@sauro_dip_a;
 marcade.dswb_val2:=@sauro_dip_b;
 //final
-reset_sauro;
 iniciar_sauro:=true;
 end;
 

@@ -136,26 +136,23 @@ end;
 
 procedure blueprint_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+  for f:=0 to 255 do begin
+    eventos_blueprint;
     if f=239 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_blueprint;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_blueprint;
   video_sync;
 end;
 end;
@@ -275,8 +272,8 @@ z80_0.reset;
 z80_1.reset;
 ay8910_0.reset;
 ay8910_1.reset;
-reset_video;
-reset_audio;
+frame_main:=z80_0.tframes;
+frame_snd:=z80_1.tframes;
 sound_latch:=0;
 marcade.in0:=0;
 marcade.in1:=0;
@@ -403,7 +400,6 @@ for f:=0 to $207 do begin
 end;
 set_pal(colores,$208);
 //final
-blueprint_reset;
 iniciar_blueprint:=true;
 end;
 

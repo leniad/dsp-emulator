@@ -93,7 +93,7 @@ self.push_s(r.d.a);
 r.cc.e:=true;
 self.push_s(self.dame_pila);
 call_irq:=19;
-r.pc:=self.getword($FFF8);
+r.pc:=self.getword($fff8);
 r.cc.i:=true;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
 end;
@@ -106,7 +106,7 @@ self.push_s(self.dame_pila);
 call_firq:=10;
 r.cc.f:=true;
 r.cc.i:=true;
-r.pc:=self.getword($FFF6);
+r.pc:=self.getword($fff6);
 if self.pedir_firq=HOLD_LINE then self.pedir_firq:=CLEAR_LINE;
 end;
 
@@ -114,7 +114,7 @@ procedure cpu_konami.trf(valor:byte);
 var
   temp:word;
 begin
-case (valor and $7) of
+case (valor and 7) of
     $0:temp:=r.d.a; //A
     $1:temp:=r.d.b; //B
     $2:temp:=r.x; //X
@@ -136,7 +136,7 @@ procedure cpu_konami.trf_ex(valor:byte);
 var
   temp1,temp2:word;
 begin
-case (valor and $7) of
+case (valor and 7) of
     $0:temp1:=r.d.a; //A
     $1:temp1:=r.d.b;  //B
     $2:temp1:=r.x; //X
@@ -152,7 +152,7 @@ case ((valor shr 4) and 7) of
     $4:temp2:=r.s; //S
     $5:temp2:=r.u; //U
 end;
-case (valor and $7) of
+case (valor and 7) of
     $0:r.d.a:=temp2; //A
     $1:r.d.b:=temp2;  //B
     $2:r.x:=temp2; //X
@@ -650,7 +650,7 @@ case instruccion of
           templ:=r.x*r.y;
           r.x:=templ shr 16;
           r.y:=templ and $ffff;
-          r.cc.z:=(templ and $ffffffff)=0;
+          r.cc.z:=(templ=0);
           r.cc.c:=(templ and $8000)<>0;
          end;
      $b5:begin //divx 10
@@ -664,7 +664,7 @@ case instruccion of
           r.x:=tempw;
           r.d.b:=tempb;
           r.cc.c:=(tempw and $80)<>0;
-          r.cc.z:=tempw=0;
+          r.cc.z:=(tempw=0);
          end;
      $b6:while (r.u<>0) do begin //bmove
               tempb:=self.getbyte(r.y);

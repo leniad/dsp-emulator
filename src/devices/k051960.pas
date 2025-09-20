@@ -28,7 +28,7 @@ type
       romoffset:word;
       spriterombank:array[0..2] of byte;
       sprite_rom:pbyte;
-      sprite_size,sprite_mask:dword;
+      sprite_size:dword;
       k051960_cb:t_k051960_cb;
       sorted_list:array[0..(NUM_SPRITES)-1] of integer;
       irq_cb,firq_cb,nmi_cb:t_irq_call;
@@ -65,7 +65,6 @@ const
 begin
   self.sprite_rom:=spr_rom;
   self.sprite_size:=spr_size;
-  self.sprite_mask:=(spr_size div 128)-1;
   self.k051960_cb:=call_back;
   self.pant:=pant;
   self.ngfx:=ngfx;
@@ -174,7 +173,7 @@ var
   f:byte;
 begin
 for f:=0 to (NUM_SPRITES)-1 do self.sorted_list[f]:=-1;
-for f:=0 to $7f do
+for f:=0 to (NUM_SPRITES)-1 do
   if (self.ram[f*8] and $80)<>0 then self.sorted_list[self.ram[f*8] and $7f]:=f*8;
 end;
 
@@ -238,18 +237,18 @@ begin
 					  else c:=c+yoffset[y];
           if (shadow<>0) then begin
             if ((zx=1) and (zy=1)) then begin
-              put_gfx_sprite_alpha(c and self.sprite_mask,color shl 4,flipx,flipy,self.ngfx);
+              put_gfx_sprite_alpha(c,color shl 4,flipx,flipy,self.ngfx);
               actualiza_gfx_sprite_alpha(sx,sy,self.pant,self.ngfx);
             end else begin
-              put_gfx_sprite_zoom_alpha(c and self.sprite_mask,color shl 4,flipx,flipy,self.ngfx,zx,zy);
+              put_gfx_sprite_zoom_alpha(c,color shl 4,flipx,flipy,self.ngfx,zx,zy);
               actualiza_gfx_sprite_zoom_alpha(sx,sy,self.pant,self.ngfx,zx,zy);
             end;
           end else begin
             if ((zx=1) and (zy=1)) then begin
-              put_gfx_sprite(c and self.sprite_mask,color shl 4,flipx,flipy,self.ngfx);
+              put_gfx_sprite(c,color shl 4,flipx,flipy,self.ngfx);
               actualiza_gfx_sprite(sx,sy,self.pant,self.ngfx);
             end else begin
-              put_gfx_sprite_zoom(c and self.sprite_mask,color shl 4,flipx,flipy,self.ngfx,zx,zy);
+              put_gfx_sprite_zoom(c,color shl 4,flipx,flipy,self.ngfx,zx,zy);
               actualiza_gfx_sprite_zoom(sx,sy,self.pant,self.ngfx,zx,zy);
             end;
           end;

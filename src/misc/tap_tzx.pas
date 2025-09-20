@@ -196,7 +196,7 @@ var
 begin
 cinta_tzx.estados:=cinta_tzx.estados+avanza_estados;
 if cinta_tzx.estados<tzx_estados_necesarios then exit;
-main_vars.mensaje_principal:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales_tzx);
+main_vars.mensaje_principal:='    '+leng.mensajes[1]+': '+inttostr(datos_totales_tzx);
 cinta_tzx.estados:=cinta_tzx.estados-tzx_estados_necesarios;
 if cinta_tzx.en_pausa then begin
   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
@@ -777,12 +777,12 @@ while longitud<long do begin
         cinta_tzx.datos_tzx[indice].checksum:=datos^;
         inc(datos);
         //Por defecto pongo como nombre 'datos'
-        cadena:=leng[main_vars.idioma].cinta[2];
+        cadena:=leng.cinta[2];
         case tap_header.flag of
             $00:if tap_header.size>18 then begin //Pongo el nombre si hay mas de 18!
-                  cadena:=leng[main_vars.idioma].cinta[0]+': '+tap_header.file_name; //cabecera
+                  cadena:=leng.cinta[0]+': '+tap_header.file_name; //cabecera
                 end;
-            $ff:cadena:=leng[main_vars.idioma].cinta[1]; //bytes
+            $ff:cadena:=leng.cinta[1]; //bytes
         end;
         tape_window1.stringgrid1.Cells[0,indice]:=cadena;
         tape_window1.stringgrid1.Cells[1,indice]:=inttostr(tap_header.size);
@@ -1085,7 +1085,7 @@ if cinta_tzx.datos_tzx[0].tipo_bloque<>$20 then begin
     tape_window1.stringgrid1.Cells[1,f]:=tape_window1.stringgrid1.Cells[1,f-1];
   end;
   //Creo la pausa
-  tape_window1.stringgrid1.Cells[0,0]:=leng[main_vars.idioma].cinta[9];
+  tape_window1.stringgrid1.Cells[0,0]:=leng.cinta[9];
   tape_window1.stringgrid1.Cells[1,0]:='2000ms.';
   cinta_tzx.indice_cinta:=0;
   cinta_tzx.indice_saltos[0]:=0;
@@ -1174,7 +1174,7 @@ while longitud<long do begin
                           inc(long_final,tzx_type_10.size);
                           freemem(tzx_type_10);
                           cinta_tzx.datos_tzx[temp].checksum:=data^;inc(data);
-                          cadena:=leng[main_vars.idioma].cinta[2]; //datos
+                          cadena:=leng.cinta[2]; //datos
                           if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=1) or (main_vars.tipo_maquina=2) or (main_vars.tipo_maquina=3) or (main_vars.tipo_maquina=4) or (main_vars.tipo_maquina=5)) then begin
                               ptemp:=cinta_tzx.datos_tzx[temp].datos;dec(ptemp,2);
                               getmem(tap_header,sizeof(ttap_header));
@@ -1182,10 +1182,10 @@ while longitud<long do begin
                               case tap_header.flag of
                                 $00:begin
                                       cinta_tzx.datos_tzx[temp].ltono_cab:=8064;
-                                      cadena:=leng[main_vars.idioma].cinta[0]+': '+tap_header.file_name; //cabecera
+                                      cadena:=leng.cinta[0]+': '+tap_header.file_name; //cabecera
                                     end;
-                                $ff:cadena:=leng[main_vars.idioma].cinta[1]; //bytes
-                                  else cadena:=leng[main_vars.idioma].cinta[2]; //datos
+                                $ff:cadena:=leng.cinta[1]; //bytes
+                                  else cadena:=leng.cinta[2]; //datos
                               end;
                               freemem(tap_header);
                           end;
@@ -1208,14 +1208,14 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
                           inc(data,cinta_tzx.datos_tzx[temp].lbloque);inc(longitud,cinta_tzx.datos_tzx[temp].lbloque);
-                          cadena:=leng[main_vars.idioma].cinta[3]; //bytes turbo
+                          cadena:=leng.cinta[3]; //bytes turbo
                           inc(long_final,cinta_tzx.datos_tzx[temp].lbloque);
                           if ((main_vars.tipo_maquina=7) or (main_vars.tipo_maquina=8) or (main_vars.tipo_maquina=9)) then begin
                               ptemp:=cinta_tzx.datos_tzx[temp].datos;
                               getmem(tzx_cpc_header,sizeof(ttzx_cpc_header));
                               copymemory(tzx_cpc_header,ptemp,18);
                               if tzx_cpc_header.sync=$2c then begin
-                                cadena:=leng[main_vars.idioma].cinta[0]+': '+tzx_cpc_header.name;
+                                cadena:=leng.cinta[0]+': '+tzx_cpc_header.name;
                                 cadena:=cadena+' ('+chr(48+(tzx_cpc_header.part div 10))+chr(48+(tzx_cpc_header.part mod 10))+')';
                               end;
                               freemem(tzx_cpc_header);
@@ -1229,7 +1229,7 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].lcabecera:=tzx_type_12.one_pulse;
                           cinta_tzx.datos_tzx[temp].ltono_cab:=tzx_type_12.number_pulse;
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
-                          cadena:=leng[main_vars.idioma].cinta[4]; //Tono Puro
+                          cadena:=leng.cinta[4]; //Tono Puro
                           cadena2:=' ';
                           freemem(tzx_type_12);
                         end;
@@ -1243,7 +1243,7 @@ while longitud<long do begin
                           //Los guardo (los pulsos son word!! por lo que es la longitud*2)
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,tempb*2);
                           inc(data,tempb*2);inc(longitud,tempb*2);
-                          cadena:=leng[main_vars.idioma].cinta[5]; //Secuencia Pulsos
+                          cadena:=leng.cinta[5]; //Secuencia Pulsos
                           cadena2:=' ';
                         end;
                     $14:begin  //datos puros
@@ -1260,7 +1260,7 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
                           inc(data,cinta_tzx.datos_tzx[temp].lbloque);inc(longitud,cinta_tzx.datos_tzx[temp].lbloque);
-                          cadena:=leng[main_vars.idioma].cinta[6]; //Datos Puros
+                          cadena:=leng.cinta[6]; //Datos Puros
                           inc(long_final,cinta_tzx.datos_tzx[temp].lbloque);
                         end;
                     $15:begin  //direct recording
@@ -1276,7 +1276,7 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
                           inc(data,cinta_tzx.datos_tzx[temp].lbloque);inc(longitud,cinta_tzx.datos_tzx[temp].lbloque);
-                          cadena:=leng[main_vars.idioma].cinta[7]; //Grabacion Directa
+                          cadena:=leng.cinta[7]; //Grabacion Directa
                           inc(long_final,cinta_tzx.datos_tzx[temp].lbloque);
                         end;
                     $19:begin
@@ -1293,7 +1293,7 @@ while longitud<long do begin
                           if not(cinta_tzx.grupo) then begin
                             cinta_tzx.datos_tzx[temp].tipo_bloque:=$21;
                             getmem(cinta_tzx.datos_tzx[temp].datos,1);
-                            cadena:=leng[main_vars.idioma].cinta[10]+': Generalized Data';
+                            cadena:=leng.cinta[10]+': Generalized Data';
                             inicio_grupo:=temp;
                             cinta_tzx.indice_saltos[temp]:=contador;
                             inc(temp);
@@ -1393,11 +1393,11 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
                           if not(cinta_tzx.grupo) then begin
                             if tzx_gen_word.valor=0 then begin
-                                cadena:=leng[main_vars.idioma].cinta[8]; //STOP the tape
+                                cadena:=leng.cinta[8]; //STOP the tape
                                 cadena2:=' ';
                                 cinta_tzx.datos_tzx[temp-1].lpausa:=0;
                             end else begin
-                                cadena:=leng[main_vars.idioma].cinta[9]; //Pausa
+                                cadena:=leng.cinta[9]; //Pausa
                                 cadena2:=inttostr(tzx_gen_word.valor)+'ms.';
                             end;
                           end;
@@ -1412,7 +1412,7 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,tempb);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,tempb);
                           inc(data,tempb);inc(longitud,tempb);
-                          nombre_grupo:=leng[main_vars.idioma].cinta[10]+': '; //grupo
+                          nombre_grupo:=leng.cinta[10]+': '; //grupo
                           ptemp:=cinta_tzx.datos_tzx[temp].datos;
                           for f:=0 to (tempb-1) do begin
                             nombre_grupo:=nombre_grupo+chr(ptemp^);
@@ -1435,7 +1435,7 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].tipo_bloque:=$23;
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
                           cinta_tzx.datos_tzx[temp].salta_bloque:=smallint(tzx_gen_word.valor);
-                          cadena:=leng[main_vars.idioma].cinta[11]+' '+inttostr(smallint(tzx_gen_word.valor));
+                          cadena:=leng.cinta[11]+' '+inttostr(smallint(tzx_gen_word.valor));
                           cadena2:=' ';
                           freemem(tzx_gen_word);
                         end;
@@ -1447,7 +1447,7 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].lbloque:=tzx_gen_word.valor;
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
                           punto_loop:=temp+1;
-                          cadena:=leng[main_vars.idioma].cinta[12]; //Loop
+                          cadena:=leng.cinta[12]; //Loop
                           cadena2:=' ';
                           freemem(tzx_gen_word);
                          end;
@@ -1455,7 +1455,7 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].tipo_bloque:=$25;
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
                           cinta_tzx.datos_tzx[temp].lbloque:=punto_loop;
-                          cadena:=leng[main_vars.idioma].cinta[13];  //fin del loop
+                          cadena:=leng.cinta[13];  //fin del loop
                           cadena2:=' ';
                         end;
                     $26:begin //Call sequence
@@ -1494,7 +1494,7 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].tipo_bloque:=$2a;
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
                           inc(data,4);inc(longitud,4);
-                          cadena:=leng[main_vars.idioma].cinta[14];
+                          cadena:=leng.cinta[14];
                           cadena2:=' ';
                         end;
                     $2b:begin //Set signal level
@@ -1516,7 +1516,7 @@ while longitud<long do begin
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,tempb);
                           inc(data,tempb);inc(longitud,tempb);
                           ptemp:=cinta_tzx.datos_tzx[temp].datos;
-                          cadena:=leng[main_vars.idioma].cinta[15]+': ';
+                          cadena:=leng.cinta[15]+': ';
                           for f:=1 to tempb do begin
                                 cadena:=cadena+chr(ptemp^);
                                 inc(ptemp);
@@ -1534,7 +1534,7 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,tempb);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,tempb);
                           inc(data,tempb);inc(longitud,tempb);
-                          cadena:=leng[main_vars.idioma].cinta[16];
+                          cadena:=leng.cinta[16];
                           cadena2:=' ';
                         end;
                     $32,$33:begin  //informacion
@@ -1543,11 +1543,11 @@ while longitud<long do begin
                           if selector=$32 then begin
                             cinta_tzx.datos_tzx[temp].lbloque:=sacar_word(data);
                             inc(data,2);inc(longitud,2);
-                            cadena:=leng[main_vars.idioma].cinta[17]; //Archivo
+                            cadena:=leng.cinta[17]; //Archivo
                           end else begin
                             cinta_tzx.datos_tzx[temp].lbloque:=data^*3;
                             inc(data);inc(longitud);
-                            cadena:=leng[main_vars.idioma].cinta[18]; //Hardware
+                            cadena:=leng.cinta[18]; //Hardware
                           end;
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
@@ -1742,7 +1742,7 @@ while longitud<long do begin
             cinta_tzx.datos_tzx[contador].crc32:=calc_crc(cinta_tzx.datos_tzx[contador].datos,MAX_PULSES);
             tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
             tape_window1.stringgrid1.Cells[1,contador]:=' ';
-            tape_window1.stringgrid1.Cells[0,contador]:=leng[main_vars.idioma].cinta[5];
+            tape_window1.stringgrid1.Cells[0,contador]:=leng.cinta[5];
             puls_total_long:=0;
             //Otro bloque...
             inc(contador);
@@ -1764,8 +1764,8 @@ while longitud<long do begin
     cinta_tzx.indice_select[contador]:=contador;
     cinta_tzx.datos_tzx[contador].crc32:=calc_crc(cinta_tzx.datos_tzx[contador].datos,cinta_tzx.datos_tzx[contador].lbloque);
     tape_window1.stringgrid1.Cells[1,contador]:=' ';
-    tape_window1.stringgrid1.Cells[0,contador]:=leng[main_vars.idioma].cinta[5];
-    cadena3:=leng[main_vars.idioma].cinta[5]; //Secuencia Pulsos
+    tape_window1.stringgrid1.Cells[0,contador]:=leng.cinta[5];
+    cadena3:=leng.cinta[5]; //Secuencia Pulsos
     cadena2:=' ';
     datos_ok:=true;
     freemem(pzx_pulse);
@@ -1777,7 +1777,7 @@ while longitud<long do begin
     //Set pause
     cinta_tzx.datos_tzx[contador].tipo_bloque:=$20;
     cinta_tzx.datos_tzx[contador].lpausa:=pzx_pause.pause and $7fffffff;
-    cadena3:=leng[main_vars.idioma].cinta[9]; //Pausa
+    cadena3:=leng.cinta[9]; //Pausa
     cadena2:=inttostr(cinta_tzx.datos_tzx[contador].lpausa div TZX_CLOCK_PAUSE)+'ms.';
     datos_ok:=true;
     set_signal:=true;
@@ -1830,7 +1830,7 @@ while longitud<long do begin
     cinta_tzx.datos_tzx[contador].lbloque:=pzx_header.size;
     getmem(cinta_tzx.datos_tzx[contador].datos,pzx_header.size);
     copymemory(cinta_tzx.datos_tzx[contador].datos,ptemp,pzx_header.size);
-    cadena3:=leng[main_vars.idioma].cinta[15]+': ';
+    cadena3:=leng.cinta[15]+': ';
     cadena2:=' ';
     for f:=1 to pzx_header.size do begin
       cadena3:=cadena3+chr(ptemp^);
@@ -1843,11 +1843,11 @@ while longitud<long do begin
     case tempw of
       0:begin
           cinta_tzx.datos_tzx[contador].tipo_bloque:=$20;
-          cadena3:=leng[main_vars.idioma].cinta[8];
+          cadena3:=leng.cinta[8];
         end;
       1:begin
           cinta_tzx.datos_tzx[contador].tipo_bloque:=$2a;
-          cadena3:=leng[main_vars.idioma].cinta[14];
+          cadena3:=leng.cinta[14];
         end;
     end;
     getmem(cinta_tzx.datos_tzx[contador].datos,1);

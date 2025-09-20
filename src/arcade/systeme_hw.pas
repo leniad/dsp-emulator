@@ -107,22 +107,20 @@ end;
 
 procedure systeme_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
+      eventos_systeme;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
       vdp_0.refresh(f);
       vdp_1.refresh(f);
   end;
   actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3);
   actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,2,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3);
   actualiza_trozo(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,3,0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,PANT_TEMP);
-  eventos_systeme;
   video_sync;
 end;
 end;
@@ -327,7 +325,7 @@ begin
  vdp_0.reset;
  vdp_1.reset;
  pia8255_0.reset;
- reset_audio;
+ frame_main:=z80_0.tframes;
  rom_bank:=0;
  vdp0_bank:=0;
  vdp1_bank:=0;
@@ -340,7 +338,6 @@ begin
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
- reset_analog;
 end;
 
 function iniciar_systeme:boolean;
@@ -460,7 +457,6 @@ case main_vars.tipo_maquina of
       end;
 end;
 //final
-reset_systeme;
 iniciar_systeme:=true;
 end;
 

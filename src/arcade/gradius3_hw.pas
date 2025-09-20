@@ -118,59 +118,55 @@ procedure eventos_gradius3;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //P2
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   //COIN
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
 procedure gradius3_principal;
 var
-  frame_m,frame_sub,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_sub:=m68000_1.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-  //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //sub
-  m68000_1.run(frame_sub);
-  frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
-  //sound
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+  eventos_gradius3;
   case f of
-    15:if (irqB_mask and 2)<>0 then m68000_1.irq[2]:=HOLD_LINE;
-    239:begin
+    16:if (irqB_mask and 2)<>0 then m68000_1.irq[2]:=HOLD_LINE;
+    240:begin
           update_video_gradius3;
           if irqA_mask then m68000_0.irq[2]:=HOLD_LINE;
           if (irqB_mask and 1)<>0 then m68000_1.irq[1]:=HOLD_LINE;
         end;
   end;
+  //main
+  m68000_0.run(frame_main);
+  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+  //sub
+  m68000_1.run(frame_sub);
+  frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
+  //sound
+  z80_0.run(frame_snd);
+  frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_gradius3;
  video_sync;
 end;
 end;
@@ -217,8 +213,8 @@ case direccion of
                    end;
     $c0000:begin
               valor:=valor shr 8;
-              priority:=(valor and $4)<>0;
-              if (valor and $8)<>0 then m68000_1.change_halt(CLEAR_LINE)
+              priority:=(valor and 4)<>0;
+              if (valor and 8)<>0 then m68000_1.change_halt(CLEAR_LINE)
                 else m68000_1.change_halt(ASSERT_LINE);
 		          irqA_mask:=(valor and $20)<>0;
             end;
@@ -259,7 +255,7 @@ begin
 case direccion of
     0..$fffff:; //ROM
     $100000..$103fff:ram_sub[(direccion and $3fff) shr 1]:=valor;
-    $140000:irqB_mask:=(valor shr 8) and $7;
+    $140000:irqB_mask:=(valor shr 8) and 7;
     $200000..$203fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $24c000..$253fff:begin
                         direccion:=(direccion-$24c000) shr 1;
@@ -314,8 +310,9 @@ begin
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_sub:=m68000_1.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -384,7 +381,6 @@ marcade.dswb_val:=@gradius3_dip_b;
 marcade.dswc:=$ff;
 marcade.dswc_val:=@gradius3_dip_c;
 //final
-reset_gradius3;
 iniciar_gradius3:=true;
 end;
 

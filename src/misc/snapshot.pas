@@ -122,6 +122,7 @@ case model of
     end;
 end;
 llamadas_maquina.iniciar;
+principal1.timer1.enabled:=true;
 end;
 
 //Spectrum .SNA
@@ -821,7 +822,7 @@ end;
 //Z80
 function abrir_z80(datos:pbyte;long:integer;es_dsp:boolean):boolean;
 var
-  longitud,contador:integer;
+  longitud,contador,templ:integer;
   f:byte;
   puntero:pointer;
   spec_z80_reg:npreg_z80;
@@ -898,7 +899,7 @@ if (z80_regs.pc=0) then begin  //version 2 o 3
                   inc(datos,z80_ram.longitud+3);inc(longitud,z80_ram.longitud+3);
                   contador:=z80_ram.longitud;
                   getmem(puntero,$5000); //Siempre un poco mas por si acaso
-                  if es_dsp then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(puntero),contador)
+                  if es_dsp then Decompress_zlib(pointer(@z80_ram.datos[0]),contador,pointer(puntero),templ)
                     else descomprimir_z80(puntero,@z80_ram.datos[0],contador);
                   copymemory(@z80_ram.datos[0],puntero,$4000);
                   freemem(puntero);
@@ -1429,7 +1430,7 @@ main_z80_reg.hl2.w:=cpc_sna.hl2;
 //GA
 cpc_ga.pen:=cpc_sna.ga_pen;
 copymemory(@cpc_ga.pal[0],@cpc_sna.ga_pal[0],17);
-write_ga($80+(cpc_sna.ga_conf and $3f));
+write_ga(0,$80+(cpc_sna.ga_conf and $3f));
 //RAM
 write_ram(0,cpc_sna.ram_config);
 //CRT
@@ -1437,6 +1438,7 @@ cpc_crt.reg:=cpc_sna.crt_index and $1f;
 for f:=0 to 17 do cpc_crt.regs[f]:=cpc_sna.crt_regs[f];
 if cpc_crt.regs[1]<50 then cpc_crt.pixel_visible:=cpc_crt.regs[1]*8
   else cpc_crt.pixel_visible:=49*8;
+cpc_crt.borde:=(PANTALLA_LARGO_CPC-cpc_crt.pixel_visible) shr 1;
 cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
 //ROM
 cpc_outbyte($df00,cpc_sna.rom_config);
@@ -2527,7 +2529,7 @@ begin
 if saverom(nombre,indice,system_type) then begin
     nombre:=changefileext(nombre,'.dsp');
     if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
-        if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+        if MessageDlg(leng.mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
     end;
     correcto:=snapshot_w(nombre,system_type);
     if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);

@@ -85,7 +85,7 @@ procedure reset_chip8;
 var
   f:byte;
 begin
- reset_audio;
+ reset_game_general;
  chip8_0.i:=0;
  chip8_0.sp:=0;
  chip8_0.pc:=$200;
@@ -353,7 +353,7 @@ while EmuStatus=EsRunning do begin
   for f:=0 to 11 do begin
     chip8_cpu;
     if chip8_0.sound_timer<>0 then tsample[chip8_0.sound_channel,sound_status.posicion_sonido]:=$7fff;
-    if sound_status.hay_sonido then begin
+    if sound_status.sonido_activo then begin
         if sound_status.posicion_sonido=sound_status.long_sample then play_sonido
           else sound_status.posicion_sonido:=trunc(sound_status.posicion_sonido+1);
     end;

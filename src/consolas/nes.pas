@@ -247,10 +247,10 @@ procedure nes_reset;
 begin
   //IMPORTANTE: Primero reset al mapper para que coloque correctamente las ROMS!!!!!
   nes_mapper_0.reset;
-  reset_audio;
   n2a03_0.reset;
   ppu_nes_0.reset;
   frame_main:=n2a03_0.m6502.tframes;
+  reset_game_general;
   nes_0.joy1:=0;
   nes_0.joy2:=0;
   nes_0.joy1_read:=0;

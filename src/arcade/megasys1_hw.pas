@@ -295,30 +295,27 @@ end;
 
 procedure megasys1_a_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=m68000_1.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
-   //Main CPU
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   //Sound CPU
-   m68000_1.run(frame_s);
-   frame_s:=frame_s+m68000_1.tframes-m68000_1.contador;
+   eventos_megasys1;
    case f of
-    127:m68000_0.irq[3]:=HOLD_LINE;
-    239:begin
+    16:m68000_0.irq[1]:=HOLD_LINE;
+    128:m68000_0.irq[3]:=HOLD_LINE;
+    240:begin
           update_video_megasys1;
           m68000_0.irq[2]:=HOLD_LINE;
         end;
-    15:m68000_0.irq[1]:=HOLD_LINE;
    end;
+   //Main CPU
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   //Sound CPU
+   m68000_1.run(frame_snd);
+   frame_snd:=frame_snd+m68000_1.tframes-m68000_1.contador;
  end;
- eventos_megasys1;
  video_sync;
 end;
 end;
@@ -484,30 +481,27 @@ end;
 //Megasys C
 procedure megasys1_c_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=m68000_1.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
-   //Main CPU
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   //Sound CPU
-   m68000_1.run(frame_s);
-   frame_s:=frame_s+m68000_1.tframes-m68000_1.contador;
+   eventos_megasys1;
    case f of
-    127:m68000_0.irq[1]:=HOLD_LINE;
-    239:begin
+    0:m68000_0.irq[2]:=HOLD_LINE;
+    128:m68000_0.irq[1]:=HOLD_LINE;
+    240:begin
           update_video_megasys1;
           m68000_0.irq[4]:=HOLD_LINE;
         end;
-    261:m68000_0.irq[2]:=HOLD_LINE;
    end;
+   //Main CPU
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   //Sound CPU
+   m68000_1.run(frame_snd);
+   frame_snd:=frame_snd+m68000_1.tframes-m68000_1.contador;
  end;
- eventos_megasys1;
  video_sync;
 end;
 end;
@@ -621,8 +615,8 @@ begin
  ym2151_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=m68000_1.tframes;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;
@@ -975,7 +969,6 @@ end;
 //final
 freemem(memoria_temp);
 freemem(memoria_w);
-reset_megasys1;
 iniciar_megasys1:=true;
 end;
 

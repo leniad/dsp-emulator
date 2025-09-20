@@ -491,22 +491,16 @@ procedure reset_dkong;
 begin
  z80_0.reset;
  case main_vars.tipo_maquina of
-    15:begin
-        marcade.in2:=0;
-        reset_samples;
-       end;
-   168:begin
-        marcade.in2:=$40;
-        reset_samples;
-       end;
+    15:marcade.in2:=0;
+
+   168:marcade.in2:=$40;
    169:begin
         marcade.in2:=0;
         n2a03_0.reset;
         n2a03_1.reset;
        end;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=0;
  marcade.in1:=0;
  haz_nmi:=false;

@@ -219,8 +219,7 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$7f;
  marcade.in2:=$ff;

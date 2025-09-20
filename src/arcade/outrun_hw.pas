@@ -408,6 +408,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+     eventos_outrun;
      case f of
         65,129,193:begin
              m68000_0.irq[2]:=ASSERT_LINE;
@@ -437,7 +438,6 @@ while EmuStatus=EsRunning do begin
         frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
      end;
   end;
-  eventos_outrun;
   video_sync;
 end;
 end;
@@ -808,9 +808,6 @@ begin
  ym2151_0.reset;
  sega_pcm_0.reset;
  pia8255_0.reset;
- reset_video;
- reset_audio;
- reset_analog;
  marcade.in0:=$ef;
  s16_info.screen_enabled:=false;
  fillchar(s16_info.tile_buffer,$4000,1);
@@ -947,7 +944,6 @@ for f:=0 to 31 do begin
   s16_info.hilight[f]:=combine_6_weights(addr(weights[1]),i0,i1,i2,i3,i4,1);
 end;
 //final
-reset_outrun;
 iniciar_outrun:=true;
 end;
 

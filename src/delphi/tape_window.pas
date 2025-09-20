@@ -50,7 +50,7 @@ end;
 procedure Ttape_window1.FormShow(Sender: TObject);
 begin
 //Hacer que no se solape con la principal
-tape_window1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
+tape_window1.Left:=principal1.Left+principal1.Width;
 tape_window1.top:=principal1.top;
 //Varios
 stringgrid1.ColWidths[0]:=stringgrid1.Width-100;
@@ -61,19 +61,19 @@ stringgrid2.ColWidths[0]:=stringgrid1.Width-100;
 stringgrid2.ColWidths[1]:=100;
 stringgrid2.ColCount:=2;
 //stringgrid2.ColWidths[2]:=60;
-StringGrid2.cells[0,0]:=leng[main_vars.idioma].varios[0];  //nombre
-StringGrid2.cells[1,0]:=leng[main_vars.idioma].varios[1];  //longitud
+StringGrid2.cells[0,0]:=leng.varios[0];  //nombre
+StringGrid2.cells[1,0]:=leng.varios[1];  //longitud
 //StringGrid2.cells[2,0]:='CRC';
 //mensajes
-tape_window1.Caption:=leng[main_vars.idioma].mensajes[2];  //nombre
-tape_window1.label1.Caption:=leng[main_vars.idioma].mensajes[9];  //nombre cinta
+tape_window1.Caption:=leng.mensajes[2];  //nombre
+tape_window1.label1.Caption:=leng.mensajes[9];  //nombre cinta
 //Hints
-tape_window1.BitBtn1.Hint:=leng[main_vars.idioma].hints[13];
-tape_window1.BitBtn2.Hint:=leng[main_vars.idioma].hints[14];
-tape_window1.BitBtn3.Hint:=leng[main_vars.idioma].hints[15];
-tape_window1.Edit1.Hint:=leng[main_vars.idioma].hints[16];
-tape_window1.StringGrid1.Hint:=leng[main_vars.idioma].hints[17];
-tape_window1.StringGrid2.Hint:=leng[main_vars.idioma].hints[17];
+tape_window1.BitBtn1.Hint:=leng.hints[13];
+tape_window1.BitBtn2.Hint:=leng.hints[14];
+tape_window1.BitBtn3.Hint:=leng.hints[15];
+tape_window1.Edit1.Hint:=leng.hints[16];
+tape_window1.StringGrid1.Hint:=leng.hints[17];
+tape_window1.StringGrid2.Hint:=leng.hints[17];
 end;
 
 procedure Ttape_window1.fplaycinta(Sender: TObject);   //play

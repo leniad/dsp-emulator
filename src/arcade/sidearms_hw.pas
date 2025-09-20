@@ -26,16 +26,16 @@ const
         (n:'b_12b.rom';l:$8000;p:$20000;crc:$86e43eda),(n:'b_14b.rom';l:$8000;p:$28000;crc:$076e92d1),
         (n:'b_12a.rom';l:$8000;p:$30000;crc:$ce107f3c),(n:'b_14a.rom';l:$8000;p:$38000;crc:$dba06076));
         sidearms_back_tiles:tipo_roms=(n:'b_03d.rom';l:$8000;p:0;crc:$6f348008);
-        sidearms_dip_a:array [0..4] of def_dip=(
-        (mask:$7;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'0 (Easiest)'),(dip_val:$6;dip_name:'1'),(dip_val:$5;dip_name:'2'),(dip_val:$4;dip_name:'3 (Normal)'),(dip_val:$3;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$1;dip_name:'6'),(dip_val:$0;dip_name:'7 (Hardest)'),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Lives';number:2;dip:((dip_val:$8;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'100K'),(dip_val:$20;dip_name:'100K 100K'),(dip_val:$10;dip_name:'150K 150K'),(dip_val:$0;dip_name:'200K 200K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        sidearms_dip_b:array [0..4] of def_dip=(
-        (mask:$07;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$02;dip_name:'2C 1C'),(dip_val:$07;dip_name:'1C 1C'),(dip_val:$06;dip_name:'1C 2C'),(dip_val:$05;dip_name:'1C 3C'),(dip_val:$04;dip_name:'1C 4C'),(dip_val:$03;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        sidearms_dip_a:array [0..4] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(7,6,5,4,3,2,1,0);name8:('0 (Easiest)','1','2','3 (Normal)','4','5','6','7 (Hardest)')),
+        (mask:8;name:'Lives';number:2;val2:(8,0);name2:('3','5')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('100K','100K 100K','150K 150K','200K 200K')),
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),());
+        sidearms_dip_b:array [0..4] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
 
 var
  memoria_rom:array[0..7,0..$3fff] of byte;
@@ -178,30 +178,27 @@ end;
 procedure sidearms_principal;
 var
   f:byte;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+  for f:=0 to 255 do begin
+    eventos_sidearms;
     case f of
       0:vblank:=0;
-      $f0:begin
+      240:begin
             z80_0.change_irq(HOLD_LINE);
             update_video_sidearms;
             vblank:=$80;
             copymemory(@buffer_sprites,@memoria[$f000],$1000);
           end;
     end;
+    //Main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_sidearms;
   video_sync;
 end;
 end;
@@ -324,8 +321,8 @@ begin
  z80_1.reset;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -410,11 +407,10 @@ gfx_set_desc_data(4,0,256*8,$200*256*8+4,$200*256*8+0,4,0);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //DIP
 marcade.dswa:=$fc;
-marcade.dswa_val:=@sidearms_dip_a;
+marcade.dswa_val2:=@sidearms_dip_a;
 marcade.dswb:=$ff;
-marcade.dswb_val:=@sidearms_dip_b;
+marcade.dswb_val2:=@sidearms_dip_b;
 //final
-reset_sidearms;
 iniciar_sidearms:=true;
 end;
 

@@ -174,34 +174,28 @@ end;
 
 procedure kikikaikai_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 263 do begin
+    eventos_kikikaikai;
+    if f=240 then begin
+        update_video_kikikaikai;
+        z80_0.change_irq(HOLD_LINE);
+        z80_1.change_irq(HOLD_LINE);
+        m6800_0.change_irq(HOLD_LINE);
+    end;
     //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
     //sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     //mcu
     m6800_0.run(frame_mcu);
     frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
-    case f of
-      15:update_video_kikikaikai;
-      239:begin
-          z80_0.change_irq(HOLD_LINE);
-          z80_1.change_irq(HOLD_LINE);
-          m6800_0.change_irq(HOLD_LINE);
-        end;
-    end;
  end;
- eventos_kikikaikai;
  video_sync;
 end;
 end;
@@ -313,31 +307,25 @@ end;
 //kick and run
 procedure kickandrun_principal;
 var
-  frame_m,frame_s,frame_sub,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_sub:=z80_2.tframes;
-frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 263 do begin
-    case f of
-      16:update_video_kickrun;
-      240:begin
-            z80_0.change_irq(ASSERT_LINE);
-            z80_1.change_irq(HOLD_LINE);
-            z80_2.change_irq(HOLD_LINE);
-            m6800_0.change_irq(HOLD_LINE);
-          end;
+    eventos_kikikaikai;
+    if f=240 then begin
+      update_video_kickrun;
+      z80_0.change_irq(ASSERT_LINE);
+      z80_1.change_irq(HOLD_LINE);
+      z80_2.change_irq(HOLD_LINE);
+      m6800_0.change_irq(HOLD_LINE);
     end;
     //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
     //sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     //sub
     z80_2.run(frame_sub);
     frame_sub:=frame_sub+z80_2.tframes-z80_2.contador;
@@ -345,7 +333,6 @@ while EmuStatus=EsRunning do begin
     m6800_0.run(frame_mcu);
     frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
  end;
- eventos_kikikaikai;
  video_sync;
 end;
 end;
@@ -383,11 +370,15 @@ procedure reset_kikikaikai;
 begin
  z80_0.reset;
  z80_1.reset;
- if main_vars.tipo_maquina=389 then z80_2.change_reset(ASSERT_LINE);
+ if main_vars.tipo_maquina=389 then begin
+  z80_2.change_reset(ASSERT_LINE);
+  frame_sub:=z80_2.tframes;
+ end;
  m6800_0.reset;
  ym2203_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
+ frame_mcu:=m6800_0.tframes;
  banco_rom:=0;
  banco_char:=0;
  marcade.in0:=$0;
@@ -511,7 +502,6 @@ for f:=0 to 255 do begin
 end;
 set_pal(colores,256);
 //final
-reset_kikikaikai;
 iniciar_kikikaikai:=true;
 end;
 

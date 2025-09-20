@@ -22,14 +22,14 @@ const
         aliens_k007232:tipo_roms=(n:'875b04.e05';l:$40000;p:0;crc:$4e209ac8);
         //DIP
         aliens_dip_a:array [0..2] of def_dip2=(
-        (mask:$0f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
         (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin')),());
         aliens_dip_b:array [0..3] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
         aliens_dip_c:array [0..1] of def_dip2=(
-        (mask:$1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),());
+        (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),());
         layer_colorbase:array[0..2] of byte=(0,4,8);
 
 var
@@ -52,7 +52,7 @@ case (color and $70) of
      $20,$60:pri:=7;  // over -, not ABF
      $0:pri:=4;       //over AB, not F
      $40:pri:=6;      // over A, not BF
-     $10:pri:=0 ;      // over ABF
+     $10:pri:=0;      // over ABF
      //No posibles debido a como pinta la pantalla el driver!!
      $50:pri:=2;      // over AF, not B
      $30,$70:pri:=3;  // over F, not AB
@@ -92,19 +92,19 @@ procedure eventos_aliens;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
@@ -114,24 +114,21 @@ end;
 
 procedure aliens_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=konami_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
     for f:=0 to $ff do begin
+      eventos_aliens;
+      if f=240 then update_video_aliens;
       //main
-      konami_0.run(frame_m);
-      frame_m:=frame_m+konami_0.tframes-konami_0.contador;
+      konami_0.run(frame_main);
+      frame_main:=frame_main+konami_0.tframes-konami_0.contador;
       //sound
-      z80_0.run(frame_s);
-      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-      if f=239 then update_video_aliens;
+      z80_0.run(frame_snd);
+      frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
       k051960_0.update_line(f);
     end;
-    eventos_aliens;
     video_sync;
 end;
 end;
@@ -239,8 +236,6 @@ end;
 
 procedure aliens_snd_bankswitch(valor:byte);
 begin
-// b1: bank for chanel A */
-// b0: bank for chanel B */
 k007232_0.set_bank((valor shr 1) and 1,valor and 1);
 end;
 
@@ -255,11 +250,11 @@ procedure reset_aliens;
 begin
  konami_0.reset;
  z80_0.reset;
+ frame_main:=konami_0.tframes;
+ frame_snd:=z80_0.tframes;
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  sound_latch:=0;
@@ -332,7 +327,6 @@ marcade.dswb_val2:=@aliens_dip_b;
 marcade.dswc:=$ff;
 marcade.dswc_val2:=@aliens_dip_c;
 //final
-reset_aliens;
 iniciar_aliens:=true;
 end;
 

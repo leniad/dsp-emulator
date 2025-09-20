@@ -184,8 +184,15 @@ procedure TFLoadRom.FormShow(Sender: TObject);
 var
   png:TPortableNetworkGraphic;
   f,h,pos:word;
+  j:integer;
 begin
-BitBtn1.Caption:=leng[main_vars.idioma].mensajes[8];
+j:=(principal1.left+(principal1.width div 2))-(FLoadRom.Width div 2);
+if j<0 then FLoadRom.Left:=0
+  else FLoadRom.Left:=j;
+j:=(principal1.top+(principal1.Height div 2))-(FLoadRom.Height div 2);
+if j<0 then FLoadRom.Top:=0
+  else FLoadRom.Top:=j;
+BitBtn1.Caption:=leng.mensajes[8];
 romlist.ColWidths[0]:=romlist.Width-90;
 romlist.ColWidths[1]:=85;
 romlist.ColWidths[2]:=0;
@@ -247,6 +254,7 @@ case main_vars.sort of
     end;
 end;
 //Muestro la imagen
+init_game_desc(main_vars.sort);
 show_picture;
 end;
 

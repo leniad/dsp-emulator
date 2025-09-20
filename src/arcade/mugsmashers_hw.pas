@@ -117,6 +117,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+   eventos_mugsmash;
    if f=248 then begin
       m68000_0.irq[6]:=ASSERT_LINE;
       update_video_mugsmash;
@@ -126,7 +127,6 @@ while EmuStatus=EsRunning do begin
    z80_0.run(frame_snd);
    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_mugsmash;
  video_sync;
 end;
 end;
@@ -229,8 +229,6 @@ begin
  frame_snd:=z80_0.tframes;
  ym2151_0.reset;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$cfff;
  marcade.in1:=$c1ff;
  sound_latch:=0;
@@ -299,7 +297,6 @@ marcade.dswc:=$daff;
 marcade.dswc_val2:=@mugsmash_dip_c;
 //final
 freemem(memoria_temp);
-reset_mugsmash;
 iniciar_mugsmash:=true;
 end;
 

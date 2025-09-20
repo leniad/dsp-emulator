@@ -154,27 +154,24 @@ end;
 
 procedure galivan_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+  eventos_galivan;
   if f=240 then begin
     update_video_galivan;
     copymemory(@buffer_sprites,@memoria[$e000],$100);
     z80_0.change_irq(ASSERT_LINE);
   end;
   //main
-  z80_0.run(frame_m);
-  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+  z80_0.run(frame_main);
+  frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   //sound
-  z80_1.run(frame_s);
-  frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+  z80_1.run(frame_snd);
+  frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
  end;
- eventos_galivan;
  video_sync;
 end;
 end;
@@ -281,8 +278,8 @@ begin
  ym3812_0.reset;
  dac_0.reset;
  dac_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -450,7 +447,6 @@ set_pal(colores,$100);
 //Despues de poner la paleta, pongo el fondo...
 put_bg;
 //final
-reset_galivan;
 iniciar_galivan:=true;
 end;
 

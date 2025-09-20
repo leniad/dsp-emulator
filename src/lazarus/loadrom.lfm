@@ -1,171 +1,170 @@
 object FLoadRom: TFLoadRom
   Left = 436
-  Height = 550
+  Height = 440
   Top = 212
-  Width = 1028
+  Width = 822
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Load Rom'
-  ClientHeight = 550
-  ClientWidth = 1028
-  DesignTimePPI = 120
+  ClientHeight = 440
+  ClientWidth = 822
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -14
+  Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   KeyPreview = True
+  LCLVersion = '4.0.0.2'
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.6.0'
   object BitBtn1: TBitBtn
-    Left = 792
-    Height = 45
-    Top = 496
-    Width = 102
+    Left = 634
+    Height = 36
+    Top = 397
+    Width = 82
     Caption = 'CANCEL'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -14
+    Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     Kind = bkCancel
     NumGlyphs = 2
-    OnClick = BitBtn1Click
     ParentFont = False
     TabOrder = 0
     TabStop = False
+    OnClick = BitBtn1Click
   end
   object BitBtn3: TBitBtn
-    Left = 608
-    Height = 45
-    Top = 496
-    Width = 102
+    Left = 486
+    Height = 36
+    Top = 397
+    Width = 82
     Caption = 'OK'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -14
+    Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     Kind = bkOK
     NumGlyphs = 2
-    OnClick = BitBtn3Click
     ParentFont = False
     TabOrder = 1
     TabStop = False
+    OnClick = BitBtn3Click
   end
   object gpxrominfo: TGroupBox
-    Left = 512
-    Height = 89
-    Top = 8
-    Width = 500
+    Left = 410
+    Height = 71
+    Top = 6
+    Width = 400
     Caption = 'Driver Info'
-    ClientHeight = 71
-    ClientWidth = 496
+    ClientHeight = 53
+    ClientWidth = 396
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -9
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
     TabOrder = 2
     object Label1: TLabel
-      Left = 8
+      Left = 6
       Height = 13
-      Top = 4
+      Top = 3
       Width = 29
       Caption = 'Year:'
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 8
+      Left = 6
       Height = 13
-      Top = 32
+      Top = 26
       Width = 97
       Caption = 'Hi Score Support:'
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 8
+      Left = 6
       Height = 13
-      Top = 18
+      Top = 14
       Width = 38
       Caption = 'Sound:'
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label4: TLabel
-      Left = 120
+      Left = 96
       Height = 1
-      Top = 8
+      Top = 6
       Width = 1
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label5: TLabel
-      Left = 120
+      Left = 96
       Height = 1
-      Top = 21
+      Top = 17
       Width = 1
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label6: TLabel
-      Left = 120
+      Left = 96
       Height = 1
-      Top = 35
+      Top = 28
       Width = 1
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label9: TLabel
-      Left = 120
+      Left = 96
       Height = 1
-      Top = 51
+      Top = 41
       Width = 1
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label10: TLabel
-      Left = 8
+      Left = 6
       Height = 13
-      Top = 48
+      Top = 38
       Width = 56
       Caption = 'Company:'
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -9
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentColor = False
@@ -173,17 +172,17 @@ object FLoadRom: TFLoadRom
     end
   end
   object RomList: TStringGrid
-    Left = 208
-    Height = 524
-    Top = 8
-    Width = 296
+    Left = 166
+    Height = 419
+    Top = 6
+    Width = 237
     ColCount = 3
-    DefaultColWidth = 120
-    DefaultRowHeight = 15
+    DefaultColWidth = 96
+    DefaultRowHeight = 12
     FixedCols = 0
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -13
+    Font.Height = -10
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -196,16 +195,16 @@ object FLoadRom: TFLoadRom
     OnDblClick = RomListDblClick
   end
   object Panel1: TPanel
-    Left = 512
-    Height = 378
-    Top = 95
-    Width = 502
-    ClientHeight = 378
-    ClientWidth = 502
+    Left = 410
+    Height = 302
+    Top = 76
+    Width = 402
+    ClientHeight = 302
+    ClientWidth = 402
     Color = clBlack
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -14
+    Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -225,121 +224,121 @@ object FLoadRom: TFLoadRom
     end
   end
   object GroupBox1: TGroupBox
-    Left = 16
-    Height = 424
-    Top = 8
-    Width = 177
+    Left = 13
+    Height = 339
+    Top = 6
+    Width = 142
     Caption = 'Sort'
-    ClientHeight = 402
-    ClientWidth = 173
+    ClientHeight = 317
+    ClientWidth = 138
     TabOrder = 5
     object RadioButton1: TRadioButton
-      Left = 12
+      Left = 10
       Height = 23
-      Top = 25
+      Top = 20
       Width = 36
       Caption = 'All'
-      OnClick = RadioButton1Click
       TabOrder = 0
+      OnClick = RadioButton1Click
     end
     object RadioButton2: TRadioButton
-      Left = 12
+      Left = 10
       Height = 23
-      Top = 47
+      Top = 38
       Width = 92
       Caption = 'Computers'
-      OnClick = RadioButton2Click
       TabOrder = 1
+      OnClick = RadioButton2Click
     end
     object RadioButton3: TRadioButton
-      Left = 12
+      Left = 10
       Height = 23
-      Top = 73
+      Top = 58
       Width = 78
       Caption = 'Consoles'
-      OnClick = RadioButton3Click
       TabOrder = 2
+      OnClick = RadioButton3Click
     end
     object RadioButton4: TRadioButton
-      Left = 12
+      Left = 10
       Height = 23
-      Top = 99
+      Top = 79
       Width = 117
       Caption = 'Game && Watch'
-      OnClick = RadioButton4Click
       TabOrder = 3
+      OnClick = RadioButton4Click
     end
     object RadioButton5: TRadioButton
-      Left = 12
+      Left = 10
       Height = 23
-      Top = 120
+      Top = 96
       Width = 66
       Caption = 'Arcade'
-      OnClick = RadioButton5Click
       TabOrder = 4
+      OnClick = RadioButton5Click
     end
     object GroupBox2: TGroupBox
-      Left = 12
-      Height = 184
-      Top = 152
-      Width = 149
+      Left = 10
+      Height = 147
+      Top = 122
+      Width = 119
       Caption = 'Arcade Sub-Type'
-      ClientHeight = 162
-      ClientWidth = 145
+      ClientHeight = 125
+      ClientWidth = 115
       TabOrder = 5
       object CheckBox1: TCheckBox
-        Left = 16
+        Left = 13
         Height = 23
-        Top = 8
+        Top = 6
         Width = 58
         Caption = 'Sport'
-        OnClick = CheckBox1Click
         TabOrder = 0
+        OnClick = CheckBox1Click
       end
       object CheckBox3: TCheckBox
-        Left = 16
+        Left = 13
         Height = 23
-        Top = 56
+        Top = 45
         Width = 53
         Caption = 'Shot'
-        OnClick = CheckBox1Click
         TabOrder = 2
+        OnClick = CheckBox1Click
       end
       object CheckBox4: TCheckBox
-        Left = 16
+        Left = 13
         Height = 23
-        Top = 79
+        Top = 63
         Width = 54
         Caption = 'Maze'
-        OnClick = CheckBox1Click
         TabOrder = 3
+        OnClick = CheckBox1Click
       end
       object CheckBox2: TCheckBox
-        Left = 16
+        Left = 13
         Height = 23
-        Top = 32
+        Top = 26
         Width = 91
         Caption = 'Run && Gun'
-        OnClick = CheckBox1Click
         TabOrder = 1
+        OnClick = CheckBox1Click
       end
       object CheckBox5: TCheckBox
-        Left = 16
+        Left = 13
         Height = 23
-        Top = 101
+        Top = 81
         Width = 54
         Caption = 'Fight'
-        OnClick = CheckBox1Click
         TabOrder = 4
+        OnClick = CheckBox1Click
       end
       object CheckBox6: TCheckBox
-        Left = 16
+        Left = 13
         Height = 23
-        Top = 123
+        Top = 98
         Width = 56
         Caption = 'Drive'
-        OnClick = CheckBox1Click
         TabOrder = 5
+        OnClick = CheckBox1Click
       end
     end
   end

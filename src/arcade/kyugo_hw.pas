@@ -3,7 +3,9 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      pal_engine,sound_engine,timer_engine;
+
 function iniciar_kyugo_hw:boolean;
+
 implementation
 const
         repulse_rom:array[0..2] of tipo_roms=(
@@ -112,57 +114,57 @@ procedure eventos_kyugo_hw;
 begin
 if event.arcade then begin
   //system
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   //P2
-  if arcade_input.left[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.right[0] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.up[0] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.down[0] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.left[0] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.right[0] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.up[0] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.down[0] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
   if arcade_input.but0[0] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
   if arcade_input.but1[0] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
 end;
 end;
+
 procedure kyugo_hw_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=239 then begin
+    eventos_kyugo_hw;
+    if f=240 then begin
       if nmi_enable then z80_0.change_nmi(PULSE_LINE);
       update_video_kyugo_hw;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_kyugo_hw;
   video_sync;
 end;
 end;
+
 function kyugo_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$a7ff,$f000..$f7ff:kyugo_getbyte:=memoria[direccion];
 end;
 end;
+
 procedure kyugo_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -192,6 +194,7 @@ case direccion of
     $b800:scroll_y:=valor;
 end;
 end;
+
 procedure kyugo_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $7) of
@@ -201,6 +204,7 @@ begin
         else z80_1.change_halt(ASSERT_LINE);
   end;
 end;
+
 //Sound
 function snd_kyugo_hw_getbyte(direccion:word):byte;
 begin
@@ -212,6 +216,7 @@ case direccion of
    $c080:snd_kyugo_hw_getbyte:=marcade.in0;
 end;
 end;
+
 procedure snd_kyugo_hw_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -219,10 +224,12 @@ case direccion of
   $a000..$a7ff:memoria[direccion+$5000]:=valor;
 end;
 end;
+
 function snd_kyugo_inbyte(puerto:word):byte;
 begin
   if (puerto and $ff)=2 then snd_kyugo_inbyte:=ay8910_0.read;
 end;
+
 procedure snd_kyugo_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -232,23 +239,28 @@ case (puerto and $ff) of
   $41:ay8910_1.write(valor);
 end;
 end;
+
 function kyugo_porta_r:byte;
 begin
   kyugo_porta_r:=marcade.dswa;
 end;
+
 function kyugo_portb_r:byte;
 begin
   kyugo_portb_r:=marcade.dswb;
 end;
+
 procedure kyugo_snd_irq;
 begin
   z80_1.change_irq(HOLD_LINE);
 end;
+
 procedure kyugo_snd_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
 end;
+
 //SRD Mission
 function srdmission_getbyte(direccion:word):byte;
 begin
@@ -256,6 +268,7 @@ case direccion of
   0..$a7ff,$e000..$e7ff:srdmission_getbyte:=memoria[direccion];
 end;
 end;
+
 procedure srdmission_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -285,6 +298,7 @@ case direccion of
     $b800:scroll_y:=valor;
 end;
 end;
+
 function snd_srdmission_hw_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -295,6 +309,7 @@ case direccion of
    $f402:snd_srdmission_hw_getbyte:=marcade.in2;
 end;
 end;
+
 procedure snd_srdmission_hw_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -303,10 +318,12 @@ case direccion of
   $8800..$8fff:mem_snd[direccion]:=valor;
 end;
 end;
+
 function snd_srdmission_inbyte(puerto:word):byte;
 begin
   if (puerto and $ff)=$82 then snd_srdmission_inbyte:=ay8910_0.read;
 end;
+
 procedure snd_srdmission_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -316,6 +333,7 @@ case (puerto and $ff) of
   $85:ay8910_1.write(valor);
 end;
 end;
+
 //Main
 procedure reset_kyugo_hw;
 begin
@@ -323,8 +341,8 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -335,6 +353,7 @@ begin
  nmi_enable:=false;
  z80_1.change_halt(ASSERT_LINE);
 end;
+
 function iniciar_kyugo_hw:boolean;
 var
   memoria_temp,memoria_temp2:array[0..$17fff] of byte;
@@ -385,9 +404,9 @@ z80_1:=cpu_z80.create(3072000,256);
 z80_1.init_sound(kyugo_snd_update);
 timers.init(z80_1.numero_cpu,3072000/(60*4),kyugo_snd_irq,nil,true);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1536000,AY8910,0.3);
+ay8910_0:=ay8910_chip.create(1536000,AY8910);
 ay8910_0.change_io_calls(kyugo_porta_r,kyugo_portb_r,nil,nil);
-ay8910_1:=ay8910_chip.create(1536000,AY8910,0.3);
+ay8910_1:=ay8910_chip.create(1536000,AY8910);
 case main_vars.tipo_maquina of
   128:begin //repulse
         //cargar roms
@@ -491,7 +510,7 @@ for f:=0 to $ff do begin
   colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 end;
 set_pal(colores,$100);
-reset_kyugo_hw;
 iniciar_kyugo_hw:=true;
 end;
+
 end.

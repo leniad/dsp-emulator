@@ -319,26 +319,23 @@ end;
 //Nemesis
 procedure nemesis_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-    //Main CPU
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+ for f:=0 to 255 do begin
+    eventos_nemesis;
+    if f=240 then begin
       update_video_nemesis;
       if irq_on then m68000_0.irq[1]:=HOLD_LINE;
     end;
+    //Main CPU
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_nemesis;
  video_sync;
 end;
 end;
@@ -484,32 +481,29 @@ end;
 
 procedure gx400_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-    //Main CPU
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //Sound CPU
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+ for f:=0 to 255 do begin
+    eventos_gx400;
     case f of
-      119:if irq4_on then m68000_0.irq[4]:=HOLD_LINE;
-      239:begin
+      0:if irq2_on then m68000_0.irq[2]:=HOLD_LINE;
+      120:if irq4_on then m68000_0.irq[4]:=HOLD_LINE;
+      240:begin
             update_video_nemesis;
             if (irq_on and screen_par) then m68000_0.irq[1]:=HOLD_LINE;
             z80_0.change_nmi(PULSE_LINE);
           end;
-      255:if irq2_on then m68000_0.irq[2]:=HOLD_LINE;
     end;
+    //Main CPU
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
  screen_par:=not(screen_par);
- eventos_gx400;
  video_sync;
 end;
 end;
@@ -839,8 +833,8 @@ begin
         marcade.in2:=0;
       end;
  end;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  irq_on:=false;
  irq2_on:=false;
  irq4_on:=false;
@@ -867,10 +861,10 @@ var
   f:byte;
 procedure init_ay_sound;
 begin
-  ay8910_0:=ay8910_chip.create(18432000 div 8,AY8910,1);
-  ay8910_1:=ay8910_chip.create(18432000 div 8,AY8910,1);
+  ay8910_0:=ay8910_chip.create(18432000 div 8,AY8910);
+  ay8910_1:=ay8910_chip.create(18432000 div 8,AY8910);
   ay8910_1.change_io_calls(nil,nil,ay8910_k005289_1,ay8910_k005289_2);
-  k005289_0:=k005289_snd_chip.create(3579545,0.5);
+  k005289_0:=k005289_snd_chip.create(3579545);
   if not(roms_load(@k005289_0.sound_prom,rom_k005289)) then exit;
 end;
 procedure init_ay_vlm_sound;
@@ -954,7 +948,6 @@ init_gfx(6,16,8,$400);
 init_gfx(7,64,64,$20);
 for f:=0 to 7 do gfx[f].trans[0]:=true;
 //final
-reset_nemesis;
 iniciar_nemesis:=true;
 end;
 

@@ -661,6 +661,7 @@ begin
   self.opcode:=false;
   self.after_ei:=false;
   self.totalt:=0;
+  self.irq_vector:=$ff;
 end;
 
 function cpu_z80.get_safe_pc:word;
@@ -802,15 +803,21 @@ var
  ban_temp:band_z80;
  irq_temp:boolean;
  old_contador:integer;
- tempw:word;
+ f,tempw:word;
 begin
 irq_temp:=false;
 self.contador:=0;
 while self.contador<maximo do begin
 old_contador:=self.contador;
 if self.pedir_halt<>CLEAR_LINE then begin
-  self.contador:=trunc(maximo);
-  exit;
+  for f:=1 to tempw do begin
+    self.contador:=self.contador+4;
+    if @self.despues_instruccion<>nil then self.despues_instruccion(4);
+    timers.update(4,self.numero_cpu);
+    self.totalt:=self.totalt+4;
+    if self.pedir_halt=CLEAR_LINE then break;
+  end;
+  if self.pedir_halt<>CLEAR_LINE then exit;
 end;
 if self.pedir_reset<>CLEAR_LINE then begin
   temp:=self.pedir_reset;
@@ -2496,7 +2503,7 @@ case instruccion of
             end;
         $23:begin {ld E,sla (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                rlc_8(@r.de.l);
+                sla_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $24:begin {ld H,sla (IX+d)}

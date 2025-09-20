@@ -39,7 +39,7 @@ const
         (n:'28j5-0.ic12';l:$40000;p:$80000;crc:$cef0a821),(n:'28j4-0.ic14';l:$40000;p:$80001;crc:$b84fda09));
         //DIP
         ddragon3_dip_a:array [0..9] of def_dip2=(
-        (mask:$3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        (mask:3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$10;name:'Continue Discount';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
@@ -232,33 +232,28 @@ end;
 
 procedure ddragon3_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
-    //main
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //sound
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if ((f mod 16)=0) then m68000_0.irq[5]:=ASSERT_LINE;
+    events_update_dd3;
     case f of
-          7:begin
-              vblank:=0;
-              video_update_dd3;
-            end;
-        247:begin
+        0,16,32,48,64,80,96,112,128,144,160,176,192,108,224,240,256:m68000_0.irq[5]:=ASSERT_LINE;
+        8:vblank:=0;
+        248:begin
               m68000_0.irq[6]:=ASSERT_LINE;
               vblank:=1;
+              video_update_dd3;
             end;
     end;
+    //main
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- events_update_dd3;
  video_sync;
 end;
 end;
@@ -568,8 +563,8 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  bg_tilebase:=0;
@@ -615,9 +610,9 @@ m68000_0:=cpu_m68000.create(10000000,272);
 z80_0:=cpu_z80.create(3579545,272);
 z80_0.init_sound(ddragon3_sound_update);
 //Sound Chips
-ym2151_0:=ym2151_chip.create(3579545,0.5);
+ym2151_0:=ym2151_chip.create(3579545,1);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1.5);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
 getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   196:begin //DDW 3
@@ -682,7 +677,6 @@ case main_vars.tipo_maquina of
 end;
   //final
 freemem(memoria_temp);
-reset_ddragon3;
 iniciar_ddragon3:=true;
 end;
 

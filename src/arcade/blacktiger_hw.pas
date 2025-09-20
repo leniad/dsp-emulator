@@ -121,15 +121,15 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
 end;
 end;
 
@@ -144,6 +144,7 @@ while EmuStatus=EsRunning do begin
   QueryPerformanceCounter(cont1);
   {$endif}
   for f:=0 to 261 do begin
+    eventos_blktiger;
     if f=246 then begin
       z80_0.change_irq(HOLD_LINE);
       copymemory(@buffer_sprites,@memoria[$fe00],$200);
@@ -159,7 +160,6 @@ while EmuStatus=EsRunning do begin
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
   end;
-  eventos_blktiger;
   {$ifdef speed_debug}
   QueryPerformanceCounter(cont2);
   principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);
@@ -456,8 +456,6 @@ begin
  frame_mcu:=mcs51_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
  banco_rom:=0;
  soundlatch:=0;
  scroll_bank:=0;
@@ -525,9 +523,9 @@ mcs51_0:=cpu_mcs51.create(I8X51,24000000 div 3,262);
 mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 if not(roms_load(mcs51_0.get_rom_addr,blktiger_mcu)) then exit;
 //Sound Chip
-ym2203_0:=ym2203_chip.create(3579545);
+ym2203_0:=ym2203_chip.create(3579545,0.5,1.5);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(3579545);
+ym2203_1:=ym2203_chip.create(3579545,0.5,1.5);
 //Timers
 timer_hs:=timers.init(z80_0.numero_cpu,10000,blk_hi_score,nil,true);
 //convertir chars
@@ -558,7 +556,6 @@ marcade.dswb:=$6f;
 marcade.dswa_val2:=@blktiger_dip_a;
 marcade.dswb_val2:=@blktiger_dip_b;
 //final
-reset_blktiger;
 iniciar_blktiger:=true;
 end;
 

@@ -110,13 +110,12 @@ end;
 
 procedure pv1000_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,true,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+      eventos_pv1000;
       case f of
         20:begin
               pv1000_0.fd_buffer_flag:=true;
@@ -129,11 +128,10 @@ while EmuStatus=EsRunning do begin
             end;
         224,228,232,238,242,246,250,252,258,0,4,8,12,16:z80_0.change_irq(ASSERT_LINE);
       end;
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
   actualiza_trozo(16,0,256,192,1,0,26,224,192,PANT_TEMP);
-  eventos_pv1000;
   video_sync;
 end;
 end;
@@ -275,7 +273,7 @@ var
   f:byte;
 begin
  z80_0.reset;
- reset_audio;
+ frame_main:=z80_0.tframes;
  pv1000_0.fd_buffer_flag:=false;
  pv1000_0.force_pattern:=false;
  pv1000_0.fd_data:=0;
@@ -358,7 +356,6 @@ for f:=0 to 7 do begin
 end;
 set_pal(colores,8);
 //final
-reset_pv1000;
 if main_vars.console_init then abrir_pv1000;
 iniciar_pv1000:=true;
 end;

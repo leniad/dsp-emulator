@@ -2,7 +2,7 @@ unit upd1771;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}timer_engine,
-     sound_engine,vars_hide,dialogs;
+     sound_engine,dialogs;
 
 const
   MAX_PACKET_SIZE=$8000;

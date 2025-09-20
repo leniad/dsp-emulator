@@ -1,4 +1,75 @@
 # DSP Emulator status #
+<b>30/04/25 - DSP Emulator 0.24WIP1. Updated Windows binary and source.<br>
+<pre>
+-Lazarus
+    +Added Close function
+    +Fixed "follow me" window functionality, now works much better
+    +Various fixes to enable compilation on Raspberry Pi (Raspbian OS) – now working
+-General
+    +Added automatic language selection, simplified all language functions and variables 
+    +Added new general reset functions. Removed partial system resets from driver reset functions, system now resets during driver initialization. Fixes issues with palette, some video gfx errors, sound sample, etc.
+    +Fixed pop-up window positioning – now appears centered in the main window
+    +Numerous stability improvements
+    +More DIP switches converted to the new system
+    +Fixed play/pause buttons
+    +Changed input events to work line-by-line, instead of frame-by-frame. Fixes coin input in 'Star Force' and 'Mario Bros.'
+    +DIP switch button is now disabled if the driver has no DIP switches
+    +Fixed auto-fire speed
+    +Fixed 'Final Starforce' export ROM size (Thanks to Okurka)
+    +Sound engine
+        -Reviewed output for all sound chips, fixed amplification and output limits. Removed unusual amplification values from drivers.
+        -Fixed sample conversion from raw, demo sound in 'Teenage Mutant Ninja Turtles' works again
+        -SN-76496: Added ready functions
+        -Taito Sound: Completely rewrite sound system. Removed all sound-related functions, CPUs, and memory from Taito drivers and converted them to use the dedicated device
+    +Video
+        -Sega VDP: Fixed change video mode
+    +CPUs
+        -Change CPUs halt behaviour, timer functions are now called even when the CPU is halted
+        -Z80
+            +Fixed initial IRQ vector value
+            +Fixed DDCB23 opcode
+        -Spectrum Z80
+            +Fixed DDCB23 and DDCB27 opcodes
+            +Fixed $37 and $3f opcode flags
+-Spectrum
+    +Remove private buffers, now using standard video buffers
+-Amstrad CPC
+    +Fixed 4Mb memory expansion
+    +Memory expansions are only available on 6128 model
+    +Enhanced video a bit, now 'Pinball Dreams!' works (thanks to Neville)
+-Bally Midway HW
+    +Fixed sprite priorities
+    +Discs of Tron: added driver with sound
+    +Tron: added driver with sound
+    +Timber: added driver with sound
+    +Satan: added driver with sound
+    +Domino Man: added driver with sound
+    +Wacko: added driver with sound
+-Bionic Commando
+    +Fixed not working shot/weapon buttons
+    +Added video timings
+    +Added flip screen
+-Bubble Bobble
+    +Fixed video issues, changed video update line
+-Irem M62 HW
+    +Rewrite sprite functions
+    +Rewrite memory read/write and IO functions
+-Route 16 HW
+    +Fixed sound chip creation order
+-Sega System 1/2
+    +Added sound ready functions, now 'Choplifter' speech sounds fine
+    +Gardia: fixed roms bank function
+-Vigilante
+    +Added DIP switches
+-Taito System B
+    +Nastar: added basic driver
+    +Master Weapon: added basic driver
+
+New Games
+<img src="https://i.ibb.co/Xr3LRqWZ/dotron.png"> <img src="https://i.ibb.co/hRCzxCQ5/Tron.png">
+<img src="https://i.ibb.co/Kjq7M8YT/SatanH.png"> <img src="https://i.ibb.co/3DBp4zR/Timber.png">
+<img src="https://i.ibb.co/jPd76gR4/Domino-Man.png"> <img src="https://i.ibb.co/PGNQ8kHW/Wacko.png">
+</pre><br>
 <b>27/10/24 - DSP Emulator 0.23Final. Updated Windows binary, Ubuntu binary and full source. For full release info, please read 'Whats New 0.23.txt' file.<br>
 <pre>
 -General
@@ -6,8 +77,8 @@
         -Fixed video freeze in Delphi 12
         -Added general video reset
         -Enhanced a bit full screen mode
-    +DIPs switches engine
-        -Still migrating DIPs to new data structure
+    +DIP switches engine
+        -Still migrating DIP switches to new data structure
     +Sound
         -Seibu Sound:
             +Enhanced IRQs functions, uses new Z80 IRQ M0 functions
@@ -19,10 +90,10 @@
             +Added opcode $2d
         -NEC v20-v30
             +Fixed prefetch
-            +Rewrited IRQ/NMI functions
+            +Rewrite IRQ/NMI functions
             +Fixed BITOP opcodes
         -Z80
-            +Rewrited IRQ M0 and M2 callback functions
+            +Rewrite IRQ M0 and M2 callback functions
             +New function to call IRQ with vector (removed im0 variable)
             +Converted daisy chain functions to new IRQ M2 functions
      +Devices
@@ -71,7 +142,7 @@ New Games
 -Arkanoid
     +Removed MCU, used general Taito 68705
 -Armed Formation HW
-    +Added DIPs
+    +Added DIP switches
     +Removed sprite masks
 -China Gate
     +Removed scan lines conversion
@@ -155,10 +226,10 @@ New Games
         -Deco 104/146: converted to classes
         -Fixed 'Gardia' ROMs export (Thanks to Neville)
         -Fixed 'Kick'n Run' ROMs export size (Thanks to Neville)
-    +DIPs switches engine
-        -Rewrited engine
+    +DIP switches engine
+        -Rewrite engine
         -New data structure, easy to maintain and easy to add
-        -Start migrate all DIPs to new structure
+        -Start migrate all DIP switches to new structure
     +Graphics engine
         -Added mask to all functions, no need to mask the graphic number before call any function, removed graphic number mask from all drivers
         -DECO BAC06
@@ -168,7 +239,7 @@ New Games
     +Sound engine
         -YM2413: added new sound chip
         -SN76496: fixed snapshot
-        -VLM5030: changed to new tables values, rewrited some code
+        -VLM5030: changed to new tables values, rewrite some code
     +CPUs
         -M6809
             +Added opcode $28
@@ -216,15 +287,15 @@ New Games
 -Legendary Wings HW
     +Avengers
         -Updated ROMs to version D
-        -Added DIPs switches
+        -Added DIP switches
 -Pang HW
     +Added YM2413 sound
 -Track and Field
     +Fixed speech sounds
 -Tehkan World Cup
-    +Added missing DIPs
+    +Added missing DIP switches
 -Toki
-    +Added missing DIPs
+    +Added missing DIP switches
 
 <img src="https://imgbb.host/images/NEG31.png"> <img src="https://imgbb.host/images/NEY07.png">
 <img src="https://imgbb.host/images/NE7JM.png"> <img src="https://imgbb.host/images/NEpX4.png">
@@ -241,7 +312,7 @@ New Games
         -ROMs export: Fixed '88 Gamed' ROM info (thanks to okurka)
         -Updated Preview images
     +Video
-        -Rewrited full screen mode
+        -Rewrite full screen mode
             +Screen now it's scaled
             +Hide mouse, except if needed (Spectrum mouse, Operation Wolf and Zero Point)
             +Fixed mouse position click
@@ -251,7 +322,7 @@ New Games
     +Controls Engine
         -Joystick
             +Removed calibrate functions, just press button to calibrate
-            +Rewrited all functions, now responds faster
+            +Rewrite all functions, now responds faster
     +Timer Engine
         -Add timer lapse, before call timer function
     +CPU
@@ -259,10 +330,10 @@ New Games
             +Fixed 'brk' opcode (fixes Oric's 'SkoolDaze' and many others)
         -M680X
             +Added opcodes $2c, $2f and $85
-            +Rewrited get/put byte functions
+            +Rewrite get/put byte functions
             +Make RAM and ROM internal
         -MB88XX
-            +Rewrited internal flags functions
+            +Rewrite internal flags functions
         -Z80
             +Added IRQ mode 2 external vector calls
             +Daisy chain: clean all functions
@@ -302,7 +373,7 @@ New Games
     +Enhanced NMI
 -Breakthru HW
     +Changed memory map to a generalized one
-    +Fixed DIPs
+    +Fixed DIP switches
 -Bubblebobble
     +Changed to new M680X CPU engine
     +Added IRQ mode 2 external vector function
@@ -366,7 +437,7 @@ Casio PV1000 <img src="https://i.ibb.co/zZtZk1W/digdug-before.jpg">             
         -GFX: Added invert option when convert GFX
     +Sound
         -MSM5205
-            +Rewrited all sound playing functions
+            +Rewrite all sound playing functions
             +Make all variables, adpcm ROMS, and timing internal, removed all variables from drivers
             +Make standard adpcm play functions by default, removed all repeated functions from drivers
     +CPU
@@ -539,7 +610,7 @@ New Games
             +Fixed opcodes $80, $81, $a3, $b3 and $e3
         -na2a03
             +Added snapshots
-            +Rewrited sound part
+            +Rewrite sound part
             +Fixed audio buffer
             +Fixed dpcm sound... But clicks a lot
 -Gameboy/Gameboy Color
@@ -666,12 +737,12 @@ New Games
         -Added IO 59XX
         -Implemented timers to internal
 -Galaga HW
-    +Added DIPs to all drivers
+    +Added DIP switches to all drivers
     +Added all remain controls to all drivers
     +DigDug: Simplified background render 
     +Super Xevious: Added driver with sound
 -Galaxian HW
-    +Added DIPs to all drivers
+    +Added DIP switches to all drivers
     +Added all remain controls to all drivers
     +Amidar
         -Updated ROMs
@@ -681,13 +752,13 @@ New Games
 -Gun.Smoke HW
     +Added sound CPU reset line
 -Mappy HW
-    +Added DIPs to all drivers
+    +Added DIP switches to all drivers
     +Added all remain controls to all drivers
     +Changed to new Namco 5X IO driver
     +Grobda: added driver with sound
     +Pac & Pal: Added driver with sound
 -Pacland
-    +Added DIPs switches
+    +Added DIP switches
     +Fixed a stupid bug with palette change
     +Change screen parameters
 </pre><br>
@@ -713,7 +784,7 @@ New Games
     +Added preliminary disc support, not working
 -Centipede HW
     +Centipede
-        -Fixed dip
+        -Fixed DIP switches
         -Fixed video
         -Fixed controls
         -Fixed colors, now using indirect palette
@@ -730,7 +801,7 @@ New Games
     +Missile Command: added driver with sound
     +Super Missile Attack: added driver with sound
 -Taito SJ HW
-    +Added DIPs
+    +Added DIP switches
     +Updated to use gfx buffers
     +Fixed controls, added buttons
     +Optimized maps
@@ -738,13 +809,13 @@ New Games
     +Fixed DAC
     +Elevator Action: updated ROMs
 -Time Pilot
-    +Added DIPs
+    +Added DIP switches
     +Added video enable
 -Wardner
-    +Fixed DIPs
+    +Fixed DIP switches
 -Zaxxon HW
     +Fixed sound
-    +Fixed DIPs
+    +Fixed DIP switches
     +Fixed video
     +Added samples volume
     +Super Zaxxon: added driver with sound
@@ -772,7 +843,7 @@ New Games
         -VIA6522: Added device
 -Amstrad CPC
     +Enabled Z80 timings (fixes Saboteur II and many others)
-    +Rewrited video to update screen pixel by pixel
+    +Rewrite video to update screen pixel by pixel
     +Fixed tape loading with new Z80 timings
 -Coleco
     +Black Onix: Added 24C08 eeprom
@@ -818,7 +889,7 @@ New Games
             +Fixed some timmings and timming calculation
     +Sound
         -Seibu sound
-            +Rewrited and converted to class
+            +Rewrite and converted to class
             +Added internal Z80, ADPCM, sound chip and controls
             +Changed CPU mappers to internal
             +Removed fake adpcm, using standard MSM5205
@@ -947,7 +1018,7 @@ Please read 'Whats New 0.21' file for full details<br><br>
         -Added SDL 2.0.16 for download
     +Enhanced joystick support
         -New redefine buttons system, select and press the button to use it
-        -Rewrited joystick internal functions
+        -Rewrite joystick internal functions
     +Windows: Removed mouse cursor, slows down everything when enabled
     +Lazarus: Added 'follow me' window style. The main emulation window follows select window when it moves.
 -CPS1 HW
@@ -1009,7 +1080,7 @@ Please read 'Whats New 0.21' file for full details<br><br>
 -Mag Max
     +Added driver with sound
 -Nemesis HW
-    +Rewrited screen flip, fixes TwinBee
+    +Rewrite screen flip, fixes TwinBee
 -The Simpsons
     +Fixed video settings
     +Added sprites dma interrupt enable/disable

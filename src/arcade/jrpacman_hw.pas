@@ -16,21 +16,21 @@ const
         (n:'jrp8h.bin';l:$2000;p:$8000;crc:$35f1fc6e),(n:'jrp8j.bin';l:$2000;p:$a000;crc:$9737099e),
         (n:'jrp8k.bin';l:$2000;p:$c000;crc:$5252dd97));
         jrpacman_pal:array[0..2] of tipo_roms=(
-        (n:'jrprom.9e';l:$100;p:$0;crc:$029d35c4),(n:'jrprom.9f';l:$100;p:$100;crc:$eee34a79),
+        (n:'jrprom.9e';l:$100;p:0;crc:$029d35c4),(n:'jrprom.9f';l:$100;p:$100;crc:$eee34a79),
         (n:'jrprom.9p';l:$100;p:$200;crc:$9f6ea9d8));
         jrpacman_char:array[0..1] of tipo_roms=(
         (n:'jrp2c.bin';l:$2000;p:0;crc:$0527ff9b),(n:'jrp2e.bin';l:$2000;p:$2000;crc:$73477193));
         jrpacman_sound:tipo_roms=(n:'jrprom.7p';l:$100;p:0;crc:$a9cc86bf);
         //DIP
-        jrpacman_dip_a:array [0..1] of def_dip=(
-        (mask:$10;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        jrpacman_dip_b:array [0..1] of def_dip=(
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        jrpacman_dip_c:array [0..4] of def_dip=(
-        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$8;dip_name:'3'),(dip_val:$c;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'10K'),(dip_val:$10;dip_name:'15K'),(dip_val:$20;dip_name:'20K'),(dip_val:$30;dip_name:'30K'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        jrpacman_dip_a:array [0..1] of def_dip2=(
+        (mask:$10;name:'Rack Test (Cheat)';number:2;val2:($10,0);name2:('Off','On')),());
+        jrpacman_dip_b:array [0..1] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
+        jrpacman_dip_c:array [0..4] of def_dip2=(
+        (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
+        (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
+        (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','30K')),
+        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),());
 
 var
  irq_vblank,bg_prio:boolean;
@@ -76,7 +76,7 @@ for x:=0 to 53 do begin
      sx:=55-x;
      sy:=y-2;
 	   if (((sy and $20)<>0) and ((sx and $20)<>0)) then offs:=0
-	    else if (sy and $20)<>0 then offs:=sx+(((sy and $3) or $38) shl 5)
+	    else if (sy and $20)<>0 then offs:=sx+(((sy and 3) or $38) shl 5)
 	      else offs:=sy+(sx shl 5);
      if gfx[0].buffer[offs] then begin
         if offs<$700 then color_index:=offs and $1f
@@ -108,17 +108,17 @@ procedure eventos_jrpacman;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   //P2
-  if arcade_input.up[1] then marcade.in0:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.left[1] then marcade.in0:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
 end;
@@ -126,21 +126,19 @@ end;
 
 procedure jrpacman_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 223 do begin
-    z80_0.run(frame);
-    frame:=frame+z80_0.tframes-z80_0.contador;
-    if f=223 then begin
+    eventos_jrpacman;
+    if f=0 then begin
       update_video_jrpacman;
       if irq_vblank then z80_0.change_irq_vector(HOLD_LINE,irq_vector);
     end;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  eventos_jrpacman;
   video_sync;
 end;
 end;
@@ -166,7 +164,7 @@ if (offset<$20) then for f:=2 to 55 do gfx[0].buffer[offset+(f*$20)]:=true
 end;
 begin
 case direccion of
-        $0..$3fff,$8000..$dfff:;
+        0..$3fff,$8000..$dfff:;
         $4000..$47ff:if memoria[direccion]<>valor then begin
                         clean_tiles(direccion and $7ff);
                         memoria[direccion]:=valor;
@@ -174,7 +172,7 @@ case direccion of
         $4800..$4fff,$5060..$506f:memoria[direccion]:=valor;
         $5000:irq_vblank:=valor<>0;
         $5001:namco_snd_0.enabled:=(valor and 1)<>0;
-        $5003:main_screen.flip_main_screen:=(valor and $1)<>0;
+        $5003:main_screen.flip_main_screen:=(valor and 1)<>0;
         $5040..$505f:namco_snd_0.regs[direccion and $1f]:=valor;
         $5070:if pal_bank<>valor then begin
                 pal_bank:=valor;
@@ -188,8 +186,8 @@ case direccion of
                 bg_prio:=(valor and 1)=0;
                 fillchar(gfx[0].buffer,$800,1);
               end;
-        $5074:if (gfx_bank<>(valor and $1)) then begin
-                gfx_bank:=valor and $1;
+        $5074:if (gfx_bank<>(valor and 1)) then begin
+                gfx_bank:=valor and 1;
                 fillchar(gfx[0].buffer,$800,1);
               end;
         $5075:sprite_bank:=valor and 1;
@@ -212,8 +210,7 @@ procedure reset_jrpacman;
 begin
  z80_0.reset;
  namco_snd_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
  irq_vblank:=false;
  marcade.in0:=$ef;
  marcade.in1:=$7f;
@@ -312,19 +309,19 @@ compute_resistor_weights(0,	255, -1.0,
 	    2,@resistances[1],@bweights,0,0);
 for f:=0 to $ff do begin
   h:=(memoria_temp[f] and $f)+((memoria_temp[f+$100] and $f) shl 4);
-	// red component */
-	bit0:=(h shr 0) and $01;
-	bit1:=(h shr 1) and $01;
-	bit2:=(h shr 2) and $01;
+	// red component
+	bit0:=(h shr 0) and 1;
+	bit1:=(h shr 1) and 1;
+	bit2:=(h shr 2) and 1;
 	colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
-	// green component */
-	bit0:=(h shr 3) and $01;
-	bit1:=(h shr 4) and $01;
-	bit2:=(h shr 5) and $01;
+	// green component
+	bit0:=(h shr 3) and 1;
+	bit1:=(h shr 4) and 1;
+	bit2:=(h shr 5) and 1;
 	colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
-	// blue component */
-	bit0:=(h shr 6) and $01;
-	bit1:=(h shr 7) and $01;
+	// blue component
+	bit0:=(h shr 6) and 1;
+	bit1:=(h shr 7) and 1;
 	colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
   //Indirect tables
   gfx[0].colores[f]:=memoria_temp[$200+f] and $f;
@@ -337,11 +334,10 @@ set_pal(colores,$100);
 marcade.dswa:=$10;
 marcade.dswb:=$80;
 marcade.dswc:=$c9;
-marcade.dswa_val:=@jrpacman_dip_a;
-marcade.dswb_val:=@jrpacman_dip_b;
-marcade.dswc_val:=@jrpacman_dip_c;
+marcade.dswa_val2:=@jrpacman_dip_a;
+marcade.dswb_val2:=@jrpacman_dip_b;
+marcade.dswc_val2:=@jrpacman_dip_c;
 //final
-reset_jrpacman;
 iniciar_jrpacman:=true;
 end;
 

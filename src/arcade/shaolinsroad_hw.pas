@@ -215,8 +215,7 @@ begin
  frame_main:=m6809_0.tframes;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  banco_pal:=0;
  marcade.in0:=$ff;
  marcade.in1:=$ff;

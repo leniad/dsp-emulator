@@ -329,21 +329,19 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
+    eventos_armedf;
+    if f=248 then begin
+      m68000_0.irq[irq_level]:=ASSERT_LINE;
+      update_video;
+    end;
     //main
     m68000_0.run(frame_main);
     frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
     //sound
     z80_0.run(frame_snd);
     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
-    case f of
-    247:begin
-          m68000_0.irq[irq_level]:=ASSERT_LINE;
-          update_video;
-        end;
-    end;
  end;
  frame:=frame+1;
- eventos_armedf;
  video_sync;
 end;
 end;
@@ -533,8 +531,6 @@ begin
  dac_0.reset;
  dac_1.reset;
  if main_vars.tipo_maquina=276 then nb1414m4_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_fg_x:=0;
@@ -751,7 +747,6 @@ case main_vars.tipo_maquina of
   end;
 end;
 //final
-reset_armedf;
 iniciar_armedf:=true;
 end;
 

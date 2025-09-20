@@ -725,8 +725,7 @@ begin
  case main_vars.tipo_maquina of
   190,191:dac_0.reset;
  end;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x1:=0;

@@ -468,8 +468,7 @@ procedure vdp_chip.video_change;
 var
   new_video:byte;
 begin
-  self.tms.vdp_mode:=(self.tms.regs[0] and 4)<>0;
-  new_video:=0;
+  new_video:=self.video_mode;
   if ((self.tms.regs[0] and 4)<>0) then begin
     self.tms.vdp_mode:=true;
     if ((self.tms.regs[0] and 2)<>0) then begin

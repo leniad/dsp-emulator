@@ -148,6 +148,7 @@ var
   cadena:string;
 begin
 correcto:=false;
+if (datos_dsk=nil) then exit;
 if ((file_extension<>'DSK') and (file_extension<>'IPF') and (file_extension<>'D64')) then exit;
 if file_extension='DSK' then begin
   case main_vars.tipo_maquina of
@@ -183,15 +184,23 @@ end;
 end;
 
 procedure Tload_dsk.FormShow(Sender: TObject);
+var
+  f:integer;
 begin
+f:=(principal1.left+(principal1.width div 2))-(load_dsk.Width div 2);
+if f<0 then load_dsk.Left:=0
+  else load_dsk.Left:=f;
+f:=(principal1.top+(principal1.Height div 2))-(load_dsk.Height div 2);
+if f<0 then load_dsk.Top:=0
+  else load_dsk.Top:=f;
 if main_vars.tipo_maquina<>3000 then filelistbox1.Mask:='*.zip;*.dsk;*.ipf'
   else filelistbox1.Mask:='*.zip;*.d64;*.ipf';
 stringgrid1.ColWidths[0]:=stringgrid1.Width-60;
 stringgrid1.ColWidths[1]:=60;
-stringgrid1.Cells[0,0]:=leng[main_vars.idioma].varios[0];
-stringgrid1.Cells[1,0]:=leng[main_vars.idioma].varios[1];
-Button2.Caption:=leng[main_vars.idioma].mensajes[7];
-Button1.Caption:=leng[main_vars.idioma].mensajes[8];
+stringgrid1.Cells[0,0]:=leng.varios[0];
+stringgrid1.Cells[1,0]:=leng.varios[1];
+Button2.Caption:=leng.mensajes[7];
+Button1.Caption:=leng.mensajes[8];
 case main_vars.tipo_maquina of
   2:DirectoryListBox1.Directory:=Directory.spectrum_disk;
   8,9:DirectoryListBox1.Directory:=Directory.amstrad_disk;

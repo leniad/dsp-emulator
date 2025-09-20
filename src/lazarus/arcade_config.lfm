@@ -14,11 +14,11 @@ object config_arcade: Tconfig_arcade
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
-  KeyPreview = True
+  Position = poScreenCenter
+  LCLVersion = '4.0.0.3'
   OnClose = FormClose
   OnKeyUp = FormKeyUp
-  Position = poDesktopCenter
-  LCLVersion = '3.4.0.0'
+  OnShow = FormShow
   object GroupBox1: TGroupBox
     Left = 10
     Height = 371

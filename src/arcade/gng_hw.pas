@@ -102,15 +102,15 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYS
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
@@ -126,6 +126,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
+    eventos_gng;
     if f=246 then begin
         update_video_gng;
         m6809_0.change_irq(HOLD_LINE);
@@ -137,7 +138,6 @@ while EmuStatus=EsRunning do begin
     z80_0.run(frame_snd);
     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
   end;
-  eventos_gng;
   video_sync;
 end;
 end;
@@ -310,8 +310,6 @@ begin
  frame_snd:=z80_0.tframes;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
  banco:=0;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -367,8 +365,8 @@ z80_0.init_sound(gng_sound_update);
 if not(roms_load(@mem_snd,gng_sound)) then exit;
 timers.init(z80_0.numero_cpu,3000000/(4*60),gng_snd_irq,nil,true);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1500000,0.5,2);
-ym2203_1:=ym2203_chip.create(1500000,0.5,2);
+ym2203_0:=ym2203_chip.create(1500000,0.3,2.5);
+ym2203_1:=ym2203_chip.create(1500000,0.3,2.5);
 //convertir chars
 if not(roms_load(@memoria_temp,gng_char)) then exit;
 init_gfx(0,8,8,1024);
@@ -401,7 +399,6 @@ marcade.dswb:=$7b;
 marcade.dswa_val2:=@gng_dip_a;
 marcade.dswb_val2:=@gng_dip_b;
 //final
-reset_gng;
 iniciar_gng:=true;
 end;
 

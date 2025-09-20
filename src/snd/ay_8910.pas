@@ -50,24 +50,24 @@ const
 implementation
 
 const
-  AY_AFINE = 0;
-  AY_ACOARSE = 1;
-  AY_BFINE = 2;
-  AY_BCOARSE = 3;
-  AY_CFINE = 4;
-  AY_CCOARSE = 5;
-  AY_NOISEPER = 6;
-  AY_ENABLE = 7;
-  AY_AVOL = 8;
-  AY_BVOL = 9;
-  AY_CVOL = 10;
-  AY_EFINE = 11;
-  AY_ECOARSE = 12;
-  AY_ESHAPE = 13;
-  AY_PORTA = 14;
-  AY_PORTB = 15;
+  AY_AFINE=0;
+  AY_ACOARSE=1;
+  AY_BFINE=2;
+  AY_BCOARSE=3;
+  AY_CFINE=4;
+  AY_CCOARSE=5;
+  AY_NOISEPER=6;
+  AY_ENABLE=7;
+  AY_AVOL=8;
+  AY_BVOL=9;
+  AY_CVOL=10;
+  AY_EFINE=11;
+  AY_ECOARSE=12;
+  AY_ESHAPE=13;
+  AY_PORTA=14;
+  AY_PORTB=15;
   STEP=$1000;
-  MAX_OUTPUT=$7FFF;
+  MAX_OUTPUT=$7fff;
 
 var
   salida_ay:array[0..3] of integer;
@@ -115,7 +115,8 @@ begin
   self.periode:=self.updateStep;
   self.periodn:=self.updateStep;
   if not(internal) then self.tsample_num:=init_channel;
-  self.amp:=amp;
+  if amp<>1 then self.amp:=amp
+    else self.amp:=2;
   self.reset;
   self.type_:=type_;
   self.gain0:=1;
@@ -128,10 +129,10 @@ procedure ay8910_chip.reset;
     i:byte;
 begin
     self.latch:=0;
-    self.outputa:= 0;
-    self.outputb:= 0;
-    self.outputc:= 0;
-    self.outputn:= $FF;
+    self.outputa:=0;
+    self.outputb:=0;
+    self.outputc:=0;
+    self.outputn:=$ff;
     self.rng:=1;
     self.lastenable:=-1;
   For i := 0 To 13 do self.aywritereg(i,0);
@@ -241,36 +242,36 @@ begin
         self.regs[AY_ACOARSE]:=self.regs[AY_ACOARSE] and $f;
         old:=self.perioda;
         self.perioda:=cardinal((self.Regs[AY_AFINE]+(256*self.regs[AY_ACOARSE]))*self.updatestep);
-        if (self.perioda=0) then self.perioda:=cardinal(self.updatestep);
+        if (self.perioda=0) then self.perioda:=self.updatestep;
         self.counta:=self.counta+(self.perioda-old);
         if (self.counta<=0) then self.counta:=1;
       end;
     AY_BFINE,AY_BCOARSE:begin
         self.regs[AY_BCOARSE]:=self.regs[AY_BCOARSE] and $f;
         old:=self.periodb;
-        self.periodb:=trunc((self.regs[AY_BFINE]+(256*self.regs[AY_BCOARSE]))*self.updatestep);
-        if (self.periodb=0) then self.periodb:=trunc(self.updatestep);
+        self.periodb:=(self.regs[AY_BFINE]+(256*self.regs[AY_BCOARSE]))*self.updatestep;
+        if (self.periodb=0) then self.periodb:=self.updatestep;
         self.countb:=self.countb+self.periodb-old;
         if (self.countb<=0) then self.countb:=1;
       end;
     AY_CFINE, AY_CCOARSE:begin
-        self.Regs[AY_CCOARSE] := self.Regs[AY_CCOARSE] and $F;
-        old := self.PeriodC;
-        self.PeriodC := trunc((self.Regs[AY_CFINE] + (256 * self.Regs[AY_CCOARSE]))*self.UpdateStep);
-        if (self.PeriodC = 0) then self.PeriodC := trunc(self.UpdateStep);
-        self.CountC := self.CountC + (self.PeriodC - old);
-        if (self.CountC <= 0) then self.CountC := 1;
+        self.Regs[AY_CCOARSE]:=self.Regs[AY_CCOARSE] and $f;
+        old:=self.PeriodC;
+        self.PeriodC:=(self.Regs[AY_CFINE]+(256*self.Regs[AY_CCOARSE]))*self.UpdateStep;
+        if (self.PeriodC=0) then self.PeriodC:=self.UpdateStep;
+        self.CountC:=self.CountC+(self.PeriodC-old);
+        if (self.CountC<=0) then self.CountC:=1;
       end;
     AY_NOISEPER:begin
-        self.Regs[AY_NOISEPER] := self.Regs[AY_NOISEPER] and $1F;
-        old := self.PeriodN;
-        self.PeriodN := trunc(self.Regs[AY_NOISEPER] * self.UpdateStep);
-        if (self.PeriodN = 0) then self.PeriodN := trunc(self.UpdateStep);
-        self.CountN := self.CountN + (self.PeriodN - old);
-        if (self.CountN <= 0) then self.CountN := 1;
+        self.Regs[AY_NOISEPER]:=self.Regs[AY_NOISEPER] and $1f;
+        old:=self.PeriodN;
+        self.PeriodN:=self.Regs[AY_NOISEPER]*self.UpdateStep;
+        if (self.PeriodN=0) then self.PeriodN:=self.UpdateStep;
+        self.CountN:=self.CountN+(self.PeriodN-old);
+        if (self.CountN<=0) then self.CountN:=1;
       end;
     AY_ENABLE:begin
-        if ((self.lastEnable = -1) or ((self.lastEnable and $40)<>(self.Regs[AY_ENABLE] and $40))) then begin
+        if ((self.lastEnable=-1) or ((self.lastEnable and $40)<>(self.Regs[AY_ENABLE] and $40))) then begin
 			      // write out 0xff if port set to input */
 			      if (@self.PortA_write<>nil) then begin
               if (self.Regs[AY_ENABLE] and $40)<>0 then self.porta_write(self.Regs[AY_PORTA])
@@ -284,51 +285,57 @@ begin
                 else self.portb_write($ff);
           end;
         end;
-		    self.lastEnable:= self.Regs[AY_ENABLE];
+		    self.lastEnable:=self.Regs[AY_ENABLE];
     end;
     AY_AVOL:begin
-        self.Regs[AY_AVOL] := self.Regs[AY_AVOL] and $1F;
-        self.EnvelopeA := self.Regs[AY_AVOL] and $10;
-        if self.Regs[AY_AVOL]<>0 then old:=self.Regs[AY_AVOL]*2+1 else old:=0;
-        if self.EnvelopeA <> 0 then self.VolA := self.VolE else self.VolA:=trunc(Vol_Table[old]);
+        self.Regs[AY_AVOL]:=self.Regs[AY_AVOL] and $1f;
+        self.EnvelopeA:=self.Regs[AY_AVOL] and $10;
+        if self.Regs[AY_AVOL]<>0 then old:=self.Regs[AY_AVOL]*2+1
+          else old:=0;
+        if self.EnvelopeA<>0 then self.VolA:=self.VolE
+          else self.VolA:=trunc(Vol_Table[old]);
       end;
     AY_BVOL:begin
-        self.Regs[AY_BVOL] := self.Regs[AY_BVOL] and $1F;
-        self.EnvelopeB := self.Regs[AY_BVOL] and $10;
-        if self.Regs[AY_BVOL]<>0 then old:=self.Regs[AY_BVOL]*2+1 else old:=0;
-        if self.EnvelopeB <> 0 then self.VolB := self.VolE else self.VolB :=trunc(Vol_Table[old]);
+        self.Regs[AY_BVOL]:=self.Regs[AY_BVOL] and $1f;
+        self.EnvelopeB:=self.Regs[AY_BVOL] and $10;
+        if self.Regs[AY_BVOL]<>0 then old:=self.Regs[AY_BVOL]*2+1
+          else old:=0;
+        if self.EnvelopeB<>0 then self.VolB:=self.VolE
+          else self.VolB:=trunc(Vol_Table[old]);
       end;
     AY_CVOL:begin
-        self.Regs[AY_CVOL] := self.Regs[AY_CVOL] and $1F;
-        self.EnvelopeC := self.Regs[AY_CVOL] and $10;
-        if self.Regs[AY_CVOL]<>0 then old:=self.Regs[AY_CVOL]*2+1 else old:=0;
-        if self.EnvelopeC <> 0 then self.VolC := self.VolE else self.VolC :=trunc(Vol_Table[old]);
+        self.Regs[AY_CVOL]:=self.Regs[AY_CVOL] and $1f;
+        self.EnvelopeC:=self.Regs[AY_CVOL] and $10;
+        if self.Regs[AY_CVOL]<>0 then old:=self.Regs[AY_CVOL]*2+1
+          else old:=0;
+        if self.EnvelopeC<>0 then self.VolC:=self.VolE
+          else self.VolC:=trunc(Vol_Table[old]);
       end;
-    AY_EFINE, AY_ECOARSE:begin
-        old := self.PeriodE;
-        self.PeriodE := trunc((self.Regs[AY_EFINE] + (256 * self.Regs[AY_ECOARSE]))* self.UpdateStep);
-        if (self.PeriodE = 0) then self.PeriodE := trunc(self.UpdateStep/2);
-        self.CountE := self.CountE + (self.PeriodE - old);
-        if (self.CountE <= 0) then self.CountE := 1
+    AY_EFINE,AY_ECOARSE:begin
+        old:=self.PeriodE;
+        self.PeriodE:=(self.Regs[AY_EFINE]+(256*self.Regs[AY_ECOARSE]))*self.UpdateStep;
+        if self.PeriodE=0 then self.PeriodE:=self.UpdateStep div 2;
+        self.CountE:=self.CountE+(self.PeriodE-old);
+        if self.CountE<=0 then self.CountE:=1;
       end;
     AY_ESHAPE:begin
-          self.Regs[AY_ESHAPE] := self.Regs[AY_ESHAPE] and $F;
-          if ((self.Regs[AY_ESHAPE] and $4)<>0) then self.Attack := $1f
-              else self.Attack := $0;
-          if ((self.Regs[AY_ESHAPE] and $8) = 0) then begin
-			      self.Hold:= 1;
-			      self.Alternate:= self.Attack;
+          self.Regs[AY_ESHAPE]:=self.Regs[AY_ESHAPE] and $f;
+          if ((self.Regs[AY_ESHAPE] and 4)<>0) then self.Attack:=$1f
+              else self.Attack:=0;
+          if ((self.Regs[AY_ESHAPE] and 8)=0) then begin
+			      self.Hold:=1;
+			      self.Alternate:=self.Attack;
 		      end else begin
-            self.Hold:= self.Regs[AY_ESHAPE] and $1;
-			      self.Alternate:= self.Regs[AY_ESHAPE] and $2;
+            self.Hold:= self.Regs[AY_ESHAPE] and 1;
+			      self.Alternate:=self.Regs[AY_ESHAPE] and 2;
           end;
-          self.CountE := self.PeriodE;
-          self.CountEnv := $1F;
-          self.Holding := 0;
-          self.VolE :=trunc(Vol_Table[self.CountEnv xor self.Attack]);
-          if (self.EnvelopeA <> 0) then self.VolA := self.VolE;
-          if (self.EnvelopeB <> 0) then self.VolB := self.VolE;
-          if (self.EnvelopeC <> 0) then self.VolC := self.VolE;
+          self.CountE:=self.PeriodE;
+          self.CountEnv:=$1f;
+          self.Holding:=0;
+          self.VolE:=trunc(Vol_Table[self.CountEnv xor self.Attack]);
+          if (self.EnvelopeA<>0) then self.VolA:=self.VolE;
+          if (self.EnvelopeB<>0) then self.VolB:=self.VolE;
+          if (self.EnvelopeC<>0) then self.VolC:=self.VolE;
       end;
       AY_PORTA:if @self.porta_write<>nil then self.porta_write(v)
                   else self.Regs[AY_PORTA]:=v;
@@ -378,117 +385,117 @@ end;
 
 function ay8910_chip.update_internal:pinteger;
 var
-  AY_OutNoise: integer;
-  VolA,VolB,VolC: integer;
-  lOut1,lOut2,lOut3: integer;
-  AY_Left: integer;
-  AY_NextEvent: integer;
-  temp2:integer;
+  AY_OutNoise:integer;
+  VolA,VolB,VolC:integer;
+  AY_Left:integer;
+  AY_NextEvent:integer;
 begin
-  if (self.Regs[AY_ENABLE] and $1)<>0 then begin
-    if self.CountA <=STEP then self.CountA :=self.CountA +STEP;
-    self.OutputA := 1;
-  end else if (self.Regs[AY_AVOL] = 0) then begin
-      if self.CountA <=STEP then self.CountA :=self.CountA +STEP;
+  if (self.Regs[AY_ENABLE] and 1)<>0 then begin
+    if self.CountA<=STEP then self.CountA:=self.CountA+STEP;
+    self.OutputA:=1;
+  end else if (self.Regs[AY_AVOL]=0) then begin
+      if self.CountA<=STEP then self.CountA:=self.CountA+STEP;
   end;
-  if (self.Regs[AY_ENABLE] and $2)<>0 then begin
-      if self.CountB <=STEP then self.CountB :=self.CountB + STEP;
-      self.OutputB := 1;
-  end else if self.Regs[AY_BVOL] = 0 then begin
-      if self.CountB <=STEP then self.CountB :=self.CountB + STEP;
+  if (self.Regs[AY_ENABLE] and 2)<>0 then begin
+      if self.CountB<=STEP then self.CountB:=self.CountB+STEP;
+      self.OutputB:=1;
+  end else if self.Regs[AY_BVOL]=0 then begin
+      if self.CountB<=STEP then self.CountB:=self.CountB+STEP;
   end;
-  if (self.Regs[AY_ENABLE] and $4)<>0 then begin
-      if self.CountC <=STEP then self.CountC :=self.CountC + STEP;
-      self.OutputC := 1;
-  end else if (self.Regs[AY_CVOL] = 0) then begin
-      if self.CountC <=STEP then self.CountC :=self.CountC +STEP;
+  if (self.Regs[AY_ENABLE] and 4)<>0 then begin
+      if self.CountC <=STEP then self.CountC:=self.CountC+STEP;
+      self.OutputC:=1;
+  end else if (self.Regs[AY_CVOL]=0) then begin
+      if self.CountC<=STEP then self.CountC:=self.CountC+STEP;
   end;
-    if ((self.Regs[AY_ENABLE] and $38) = $38) then
-      if (self.CountN <=STEP) then self.CountN:=self.CountN +STEP;
-    AY_OutNoise := (self.OutputN Or self.Regs[AY_ENABLE]);
-    VolA := 0; VolB := 0; VolC := 0;
-    AY_Left :=STEP;
-    repeat
-        If (self.CountN < AY_Left) Then AY_NextEvent := self.CountN
-                else AY_NextEvent := AY_Left;
-        If (AY_OutNoise And $8)<>0 Then begin
-            If self.OutputA<>0 Then VolA := VolA + self.CountA;
-            self.CountA := self.CountA - AY_NextEvent;
-            While (self.CountA <= 0) do begin
-                self.CountA := self.CountA + self.PeriodA;
-                If (self.CountA > 0) Then begin
-                    self.OutputA := self.OutputA Xor 1;
-                    If (self.OutputA<>0) Then VolA := VolA + self.PeriodA;
+  if ((self.Regs[AY_ENABLE] and $38)=$38) then
+      if (self.CountN<=STEP) then self.CountN:=self.CountN+STEP;
+  AY_OutNoise:=(self.OutputN or self.Regs[AY_ENABLE]);
+  VolA:=0;
+  VolB:=0;
+  VolC:=0;
+  AY_Left:=STEP;
+  repeat
+        if (self.CountN<AY_Left) then AY_NextEvent:=self.CountN
+                else AY_NextEvent:=AY_Left;
+        if (AY_OutNoise And 8)<>0 then begin
+            if self.OutputA<>0 then VolA:=VolA+self.CountA;
+            self.CountA:=self.CountA-AY_NextEvent;
+            while (self.CountA<=0) do begin
+                self.CountA:=self.CountA+self.PeriodA;
+                if (self.CountA>0) then begin
+                    self.OutputA:=self.OutputA xor 1;
+                    if (self.OutputA<>0) then VolA:=VolA+self.PeriodA;
                     break;
                 end;
-                self.CountA := self.CountA + self.PeriodA;
-                VolA := VolA + self.PeriodA;
+                self.CountA:=self.CountA+self.PeriodA;
+                VolA:=VolA+self.PeriodA;
             end;
-            If (self.OutputA<>0) Then VolA := VolA - self.CountA;
-        end Else begin
-            self.CountA := self.CountA - AY_NextEvent;
-            While (self.CountA <= 0) do begin
-                self.CountA := self.CountA + self.PeriodA;
-                If (self.CountA > 0) Then begin
-                    self.OutputA := self.OutputA Xor 1;
+            if (self.OutputA<>0) Then VolA:=VolA-self.CountA;
+        end else begin
+            self.CountA:=self.CountA-AY_NextEvent;
+            while (self.CountA<=0) do begin
+                self.CountA:=self.CountA+self.PeriodA;
+                if (self.CountA>0) then begin
+                    self.OutputA:=self.OutputA xor 1;
                     break;
                 end;
-                self.CountA := self.CountA + self.PeriodA;
+                self.CountA:=self.CountA+self.PeriodA;
             end;
         end;
-        If (AY_OutNoise And $10)<>0 Then begin
-            If self.OutputB<>0 Then VolB := VolB + self.CountB;
-            self.CountB := self.CountB - AY_NextEvent;
-            While (self.CountB <= 0) do begin
-                self.CountB := self.CountB + self.PeriodB;
-                If (self.CountB > 0) Then begin
-                    self.OutputB := self.OutputB Xor 1;
-                    If (self.OutputB<>0) Then VolB := VolB + self.PeriodB;
+        if (AY_OutNoise And $10)<>0 then begin
+            if self.OutputB<>0 then VolB:=VolB+self.CountB;
+            self.CountB:=self.CountB-AY_NextEvent;
+            while (self.CountB<=0) do begin
+                self.CountB:=self.CountB+self.PeriodB;
+                if (self.CountB>0) then begin
+                    self.OutputB:=self.OutputB xor 1;
+                    if (self.OutputB<>0) then VolB:=VolB+self.PeriodB;
                     break;
                 end;
-                self.CountB := self.CountB + self.PeriodB;
-                VolB := VolB + self.PeriodB;
+                self.CountB:=self.CountB+self.PeriodB;
+                VolB:=VolB+self.PeriodB;
             end;
-            If (self.OutputB<>0) Then VolB := VolB - self.CountB;
-        end Else begin
-            self.CountB := self.CountB - AY_NextEvent;
-            While (self.CountB <= 0) do begin
-                self.CountB := self.CountB + self.PeriodB;
-                If (self.CountB > 0) Then begin
-                    self.OutputB := self.OutputB Xor 1;
+            if (self.OutputB<>0) then VolB:=VolB-self.CountB;
+        end else begin
+            self.CountB:=self.CountB-AY_NextEvent;
+            while (self.CountB<=0) do begin
+                self.CountB:=self.CountB+self.PeriodB;
+                if (self.CountB>0) then begin
+                    self.OutputB:=self.OutputB xor 1;
                     break;
                 end;
-                self.CountB := self.CountB + self.PeriodB;
+                self.CountB:=self.CountB+self.PeriodB;
             end;
         end;
-        If (AY_OutNoise And $20)<>0 Then begin
-            If (self.OutputC<>0) Then VolC := VolC + self.CountC;
-            self.CountC := self.CountC - AY_NextEvent;
-            While (self.CountC <= 0) do begin
-                self.CountC := self.CountC + self.PeriodC;
-                If (self.CountC > 0) Then begin
-                    self.OutputC := self.OutputC Xor 1;
-                    If (self.OutputC<>0) Then VolC := VolC + self.PeriodC;
+        if (AY_OutNoise And $20)<>0 then begin
+            if (self.OutputC<>0) then VolC:=VolC+self.CountC;
+            self.CountC:=self.CountC-AY_NextEvent;
+            while (self.CountC<=0) do begin
+                self.CountC:=self.CountC+self.PeriodC;
+                if (self.CountC>0) then begin
+                    self.OutputC := self.OutputC xor 1;
+                    If (self.OutputC<>0) then VolC:=VolC+self.PeriodC;
                     break;
                 end;
-                self.CountC := self.CountC + self.PeriodC;
-                VolC := VolC + self.PeriodC;
+                self.CountC:=self.CountC+self.PeriodC;
+                VolC:=VolC+self.PeriodC;
             end;
             If (self.OutputC<>0) Then VolC := VolC - self.CountC;
-        end Else begin
+        end else begin
             self.CountC := self.CountC - AY_NextEvent;
-            While (self.CountC <= 0) do begin
+            while (self.CountC <= 0) do begin
                 self.CountC := self.CountC + self.PeriodC;
-                If (self.CountC > 0) Then begin
-                    self.OutputC := self.OutputC Xor 1;
+                if (self.CountC > 0) then begin
+                    self.OutputC:=self.OutputC xor 1;
                     break;
                 end;
-                self.CountC := self.CountC + self.PeriodC;
+                self.CountC:=self.CountC+self.PeriodC;
             end;
         end;
-        self.CountN := self.CountN - AY_NextEvent;
-        If (self.CountN <= 0) Then begin
-          if ((self.RNG + 1) and 2)<>0 then begin	//* (bit0^bit1)? */
+        self.CountN:=self.CountN-AY_NextEvent;
+        if (self.CountN<=0) then begin
+          if ((self.RNG+1) and 2)<>0 then begin	//* (bit0^bit1)? */
 					  self.OutputN:=not(self.OutputN);
 					  AY_Outnoise:=(self.OutputN or self.Regs[AY_ENABLE]);
           end;
@@ -496,47 +503,43 @@ begin
 				  self.RNG:=self.RNG shr 1;
 				  self.CountN:=self.CountN+self.PeriodN;
         end;
-        AY_Left := AY_Left - AY_NextEvent;
-    until (AY_Left <= 0);
-    if (self.Holding = 0) then begin
-        self.CountE :=self.CountE -STEP;
-        If (self.CountE <= 0) then begin
+        AY_Left:=AY_Left-AY_NextEvent;
+    until (AY_Left<=0);
+    if (self.Holding=0) then begin
+        self.CountE:=self.CountE-STEP;
+        If (self.CountE<=0) then begin
             repeat
-                self.CountEnv := self.CountEnv - 1;
-                self.CountE := self.CountE + self.PeriodE;
-            until (self.CountE > 0);
-            if (self.CountEnv < 0) then begin
+                self.CountEnv:=self.CountEnv-1;
+                self.CountE:=self.CountE+self.PeriodE;
+            until (self.CountE>0);
+            if (self.CountEnv<0) then begin
                 if (self.Hold<>0) then begin
                     if (self.Alternate<>0) then self.Attack:=self.Attack xor $1f;
                     self.Holding:=1;
                     self.CountEnv:=0;
                 end else begin
-                    If (self.Alternate<>0) and ((self.CountEnv and $20)<>0) then self.Attack := self.Attack xor $1f;
-                    self.CountEnv:=self.CountEnv and $1f;  //1f
+                    If (self.Alternate<>0) and ((self.CountEnv and $20)<>0) then self.Attack:=self.Attack xor $1f;
+                    self.CountEnv:=self.CountEnv and $1f;
                 end;
             end;
             self.VolE :=trunc(Vol_Table[self.CountEnv xor self.Attack]);
-            If (self.EnvelopeA<>0) then self.VolA:=self.VolE;
-            If (self.EnvelopeB<>0) then self.VolB:=self.VolE;
-            If (self.EnvelopeC<>0) then self.VolC:=self.VolE;
+            if (self.EnvelopeA<>0) then self.VolA:=self.VolE;
+            if (self.EnvelopeB<>0) then self.VolB:=self.VolE;
+            if (self.EnvelopeC<>0) then self.VolC:=self.VolE;
         end;
     end;
-    lOut1:=trunc(((VolA*self.VolA)/STEP)*self.gain0*self.amp);
-    lOut2:=trunc(((VolB*self.VolB)/STEP)*self.gain1*self.amp);
-    lOut3:=trunc(((VolC*self.VolC)/STEP)*self.gain2*self.amp);
-    temp2:=trunc(((((VolA*self.VolA)/STEP)*self.gain0)+(((VolB*self.VolB)/STEP)*self.gain1)+(((VolC*self.VolC)/STEP))*self.gain2)*self.amp);
-    if lout1>32767 then salida_ay[1]:=32767
-      else if lout1<-32767 then salida_ay[1]:=-32767
-          else salida_ay[1]:=lout1;
-    if lout2>32767 then salida_ay[2]:=32767
-      else if lout2<-32767 then salida_ay[2]:=-32767
-          else salida_ay[2]:=lout2;
-    if lout3>32767 then salida_ay[3]:=32767
-      else if lout3<-32767 then salida_ay[3]:=-32767
-          else salida_ay[3]:=lout3;
-    if temp2>32767 then salida_ay[0]:=32767
-      else if temp2<-32767 then salida_ay[0]:=-32767
-          else salida_ay[0]:=temp2;
+    salida_ay[0]:=trunc(((((VolA*self.VolA)/STEP)*self.gain0)+(((VolB*self.VolB)/STEP)*self.gain1)+(((VolC*self.VolC)/STEP)*self.gain2))*self.amp);
+    salida_ay[1]:=trunc(((VolA*self.VolA)/STEP)*self.gain0*self.amp);
+    salida_ay[2]:=trunc(((VolB*self.VolB)/STEP)*self.gain1*self.amp);
+    salida_ay[3]:=trunc(((VolC*self.VolC)/STEP)*self.gain2*self.amp);
+    if salida_ay[1]>$7fff then salida_ay[1]:=$7fff
+      else if salida_ay[1]<-$7fff then salida_ay[1]:=-$7fff;
+    if salida_ay[2]>$7fff then salida_ay[2]:=$7fff
+      else if salida_ay[2]<-$7fff then salida_ay[2]:=-$7fff;
+    if salida_ay[3]>$7fff then salida_ay[3]:=$7fff
+      else if salida_ay[3]<-$7fff then salida_ay[3]:=-$7fff;
+    if salida_ay[0]>$7fff then salida_ay[0]:=$7fff
+      else if salida_ay[0]<-$7fff then salida_ay[0]:=-$7fff;
     update_internal:=@salida_ay[0];
 end;
 

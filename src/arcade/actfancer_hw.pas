@@ -215,8 +215,7 @@ begin
  ym2203_0.reset;
  oki_6295_0.reset;
  bac06_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$7f;
  marcade.in2:=$ff;
@@ -284,7 +283,6 @@ case main_vars.tipo_maquina of
       end;
 end;
 //final
-reset_actfancer;
 iniciar_actfancer:=true;
 end;
 

@@ -111,9 +111,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.pv2000:=fich_ini.readString('dir','pv2000',directory.Base+'pv2000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
-  if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
-  sound_status.hay_sonido:=fich_ini.ReadInteger('dsp','sonido_ena',1)=1;
-  if sound_status.hay_sonido then principal1.consonido1.checked:=true
+  if ((main_vars.idioma>max_idiomas) and (main_vars.idioma<>200)) then main_vars.idioma:=1;
+  sound_status.sonido_activo:=fich_ini.ReadInteger('dsp','sonido_ena',1)=1;
+  if sound_status.sonido_activo then principal1.consonido1.checked:=true
     else principal1.SinSonido1.Checked:=true;
   main_screen.video_mode:=fich_ini.ReadInteger('dsp','video',1);
   if ((main_screen.video_mode<1) or (main_screen.video_mode>5)) then main_screen.video_mode:=1;
@@ -135,7 +135,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   var_spectrum.turbo_sound:=(fich_ini.ReadInteger('spectrum','turbo_sound',0)=1);
   ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
-  for f:=0 to 6 do cpc_rom[f].name:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
+  for f:=0 to 15 do cpc_rom[f].name:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
   cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
   cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
   cpc_crt.color_monitor:=fich_ini.ReadInteger('cpc','cpccolor',1)=1;
@@ -243,7 +243,7 @@ end else begin
   Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
-  sound_status.hay_sonido:=true;
+  sound_status.sonido_activo:=true;
   main_screen.pantalla_completa:=false;
   main_vars.show_crc_error:=true;
   main_vars.center_screen:=true;
@@ -260,7 +260,7 @@ end else begin
   var_spectrum.speaker_oversample:=false;
   var_spectrum.turbo_sound:=false;
   //Configuracion CPC
-  for f:=0 to 6 do cpc_rom[f].name:='';
+  for f:=0 to 15 do cpc_rom[f].name:='';
   cpc_ga.cpc_model:=0;
   cpc_ga.ram_exp:=0;
   cpc_crt.color_monitor:=true;
@@ -415,7 +415,7 @@ fich_ini.Writestring('dir','oric_tap',test_dir(Directory.oric_tap));
 fich_ini.Writestring('dir','pv1000',test_dir(Directory.pv1000));
 fich_ini.Writestring('dir','pv2000',test_dir(Directory.pv2000));
 //Config general
-fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.hay_sonido));
+fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.sonido_activo));
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
 fich_ini.WriteInteger('dsp','maquina',main_vars.tipo_maquina);
 fich_ini.WriteInteger('dsp','auto_exec',byte(main_vars.auto_exec));
@@ -434,7 +434,7 @@ fich_ini.WriteInteger('spectrum','turbo_sound',byte(var_spectrum.turbo_sound));
 fich_ini.WriteInteger('spectrum','audio_128k',var_spectrum.audio_128k);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 //Configuracion CPC
-for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom[f].name);
+for f:=0 to 15 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom[f].name);
 fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
 fich_ini.WriteInteger('cpc','cpccolor',byte(cpc_crt.color_monitor));
@@ -670,8 +670,8 @@ if not(FileExists(nombre_zip)) then exit;
 {$endif}
 search_file_from_zip:=res;
 if (warning and not(res)) then begin
-  MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-  principal1.Enabled:=true;
+  MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+  //principal1.Enabled:=true;
 end;
 end;
 
@@ -775,8 +775,8 @@ begin
     ZipFile.Close;
     ZipFile.Free;
     if warning then begin
-      MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-      principal1.Enabled:=true;
+      MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+      //principal1.Enabled:=true;
     end;
     exit;
   end;
@@ -801,8 +801,8 @@ begin
   if not(find) then begin
     ZipFile.Free;
     if warning then begin
-      MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-      principal1.Enabled:=true;
+      MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+      //principal1.Enabled:=true;
     end;
     exit;
   end;
@@ -833,8 +833,8 @@ begin
   load_file_from_zip_crc:=false;
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
-    if warning then MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
-    principal1.Enabled:=true;
+    if warning then MessageDlg(leng.errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
+    //principal1.Enabled:=true;
     exit;
   end;
   find:=false;

@@ -132,8 +132,8 @@ end;
 
 procedure Tlenslock1.FormShow(Sender: TObject);
 begin
-lenslock1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
-lenslock1.Top:=SCREEN_DIF+tape_window1.top+tape_window1.Height;
+lenslock1.Left:=principal1.left+principal1.Width;
+lenslock1.Top:=principal1.top+principal1.Height-lenslock1.Height;
 combobox1.Items.Clear;
 combobox1.Items.Add('ACE');
 combobox1.Items.Add('Art Studio');

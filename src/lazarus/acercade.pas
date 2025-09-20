@@ -34,13 +34,22 @@ var
   Aboutbox: TAboutbox;
 
 implementation
+uses principal;
 
 { TAboutbox }
 
 procedure TAboutbox.FormShow(Sender: TObject);
+var
+  f:integer;
 begin
-  label1.Caption:='v'+dsp_version;
-  aboutbox.caption:=leng[main_vars.idioma].archivo[3];
+f:=(principal1.left+(principal1.width div 2))-(AboutBox.Width div 2);
+if f<0 then AboutBox.Left:=0
+  else AboutBox.Left:=f;
+f:=(principal1.top+(principal1.Height div 2))-(AboutBox.Height div 2);
+if f<0 then AboutBox.Top:=0
+  else AboutBox.Top:=f;
+label1.Caption:='v'+dsp_version;
+aboutbox.caption:=leng.archivo[3];
 end;
 
 procedure TAboutbox.OKButtonClick(Sender: TObject);

@@ -323,8 +323,7 @@ begin
  frame_snd:=m6809_1.tframes;
  ym2203_0.reset;
  ay8910_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  fillchar(lines_color_look[0],$100,0);
  marcade.in0:=$ff;
  marcade.in1:=$80;
@@ -369,7 +368,7 @@ m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 m6809_1.init_sound(citycon_sound_update);
 if not(roms_load(@mem_snd,citycon_sonido)) then exit;
 //Sound Chip
-ym2203_0:=ym2203_chip.create(20000000 div 16,0.5,1);
+ym2203_0:=ym2203_chip.create(20000000 div 16);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
 ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910);
 //convertir chars

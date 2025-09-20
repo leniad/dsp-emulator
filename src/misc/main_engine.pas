@@ -3,11 +3,11 @@ interface
 
 uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
-     forms,sysutils,misc_functions,pal_engine,sound_engine,
-     gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
+     forms,sysutils,misc_functions,pal_engine,sound_engine,gfx_engine,
+     arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.23F';
+        DSP_VERSION='0.24WIP1';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -17,7 +17,6 @@ const
         MAX_PANT_SPRITES=256;
         MAX_DIP_VALUES=$f;
         MAX_PUNBUF=768;
-        SCREEN_DIF=20;
         FULL_SCREEN_X=800;
         FULL_SCREEN_Y=600;
         //CPU lines
@@ -28,14 +27,14 @@ const
         ALREADY_RESET=4;
         IRQ_DELAY=5;
         INPUT_LINE_NMI=$20;
+        M_PI=3.1415926535;
         {$ifdef fpc}
         {$ifdef windows}
-        FORM_POS_LAZARUS=0;
+        LAZARUS_SCR_POS=20;
         {$else}
-        FORM_POS_LAZARUS=20;
+        LAZARUS_SCR_POS=50;
         {$endif}
-        {$endif}
-        M_PI=3.1415926535;
+        {$ENDIF}
 
 type
         TMain_vars=record
@@ -89,7 +88,7 @@ type
         end;
         tllamadas_globales = record
            iniciar:function:boolean;
-           cintas,cartuchos,bucle_general,reset,close,grabar_snapshot,configurar,acepta_config:procedure;
+           cintas,cartuchos,bucle_general,reset,close,grabar_snapshot:procedure;
            caption:string;
            fps_max:single;
            save_qsnap,load_qsnap:procedure(nombre:string);
@@ -142,6 +141,7 @@ procedure video_sync;
 //misc
 procedure change_caption(nombre:string);
 procedure reset_dsp;
+procedure reset_game_general;
 //Multidirs
 function find_rom_multiple_dirs(rom_name:string):byte;
 procedure split_dirs(dir:string);
@@ -153,7 +153,7 @@ procedure copymemory(dest,source:pointer;size:integer);
 
 var
         //video
-        pantalla:array[0..max_pantalla] of libsdlP_Surface;
+        pantalla:array[0..MAX_PANTALLA] of libsdlP_Surface;
         window_render:libsdlp_Window;
         punbuf:pword;
         punbuf_alpha:pdword;
@@ -176,7 +176,7 @@ var
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
 
 implementation
-uses principal,controls_engine,cpu_misc,tap_tzx,spectrum_misc;
+uses principal,controls_engine,cpu_misc,tap_tzx,spectrum_misc,samples;
 
 function find_rom_multiple_dirs(rom_name:string):byte;
 var
@@ -249,18 +249,6 @@ get_all_dirs:=res;
 end;
 
 procedure cambiar_video;
-//Si el sistema usa la pantalla SDL arreglos visuales
-procedure uses_sdl_window;
-begin
-case main_vars.tipo_maquina of
-     0..9,1000..1008,2000..2002,3000:begin
-             fix_screen_pos(400,100);
-             principal1.Panel2.width:=400;
-             principal1.Panel2.height:=55;
-          end;
-     else fix_screen_pos(400,70);
-end;
-end;
 var
   x,y:word;
   temps:single;
@@ -283,7 +271,20 @@ case main_screen.video_mode of
 end;
 {$ifdef fpc}
 //En linux uso la pantalla de SDL...
-uses_sdl_window;
+case main_vars.tipo_maquina of
+     0..9,1000..1008,2000..2002,3000:begin
+             fix_screen_pos(400,100);
+             principal1.Panel2.width:=400;
+             principal1.Panel2.height:=55;
+          end;
+     else fix_screen_pos(400,70);
+end;
+SDL_SetWindowSize(window_render,x,y);
+if main_vars.center_screen then begin
+  principal1.Left:=(screen.Width div 2)-((principal1.Width+x) div 2);
+  principal1.Top:=(screen.Height div 2)-((principal1.Height+y) div 2);
+end;
+SDL_SetWindowPosition(window_render,principal1.left,principal1.top+principal1.Height+principal1.panel1.Height+principal1.statusbar1.Height+LAZARUS_SCR_POS);
 {$else}
 child.clientWidth:=x;
 if child.clientWidth<x then child.clientWidth:=x;  //??????????????
@@ -299,15 +300,13 @@ fix_screen_pos(x,child.height+70);
 if principal1.Panel2.visible then x:=x-60;
 child.Left:=(x-child.width) div 2;
 principal1.image2.visible:=false;
-{$endif}
-//pongo el nombre de la maquina...
-change_caption('');
-SDL_SetWindowSize(window_render,x,y);
-SDL_SetWindowPosition(window_render,principal1.left,principal1.Height+principal1.panel1.Height+principal1.statusbar1.Height+125);
 if main_vars.center_screen then begin
   principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
   principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
 end;
+{$endif}
+//pongo el nombre de la maquina...
+change_caption('');
 if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 //Calculo el rectangulo de destino para la pantalla completa
@@ -342,8 +341,8 @@ pantalla[PANT_TEMP]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0
 //Si el video el *2 necesito una temporal
 if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
 pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
-//El spectrum hay que forzarlo tambien
-spectrum_reset_video;
+//Limpiar todos los buffers de video
+reset_gfx;
 end;
 
 procedure change_video_size(x,y:word);
@@ -387,7 +386,6 @@ if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,x,y,0);
 {$endif}
 cambiar_video;
-pantalla[PANT_TEMP]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0);
 //Creo la pantalla de los sprites
 if alpha then begin
   pantalla[PANT_SPRITES_ALPHA]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,32,$ff,$ff00,$ff0000,$ff000000);
@@ -499,7 +497,7 @@ for h:=0 to (MAX_GFX-1) do begin
     if gfx[h].datos<>nil then freemem(gfx[h].datos);
     gfx[h].datos:=nil;
 end;
-for f:=0 to max_pantalla do begin
+for f:=0 to MAX_PANTALLA do begin
   if pantalla[f]<>nil then SDL_FreeSurface(pantalla[f]);
   pantalla[f]:=nil;
   fillchar(p_final[f],sizeof(tpantalla),0);
@@ -810,9 +808,9 @@ case main_screen.video_mode of
 //O la pantalla se queda congelada... ¿?¿?¿?¿?
 r:=SDL_UpdateWindowSurface(window_render);
 if r<>0 then begin
-    if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
-    pantalla[0]:=SDL_GetWindowSurface(window_render);
-  end;
+  if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
+  pantalla[0]:=SDL_GetWindowSurface(window_render);
+end;
 end;
 
 procedure change_caption(nombre:string);
@@ -867,27 +865,22 @@ end;
 
 procedure reset_dsp;
 begin
-fillchar(paleta[0],MAX_COLORES*2,0);
 fillchar(memoria[0],$10000,0);
 fillchar(mem_snd[0],$10000,0);
-fillchar(buffer_paleta[0],MAX_COLORES*2,1);
+fillchar(mem_misc[0],$10000,0);
 cpu_main_reset;
+fillchar(paleta,MAX_COLORES*2,0);
+fillchar(paleta32,MAX_COLORES*4,0);
+fillchar(paleta_alpha,MAX_COLORES*4,0);
 llamadas_maquina.cartuchos:=nil;
 llamadas_maquina.cintas:=nil;
 llamadas_maquina.grabar_snapshot:=nil;
-llamadas_maquina.cintas:=nil;
 llamadas_maquina.iniciar:=nil;
 llamadas_maquina.reset:=nil;
 llamadas_maquina.close:=nil;
 llamadas_maquina.bucle_general:=nil;
-llamadas_maquina.configurar:=nil;
-llamadas_maquina.acepta_config:=nil;
 llamadas_maquina.save_qsnap:=nil;
 llamadas_maquina.load_qsnap:=nil;
-if ((main_vars.tipo_maquina>9) and (main_vars.tipo_maquina<1000)) then llamadas_maquina.configurar:=arcade_config.activate_arcade_config
-  else llamadas_maquina.configurar:=nil;
-llamadas_maquina.acepta_config:=nil;
-llamadas_maquina.bucle_general:=nil;
 llamadas_maquina.fps_max:=60;
 main_vars.vactual:=0;
 main_vars.mensaje_principal:='';
@@ -916,8 +909,21 @@ marcade.dswc_val2:=nil;
 {$ifndef windows}
 cont_sincroniza:=sdl_getticks();
 {$endif}
+sound_engine_close;
 close_audio;
 close_video;
+end;
+
+
+procedure reset_game_general;
+begin
+fillchar(buffer_paleta,MAX_COLORES*2,$ff);
+fillchar(buffer_color,MAX_COLORES,1);
+fillchar(keyboard,$100,0);
+reset_gfx;
+reset_audio;
+reset_analog;
+reset_samples;
 end;
 
 end.

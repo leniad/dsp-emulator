@@ -50,7 +50,8 @@ case direccion of
   $10..$7ff:arkanoid_getbyte:=taito_68705_0.mcu_mem[direccion];
 end;
 end;
-
+
+
 procedure arkanoid_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7ff;
@@ -78,14 +79,19 @@ end;
 //Resto
 function read_addr_2_st:byte;
 begin
-  read_addr_2_st:=byte(taito_68705_0.main_sent) or (byte(not(taito_68705_0.mcu_sent)) shl 1);
+
+  read_addr_2_st:=byte(taito_68705_0.main_sent) or (byte(not(taito_68705_0.mcu_sent)) shl 1);
 end;
 
-function read_addr_2_tigerh:byte;
-begin
-  read_addr_2_tigerh:=byte(not(taito_68705_0.main_sent)) or (byte(taito_68705_0.mcu_sent) shl 1);
+
+function read_addr_2_tigerh:byte;
+
+begin
+
+  read_addr_2_tigerh:=byte(not(taito_68705_0.main_sent)) or (byte(taito_68705_0.mcu_sent) shl 1);
 end;
-
+
+
 function getbyte(direccion:word):byte;
 begin
 direccion:=direccion and $7ff;

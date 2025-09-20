@@ -248,7 +248,7 @@ end;
     1:radiobutton15.Checked:=true;
     2:radiobutton16.Checked:=true;
   end;
-Button2.Caption:=leng[main_vars.idioma].mensajes[8];
+Button2.Caption:=leng.mensajes[8];
 end;
 
 initialization

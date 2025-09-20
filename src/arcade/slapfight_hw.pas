@@ -144,7 +144,8 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 269 do begin
-    if (f=240) then begin
+    eventos_sf_hw;
+    if f=240 then begin
       if ena_irq then z80_0.change_irq(ASSERT_LINE);
       update_video_sf_hw;
     end;
@@ -156,7 +157,6 @@ while EmuStatus=EsRunning do begin
     //MCU CPU
     taito_68705_0.run;
   end;
-  eventos_sf_hw;
   video_sync;
 end;
 end;
@@ -295,8 +295,6 @@ begin
  taito_68705_0.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_video;
- reset_audio;
  ena_irq:=false;
  sound_nmi:=false;
  marcade.in0:=$ff;
@@ -441,7 +439,6 @@ for f:=0 to $ff do begin
 		colores[f].b:=$e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 end;
 set_pal(colores,$100);
-reset_sf_hw;
 iniciar_sf_hw:=true;
 end;
 

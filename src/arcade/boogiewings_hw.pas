@@ -28,7 +28,7 @@ const
         boogwing_oki1:tipo_roms=(n:'mbd-10.17p';l:$80000;p:0;crc:$f159f76a);
         boogwing_oki2:tipo_roms=(n:'mbd-09.16p';l:$80000;p:0;crc:$f44f2f87);
         boogwing_dip_a:array [0..7] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
+        (mask:7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$38,$30,$28,$20,$18,$10);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$80;name:'Continue Coin';number:2;val2:($80,0);name2:('1 Start/1 Continue','2 Start/1 Continue')),
@@ -89,6 +89,7 @@ frame_m:=m68000_0.tframes;
 frame_s:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 273 do begin
+   eventos_boogwing;
    case f of
       248:begin
             m68000_0.irq[6]:=HOLD_LINE;
@@ -104,7 +105,6 @@ while EmuStatus=EsRunning do begin
    h6280_0.run(trunc(frame_s));
    frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
  end;
- eventos_boogwing;
  video_sync;
 end;
 end;
@@ -221,8 +221,6 @@ begin
  deco104_0.reset;
  copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
  deco16_snd_simple_reset;
- reset_video;
- reset_audio;
  deco_sprites_0.reset;
  deco_sprites_1.reset;
  marcade.in0:=$ffff;
@@ -331,7 +329,6 @@ marcade.dswa_val2:=@boogwing_dip_a;
 freemem(memoria_temp);
 freemem(memoria_temp2);
 freemem(memoria_temp_rom);
-reset_boogwing;
 iniciar_boogwing:=true;
 end;
 

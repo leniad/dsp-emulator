@@ -10,7 +10,7 @@ function iniciar_puzz3x3:boolean;
 implementation
 const
         puzz3x3_rom:array[0..1] of tipo_roms=(
-        (n:'1.bin';l:$20000;p:0;crc:$e9c39ee7),(n:'2.bin';l:$20000;p:$1;crc:$524963be));
+        (n:'1.bin';l:$20000;p:0;crc:$e9c39ee7),(n:'2.bin';l:$20000;p:1;crc:$524963be));
         puzz3x3_gfx1:array[0..3] of tipo_roms=(
         (n:'3.bin';l:$80000;p:0;crc:$53c2aa6a),(n:'4.bin';l:$80000;p:1;crc:$fb0b76fd),
         (n:'5.bin';l:$80000;p:2;crc:$b6c1e108),(n:'6.bin';l:$80000;p:3;crc:$47cb0e8e));
@@ -42,7 +42,7 @@ const
         casanova_oki:array[0..1] of tipo_roms=(
         (n:'casanova.su2';l:$80000;p:0;crc:$84a8320e),(n:'casanova.su3';l:$40000;p:$80000;crc:$334a2d1a));
         casanova_dip_a:array [0..4] of def_dip=(
-        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'3C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Coinage';number:4;dip:((dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'3C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Dip Info';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -126,25 +126,23 @@ end;
 
 procedure puzz3x3_principal;
 var
-  frame:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=m68000_0.tframes;
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-   m68000_0.run(frame);
-   frame:=frame+m68000_0.tframes-m68000_0.contador;
+ for f:=0 to 255 do begin
+   eventos_puzz3x3;
    case f of
-      21:vblank:=0;
-      247:begin
+      22:vblank:=0;
+      248:begin
             vblank:=$ffff;
             m68000_0.irq[4]:=HOLD_LINE;
             update_video_puzz3x3;
           end;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
  end;
- eventos_puzz3x3;
  video_sync;
 end;
 end;
@@ -152,7 +150,7 @@ end;
 function puzz3x3_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$7ffff:puzz3x3_getword:=rom[direccion shr 1];
+  0..$7ffff:puzz3x3_getword:=rom[direccion shr 1];
   $100000..$10ffff:puzz3x3_getword:=ram[(direccion and $ffff) shr 1];
   $200000..$2007ff:puzz3x3_getword:=video1[(direccion and $7ff) shr 1];
   $201000..$201fff:puzz3x3_getword:=video2[(direccion and $fff) shr 1];
@@ -232,8 +230,7 @@ procedure reset_puzz3x3;
 begin
  m68000_0.reset;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
+ frame_main:=m68000_0.tframes;
  oki_bank:=0;
  vblank:=$ffff;
  long_video:=true;
@@ -334,7 +331,6 @@ case main_vars.tipo_maquina of
 end;
 //final
 freemem(memoria_temp);
-reset_puzz3x3;
 iniciar_puzz3x3:=true;
 end;
 

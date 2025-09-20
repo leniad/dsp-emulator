@@ -2,12 +2,14 @@ unit sound_engine;
 interface
 uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$else}lib_sdl2,{$endif}
      timer_engine,dialogs;
+
 const
         MAX_AUDIO_BUFFER=$f;
         MAX_CANALES=9;
         LONG_MAX_AUDIO=3000;  //Tapper necesita esto tan alto...
         FREQ_BASE_AUDIO=44100;
         M_PI=3.1415926535;
+
 type
         tipo_sonido=record
           posicion_sonido:word;
@@ -19,7 +21,7 @@ type
           num_buffer:byte;
           long_sample:word;
           canales_usados:integer;
-          stereo,hay_sonido,hay_tsonido:boolean;
+          stereo,sonido_activo,hay_tsonido:boolean;
           filter_call:array[0..MAX_CANALES-1] of procedure(canal:byte);
         end;
         snd_chip_class=class
@@ -30,6 +32,7 @@ type
             amp:single;
             clock:dword;
         end;
+
 var
         sound_status:tipo_sonido;
         update_sound_proc:exec_type_simple;
@@ -42,21 +45,25 @@ var
         tsample:array[0..MAX_CANALES-1,0..LONG_MAX_AUDIO-1] of integer;
         sample_final:array[0..LONG_MAX_AUDIO-1] of smallint;
         {$endif}
+
 function iniciar_audio(stereo_sound:boolean):boolean;
 procedure sound_engine_init(num_cpu:byte;clock:dword;update_call:exec_type_simple);
 procedure sound_engine_close;
-procedure sound_engine_change_clock(clock:single);
+procedure sound_engine_change_clock(clock:dword);
 procedure reset_audio;
 procedure play_sonido;
 procedure close_audio;
 procedure sound_update_internal;
 function init_channel:byte;
+
 implementation
 uses main_engine;
+
 function snd_chip_class.get_sample_num:byte;
 begin
   get_sample_num:=self.tsample_num;
 end;
+
 {$ifndef fpc}
 function iniciar_audio(stereo_sound:boolean):boolean;
 var
@@ -73,6 +80,7 @@ end else begin
     sound_status.stereo:=false;
     canales:=1;
 end;
+if llamadas_maquina.fps_max=0 then MessageDlg('FPS no iniciados!!', mtInformation,[mbOk], 0);
 fillchar(Format,SizeOf(TWaveFormatEx),0);
 Format.wFormatTag:=WAVE_FORMAT_PCM;
 Format.nChannels:=canales;
@@ -97,8 +105,8 @@ end;
 reset_audio;
 iniciar_audio:=true;
 sound_status.hay_tsonido:=true;
-sound_engine_close;
 end;
+
 procedure close_audio;
 var
   j,f:byte;
@@ -148,16 +156,18 @@ sound_status.hay_tsonido:=true;
 reset_audio;
 iniciar_audio:=true;
 end;
+
 procedure close_audio;
 begin
 SDL_CloseAudioDevice(sound_device);
 end;
 {$endif}
+
 procedure play_sonido;
 var
   f{$ifdef fpc},h,j{$endif}:integer;
 begin
-if ((sound_status.hay_tsonido) and (sound_status.hay_sonido)) then begin
+if (sound_status.hay_tsonido and sound_status.sonido_activo) then begin
 for f:=0 to sound_status.canales_usados do begin
   if @sound_status.filter_call[f]<>nil then sound_status.filter_call[f](f);
   {$ifndef fpc}
@@ -204,10 +214,12 @@ begin
   update_sound_proc:=nil;
 end;
 
-procedure sound_engine_change_clock(clock:single);
+procedure sound_engine_change_clock(clock:dword);
 begin
   timers.timer[sound_engine_timer].time_final:=clock/FREQ_BASE_AUDIO;
-  sound_status.cpu_clock:=trunc(clock);
+  sound_status.cpu_clock:=clock;
+  close_audio;
+  iniciar_audio(sound_status.stereo);
 end;
 
 procedure sound_update_internal;

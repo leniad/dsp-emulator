@@ -39,7 +39,8 @@ uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   ambush_hw,superduck_hw,hangon_hw,shadow_warriors_hw,raiden_hw,twins_hw,
   oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
   mugsmashers_hw,steelforce_hw,bankpanic_hw,appoooh_hw,hw_88games,dooyong_hw,
-  blueprint_hw,unico_hw,kikikaikai_hw,lasso_hw,finalstarforce_hw,wyvernf0_hw;
+  blueprint_hw,unico_hw,kikikaikai_hw,lasso_hw,finalstarforce_hw,wyvernf0_hw,
+  taito_b_hw;
 
 type
   tgame_desc=record
@@ -67,7 +68,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=428;
+  GAMES_CONT=436;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum;tipo:COMPUTER),
@@ -484,6 +485,14 @@ const
   (name:'Riot City';year:'1991';snd:1;hi:false;zip:'riotcity';grid:408;company:'Sega/Westone';rom:@riotcity_roms;tipo:ARCADE or FIGHT),
   (name:'SDI - Strategic Defense Initiative';year:'1987';snd:1;hi:false;zip:'sdib';grid:409;company:'Sega';rom:@sdi_roms;tipo:ARCADE or SHOT),
   (name:'Cotton';year:'1991';snd:1;hi:false;zip:'cotton';grid:410;company:'Sega';rom:@cotton_roms;tipo:ARCADE or SHOT),
+  (name:'Discs of Tron';year:'1983';snd:1;hi:false;zip:'dotron';grid:411;company:'Bally Midway';rom:@dotron_roms;tipo:ARCADE or SHOT),
+  (name:'Tron';year:'1981';snd:1;hi:false;zip:'tron';grid:412;company:'Bally Midway';rom:@tron_roms;tipo:ARCADE or SHOT),
+  (name:'Timber';year:'1984';snd:1;hi:false;zip:'timber';grid:413;company:'Bally Midway';rom:@timber_roms;tipo:ARCADE or RUN_GUN),
+  (name:'Satan''s Hollow';year:'1981';snd:1;hi:false;zip:'shollow';grid:414;company:'Bally Midway';rom:@shollow_roms;tipo:ARCADE or SHOT),
+  (name:'Domino Man';year:'1982';snd:1;hi:false;zip:'domino';grid:415;company:'Bally Midway';rom:@domino_roms;tipo:ARCADE or MAZE),
+  (name:'Wacko';year:'1982';snd:1;hi:false;zip:'wacko';grid:416;company:'Bally Midway';rom:@wacko_roms;tipo:ARCADE or MAZE),
+  (name:'Nastar';year:'1988';snd:1;hi:false;zip:'nastar';grid:417;company:'Taito';rom:@nastar_roms;tipo:ARCADE or RUN_GUN or FIGHT),
+  (name:'Master of Weapon';year:'1989';snd:1;hi:false;zip:'masterw';grid:418;company:'Taito';rom:@masterw_roms;tipo:ARCADE or SHOT),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_;tipo:CONSOLE),
@@ -512,7 +521,7 @@ procedure cargar_maquina(tmaquina:word);
 function tipo_cambio_maquina(sender:TObject):word;
 
 implementation
-uses principal,misc_functions;
+uses principal;
 
 procedure load_game(numero:word);
 begin
@@ -930,6 +939,14 @@ case numero of
   408:principal1.CambiarMaquina(principal1.RiotCity1);
   409:principal1.CambiarMaquina(principal1.sdi1);
   410:principal1.CambiarMaquina(principal1.cotton1);
+  411:principal1.CambiarMaquina(principal1.dotron1);
+  412:principal1.CambiarMaquina(principal1.tron1);
+  413:principal1.CambiarMaquina(principal1.timber1);
+  414:principal1.CambiarMaquina(principal1.shollow1);
+  415:principal1.CambiarMaquina(principal1.domino1);
+  416:principal1.CambiarMaquina(principal1.wacko1);
+  417:principal1.CambiarMaquina(principal1.nastar1);
+  418:principal1.CambiarMaquina(principal1.masterw1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1364,6 +1381,14 @@ principal1.WyvernF01.Checked:=false;
 principal1.riotcity1.Checked:=false;
 principal1.sdi1.Checked:=false;
 principal1.cotton1.Checked:=false;
+principal1.dotron1.Checked:=false;
+principal1.tron1.Checked:=false;
+principal1.timber1.Checked:=false;
+principal1.shollow1.Checked:=false;
+principal1.domino1.Checked:=false;
+principal1.wacko1.Checked:=false;
+principal1.nastar1.Checked:=false;
+principal1.masterw1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1403,7 +1428,7 @@ principal1.BitBtn11.Enabled:=true;
 principal1.BitBtn12.Enabled:=true;
 principal1.BitBtn14.Enabled:=true;
 principal1.BitBtn8.enabled:=false; //Arcade config
-principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[8];
+principal1.BitBtn10.Hint:=leng.hints[8];
 case driver of
   0..6:begin
           principal1.Panel2.visible:=true;
@@ -1444,20 +1469,20 @@ case driver of
   1008:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
-          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          principal1.BitBtn10.Hint:=leng.hints[20];
        end;
   1000,1001,1003,1005,1006,1007,1009,1010:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartcuho
           principal1.BitBtn11.visible:=true; //Snapshot
-          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          principal1.BitBtn10.Hint:=leng.hints[20];
        end;
   1002,1004:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn1.visible:=true; //Config
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn11.visible:=true; //Snapshot
-          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
+          principal1.BitBtn10.Hint:=leng.hints[20];
        end;
 end;
 end;
@@ -1630,7 +1655,7 @@ case tmaquina of
   314:llamadas_maquina.iniciar:=iniciar_ccastles;
   315:llamadas_maquina.iniciar:=iniciar_flower;
   318:llamadas_maquina.iniciar:=iniciar_sdodgeball;
-  324:llamadas_maquina.iniciar:=iniciar_mcr;
+  324,411,412,413,414,415,416:llamadas_maquina.iniciar:=iniciar_mcr;
   325:llamadas_maquina.iniciar:=iniciar_arkanoid;
   326:llamadas_maquina.iniciar:=iniciar_sidearms;
   327:llamadas_maquina.iniciar:=iniciar_speedr;
@@ -1658,6 +1683,7 @@ case tmaquina of
   390,391:llamadas_maquina.iniciar:=iniciar_lasso;
   406:llamadas_maquina.iniciar:=iniciar_finalstarforce;
   407:llamadas_maquina.iniciar:=iniciar_wyvernf0;
+  417,418:llamadas_maquina.iniciar:=iniciar_taito_b;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -3332,6 +3358,38 @@ end;
 if sender=principal1.cotton1 then begin
   tipo:=410;
   principal1.cotton1.Checked:=true;
+end;
+if sender=principal1.dotron1 then begin
+  tipo:=411;
+  principal1.dotron1.Checked:=true;
+end;
+if sender=principal1.tron1 then begin
+  tipo:=412;
+  principal1.tron1.Checked:=true;
+end;
+if sender=principal1.timber1 then begin
+  tipo:=413;
+  principal1.timber1.Checked:=true;
+end;
+if sender=principal1.shollow1 then begin
+  tipo:=414;
+  principal1.shollow1.Checked:=true;
+end;
+if sender=principal1.domino1 then begin
+  tipo:=415;
+  principal1.domino1.Checked:=true;
+end;
+if sender=principal1.wacko1 then begin
+  tipo:=416;
+  principal1.wacko1.Checked:=true;
+end;
+if sender=principal1.nastar1 then begin
+  tipo:=417;
+  principal1.nastar1.Checked:=true;
+end;
+if sender=principal1.masterw1 then begin
+  tipo:=418;
+  principal1.masterw1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

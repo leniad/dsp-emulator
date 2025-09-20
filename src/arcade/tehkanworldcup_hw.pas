@@ -313,12 +313,10 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  msm5205_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$20;
  marcade.in1:=$20;
  marcade.in2:=$f;
- reset_analog;
  scroll_x:=0;
  scroll_y:=0;
  sound_latch:=0;

@@ -105,15 +105,15 @@ procedure eventos_vulgus;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
@@ -129,25 +129,22 @@ end;
 procedure vulgus_principal;
 var
   f:byte;
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //snd
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=239 then begin
+  for f:=0 to 255 do begin
+    eventos_vulgus;
+    if f=240 then begin
       z80_0.change_irq_vector(HOLD_LINE,$d7);
       update_video_vulgus;
     end;
+    //main
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //snd
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_vulgus;
   video_sync;
 end;
 end;
@@ -232,8 +229,8 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_video;
- reset_audio;
+ frame_main:=z80_0.tframes;
+ frame_snd:=z80_1.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -279,8 +276,8 @@ z80_1.init_sound(vulgus_sound_update);
 //IRQ Sound CPU
 timers.init(z80_1.numero_cpu,3000000/(8*60),vulgus_snd_irq,nil,true);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
-ay8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
+ay8910_0:=ay8910_chip.create(1500000,AY8910);
+ay8910_1:=ay8910_chip.create(1500000,AY8910);
 //cargar y desencriptar las ROMS
 if not(roms_load(@memoria,vulgus_rom)) then exit;
 //cargar ROMS sonido
@@ -337,7 +334,6 @@ marcade.dswb:=$7f;
 marcade.dswa_val2:=@vulgus_dip_a;
 marcade.dswb_val2:=@vulgus_dip_b;
 //final
-reset_vulgus;
 iniciar_vulgus:=true;
 end;
 

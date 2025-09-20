@@ -142,7 +142,8 @@ var
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
+ for f:=0 to 255 do begin
+    eventos_raiden;
     if f=240 then begin
       nec_0.set_input(INT_IRQ,HOLD_LINE,$32);//$c8 div 4
       nec_1.set_input(INT_IRQ,HOLD_LINE,$32);//$c8 div 4
@@ -159,7 +160,6 @@ while EmuStatus=EsRunning do begin
       seibu_snd_0.run;
     end;
  end;
- eventos_raiden;
  video_sync;
 end;
 end;
@@ -255,8 +255,6 @@ begin
  frame_main:=nec_0.tframes;
  frame_sub:=nec_1.tframes;
  seibu_snd_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ffff;
  seibu_snd_0.input:=0;
  bg_enabled:=true;
@@ -349,7 +347,6 @@ init_gfx(3,16,16,$1000);
 gfx[3].trans[15]:=true;
 convert_gfx(3,0,memoria_temp,@pc_x,@pc_y,false,true);
 freemem(memoria_temp);
-reset_raiden;
 iniciar_raiden:=true;
 end;
 

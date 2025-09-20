@@ -1,4 +1,6 @@
 program dsp;
+
+
 uses
   Forms,
   coleco in '..\CONSOLAS\coleco.pas',
@@ -92,7 +94,7 @@ uses
   contra_hw in '..\arcade\contra_hw.pas',
   mappy_hw in '..\arcade\mappy_hw.pas',
   rastan_hw in '..\arcade\rastan_hw.pas',
-  taitosnd in '..\snd\taitosnd.pas',
+  taito_sound in '..\arcade\misc\taito_sound.pas',
   namcoio_56xx_58xx in '..\devices\namcoio_56xx_58xx.pas',
   legendarywings_hw in '..\arcade\legendarywings_hw.pas',
   streetfighter_hw in '..\arcade\streetfighter_hw.pas',
@@ -366,7 +368,10 @@ uses
   wyvernf0_hw in '..\arcade\wyvernf0_hw.pas',
   taito_68705 in '..\arcade\misc\taito_68705.pas',
   galaxian_stars in '..\arcade\misc\galaxian_stars.pas',
-  msm5232 in '..\snd\msm5232.pas';
+  msm5232 in '..\snd\msm5232.pas',
+  taito_b_hw in '..\arcade\taito_b_hw.pas',
+  taito_tc0180vcu in '..\arcade\misc\taito_tc0180vcu.pas',
+  ym_2610 in '..\snd\ym_2610.pas';
 
 {$R *.res}
 begin

@@ -4,8 +4,8 @@ object FLoadRom: TFLoadRom
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Load Rom'
-  ClientHeight = 507
-  ClientWidth = 900
+  ClientHeight = 499
+  ClientWidth = 898
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

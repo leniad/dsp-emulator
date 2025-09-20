@@ -26,16 +26,16 @@ object load_dsk: Tload_dsk
   end
   object GroupBox1: TGroupBox
     Left = 8
-    Top = 271
+    Top = 270
     Width = 565
-    Height = 185
+    Height = 179
     Caption = 'Contenido ZIP / Inside ZIP'
     TabOrder = 2
     object StringGrid1: TStringGrid
-      Left = 0
-      Top = 26
-      Width = 562
-      Height = 159
+      Left = 4
+      Top = 18
+      Width = 556
+      Height = 151
       TabStop = False
       ColCount = 2
       DefaultColWidth = 134

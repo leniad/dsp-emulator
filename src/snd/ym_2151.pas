@@ -96,16 +96,25 @@ begin
 end;
 
 procedure ym2151_chip.update;
+function calc_max(val:integer):smallint;
+var
+  tempi:integer;
+begin
+tempi:=trunc(val*self.amp);
+if tempi>$7fff then calc_max:=$7fff
+  else if tempi<-$7fff then calc_max:=-$7fff
+    else calc_max:=tempi;
+end;
 var
   audio:pinteger;
 begin
   audio:=YM_2151UpdateOne(self.chip_number);
   if sound_status.stereo then begin
     inc(audio);
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(audio^*self.amp);
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=calc_max(audio^);
     inc(audio);
-    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(audio^*self.amp);
-  end else tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(audio^*self.amp);
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=calc_max(audio^);
+  end else tsample[self.tsample_num,sound_status.posicion_sonido]:=calc_max(audio^);
 end;
 
 end.

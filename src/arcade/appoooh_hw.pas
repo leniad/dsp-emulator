@@ -153,6 +153,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to $ff do begin
+    eventos_appoooh;
     if f=240 then begin
       if nmi_vblank then z80_0.change_nmi(PULSE_LINE);
       update_video_appoooh;
@@ -160,7 +161,6 @@ while EmuStatus=EsRunning do begin
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  eventos_appoooh;
   video_sync;
 end;
 end;
@@ -262,8 +262,6 @@ procedure appoooh_reset;
 begin
 z80_0.reset;
 frame_main:=z80_0.tframes;
-reset_video;
-reset_audio;
 sn_76496_0.reset;
 sn_76496_1.reset;
 sn_76496_2.reset;
@@ -389,7 +387,6 @@ for f:=0 to $1ff do begin
 end;
 set_pal(colores,$200);
 //final
-appoooh_reset;
 iniciar_appoooh:=true;
 end;
 

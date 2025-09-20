@@ -386,8 +386,6 @@ begin
  upd7810_0.reset;
  frame_main:=upd7810_0.tframes;
  upd1771_0.reset;
- reset_video;
- reset_audio;
  scv_0.porta_val:=$ff;
  scv_0.portc_val:=$ff;
  fillchar(scv_0.keys,9,$ff);
@@ -545,7 +543,6 @@ for f:=0 to 15 do begin
 end;
 set_pal(colores,$10);
 //final
-reset_scv;
 if main_vars.console_init then abrir_scv;
 iniciar_scv:=true;
 end;

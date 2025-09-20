@@ -160,7 +160,8 @@ var
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
-    for f:=0 to 263 do begin
+  for f:=0 to 263 do begin
+      eventos_simpsons;
       if f=224 then begin
         if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
         if k053246_0.is_irq_enabled then begin
@@ -175,9 +176,8 @@ while EmuStatus=EsRunning do begin
       //sound
       z80_0.run(frame_snd);
       frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
-    end;
-eventos_simpsons;
-video_sync;
+  end;
+  video_sync;
 end;
 end;
 
@@ -330,8 +330,6 @@ begin
  k053246_0.reset;
  k053260_0.reset;
  ym2151_0.reset;
- reset_video;
- reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -413,7 +411,6 @@ sprite_timer_dmaon:=timers.init(konami_0.numero_cpu,256,simpsons_sprites_dmaon,n
 sprite_timer_dmaoff:=timers.init(konami_0.numero_cpu,2048,simpsons_sprites_dmaoff,nil,false);
 k053246_0.k053247_start(0,16);
 //final
-reset_simpsons;
 iniciar_simpsons:=true;
 end;
 

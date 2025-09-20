@@ -150,7 +150,8 @@ var
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 255 do begin
+    eventos_lk_hw;
     if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_lk_hw;
@@ -164,7 +165,6 @@ while EmuStatus=EsRunning do begin
     //MCU CPU
     taito_68705_0.run;
   end;
-  eventos_lk_hw;
   video_sync;
 end;
 end;
@@ -323,8 +323,6 @@ begin
  taito_68705_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
  fillchar(scroll_val[0],5,0);
  marcade.in0:=$b;
  marcade.in1:=$ff;
@@ -396,7 +394,6 @@ marcade.dswc:=$ff;
 marcade.dswa_val2:=@lk_dip_a;
 marcade.dswb_val2:=@lk_dip_b;
 marcade.dswc_val2:=@lk_dip_c;
-reset_lk_hw;
 iniciar_lk_hw:=true;
 end;
 

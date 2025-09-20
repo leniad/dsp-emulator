@@ -20,13 +20,13 @@ const
         (n:'ba3__07.2764.ic9';l:$2000;p:$4000;crc:$efe43731),(n:'ba3__08.2764.ic10';l:$2000;p:$6000;crc:$3ca20696));
         elevator_prom:tipo_roms=(n:'eb16.22';l:$100;p:0;crc:$b833b5ea);
         elevator_dip_a:array [0..5] of def_dip=(
-        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'10000'),(dip_val:$2;dip_name:'15000'),(dip_val:$1;dip_name:'20000'),(dip_val:$0;dip_name:'25000'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Free Play';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'10000'),(dip_val:$2;dip_name:'15000'),(dip_val:$1;dip_name:'20000'),(dip_val:$0;dip_name:'25000'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:4;name:'Free Play';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$18;name:'Lives';number:4;dip:((dip_val:$18;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$8;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         elevator_dip_c:array [0..5] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'Easiest'),(dip_val:$2;dip_name:'Easy'),(dip_val:$1;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'Easiest'),(dip_val:$2;dip_name:'Easy'),(dip_val:$1;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Coinage Display';number:2;dip:((dip_val:$10;dip_name:'Coins/Credits'),(dip_val:$0;dip_name:'Insert Coin'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Year Display';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$20;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Hit Detection';number:2;dip:((dip_val:$40;dip_name:'Normal Game'),(dip_val:$0;dip_name:'No Hit'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -48,18 +48,18 @@ const
         (n:'kn55.bin';l:$1000;p:$6000;crc:$70aef58f),(n:'kn56.bin';l:$1000;p:$7000;crc:$932eb667));
         junglek_prom:tipo_roms=(n:'eb16.22';l:$100;p:0;crc:$b833b5ea);
         junglek_dip_a:array [0..4] of def_dip=(
-        (mask:$3;name:'Finish Bonus';number:4;dip:((dip_val:$3;dip_name:'None'),(dip_val:$2;dip_name:'Timer x1'),(dip_val:$1;dip_name:'Timer x2'),(dip_val:$0;dip_name:'Timer x3'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Finish Bonus';number:4;dip:((dip_val:$3;dip_name:'None'),(dip_val:$2;dip_name:'Timer x1'),(dip_val:$1;dip_name:'Timer x2'),(dip_val:$0;dip_name:'Timer x3'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$18;name:'Lives';number:4;dip:((dip_val:$18;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$8;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         junglek_dip_c:array [0..4] of def_dip=(
-        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$2;dip_name:'10000'),(dip_val:$1;dip_name:'20000'),(dip_val:$0;dip_name:'30000'),(dip_val:$3;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:3;name:'Bonus Life';number:4;dip:((dip_val:$2;dip_name:'10000'),(dip_val:$1;dip_name:'20000'),(dip_val:$0;dip_name:'30000'),(dip_val:$3;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Year Display';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$20;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Infinite Lives';number:2;dip:((dip_val:$40;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Coin Slots';number:2;dip:((dip_val:$80;dip_name:'A and B'),(dip_val:$0;dip_name:'A only'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //General
         coin_dip:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$0f;dip_name:'9C 1C'),(dip_val:$0e;dip_name:'8C 1C'),(dip_val:$0d;dip_name:'7C 1C'),(dip_val:$0c;dip_name:'6C 1C'),(dip_val:$0b;dip_name:'5C 1C'),(dip_val:$0a;dip_name:'4C 1C'),(dip_val:$09;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$00;dip_name:'1C 1C'),(dip_val:$01;dip_name:'1C 2C'),(dip_val:$02;dip_name:'1C 3C'),(dip_val:$03;dip_name:'1C 4C'),(dip_val:$04;dip_name:'1C 5C'),(dip_val:$05;dip_name:'1C 6C'),(dip_val:$06;dip_name:'1C 7C'),(dip_val:$07;dip_name:'1C 8C'))),
+        (mask:$f;name:'Coin A';number:16;dip:((dip_val:$0f;dip_name:'9C 1C'),(dip_val:$0e;dip_name:'8C 1C'),(dip_val:$0d;dip_name:'7C 1C'),(dip_val:$0c;dip_name:'6C 1C'),(dip_val:$0b;dip_name:'5C 1C'),(dip_val:$0a;dip_name:'4C 1C'),(dip_val:$09;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$00;dip_name:'1C 1C'),(dip_val:$01;dip_name:'1C 2C'),(dip_val:$02;dip_name:'1C 3C'),(dip_val:$03;dip_name:'1C 4C'),(dip_val:$04;dip_name:'1C 5C'),(dip_val:$05;dip_name:'1C 6C'),(dip_val:$06;dip_name:'1C 7C'),(dip_val:$07;dip_name:'1C 8C'))),
         (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$f0;dip_name:'9C 1C'),(dip_val:$e0;dip_name:'8C 1C'),(dip_val:$d0;dip_name:'7C 1C'),(dip_val:$c0;dip_name:'6C 1C'),(dip_val:$b0;dip_name:'5C 1C'),(dip_val:$a0;dip_name:'4C 1C'),(dip_val:$90;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$00;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$20;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'),(dip_val:$40;dip_name:'1C 5C'),(dip_val:$50;dip_name:'1C 6C'),(dip_val:$60;dip_name:'1C 7C'),(dip_val:$70;dip_name:'1C 8C'))),());
 var
  memoria_rom:array[0..1,0..$1fff] of byte;
@@ -229,26 +229,23 @@ end;
 
 procedure taitosj_nomcu_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=239 then begin
+  for f:=0 to 255 do begin
+    eventos_taitosj;
+    if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_taitosj;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
   end;
-  eventos_taitosj;
   video_sync;
 end;
 end;
@@ -364,30 +361,26 @@ end;
 
 procedure taitosj_mcu_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s:=z80_1.tframes;
-frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sound
-    z80_1.run(frame_s);
-    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    //mcu
-    m6805_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
-    if f=239 then begin
+  for f:=0 to 255 do begin
+    eventos_taitosj;
+    if f=240 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_taitosj;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //Sound
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+    //mcu
+    m6805_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
   end;
-  eventos_taitosj;
   video_sync;
 end;
 end;
@@ -563,14 +556,17 @@ procedure taitosj_reset;
 begin
 z80_0.reset;
 z80_1.reset;
-if main_vars.tipo_maquina=185 then m6805_0.reset;
+if main_vars.tipo_maquina=185 then begin
+  m6805_0.reset;
+  frame_mcu:=m6805_0.tframes;
+end;
 ay8910_0.reset;
 ay8910_1.reset;
 ay8910_2.reset;
 ay8910_3.reset;
+frame_main:=z80_0.tframes;
+frame_snd:=z80_1.tframes;
 dac_0.reset;
-reset_video;
-reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
@@ -629,15 +625,15 @@ z80_1.init_sound(taitosj_sound_update);
 //IRQ sonido
 timers.init(z80_1.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,nil,true);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,AY8910,0.15);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
 ay8910_0.change_io_calls(ay0_porta_read,ay0_portb_read,nil,nil);
-ay8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,1);
 ay8910_1.change_io_calls(nil,nil,ay1_porta_write,ay1_portb_write);
-ay8910_2:=ay8910_chip.create(1500000,AY8910,0.5);
+ay8910_2:=ay8910_chip.create(1500000,AY8910,1);
 ay8910_2.change_io_calls(nil,nil,ay2_porta_write,nil);
-ay8910_3:=ay8910_chip.create(1500000,AY8910,1);
+ay8910_3:=ay8910_chip.create(1500000,AY8910,2);
 ay8910_3.change_io_calls(nil,nil,nil,ay3_portb_write);
-dac_0:=dac_chip.create(0.15);
+dac_0:=dac_chip.create(0.30);
 case main_vars.tipo_maquina of
   185:begin  //Elevator Action
         z80_0.change_ram_calls(taitosj_mcu_getbyte,taitosj_mcu_putbyte);
@@ -726,7 +722,6 @@ compute_resistor_weights(0,255,-1.0,
 			3,@resistances[0],@gweights[0],0,0,
 			3,@resistances[0],@bweights[0],0,0);
 //final
-taitosj_reset;
 taitosj_iniciar:=true;
 end;
 

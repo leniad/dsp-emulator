@@ -1,6 +1,6 @@
 unit tms36xx;
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine,dialogs;
+uses sound_engine,timer_engine,dialogs;
 
 type
   TMS36XX_type=record
@@ -467,7 +467,7 @@ var
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   //Primero las tablas
-  for f:=0 to 3 do
+  for f:=1 to 4 do
       for j:=0 to ((96*6)-1) do tunes[f,j]:=0;
   //tune 1
   for f:=0 to 191 do begin

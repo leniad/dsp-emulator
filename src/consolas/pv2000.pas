@@ -126,19 +126,17 @@ end;
 
 procedure pv2000_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,true,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
-      z80_0.run(frame);
-      frame:=frame+z80_0.tframes-z80_0.contador;
-      tms_0.refresh(f);
+    eventos_pv2000;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    tms_0.refresh(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
-  eventos_pv2000;
   video_sync;
 end;
 end;
@@ -209,7 +207,7 @@ procedure reset_pv2000;
 begin
  z80_0.reset;
  sn_76496_0.reset;
- reset_audio;
+ frame_main:=z80_0.tframes;
  pv2000_0.last_nmi:=false;
  pv2000_0.keyb_column:=0;
  pv2000_0.last_key:=0;
@@ -273,7 +271,6 @@ sn_76496_0:=sn76496_chip.Create(7159090 div 2);
 //cargar roms
 if not(roms_load(@memoria[0],pv2000_bios)) then exit;
 //final
-reset_pv2000;
 if main_vars.console_init then abrir_pv2000;
 iniciar_pv2000:=true;
 end;

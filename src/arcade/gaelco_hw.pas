@@ -612,8 +612,7 @@ begin
     ym3812_0.reset;
  end;
  oki_6295_0.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x0:=1;

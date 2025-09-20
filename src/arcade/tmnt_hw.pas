@@ -120,26 +120,23 @@ end;
 
 procedure tmnt_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-  //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //sound
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-  if f=239 then begin
-    update_video_tmnt;
-    if irq5_mask then m68000_0.irq[5]:=HOLD_LINE;
-  end;
+ for f:=0 to 255 do begin
+    eventos_tmnt;
+    if f=240 then begin
+      update_video_tmnt;
+      if irq5_mask then m68000_0.irq[5]:=HOLD_LINE;
+    end;
+    //main
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_tmnt;
  video_sync;
 end;
 end;
@@ -312,26 +309,23 @@ end;
 
 procedure ssriders_principal;
 var
-  frame_m,frame_s:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-  //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //sound
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-  case f of
-    21:update_video_ssriders;
-    239:if k052109_0.is_irq_enabled then m68000_0.irq[4]:=HOLD_LINE;
-  end;
+    eventos_tmnt;
+    if f=240 then begin
+      if k052109_0.is_irq_enabled then m68000_0.irq[4]:=HOLD_LINE;
+      update_video_ssriders;
+    end;
+    //main
+    m68000_0.run(frame_main);
+    frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+    //sound
+    z80_0.run(frame_snd);
+    frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
  end;
- eventos_tmnt;
  video_sync;
 end;
 end;
@@ -524,7 +518,6 @@ begin
         upd7759_0.reset;
         upd7759_0.start_w(0);
         upd7759_0.reset_w(1);
-        reset_samples;
       end;
   215:begin
         k053245_reset;
@@ -533,11 +526,11 @@ begin
         eepromser_0.reset;
       end;
  end;
- reset_video;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=z80_0.tframes;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  sound_latch:=0;
  sound_latch2:=0;
  irq5_mask:=false;
@@ -784,7 +777,6 @@ case main_vars.tipo_maquina of
   end;
 end;
 //final
-reset_tmnt;
 iniciar_tmnt:=true;
 end;
 

@@ -79,7 +79,15 @@ close;
 end;
 
 procedure TConfigSP.FormShow(Sender: TObject);
+var
+  f:integer;
 begin
+f:=(principal1.left+(principal1.width div 2))-(configsp.Width div 2);
+if f<0 then configsp.Left:=0
+  else configsp.Left:=f;
+f:=(principal1.top+(principal1.Height div 2))-(configsp.Height div 2);
+if f<0 then configsp.Top:=0
+  else configsp.Top:=f;
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
@@ -151,7 +159,7 @@ end;
     1:radiobutton15.Checked:=true;
     2:radiobutton16.Checked:=true;
   end;
-Button2.Caption:=leng[main_vars.idioma].mensajes[8];
+Button2.Caption:=leng.mensajes[8];
 end;
 
 procedure TConfigSP.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
@@ -182,7 +190,7 @@ with ConfigSP do begin
   end;
   if radiobutton9.Checked then begin
     borde.tipo:=2;
-    fillchar(borde.buffer,71136,16);
+    fillchar(borde.buffer,78000,$80);
     case main_vars.tipo_maquina of
       0,5:borde.borde_spectrum:=borde_48_full;
       1,2,3,4:borde.borde_spectrum:=borde_128_full;

@@ -590,9 +590,9 @@ m6502_1:=cpu_m6502.create(500000,272,TCPU_M6502);
 m6502_1.change_ram_calls(getbyte_snd_btime,putbyte_snd_btime);
 m6502_1.init_sound(btime_sound_update);
 //Sound Chip
-AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910);
 AY8910_0.change_io_calls(nil,nil,btime_porta_w,nil);
-AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
+AY8910_1:=ay8910_chip.create(1500000,AY8910);
 case main_vars.tipo_maquina of
   31:begin //Burguer Time
         m6502_0.change_ram_calls(getbyte_btime,putbyte_btime);

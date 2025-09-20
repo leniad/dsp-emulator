@@ -541,20 +541,10 @@ procedure reset_gunsmokehw;
 begin
  z80_0.reset;
  z80_1.reset;
- if main_vars.tipo_maquina<>80 then begin
-    mcs51_0.reset;
-    cpu_to_mcu:=0;
-    mcu_p0:=0;
-    audiocpu_to_mcu:=0;
-    mcu_p2:=0;
-    mcu_p3:=0;
-    mcu_to_cpu:=0;
-    mcu_to_audiocpu:=0;
- end;
+ if main_vars.tipo_maquina<>80 then mcs51_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_video;
- reset_audio;
+ reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -569,6 +559,13 @@ begin
  rom_bank:=0;
  sprite3bank:=0;
  sound_command:=0;
+ cpu_to_mcu:=0;
+ mcu_p0:=0;
+ audiocpu_to_mcu:=0;
+ mcu_p2:=0;
+ mcu_p3:=0;
+ mcu_to_cpu:=0;
+ mcu_to_audiocpu:=0;
 end;
 
 function iniciar_gunsmokehw:boolean;

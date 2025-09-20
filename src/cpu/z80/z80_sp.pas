@@ -405,8 +405,8 @@ case instruccion of
                 spec_putbyte(r.hl.w,temp);
             end;
         $37:begin  {scf >4t<}
-                r.f.bit5:=((r.a and $20)<>0) or r.f.bit5;
-                r.f.bit3:=((r.a and 8)<>0) or r.f.bit3;
+                r.f.bit5:=(r.a and $20)<>0;
+                r.f.bit3:=(r.a and 8)<>0;
                 r.f.c:=true;
                 r.f.h:=false;
                 r.f.n:=false;
@@ -446,8 +446,8 @@ case instruccion of
                 r.pc:=r.pc+1;
             end;
         $3f:begin   {ccf >4t<}
-                r.f.bit5:=((r.a and $20)<>0) or r.f.bit5;
-                r.f.bit3:=((r.a and 8)<>0) or r.f.bit3;
+                r.f.bit5:=(r.a and $20)<>0;
+                r.f.bit3:=(r.a and 8)<>0;
                 r.f.h:=r.f.c;
                 r.f.n:=false;
                 r.f.c:=not(r.f.c);
@@ -2066,7 +2066,8 @@ var
  tempb,instruccion:byte;
  temp2:word;
 begin
-if tipo then temp2:=r.ix.w else temp2:=r.iy.w;
+if tipo then temp2:=r.ix.w
+  else temp2:=r.iy.w;
 self.retraso(r.pc);inc(self.contador,3);
 instruccion:=self.getbyte(r.pc);
 r.pc:=r.pc+1;
@@ -2291,7 +2292,7 @@ case instruccion of
         $23:begin {ld E,sla (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(@r.de.l);
+                sla_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $24:begin {ld H,sla (IX+d)}
@@ -2313,11 +2314,10 @@ case instruccion of
                 spec_putbyte(temp2,tempb);
             end;
         $27:begin {ld A,sla (IX+d)}
-                tempb:=spec_getbyte(temp2);
-                r.a:=tempb;
+                r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(@tempb);
-                spec_putbyte(temp2,tempb);
+                sla_8(@r.a);
+                spec_putbyte(temp2,r.a);
             end;
         $28:begin //ld B,sra (IX+d)
                 r.bc.h:=spec_getbyte(temp2);
