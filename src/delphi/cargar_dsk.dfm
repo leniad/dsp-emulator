@@ -2,19 +2,17 @@ object load_dsk: Tload_dsk
   Left = 183
   Top = 154
   Caption = 'Open/Abrir Disk'
-  ClientHeight = 465
-  ClientWidth = 699
+  ClientHeight = 456
+  ClientWidth = 693
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesigned
   OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
     Left = 579

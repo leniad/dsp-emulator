@@ -52,7 +52,8 @@ var
  sprites_count,y_count,char_mask,sprite_mask,t1scroll_x,t1scroll_y:word;
  vram_refresh:boolean;
 
-procedure put_gfx_sprite_1945(nchar:dword;ngfx:byte;flick:boolean);inline;
+procedure update_video_k31945;
+procedure put_gfx_sprite_1945(nchar:dword;ngfx:byte;flick:boolean);
 var
   x,y,pos_y,ptemp:byte;
   temp,temp2:pword;
@@ -77,8 +78,6 @@ for y:=0 to 15 do begin
   pos_y:=pos_y+1;
 end;
 end;
-
-procedure update_video_k31945;
 var
   f,nchar,x,y:word;
 begin
@@ -102,7 +101,7 @@ end;
 actualiza_trozo_final(0,0,320,y_size,2);
 end;
 
-procedure eventos_k31945;inline;
+procedure eventos_k31945;
 begin
 if event.arcade then begin
   //P1
@@ -151,7 +150,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin

@@ -126,7 +126,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure update_video_lw;inline;
+procedure update_video_lw;
 var
   f,color,nchar,x,y:word;
   attr:byte;
@@ -212,7 +212,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -292,7 +292,7 @@ begin
 end;
 
 //trojan
-procedure update_video_trojan;inline;
+procedure update_video_trojan;
 var
   f,color,nchar,x,y,tile_index,offsy:word;
   attr:byte;
@@ -394,7 +394,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color_trojan(dir:word);inline;
+procedure cambiar_color_trojan(dir:word);
 var
   tmp_color:byte;
   color:tcolor;

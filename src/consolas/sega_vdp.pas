@@ -88,6 +88,7 @@ begin
   self.tms.reset;
   self.tms.regs[$a]:=$ff;
   self.tms.regs[2]:=$e;
+  self.tms.regs[1]:=$20;
   self.video_mode:=0;
   self.hpos:=0;
   self.reg8tmp:=0;

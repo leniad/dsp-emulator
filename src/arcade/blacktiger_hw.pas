@@ -45,7 +45,7 @@ var
  mask_sx,mask_sy,scroll_x,scroll_y,scroll_bank:word;
  bg_on,ch_on,spr_on:boolean;
 
-procedure update_video_blktiger;inline;
+procedure update_video_blktiger;
 const
   split_table:array[0..15] of byte=(3,3,2,2,1,1,0,0,0,0,0,0,0,0,0,0);
 var
@@ -183,7 +183,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;

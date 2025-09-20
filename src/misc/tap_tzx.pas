@@ -3,7 +3,7 @@ unit tap_tzx;
 {
  - Version 3.5.2
      - Cambiado el calculo de la pausa... Los estados T se basan en los 3.5Mhz del spectrum
-     - En la funcion 'play_cinsta_tzx' se suman los estados T, no hay que hacerlo manualmente
+     - En la funcion 'play_cinta_tzx' se suman los estados T, no hay que hacerlo manualmente
      - La variable lpausa ahora el dword, y ya no se calcula cuando avanza la cinta, se calcula antes
  - Version 3.5.1
      - Arreglado el ultimo bloque en Lazarus
@@ -104,6 +104,7 @@ type
             indice_cinta:word;
             estado_actual,bit_actual:byte;
             estados:integer;
+            total_bloques:word;
             datos_tzx:array[0..MAX_TZX] of ptipo_datos_tzx;
             indice_saltos,indice_select:array[0..MAX_TZX] of word;
             value:byte;
@@ -123,6 +124,7 @@ procedure play_cinta_tzx(avanza_estados:byte);
 procedure siguiente_bloque_tzx;
 function abrir_tap(datos:pbyte;long:integer):boolean;
 function abrir_tzx(data:pbyte;long:integer):boolean;
+function abrir_cdt(data:pbyte;long:integer):boolean;
 function abrir_csw(data:pbyte;long:integer):boolean;
 function abrir_wav(data:pbyte;long:integer):boolean;
 function abrir_pzx(data:pbyte;long:integer):boolean;
@@ -197,15 +199,20 @@ main_vars.mensaje_principal:='    '+leng[main_vars.idioma].mensajes[1]+': '+intt
 cinta_tzx.estados:=cinta_tzx.estados-tzx_estados_necesarios;
 if cinta_tzx.en_pausa then begin
   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
-  if cinta_tzx.es_tap then main_screen.rapido:=false;
-  siguiente_bloque_tzx;
   cinta_tzx.en_pausa:=false;
-  exit;
+  cinta_tzx.value:=0;
+  if cinta_tzx.es_tap then begin
+    siguiente_bloque_tzx;
+    cinta_tzx.es_tap:=false;
+    main_screen.rapido:=false;
+    exit;
+  end;
+  if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque=$fe then begin
+    siguiente_bloque_tzx;
+    exit;
+  end else siguiente_bloque_tzx;
 end;
-if cinta_tzx.es_tap then begin
-  cinta_tzx.es_tap:=false;
-  main_screen.rapido:=true;
-end;
+main_screen.rapido:=true;
 case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
         $10,$11,$14:begin //cargas normal, turbo y datos puros
                    case cinta_tzx.estado_actual of
@@ -220,8 +227,13 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                                   cinta_tzx.estado_actual:=1;
                                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lsinc1;
                                 end else begin
-                                  cinta_tzx.en_pausa:=true;
-                                  tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                                  if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa<>0 then begin
+                                    tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                                    cinta_tzx.en_pausa:=true;
+                                  end else begin
+                                    cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                                    siguiente_bloque_tzx;
+                                  end;
                                 end;
                             end;
                           end;
@@ -239,15 +251,15 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                                 tzx_pulsos:=2;
                                 tzx_ultimo_bit:=1;
                           end;
-                        3:begin  //datos
+                        3:begin  //datos puros
                                 cinta_tzx.value:=cinta_tzx.value xor $40;
                                 tzx_pulsos:=tzx_pulsos-1; //hago la forma de la onda
                                 if tzx_pulsos=0 then begin
                                   if cinta_tzx.bit_actual>tzx_ultimo_bit then begin //no estoy en el ultimo bit
-                                        cinta_tzx.bit_actual:=cinta_tzx.bit_actual shr 1; //pillo el siguiente
-                                        tzx_pulsos:=2;
-                                        if (tzx_datos_p^ and cinta_tzx.bit_actual)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
-                                           else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
+                                      cinta_tzx.bit_actual:=cinta_tzx.bit_actual shr 1; //pillo el siguiente
+                                      tzx_pulsos:=2;
+                                      if (tzx_datos_p^ and cinta_tzx.bit_actual)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
+                                        else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
                                   end else begin //estoy en el ultimo bit
                                       tzx_contador_datos:=tzx_contador_datos+1;
                                       datos_totales_tzx:=datos_totales_tzx+1;
@@ -260,8 +272,14 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                                         if (tzx_datos_p^ and $80)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
                                            else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
                                       end else begin   //pasar al otro bloque
-                                        tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
-                                        cinta_tzx.en_pausa:=true;
+                                        if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa<>0 then begin
+                                          tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                                          cinta_tzx.en_pausa:=true;
+                                        end else begin
+                                          cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                                          siguiente_bloque_tzx;
+                                          //cinta_tzx.value:=cinta_tzx.value xor $40;
+                                        end;
                                       end;
                                   end;
                                 end else begin  //no ha completado la onda
@@ -274,8 +292,8 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
         $12:begin //tono puro
                 cinta_tzx.value:=cinta_tzx.value xor $40;
                 if tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab then begin
-                        tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
-                        tzx_temp:=tzx_temp+1;
+                  tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
+                  tzx_temp:=tzx_temp+1;
                 end else begin
                   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
                   siguiente_bloque_tzx;
@@ -284,9 +302,9 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
          $13:begin //secuencia de pulsos
                 cinta_tzx.value:=cinta_tzx.value xor $40;
                 if tzx_pulsos<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then begin
-                        tzx_pulsos:=tzx_pulsos+1;
-                        tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                        inc(tzx_datos_p,2);
+                  tzx_pulsos:=tzx_pulsos+1;
+                  tzx_estados_necesarios:=sacar_word(tzx_datos_p);
+                  inc(tzx_datos_p,2);
                 end else begin
                   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
                   siguiente_bloque_tzx;
@@ -307,8 +325,13 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                     cinta_tzx.bit_actual:=$80;
                     if (tzx_datos_p^ and $80)<>0 then cinta_tzx.value:=$40 else cinta_tzx.value:=0;
                   end else begin   //pasar al otro bloque
-                    tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
-                    cinta_tzx.en_pausa:=true;
+                    if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa<>0 then begin
+                      tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                      cinta_tzx.en_pausa:=true;
+                    end else begin
+                      cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                      siguiente_bloque_tzx;
+                    end;
                   end;
                 end;
             end;
@@ -345,8 +368,13 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                         3:cinta_tzx.value:=$40;
                       end;
                     end else begin  //Se ha terminado... hago la pausa
-                      tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
-                      cinta_tzx.en_pausa:=true;
+                      if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa<>0 then begin
+                        tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                        cinta_tzx.en_pausa:=true;
+                      end else begin
+                        cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                        siguiente_bloque_tzx;
+                      end;
                     end;
                   end;
                 end else begin
@@ -403,7 +431,7 @@ if not(cinta_tzx.grupo) then begin
     cinta_tzx.click_falso:=false;
   {$endif}
 end;
-cinta_tzx.en_pausa:=false;
+//cinta_tzx.en_pausa:=false;
 tzx_temp:=0;
 tzx_datos_p:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
 tzx_contador_datos:=0;
@@ -575,8 +603,6 @@ var
   ptemp:pbyte;
   bt:band_z80;
 begin
-main_screen.rapido:=true;
-cinta_tzx.es_tap:=true;
 ptemp:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
 if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque>1 then begin
   checksum:=ptemp^;
@@ -603,6 +629,8 @@ datos_totales_tzx:=datos_totales_tzx+cinta_tzx.datos_tzx[cinta_tzx.indice_cinta]
 bt:=z80_val.f;z80_val.f:=z80_val.f2;z80_val.f2:=bt;
 z80_val.pc:=$05e2;
 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+cinta_tzx.es_tap:=true;
+main_screen.rapido:=true;
 cinta_tzx.en_pausa:=true;
 end;
 
@@ -626,13 +654,14 @@ while cinta_tzx.datos_tzx[temp]<>nil do begin
     freemem(cinta_tzx.datos_tzx[temp]);
     cinta_tzx.datos_tzx[temp]:=nil;
     temp:=temp+1;
+    tape_window1.stringgrid1.Cells[0,temp]:='';
+    tape_window1.stringgrid1.Cells[1,temp]:='';
 end;
 fillchar(cinta_tzx.indice_saltos,MAX_TZX*2,0);
 fillchar(cinta_tzx.indice_select,MAX_TZX*2,0);
 cinta_tzx.es_tap:=false;
 cinta_tzx.indice_cinta:=0;
-llamadas_maquina.open_file:='';
-change_caption;
+change_caption('');
 tape_window1.stringgrid1.RowCount:=1;
 var_spectrum.sd_1:=false;
 cinta_tzx.en_pausa:=false;
@@ -766,6 +795,7 @@ cinta_tzx.datos_tzx[indice].tipo_bloque:=$fe;
 cinta_tzx.datos_tzx[indice].lbloque:=1;
 getmem(cinta_tzx.datos_tzx[indice].datos,1);
 //Valores finales
+cinta_tzx.total_bloques:=indice+1;
 cinta_tzx.play_tape:=false;
 cinta_tzx.cargada:=true;
 cinta_tzx.value:=$0;
@@ -1031,6 +1061,40 @@ type
     name:array[0..15] of ansichar;
     size:dword;
   end;
+
+function abrir_cdt(data:pbyte;long:integer):boolean;
+var
+  f:word;
+begin
+abrir_cdt:=abrir_tzx(data,long);
+if cinta_tzx.datos_tzx[0].tipo_bloque<>$20 then begin
+  tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+  for f:=cinta_tzx.total_bloques downto 1 do begin
+    cinta_tzx.datos_tzx[f]:=cinta_tzx.datos_tzx[f-1];
+    cinta_tzx.indice_saltos[f]:=cinta_tzx.indice_saltos[f-1]+1;
+    cinta_tzx.indice_select[f]:=cinta_tzx.indice_select[f-1]+1;
+    tape_window1.stringgrid1.Cells[0,f]:=tape_window1.stringgrid1.Cells[0,f-1];
+    tape_window1.stringgrid1.Cells[1,f]:=tape_window1.stringgrid1.Cells[1,f-1];
+  end;
+  //Creo la pausa
+  tape_window1.stringgrid1.Cells[0,0]:=leng[main_vars.idioma].cinta[9];
+  tape_window1.stringgrid1.Cells[1,0]:='2000ms.';
+  cinta_tzx.indice_cinta:=0;
+  cinta_tzx.indice_saltos[0]:=0;
+  cinta_tzx.indice_select[0]:=0;
+  cinta_tzx.indice_saltos[cinta_tzx.total_bloques+1]:=0;
+  cinta_tzx.indice_select[cinta_tzx.total_bloques+1]:=0;
+  cinta_tzx.datos_tzx[0]:=nil;
+  getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
+  zero_tape_data(0);
+  cinta_tzx.datos_tzx[0].tipo_bloque:=$20;
+  cinta_tzx.datos_tzx[0].lcabecera:=0;
+  cinta_tzx.datos_tzx[0].lpausa:=2000*TZX_CLOCK;
+  getmem(cinta_tzx.datos_tzx[0].datos,1);
+  cinta_tzx.total_bloques:=cinta_tzx.total_bloques+1;
+  siguiente_bloque_tzx;
+end;
+end;
 
 function abrir_tzx(data:pbyte;long:integer):boolean;
 var
@@ -1555,6 +1619,7 @@ cinta_tzx.datos_tzx[temp].tipo_bloque:=$fe;
 cinta_tzx.datos_tzx[temp].lbloque:=1;
 getmem(cinta_tzx.datos_tzx[temp].datos,1);
 //Datos finales
+cinta_tzx.total_bloques:=temp+1;
 cinta_tzx.play_tape:=false;
 cinta_tzx.cargada:=true;
 cinta_tzx.play_once:=false;

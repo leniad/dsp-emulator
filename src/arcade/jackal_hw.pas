@@ -38,7 +38,9 @@ var
  banco,scroll_x,scroll_y,scroll_crt,sprite_crt,ram_bank,sprite_bank:byte;
  irq_enable:boolean;
 
-procedure draw_sprites(bank:byte;pos:word);inline;
+procedure update_video_jackal;
+
+procedure draw_sprites(bank:byte;pos:word);
 var
   sn1,sn2,attr,a,b,c,d,flipx_v,flipy_v:byte;
 	flipx,flipy:boolean;
@@ -91,7 +93,6 @@ begin
   end;
 end;
 
-procedure update_video_jackal;inline;
 var
   x,y,f,nchar:word;
   atrib:byte;
@@ -230,7 +231,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure sound_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:word);
 var
   data:word;
   color:tcolor;
@@ -246,7 +249,6 @@ begin
   if ((dir>$ff) and (dir<$200)) then fillchar(gfx[0].buffer,$400,1);
 end;
 
-procedure sound_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $2000:ym2151_0.reg(valor);

@@ -1,11 +1,13 @@
 unit pia6821;
-
 interface
 
 type
+
 in_handler=function:byte;
 out_handler=procedure(valor:byte);
 irq_handler=procedure(state:boolean);
+cb_handler=procedure(state_out:boolean);
+
 pia6821_chip=class
       constructor Create;
       destructor free;
@@ -15,6 +17,7 @@ pia6821_chip=class
       function read(dir:byte):byte;
       procedure write(dir,valor:byte);
       procedure change_in_out(in_a,in_b:in_handler;out_a,out_b:out_handler);
+      procedure change_cb(cb2:cb_handler);
       procedure change_irq(irq_a,irq_b:irq_handler);
       procedure ca1_w(state:boolean);
       procedure cb1_w(state:boolean);
@@ -60,30 +63,33 @@ pia6821_chip=class
       procedure ddr_b_w(valor:byte);
       procedure control_b_w(valor:byte);
   end;
+
 var
   pia6821_0,pia6821_1,pia6821_2:pia6821_chip;
 
 implementation
+
 const
   PIA_IRQ1=$80;
   PIA_IRQ2=$40;
 
-function irq1_enabled(c:byte):boolean;    begin irq1_enabled:=((c shr 0) and 1)<>0; end;
-function c1_low_to_high(c:byte):boolean;  begin c1_low_to_high:=((c shr 1) and 1)<>0; end;
-function c1_high_to_low(c:byte):boolean;  begin c1_high_to_low:=((c shr 1) and 1)=0; end;
-function output_selected(c:byte):boolean; begin output_selected:=((c shr 2) and 1)<>0; end;
-function irq2_enabled(c:byte):boolean;    begin irq2_enabled:=((c shr 3) and 1)<>0; end;
-function strobe_e_reset(c:byte):boolean;  begin strobe_e_reset:=((c shr 3) and 1)<>0; end;
-function strobe_c1_reset(c:byte):boolean; begin strobe_c1_reset:=((c shr 3) and 1)=0; end;
-function c2_set(c:byte):boolean;          begin c2_set:=((c shr 3) and 1)<>0; end;
-function c2_low_to_high(c:byte):boolean;  begin c2_low_to_high:=((c shr 4) and 1)<>0; end;
-function c2_high_to_low(c:byte):boolean;  begin c2_high_to_low:=((c shr 4) and 1)=0; end;
-function c2_set_mode(c:byte):boolean;     begin c2_set_mode:=((c shr 4) and 1)<>0; end;
-function c2_strobe_mode(c:byte):boolean;  begin c2_strobe_mode:=((c shr 4) and 1)=0; end;
-function c2_output(c:byte):boolean;       begin c2_output:=((c shr 5) and 1)<>0; end;
-function c2_input(c:byte):boolean;        begin c2_input:=((c shr 5) and 1)=0; end;
+function irq1_enabled(c:byte):boolean;    begin irq1_enabled:=(c and 1)<>0; end;
+function c1_low_to_high(c:byte):boolean;  begin c1_low_to_high:=(c and 2)<>0; end;
+function c1_high_to_low(c:byte):boolean;  begin c1_high_to_low:=(c and 2)=0; end;
+function output_selected(c:byte):boolean; begin output_selected:=(c and 4)<>0; end;
+function irq2_enabled(c:byte):boolean;    begin irq2_enabled:=(c and 8)<>0; end;
+function strobe_e_reset(c:byte):boolean;  begin strobe_e_reset:=(c and 8)<>0; end;
+function strobe_c1_reset(c:byte):boolean; begin strobe_c1_reset:=(c and 8)=0; end;
+function c2_set(c:byte):boolean;          begin c2_set:=(c and 8)<>0; end;
+function c2_low_to_high(c:byte):boolean;  begin c2_low_to_high:=(c and $10)<>0; end;
+function c2_high_to_low(c:byte):boolean;  begin c2_high_to_low:=(c and $10)=0; end;
+function c2_set_mode(c:byte):boolean;     begin c2_set_mode:=(c and $10)<>0; end;
+function c2_strobe_mode(c:byte):boolean;  begin c2_strobe_mode:=(c and $10)=0; end;
+function c2_output(c:byte):boolean;       begin c2_output:=(c and $20)<>0; end;
+function c2_input(c:byte):boolean;        begin c2_input:=(c and $20)=0; end;
 
 constructor pia6821_chip.Create;
+
 begin
   self.in_ca1_handler:=nil;
   self.in_ca2_handler:=nil;
@@ -107,6 +113,11 @@ begin
   self.in_b_handler:=in_b;
   self.out_a_handler:=out_a;
   self.out_b_handler:=out_b;
+end;
+
+procedure pia6821_chip.change_cb(cb2:cb_handler);
+begin
+  self.cb2_handler:=cb2;
 end;
 
 procedure pia6821_chip.change_irq(irq_a,irq_b:irq_handler);
@@ -255,7 +266,6 @@ function pia6821_chip.get_in_a_value:byte;
 var
   port_a_data,ret:byte;
 begin
-	port_a_data:=0;
 	// update the input
 	if (addr(in_a_handler)<>nil) then begin
 		port_a_data:=self.in_a_handler;

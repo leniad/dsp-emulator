@@ -40,7 +40,7 @@ var
   weights_b:array[0..1] of single;
   ms_scanline:array[0..271] of word;
 
-procedure cambiar_color(pos:byte);inline;
+procedure cambiar_color(pos:byte);
 var
   valor,bit0,bit1,bit2:byte;
   color:tcolor;
@@ -63,7 +63,7 @@ begin
   set_pal_color(color,pos);
 end;
 
-procedure update_video_ms;inline;
+procedure update_video_ms;
 var
   f,nchar,color,x,y:word;
   atrib:byte;
@@ -292,7 +292,6 @@ close_qsnapshot;
 fillchar(gfx[0].buffer,$400,1);
 fillchar(gfx[2].buffer,$1000,1);
 for f:=0 to $1f do cambiar_color(f);
-
 end;
 
 procedure reset_ms;

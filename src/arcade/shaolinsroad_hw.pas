@@ -38,7 +38,7 @@ var
  banco_pal,scroll:byte;
  pedir_nmi:boolean;
 
-procedure update_video_shaolin;inline;
+procedure update_video_shaolin;
 var
   x,y,f,color,nchar:word;
   atrib:byte;

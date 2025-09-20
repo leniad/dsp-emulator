@@ -1,4 +1,243 @@
 ﻿# DSP Emulator status #
+<b>12/03/23 - DSP Emulator 0.21Final. Updated Windows binary, linux 64 binary and source.<br>
+<pre>
+-General
+    +Added some SDL2 functions to autoselect the best video format when switch to full screen
+    +Fixed some export ROM data (thanks to Neville)
+    +Fixed a stupid bug creating pixel buffer
+    +CPU
+        -M68000
+            +Fixed opcodes divu and sbcd (thanks to Neville)
+-SG-1000
+    +Added HOLD button
+-Sega Master System
+    +Fixed 'Pause' button, now works
+-Mega System 1 HW
+    +Fixed RAM byte write (fixes '64th Street - A detective story' protection)
+</pre><br>
+Please read 'Whats New 0.21' file for full details<br><br>
+<b>12/02/23 - DSP Emulator 0.21WIP6. Updated Windows binary and source.<br>
+<pre>
+-General 
+    +Updated SDL library to 2.26.3
+    +Updated preview images
+    +Remove arcade keys when not using arcade drivers
+    +CPU
+        -M68000
+            +Split read/write byte flags
+            +Enhanced timings
+            +Fixed opcodes addi.l, addq.l, sbcd.rr, abcd.rr, roxr.w, roxl.w, rol.w, asr.b, lsr.b, roxr.b, ror.b, asr.w, lsr.w, ror.w, asr.l, lsr.l, roxr.l, ror.l asl.b, lsl.b, roxl.b, rol.b, asl.w, lsl.w, asl.l, lsl.l, roxl.l, rol.l
+            +Added movem.w $38 efective address
+        -MCS51
+            +Added opcodes $38..$3f, $62, $63, $64 and $b1
+            +Fixed external get/put byte with no function
+        -fd1089: Updated decode functions
+    +Sound
+        -SEGA PCM: Added stereo
+        -SN76496: Added stereo
+        -VLM5030: Added stereo
+        -YM2203: Added stereo
+    +Updated key redefine names
+        -'COIN' --> 'COIN/SELECT'
+        -'START' --> 'P1/START' or 'P2/START'
+-Gauntlet
+    +Gauntlet: Renamed ROM zip to 'gauntlet'
+    +Gauntlet II: Updated ROMs to v2
+-Hang-On HW
+    +Hang-On: added driver with sound
+    +Enduro racer: added driver with sound
+    +Space Harrier: added driver with sound, some sprite problems (M68000 bug?)
+-Mega System 1 HW
+    +Fixed all video issues
+        -Fixed graphics layers
+        -Fixed scroll
+        -Fixed sprites
+    +Fixed graphics decode
+    +Rod Land
+        -Updated ROMs
+        -Added graphics decrypt
+    +64th Street - A detective story: added driver with sound
+-Outrun
+    +Fixed tile buffer size and activation
+    +Fixed missing sprites
+    +Fixed tiles transparency
+    +Fixed tiles priority
+-Sega System 16A HW
+    +Fixed graphics decode
+    +Fixed sprite ROMs and decode to 16bits
+    +Fixed tiles transparency
+    +Fixed tiles priority (very obious in WB3 end zone)
+    +Alien Syndrome: Updated fd1089 ROM decode key
+    +Wonder Boy III: Updated fd1089 ROM decode key
+-Sega System 16B HW
+    +Fixed disabled screen
+    +Fixed tiles transparency
+    +Fixed tiles priority
+    +Fixed tile buffer activation
+</pre><br>
+<img src="https://i.ibb.co/1TJHpV3/64street.png"> <img src="https://i.ibb.co/ky5TD1S/enduror.png"><br>
+<img src="https://i.ibb.co/NZ45xpK/hangon.png"> <img src="https://i.ibb.co/8jFd81t/sharrier.png"><br><br>
+<b>10/01/23 - DSP Emulator 0.21WIP5.1. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Change between drivers is faster now
+    +Fixed joystick SDL 2 support! Changed hint function before SDL init, and works with all SDL 2 versions (removed SDL 2.0.16)
+    +Added start and coin/select in player redefinition page
+    +Start and coin/select keys can be mapped to joystick buttons
+-Sega Master System
+    +Remapped 'Pause' button to coin/select button
+-Sega Game Gear
+    +Removed 'Pause' button (doesn't have it)
+</pre><br><br>
+<b>08/01/23 - DSP Emulator 0.21WIP5. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Find a bug on new releases of SDL 2 library, joystick stop working when main window loses focus. Changed to SDL 2.0.16, works fine with this version
+        -Added SDL 2.0.16 for download
+    +Enhanced joystick support
+        -New redefine buttons system, select and press the button to use it
+        -Rewrited joystick internal functions
+    +Windows: Removed mouse cursor, slows down everything when enabled
+    +Lazarus: Added 'follow me' window style. The main emulation window follows select window when it moves.
+-CPS1 HW
+    +Added 3 extra players buttons, 'Street Fighter II' now works with all buttons
+    +Better row scroll, still not working
+-Super Duck
+    +Added driver with sound
+-Tiger Road
+    +Added sprite buffer
+</pre><br>
+<img src="https://i.ibb.co/3WVdjYP/supduck.png"><br><br>
+<b>06/12/22 - DSP Emulator 0.21WIP4.2. Another fix! Updated Windows binary and source update.<br>
+<pre>
+-General
+    +Fixed - Emulator losses focus and keyboard stop working (Thanks to Neville)
+    +Updated SDL library to 2.26.1
+-Coleco
+    +Fire button 1 and 2 switched
+    +Fixed error message loading a cartridge
+</pre><br><br>
+<b>05/11/22 - DSP Emulator 0.21WIP4.1. Quick fix! Updated Windows binary and source update.<br>
+<pre>
+-Lazarus
+    +Fixed image preview error
+    +Fixed linux sort games
+    +Added check for SDL2 Mixer present, needed for linux and MacOS
+-General
+    +Fixed - Emulator stops with no reason (Thanks to Neville)
+    +Better console game files loading, better error handling
+    +Better tape files loading, better error handling
+    +Fixed remembering last open dir for all systems
+    +Better fullscreen mode (Press F6)
+</pre><br><br>
+<b>25/10/22 - DSP Emulator 0.21WIP4. Updated Windows binary and source update.<br>
+<pre>
+-General
+    +Update preview images, added images for new drivers
+    +Konami K051316
+        -Begin implementation, still WIP
+    +CPU
+        -HD6309: Fixed opcodes $2c, $2d and $2f
+        -Konami CPU
+              +Fixed opcodes $66, $67, $6e, $6f, $76, $77, $7e, $7f, $b4 and $b5
+              +Added opcodes $74, $bc, $be, $c6, $cc, $cd and $ce (Fixes 'The Simpsons', it's playable to the end)
+        -M6809: Fixed opcodes $2c, $2d, $2e and $2f
+    +Konami 053246
+        -Fixed shadows
+    +Sound
+        -AY8910
+              +Added gain per channel
+              +Fixed AY8912 PORTB channel
+-Ajax
+    +Added K051316 video chip
+-Ambush
+    +Added driver with sound
+-Kyugo HW
+    +S.R.D. Mission: Added driver with sound
+    +AirWolf: Added driver with sound
+-Mag Max
+    +Added driver with sound
+-Nemesis HW
+    +Rewrited screen flip, fixes TwinBee
+-The Simpsons
+    +Fixed video settings
+    +Added sprites dma interrupt enable/disable
+-Thunder Cross HW
+    +Fixed sprites priority
+</pre><br>
+<img src="https://i.ibb.co/TgzTxTV/Airwolf.png"> <img src="https://i.ibb.co/PFmVY4f/Ambush.png"><br>
+<img src="https://i.ibb.co/TwdZJMY/magmax.png"> <img src="https://i.ibb.co/yX12fWz/srdmission.png"><br>
+<img src="https://i.ibb.co/pdpvh16/twinbee.png"> <img src="https://i.ibb.co/S332FHp/vendetta.png"><br><br>
+<b>09/10/22 - DSP Emulator 0.21WIP3. Updated Windows 32 and source update.<br>
+<pre>
+-General
+    +Update preview images, added images for new drivers
+    +Update SDL library to 2.24.1
+    +Added sort options in game list menu. You can sort computers, Game & Watch, consoles and arcade (and arcade subtypes sport, run & gun, shot, maze, fight and drive)
+    +CPU
+        -Konami CPU: Fixed opcodes $6f, $76 and $7e. Fixes 'The Simpsons', which it's fully playable now.
+    +Konami 052109
+        -Fixed scroll, now 'Ajax' works fine.
+-China Gate
+    +Added driver with sound
+-Side Arms
+    +Added driver with sound
+-Speed Rumbler
+    +Added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/nQLhzkR/sidearms.png"> <img src="https://i.ibb.co/ZL4qdMG/chinagate.png"><br>
+<img src="https://i.ibb.co/HKM5b3X/speedrumbler.png"><br>
+<img src="https://i.ibb.co/DDZvm9x/ajax.png"> <img src="https://i.ibb.co/4J0nfrT/simpsons.png"><br>
+<img src="https://i.ibb.co/smYLSk8/sort-list.png"><br><br>
+<b>04/09/22 - DSP Emulator 0.21WIP2. Updated Windows 32 and source update. This release tries to improve general stability.<br>
+<pre>
+-DSP 0.20Final has been repacked with preview images
+-General
+    +Update preview images
+    +New option for consoles, now you can choose if you want start the driver with the window for loading games open or not
+    +Sound options simplified, now you can choose 'enabled' or 'disabled'
+    +Fixed label 'load disk' in console cartridge 'open' icon, now shows 'load game'
+    +If no game is loaded, shows a image, not just an empty window
+    +Fixed window priority, if a option window is active, the window behind is disabled
+    +Added some languaje translations in main config menu
+    +Changed 'Show game list', 'Configure DSP' and 'Save screen' icons
+    +Changed 'Show game list' and 'Configure DSP' position in main window
+    +Sound: removed 11025Hz and 22050Hz sample quality, they are useless!
+    +CPU
+        -M6805: Added opcodes $21, $56, $6a, $7a, $7f and $c1
+-Amstrad CPC
+    +If a CDT tape is loaded and there is no pause block at the beginning, a 2000ms pause is added to the virtual tape
+-Arkanoid
+    +Added driver with sound (Not correct sound chip)
+-Renegade
+    +Fixed input
+    +Fixed sprites
+</pre><br>
+<img src="https://i.ibb.co/y6x0knj/arkanoid.png"><br><br>
+<b>01/08/22 - DSP Emulator 0.21WIP1. Updated Windows 32 and source update.<br>
+<pre>
+-General
+    +Z80 CTC: converted to classes
+    +Added close function to many devices
+    +Sound: Make internal sound buffer bigger
+    +CPU
+        -M6809: Added opcodes $01, $29 and $1X2e
+        -M680X: 
+             + Added opcodes $47,$c2,$c9,$d9,$f0 and $fb
+             + Opcode $f3 is not for M6808
+-Senjyo HW
+    +Update driver to new CTC
+    +Senjyo: Fixed ROMs export size (thanks to okurka)
+-MCR HW
+    +Tapper: added driver with sound
+-Williams HW
+    +Fixed sound
+    +Joust: added driver with sound
+    +Robotron: added driver with sound
+    +Stargate: added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/7ygV8q2/joust.png"> <img src="https://i.ibb.co/QMLz9Cq/Robotron.png"><br>
+<img src="https://i.ibb.co/gzB2Ld8/Stargate.png"> <img src="https://i.ibb.co/WkrhCBH/Tapper.png"><br><br>
 <b>15/07/22 - DSP Emulator 0.20Final. Updated Windows (32 & 64), Linux (64), OSX (64) and source update.<br>
 <pre>
 -General
@@ -318,77 +557,3 @@ All changes on previous 0.18b3 release and
     +Hard Head 2
         -Fixed palette
 </pre>
-<b>28/03/21 - Last update before stable version. DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +Samples: simplified samples loading functions
--Suna 8 HW
-    +Added DIP switches
-    +Fixed sound clock
-        -Hard Head
-            +Fixed DAC samples
-            +Fixed FPS
-        -Hard Head 2
-            +Fixed ROM decode
-            +Fixed video (only remains palette color problem)
-            +Added DAC samples
--Tiger Road HW
-    +Added DIP switches
--Outrun
-    +Fixed gear button
-</pre>
-<img src='https://i.ibb.co/3vsqcdv/hh2-1.jpg'> <img src='https://i.ibb.co/233KTxs/hh2-2.jpg'><br><br>
-<b>13/03/21 - Second update today! DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--GameBoy/Gameboy Color HW
-    +Now you can choose between original GB green palette and GB pocket BW (Thanks to Neville)
--Amstrad CPC
-    +Fixed screen flickering (Thanks to Neville)
-</pre>
-<b>13/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +Sound
-        -Sega PCM: Added sound chip
--Spectrum
-    +Fixed low border size, was 8 pixels too long (Thanks to Neville)
-    +Fixed fast speed and no border draw, now don't draw any border
--Amstrad CPC
-    +Resize screen size, it was too big, now it's 384x272 pixels (Thanks to Neville)
--Sega Master System
-    +Fixed zip ROM load (Thanks to Neville)
--Sega GameGear
-    +Fixed zip ROM load (Thanks to Neville)
--Outrun HW
-    +Added road
-    +Added Sega PCM
-    +Added controls
-    +Added DIP switches
-</pre>
-<img src='https://i.ibb.co/RcKQtpX/Outrun-1.jpg'> <img src='https://i.ibb.co/GJmTSdT/Outrun-2.jpg'><br><br>
-<b>05/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +CPU
-        -M68000: Added reset line procedure
-    +Added Sega 315-5195 as a device
--Outrun HW
-    +Enhanced driver only missing: partial road, digital sound and controls
-</pre>
-<img src='https://i.ibb.co/4VZGbtv/Outrun-1.jpg'> <img src='https://i.ibb.co/fvp9PQL/Outrun-2.jpg'><br><br>
-<b>26/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +CPU
-        -MCS51:
-            +clean the code
-            +Fixed carry in opcodes $B8 to $BF
-            +Fixed IRQs
-    +ROMS export: Fixed many ROMs sets and added samples, again
--Ajax: Fixed ROM names
--Slap Fight: Fixed ROM names
--Sega System 16B HW
-    +Small fix to memory mapper
-    +When using i8751, the M68000 don't have access to 315-5195
-    +Removed i8751/M68000 hack
-    +Added dipswitches
-        -Golden Axe: Fixed remaining issues with i8751
-        -Passing Shot: Added driver with sound, due the lack of FD1094 emulation using predecoded version
-        -Aurail: Added driver with sound
-</pre>
-<img src='https://i.ibb.co/d4KG1Mr/passingshot.jpg'> <img src='https://i.ibb.co/b3mqHPb/Aurail.jpg'><br><br>

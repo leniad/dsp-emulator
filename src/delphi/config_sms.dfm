@@ -12,11 +12,9 @@ object SMSConfig: TSMSConfig
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object SpeedButton1: TSpeedButton
     Left = 24
@@ -52,7 +50,7 @@ object SMSConfig: TSMSConfig
     object RadioButton2: TRadioButton
       Left = 16
       Top = 48
-      Width = 121
+      Width = 138
       Height = 17
       Caption = 'Europe/Australia (PAL)'
       TabOrder = 1

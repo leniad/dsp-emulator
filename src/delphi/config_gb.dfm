@@ -10,17 +10,15 @@ object configgb: Tconfiggb
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object GroupBox7: TGroupBox
     Left = 47
     Top = 31
     Width = 170
     Height = 64
-    Caption = 'LensLok'
+    Caption = 'Screen'
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 14

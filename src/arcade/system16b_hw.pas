@@ -141,9 +141,10 @@ type
     	normal,shadow,hilight:array[0..31] of byte;
       s_banks,t_banks:byte;
       mb_type:byte;
-      s16_screen:array[0..7] of byte;
+      screen:array[0..7] of byte;
       screen_enabled:boolean;
       tile_bank:array[0..1] of byte;
+      tile_buffer:array[0..7,0..$7ff] of boolean;
    end;
 
 var
@@ -151,7 +152,6 @@ var
  rom2:array[0..$1ffff] of word;
  ram:array[0..$ffff] of word;
  tile_ram:array[0..$7fff] of word;
- tile_buffer:array[0..$7fff] of boolean;
  char_ram:array[0..$7ff] of word;
  sprite_ram:array[0..$3ff] of word;
  sprite_rom:array[0..$fffff] of word;
@@ -170,109 +170,107 @@ var
  region2_write:procedure(direccion:dword;valor:word);
  sound_bank_calc:function(valor:byte):byte;
 
-procedure draw_sprites(pri:byte);inline;
+procedure update_video_system16b;
+procedure draw_sprites(pri:byte);
 var
   g,f,sprpri,vzoom,hzoom:byte;
-  bottom,top,xacc,xpos,addr,bank,x,y,pix,data_7,pixels,color:word;
-  pitch:integer;
+  bottom,top,xacc,addr,bank,y,pix,data_7,pixels,color:word;
+  x,xpos,pitch:integer;
   spritedata:dword;
   hide,flip:boolean;
-procedure system16b_draw_pixel(x,y,pix:word);inline;
+procedure system16b_draw_pixel(x:integer;y,pix:word);
 var
   punt,punt2,temp1,temp2,temp3:word;
-  xf:integer;
 begin
-  xf:=x-$bd+6;
   //only draw if onscreen, not 0 or 15
-	if ((xf>=0) and (xf<512) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
+	if ((x>=0) and (x<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
       if (pix and $3f0)=$3f0 then begin //Shadow
-          punt:=getpixel(xf+ADD_SPRITE,y+ADD_SPRITE,7);
+          punt:=getpixel(x+ADD_SPRITE,y+ADD_SPRITE,7);
           punt2:=paleta[$800];
           temp1:=(((punt and $f800)+(punt2 and $f800)) shr 1) and $f800;
           temp2:=(((punt and $7e0)+(punt2 and $7e0)) shr 1) and $7e0;
           temp3:=(((punt and $1f)+(punt2 and $1f)) shr 1) and $1f;
           punt:=temp1 or temp2 or temp3;
       end else punt:=paleta[pix+$400]; //Normal
-      putpixel(xf+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
+      putpixel(x+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
 	end;
 end;
 begin
   for f:=0 to $7f do begin
-    if (sprite_ram[(f*$8)+2] and $8000)<>0 then exit;
-    sprpri:=(sprite_ram[(f*$8)+4] and $ff) shr 6;
+    sprpri:=(sprite_ram[(f*8)+4] and $ff) shr 6;
     if sprpri<>pri then continue;
-    bottom:=(sprite_ram[f*$8] shr 8);
-    top:=sprite_ram[f*$8] and $ff;
-    hide:=(sprite_ram[(f*$8)+2] and $4000)<>0;
-    // initialize the end address to the start address
-    addr:=sprite_ram[(f*$8)+3];
-    sprite_ram[(f*$8)+$7]:=addr;
-    bank:=sprite_bank[(sprite_ram[(f*$8)+4] shr 8) and $f];
+    addr:=sprite_ram[(f*8)+3];
+    sprite_ram[(f*8)+7]:=addr;
+    if (sprite_ram[(f*8)+2] and $8000)<>0 then exit;
+    bottom:=(sprite_ram[f*8] shr 8);
+    top:=sprite_ram[f*8] and $ff;
+    hide:=(sprite_ram[(f*8)+2] and $4000)<>0;
+    bank:=sprite_bank[(sprite_ram[(f*8)+4] shr 8) and $f];
     // if hidden, or top greater than/equal to bottom, or invalid bank, punt
 		if (hide or (top>=bottom) or (bank=255)) then continue;
-		xpos:=sprite_ram[(f*$8)+1] and $1ff;
-		pitch:=shortint(sprite_ram[(f*$8)+2] and $ff);
-		color:=(sprite_ram[(f*$8)+4] and $3f) shl 4;
-    flip:=(sprite_ram[(f*$8)+2] and $100)<>0;
-    vzoom:=(sprite_ram[(f*$8)+5] shr 5) and $1f;
-    hzoom:=sprite_ram[(f*$8)+5] and $1f;
+		xpos:=(sprite_ram[(f*8)+1] and $1ff)-$b7; //-$bd+6
+		pitch:=shortint(sprite_ram[(f*8)+2] and $ff);
+		color:=(sprite_ram[(f*8)+4] and $3f) shl 4;
+    flip:=(sprite_ram[(f*8)+2] and $100)<>0;
+    vzoom:=(sprite_ram[(f*8)+5] shr 5) and $1f;
+    hzoom:=sprite_ram[(f*8)+5] and $1f;
 		// clamp to within the memory region size
 		spritedata:=$10000*(bank mod s16_info.s_banks);
     // reset the yzoom counter
-    sprite_ram[(f*$8)+5]:=sprite_ram[(f*$8)+5] and $3ff;
+    sprite_ram[(f*8)+5]:=sprite_ram[(f*8)+5] and $3ff;
 		// loop from top to bottom
 		for y:=top to (bottom-1) do begin
 			// advance a row
 			addr:=addr+pitch;
       // accumulate zoom factors; if we carry into the high bit, skip an extra row
-      sprite_ram[(f*$8)+5]:=sprite_ram[(f*$8)+5]+(vzoom shl 10);
-      if (sprite_ram[(f*$8)+5] and $8000)<>0 then begin
+      sprite_ram[(f*8)+5]:=sprite_ram[(f*8)+5]+(vzoom shl 10);
+      if (sprite_ram[(f*8)+5] and $8000)<>0 then begin
         addr:=addr+pitch;
-        sprite_ram[(f*$8)+5]:=sprite_ram[(f*$8)+5] and $7fff;
+        sprite_ram[(f*8)+5]:=sprite_ram[(f*8)+5] and $7fff;
       end;
 			// skip drawing if not within the cliprect
-			if (y<=256) then begin
+			if (y<256) then begin
         xacc:=4*hzoom;
 				if not(flip) then begin
-					// start at the word before because we preincrement below
-          sprite_ram[(f*$8)+$7]:=addr-1;
+					data_7:=addr;
 					x:=xpos;
-          while ((xpos-x) and $1ff)<>1 do begin
-            data_7:=sprite_ram[(f*$8)+$7]+1;
-            sprite_ram[(f*$8)+$7]:=data_7;
+          while (x<512) do begin
 						pixels:=sprite_rom[spritedata+data_7];
 						// draw four pixels
             for g:=3 downto 0 do begin
-						  pix:=(pixels shr (g*4)) and $f;
               xacc:=(xacc and $3f)+hzoom;
               if xacc<$40 then begin
+                pix:=(pixels shr (g*4)) and $f;
                 system16b_draw_pixel(x,y,pix or color);
                 x:=x+1;
               end;
             end;
 						// stop if the last pixel in the group was 0xf
-						if (pix=15) then break;
+						if (((pixels shr 0) and $f)=15) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7+1;
 					end;
 				end else begin
-				// flipped case
-					// start at the word after because we predecrement below
-          sprite_ram[(f*$8)+$7]:=addr+1;
+				  // flipped case
+          data_7:=addr;
 					x:=xpos;
-          while ((xpos-x) and $1ff)<>1 do begin
-            data_7:=sprite_ram[(f*$8)+$7]-1;
-            sprite_ram[(f*$8)+$7]:=data_7;
+          while (x<512) do begin
 						pixels:=sprite_rom[spritedata+data_7];
 						// draw four pixels
             for g:=0 to 3 do begin
-						  pix:=(pixels shr (g*4)) and $f;
               xacc:=(xacc and $3f)+hzoom;
               if xacc<$40 then begin
+                pix:=(pixels shr (g*4)) and $f;
                 system16b_draw_pixel(x,y,pix or color);
                 x:=x+1;
               end;
             end;
 						// stop if the last pixel in the group was 0xf
-						if (pix=15) then break;
+						if (((pixels shr 12) and $f)=15) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7-1;
 					end;
 				end;
 			end;
@@ -280,39 +278,34 @@ begin
 	end;
 end;
 
-procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
 var
   pos,f,nchar,color,data,x,y:word;
 begin
-  pos:=s16_info.s16_screen[num]*$800;
+  pos:=s16_info.screen[num]*$800;
   for f:=$0 to $7ff do begin
     data:=tile_ram[pos+f];
     color:=(data shr 6) and $7f;
-    if (tile_buffer[pos+f] or buffer_color[color]) then begin
+    if (s16_info.tile_buffer[num,f] or buffer_color[color]) then begin
       x:=((f and $3f) shl 3)+px;
       y:=((f shr 6) shl 3)+py;
       nchar:=data and $1fff;
       nchar:=s16_info.tile_bank[nchar div $1000]*$1000+(nchar mod $1000);
-      if trans then begin
-        put_gfx_trans(x,y,nchar,color shl 3,scr,0);
-        if (data and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
-          else put_gfx_block_trans(x,y,scr+1,8,8);
-      end else begin
-        put_gfx(x,y,nchar,color shl 3,scr,0);
-        if (data and $8000)<>0 then put_gfx(x,y,nchar,color shl 3,scr+1,0)
-          else put_gfx_block(x,y,scr+1,8,8,$1fff);
-      end;
+      if trans then put_gfx_trans(x,y,nchar,color shl 3,scr,0)
+        else put_gfx(x,y,nchar,color shl 3,scr,0);
+      if (data and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
+        else put_gfx_block_trans(x,y,scr+1,8,8);
+      s16_info.tile_buffer[num,f]:=false;
     end;
   end;
 end;
 
-procedure update_video_system16b;inline;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
 begin
 if not(s16_info.screen_enabled) then begin
-  actualiza_trozo_final(0,0,320,224,7);
   fill_full_screen(7,$1000);
+  actualiza_trozo_final(0,0,320,224,7);
   exit;
 end;
 //Background
@@ -340,26 +333,24 @@ for f:=$0 to $6ff do begin
     y:=(f shr 6) shl 3;
     nchar:=s16_info.tile_bank[0]*$1000+(atrib and $1ff);
     put_gfx_trans(x,y,nchar,color shl 3,1,0);
-    if (nchar and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
+    if (atrib and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
       else put_gfx_block_trans(x,y,2,8,8);
     gfx[0].buffer[f]:=false;
   end;
 end;
 //Lo pongo todo con prioridades, falta scrollrow y scrollcol!!
-scroll_x_y(4,7,scroll_x1,scroll_y1); //B0
+scroll_x_y(3,7,scroll_x1,scroll_y1); //B0
 draw_sprites(0);
-scroll_x_y(3,7,scroll_x1,scroll_y1); //B1
+scroll_x_y(4,7,scroll_x1,scroll_y1); //B1
 draw_sprites(1);
 scroll_x_y(5,7,scroll_x2,scroll_y2);  //F0
 draw_sprites(2);
 scroll_x_y(6,7,scroll_x2,scroll_y2); //F1
-actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //T0
+actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //T0
 draw_sprites(3);
-actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //T1
+actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //T1
 //Y lo pinto a la pantalla principal
 actualiza_trozo_final(0,0,320,224,7);
-//OJO: No puedo marcar el buffer como usado cuando pinto una pantalla, puede usarla de nuevo!!
-fillchar(tile_buffer,$8000,0);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
@@ -468,7 +459,7 @@ end;
 standar_s16_io_r:=res;
 end;
 
-procedure change_pal(direccion,valor:word);inline;
+procedure change_pal(direccion,valor:word);
 var
 	r,g,b:byte;
   color:tcolor;
@@ -506,47 +497,47 @@ begin
 if direccion=$740 then begin
           //Foreground
           tmp:=(char_ram[$740] shr 12) and $f;
-          if tmp<>s16_info.s16_screen[4] then begin
-            s16_info.s16_screen[4]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[4] then begin
+            s16_info.screen[4]:=tmp;
+            fillchar(s16_info.tile_buffer[4,0],$800,1);
           end;
           tmp:=(char_ram[$740] shr 8) and $f;
-          if tmp<>s16_info.s16_screen[5] then begin
-            s16_info.s16_screen[5]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[5] then begin
+            s16_info.screen[5]:=tmp;
+            fillchar(s16_info.tile_buffer[5,0],$800,1);
           end;
           tmp:=(char_ram[$740] shr 4) and $f;
-          if tmp<>s16_info.s16_screen[6] then begin
-            s16_info.s16_screen[6]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[6] then begin
+            s16_info.screen[6]:=tmp;
+            fillchar(s16_info.tile_buffer[6,0],$800,1);
           end;
           tmp:=char_ram[$740] and $f;
-          if tmp<>s16_info.s16_screen[7] then begin
-            s16_info.s16_screen[7]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[7] then begin
+            s16_info.screen[7]:=tmp;
+            fillchar(s16_info.tile_buffer[7,0],$800,1);
           end;
 end;
 if direccion=$741 then begin
           //Background
           tmp:=(char_ram[$741] shr 12) and $f;
-          if tmp<>s16_info.s16_screen[0] then begin
-            s16_info.s16_screen[0]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[0] then begin
+            s16_info.screen[0]:=tmp;
+            fillchar(s16_info.tile_buffer[0,0],$800,1);
           end;
           tmp:=(char_ram[$741] shr 8) and $f;
-          if tmp<>s16_info.s16_screen[1] then begin
-            s16_info.s16_screen[1]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[1] then begin
+            s16_info.screen[1]:=tmp;
+            fillchar(s16_info.tile_buffer[1,0],$800,1);
           end;
           tmp:=(char_ram[$741] shr 4) and $f;
-          if tmp<>s16_info.s16_screen[2] then begin
-            s16_info.s16_screen[2]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[2] then begin
+            s16_info.screen[2]:=tmp;
+            fillchar(s16_info.tile_buffer[2,0],$800,1);
           end;
           tmp:=char_ram[$741] and $f;
-          if tmp<>s16_info.s16_screen[3] then begin
-            s16_info.s16_screen[3]:=tmp;
-            fillchar(tile_buffer[$800*tmp],$800,1);
+          if tmp<>s16_info.screen[3] then begin
+            s16_info.screen[3]:=tmp;
+            fillchar(s16_info.tile_buffer[3,0],$800,1);
           end;
 end;
 end;
@@ -647,7 +638,7 @@ case (direccion and $1800) of
   end;
   $1000:begin
           s16_info.tile_bank[direccion and 1]:=(valor and 7) and s16_info.t_banks; //Tile bank!
-          fillchar(tile_buffer,$8000,1);
+          fillchar(s16_info.tile_buffer,$4000,1);
         end;
 end;
 end;
@@ -656,7 +647,7 @@ procedure region2_5704_write(direccion:dword;valor:word);
 begin
   if s16_info.tile_bank[(direccion and 3) shr 1]<>(valor and 7) then begin//Tile bank!
     s16_info.tile_bank[(direccion and 3) shr 1]:=(valor and 7) and s16_info.t_banks;
-    fillchar(tile_buffer,$8000,1);
+    fillchar(s16_info.tile_buffer,$4000,1);
   end;
 end;
 
@@ -704,6 +695,17 @@ end;
 if not(zona) then system16b_getword:=s315_5195_0.read_reg((direccion shr 1) and $1f);
 end;
 
+procedure test_tile_buffer(direccion:word);
+var
+  num_scr,f:byte;
+  pos:word;
+begin
+  num_scr:=direccion shr 11;
+  pos:=direccion and $7ff;
+  for f:=0 to 7 do
+    if s16_info.screen[f]=num_scr then s16_info.tile_buffer[f,pos]:=true;
+end;
+
 procedure system16b_putword(direccion:dword;valor:word);
 var
   zona:boolean;
@@ -745,7 +747,7 @@ if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5
                   direccion:=(direccion and $ffff) shr 1;
                   if tile_ram[direccion]<>valor then begin
                     tile_ram[direccion]:=valor;
-                    tile_buffer[direccion]:=true;
+                    test_tile_buffer(direccion);
                   end;
                end;
       $10000..$1ffff:begin
@@ -776,7 +778,7 @@ end;
 if not(zona) then begin
   tempd:=s315_5195_0.dirs_start[5];
   s315_5195_0.write_reg((direccion shr 1) and $1f,valor and $ff);
-  if tempd<>s315_5195_0.dirs_start[5] then fillchar(tile_buffer,$8000,0);
+  if tempd<>s315_5195_0.dirs_start[5] then fillchar(s16_info.tile_buffer,$4000,0);
 end;
 end;
 
@@ -804,7 +806,7 @@ if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5
                   direccion:=(direccion and $ffff) shr 1;
                   if tile_ram[direccion]<>valor then begin
                     tile_ram[direccion]:=valor;
-                    tile_buffer[direccion]:=true;
+                    test_tile_buffer(direccion);
                   end;
                end;
       $10000..$1ffff:begin
@@ -918,7 +920,7 @@ var
 begin
   tempd:=s315_5195_0.dirs_start[5];
   s315_5195_0.write_reg(direccion and $1f,valor);
-  if tempd<>s315_5195_0.dirs_start[5] then fillchar(tile_buffer,$8000,0);
+  if tempd<>s315_5195_0.dirs_start[5] then fillchar(s16_info.tile_buffer,$4000,0);
 end;
 
 function in_port1:byte;
@@ -962,7 +964,7 @@ begin
   sprite_bank[14]:=0;
  end else for f:=0 to $f do sprite_bank[f]:=f;
  s16_info.screen_enabled:=false;
- fillchar(tile_buffer[0],$8000,1);
+ fillchar(s16_info.tile_buffer,$4000,1);
  s16_info.tile_bank[0]:=0;
  s16_info.tile_bank[1]:=1;
  sound_bank_num:=0;

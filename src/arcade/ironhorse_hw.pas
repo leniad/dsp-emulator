@@ -40,7 +40,7 @@ var
  spritebank:word;
  scroll_x:array[0..$1f] of word;
 
-procedure update_video_ironhorse;inline;
+procedure update_video_ironhorse;
 var
   x,y,atrib,a,b,c,d:byte;
   f,nchar,color:word;

@@ -57,7 +57,7 @@ var
  mcu_accept,mcu_ready:boolean;
 
 procedure update_video_xain;
-procedure chars(trans:boolean);inline;
+procedure chars(trans:boolean);
 var
   x,y,color,f,nchar:word;
   atrib:byte;
@@ -76,7 +76,7 @@ begin
   end;
   actualiza_trozo(0,0,256,256,1,0,0,256,256,4);
 end;
-procedure sprites;inline;
+procedure sprites;
 var
   x,y,color,f,nchar:word;
   atrib:byte;
@@ -99,7 +99,7 @@ for f:=0 to $5f do begin
   end;
 end;
 end;
-procedure tiles_0(trans:boolean);inline;
+procedure tiles_0(trans:boolean);
 var
   x,y,color,f,nchar,pos:word;
   atrib:byte;
@@ -119,7 +119,7 @@ begin
   end;
   scroll_x_y(2,4,scroll_x_p0,scroll_y_p0);
 end;
-procedure tiles_1(trans:boolean);inline;
+procedure tiles_1(trans:boolean);
 var
   x,y,color,f,nchar,pos:word;
   atrib:byte;
@@ -194,7 +194,7 @@ actualiza_trozo_final(0,8,256,240,4);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_xain;inline;
+procedure eventos_xain;
 begin
 if event.arcade then begin
   //P1
@@ -263,11 +263,6 @@ end;
 end;
 
 //MCU
-function mcu_status_r:byte;inline;
-begin
-   mcu_status_r:=(byte(mcu_ready) shl 3) or (byte(mcu_accept) shl 4);
-end;
-
 function mcu_xain_hw_getbyte(direccion:word):byte;
 begin
 direccion:=direccion and $7ff;
@@ -314,6 +309,12 @@ end;
 end;
 
 function xain_getbyte(direccion:word):byte;
+
+function mcu_status_r:byte;
+begin
+   mcu_status_r:=(byte(mcu_ready) shl 3) or (byte(mcu_accept) shl 4);
+end;
+
 begin
     case direccion of
         0..$397f,$8000..$ffff:xain_getbyte:=memoria[direccion];
@@ -336,7 +337,8 @@ begin
     end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure xain_putbyte(direccion:word;valor:byte);
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -353,8 +355,6 @@ begin
     384..511:buffer_color[((pos shr 4) and $7)+8]:=true;
   end;
 end;
-
-procedure xain_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
         0..$1fff,$3800..$397f:memoria[direccion]:=valor;

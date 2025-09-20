@@ -398,7 +398,7 @@ begin
   gb_sound_w_internal(NR52,$00);
 end;
 
-function sshr(num:integer;fac:byte):integer;inline;
+function sshr(num:integer;fac:byte):integer;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;
@@ -590,4 +590,4 @@ begin
 	  gb_snd.snd_regs[NR52]:=(gb_snd.snd_regs[NR52] and $f0) or gb_snd.snd_1.on_ or (gb_snd.snd_2.on_ shl 1) or (gb_snd.snd_3.on_ shl 2) or (gb_snd.snd_4.on_ shl 3);
 end;
 
-end.
+end.

@@ -41,7 +41,7 @@ var
  scroll_x,scroll_y:word;
  sound_command,palette_bank:byte;
 
-procedure update_video_vulgus;inline;
+procedure update_video_vulgus;
 var
   f,color,nchar,x,y:word;
   attr,row:byte;
@@ -101,7 +101,7 @@ actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
 actualiza_trozo_final(16,0,224,256,1);
 end;
 
-procedure eventos_vulgus;inline;
+procedure eventos_vulgus;
 begin
 if event.arcade then begin
   //P1

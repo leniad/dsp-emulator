@@ -1,9 +1,12 @@
 unit system16a_hw;
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ppi8255,sound_engine,ym_2151,fd1089,dialogs,mcs48,dac;
+
 function iniciar_system16a:boolean;
+
 implementation
 const
         //Shinobi
@@ -17,10 +20,10 @@ const
         (n:'epr-11264.95';l:$10000;p:0;crc:$46627e7d),(n:'epr-11265.94';l:$10000;p:$10000;crc:$87d0f321),
         (n:'epr-11266.93';l:$10000;p:$20000;crc:$efb4af87));
         shinobi_sprites:array[0..7] of tipo_roms=(
-        (n:'epr-11290.10';l:$10000;p:1;crc:$611f413a),(n:'epr-11294.11';l:$10000;p:$0;crc:$5eb00fc1),
-        (n:'epr-11291.17';l:$10000;p:$20001;crc:$3c0797c0),(n:'epr-11295.18';l:$10000;p:$20000;crc:$25307ef8),
-        (n:'epr-11292.23';l:$10000;p:$40001;crc:$c29ac34e),(n:'epr-11296.24';l:$10000;p:$40000;crc:$04a437f8),
-        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72));
+        (n:'epr-11290.10';l:$10000;p:0;crc:$611f413a),(n:'epr-11294.11';l:$10000;p:$1;crc:$5eb00fc1),
+        (n:'epr-11291.17';l:$10000;p:$20000;crc:$3c0797c0),(n:'epr-11295.18';l:$10000;p:$20001;crc:$25307ef8),
+        (n:'epr-11292.23';l:$10000;p:$40000;crc:$c29ac34e),(n:'epr-11296.24';l:$10000;p:$40001;crc:$04a437f8),
+        (n:'epr-11293.29';l:$10000;p:$60000;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60001;crc:$b6e1fd72));
         //Alex Kidd
         alexkid_rom:array[0..3] of tipo_roms=(
         (n:'epr-10447.43';l:$10000;p:0;crc:$29e87f71),(n:'epr-10445.26';l:$10000;p:$1;crc:$25ce5b6f),
@@ -30,10 +33,10 @@ const
         (n:'epr-10431.95';l:$8000;p:0;crc:$a7962c39),(n:'epr-10432.94';l:$8000;p:$8000;crc:$db8cd24e),
         (n:'epr-10433.93';l:$8000;p:$10000;crc:$e163c8c2));
         alexkid_sprites:array[0..7] of tipo_roms=(
-        (n:'epr-10437.10';l:$8000;p:1;crc:$522f7618),(n:'epr-10441.11';l:$8000;p:$0;crc:$74e3a35c),
-        (n:'epr-10438.17';l:$8000;p:$10001;crc:$738a6362),(n:'epr-10442.18';l:$8000;p:$10000;crc:$86cb9c14),
-        (n:'epr-10439.23';l:$8000;p:$20001;crc:$b391aca7),(n:'epr-10443.24';l:$8000;p:$20000;crc:$95d32635),
-        (n:'epr-10440.29';l:$8000;p:$30001;crc:$23939508),(n:'epr-10444.30';l:$8000;p:$30000;crc:$82115823));
+        (n:'epr-10437.10';l:$8000;p:0;crc:$522f7618),(n:'epr-10441.11';l:$8000;p:$1;crc:$74e3a35c),
+        (n:'epr-10438.17';l:$8000;p:$10000;crc:$738a6362),(n:'epr-10442.18';l:$8000;p:$10001;crc:$86cb9c14),
+        (n:'epr-10439.23';l:$8000;p:$20000;crc:$b391aca7),(n:'epr-10443.24';l:$8000;p:$20001;crc:$95d32635),
+        (n:'epr-10440.29';l:$8000;p:$30000;crc:$23939508),(n:'epr-10444.30';l:$8000;p:$30001;crc:$82115823));
         alexkid_n7751_data:array[0..1] of tipo_roms=(
         (n:'epr-10435.1';l:$8000;p:0;crc:$ad89f6e3),(n:'epr-10436.2';l:$8000;p:$8000;crc:$96c76613));
         //Fantasy Zone
@@ -46,24 +49,24 @@ const
         (n:'epr-7388.95';l:$8000;p:0;crc:$8eb02f6b),(n:'epr-7389.94';l:$8000;p:$8000;crc:$2f4f71b8),
         (n:'epr-7390.93';l:$8000;p:$10000;crc:$d90609c6));
         fantzone_sprites:array[0..5] of tipo_roms=(
-        (n:'epr-7392.10';l:$8000;p:1;crc:$5bb7c8b6),(n:'epr-7396.11';l:$8000;p:$0;crc:$74ae4b57),
-        (n:'epr-7393.17';l:$8000;p:$10001;crc:$14fc7e82),(n:'epr-7397.18';l:$8000;p:$10000;crc:$e05a1e25),
-        (n:'epr-7394.23';l:$8000;p:$20001;crc:$531ca13f),(n:'epr-7398.24';l:$8000;p:$20000;crc:$68807b49));
+        (n:'epr-7392.10';l:$8000;p:0;crc:$5bb7c8b6),(n:'epr-7396.11';l:$8000;p:$1;crc:$74ae4b57),
+        (n:'epr-7393.17';l:$8000;p:$10000;crc:$14fc7e82),(n:'epr-7397.18';l:$8000;p:$10001;crc:$e05a1e25),
+        (n:'epr-7394.23';l:$8000;p:$20000;crc:$531ca13f),(n:'epr-7398.24';l:$8000;p:$20001;crc:$68807b49));
         //Alien Syndrome
         alien_rom:array[0..5] of tipo_roms=(
         (n:'epr-10804.43';l:$8000;p:0;crc:$23f78b83),(n:'epr-10802.26';l:$8000;p:$1;crc:$996768bd),
         (n:'epr-10805.42';l:$8000;p:$10000;crc:$53d7fe50),(n:'epr-10803.25';l:$8000;p:$10001;crc:$0536dd33),
         (n:'epr-10732.41';l:$8000;p:$20000;crc:$c5712bfc),(n:'epr-10729.24';l:$8000;p:$20001;crc:$3e520e30));
-        alien_key:tipo_roms=(n:'317-0037.key';l:$2000;p:0;crc:$49e882e5);
+        alien_key:tipo_roms=(n:'317-0037.key';l:$2000;p:0;crc:$68bb7745);
         alien_sound:tipo_roms=(n:'epr-10705.12';l:$8000;p:0;crc:$777b749e);
         alien_tiles:array[0..2] of tipo_roms=(
         (n:'epr-10739.95';l:$10000;p:0;crc:$a29ec207),(n:'epr-10740.94';l:$10000;p:$10000;crc:$47f93015),
         (n:'epr-10741.93';l:$10000;p:$20000;crc:$4970739c));
         alien_sprites:array[0..7] of tipo_roms=(
-        (n:'epr-10709.10';l:$10000;p:1;crc:$addf0a90),(n:'epr-10713.11';l:$10000;p:$0;crc:$ececde3a),
-        (n:'epr-10710.17';l:$10000;p:$20001;crc:$992369eb),(n:'epr-10714.18';l:$10000;p:$20000;crc:$91bf42fb),
-        (n:'epr-10711.23';l:$10000;p:$40001;crc:$29166ef6),(n:'epr-10715.24';l:$10000;p:$40000;crc:$a7c57384),
-        (n:'epr-10712.29';l:$10000;p:$60001;crc:$876ad019),(n:'epr-10716.30';l:$10000;p:$60000;crc:$40ba1d48));
+        (n:'epr-10709.10';l:$10000;p:0;crc:$addf0a90),(n:'epr-10713.11';l:$10000;p:$1;crc:$ececde3a),
+        (n:'epr-10710.17';l:$10000;p:$20000;crc:$992369eb),(n:'epr-10714.18';l:$10000;p:$20001;crc:$91bf42fb),
+        (n:'epr-10711.23';l:$10000;p:$40000;crc:$29166ef6),(n:'epr-10715.24';l:$10000;p:$40001;crc:$a7c57384),
+        (n:'epr-10712.29';l:$10000;p:$60000;crc:$876ad019),(n:'epr-10716.30';l:$10000;p:$60001;crc:$40ba1d48));
         alien_n7751_data:array[0..2] of tipo_roms=(
         (n:'epr-10706.1';l:$8000;p:0;crc:$aa114acc),(n:'epr-10707.2';l:$8000;p:$8000;crc:$800c1d82),
         (n:'epr-10708.4';l:$8000;p:$10000;crc:$5921ef52));
@@ -71,16 +74,16 @@ const
         wb3_rom:array[0..3] of tipo_roms=(
         (n:'epr-12120.43';l:$10000;p:0;crc:$cbd8c99b),(n:'epr-12118.26';l:$10000;p:$1;crc:$e9a3280c),
         (n:'epr-12121.42';l:$10000;p:$20000;crc:$5e44c0a9),(n:'epr-12119.25';l:$10000;p:$20001;crc:$01ed3ef9));
-        wb3_key:tipo_roms=(n:'317-0086.key';l:$2000;p:0;crc:$ec480b80);
+        wb3_key:tipo_roms=(n:'317-0086.key';l:$2000;p:0;crc:$5b8e7076);
         wb3_sound:tipo_roms=(n:'epr-12089.12';l:$8000;p:0;crc:$8321eb0b);
         wb3_tiles:array[0..2] of tipo_roms=(
         (n:'epr-12086.95';l:$10000;p:0;crc:$45b949df),(n:'epr-12087.94';l:$10000;p:$10000;crc:$6f0396b7),
         (n:'epr-12088.83';l:$10000;p:$20000;crc:$ba8c0749));
         wb3_sprites:array[0..7] of tipo_roms=(
-        (n:'epr-12090.10';l:$10000;p:1;crc:$aeeecfca),(n:'epr-12094.11';l:$10000;p:$0;crc:$615e4927),
-        (n:'epr-12091.17';l:$10000;p:$20001;crc:$8409a243),(n:'epr-12095.18';l:$10000;p:$20000;crc:$e774ec2c),
-        (n:'epr-12092.23';l:$10000;p:$40001;crc:$5c2f0d90),(n:'epr-12096.24';l:$10000;p:$40000;crc:$0cd59d6e),
-        (n:'epr-12093.29';l:$10000;p:$60001;crc:$4891e7bb),(n:'epr-12097.30';l:$10000;p:$60000;crc:$e645902c));
+        (n:'epr-12090.10';l:$10000;p:0;crc:$aeeecfca),(n:'epr-12094.11';l:$10000;p:$1;crc:$615e4927),
+        (n:'epr-12091.17';l:$10000;p:$20000;crc:$8409a243),(n:'epr-12095.18';l:$10000;p:$20001;crc:$e774ec2c),
+        (n:'epr-12092.23';l:$10000;p:$40000;crc:$5c2f0d90),(n:'epr-12096.24';l:$10000;p:$40001;crc:$0cd59d6e),
+        (n:'epr-12093.29';l:$10000;p:$60000;crc:$4891e7bb),(n:'epr-12097.30';l:$10000;p:$60001;crc:$e645902c));
         //Tetris
         tetris_rom:array[0..1] of tipo_roms=(
         (n:'xepr12201.rom';l:$8000;p:1;crc:$343c0670),(n:'xepr12200.rom';l:$8000;p:$0;crc:$0b694740));
@@ -90,7 +93,7 @@ const
         (n:'epr-12202.rom';l:$10000;p:0;crc:$2f7da741),(n:'epr-12203.rom';l:$10000;p:$10000;crc:$a6e58ec5),
         (n:'epr-12204.rom';l:$10000;p:$20000;crc:$0ae98e23));
         tetris_sprites:array[0..1] of tipo_roms=(
-        (n:'epr-12169.b1';l:$8000;p:1;crc:$dacc6165),(n:'epr-12170.b5';l:$8000;p:$0;crc:$87354e42));
+        (n:'epr-12169.b1';l:$8000;p:0;crc:$dacc6165),(n:'epr-12170.b5';l:$8000;p:$1;crc:$87354e42));
         //Dip
         system16a_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$7;dip_name:'4C/1C'),(dip_val:$8;dip_name:'3C/1C'),(dip_val:$9;dip_name:'2C/1C'),(dip_val:$5;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$4;dip_name:'2C/1C 4C/3C'),(dip_val:$f;dip_name:'1C/1C'),(dip_val:$3;dip_name:'1C/1C 5C/6C'),(dip_val:$2;dip_name:'1C/1C 4C/5C'),(dip_val:$1;dip_name:'1C/1C 2C/3C'),(dip_val:$6;dip_name:'2C/3C'),(dip_val:$e;dip_name:'1C/2C'),(dip_val:$d;dip_name:'1C/3C'),(dip_val:$c;dip_name:'1C/4C'),(dip_val:$b;dip_name:'1C/5C'),(dip_val:$a;dip_name:'1C/6C'),(dip_val:$0;dip_name:'Free Play (if Coin B too) or 1C/1C'))),
@@ -131,41 +134,39 @@ const
         CPU_SYNC=4;
 type
   tsystem16_info=record
-    	normal,shadow,hilight:array[0..31] of byte;	//RGB translations for hilighted pixels
-      s_banks:byte;
+    	normal,shadow,hilight:array[0..31] of byte;
+      banks:byte;
+      screen:array[0..7] of byte;
+      screen_enabled:boolean;
+      tile_buffer:array[0..7,0..$7ff] of boolean;
    end;
 var
  rom,rom_data:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
- fd1089_key:array[0..$1fff] of byte;
  tile_ram:array[0..$3fff] of word;
- tile_buffer:array[0..$3fff] of boolean;
  char_ram:array[0..$7ff] of word;
  sprite_ram:array[0..$3ff] of word;
- sprite_rom:array[0..$7ffff] of byte;
+ sprite_rom:array[0..$3ffff] of word;
  sprite_bank:array[0..$f] of byte;
  n7751_data:array[0..$17fff]of byte;
  s16_info:tsystem16_info;
- s16_screen:array[0..7] of byte;
- screen_enabled:boolean;
  n7751_numroms,sound_latch,n7751_command:byte;
  n7751_rom_address:dword;
-//Cada sprite 16bytes (8 words)
-//parte alta byte 0
+
 procedure draw_sprites(pri:byte);
 var
   sprpri:byte;
   f:integer;
   bottom,top:word;
-  xpos,addr,bank,x,y,pix,data_7,pixels,color:word;
-  pitch:integer;
+  addr,bank,y,pix,data_7,pixels,color:word;
+  x,xpos,pitch:integer;
   spritedata:dword;
 procedure system16a_draw_pixel(x,y,pix:word);
 var
   punt,punt2,temp1,temp2,temp3:word;
 begin
   //only draw if onscreen, not 0 or 15
-	if ((x<512) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
+	if ((x<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
       if (pix and $3f0)=$3f0 then begin //Shadow
           punt:=getpixel(x+ADD_SPRITE,y+ADD_SPRITE,7);
           punt2:=paleta[$1000];
@@ -179,40 +180,36 @@ begin
 end;
 begin
   for f:=0 to $7f do begin
-    bottom:=(sprite_ram[f*$8] shr 8)+1;
-    if bottom>$f0 then break;
-    sprpri:=(sprite_ram[(f*$8)+4] and $ff) and $3;
+    sprpri:=(sprite_ram[(f*8)+4] and $ff) and $3;
     if sprpri<>pri then continue;
-    bank:=sprite_bank[(sprite_ram[(f*$8)+4] shr 4) and $7];
-    top:=(sprite_ram[f*$8] and $ff)+1;
-    // if hidden, or top greater than/equal to bottom, or invalid bank, punt
+    addr:=sprite_ram[(f*8)+3];
+    sprite_ram[(f*8)+7]:=addr;
+    bottom:=(sprite_ram[f*8] shr 8)+1;
+    if bottom>$f0 then break;
+    bank:=sprite_bank[(sprite_ram[(f*8)+4] shr 4) and $7];
+    top:=(sprite_ram[f*8] and $ff)+1;
+    // if hidden, or top greater than/equal to bottom, or invalid bank
 		if ((top>=bottom) or (bank=255)) then continue;
-		xpos:=(sprite_ram[(f*$8)+1] and $1ff)-$bd;
+		xpos:=(sprite_ram[(f*8)+1] and $1ff)-$bd;
 		pitch:=smallint(sprite_ram[(f*$8)+2]);
-		addr:=sprite_ram[(f*$8)+3];
-		color:=((sprite_ram[(f*$8)+4] shr 8) and $3f) shl 4;
-		// initialize the end address to the start address */
-    sprite_ram[(f*$8)+$7]:=addr;
+		color:=((sprite_ram[(f*8)+4] shr 8) and $3f) shl 4;
 		// clamp to within the memory region size
-		spritedata:=$8000*(bank mod s16_info.s_banks);
+		spritedata:=$8000*(bank mod s16_info.banks);
 		// loop from top to bottom
 		for y:=top to (bottom-1) do begin
 			// advance a row
 			addr:=addr+pitch;
 			// skip drawing if not within the cliprect
-			if (y<=256) then begin
+			if (y<256) then begin
 				// note that the System 16A sprites have a design flaw that allows the address
 				// to carry into the flip flag, which is the topmost bit -- it is very important
 				// to emulate this as the games compensate for it
 				// non-flipped case
 				if (addr and $8000)=0 then begin
-					// start at the word before because we preincrement below
-          sprite_ram[(f*$8)+$7]:=addr-1;
+          data_7:=addr;
 					x:=xpos;
-          while ((xpos-x) and $1ff)<>1 do begin
-            data_7:=sprite_ram[(f*$8)+$7]+1;
-            sprite_ram[(f*$8)+$7]:=data_7;
-						pixels:=(sprite_rom[(spritedata+(data_7 and $7fff)) shl 1] shl 8)+sprite_rom[((spritedata+(data_7 and $7fff)) shl 1)+1];
+          while (x<512) do begin
+						pixels:=sprite_rom[spritedata+(data_7 and $7fff)];
 						// draw four pixels
 						pix:=(pixels shr 12) and $f;
             system16a_draw_pixel(x,y,pix or color);
@@ -224,18 +221,18 @@ begin
             system16a_draw_pixel(x+3,y,pix or color);
             x:=x+4;
 						// stop if the last pixel in the group was 0xf
-						if (pix=15) then break;
+						if (pix=15) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7+1;
 					end;
 				end else begin
 				// flipped case
-					// start at the word after because we predecrement below
-          sprite_ram[(f*$8)+$7]:=addr+1;
+          data_7:=addr;
 					x:=xpos;
-          while ((xpos-x) and $1ff)<>1 do begin
-            data_7:=sprite_ram[(f*$8)+$7]-1;
-            sprite_ram[(f*$8)+$7]:=data_7;
-						pixels:=(sprite_rom[(spritedata+(data_7 and $7fff)) shl 1] shl 8)+sprite_rom[((spritedata+(data_7 and $7fff)) shl 1)+1];
-						// draw four pixels */
+          while (x<512) do begin
+						pixels:=sprite_rom[spritedata+(data_7 and $7fff)];
+						// draw four pixels
 						pix:=(pixels shr 0) and $f;
             system16a_draw_pixel(x,y,pix or color);
 						pix:=(pixels shr 4) and $f;
@@ -246,46 +243,45 @@ begin
             system16a_draw_pixel(x+3,y,pix or color);
             x:=x+4;
 						// stop if the last pixel in the group was 0xf
-						if (pix=15) then break;
+						if (pix=15) then begin
+              sprite_ram[(f*8)+7]:=data_7;
+              break;
+            end else data_7:=data_7-1;
 					end;
 				end;
 			end;
 		end;
 	end;
 end;
-procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
+
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
 var
   pos,f,nchar,color,data:word;
   x,y:word;
 begin
-  pos:=s16_screen[num]*$800;
+  pos:=s16_info.screen[num]*$800;
   for f:=$0 to $7ff do begin
-    data:=tile_ram[pos];
+    data:=tile_ram[pos+f];
     color:=(data shr 5) and $7f;
-    if (tile_buffer[(num*$800)+f] or buffer_color[color]) then begin
+    if (s16_info.tile_buffer[num,f] or buffer_color[color]) then begin
       x:=((f and $3f) shl 3)+px;
       y:=((f shr 6) shl 3)+py;
       nchar:=((data shr 1) and $1000) or (data and $fff);
-      if trans then begin
-        put_gfx_trans(x,y,nchar,color shl 3,scr,0);
-        if ((data shr 12) and 1)<>1 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
+      if trans then put_gfx_trans(x,y,nchar,color shl 3,scr,0)
+        else put_gfx(x,y,nchar,color shl 3,scr,0);
+      if (data and $1000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
           else put_gfx_block_trans(x,y,scr+1,8,8);
-      end else begin
-        put_gfx(x,y,nchar,color shl 3,scr,0);
-        if ((data shr 12) and 1)<>1 then put_gfx(x,y,nchar,color shl 3,scr+1,0)
-          else put_gfx_block(x,y,scr+1,8,8,$1fff);
-      end;
-      tile_buffer[(num*$800)+f]:=false;
+      s16_info.tile_buffer[num,f]:=false;
     end;
-    pos:=pos+1;
   end;
 end;
-procedure update_video_system16a;inline;
+
+procedure update_video_system16a;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib:word;
   scroll_y1,scroll_y2:byte;
 begin
-if not(screen_enabled) then begin
+if not(s16_info.screen_enabled) then begin
   fill_full_screen(7,$1fff);
   actualiza_trozo_final(0,0,320,224,7);
   exit;
@@ -315,26 +311,28 @@ for f:=$0 to $6ff do begin
     y:=(f shr 6) shl 3;
     nchar:=atrib and $ff;
     put_gfx_trans(x,y,nchar,color shl 3,1,0);
-    if ((nchar shr 11) and 1)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
+    if (atrib and $800)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
       else put_gfx_block_trans(x,y,2,8,8);
     gfx[0].buffer[f]:=false;
+
   end;
 end;
 //Lo pongo todo con prioridades, falta scrollrow y scrollcol!!
-scroll_x_y(4,7,scroll_x1,scroll_y1); //0
+scroll_x_y(3,7,scroll_x1,scroll_y1); //0
 draw_sprites(0);
-scroll_x_y(3,7,scroll_x1,scroll_y1); //1
+scroll_x_y(4,7,scroll_x1,scroll_y1); //1
 draw_sprites(1);
-scroll_x_y(6,7,scroll_x2,scroll_y2); //2
-scroll_x_y(5,7,scroll_x2,scroll_y2);  //2
+scroll_x_y(5,7,scroll_x2,scroll_y2); //2
 draw_sprites(2);
-actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //4
+scroll_x_y(6,7,scroll_x2,scroll_y2);  //2
+actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //4
 draw_sprites(3);
-actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //8
+actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //8
 //Y lo pinto a la pantalla principal
 actualiza_trozo_final(0,0,320,224,7);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
+
 procedure eventos_system16a;
 begin
 if event.arcade then begin
@@ -361,6 +359,7 @@ if event.arcade then begin
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
 end;
 end;
+
 procedure system16a_principal_adpcm;
 var
   frame_m,frame_s,frame_s_sub:single;
@@ -393,9 +392,10 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 procedure system16a_principal;
 var
-  frame_m,frame_s,frame_s_sub:single;
+  frame_m,frame_s:single;
   f:word;
   h:byte;
 begin
@@ -421,7 +421,8 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-function standar_s16_io_r(direccion:word):word;inline;
+
+function standar_s16_io_r(direccion:word):word;
 var
   res:word;
 begin
@@ -441,6 +442,7 @@ case (direccion and $3000) of
 end;
 standar_s16_io_r:=res;
 end;
+
 function system16a_getword(direccion:dword):word;
 begin
 case direccion of
@@ -464,6 +466,7 @@ case direccion of
     end;
 end;
 end;
+
 function system16a_getword_fd1089(direccion:dword):word;
 begin
 case direccion of
@@ -472,50 +475,62 @@ case direccion of
     else system16a_getword_fd1089:=system16a_getword(direccion);
 end;
 end;
+
 procedure test_screen_change(direccion:word);
+var
+  tmp:byte;
 begin
 if direccion=$74e then begin
           //Background abajo 1-2
-          if ((char_ram[$74e] shr 12) and $7)<>s16_screen[0] then begin
-            s16_screen[0]:=(char_ram[$74e] shr 12) and $7;
-            fillchar(tile_buffer[$800*0],$800,1);
+          tmp:=(char_ram[$74e] shr 12) and $7;
+          if tmp<>s16_info.screen[0] then begin
+            s16_info.screen[0]:=tmp;
+            fillchar(s16_info.tile_buffer[0,0],$800,1);
           end;
-          if ((char_ram[$74e] shr 8) and $7)<>s16_screen[1] then begin
-            s16_screen[1]:=(char_ram[$74e] shr 8) and $7;
-            fillchar(tile_buffer[$800*1],$800,1);
+          tmp:=(char_ram[$74e] shr 8) and $7;
+          if tmp<>s16_info.screen[1] then begin
+            s16_info.screen[1]:=tmp;
+            fillchar(s16_info.tile_buffer[1,0],$800,1);
           end;
             //Background arriba 1-2
-          if ((char_ram[$74e] shr 4) and $7)<>s16_screen[2] then begin
-            s16_screen[2]:=(char_ram[$74e] shr 4) and $7;
-            fillchar(tile_buffer[$800*2],$800,1);
+          tmp:=(char_ram[$74e] shr 4) and $7;
+          if tmp<>s16_info.screen[2] then begin
+            s16_info.screen[2]:=tmp;
+            fillchar(s16_info.tile_buffer[2,0],$800,1);
           end;
-          if (char_ram[$74e] and $7)<>s16_screen[3] then begin
-            s16_screen[3]:=char_ram[$74e] and $7;
-            fillchar(tile_buffer[$800*3],$800,1);
+          tmp:=char_ram[$74e] and $7;
+          if tmp<>s16_info.screen[3] then begin
+            s16_info.screen[3]:=tmp;
+            fillchar(s16_info.tile_buffer[3,0],$800,1);
           end;
 end;
 if direccion=$74f then begin
             //Foreground abajo
-          if ((char_ram[$74f] shr 12) and $7)<>s16_screen[4] then begin
-            s16_screen[4]:=(char_ram[$74f] shr 12) and $7;
-            fillchar(tile_buffer[$800*4],$800,1);
+          tmp:=(char_ram[$74f] shr 12) and $7;
+          if tmp<>s16_info.screen[4] then begin
+            s16_info.screen[4]:=tmp;
+            fillchar(s16_info.tile_buffer[4,0],$800,1);
           end;
-          if ((char_ram[$74f] shr 8) and $7)<>s16_screen[5] then begin
-            s16_screen[5]:=(char_ram[$74f] shr 8) and $7;
-            fillchar(tile_buffer[$800*5],$800,1);
+          tmp:=(char_ram[$74f] shr 8) and $7;
+          if tmp<>s16_info.screen[5] then begin
+            s16_info.screen[5]:=tmp;
+            fillchar(s16_info.tile_buffer[5,0],$800,1);
           end;
             //Foreground arriba
-          if ((char_ram[$74f] shr 4) and $7)<>s16_screen[6] then begin
-            s16_screen[6]:=(char_ram[$74f] shr 4) and $7;
-            fillchar(tile_buffer[$800*6],$800,1);
+          tmp:=(char_ram[$74f] shr 4) and $7;
+          if tmp<>s16_info.screen[6] then begin
+            s16_info.screen[6]:=tmp;
+            fillchar(s16_info.tile_buffer[6,0],$800,1);
           end;
-          if (char_ram[$74f] and $7)<>s16_screen[7] then begin
-            s16_screen[7]:=char_ram[$74f] and $7;
-            fillchar(tile_buffer[$800*7],$800,1);
+          tmp:=char_ram[$74f] and $7;
+          if tmp<>s16_info.screen[7] then begin
+            s16_info.screen[7]:=tmp;
+            fillchar(s16_info.tile_buffer[7,0],$800,1);
           end;
 end;
 end;
-procedure change_pal(direccion:word);inline;
+
+procedure change_pal(direccion:word);
 var
 	val:word;
   color:tcolor;
@@ -547,7 +562,8 @@ begin
   //Buffer
   buffer_color[(direccion shr 3) and $7f]:=true;
 end;
-procedure test_tile_buffer(direccion:word);inline;
+
+procedure test_tile_buffer(direccion:word);
 var
   num_scr,f:byte;
   pos:word;
@@ -555,14 +571,9 @@ begin
   num_scr:=direccion shr 11;
   pos:=direccion and $7ff;
   for f:=0 to 7 do
-    if s16_screen[f]=num_scr then tile_buffer[(f shl 11)+pos]:=true;
+    if s16_info.screen[f]=num_scr then s16_info.tile_buffer[f,pos]:=true;
 end;
-procedure standard_io_w(direccion,valor:word);inline;
-begin
-case (direccion and $3000) of
-		$0:pia8255_0.write((direccion shr 1) and $3,valor and $ff);
-end;
-end;
+
 procedure system16a_putword(direccion:dword;valor:word);
 begin
 case direccion of
@@ -597,7 +608,7 @@ case direccion of
                                           end;
                                           test_screen_change((direccion and $fff) shr 1);
                                        end;
-                        $40000..$5ffff:standard_io_w(direccion and $3fff,valor);  //misc_io
+                        $40000..$5ffff:if (direccion and $3000)=0 then pia8255_0.write((direccion shr 1) and $3,valor and $ff);
                         $70000..$7ffff:begin
                                           ram[(direccion and $3fff) shr 1]:=valor;
                                           if ((direccion and $3fff) shr 1)=$38 then sound_latch:=valor;
@@ -605,6 +616,7 @@ case direccion of
                      end;
   end;
 end;
+
 function system16a_snd_getbyte(direccion:word):byte;
 var
   res:byte;
@@ -619,10 +631,12 @@ case direccion of
 end;
 system16a_snd_getbyte:=res;
 end;
+
 procedure system16a_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$f7ff then mem_snd[direccion]:=valor;
 end;
+
 function system16a_snd_inbyte(puerto:word):byte;
 var
   res:byte;
@@ -637,6 +651,7 @@ case (puerto and $ff) of
 end;
 system16a_snd_inbyte:=res;
 end;
+
 procedure system16a_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -647,6 +662,7 @@ case (puerto and $ff) of
   $80..$bf:;
 end;
 end;
+
 procedure system16a_snd_outbyte_adpcm(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -664,28 +680,34 @@ case (puerto and $ff) of
            end;
 end;
 end;
+
 procedure ppi8255_wporta(valor:byte);
 begin
   sound_latch:=valor;
 end;
+
 procedure ppi8255_wportb(valor:byte);
 begin
-  screen_enabled:=(valor and $10)<>0;
+  s16_info.screen_enabled:=(valor and $10)<>0;
 end;
+
 procedure ppi8255_wportc(valor:byte);
 begin
 if (valor and $80)<>0 then z80_0.change_nmi(CLEAR_LINE)
   else z80_0.change_nmi(ASSERT_LINE);
 end;
+
 procedure system16a_sound_adpcm;
 begin
   ym2151_0.update;
   dac_0.update;
 end;
+
 procedure system16a_sound_update;
 begin
   ym2151_0.update;
 end;
+
 procedure ym2151_snd_port(valor:byte);
 begin
 if (valor and $1)<>0 then mcs48_0.change_reset(CLEAR_LINE)
@@ -693,6 +715,7 @@ if (valor and $1)<>0 then mcs48_0.change_reset(CLEAR_LINE)
 if (valor and $2)<>0 then mcs48_0.change_irq(CLEAR_LINE)
   else mcs48_0.change_irq(ASSERT_LINE);
 end;
+
 //Sub sound cpu
 function system16a_sound_inport(puerto:word):byte;
 begin
@@ -702,6 +725,7 @@ case puerto of
   MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (mcs48_0.i8243.p2_r and $f);
 end;
 end;
+
 procedure system16a_sound_outport(puerto:word;valor:byte);
 begin
 case puerto of
@@ -710,6 +734,7 @@ case puerto of
   MCS48_PORT_PROG:mcs48_0.i8243.prog_w(valor);
 end;
 end;
+
 procedure n7751_rom_offset_w(puerto:word;valor:byte);
 var
   mask,newdata:dword;
@@ -722,6 +747,7 @@ begin
 	newdata:=(valor shl (4*puerto)) and mask;
 	n7751_rom_address:=(n7751_rom_address and not(mask)) or newdata;
 end;
+
 //Main
 procedure reset_system16a;
 var
@@ -737,15 +763,17 @@ begin
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;
  for f:=0 to $f do sprite_bank[f]:=f;
- screen_enabled:=true;
- fillchar(tile_buffer[0],$800*8,1);
+ s16_info.screen_enabled:=true;
+ fillchar(s16_info.tile_buffer,$4000,1);
  sound_latch:=0;
  n7751_rom_address:=0;
 end;
+
 function iniciar_system16a:boolean;
 var
   f:word;
   memoria_temp:array[0..$7ffff] of byte;
+  fd1089_key:array[0..$1fff] of byte;
   weights:array[0..1,0..5] of single;
   i0,i1,i2,i3,i4:integer;
 const
@@ -826,15 +854,15 @@ case main_vars.tipo_maquina of
         if not(roms_load16b(@memoria_temp,shinobi_sprites)) then exit;
         for f:=0 to 7 do begin
           copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+          copymemory(@sprite_rom[$20000],@memoria_temp[$10000],$10000);
+          copymemory(@sprite_rom[$8000],@memoria_temp[$20000],$10000);
+          copymemory(@sprite_rom[$28000],@memoria_temp[$30000],$10000);
+          copymemory(@sprite_rom[$10000],@memoria_temp[$40000],$10000);
+          copymemory(@sprite_rom[$30000],@memoria_temp[$50000],$10000);
+          copymemory(@sprite_rom[$18000],@memoria_temp[$60000],$10000);
+          copymemory(@sprite_rom[$38000],@memoria_temp[$70000],$10000);
         end;
-        s16_info.s_banks:=8;
+        s16_info.banks:=8;
         marcade.dswb:=$fc;
         marcade.dswb_val:=@shinobi_dip_b;
   end;
@@ -853,7 +881,7 @@ case main_vars.tipo_maquina of
         convert_chars(1);
         //Cargar ROM de los sprites
         if not(roms_load16b(@sprite_rom,alexkid_sprites)) then exit;
-        s16_info.s_banks:=4;
+        s16_info.banks:=4;
         marcade.dswb:=$fc;
         marcade.dswb_val:=@alexkidd_dip_b;
   end;
@@ -869,7 +897,7 @@ case main_vars.tipo_maquina of
         convert_chars(1);
         //Cargar ROM de los sprites
         if not(roms_load16b(@sprite_rom,fantzone_sprites)) then exit;
-        s16_info.s_banks:=4;
+        s16_info.banks:=4;
         marcade.dswb:=$fc;
         marcade.dswb_val:=@fantzone_dip_b;
   end;
@@ -893,15 +921,15 @@ case main_vars.tipo_maquina of
         if not(roms_load16b(@memoria_temp,alien_sprites)) then exit;
         for f:=0 to 7 do begin
           copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+          copymemory(@sprite_rom[$20000],@memoria_temp[$10000],$10000);
+          copymemory(@sprite_rom[$8000],@memoria_temp[$20000],$10000);
+          copymemory(@sprite_rom[$28000],@memoria_temp[$30000],$10000);
+          copymemory(@sprite_rom[$10000],@memoria_temp[$40000],$10000);
+          copymemory(@sprite_rom[$30000],@memoria_temp[$50000],$10000);
+          copymemory(@sprite_rom[$18000],@memoria_temp[$60000],$10000);
+          copymemory(@sprite_rom[$38000],@memoria_temp[$70000],$10000);
         end;
-        s16_info.s_banks:=8;
+        s16_info.banks:=8;
         marcade.dswb:=$fd;
         marcade.dswb_val:=@aliensynd_dip_b;
   end;
@@ -922,15 +950,15 @@ case main_vars.tipo_maquina of
         if not(roms_load16b(@memoria_temp,wb3_sprites)) then exit;
         for f:=0 to 7 do begin
           copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+          copymemory(@sprite_rom[$20000],@memoria_temp[$10000],$10000);
+          copymemory(@sprite_rom[$8000],@memoria_temp[$20000],$10000);
+          copymemory(@sprite_rom[$28000],@memoria_temp[$30000],$10000);
+          copymemory(@sprite_rom[$10000],@memoria_temp[$40000],$10000);
+          copymemory(@sprite_rom[$30000],@memoria_temp[$50000],$10000);
+          copymemory(@sprite_rom[$18000],@memoria_temp[$60000],$10000);
+          copymemory(@sprite_rom[$38000],@memoria_temp[$70000],$10000);
         end;
-        s16_info.s_banks:=8;
+        s16_info.banks:=8;
         marcade.dswb:=$7c;
         marcade.dswb_val:=@wb3_dip_b;
   end;
@@ -946,7 +974,7 @@ case main_vars.tipo_maquina of
         convert_chars(2);
         //Cargar ROM de los sprites
         if not(roms_load16b(@sprite_rom,tetris_sprites)) then exit;
-        s16_info.s_banks:=1;
+        s16_info.banks:=1;
         marcade.dswb:=$30;
         marcade.dswb_val:=@tetris_dip_b;
   end;
@@ -974,4 +1002,5 @@ end;
 reset_system16a;
 iniciar_system16a:=true;
 end;
+
 end.

@@ -38,7 +38,7 @@ var
  vblank,irq_source:byte;
  pal_bank:word;
 
-procedure update_video_pang;inline;
+procedure update_video_pang;
 var
   x,y,f,color,nchar:word;
   atrib:byte;
@@ -137,7 +137,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure pang_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -151,7 +153,6 @@ begin
   buffer_color[(pos shr 5) and $7f]:=true;
 end;
 
-procedure pang_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$bfff:;

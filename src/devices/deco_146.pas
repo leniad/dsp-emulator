@@ -1144,7 +1144,7 @@ begin
   magic_read_address_xor_enabled:=true;
 end;
 
-function reorder(input:word;weights:pbyte):word;inline;
+function reorder(input:word;weights:pbyte):word;
 var
   temp:word;
   i:byte;

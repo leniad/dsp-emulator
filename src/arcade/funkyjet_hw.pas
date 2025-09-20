@@ -32,7 +32,7 @@ var
  rom:array[0..$3ffff] of word;
  ram:array[0..$1fff] of word;
 
-procedure update_video_funkyjet;inline;
+procedure update_video_funkyjet;
 begin
 //fill_full_screen(3,$200);
 deco16ic_0.update_pf_2(3,false);
@@ -41,7 +41,7 @@ deco_sprites_0.draw_sprites;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
-procedure eventos_funkyjet;inline;
+procedure eventos_funkyjet;
 begin
 if event.arcade then begin
   //P1
@@ -94,7 +94,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function funkyjet_deco146_r(real_address:word):word;inline;
+function funkyjet_deco146_r(real_address:word):word;
 var
   deco146_addr:dword;
   data:word;
@@ -122,7 +122,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure funkyjet_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -136,7 +138,7 @@ begin
   end;
 end;
 
-procedure funkyjet_deco146_w(real_address,data:word);inline;
+procedure funkyjet_deco146_w(real_address,data:word);
 var
   deco146_addr:dword;
   cs:byte;
@@ -147,7 +149,6 @@ begin
 	main_deco146.write_data(deco146_addr,data,cs);
 end;
 
-procedure funkyjet_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM

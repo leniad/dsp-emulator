@@ -138,7 +138,21 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+function pinballaction_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$e07f:pinballaction_getbyte:=memoria[direccion];
+  $e400..$e5ff:pinballaction_getbyte:=buffer_paleta[direccion and $1ff];
+  $e600:pinballaction_getbyte:=marcade.in0; //p1
+  $e601:pinballaction_getbyte:=marcade.in1; //p2
+  $e602:pinballaction_getbyte:=marcade.in2; //system
+  $e604:pinballaction_getbyte:=marcade.dswa;
+  $e605:pinballaction_getbyte:=marcade.dswb;
+end;
+end;
+
+procedure pinballaction_putbyte(direccion:word;valor:byte);
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -155,21 +169,6 @@ begin
     128..255:buffer_color[((dir shr 4) and $7)+$10]:=true;
   end;
 end;
-
-function pinballaction_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $0..$e07f:pinballaction_getbyte:=memoria[direccion];
-  $e400..$e5ff:pinballaction_getbyte:=buffer_paleta[direccion and $1ff];
-  $e600:pinballaction_getbyte:=marcade.in0; //p1
-  $e601:pinballaction_getbyte:=marcade.in1; //p2
-  $e602:pinballaction_getbyte:=marcade.in2; //system
-  $e604:pinballaction_getbyte:=marcade.dswa;
-  $e605:pinballaction_getbyte:=marcade.dswb;
-end;
-end;
-
-procedure pinballaction_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$7fff:;

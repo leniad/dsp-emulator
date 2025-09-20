@@ -402,12 +402,13 @@ begin
  rom_window:=0;
 end;
 
-function abrir_scv:boolean;
+procedure abrir_scv;
 var
   extension,extension2,nombre_file,RomFile:string;
   datos,datos2:pbyte;
   longitud,longitud2,crc:integer;
   resultado:boolean;
+  crc32:dword;
 procedure load_rom;
 begin
 rom_bank_type:=0;
@@ -434,58 +435,58 @@ if longitud<=$2000 then begin
                         end;
 end;
 begin
-  upd7810_0.change_ram_calls(scv_getbyte,scv_putbyte);
-  if not(OpenRom(StSuperCassette,Romfile)) then begin
-    abrir_scv:=true;
-    exit;
-  end;
-  abrir_scv:=false;
+  if not(OpenRom(StSuperCassette,Romfile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.bin',nombre_file,longitud,crc,false)) then
-      if not(search_file_from_zip(RomFile,'*.0',nombre_file,longitud,crc,false)) then exit;
+      if not(search_file_from_zip(RomFile,'*.0',nombre_file,longitud,crc,false)) then begin
+        MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+        exit;
+      end;
     getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      exit;
-    end;
+    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
+      else resultado:=true;
   end else begin
-    if (extension<>'BIN') then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
+    if ((extension<>'BIN') and (extension<>'0')) then begin
+      MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
       exit;
     end;
-    nombre_file:=extractfilename(RomFile);
+    if read_file_size(RomFile,longitud) then begin
+      getmem(datos,longitud);
+      if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+        else resultado:=true;
+      nombre_file:=extractfilename(RomFile);
+    end;
   end;
-abrir_scv:=true;
-extension2:=extension_fichero(nombre_file);
-ram_bank:=false;
-ram_bank2:=false;
-if (extension2='BIN') then begin
-  load_rom;
-  resultado:=true;
-end;
-if (extension2='0') then begin
-  if extension='ZIP' then begin
-    getmem(datos2,$20000);
-    copymemory(datos2,datos,longitud);
-    if not(search_file_from_zip(RomFile,'*.1',nombre_file,longitud2,crc,false)) then exit;
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud2,crc,true)) then begin
-      freemem(datos);
-      freemem(datos2);
-      exit;
-    end;
-    case crc of
-      $d2de91a6:begin //Doraemon
+  extension2:=extension_fichero(nombre_file);
+  ram_bank:=false;
+  ram_bank2:=false;
+  if (extension2='BIN') then begin
+    load_rom;
+    resultado:=true;
+  end;
+  if (extension2='0') then begin
+    if extension='ZIP' then begin
+      getmem(datos2,$20000);
+      copymemory(datos2,datos,longitud);
+      if not(search_file_from_zip(RomFile,'*.1',nombre_file,longitud2,crc,false)) then exit;
+      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud2,crc,true)) then begin
+        freemem(datos);
+        freemem(datos2);
+        MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+        exit;
+      end;
+      crc32:=calc_crc(datos,longitud2);
+      case crc32 of
+        $d2de91a6:begin //Doraemon
                   copymemory(@datos2[$8000],datos,$8000);
                   freemem(datos);
                   getmem(datos,$10000);
                   longitud:=$10000;
                   copymemory(datos,datos2,longitud);
                 end;
-      $a895375a:begin //kungfu
+        $a895375a:begin //kungfu
                   copymemory(@datos2[$8000],datos2,$6000);
                   copymemory(@datos2[$e000],datos,$2000);
                   freemem(datos);
@@ -493,7 +494,7 @@ if (extension2='0') then begin
                   longitud:=$10000;
                   copymemory(datos,datos2,longitud);
                 end;
-      $7978c4a6:begin  //star speeder
+        $7978c4a6:begin  //star speeder
                   copymemory(@datos2[$8000],@datos2[0],$8000);
                   copymemory(@datos2[0],@datos[0],$2000);
                   copymemory(@datos2[$2000],datos,$2000);
@@ -504,29 +505,26 @@ if (extension2='0') then begin
                   longitud:=$10000;
                   copymemory(datos,datos2,longitud);
                 end;
+      end;
+      load_rom;
+      freemem(datos2);
+      resultado:=true;
     end;
-    load_rom;
-    freemem(datos2);
-    resultado:=true;
   end;
-end;
-freemem(datos);
-//Tiene RAM?
-case crc of
-  $5971940f,$84005c4c,$ca965c2b:ram_bank2:=true; //Dragon Slayer, Shougi Nyuumon, BASIC Nyuumon
-  $cc4fb04d:ram_bank:=true; //pop & chips
-  $cb69903d,$5b3a04e0:upd7810_0.change_ram_calls(polepos2_getbyte,polepos2_putbyte); //Pole Position II
-end;
-if resultado then begin
-  reset_scv;
-  llamadas_maquina.open_file:=nombre_file;
+  freemem(datos);
+  //Tiene RAM?
+  case crc of
+    $5971940f,$84005c4c,$ca965c2b:ram_bank2:=true; //Dragon Slayer, Shougi Nyuumon, BASIC Nyuumon
+    $cc4fb04d:ram_bank:=true; //pop & chips
+    $cb69903d,$5b3a04e0:upd7810_0.change_ram_calls(polepos2_getbyte,polepos2_putbyte); //Pole Position II
+      else upd7810_0.change_ram_calls(scv_getbyte,scv_putbyte);
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    nombre_file:='';
+  end else reset_scv;
+  change_caption(nombre_file);
   Directory.scv:=ExtractFilePath(romfile);
-end else begin
-  MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-  llamadas_maquina.open_file:='';
-end;
-change_caption;
-directory.coleco_snap:=ExtractFilePath(romfile);
 end;
 
 function iniciar_scv:boolean;
@@ -562,6 +560,7 @@ end;
 set_pal(colores,$10);
 //final
 reset_scv;
+if main_vars.console_init then abrir_scv;
 iniciar_scv:=true;
 end;
 
@@ -577,6 +576,5 @@ llamadas_maquina.cartuchos:=abrir_scv;
 //llamadas_maquina.grabar_snapshot:=scv_grabar_snapshot;
 llamadas_maquina.fps_max:=59.922745;
 end;
-
 
 end.

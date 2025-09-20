@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,
      misc_functions;
 
-procedure cargar_dietgo;
+function iniciar_dietgo:boolean;
 
 implementation
 const
@@ -30,7 +30,7 @@ var
  rom_opcode,rom_data:array[0..$3ffff] of word;
  ram:array[0..$7fff] of word;
 
-procedure update_video_dietgo;inline;
+procedure update_video_dietgo;
 begin
 deco16ic_0.update_pf_2(3,false);
 deco16ic_0.update_pf_1(3,true);
@@ -43,18 +43,18 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $0001);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ffFd) else marcade.in0:=(marcade.in0 or $0002);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $0002);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $0004);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $ffF7) else marcade.in0:=(marcade.in0 or $0008);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $0008);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $0010);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $0020);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $0040);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $0080);
   //P2
   if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $0100);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $Fdff) else marcade.in0:=(marcade.in0 or $0200);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $0200);
   if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $0400);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $F7ff) else marcade.in0:=(marcade.in0 or $0800);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $0800);
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
@@ -95,7 +95,8 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function dietgo_protection_region_0_104_r(real_address:word):word;inline;
+function dietgo_getword(direccion:dword):word;
+function dietgo_protection_region_0_104_r(real_address:word):word;
 var
   deco146_addr:word;
   cs:byte;
@@ -106,7 +107,6 @@ begin
    dietgo_protection_region_0_104_r:=main_deco104.read_data(deco146_addr,cs);
 end;
 
-function dietgo_getword(direccion:dword):word;
 begin
 case direccion of
   $0..$7ffff:if m68000_0.opcode then dietgo_getword:=rom_opcode[direccion shr 1]
@@ -120,7 +120,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
+procedure dietgo_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(numero:word);
 var
   color:tcolor;
 begin
@@ -134,7 +136,7 @@ begin
   end;
 end;
 
-procedure dietgo_protection_region_0_104_w(real_address,data:word);inline;
+procedure dietgo_protection_region_0_104_w(real_address,data:word);
 var
   deco146_addr:word;
   cs:byte;
@@ -145,7 +147,6 @@ begin
 	main_deco104.write_data(deco146_addr, data,cs);
 end;
 
-procedure dietgo_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM
@@ -191,7 +192,7 @@ begin
  copymemory(oki_6295_0.get_rom_addr,@oki_rom[0],$40000);
  deco16_snd_simple_reset;
  reset_audio;
- marcade.in0:=$FFFF;
+ marcade.in0:=$ffff;
  marcade.in1:=$7;
 end;
 
@@ -209,6 +210,9 @@ var
   memoria_temp,ptemp:pbyte;
   memoria_temp_rom:pword;
 begin
+llamadas_maquina.bucle_general:=dietgo_principal;
+llamadas_maquina.reset:=reset_dietgo;
+llamadas_maquina.fps_max:=58;
 iniciar_dietgo:=false;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$0,$0,$f,$f,0,1,0,16,dietgo_bank_callback,dietgo_bank_callback);
@@ -263,14 +267,6 @@ freemem(memoria_temp_rom);
 freemem(memoria_temp);
 reset_dietgo;
 iniciar_dietgo:=true;
-end;
-
-procedure Cargar_dietgo;
-begin
-llamadas_maquina.bucle_general:=dietgo_principal;
-llamadas_maquina.iniciar:=iniciar_dietgo;
-llamadas_maquina.reset:=reset_dietgo;
-llamadas_maquina.fps_max:=58;
 end;
 
 end.

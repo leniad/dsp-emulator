@@ -38,7 +38,12 @@ var
  scroll_ram:array[0..1,0..$3f] of word;
  priority:boolean;
 
-procedure draw_sprites(bank:byte);inline;
+procedure update_video_combatsc;
+var
+  x,y,f,nchar,color:word;
+  atrib:byte;
+
+procedure draw_sprites(bank:byte);
 var
   color_base:word;
 begin
@@ -46,11 +51,7 @@ begin
   K007121_draw_sprites(bank,5,0,color_base,false);
 end;
 
-procedure update_video_combatsc;
-var
-  x,y,f,nchar,color:word;
-  atrib:byte;
-procedure draw_chip(chip,pant1,pant2:byte);inline;
+procedure draw_chip(chip,pant1,pant2:byte);
 begin
 if (K007121_chip[chip].control[1] and 2)<>0 then begin
     scroll__x_part2(pant1,5,8,@scroll_ram[1,0]);
@@ -213,7 +214,9 @@ begin
     end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure combatsc_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:word);
 var
   data:word;
   color:tcolor;
@@ -227,7 +230,6 @@ begin
   buffer_color[dir shl 4]:=true;
 end;
 
-procedure combatsc_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $0..$7:begin

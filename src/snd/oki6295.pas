@@ -83,7 +83,7 @@ var
     diff_lookup:array[0..(49*16)-1] of single;
     chips_total:integer=-1;
 
-procedure compute_tables;inline;
+procedure compute_tables;
 const
 	// nibble to bit map */
 	nbl2bit:array[0..15,0..3] of integer=(

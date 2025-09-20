@@ -721,7 +721,8 @@ Case r.im of
             estados_t:=estados_t+13;
         end;
         2:begin
-            if self.daisy then posicion:=z80daisy_ack
+            if self.daisy then
+            posicion:=z80daisy_ack
               else posicion:=self.im2_lo;
             posicion:=posicion or (r.i shl 8);
             r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);

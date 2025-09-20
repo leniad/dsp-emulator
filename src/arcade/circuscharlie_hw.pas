@@ -41,7 +41,7 @@ var
  sound_latch,scroll_x,linea:byte;
  spritebank:word;
 
-procedure update_video_circusc;inline;
+procedure update_video_circusc;
 var
   x,y,atrib:byte;
   f,nchar,color:word;
@@ -80,7 +80,7 @@ scroll__x_part(1,3,scroll_x,0,80,176);
 actualiza_trozo_final(16,0,224,256,3);
 end;
 
-procedure eventos_circusc;inline;
+procedure eventos_circusc;
 begin
 if event.arcade then begin
   //p1

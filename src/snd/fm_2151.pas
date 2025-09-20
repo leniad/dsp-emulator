@@ -387,7 +387,7 @@ var
   d1l_tab:array[0..15] of dword;
   salida_fm:array[0..2] of integer;
 
-function sshr(num:int64;fac:byte):int64;inline;
+function sshr(num:int64;fac:byte):int64;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;
@@ -540,7 +540,7 @@ begin
 		end;
 end;
 
-procedure envelope_KONKOFF(num:byte;n_op:byte;v:integer);inline;
+procedure envelope_KONKOFF(num:byte;n_op:byte;v:integer);
 var
 	chip:pYM2151;
 begin
@@ -558,7 +558,7 @@ begin
 	  else KEY_OFF(chip.oper[n_op+3],1);
 end;
 
-procedure set_connect(num,op:byte;cha,v:integer);inline;
+procedure set_connect(num,op:byte;cha,v:integer);
 var
 	om1,om2:pYM2151Operator;
 	oc1:pYM2151Operator;
@@ -650,7 +650,7 @@ begin
 	end;
 end;
 
-procedure refresh_EG(num,n_op:byte);inline;
+procedure refresh_EG(num,n_op:byte);
 var
 	kc:dword;
 	v,f:dword;

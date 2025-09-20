@@ -40,7 +40,12 @@ var
  punt:array[0..$ffff] of word;
  star_shift_reg:dword;
 
-procedure draw_sprite(offs:byte;flip:boolean);inline;
+procedure update_video_spacefb;
+var
+  offs:byte;
+  flip:boolean;
+
+procedure draw_sprite(offs:byte;flip:boolean);
 var
   sy,code,color_base,y,sx,dy,x,data,data1,data2,dx:byte;
 begin
@@ -66,7 +71,7 @@ begin
 	end;
 end;
 
-procedure draw_bullet(offs:byte;flip:boolean);inline;
+procedure draw_bullet(offs:byte;flip:boolean);
 var
   sy,code,y,sx,dy,data,x,dx:byte;
 begin
@@ -90,10 +95,6 @@ begin
 	end;
 end;
 
-procedure update_video_spacefb;inline;
-var
-  offs:byte;
-  flip:boolean;
 begin
   offs:=(port_0 and $20) shl 2;
   flip:=(port_0 and 1)<>0;
@@ -109,12 +110,12 @@ putpixel(0,0,$10000,@punt[0],1);
 actualiza_trozo(16,0,224,256,1,0,0,224,256,PANT_TEMP);
 end;
 
-procedure shift_star_generator;inline;
+procedure shift_star_generator;
 begin
   star_shift_reg:=((star_shift_reg shl 1) or (((not(star_shift_reg) shr 16) and 01) xor ((star_shift_reg shr 4) and $01))) and $1ffff;
 end;
 
-procedure draw_stars(y:byte);inline;
+procedure draw_stars(y:byte);
 var
   x:word;
 begin
@@ -184,7 +185,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure get_sprite_pens;inline;
+procedure get_sprite_pens;
 const
   fade_weights:array [0..3] of double=(1.0,1.5,2.5,4.0);
 var
@@ -216,7 +217,7 @@ begin
 	end;
 end;
 
-procedure get_stars_pens;inline;
+procedure get_stars_pens;
 var
   i,gb,ga,bb,ba,ra,rb,color_contrast_r,color_contrast_g,color_contrast_b,background_red,background_blue,disable_star_field:byte;
   color:tcolor;

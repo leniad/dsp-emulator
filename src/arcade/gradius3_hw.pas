@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232;
 
-procedure cargar_gradius3;
+function iniciar_gradius3:boolean;
 
 implementation
 const
@@ -194,7 +194,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color_gradius3(pos,valor:word);inline;
+procedure gradius3_putword(direccion:dword;valor:word);
+
+procedure cambiar_color_gradius3(pos,valor:word);
 var
   color:tcolor;
 begin
@@ -205,7 +207,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure gradius3_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3ffff:; //ROM
@@ -228,8 +229,8 @@ case direccion of
     $100000..$103fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $14c000..$153fff:begin
                         direccion:=(direccion-$14c000) shr 1;
-                        if not(m68000_0.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
-                        if m68000_0.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
+                        if not(m68000_0.write_8bits_lo_dir) then k052109_0.write(direccion,valor);
+                        if m68000_0.write_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
                      end;
     $180000..$19ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
@@ -262,8 +263,8 @@ case direccion of
     $200000..$203fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $24c000..$253fff:begin
                         direccion:=(direccion-$24c000) shr 1;
-                        if not(m68000_1.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
-                        if m68000_1.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
+                        if not(m68000_1.write_8bits_lo_dir) then k052109_0.write(direccion,valor);
+                        if m68000_1.write_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
                      end;
     $280000..$29ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
@@ -322,8 +323,19 @@ begin
  irqB_mask:=0;
 end;
 
+procedure cerrar_gradius3;
+begin
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+end;
+
 function iniciar_gradius3:boolean;
 begin
+llamadas_maquina.close:=cerrar_gradius3;
+llamadas_maquina.reset:=reset_gradius3;
+llamadas_maquina.bucle_general:=gradius3_principal;
 iniciar_gradius3:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -354,11 +366,11 @@ getmem(k007232_rom,$80000);
 if not(roms_load(k007232_rom,gradius3_k007232)) then exit;
 k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb,true);
 //Iniciar video
-k052109_0:=k052109_chip.create(1,2,3,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
+k052109_0:=k052109_chip.create(1,2,3,0,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
 getmem(sprite_rom,$200000);
 if not(roms_load32b(sprite_rom,gradius3_sprites_1)) then exit;
 if not(roms_load32b_b(sprite_rom,gradius3_sprites_2)) then exit;
-k051960_0:=k051960_chip.create(4,sprite_rom,$200000,gradius3_sprite_cb,1);
+k051960_0:=k051960_chip.create(4,1,sprite_rom,$200000,gradius3_sprite_cb,1);
 layer_colorbase[0]:=0;
 layer_colorbase[1]:=32;
 layer_colorbase[2]:=48;
@@ -373,22 +385,6 @@ marcade.dswc_val:=@gradius3_dip_c;
 //final
 reset_gradius3;
 iniciar_gradius3:=true;
-end;
-
-procedure cerrar_gradius3;
-begin
-if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-end;
-
-procedure Cargar_gradius3;
-begin
-llamadas_maquina.iniciar:=iniciar_gradius3;
-llamadas_maquina.close:=cerrar_gradius3;
-llamadas_maquina.reset:=reset_gradius3;
-llamadas_maquina.bucle_general:=gradius3_principal;
 end;
 
 end.

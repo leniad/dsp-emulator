@@ -28,11 +28,11 @@ const
         gauntlet2_rom:array[0..7] of tipo_roms=(
         (n:'136037-1307.9a';l:$8000;p:0;crc:$46fe8743),(n:'136037-1308.9b';l:$8000;p:$1;crc:$276e15c4),
         (n:'136043-1105.10a';l:$4000;p:$38000;crc:$45dfda47),(n:'136043-1106.10b';l:$4000;p:$38001;crc:$343c029c),
-        (n:'136043-1109.7a';l:$8000;p:$40000;crc:$58a0a9a3),(n:'136043-1110.7b';l:$8000;p:$40001;crc:$658f0da8),
-        (n:'136043-1121.6a';l:$8000;p:$50000;crc:$ae301bba),(n:'136043-1122.6b';l:$8000;p:$50001;crc:$e94aaa8a));
+        (n:'136044-2109.7a';l:$8000;p:$40000;crc:$1102ab96),(n:'136044-2110.7b';l:$8000;p:$40001;crc:$d2203a2b),
+        (n:'136044-2121.6a';l:$8000;p:$50000;crc:$753982d7),(n:'136044-2122.6b';l:$8000;p:$50001;crc:$879149ea));
         gauntlet2_sound:array[0..1] of tipo_roms=(
         (n:'136043-1120.16r';l:$4000;p:$4000;crc:$5c731006),(n:'136043-1119.16s';l:$8000;p:$8000;crc:$dc3591e7));
-        gauntlet2_char:tipo_roms=(n:'136043-1104.6p';l:$2000;p:0;crc:$1343cf6f);
+        gauntlet2_char:tipo_roms=(n:'136043-1104.6p';l:$4000;p:0;crc:$bddc3dfc);
         gauntlet2_back:array[0..15] of tipo_roms=(
         (n:'136043-1111.1a';l:$8000;p:0;crc:$09df6e23),(n:'136037-112.1b';l:$8000;p:$8000;crc:$869330be),
         (n:'136043-1123.1c';l:$4000;p:$10000;crc:$e4c98f01),(n:'136043-1123.1c';l:$4000;p:$14000;crc:$e4c98f01),
@@ -44,40 +44,40 @@ const
         (n:'136043-1126.2p';l:$4000;p:$58000;crc:$a32c732a),(n:'136043-1126.2p';l:$4000;p:$5c000;crc:$a32c732a));
         gauntlet2_proms:array[0..2] of tipo_roms=(
         (n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),(n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),
-        (n:'74s287-136037-103.4r';l:$100;p:$400;crc:$6c5ccf08));
+        (n:'82s129-136043-1103.4r';l:$100;p:$400;crc:$32ae1fa9));
         //DIP
         gauntlet_dip:array [0..1] of def_dip=(
         (mask:$8;name:'Service';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),());
         gauntlet_mo_config:atari_motion_objects_config=(
-        	gfxindex:1;               // index to which gfx system */
-	        bankcount:1;              // number of motion object banks */
-	        linked:true;              // are the entries linked? */
-	        split:true;               // are the entries split? */
-	        reverse:false;            // render in reverse order? */
-	        swapxy:false;             // render in swapped X/Y order? */
-	        nextneighbor:false;       // does the neighbor bit affect the next object? */
-	        slipheight:8;             // pixels per SLIP entry (0 for no-slip) */
-	        slipoffset:1;             // pixel offset for SLIPs */
-	        maxperline:0;             // maximum number of links to visit/scanline (0=all) */
-	        palettebase:$100;         // base palette entry */
-	        maxcolors:$100;           // maximum number of colors */
-	        transpen:0;               // transparent pen index */
-	        link_entry:(0,0,0,$03ff); // mask for the link */
-	        code_entry:(data_lower:($7fff,0,0,0);data_upper:(0,0,0,0)); // mask for the code index */
-	        color_entry:(data_lower:(0,$000f,0,0);data_upper:(0,0,0,0)); // mask for the color */
-	        xpos_entry:(0,$ff80,0,0); // mask for the X position */
-          ypos_entry:(0,0,$ff80,0); // mask for the Y position */
-	        width_entry:(0,0,$0038,0); // mask for the width, in tiles*/
-	        height_entry:(0,0,$0007,0); // mask for the height, in tiles */
-	        hflip_entry:(0,0,$0040,0); // mask for the horizontal flip */
-	        vflip_entry:(0,0,0,0);     // mask for the vertical flip */
-	        priority_entry:(0,0,0,0); // mask for the priority */
-	        neighbor_entry:(0,0,0,0); // mask for the neighbor */
-	        absolute_entry:(0,0,0,0);// mask for absolute coordinates */
-	        special_entry:(0,0,0,0);  // mask for the special value */
-	        specialvalue:0;           // resulting value to indicate "special" */
+        	gfxindex:1;               // index to which gfx system
+	        bankcount:1;              // number of motion object banks
+	        linked:true;              // are the entries linked?
+	        split:true;               // are the entries split?
+	        reverse:false;            // render in reverse order?
+	        swapxy:false;             // render in swapped X/Y order?
+	        nextneighbor:false;       // does the neighbor bit affect the next object?
+	        slipheight:8;             // pixels per SLIP entry (0 for no-slip)
+	        slipoffset:1;             // pixel offset for SLIPs
+	        maxperline:0;             // maximum number of links to visit/scanline (0=all)
+	        palettebase:$100;         // base palette entry
+	        maxcolors:$100;           // maximum number of colors
+	        transpen:0;               // transparent pen index
+	        link_entry:(0,0,0,$03ff); // mask for the link
+	        code_entry:(data_lower:($7fff,0,0,0);data_upper:(0,0,0,0)); // mask for the code index
+	        color_entry:(data_lower:(0,$000f,0,0);data_upper:(0,0,0,0)); // mask for the color
+	        xpos_entry:(0,$ff80,0,0); // mask for the X position
+          ypos_entry:(0,0,$ff80,0); // mask for the Y position
+	        width_entry:(0,0,$0038,0); // mask for the width, in tiles
+	        height_entry:(0,0,$0007,0); // mask for the height, in tiles
+	        hflip_entry:(0,0,$0040,0); // mask for the horizontal flip
+	        vflip_entry:(0,0,0,0);     // mask for the vertical flip
+	        priority_entry:(0,0,0,0); // mask for the priority
+	        neighbor_entry:(0,0,0,0); // mask for the neighbor
+	        absolute_entry:(0,0,0,0);// mask for absolute coordinates
+	        special_entry:(0,0,0,0);  // mask for the special value
+	        specialvalue:0;           // resulting value to indicate "special"
         );
-        CPU_SYNC=4;
+        CPU_SYNC=2;
 
 var
  rom:array[0..$3ffff] of word;
@@ -89,7 +89,7 @@ var
  rom_bank,vblank,sound_to_main_data,main_to_sound_data:byte;
  scroll_x,sound_reset_val:word;
 
-procedure update_video_gauntlet;inline;
+procedure update_video_gauntlet;
 var
   f,color,x,y,nchar,atrib,scroll_y:word;
   tile_bank:byte;
@@ -226,7 +226,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure gauntlet_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -240,7 +242,6 @@ begin
   end;
 end;
 
-procedure gauntlet_putword(direccion:dword;valor:word);
 var
   old:word;
 begin

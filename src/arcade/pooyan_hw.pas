@@ -36,7 +36,7 @@ var
  nmi_vblank:boolean;
  last:byte;
 
-procedure update_video_pooyan;inline;
+procedure update_video_pooyan;
 var
   f:word;
   x,y,color,nchar,atrib:byte;

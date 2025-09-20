@@ -100,7 +100,7 @@ if copy_gfx then begin
 end;
 end;
 
-procedure eventos_puzz3x3;inline;
+procedure eventos_puzz3x3;
 begin
 if event.arcade then begin
   //P1
@@ -166,7 +166,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure puzz3x3_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -176,7 +178,6 @@ begin
   set_pal_color(color,numero);
 end;
 
-procedure puzz3x3_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$7ffff:; //ROM

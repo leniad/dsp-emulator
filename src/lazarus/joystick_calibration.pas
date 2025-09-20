@@ -49,13 +49,12 @@ while not(salir) do begin
     application.ProcessMessages;
     if salir then break;
   end;
-  SDL_JoystickUpdate;
   if sdl_event.type_=libSDL_JOYAXISMOTION then begin
-    tempi:=SDL_JoystickGetAxis(joystick_def[numero],0);
+    //tempi:=SDL_JoystickGetAxis(joystick_def[numero],0);
     if abs(tempi)>abs(max_x) then max_x:=tempi;
     cent_x:=tempi;
     joy_calibration.label1.caption:=inttostr(tempi);
-    tempi:=SDL_JoystickGetAxis(joystick_def[numero],1);
+    //tempi:=SDL_JoystickGetAxis(joystick_def[numero],1);
     if abs(tempi)>abs(max_y) then max_y:=tempi;
     cent_y:=tempi;
     joy_calibration.label2.caption:=inttostr(tempi);

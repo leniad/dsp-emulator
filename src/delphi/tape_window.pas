@@ -102,7 +102,7 @@ begin
 cinta_tzx.grupo:=false;
 cinta_tzx.indice_cinta:=cinta_tzx.indice_select[tape_window1.stringgrid1.Selection.Top];
 siguiente_bloque_tzx;
-Windows.SetFocus(child.Handle);
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Ttape_window1.StringGrid1DblClick(Sender: TObject);

@@ -32,7 +32,7 @@ var
  palette:byte;
  buffer:array[0..$7fff] of boolean;
 
-procedure update_video_epos;inline;
+procedure update_video_epos;
 var
   f,x,y,temp:word;
   atrib:byte;

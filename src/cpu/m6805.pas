@@ -49,17 +49,17 @@ const
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,  //00
       7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,  //10
-      3, 0, 3, 0, 3, 3, 3, 3, 0, 0, 3, 3, 0, 0, 3, 3,  //20
+      3, 3, 3, 0, 3, 3, 3, 3, 0, 0, 3, 3, 0, 0, 3, 3,  //20
       0, 0, 0, 0, 0, 0, 7, 0, 7, 7, 7, 0, 7, 7, 0, 4,  //30
       1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1,  //40
-      0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1,  //50
-      0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 6, 0, 0, 6,  //60
-      0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0,  //70
+      0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1,  //50
+      0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 6, 0, 0, 6,  //60
+      0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 0, 0, 9,  //70
       1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  //80
       0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,  //90
       3, 3, 0, 3, 3, 0, 3, 0, 3, 0, 0, 3, 0, 3, 3, 0,  //a0
       4, 4, 0, 0, 4, 0, 7, 4, 0, 4, 7, 7, 4, 4, 7, 4,  //b0
-      8, 0, 0, 0, 0, 0, 8, 2, 8, 0, 8, 8, 2, 2, 8, 2,  //c0
+      8, 8, 0, 0, 0, 0, 8, 2, 8, 0, 8, 8, 2, 2, 8, 2,  //c0
       0, 5, 5, 0, 5, 0, 5, 5, 5, 5, 0, 5, 5, 0, 0, 0,  //d0
       0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0,  //e0
       0, 0, 0, 0, 0, 0, 9, 9, 0, 0, 0, 9, 0, 0, 0, 0); //f0
@@ -316,6 +316,7 @@ case instruccion of
         self.putbyte(posicion,tempb);
       end;
   $20:r.pc:=r.pc+shortint(numero); //bra
+  $21:; //brn
   $22:if (not(r.cc.z) and not(r.cc.c)) then r.pc:=r.pc+shortint(numero); //bhi
   $24:if not(r.cc.c) then r.pc:=r.pc+shortint(numero); //bcc
   $25:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs
@@ -357,7 +358,7 @@ case instruccion of
         r.cc.c:=(tempw and $100)<>0;
         self.putbyte(posicion,tempw and $ff);
       end;
-  $3a:begin //dec
+  $3a,$6a,$7a:begin //dec
         numero:=numero-1;
         r.cc.z:=(numero=0);
         r.cc.n:=(numero and $80)<>0;
@@ -373,7 +374,7 @@ case instruccion of
         r.cc.z:=(numero=0);
         r.cc.n:=(numero and $80)<>0;
       end;
-  $3f,$6f:begin //clr
+  $3f,$6f,$7f:begin //clr
         r.cc.n:=false;
         r.cc.c:=false;
         r.cc.z:=true;
@@ -431,6 +432,13 @@ case instruccion of
         r.cc.n:=false;
         r.cc.z:=true;
         r.a:=0;
+      end;
+  $56:begin //rorx
+        tempb:=byte(r.cc.c)*$80 or (r.x shr 1);
+	      r.cc.c:=(r.x and 1)<>0;
+        r.cc.z:=(tempb=0);
+        r.cc.n:=(tempb and $80)<>0;
+	      r.x:=tempb;
       end;
   $54:begin //lsrx
         r.cc.n:=false;
@@ -495,7 +503,7 @@ case instruccion of
         r.cc.n:=(tempw and $80)<>0;
         r.a:=tempw;
       end;
-  $a1,$b1,$d1:begin //cmpa
+  $a1,$b1,$c1,$d1:begin //cmpa
         tempw:=r.a-numero;
         r.cc.z:=(tempw=0);
         r.cc.c:=(tempw and $100)<>0;

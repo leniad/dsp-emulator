@@ -15,7 +15,7 @@ var
 
 implementation
 
-function decrypt(param1:byte;param2:word;enc_prev_word,dec_prev_word,enc_word:word):word;inline;
+function decrypt(param1:byte;param2:word;enc_prev_word,dec_prev_word,enc_word:word):word;
 var
   swap,type_:byte;
   res,k:word;

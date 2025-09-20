@@ -37,12 +37,12 @@ const
       4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 5, 3, 5, 3, 5, 3,  // 40
       5, 3, 5, 3, 5, 4, 5, 4, 3, 3, 3, 3, 3, 0, 0, 0,  // 50
       3, 3, 3, 3, 0, 3, 3, 3, 4, 4, 4, 4, 0, 4, 4, 4,  // 60
-      3, 3, 3, 3, 0, 3, 3, 3, 4, 4, 4, 4, 0, 4, 4, 4,  // 70
+      3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 0, 4, 4, 4,  // 70
       1, 1, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 4,  // 80
       2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 4,  // 90
       2, 2, 4, 2, 0, 2, 2, 0, 1, 5, 7, 9, 3, 3, 2, 0,  // A0
       3, 2, 2,11,21,10, 1, 0, 2, 0, 0, 0, 2, 0, 2, 0,  // B0
-      0, 0, 2, 2, 2, 2, 0, 2, 0, 2, 2, 2, 2, 2, 2, 1,  // C0
+      0, 0, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 1,  // C0
       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // D0
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // E0
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // F0
@@ -56,28 +56,28 @@ const
         3, 9, 3, 9, 3, 9, 3, 9, 3, 9, 3, 9, 3, 9, 3, 9,  //40
         3, 9, 3, 9, 3, 9, 3, 9, 4, 4, 4, 4, 4,$f,$f,$f,  //50
         2, 2, 2, 2,$f, 2, 2, 2, 3, 3, 3, 3,$f, 3, 3, 3,  //60
-        2, 2, 2, 2,$f, 2, 2, 2, 3, 3, 3, 3,$f, 3, 3, 3,  //70
+        2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3,$f, 3, 3, 3,  //70
         0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0,  //80
         0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0,  //90
         0, 0, 4, 4,$f, 4, 4,$f, 4, 4, 2, 3, 2, 2, 0,$f,  //a0
         0, 0, 0, 0, 0, 0, 0,$f, 2,$f,$f,$f, 2,$f, 2,$f,  //b0
-       $f,$f, 0, 4, 0, 4,$f, 4,$f, 4, 0, 4, 0, 0, 0, 0,  //c0
+       $f,$f, 0, 4, 0, 4, 4, 4,$f, 4, 0, 4, 0, 0, 0, 0,  //c0
         0,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //d0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //e0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f); //f0
 
 constructor cpu_konami.create(clock:dword;frames_div:word);
 begin
-getmem(self.r,sizeof(reg_m6809));
-fillchar(self.r^,sizeof(reg_m6809),0);
-self.numero_cpu:=cpu_main_init(clock);
-self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+  getmem(self.r,sizeof(reg_m6809));
+  fillchar(self.r^,sizeof(reg_m6809),0);
+  self.numero_cpu:=cpu_main_init(clock);
+  self.clock:=clock;
+  self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 end;
 
 procedure cpu_konami.change_set_lines(tset_lines_call:tset_lines);
 begin
-     self.set_lines_call:=tset_lines_call;
+  self.set_lines_call:=tset_lines_call;
 end;
 
 function cpu_konami.call_irq:byte;
@@ -499,29 +499,30 @@ case instruccion of
      $62:if not(r.cc.c) then r.pc:=r.pc+shortint(numero);  //bcc 3T
      $63:if not(r.cc.z) then r.pc:=r.pc+shortint(numero); //bne 3T
      $65:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl 3T
-     $66:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//bge 3T
-     $67:if ((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //bgt 3T
+     $66:if (r.cc.n=r.cc.v) then r.pc:=r.pc+shortint(numero);//bge 3T
+     $67:if ((r.cc.n=r.cc.v) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //bgt 3T
      $68:r.pc:=r.pc+smallint(posicion); //lbra 3T
      $69:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+smallint(posicion);  //lbhi 3T
      $6a:if not(r.cc.c) then r.pc:=r.pc+smallint(posicion);  //lbcc 3T
      $6b:if not(r.cc.z) then r.pc:=r.pc+smallint(posicion); //lbne 3T
      $6d:if not(r.cc.n) then r.pc:=r.pc+smallint(posicion); //lbpl 3T
-     $6e:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+smallint(posicion);//lbge 3T
-     $6f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lbgt 3T
+     $6e:if (r.cc.n=r.cc.v) then r.pc:=r.pc+smallint(posicion);//lbge 3T
+     $6f:if ((r.cc.n=r.cc.v) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lbgt 3T
      $70:; //brn 3T
      $71:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero); //bls 3T
      $72:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs 3T
      $73:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq 3T
+     $74:if r.cc.v then r.pc:=r.pc+shortint(numero); //bvs 3T
      $75:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi 3T
-     $76:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//blt 3T
-     $77:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //ble 3T
+     $76:if not(r.cc.n=r.cc.v) then r.pc:=r.pc+shortint(numero);//blt 3T
+     $77:if not((r.cc.n=r.cc.v) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //ble 3T
      $78:; //lbrn 3T
      $79:if (r.cc.c or r.cc.z) then r.pc:=r.pc+smallint(posicion); //lbls 3T
      $7a:if r.cc.c then r.pc:=r.pc+smallint(posicion); //lbcs 3T
      $7b:if r.cc.z then r.pc:=r.pc+smallint(posicion); //lbeq 3T
      $7d:if r.cc.n then r.pc:=r.pc+smallint(posicion); //lbmi 3T
-     $7e:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+smallint(posicion);//lblt 3T
-     $7f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lble 3T
+     $7e:if not(r.cc.n=r.cc.v) then r.pc:=r.pc+smallint(posicion);//lblt 3T
+     $7f:if not((r.cc.n=r.cc.v) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lble 3T
      $80:begin //clra 2T
             r.d.a:=0;
             r.cc.z:=true;
@@ -648,7 +649,7 @@ case instruccion of
           templ:=r.x*r.y;
           r.x:=templ shr 16;
           r.y:=templ and $ffff;
-          r.cc.z:=(templ and $ffff)=0;
+          r.cc.z:=(templ and $ffffffff)=0;
           r.cc.c:=(templ and $8000)<>0;
          end;
      $b5:begin //divx 10
@@ -662,7 +663,7 @@ case instruccion of
           r.x:=tempw;
           r.d.b:=tempb;
           r.cc.c:=(tempw and $80)<>0;
-          r.cc.z:=(tempw=0);
+          r.cc.z:=tempw=0;
          end;
      $b6:while (r.u<>0) do begin //bmove
               tempb:=self.getbyte(r.y);
@@ -691,6 +692,7 @@ case instruccion of
          end;
      $c4:r.d.w:=m680x_neg16(r.d.w,@r.cc); // negd
      $c5:self.putword(posicion,m680x_neg16(self.getword(posicion),@r.cc)); // neg16
+     $c6:r.d.w:=m680x_inc16(r.d.w,@r.cc); //incd
      $c7:self.putword(posicion,m680x_inc16(self.getword(posicion),@r.cc)); //inc16
      $c9:self.putword(posicion,m680x_dec16(self.getword(posicion),@r.cc)); //dec16
      $ca:m680x_tst16(r.d.w,@r.cc); //tstd

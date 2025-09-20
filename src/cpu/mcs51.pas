@@ -1,9 +1,7 @@
 unit mcs51;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      dialogs,sysutils,timer_engine,main_engine,cpu_misc;
-
 type
         band_mcs51=record
                 p,o,r_bank0,r_bank1,u,a,c:boolean;
@@ -55,10 +53,8 @@ type
                 function r_reg(addr:byte):byte;
                 procedure set_reg(addr,valor:byte);
         end;
-
 var
   mcs51_0:cpu_mcs51;
-
 implementation
 const
   ciclos_mcs51:array[0..$ff] of byte=(
@@ -187,12 +183,12 @@ begin
   get_rom_addr:=@self.rom[0];
 end;
 
-function get_bit(r,n:byte):byte;inline;
+function get_bit(r,n:byte):byte;
 begin
   get_bit:=(r shr n) and 1;
 end;
 
-function set_bit(r,n,v:byte):byte;inline;
+function set_bit(r,n,v:byte):byte;
 begin
  set_bit:=(r and not(1 shl n)) or (v shl n);
 end;
@@ -299,7 +295,7 @@ begin
   self.ram[ADDR_PSW]:=self.dame_pila;
 end;
 
-// Check and update status of serial port */
+// Check and update status of serial port
 procedure	cpu_mcs51.update_irq_prio(ipl,iph:byte);
 var
   i:byte;
@@ -705,7 +701,7 @@ case instruccion of
       	end;
         self.rwm:=false;
       end;
-  $11,$31,$51,$71,$91:begin //acall
+  $11,$31,$51,$71,$91,$b1:begin //acall
         pos:=self.rom[r.pc];
         r.pc:=r.pc+1;				//Grab code address byte
 	      self.PUSH_PC;								//Save PC to the
@@ -811,6 +807,13 @@ case instruccion of
 	       self.ram[ADDR_ACC]:=tempb;
          self.calc_parity:=true;      //Store 8 bit result of addtion in ACC
       end;
+  $38..$3f:begin //addc a,rX
+         tempb2:=R_REG(instruccion and $7);                  //Grab data from R0 - R7
+	       tempb:=self.ram[ADDR_ACC]+tempb2+byte(r.psw.c); //Add data + carry flag to accumulator
+	       self.DO_ADD_FLAGS(self.ram[ADDR_ACC],tempb2,byte(r.psw.c));      //Set Flags
+	       self.ram[ADDR_ACC]:=tempb;
+         self.calc_parity:=true;                        //Store 8 bit result of addtion in ACC
+      end;
   $40:begin //jc
         pos:=self.rom[r.pc];
         r.pc:=r.pc+1;	//Grab relative code address
@@ -877,9 +880,28 @@ case instruccion of
         r.pc:=r.pc+1;		//Grab relative code address
 	      if (self.ram[ADDR_ACC]=0) then r.pc:=r.pc+shortint(pos);	//Branch if ACC is 0
       end;
+  $62:begin //xrl_mem_a
+        pos:=self.rom[r.pc];
+        r.pc:=r.pc+1;                     //Grab data address
+	      tempb:=IRAM_R(pos);            //Grab data from data address
+	      self.IRAM_W(pos,tempb xor self.ram[ADDR_ACC]);   //Set data address value to it's value Logical XOR with ACC
+      end;
+  $63:begin //xrl_mem_byte
+        pos:=self.rom[r.pc];
+        r.pc:=r.pc+1;                     //Grab data address
+        tempb:=self.rom[r.pc];
+        r.pc:=r.pc+1;                     //Grab data
+	      tempb2:=self.IRAM_R(pos);           //Grab data from data address
+	      self.IRAM_W(pos,tempb2 xor tempb);            //Set data address value to it's value Logical XOR with Data
+      end;
   $64:begin //xrl_a_byte
         tempb:=self.rom[r.pc];
         r.pc:=r.pc+1;             //Grab data
+	      self.ram[ADDR_ACC]:=self.ram[ADDR_ACC] xor tempb; //Set ACC to value of ACC Logical XOR with Data
+        self.calc_parity:=true;
+      end;
+  $65:begin //xrl_a_ir
+        tempb:=self.ram[r_reg(instruccion and 1)];         //Grab data from address R0 or R1 points to
 	      self.ram[ADDR_ACC]:=self.ram[ADDR_ACC] xor tempb; //Set ACC to value of ACC Logical XOR with Data
         self.calc_parity:=true;
       end;
@@ -1133,13 +1155,13 @@ case instruccion of
   $e0:begin //MOVX A,@DPTR
          //uint32_t addr = ERAM_ADDR(DPTR, 0xFFFF);
          tempw:=(self.ram[ADDR_DPH] shl 8)+self.ram[ADDR_DPL];
-         tempb:=self.getbyte(tempw); //Grab 1 byte from External DATA memory pointed to by dptr
+         if @self.getbyte<>nil then tempb:=self.getbyte(tempw); //Grab 1 byte from External DATA memory pointed to by dptr
 	       self.ram[ADDR_ACC]:=tempb;  //Store 8 bit result of addtion in ACC
          self.calc_parity:=true;
       end;
   $e2,$e3:begin //movx_a_ir
         tempw:=(self.iram_r(ADDR_P2) shl 8)+R_REG(instruccion and $1);
-        self.ram[ADDR_ACC]:=self.getbyte(tempw);
+        if @self.getbyte<>nil then self.ram[ADDR_ACC]:=self.getbyte(tempw);
         self.calc_parity:=true;
       end;
   $e4:begin  //clr_a
@@ -1163,11 +1185,11 @@ case instruccion of
   $f0:begin //movx_idptr_a
           //uint32_t addr = ERAM_ADDR(DPTR, 0xFFFF);
           tempw:=(self.ram[ADDR_DPH] shl 8)+self.ram[ADDR_DPL];
-	        self.putbyte(tempw,self.ram[ADDR_ACC]);               //Store ACC to External DATA memory address pointed to by DPTR
+	        if @self.putbyte<>nil then self.putbyte(tempw,self.ram[ADDR_ACC]);               //Store ACC to External DATA memory address pointed to by DPTR
       end;
   $f2,$f3:begin //movx_ir_a
           tempw:=(self.iram_r(ADDR_P2) shl 8)+R_REG(instruccion and $1);
-	        self.putbyte(tempw,self.ram[ADDR_ACC]);
+	        if @self.putbyte<>nil then self.putbyte(tempw,self.ram[ADDR_ACC]);
       end;
   $f4:begin //cpl_a
         tempb:=not(self.ram[ADDR_ACC]) and $ff;

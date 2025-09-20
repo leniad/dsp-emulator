@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m6502,mcs51,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_3812,msm5205;
 
-procedure cargar_firetrap;
+function iniciar_firetrap:boolean;
 
 implementation
 const
@@ -40,7 +40,7 @@ const
         (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$4;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$10;dip_name:'30K 70K'),(dip_val:$0;dip_name:'50K 100K'),(dip_val:$30;dip_name:'30K'),(dip_val:$20;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        CPU_SYNC=5;
+        CPU_SYNC=8;
 
 var
  main_bank,snd_bank,sound_latch,mcu_to_maincpu,maincpu_to_mcu,mcu_p3,vblank,coins,msm5205_data,msm5205_toggle:byte;
@@ -49,7 +49,13 @@ var
  sound_irq_enable,nmi_enable:boolean;
  bg1_scrollx,bg1_scrolly,bg2_scrollx,bg2_scrolly:word;
 
-procedure draw_sprites;inline;
+procedure update_video_firetrap;
+var
+  f,nchar,pos:word;
+  color,attr,x,y:byte;
+  flipx,flipy:boolean;
+
+procedure draw_sprites;
 var
   f,x,y,nchar,attr,attr2,color:byte;
   flipx,flipy:boolean;
@@ -68,11 +74,6 @@ for f:=$7 downto 0 do begin
 end;
 end;
 
-procedure update_video_firetrap;
-var
-  f,nchar,pos:word;
-  color,attr,x,y:byte;
-  flipx,flipy:boolean;
 begin
 for f:=0 to $3ff do begin
   //Fondo
@@ -130,7 +131,7 @@ actualiza_trozo(0,0,256,256,1,0,0,256,256,4);
 actualiza_trozo_final(0,8,256,240,4);
 end;
 
-procedure eventos_firetrap;inline;
+procedure eventos_firetrap;
 begin
 if event.arcade then begin
   //P1
@@ -392,6 +393,8 @@ begin
   convert_gfx(num,0,@memoria_temp,@pt_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=firetrap_principal;
+llamadas_maquina.reset:=reset_firetrap;
 iniciar_firetrap:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -470,13 +473,6 @@ marcade.dswb_val:=@firetrap_dip_b;
 //final
 reset_firetrap;
 iniciar_firetrap:=true;
-end;
-
-procedure cargar_firetrap;
-begin
-llamadas_maquina.iniciar:=iniciar_firetrap;
-llamadas_maquina.bucle_general:=firetrap_principal;
-llamadas_maquina.reset:=reset_firetrap;
 end;
 
 end.

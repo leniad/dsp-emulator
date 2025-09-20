@@ -11,7 +11,7 @@ implementation
 uses principal;
 
 var
-  ram_8k,mid_8k_ram:boolean;
+  ram_8k,mid_8k_ram,push_pause:boolean;
 
 procedure eventos_sg;
 begin
@@ -30,6 +30,12 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.coin[0] then push_pause:=true
+    else begin
+      if push_pause then
+        z80_0.change_nmi(PULSE_LINE);
+      push_pause:=false;
+    end;
 end;
 end;
 
@@ -38,7 +44,7 @@ var
   frame:single;
   f:word;
 begin
-init_controls(false,true,true,false);
+init_controls(false,false,false,true);
 frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
@@ -59,7 +65,6 @@ case direccion of
   $c000..$ffff:sg_getbyte:=memoria[$c000+direccion and $1fff];
 end;
 end;
-
 procedure sg_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -76,18 +81,17 @@ begin
   case (puerto and $ff) of
     $80..$bf:if (puerto and $01)<>0 then sg_inbyte:=tms_0.register_r
           else sg_inbyte:=tms_0.vram_r;
-    $dc:sg_inbyte:=marcade.in0;
-    $df:sg_inbyte:=marcade.in1;
+    $c0..$ff:if (puerto and 1)<>0 then sg_inbyte:=marcade.in1
+                  else sg_inbyte:=marcade.in0;
   end;
 end;
-
 procedure sg_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $ff) of
     $40..$7f:sn_76496_0.Write(valor);
     $80..$bf:if (puerto and $1)<>0 then tms_0.register_w(valor)
                 else tms_0.vram_w(valor);
-    $dc,$df:; //mandos
+    $c0..$ff:; //mandos
   end;
 end;
 
@@ -111,63 +115,60 @@ begin
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
+ push_pause:=false;
 end;
 
-function abrir_sg:boolean;
+procedure abrir_sg;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
   crc_val,longitud:integer;
+  resultado:boolean;
 begin
-  if not(OpenRom(StSG1000,RomFile)) then begin
-    abrir_sg:=true;
-    EmuStatusTemp:=EsRuning;
-    principal1.timer1.Enabled:=true;
-    exit;
-  end;
-  abrir_sg:=false;
+  if not(OpenRom(StSG1000,RomFile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc_val,true)) then exit;
-    getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc_val,true)) then begin
-      freemem(datos);
-      exit;
+    if search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc_val,true) then begin
+      getmem(datos,longitud);
+      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc_val,true)) then freemem(datos)
+        else resultado:=true;
     end;
   end else begin
-    if extension<>'SG' then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
-      exit;
+    if extension='SG' then begin
+      if read_file_size(RomFile,longitud) then begin
+        getmem(datos,longitud);
+        if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+          else resultado:=true;
+        nombre_file:=extractfilename(RomFile);
+      end;
     end;
-    nombre_file:=extractfilename(RomFile);
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   //Abrirlo
   extension:=extension_fichero(nombre_file);
+  if longitud>49152 then longitud:=49152;
   if extension='SG' then copymemory(@memoria,datos,longitud);
   ram_8k:=false;
   mid_8k_ram:=false;
   crc_val:=calc_crc(datos,longitud);
+  freemem(datos);
   case dword(crc_val) of
     //BomberMan Super (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
     $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:ram_8k:=true;
     //Castle, Othello (2)
     $92f29d6,$af4f14bc,$1d1a0ca3:mid_8k_ram:=true;
   end;
-  llamadas_maquina.open_file:=nombre_file;
-  abrir_sg:=true;
   reset_sg;
-  EmuStatusTemp:=EsRuning;
-  principal1.timer1.Enabled:=true;
-  change_caption;
+  change_caption(nombre_file);
   Directory.sg1000:=ExtractFilePath(romfile);
-  freemem(datos);
 end;
 
-function iniciar_sg:boolean;
-begin
+function iniciar_sg:boolean;
+begin
 iniciar_sg:=false;
 iniciar_audio(false);
 screen_init(1,284,243);
@@ -183,11 +184,11 @@ tms_0:=tms99xx_chip.create(1,sg_interrupt);
 sn_76496_0:=sn76496_chip.Create(3579545);
 //final
 reset_sg;
-abrir_sg;
+if main_vars.console_init then abrir_sg;
 iniciar_sg:=true;
 end;
 
-procedure cargar_sg;
+procedure cargar_sg;
 begin
 principal1.BitBtn10.Glyph:=nil;
 principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);

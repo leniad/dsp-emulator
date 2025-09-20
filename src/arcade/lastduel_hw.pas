@@ -286,7 +286,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   col_val:word;
   bright:byte;

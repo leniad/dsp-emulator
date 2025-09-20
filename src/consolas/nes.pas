@@ -587,60 +587,56 @@ begin
   end else begin
     abrir_cartucho:=false;
     MessageDlg('NES: Mapper unknown!!! - Type: '+inttostr(mapper), mtError,[mbOk], 0);
-    EmuStatus:=EsStoped;
   end;
 end;
 
-function abrir_nes:boolean;
+procedure abrir_nes;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
   longitud,crc:integer;
   resultado:boolean;
 begin
-  if not(OpenRom(StNes,RomFile)) then begin
-    abrir_nes:=true;
-    exit;
-  end;
+  if not(OpenRom(StNes,RomFile)) then exit;
+  cartucho_cargado:=false;
   //Primero, si tengo que guardar la SRAM por que ya he abierto un cartucho
   if sram_present then write_file(cart_name,@memoria[$6000],$2000);
   if @n2a03_0.additional_sound<>nil then n2a03_0.add_more_sound(nil);
-  abrir_nes:=false;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.nes',nombre_file,longitud,crc,true)) then exit;
-    getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      exit;
+    if search_file_from_zip(RomFile,'*.nes',nombre_file,longitud,crc,true) then begin
+      getmem(datos,longitud);
+      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
+        else resultado:=true;
     end;
-  end else begin
-    if extension<>'NES' then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
-      exit;
-    end;
-    nombre_file:=extractfilename(RomFile);
+  end else if extension='NES' then begin
+              if read_file_size(RomFile,longitud) then begin
+                getmem(datos,longitud);
+                if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+                  else resultado:=true;
+                nombre_file:=extractfilename(RomFile);
+              end;
+           end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   //Abrirlo
-  extension:=extension_fichero(nombre_file);
+  //extension:=extension_fichero(nombre_file);
   //if extension='DSP' then resultado:=abrir_coleco_snapshot(datos,longitud)
   //  else
   resultado:=abrir_cartucho(datos,longitud);
   freemem(datos);
   if resultado then begin
     cart_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
-    llamadas_maquina.open_file:=nombre_file;
     nes_reset;
-    abrir_nes:=true;
     cartucho_cargado:=true;
   end else begin
     MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-    llamadas_maquina.open_file:='';
+    nombre_file:='';
   end;
-  change_caption;
+  change_caption(nombre_file);
   Directory.Nes:=ExtractFilePath(romfile);
 end;
 
@@ -656,7 +652,7 @@ begin
   getmem(mapper_nes,sizeof(tnes_mapper));
   getmem(ppu_nes,sizeof(tnes_ppu));
   nes_init_palette;
-  abrir_nes;
+  if main_vars.console_init then abrir_nes;
   iniciar_nes:=true;
 end;
 
@@ -672,7 +668,7 @@ if SaveRom(StNES,nombre,indice) then begin
   end;
   correcto:=grabar_nes_snapshot(nombre);
   if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0)
-    else Directory.Nes:=extractfiledir(nombre)+main_vars.cadena_dir;
+    else Directory.Nes:=ExtractFilePath(nombre);
 end;
 end;
 

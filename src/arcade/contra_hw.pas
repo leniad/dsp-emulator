@@ -37,7 +37,12 @@ var
  memoria_rom:array[0..$b,0..$1fff] of byte;
  banco,sound_latch:byte;
 
-procedure draw_sprites(bank:byte);inline;
+procedure update_video_contra;
+var
+  x,y,f,nchar,color,mask:word;
+  atrib,bank,bit0,bit1,bit2,bit3:byte;
+
+procedure draw_sprites(bank:byte);
 var
   color_base:word;
 begin
@@ -45,10 +50,6 @@ begin
   K007121_draw_sprites(bank,4,16,color_base,true);
 end;
 
-procedure update_video_contra;inline;
-var
-  x,y,f,nchar,color,mask:word;
-  atrib,bank,bit0,bit1,bit2,bit3:byte;
 begin
 for f:=$0 to $3ff do begin
     x:=31-(f div 32);
@@ -193,7 +194,9 @@ begin
     end;
 end;
 
-procedure cambiar_color(dir:byte);inline;
+procedure contra_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:byte);
 var
   data:word;
   color:tcolor;
@@ -207,7 +210,6 @@ begin
   buffer_color[(dir shr 4) and 7]:=true;
 end;
 
-procedure contra_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $0..$7:if K007121_chip[0].control[direccion]<>valor then begin

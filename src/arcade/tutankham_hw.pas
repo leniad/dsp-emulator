@@ -37,7 +37,7 @@ var
  xorx,xory,rom_nbank,scroll_y:byte;
  rom_bank:array[0..$f,0..$fff] of byte;
 
-procedure update_video_tutankham;inline;
+procedure update_video_tutankham;
 var
   x,y,effx,yscroll,effy,vrambyte,shifted:byte;
   punt:array[0..$ffff] of word;

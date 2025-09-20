@@ -86,7 +86,7 @@ end;
 actualiza_trozo_final(8,16,240,224,3);
 end;
 
-procedure eventos_sauro;inline;
+procedure eventos_sauro;
 begin
 if event.arcade then begin
   //P1

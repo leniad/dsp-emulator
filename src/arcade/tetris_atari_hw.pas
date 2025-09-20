@@ -113,7 +113,8 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:byte);inline;
+procedure putbyte_tetris(direccion:word;valor:byte);
+procedure cambiar_color(dir:byte);
 var
   tmp_color:byte;
   color:tcolor;
@@ -125,8 +126,6 @@ begin
   set_pal_color(color,dir);
   buffer_color[dir shr 4]:=true;
 end;
-
-procedure putbyte_tetris(direccion:word;valor:byte);
 begin
 case direccion of
   0..$fff:memoria[direccion]:=valor;

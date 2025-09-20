@@ -12,11 +12,9 @@ object config_arcade: Tconfig_arcade
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesktopCenter
   OnClose = FormClose
   OnKeyUp = FormKeyUp
-  PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8

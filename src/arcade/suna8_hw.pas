@@ -73,7 +73,7 @@ var
  dac_pos:word;
 
 //Hard Head
-procedure update_video_hardhead;inline;
+procedure update_video_hardhead;
 var
   x,y,nchar,bank:word;
   f,ty,tx:byte;

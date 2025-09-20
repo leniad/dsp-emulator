@@ -223,7 +223,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin

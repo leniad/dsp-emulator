@@ -21,6 +21,7 @@ type
 var
   mapper_sms:^tmapper_sms;
   sms_model:byte;
+  push_pause:boolean;
 
 const
   CLOCK_NTSC=3579545;
@@ -39,9 +40,6 @@ var
 
 procedure eventos_sms;
 begin
-if event.keyboard then begin
-  if (keyboard[KEYBOARD_F1]) then z80_0.change_nmi(PULSE_LINE);
-end;
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
@@ -57,6 +55,12 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.coin[0] then push_pause:=true
+    else begin
+      if push_pause then
+        z80_0.change_nmi(PULSE_LINE);
+      push_pause:=false;
+    end;
 end;
 end;
 
@@ -65,7 +69,7 @@ var
   frame:single;
   f:word;
 begin
-init_controls(false,false,true,false);
+init_controls(false,false,false,true);
 frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
@@ -349,11 +353,12 @@ begin
  mapper_sms.slot2:=2 mod mapper_sms.max;
  mapper_sms.slot3:=0;
  mapper_sms.slot2_bank:=0;
+ push_pause:=true;
  //Alibaba confia en este inicio de la RAM!!!
  fillchar(mapper_sms.ram[0],$2000,$f0);
 end;
 
-function abrir_sms:boolean;
+procedure abrir_sms;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
@@ -361,31 +366,33 @@ var
   resultado:boolean;
   crc_val:dword;
 begin
-  if not(OpenRom(StSMS,RomFile)) then begin
-    abrir_sms:=true;
-    EmuStatusTemp:=EsRuning;
-    principal1.timer1.Enabled:=true;
-    exit;
-  end;
-  abrir_sms:=false;
+  if not(OpenRom(StSMS,RomFile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.sms',nombre_file,longitud,crc,true)) then
-      if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,true)) then exit;
-    getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      exit;
-    end;
+      if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,true)) then begin
+        MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+        exit;
+      end;
+      getmem(datos,longitud);
+      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
+        else resultado:=true;
   end else begin
-    if ((extension<>'SMS') and (extension<>'ROM')) then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
+    if ((extension<>'SMS') and (extension<>'ROM')) then begin
+      MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
       exit;
     end;
-    nombre_file:=extractfilename(RomFile);
+    if read_file_size(RomFile,longitud) then begin
+      getmem(datos,longitud);
+      if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+        else resultado:=true;
+      nombre_file:=extractfilename(RomFile);
+    end;
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   //Abrirlo
   extension:=extension_fichero(nombre_file);
@@ -394,11 +401,10 @@ begin
   case crc_val of
     $81c3476b:resultado:=abrir_cartucho_sms_bios(datos,longitud);
     else if (extension='SMS') then resultado:=abrir_cartucho_sms(datos,longitud)
-     else if extension='ROM' then resultado:=abrir_cartucho_sms_bios(datos,longitud);
+     else if (extension='ROM') then resultado:=abrir_cartucho_sms_bios(datos,longitud);
   end;
+  freemem(datos);
   if resultado then begin
-    llamadas_maquina.open_file:=nombre_file;
-    abrir_sms:=true;
     case crc_val of
       $58fa27c6,$a577ce46,$29822980,$ea5c3a6f,$8813514b,$b9664ae1:begin //Codemasters
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_codemasters);
@@ -417,15 +423,12 @@ begin
       end;
     end;
     reset_sms;
-    EmuStatusTemp:=EsRuning;
-    principal1.timer1.Enabled:=true;
   end else begin
     MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-    llamadas_maquina.open_file:='';
+    nombre_file:='';
   end;
-  change_caption;
+  change_caption(nombre_file);
   Directory.sms:=ExtractFilePath(romfile);
-  freemem(datos);
 end;
 
 function read_memory(direccion:word):byte;
@@ -491,7 +494,8 @@ z80_0.init_sound(sms_sound_update);
 z80_0.change_misc_calls(sms_set_hpos);
 //final
 mapper_sms.max:=1;
-abrir_sms;
+reset_sms;
+if main_vars.console_init then abrir_sms;
 iniciar_sms:=true;
 end;
 

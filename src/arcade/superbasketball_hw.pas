@@ -39,7 +39,7 @@ var
  mem_opcodes:array[0..$9fff] of byte;
  last_addr:word;
 
-procedure update_video_sbasketb;inline;
+procedure update_video_sbasketb;
 var
   f,nchar,color,offset:word;
   x,y,atrib:byte;

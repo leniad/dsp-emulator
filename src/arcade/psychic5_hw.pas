@@ -200,7 +200,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function ram_paginada_r(direccion:word):byte;inline;
+function ram_paginada_r(direccion:word):byte;
 begin
   case (direccion+((banco_vram and 1) shl 13)) of
       0..$fff:ram_paginada_r:=mem_ram[0,direccion];
@@ -218,7 +218,7 @@ begin
   end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure cambiar_color(pos:word);
 var
 	valor:byte;
   color,color_g:tcolor;
@@ -257,7 +257,7 @@ case pos of
 end;
 end;
 
-procedure ram_paginada_w(direccion:word;valor:byte);inline;
+procedure ram_paginada_w(direccion:word;valor:byte);
 begin
 case (direccion+((banco_vram and 1) shl 13)) of
     0..$fff:if mem_ram[0,direccion]<>valor then begin

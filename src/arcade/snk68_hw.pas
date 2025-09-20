@@ -84,7 +84,7 @@ var
        0:$FF -> Fijo
        1:----xxxx xxxx----
    2 y 3:xxxxyyyy yyyyyyyy}
-procedure poner_sprites(group:byte);inline;
+procedure poner_sprites(group:byte);
 var
   f,i,nchar,atrib,color,x:word;
   tiledata_pos:word;
@@ -135,9 +135,9 @@ end;
 
 procedure update_video_pow;
 var
-        f:word;
-        color:word;
-        x,y,nchar:word;
+  f:word;
+  color:word;
+  x,y,nchar:word;
 begin
 fill_full_screen(2,$7ff);
 for f:=$0 to $3ff do begin
@@ -254,7 +254,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin

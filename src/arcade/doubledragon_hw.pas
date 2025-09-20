@@ -71,10 +71,15 @@ var
  ddragon_scanline:array[0..271] of word;
  adpcm_ch,adpcm_idle:array [0..1] of boolean;
 
-procedure draw_sprites;inline;
+procedure update_video_ddragon;
 var
-  f,x,y,color,nchar,size:word;
+  x,y,color,f,nchar,pos:word;
   atrib:byte;
+
+procedure draw_sprites;
+var
+  size,x,y,nchar:word;
+  f,color,atrib:byte;
   flipx,flipy:boolean;
 begin
 	for f:=0 to $3f do begin
@@ -86,33 +91,33 @@ begin
 			flipx:=(atrib and 8)<>0;
 			flipy:=(atrib and 4)<>0;
       if tipo_video<>0 then begin
-          color:=(memoria[$2802+(f*5)] shr 5) shl 4;
+          color:=((memoria[$2802+(f*5)] shr 5) shl 4)+$80;
 			    nchar:=memoria[$2803+(f*5)]+((memoria[$2802+(f*5)] and $1f) shl 8);
       end else begin
-          color:=((memoria[$2802+(f*5)] shr 4) and $07) shl 4;
+          color:=(((memoria[$2802+(f*5)] shr 4) and $07) shl 4)+$80;
 			    nchar:=memoria[$2803+(f*5)]+((memoria[$2802+(f*5)] and $0f) shl 8);
       end;
 			nchar:=nchar and not(size);
 			case size of
 				0:begin // normal
-             put_gfx_sprite(nchar,128+color,flipx,flipy,2);
+             put_gfx_sprite(nchar,color,flipx,flipy,2);
              actualiza_gfx_sprite(x,y,4,2);
 				  end;
 				1:begin // double y
-             put_gfx_sprite_diff(nchar,128+color,flipx,flipy,2,0,0);
-             put_gfx_sprite_diff(nchar+1,128+color,flipx,flipy,2,0,16);
+             put_gfx_sprite_diff(nchar,color,flipx,flipy,2,0,0);
+             put_gfx_sprite_diff(nchar+1,color,flipx,flipy,2,0,16);
              actualiza_gfx_sprite_size(x,y-16,4,16,32);
 				  end;
 				2:begin // double x
-             put_gfx_sprite_diff(nchar,128+color,flipx,flipy,2,0,0);
-             put_gfx_sprite_diff(nchar+1,128+color,flipx,flipy,2,16,0);
+             put_gfx_sprite_diff(nchar,color,flipx,flipy,2,0,0);
+             put_gfx_sprite_diff(nchar+1,color,flipx,flipy,2,16,0);
              actualiza_gfx_sprite_size(x-16,y,4,32,16);
 				  end;
 				3:begin
-             put_gfx_sprite_diff(nchar,128+color,flipx,flipy,2,0,0);
-             put_gfx_sprite_diff(nchar+1,128+color,flipx,flipy,2,16,0);
-             put_gfx_sprite_diff(nchar+2,128+color,flipx,flipy,2,0,16);
-             put_gfx_sprite_diff(nchar+3,128+color,flipx,flipy,2,16,16);
+             put_gfx_sprite_diff(nchar,color,flipx,flipy,2,0,0);
+             put_gfx_sprite_diff(nchar+1,color,flipx,flipy,2,16,0);
+             put_gfx_sprite_diff(nchar+2,color,flipx,flipy,2,0,16);
+             put_gfx_sprite_diff(nchar+3,color,flipx,flipy,2,16,16);
              actualiza_gfx_sprite_size(x-16,y-16,4,32,32);
 				  end;
 			end;
@@ -120,10 +125,6 @@ begin
 	end;  //for
 end;
 
-procedure update_video_ddragon;inline;
-var
-  x,y,color,f,nchar,pos:word;
-  atrib:byte;
 begin
 for f:=$0 to $3ff do begin
   x:=f mod 32;
@@ -153,7 +154,7 @@ actualiza_trozo_final(0,8,256,240,4);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_ddragon;inline;
+procedure eventos_ddragon;
 begin
 if event.arcade then begin
   //p1
@@ -219,7 +220,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;

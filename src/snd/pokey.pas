@@ -702,10 +702,12 @@ begin
     end;
   end;
 end;
+
 procedure pokey_chip.write(offset:word;data:byte);
 begin
   self.write_internal(offset,data);
 end;
+
 procedure pokey_chip.process_channel(ch:integer);
 begin
 	if (((self.channel[ch].AUDC and NOTPOLY5)<>0) or ((self.poly5[self.p5] and 1)<>0)) then begin

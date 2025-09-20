@@ -138,7 +138,7 @@ var
  update_video_m62:procedure;
  calc_nchar_sp:function(color:byte):word;
 
-procedure draw_sprites(pos,col,col_mask,pri_mask,pri:byte);inline;
+procedure draw_sprites(pos,col,col_mask,pri_mask,pri:byte);
 var
   f,i,h,atrib:byte;
   nchar,x,y,color:word;

@@ -43,7 +43,7 @@ var
   bg_tiles_cam:array[0..3] of boolean;
   old_val,old_val2:boolean;
 
-procedure update_video_expraid;inline;
+procedure update_video_expraid;
 var
   f,i,nchar,color,atrib:word;
   x,y,pos_ini:word;

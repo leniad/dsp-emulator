@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,sound_engine,ym_2151,k052109,k053260,eepromser,timer_engine,
      k053251,k053246_k053247_k055673;
 
-procedure cargar_simpsons;
+function iniciar_simpsons:boolean;
 
 implementation
 const
@@ -25,7 +25,7 @@ const
 
 var
  tiles_rom,sprite_rom,k053260_rom:pbyte;
- sprite_colorbase,bank0_bank,bank2000_bank,rom_bank1,sound_bank,snd_timer,sprite_timer:byte;
+ sprite_colorbase,bank0_bank,bank2000_bank,rom_bank1,sound_bank,snd_timer,sprite_timer_dmaon,sprite_timer_dmaoff:byte;
  layer_colorbase,layerpri:array[0..2] of byte;
  rom_bank:array[0..$3f,0..$1fff] of byte;
  sound_rom_bank:array[0..7,0..$3fff] of byte;
@@ -50,10 +50,17 @@ code:=code or (((color and $3f) shl 8) or (bank shl 14));
 color:=layer_colorbase[layer]+((color and $c0) shr 6);
 end;
 
-procedure simpsons_sprites_firq;
+procedure simpsons_sprites_dmaon;
 begin
-timers.enabled(sprite_timer,false);
-if firq_enabled then konami_0.change_firq(HOLD_LINE);
+timers.enabled(sprite_timer_dmaon,false);
+timers.enabled(sprite_timer_dmaoff,true);
+if firq_enabled then konami_0.change_firq(ASSERT_LINE);
+end;
+
+procedure simpsons_sprites_dmaoff;
+begin
+timers.enabled(sprite_timer_dmaoff,false);
+konami_0.change_firq(CLEAR_LINE);
 end;
 
 procedure update_video_simpsons;
@@ -123,10 +130,10 @@ if event.arcade then begin
 end;
 end;
 
-procedure simpsons_objdma;inline;
+procedure simpsons_objdma;
 var
 	dst,src:pword;
-  inac,count:integer;
+  inac,count:word;
 begin
 	dst:=k053246_0.k053247_get_ram;
   src:=@sprite_ram[0];
@@ -151,30 +158,30 @@ end;
 procedure simpsons_principal;
 var
   frame_m,frame_s:single;
-  f:byte;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-    for f:=0 to $ff do begin
-    //main
-    konami_0.run(frame_m);
-    frame_m:=frame_m+konami_0.tframes-konami_0.contador;
-    //sound
-    z80_0.run(frame_s);
-    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
-                    if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
-                    if k053246_0.is_irq_enabled then begin
-                       simpsons_objdma;
-                       timers.enabled(sprite_timer,true);
-                    end;
-                    update_video_simpsons;
-                  end;
+    for f:=0 to 263 do begin
+      //main
+      konami_0.run(frame_m);
+      frame_m:=frame_m+konami_0.tframes-konami_0.contador;
+      //sound
+      z80_0.run(frame_s);
+      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+      if f=223 then begin
+        if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
+        if k053246_0.is_irq_enabled then begin
+          simpsons_objdma;
+          timers.enabled(sprite_timer_dmaon,true);
+        end;
+        update_video_simpsons;
+      end;
     end;
-    eventos_simpsons;
-    video_sync;
+eventos_simpsons;
+video_sync;
 end;
 end;
 
@@ -215,7 +222,11 @@ case direccion of
     end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure simpsons_putbyte(direccion:word;valor:byte);
+var
+   tempw:word;
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -228,9 +239,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure simpsons_putbyte(direccion:word;valor:byte);
-var
-   tempw:word;
 begin
 case direccion of
     0..$fff:if bank0_bank=1 then begin
@@ -351,6 +359,10 @@ var
    temp_mem:array[0..$7ffff] of byte;
    f:byte;
 begin
+llamadas_maquina.close:=cerrar_simpsons;
+llamadas_maquina.reset:=reset_simpsons;
+llamadas_maquina.bucle_general:=simpsons_principal;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_simpsons:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -370,11 +382,11 @@ if not(roms_load(@temp_mem,simpsons_sound)) then exit;
 copymemory(@mem_snd,@temp_mem,$8000);
 for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[f*$4000],$4000);
 //Main CPU
-konami_0:=cpu_konami.create(3000000,256);
+konami_0:=cpu_konami.create(3000000,264);
 konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
 konami_0.change_set_lines(simpsons_bank);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545,264);
 z80_0.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
 z80_0.init_sound(simpsons_sound_update);
 snd_timer:=timers.init(z80_0.numero_cpu,90,simpsons_nmi,nil,false);
@@ -392,24 +404,16 @@ k053251_0:=k053251_chip.create;
 //Iniciar video
 getmem(tiles_rom,$100000);
 if not(roms_load32b(tiles_rom,simpsons_tiles)) then exit;
-k052109_0:=k052109_chip.create(1,2,3,simpsons_cb,tiles_rom,$100000);
+k052109_0:=k052109_chip.create(1,2,3,0,simpsons_cb,tiles_rom,$100000);
 getmem(sprite_rom,$400000);
 if not(roms_load64b(sprite_rom,simpsons_sprites)) then exit;
 k053246_0:=k053246_chip.create(4,simpsons_sprite_cb,sprite_rom,$400000);
-sprite_timer:=timers.init(konami_0.numero_cpu,90,simpsons_sprites_firq,nil,false);
+sprite_timer_dmaon:=timers.init(konami_0.numero_cpu,256,simpsons_sprites_dmaon,nil,false);
+sprite_timer_dmaoff:=timers.init(konami_0.numero_cpu,2048,simpsons_sprites_dmaoff,nil,false);
 k053246_0.k053247_start(0,16);
 //final
 reset_simpsons;
 iniciar_simpsons:=true;
-end;
-
-procedure Cargar_simpsons;
-begin
-llamadas_maquina.iniciar:=iniciar_simpsons;
-llamadas_maquina.close:=cerrar_simpsons;
-llamadas_maquina.reset:=reset_simpsons;
-llamadas_maquina.bucle_general:=simpsons_principal;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

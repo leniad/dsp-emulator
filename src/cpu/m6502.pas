@@ -199,7 +199,7 @@ begin
   self.read_dummy:=temp^<>0;
 end;
 
-procedure pon_pila(r:preg_m6502;valor:byte);inline;
+procedure pon_pila(r:preg_m6502;valor:byte);
 begin
   r.p.n:=(valor and $80)<>0;
   r.p.o_v:=(valor and $40)<>0;
@@ -209,7 +209,7 @@ begin
   r.p.c:=(valor and 1)<>0;
 end;
 
-function dame_pila(r:preg_m6502):byte;inline;
+function dame_pila(r:preg_m6502):byte;
 var
   temp:byte;
 begin

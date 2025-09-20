@@ -21,6 +21,7 @@ type
         function save_snapshot(data:pbyte):word;
         procedure load_snapshot(data:pbyte);
         procedure change_clock(clock:dword);
+        procedure change_gain(gain0,gain1,gain2:single);
       private
         Regs:array[0..15] of byte;
         PeriodA,PeriodB,PeriodC,PeriodN,PeriodE:integer;
@@ -34,6 +35,7 @@ type
         lastenable:smallint;
         porta_read,portb_read:cpu_inport_call;
         porta_write,portb_write:cpu_outport_call;
+        gain0,gain1,gain2:single;
         procedure AYWriteReg(r,v:byte);
         function AYReadReg(r:byte):byte;
   end;
@@ -46,6 +48,7 @@ const
   AY8912=1;
 
 implementation
+
 const
   AY_AFINE = 0;
   AY_ACOARSE = 1;
@@ -83,6 +86,13 @@ begin
   Vol_Table[0]:=0;
 end;
 
+procedure ay8910_chip.change_gain(gain0,gain1,gain2:single);
+begin
+  self.gain0:=gain0;
+  self.gain1:=gain1;
+  self.gain2:=gain2;
+end;
+
 procedure ay8910_chip.change_clock(clock:dword);
 begin
   self.clock:=clock;
@@ -107,6 +117,9 @@ begin
   self.amp:=amp;
   self.reset;
   self.type_:=type_;
+  self.gain0:=1;
+  self.gain1:=1;
+  self.gain2:=1;
 end;
 
 procedure ay8910_chip.reset;
@@ -210,9 +223,11 @@ end;
 procedure ay8910_chip.change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
 begin
   self.porta_read:=porta_read;
-  self.portb_read:=portb_read;
+  if self.type_=AY8912 then self.portb_read:=porta_read
+    else self.portb_read:=portb_read;
   self.porta_write:=porta_write;
-  self.portb_write:=portb_write;
+  if self.type_=AY8912 then self.portb_write:=porta_write
+    else self.portb_write:=portb_write;
 end;
 
 procedure ay8910_chip.AYWriteReg(r,v:byte);
@@ -317,7 +332,7 @@ begin
       AY_PORTA:if @self.porta_write<>nil then self.porta_write(v)
                   else self.Regs[AY_PORTA]:=v;
       AY_PORTB:if @self.portb_write<>nil then self.portb_write(v)
-                else self.Regs[AY_PORTB]:=v;
+                        else self.Regs[AY_PORTB]:=v;
   end; //case
 end;
 
@@ -325,10 +340,7 @@ function ay8910_chip.AYReadReg(r:byte):byte;
 begin
   case r of
       AY_PORTA:if (@self.porta_read<>nil) then self.Regs[AY_PORTA]:=self.porta_read;
-      AY_PORTB:case self.type_ of
-                  AY8910:if (@self.portb_read<>nil) then self.Regs[AY_PORTB]:=self.portb_read;
-                  AY8912:self.Regs[AY_PORTB]:=$ff;
-               end;
+      AY_PORTB:if (@self.portb_read<>nil) then self.Regs[AY_PORTB]:=self.portb_read;
   end;
   AYReadReg:=self.Regs[r];
 end;
@@ -494,36 +506,36 @@ begin
             until (self.CountE > 0);
             if (self.CountEnv < 0) then begin
                 if (self.Hold<>0) then begin
-                    if (self.Alternate<>0) then self.Attack := self.Attack xor $1f;
-                    self.Holding := 1;
-                    self.CountEnv := 0;
+                    if (self.Alternate<>0) then self.Attack:=self.Attack xor $1f;
+                    self.Holding:=1;
+                    self.CountEnv:=0;
                 end else begin
                     If (self.Alternate<>0) and ((self.CountEnv and $20)<>0) then self.Attack := self.Attack xor $1f;
-                    self.CountEnv := self.CountEnv and $1f;  //1f
+                    self.CountEnv:=self.CountEnv and $1f;  //1f
                 end;
             end;
             self.VolE :=trunc(Vol_Table[self.CountEnv xor self.Attack]);
-            If (self.EnvelopeA <> 0) then self.VolA := self.VolE;
-            If (self.EnvelopeB <> 0) then self.VolB := self.VolE;
-            If (self.EnvelopeC <> 0) then self.VolC := self.VolE;
+            If (self.EnvelopeA<>0) then self.VolA:=self.VolE;
+            If (self.EnvelopeB<>0) then self.VolB:=self.VolE;
+            If (self.EnvelopeC<>0) then self.VolC:=self.VolE;
         end;
     end;
-    lOut1:=trunc((VolA * self.VolA)/STEP);
-    lOut2:=trunc((VolB * self.VolB)/STEP);
-    lOut3:=trunc((VolC * self.VolC)/STEP);
-    temp2:=trunc(((VolA * self.VolA)/STEP)+((VolB * self.VolB)/STEP)+((VolC * self.VolC)/STEP));
-    if lout1>32767 then lout1:=32767
-      else if lout1<-32767 then lout1:=-32767;
-    if lout2>32767 then lout2:=32767
-      else if lout2<-32767 then lout2:=-32767;
-    if lout3>32767 then lout3:=32767
-      else if lout3<-32767 then lout3:=-32767;
-    if temp2>32767 then temp2:=32767
-      else if temp2<-32767 then temp2:=-32767;
-    salida_ay[0]:=trunc(temp2*self.amp);
-    salida_ay[1]:=trunc(lout1*self.amp);
-    salida_ay[2]:=trunc(lout2*self.amp);
-    salida_ay[3]:=trunc(lout3*self.amp);
+    lOut1:=trunc(((VolA*self.VolA)/STEP)*self.gain0*self.amp);
+    lOut2:=trunc(((VolB*self.VolB)/STEP)*self.gain1*self.amp);
+    lOut3:=trunc(((VolC*self.VolC)/STEP)*self.gain2*self.amp);
+    temp2:=trunc(((((VolA*self.VolA)/STEP)*self.gain0)+(((VolB*self.VolB)/STEP)*self.gain1)+(((VolC*self.VolC)/STEP))*self.gain2)*self.amp);
+    if lout1>32767 then salida_ay[1]:=32767
+      else if lout1<-32767 then salida_ay[1]:=-32767
+          else salida_ay[1]:=lout1;
+    if lout2>32767 then salida_ay[2]:=32767
+      else if lout2<-32767 then salida_ay[2]:=-32767
+          else salida_ay[2]:=lout2;
+    if lout3>32767 then salida_ay[3]:=32767
+      else if lout3<-32767 then salida_ay[3]:=-32767
+          else salida_ay[3]:=lout3;
+    if temp2>32767 then salida_ay[0]:=32767
+      else if temp2<-32767 then salida_ay[0]:=-32767
+          else salida_ay[0]:=temp2;
     update_internal:=@salida_ay[0];
 end;
 
@@ -533,6 +545,5 @@ self.update_internal;
 tsample[self.tsample_num,sound_status.posicion_sonido]:=salida_ay[0];
 if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=salida_ay[0];
 end;
-
 
 end.

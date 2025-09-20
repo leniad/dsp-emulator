@@ -6,12 +6,12 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,sound_engine,ym_2151,k052109,k053260,k053246_k053247_k055673,
      k054000,k053251,timer_engine,eepromser;
 
-procedure cargar_vendetta;
+function iniciar_vendetta:boolean;
 
 implementation
 const
         //vendetta
-        vendetta_rom:tipo_roms=(n:'081u01';l:$40000;p:0;crc:$b4d9ade5);
+        vendetta_rom:tipo_roms=(n:'081u01.17c';l:$40000;p:0;crc:$b4d9ade5);
         vendetta_sound:tipo_roms=(n:'081b02';l:$10000;p:0;crc:$4c604d9b);
         vendetta_tiles:array[0..1] of tipo_roms=(
         (n:'081a09';l:$80000;p:0;crc:$b4c777a9),(n:'081a08';l:$80000;p:2;crc:$272ac8d9));
@@ -176,7 +176,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure vendetta_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -189,7 +191,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure vendetta_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$1fff,$8000..$ffff:; //ROM
@@ -289,11 +290,25 @@ begin
  video_bank:=0;
 end;
 
+procedure cerrar_vendetta;
+begin
+if k053260_rom<>nil then freemem(k053260_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k053260_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+end;
+
 function iniciar_vendetta:boolean;
 var
    temp_mem:array[0..$3ffff] of byte;
    f:byte;
 begin
+llamadas_maquina.close:=cerrar_vendetta;
+llamadas_maquina.reset:=reset_vendetta;
+llamadas_maquina.bucle_general:=vendetta_principal;
+llamadas_maquina.fps_max:=59.17;
 iniciar_vendetta:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -337,7 +352,7 @@ k053251_0:=k053251_chip.create;
 //tiles
 getmem(tiles_rom,$100000);
 if not(roms_load32b(tiles_rom,vendetta_tiles)) then exit;
-k052109_0:=k052109_chip.create(1,2,3,vendetta_cb,tiles_rom,$100000);
+k052109_0:=k052109_chip.create(1,2,3,0,vendetta_cb,tiles_rom,$100000);
 //sprites
 getmem(sprite_rom,$400000);
 if not(roms_load64b(sprite_rom,vendetta_sprites)) then exit;
@@ -359,25 +374,6 @@ marcade.dswc_val:=@vendetta_dip_c;
 //final
 reset_vendetta;
 iniciar_vendetta:=true;
-end;
-
-procedure cerrar_vendetta;
-begin
-if k053260_rom<>nil then freemem(k053260_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k053260_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
-procedure Cargar_vendetta;
-begin
-llamadas_maquina.iniciar:=iniciar_vendetta;
-llamadas_maquina.close:=cerrar_vendetta;
-llamadas_maquina.reset:=reset_vendetta;
-llamadas_maquina.bucle_general:=vendetta_principal;
-llamadas_maquina.fps_max:=59.17;
 end;
 
 end.

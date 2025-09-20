@@ -31,7 +31,7 @@ function file_name_only(cadena:string):string;
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
 function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
 //Parte ZLIB
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
 procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:pointer;var out_size:integer);
@@ -109,17 +109,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
-  sound_status.calidad_audio:=fich_ini.ReadInteger('dsp','sonido',1);
-  if sound_status.calidad_audio>3 then sound_status.calidad_audio:=3;
-  case sound_status.calidad_audio of
-    0:principal1.N110251.Checked:=true;
-    1:principal1.N220501.Checked:=true;
-    2:principal1.N441001.Checked:=true;
-    3:begin
-      principal1.SinSonido1.Checked:=true;
-      sound_status.hay_sonido:=false;
-      end;
-  end;
+  sound_status.hay_sonido:=fich_ini.ReadInteger('dsp','sonido_ena',1)=1;
+  if sound_status.hay_sonido then principal1.consonido1.checked:=true
+    else principal1.SinSonido1.Checked:=true;
   main_screen.video_mode:=fich_ini.ReadInteger('dsp','video',1);
   if ((main_screen.video_mode<1) or (main_screen.video_mode>5)) then main_screen.video_mode:=1;
   main_screen.pantalla_completa:=false;
@@ -127,7 +119,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   main_vars.auto_exec:=(fich_ini.ReadInteger('dsp','auto_exec',0)=1);
   main_vars.show_crc_error:=(fich_ini.ReadInteger('dsp','show_crc_error',1)=1);
   main_vars.center_screen:=(fich_ini.ReadInteger('dsp','center_screen',1)=1);
-  main_vars.x11:=(fich_ini.ReadInteger('dsp','x11',0)=1);
+  main_vars.console_init:=(fich_ini.ReadInteger('dsp','console_init',0)=1);
+  main_vars.sort:=fich_ini.ReadInteger('dsp','sort',0);
   //configuracion spectrum
   var_spectrum.issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
   var_spectrum.tipo_joy:=fich_ini.ReadInteger('spectrum','joystick',0);
@@ -165,6 +158,10 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3) and $ff;
   arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4) and $ff;
   arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5) and $ff;
+  arcade_input.jcoin[0]:=fich_ini.ReadInteger('keyboard','jcoin_0',6) and $ff;
+  arcade_input.jcoin[1]:=fich_ini.ReadInteger('keyboard','jcoin_1',6) and $ff;
+  arcade_input.jstart[0]:=fich_ini.ReadInteger('keyboard','jstart_0',7) and $ff;
+  arcade_input.jstart[1]:=fich_ini.ReadInteger('keyboard','jstart_1',7) and $ff;
   arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',KEYBOARD_5) and $ff;
   arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',KEYBOARD_6) and $ff;
   arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',KEYBOARD_1) and $ff;
@@ -242,11 +239,12 @@ end else begin
   Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
-  sound_status.calidad_audio:=1;
+  sound_status.hay_sonido:=true;
   main_screen.pantalla_completa:=false;
   main_vars.show_crc_error:=true;
   main_vars.center_screen:=true;
-  main_vars.x11:=false;
+  main_vars.console_init:=true;
+  main_vars.sort:=0;
   //configuracion basica spectrum
   var_spectrum.audio_128k:=0;
   var_spectrum.audio_load:=true;
@@ -284,6 +282,10 @@ end else begin
   arcade_input.jbut3[0]:=3;
   arcade_input.jbut4[0]:=4;
   arcade_input.jbut5[0]:=5;
+  arcade_input.jcoin[0]:=6;
+  arcade_input.jcoin[1]:=6;
+  arcade_input.jstart[0]:=7;
+  arcade_input.jstart[1]:=7;
   arcade_input.ncoin[0]:=KEYBOARD_5;
   arcade_input.ncoin[1]:=KEYBOARD_6;
   arcade_input.nstart[0]:=KEYBOARD_1;
@@ -405,13 +407,14 @@ fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
 fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
 //Config general
-fich_ini.WriteInteger('dsp','sonido',sound_status.calidad_audio);
+fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.hay_sonido));
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
 fich_ini.WriteInteger('dsp','maquina',main_vars.tipo_maquina);
 fich_ini.WriteInteger('dsp','auto_exec',byte(main_vars.auto_exec));
 fich_ini.WriteInteger('dsp','show_crc_error',byte(main_vars.show_crc_error));
 fich_ini.WriteInteger('dsp','center_screen',byte(main_vars.center_screen));
-fich_ini.WriteInteger('dsp','x11',byte(main_vars.x11));
+fich_ini.WriteInteger('dsp','console_init',byte(main_vars.console_init));
+fich_ini.WriteInteger('dsp','sort',main_vars.sort);
 //Config Spectrum
 fich_ini.WriteInteger('spectrum','issue',byte(var_spectrum.issue2));
 fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);
@@ -454,6 +457,10 @@ fich_ini.WriteInteger('keyboard','coin_0',arcade_input.ncoin[0]);
 fich_ini.WriteInteger('keyboard','coin_1',arcade_input.ncoin[1]);
 fich_ini.WriteInteger('keyboard','start_0',arcade_input.nstart[0]);
 fich_ini.WriteInteger('keyboard','start_1',arcade_input.nstart[1]);
+fich_ini.WriteInteger('keyboard','jcoin_0',arcade_input.jcoin[0]);
+fich_ini.WriteInteger('keyboard','jcoin_1',arcade_input.jcoin[1]);
+fich_ini.WriteInteger('keyboard','jstart_0',arcade_input.jstart[0]);
+fich_ini.WriteInteger('keyboard','jstart_1',arcade_input.jstart[1]);
 //Teclas P2
 fich_ini.WriteInteger('keyboard','up_1',arcade_input.nup[1]);
 fich_ini.WriteInteger('keyboard','down_1',arcade_input.ndown[1]);
@@ -656,7 +663,10 @@ if not(FileExists(nombre_zip)) then exit;
   ZipFile.Free;
 {$endif}
 search_file_from_zip:=res;
-if (warning and not(res)) then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+if (warning and not(res)) then begin
+  MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+  principal1.Enabled:=true;
+end;
 end;
 
 function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
@@ -758,7 +768,10 @@ begin
   if not(find) then begin
     ZipFile.Close;
     ZipFile.Free;
-    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+    if warning then begin
+      MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+      principal1.Enabled:=true;
+    end;
     exit;
   end;
   longitud:=ZipFile.FileInfos[f].UncompressedSize;
@@ -780,7 +793,10 @@ begin
   end;
   if not(find) then begin
     ZipFile.Free;
-    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+    if warning then begin
+      MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+      principal1.Enabled:=true;
+    end;
     exit;
   end;
   zfile:=unzOpen(pchar(nombre_zip));
@@ -794,7 +810,7 @@ begin
 load_file_from_zip:=true;
 end;
 
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
 var
   f:word;
   find:boolean;
@@ -810,6 +826,7 @@ begin
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
     MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
+    principal1.Enabled:=true;
     exit;
   end;
   find:=false;
@@ -817,7 +834,7 @@ begin
   ZipFile:=TZipFile.Create;
   ZipFile.Open(nombre_zip,zmRead);
   for f:=0 to (ZipFile.FileCount-1) do begin
-    if ZipFile.FileInfos[f].CRC32=cardinal(crc) then begin
+    if ZipFile.FileInfos[f].CRC32=crc then begin
       find:=true;
       break;
     end;

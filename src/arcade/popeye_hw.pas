@@ -36,33 +36,7 @@ var
   scroll_x:word;
   nmi_enabled:boolean;
 
-procedure cambiar_paleta(valor:byte);inline;
-var
-  f,ctemp1,ctemp2,ctemp3,ctemp4:byte;
-  colores:tcolor;
-begin
-  for f:=0 to 15 do begin
-    ctemp4:=buffer_paleta[f+$10*valor];
-		// red component */
-		ctemp1:=(ctemp4 shr 0) and $01;
-		ctemp2:=(ctemp4 shr 1) and $01;
-		ctemp3:=(ctemp4 shr 2) and $01;
-		colores.r:=$1c*ctemp1+$31*ctemp2+$47*ctemp3;
-		// green component */
-		ctemp1:=(ctemp4 shr 3) and $01;
-		ctemp2:=(ctemp4 shr 4) and $01;
-		ctemp3:=(ctemp4 shr 5) and $01;
-		colores.g:=$1c*ctemp1+$31*ctemp2+$47*ctemp3;
-		// blue component */
-		ctemp1:=(ctemp4 shr 6) and $01;
-		ctemp2:=(ctemp4 shr 7) and $01;
-		colores.b:=$31*ctemp1+$47*ctemp2;
-    set_pal_color(colores,f);
-   end;
-   fillchar(fondo_write,$2000,1);
-end;
-
-procedure update_video_popeye;inline;
+procedure update_video_popeye;
 var
   f,color,nchar,x,y:word;
   i,atrib,atrib2:byte;
@@ -166,6 +140,31 @@ end;
 end;
 
 procedure popeye_putbyte(direccion:word;valor:byte);
+procedure cambiar_paleta(valor:byte);
+var
+  f,ctemp1,ctemp2,ctemp3,ctemp4:byte;
+  colores:tcolor;
+begin
+  for f:=0 to 15 do begin
+    ctemp4:=buffer_paleta[f+$10*valor];
+		// red component */
+		ctemp1:=(ctemp4 shr 0) and $01;
+		ctemp2:=(ctemp4 shr 1) and $01;
+		ctemp3:=(ctemp4 shr 2) and $01;
+		colores.r:=$1c*ctemp1+$31*ctemp2+$47*ctemp3;
+		// green component */
+		ctemp1:=(ctemp4 shr 3) and $01;
+		ctemp2:=(ctemp4 shr 4) and $01;
+		ctemp3:=(ctemp4 shr 5) and $01;
+		colores.g:=$1c*ctemp1+$31*ctemp2+$47*ctemp3;
+		// blue component */
+		ctemp1:=(ctemp4 shr 6) and $01;
+		ctemp2:=(ctemp4 shr 7) and $01;
+		colores.b:=$31*ctemp1+$47*ctemp2;
+    set_pal_color(colores,f);
+   end;
+   fillchar(fondo_write,$2000,1);
+end;
 begin
 case direccion of
   0..$7fff:;
@@ -317,7 +316,6 @@ begin
  dswbit:=0;
  scroll_x:=0;
  field:=0;
- cambiar_paleta(0);
  fillchar(fondo_write[0],$2000,1);
  nmi_enabled:=true;
 end;

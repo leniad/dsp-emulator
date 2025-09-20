@@ -1,14 +1,10 @@
 unit fd1089;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$endif}misc_functions;
-
 const
   fd_typeA=1;
   fd_typeB=2;
-
 procedure fd1089_decrypt(size:dword;srcptr,opcodesptr,dataptr:pword;m_key:pbyte;fd_type:byte);
-
 implementation
 const
   s_basetable_fd1089:array[0..$ff] of byte=(
@@ -28,52 +24,47 @@ const
 	$57,$7b,$b1,$9d,$b3,$9f,$59,$75,$8c,$90,$fa,$e6,$f4,$e8,$8e,$92,
 	$12,$0e,$68,$74,$e2,$fe,$94,$88,$65,$49,$8f,$a3,$99,$b5,$7f,$53,
 	$35,$19,$d3,$ff,$c9,$e5,$23,$0f,$be,$a2,$c8,$d4,$4e,$52,$34,$28);
-
   s_addr_params:array[0..15,0..8] of byte=(
-	($23, 6,4,5,7,3,0,1,2),
-	($92, 2,5,3,6,7,1,0,4),
-	($b8, 6,7,4,2,0,5,1,3),
-	($74, 5,3,7,1,4,6,0,2),
-	($cf, 7,4,1,0,6,2,3,5),
-	($c4, 3,1,6,4,5,0,2,7),
-	($51, 5,7,2,4,3,1,6,0),
-	($14, 7,2,0,6,1,3,4,5),
-	($7f, 3,5,6,0,2,1,7,4),
-	($03, 2,3,4,0,6,7,5,1),
-	($96, 3,1,7,5,2,4,6,0),
-	($30, 7,6,2,3,0,4,5,1),
-	($e2, 1,0,3,7,4,5,2,6),
-	($72, 1,6,0,5,7,2,4,3),
-	($f5, 0,4,1,2,6,5,7,3),
-	($5b, 0,7,5,3,1,4,2,6));
-
+	( $23, 6,4,5,7,3,0,1,2 ),
+	( $92, 2,5,3,6,7,1,0,4 ),
+	( $b8, 6,7,4,2,0,5,1,3 ),
+	( $74, 5,3,7,1,4,6,0,2 ),
+	( $cf, 7,4,1,0,6,2,3,5 ),
+	( $c4, 3,1,6,4,5,0,2,7 ),
+	( $51, 5,7,2,4,3,1,6,0 ),
+	( $14, 7,2,0,6,1,3,4,5 ),
+	( $7f, 3,5,6,0,2,1,7,4 ),
+	( $03, 2,3,4,0,6,7,5,1 ),
+	( $96, 3,1,7,5,2,4,6,0 ),
+	( $30, 7,6,2,3,0,4,5,1 ),
+	( $e2, 1,0,3,7,4,5,2,6 ),
+	( $72, 1,6,0,5,7,2,4,3 ),
+	( $f5, 0,4,1,2,6,5,7,3 ),
+	( $5b, 0,7,5,3,1,4,2,6 ));
   // data decryption parameters for the A variant
   s_data_params_a:array[0..15,0..8] of byte=(
-	($55, 6,5,1,0,7,4,2,3),
-	($94, 7,6,4,2,0,5,1,3),
-	($8d, 1,4,2,3,0,6,7,5),
-	($9a, 4,3,5,6,0,2,1,7),
-	($72, 4,3,7,0,5,6,1,2),
-	($ff, 1,7,2,3,6,4,5,0),
-	($06, 6,5,3,2,4,1,0,7),
-	($c5, 3,5,1,4,2,7,0,6),
-	($ec, 4,7,5,1,6,0,2,3),
-	($89, 3,5,0,6,1,2,7,4),
-	($5c, 1,3,0,7,5,2,4,6),
-	($3f, 7,3,0,2,4,6,1,5),
-	($57, 6,4,7,2,1,5,3,0),
-	($f7, 6,3,7,0,5,4,2,1),
-	($3a, 6,1,3,2,7,4,5,0),
-	($ac, 1,6,3,5,0,7,4,2));
-
+	( $55, 6,5,1,0,7,4,2,3 ),
+	( $94, 7,6,4,2,0,5,1,3 ),
+	( $8d, 1,4,2,3,0,6,7,5 ),
+	( $9a, 4,3,5,6,0,2,1,7 ),
+	( $72, 4,3,7,0,5,6,1,2 ),
+	( $ff, 1,7,2,3,6,4,5,0 ),
+	( $06, 6,5,3,2,4,1,0,7 ),
+	( $c5, 3,5,1,4,2,7,0,6 ),
+	( $ec, 4,7,5,1,6,0,2,3 ),
+	( $89, 3,5,0,6,1,2,7,4 ),
+	( $5c, 1,3,0,7,5,2,4,6 ),
+	( $3f, 7,3,0,2,4,6,1,5 ),
+	( $57, 6,4,7,2,1,5,3,0 ),
+	( $f7, 6,3,7,0,5,4,2,1 ),
+	( $3a, 6,1,3,2,7,4,5,0 ),
+	( $ac, 1,6,3,5,0,7,4,2 ));
 function rearrange_key(table:byte;opcode:boolean):byte;
 begin
 	if not(opcode) then begin
 		table:=table xor (1 shl 4);
 		table:=table xor (1 shl 5);
-		table:=table xor (1 shl 6);
 		if (BIT(not(table),3)) then table:=table xor (1 shl 1);
-		if (BIT(table,6)) then table:=table xor (1 shl 7);
 		table:=BITSWAP8(table,1,0,6,4,3,5,2,7);
 		if (BIT(table,6)) then table:=BITSWAP8(table,7,6,2,4,5,3,1,0);
 	end else begin
@@ -81,8 +72,8 @@ begin
 		table:=table xor (1 shl 3);
 		table:=table xor (1 shl 4);
 		if (BIT(not(table),3)) then table:=table xor (1 shl 5);
-		if (BIT(not(table),7)) then table:=table xor (1 shl 6);
-		table:=BITSWAP8(table,5,6,7,4,2,3,1,0);
+		if (BIT(table,7)) then table:=table xor (1 shl 6);
+		table:=BITSWAP8(table,5,7,6,4,2,3,1,0);
 		if (BIT(table,6)) then table:=BITSWAP8(table,7,6,5,3,2,4,1,0);
 	end;
 	if (BIT(table,6)) then begin
@@ -92,14 +83,13 @@ begin
 	end;
 	rearrange_key:=table;
 end;
-
 function decode_a(val,key:byte;opcode:boolean):byte;
 var
   table,family:byte;
   xorval,s0,s1,s2,s3,s4,s5,s6,s7:byte;
 begin
 	// special case - don't decrypt
-	if (key=$40) then begin
+	if (key=$0) then begin
 		decode_a:=val;
     exit;
   end;
@@ -149,14 +139,13 @@ begin
 	val:=BITSWAP8(val,s7,s6,s5,s4,s3,s2,s1,s0);
 	decode_a:=val;
 end;
-
 function decode_b(val,key:byte;opcode:boolean):word;
 var
   table:byte;
   xorval,s7,s6,s5,s4,s3,s2,s1,s0:byte;
 begin
 	// special case - don't decrypt
-	if (key=$40) then begin
+	if (key=$0) then begin
 		decode_b:=val;
     exit;
   end;
@@ -196,7 +185,6 @@ begin
 	end;
 	decode_b:=val;
 end;
-
 function decrypt_one(addr:dword;val:word;key:pbyte;opcode:boolean;fd_type:byte):word;
 var
   tbl_num:dword;
@@ -214,7 +202,6 @@ begin
 	src:=((src and $01) shl 3) or	((src and $02) shl 5) or ((src and $fc) shl 8);
 	decrypt_one:=(val and not($fc48)) or src;
 end;
-
 procedure fd1089_decrypt(size:dword;srcptr,opcodesptr,dataptr:pword;m_key:pbyte;fd_type:byte);
 var
   offset,half_size:dword;
@@ -234,5 +221,4 @@ begin
     inc(ptemp3);
 	end;
 end;
-
 end.

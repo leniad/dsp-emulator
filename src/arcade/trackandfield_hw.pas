@@ -41,7 +41,7 @@ var
  mem_opcodes:array[0..$9fff] of byte;
  last_addr:word;
 
-procedure update_video_trackfield;inline;
+procedure update_video_trackfield;
 var
   x,y,atrib:byte;
   f,nchar,color:word;

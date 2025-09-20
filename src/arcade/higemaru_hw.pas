@@ -30,7 +30,7 @@ const
         (mask:$20;name:'Demo Music';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-procedure update_video_higemaru;inline;
+procedure update_video_higemaru;
 var
   f,nchar:word;
   color,x,y,attr:byte;

@@ -34,7 +34,7 @@ var
  video_ram:array[0..(256*64)-1] of dword;
  gfx_data:array[0..1,0..$1fff] of byte;
 
-procedure update_video_kangaroo;inline;
+procedure update_video_kangaroo;
 var
   x,y,scrolly,scrollx,maska,maskb,xora,xorb:byte;
   effxb,effyb,pixa,pixb,finalpens:byte;
@@ -140,7 +140,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure videoram_write(offset:word;data,mask:byte);inline;
+procedure videoram_write(offset:word;data,mask:byte);
 var
   expdata,layermask:dword;
 begin
@@ -164,7 +164,7 @@ begin
 	video_ram[offset]:=(video_ram[offset] and not(layermask)) or (expdata and layermask);
 end;
 
-procedure blitter_execute;inline;
+procedure blitter_execute;
 var
 	src,dst,effdst,effsrc:word;
 	height,width,mask,x,y:byte;

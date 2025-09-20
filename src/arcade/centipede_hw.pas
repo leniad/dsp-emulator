@@ -62,7 +62,7 @@ end;
 actualiza_trozo_final(0,0,240,256,2);
 end;
 
-procedure eventos_centipede;inline;
+procedure eventos_centipede;
 begin
 if event.arcade then begin
   //system
@@ -128,7 +128,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure centipede_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
   f:byte;
@@ -161,7 +163,6 @@ begin
 	end;
 end;
 
-procedure centipede_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $3fff;
 case direccion of

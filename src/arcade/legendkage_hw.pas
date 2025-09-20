@@ -48,7 +48,12 @@ var
  from_main,from_mcu:byte;
  main_sent,mcu_sent:boolean;
 
-procedure draw_sprites(prio:byte);inline;
+procedure update_video_lk_hw;
+var
+  x,y:byte;
+  f,nchar:word;
+
+procedure draw_sprites(prio:byte);
 var
   f,x,y,nchar:word;
   atrib,color:byte;
@@ -82,10 +87,6 @@ begin
 	end;
 end;
 
-procedure update_video_lk_hw;
-var
-  x,y:byte;
-  f,nchar:word;
 begin
 for f:=0 to $3ff do begin
   x:=f mod 32;
@@ -211,7 +212,11 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure lk_putbyte(direccion:word;valor:byte);
+var
+  bank:word;
+
+procedure cambiar_color(pos:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -230,9 +235,6 @@ begin
   end;
 end;
 
-procedure lk_putbyte(direccion:word;valor:byte);
-var
-  bank:word;
 begin
 case direccion of
   0..$dfff:;

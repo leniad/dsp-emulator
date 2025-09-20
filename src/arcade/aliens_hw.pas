@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232;
 
-procedure cargar_aliens;
+function iniciar_aliens:boolean;
 
 implementation
 const
@@ -30,11 +30,11 @@ const
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         aliens_dip_c:array [0..1] of def_dip=(
         (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        layer_colorbase:array[0..2] of byte=(0,4,8);
 
 var
  tiles_rom,sprite_rom,k007232_rom:pbyte;
  sound_latch,bank0_bank,rom_bank1:byte;
- layer_colorbase:array[0..2] of byte;
  rom_bank:array[0..19,0..$1fff] of byte;
  ram_bank:array[0..1,0..$3ff] of byte;
 
@@ -46,16 +46,16 @@ end;
 
 procedure aliens_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
 begin
-// The PROM allows for mixed priorities, where sprites would have */
-// priority over text but not on one or both of the other two planes. */
+// The PROM allows for mixed priorities, where sprites would have
+// priority over text but not on one or both of the other two planes.
 case (color and $70) of
-     $20,$60:pri:=7;  // over -, not ABF */
-     $0:pri:=4;       //over AB, not F */
-     $40:pri:=6;      // over A, not BF */
-     $10:pri:=0 ;      // over ABF */
+     $20,$60:pri:=7;  // over -, not ABF
+     $0:pri:=4;       //over AB, not F
+     $40:pri:=6;      // over A, not BF
+     $10:pri:=0 ;      // over ABF
      //No posibles debido a como pinta la pantalla el driver!!
-     $50:pri:=2;      // over AF, not B */
-     $30,$70:pri:=3;  // over F, not AB */
+     $50:pri:=2;      // over AF, not B
+     $30,$70:pri:=3;  // over F, not AB
 end;
 code:=code or ((color and $80) shl 6);
 color:=16+(color and $f);
@@ -160,7 +160,9 @@ case direccion of
     end;
 end;
 
-procedure cambiar_color(pos:word);inline;
+procedure aliens_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(pos:word);
 var
   color:tcolor;
   valor:word;
@@ -173,7 +175,6 @@ begin
   k052109_0.clean_video_buffer;
 end;
 
-procedure aliens_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
     0..$3ff:begin
@@ -263,11 +264,25 @@ begin
  rom_bank1:=0;
 end;
 
+procedure cerrar_aliens;
+begin
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+end;
+
 function iniciar_aliens:boolean;
 var
    temp_mem:array[0..$2ffff] of byte;
    f:byte;
 begin
+llamadas_maquina.close:=cerrar_aliens;
+llamadas_maquina.reset:=reset_aliens;
+llamadas_maquina.bucle_general:=aliens_principal;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_aliens:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -301,14 +316,11 @@ k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,aliens_k007232_cb
 //Iniciar video
 getmem(tiles_rom,$200000);
 if not(roms_load32b(tiles_rom,aliens_tiles)) then exit;
-k052109_0:=k052109_chip.create(1,2,3,aliens_cb,tiles_rom,$200000);
+k052109_0:=k052109_chip.create(1,2,3,0,aliens_cb,tiles_rom,$200000);
 getmem(sprite_rom,$200000);
 if not(roms_load32b(sprite_rom,aliens_sprites)) then exit;
-k051960_0:=k051960_chip.create(4,sprite_rom,$200000,aliens_sprite_cb,2);
+k051960_0:=k051960_chip.create(4,1,sprite_rom,$200000,aliens_sprite_cb,2);
 k051960_0.change_irqs(aliens_k051960_cb,nil,nil);
-layer_colorbase[0]:=0;
-layer_colorbase[1]:=4;
-layer_colorbase[2]:=8;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@aliens_dip_a;
@@ -319,25 +331,6 @@ marcade.dswc_val:=@aliens_dip_c;
 //final
 reset_aliens;
 iniciar_aliens:=true;
-end;
-
-procedure cerrar_aliens;
-begin
-if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
-procedure Cargar_aliens;
-begin
-llamadas_maquina.iniciar:=iniciar_aliens;
-llamadas_maquina.close:=cerrar_aliens;
-llamadas_maquina.reset:=reset_aliens;
-llamadas_maquina.bucle_general:=aliens_principal;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

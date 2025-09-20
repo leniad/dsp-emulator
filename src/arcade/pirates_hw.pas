@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,oki6295,misc_functions;
 
-procedure cargar_pirates;
+function iniciar_pirates:boolean;
 
 implementation
 const
@@ -38,6 +38,9 @@ var
  sprite_ram:array[0..$7ff] of word;
  scroll_x:word;
 
+procedure update_video_pirates;
+var
+  f,x,y,nchar,color:word;
 procedure draw_sprites;
 var
   f,nchar,color,atrib,sx,sy:word;
@@ -57,10 +60,6 @@ for f:=0 to $1fd do begin
     actualiza_gfx_sprite(sx,sy,4,1);
 end;
 end;
-
-procedure update_video_pirates;
-var
-  f,x,y,nchar,color:word;
 begin
 for f:=$0 to $47f do begin
   x:=f div 32;
@@ -99,7 +98,7 @@ actualiza_trozo_final(0,16,288,224,4);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_pirates;inline;
+procedure eventos_pirates;
 begin
 if event.arcade then begin
   //input
@@ -111,7 +110,6 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $0020);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $0040);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $0080);
-
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $feff) else marcade.in1:=(marcade.in1 or $0100);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fdff) else marcade.in1:=(marcade.in1 or $0200);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fbff) else marcade.in1:=(marcade.in1 or $0400);
@@ -162,24 +160,20 @@ case direccion of
 end;
 end;
 
+procedure pirates_putword(direccion:dword;valor:word);
 procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
 begin
-  // red component */
 	color.r:=pal5bit(data shr 10);
-	// green component */
 	color.g:=pal5bit((data shr 5) and $1f);
-	// blue component */
 	color.b:=pal5bit(data);
   set_pal_color(color,pos);
   buffer_color[pos shr 4]:=true;
 end;
-
-procedure pirates_putword(direccion:dword;valor:word);
 begin
-if direccion<$100000 then exit;
 case direccion of
+    0..$fffff:;
     $100000..$10ffff:ram1[(direccion and $ffff) shr 1]:=valor;
     $500000..$500fff:sprite_ram[(direccion and $fff) shr 1]:=valor;
     $600000:begin
@@ -233,7 +227,7 @@ begin
  oki_6295_0.reset;
  reset_audio;
  marcade.in0:=$9f;
- marcade.in1:=$FFFF;
+ marcade.in1:=$ffff;
 end;
 
 function iniciar_pirates:boolean;
@@ -335,6 +329,8 @@ gfx_set_desc_data(4,0,16*16,$180000*8,$100000*8,$80000*8,0);
 convert_gfx(1,0,ptempb2,@ps_x[0],@ps_y[0],false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=pirates_principal;
+llamadas_maquina.reset:=reset_pirates;
 iniciar_pirates:=false;
 iniciar_audio(false);
 //Pantallas
@@ -395,13 +391,6 @@ freemem(ptempb2);
 //final
 reset_pirates;
 iniciar_pirates:=true;
-end;
-
-procedure Cargar_pirates;
-begin
-llamadas_maquina.iniciar:=iniciar_pirates;
-llamadas_maquina.bucle_general:=pirates_principal;
-llamadas_maquina.reset:=reset_pirates;
 end;
 
 end.

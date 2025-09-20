@@ -67,7 +67,7 @@ procedure update_video_sfighter;
 var
   f,x,y,nchar,atrib,color,pos,nchar1,nchar2,nchar3,nchar4:word;
   flipx,flipy:boolean;
-function sf_invert(char:word):word;inline;
+function sf_invert(char:word):word;
 const
   delta:array[0..3] of byte=($00,$18,$18,$00);
 begin
@@ -241,7 +241,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure sfighter_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -255,7 +257,6 @@ begin
   end;
 end;
 
-procedure sfighter_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$4ffff:; //ROM

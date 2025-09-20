@@ -175,7 +175,7 @@ begin
 end;
 end;
 
-procedure update_video_freekick;inline;
+procedure update_video_freekick;
 var
   f,nchar:word;
   x,y,color,atrib:byte;

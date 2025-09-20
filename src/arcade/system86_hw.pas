@@ -231,7 +231,7 @@ begin
   end;
 end;
 
-procedure update_video_screen;inline;
+procedure update_video_screen;
 var
         f,color,nchar,offs:word;
         x,y:byte;
@@ -315,7 +315,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure copy_sprites_hw;inline;
+procedure copy_sprites_hw;
 var
   i,j:byte;
 begin
@@ -437,13 +437,13 @@ case direccion of
 end;
 end;
 
-function ret_dsw0:byte;inline;
+function ret_dsw0:byte;
 begin
   ret_dsw0:=((marcade.dswa and 1) shl 4) or ((marcade.dswa and 4) shl 3) or ((marcade.dswa and $10) shl 2) or ((marcade.dswa and $40) shl 1) or
             (marcade.dswb and 1) or ((marcade.dswb and 4) shr 1) or ((marcade.dswb and $10) shr 2) or ((marcade.dswb and $40) shr 3);
 end;
 
-function ret_dsw1:byte;inline;
+function ret_dsw1:byte;
 begin
   ret_dsw1:=((marcade.dswa and 2) shl 3) or ((marcade.dswa and 8) shl 2) or ((marcade.dswa and $20) shl 1) or (marcade.dswa and $80) or
             ((marcade.dswb and 2) shr 1) or ((marcade.dswb and 8) shr 2) or ((marcade.dswb and $20) shr 3) or ((marcade.dswb and $80) shr 4);

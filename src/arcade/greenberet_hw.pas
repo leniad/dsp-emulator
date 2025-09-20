@@ -55,7 +55,7 @@ var
  interrupt_mask,interrupt_ticks,sound_latch,rom_bank,timer_hs:byte;
  banco_sprites:word;
 
-procedure update_video_gberet;inline;
+procedure update_video_gberet;
 var
   f,x,y,color,nchar,atrib2:word;
   atrib:byte;

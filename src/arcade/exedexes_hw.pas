@@ -38,7 +38,12 @@ var
  scroll_x,scroll_y,scroll_bg:word;
  sound_command:byte;
  sc2on,sc1on,objon,chon:boolean;
-procedure draw_sprites(pri:byte);inline;
+
+procedure update_video_exedexes;
+var
+  f,color,nchar,x,y:word;
+  attr:byte;
+procedure draw_sprites(pri:byte);
 var
   f,color,nchar,x,y:word;
   atrib:byte;
@@ -56,10 +61,6 @@ begin
 		end;
   end;
 end;
-procedure update_video_exedexes;inline;
-var
-  f,color,nchar,x,y:word;
-  attr:byte;
 begin
 if sc2on then scroll__y(1,4,1792-scroll_bg)
   else fill_full_screen(4,0);
@@ -84,6 +85,7 @@ end;
 actualiza_trozo_final(16,0,224,256,4);
 copymemory(@buffer_sprites,@memoria[$f000],$1000);
 end;
+
 procedure eventos_exedexes;
 begin
 if event.arcade then begin
@@ -105,6 +107,7 @@ if event.arcade then begin
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
 end;
+
 procedure exedexes_hw_principal;
 var
   f:byte;
@@ -137,6 +140,7 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 function exedexes_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -148,6 +152,7 @@ case direccion of
   $c004:exedexes_getbyte:=marcade.dswb;
 end;
 end;
+
 procedure exedexes_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -175,6 +180,7 @@ case direccion of
   $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
+
 function exedexes_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -182,6 +188,7 @@ case direccion of
   $6000:exedexes_snd_getbyte:=sound_command;
 end;
 end;
+
 procedure exedexes_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -193,16 +200,19 @@ case direccion of
   $8003:sn_76496_1.Write(valor);
 end;
 end;
+
 procedure exedexes_snd_irq;
 begin
   z80_1.change_irq(HOLD_LINE);
 end;
+
 procedure exedexes_sound;
 begin
   ay8910_0.update;
   sn_76496_0.Update;
   sn_76496_1.Update;
 end;
+
 //Main
 procedure reset_exedexes_hw;
 begin
@@ -221,6 +231,7 @@ begin
  sc1on:=true;
  objon:=true;
 end;
+
 function iniciar_exedexes_hw:boolean;
 var
     colores:tpaleta;
@@ -237,6 +248,7 @@ const
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
 			16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
 			24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16);
+
 procedure poner_bg;
 var
   f,pos,color:word;
@@ -255,6 +267,7 @@ for f:=0 to $fff do begin
   put_gfx_flip(x*32,(63-y)*32,nchar,color,1,1,flipx,flipy);
 end;
 end;
+
 procedure poner_fg;
 var
   f,pos:word;
@@ -268,6 +281,7 @@ for f:=0 to $1fff do begin
   put_gfx_trans(x*16,(127-y)*16,nchar,0,2,2);
 end;
 end;
+
 begin
 llamadas_maquina.bucle_general:=exedexes_hw_principal;
 llamadas_maquina.reset:=reset_exedexes_hw;
@@ -345,4 +359,5 @@ marcade.dswb_val:=@exedexes_dip_b;
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;
 end;
+
 end.

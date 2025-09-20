@@ -1,0 +1,168 @@
+What's New!!! DSP Emulator
+
+DSP 0.21 11/03/23
+********
+-General
+    +Lazarus
+        -Added 'follow me' window style. The main emulation window follows select window when it moves.
+        -Fixed image preview error
+        -Fixed linux sort games
+        -Added check for SDL2 Mixer present, needed for linux and MacOS
+    +Windows
+        -Removed mouse cursor, slows down everything when enabled
+        -Updated SDL library to 2.26.3
+    +Updated preview images for new systems
+    +Change between drivers is faster now
+    +Better tape files loading, better error handling
+    +Fixed remembering last open dir for all systems
+    +Better fullscreen mode (Press F6), autoselect the best video mode
+    +Added sort options in game list menu. You can sort computers, Game & Watch, consoles and arcade (and arcade subtypes sport, run & gun, shot, maze, fight and drive)
+    +If no game is loaded, shows a image, not just an empty window
+    +Fixed window priority, if a option window is active, the window behind is disabled
+    +Added some languaje translations in main config menu
+    +Changed 'Show game list', 'Configure DSP' and 'Save screen' icons
+    +Changed 'Show game list' and 'Configure DSP' position in main window
+    +Fixed many ROMs export info (thanks to Neville)
+    +Added close function to many devices
+    +Consoles
+        -Better console game files loading, better error handling
+        -You can choose if you want start the driver with the window for loading games open or not
+        -Fixed label 'load disk' in console cartridge 'open' icon, now shows 'load game'
+    +Konami K051316
+        -Begin implementation, still WIP
+    +Konami 053246
+        -Fixed shadows
+    +Konami 052109
+        -Fixed scroll, now 'Ajax' works fine.
+    +CPU
+        -HD6309: Fixed opcodes $2c, $2d and $2f
+        -Konami CPU
+            +Fixed opcodes $66, $67, $6e, $6f, $76, $77, $7e, $7f, $b4 and $b5
+            +Added opcodes $74, $bc, $be, $c6, $cc, $cd and $ce (Fixes 'The Simpsons', it's playable to the end)
+        -M6809: 
+            +Fixed opcodes $2c, $2d, $2e and $2f
+            +Added opcodes $01, $29 and $1X2e
+        -M680X: 
+            +Added opcodes $47,$c2,$c9,$d9,$f0 and $fb
+            +Opcode $f3 is not for M6808
+        -M68000
+            +Split read/write byte flags
+            +Enhanced timings
+            +Fixed opcodes addi.l, addq.l, sbcd.rr, abcd.rr, roxr.w, roxl.w, rol.w, asr.b, lsr.b, roxr.b, ror.b, asr.w, lsr.w, ror.w, asr.l, lsr.l, roxr.l, ror.l asl.b, lsl.b, roxl.b, rol.b, asl.w, lsl.w, asl.l, lsl.l, roxl.l, rol.l
+            +Added movem.w $38 efective address
+        -MCS51
+            +Added opcodes $38..$3f, $62, $63, $64 and $b1
+            +Fixed external get/put byte with no function
+        -M6805: Added opcodes $21, $56, $6a, $7a, $7f and $c1
+        -FD1089: Updated decode functions
+        -Z80 CTC: converted to classes
+    +Sound
+        -Sound options simplified, now you can choose 'enabled' or 'disabled'
+        -Removed 11025Hz and 22050Hz sample quality options, they are useless!
+        -Make internal sound buffer bigger
+        -SEGA PCM: Added stereo
+        -SN76496: Added stereo
+        -VLM5030: Added stereo
+        -YM2203: Added stereo
+        -AY8910
+            +Added gain per channel
+            +Fixed AY8912 PORTB channel
+    +Controls
+        -Updated key redefine names
+            +'COIN' --> 'COIN/SELECT'
+            +'START' --> 'P1/START' or 'P2/START'
+        -Remove arcade keys when not using arcade drivers
+        -Enhanced joystick support
+            +New redefine buttons system, select and press the button to use it
+            +Rewrited joystick internal functions
+            +Start and coin/select keys can be mapped to joystick buttons
+        -Added start and coin/select in player redefinition page
+-Amstrad CPC
+    +If a CDT tape is loaded and there is no pause block at the beginning, a 2000ms pause is added to the virtual tape
+-Coleco
+    +Fire button 1 and 2 switched
+    +Fixed error message loading a cartridge
+-Sega Master System
+    +Remapped 'Pause' button to coin/select button
+-Sega Game Gear
+    +Removed 'Pause' button (doesn't have it)
+-SG-1000
+    +Added 'HOLD' button, mapped to coin/select
+-Ajax
+    +Added K051316 video chip
+-Ambush
+    +Added driver with sound
+-Arkanoid
+    +Added driver with sound
+-China Gate
+    +Added driver with sound
+-CPS1 HW
+    +Added 3 extra players buttons, all 'Street Fighter II' now works with all buttons
+    +Better row scroll, still not working
+-Gauntlet
+    +Gauntlet: Renamed ROM zip to 'gauntlet'
+    +Gauntlet II: Updated ROMs to v2
+-Hang-On HW
+    +Hang-On: added driver with sound
+    +Enduro racer: added driver with sound
+    +Space Harrier: added driver with sound, some sprite problems (M68000 bug?)
+-Kyugo HW
+    +S.R.D. Mission: Added driver with sound
+    +AirWolf: Added driver with sound
+-Mag Max
+    +Added driver with sound
+-MCR HW
+    +Tapper: added driver with sound
+-Mega System 1 HW
+    +Fixed all video issues
+        -Fixed graphics layers
+        -Fixed scroll
+        -Fixed sprites
+    +Fixed graphics decode
+    +Rod Land
+        -Updated ROMs
+        -Added graphics decrypt
+    +64th Street - A detective story: added driver with sound
+-Nemesis HW
+    +Rewrited screen flip, fixes TwinBee
+-Outrun
+    +Fixed tile buffer size and activation
+    +Fixed missing sprites
+    +Fixed tiles transparency
+    +Fixed tiles priority
+-Renegade
+    +Fixed input
+    +Fixed sprites
+-Sega System 16A HW
+    +Fixed graphics decode
+    +Fixed sprite ROMs and decode to 16bits
+    +Fixed tiles transparency
+    +Fixed tiles priority (very obious in WB3 end zone)
+    +Alien Syndrome: Updated fd1089 ROM decode key
+    +Wonder Boy III: Updated fd1089 ROM decode key
+-Sega System 16B HW
+    +Fixed disabled screen
+    +Fixed tiles transparency
+    +Fixed tiles priority
+    +Fixed tile buffer activation
+-Senjyo HW
+    +Update driver to new CTC
+    +Senjyo: Fixed ROMs export size (thanks to okurka)
+-Side Arms
+    +Added driver with sound
+-Speed Rumbler
+    +Added driver with sound
+-Super Duck
+    +Added driver with sound
+-The Simpsons
+    +Fixed video settings
+    +Added sprites dma interrupt enable/disable
+-Thunder Cross HW
+    +Fixed sprites priority
+-Tiger Road
+    +Added sprite buffer
+-Williams HW
+    +Fixed sound
+    +Joust: added driver with sound
+    +Robotron: added driver with sound
+    +Stargate: added driver with sound

@@ -31,7 +31,7 @@ var
  adpcm_b,adpcm_c:array[0..5] of byte;
  adpcm_pos,adpcm_end,adpcm_data:array[0..1] of dword;
 
-procedure update_video_opwolf;inline;
+procedure update_video_opwolf;
 var
   f,x,y,nchar,atrib,color:word;
   flipx,flipy:boolean;
@@ -135,13 +135,15 @@ case direccion of
   $380002:opwolf_getword:=$7f;
   $3a0000:opwolf_getword:=raton.x+15;  //mouse x
   $3a0002:opwolf_getword:=raton.y;  //mouse y
-  $3e0002:if m68000_0.access_8bits_hi_dir then opwolf_getword:=tc0140syt_0.comm_r;
+  $3e0002:if m68000_0.read_8bits_hi_dir then opwolf_getword:=tc0140syt_0.comm_r;
   $c00000..$c0ffff:opwolf_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:opwolf_getword:=ram3[(direccion and $3fff) shr 1];
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure opwolf_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -152,10 +154,9 @@ begin
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
 
-procedure opwolf_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
+      0..$3ffff:;
       $0ff000..$0ff7ff:opwolf_cchip_data_w(direccion and $7ff,valor);
 	    $0ff802:opwolf_cchip_status_w(valor);
 	    $0ffc00:opwolf_cchip_bank_w(valor);

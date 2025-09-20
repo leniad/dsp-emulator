@@ -91,7 +91,14 @@ var
  draw_video:procedure;
  char_scroll:array[0..$1f] of word;
 
-procedure draw_sprites_starforce(prioridad:byte);inline;
+procedure update_video_starforce;
+const
+  color_code:array[0..7] of byte=(0,2,4,6,1,3,5,7);
+var
+  nchar,f:word;
+  color,x,y,atrib:byte;
+
+procedure draw_sprites_starforce(prioridad:byte);
 var
   nchar,x,y,color,f:word;
   atrib:byte;
@@ -117,13 +124,6 @@ for f:=$1f downto 0 do begin
 end;
 end;
 
-procedure update_video_starforce;inline;
-const
-  color_code:array[0..7] of byte=(0,2,4,6,1,3,5,7);
-var
-  nchar,f:word;
-  stripe,pen,color,x,y,atrib:byte;
-  count:integer;
 begin
 //No usa stripe de fondo ni radar!
 for f:=0 to $1ff do begin
@@ -181,7 +181,7 @@ actualiza_trozo_final(16,0,224,256,5);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
-procedure draw_sprites_senjyo(prioridad:byte);inline;
+procedure draw_sprites_senjyo(prioridad:byte);
 var
   nchar,color,f:word;
   x,y,atrib:byte;
@@ -212,7 +212,6 @@ var
   sx,sy,nchar,f:word;
   stripe,pen,x,y,color,atrib:byte;
   count:integer;
-  temp:pword;
 begin
 //Fondo
 stripe:=memoria[$9e27]+1;
@@ -286,12 +285,11 @@ draw_sprites_senjyo(3);
 scroll__x_part2(4,5,8,@char_scroll[0]);  //chars
 //Radar
 for f:=0 to $3ff do begin
-    temp:=punbuf;
 		for x:=0 to 7 do begin
 			if (memoria[$b800+f] and (1 shl x))<>0 then begin
-				sy:=(8*(f mod 8)+x)+256;
-				sx:=224-(((f and $1ff) div 8));
-        punbuf^:=paleta[$200 or ((f shr 9) and 1)]; //Si es <$200 el color $200 si es mayor $201
+        punbuf^:=paleta[$200 or ((f shr 9) and 1)]; //Si es f<$200 el color $200 si es mayor $201
+        sy:=(8*(f mod 8)+256)+x;
+        sx:=224-((f and $1ff) div 8);
         putpixel(sx,sy,1,punbuf,5);
       end;
     end;
@@ -461,7 +459,7 @@ function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
     $0..$3:snd_inbyte:=z80pio_ba_cd_r(0,puerto and $3);
-    $8..$b:snd_inbyte:=z80ctc_r(0,puerto and $3);
+    $8..$b:snd_inbyte:=ctc_0.read(puerto and $3);
 end;
 end;
 
@@ -469,7 +467,7 @@ procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0..$3:z80pio_ba_cd_w(0,puerto and $3,valor);
-  $8..$b:z80ctc_w(0,puerto and $3,valor);
+  $8..$b:ctc_0.write(puerto and $3,valor);
 end;
 end;
 
@@ -498,7 +496,7 @@ begin
  z80_0.reset;
  z80_1.reset;
  z80pio_reset(0);
- z80ctc_reset(0);
+ ctc_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
@@ -515,7 +513,6 @@ end;
 procedure cerrar_starforce;
 begin
   z80pio_close(0);
-  z80ctc_close(0);
 end;
 
 function iniciar_starforce:boolean;
@@ -582,9 +579,10 @@ z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(starforce_sound_update);
 //Daisy Chain PIO+CTC
-z80ctc_init(0,z80_1.numero_cpu,2000000,z80_1.clock,NOTIMER_2,pio_int_main,z80ctc_trg01_w);
+ctc_0:=tz80ctc.create(z80_1.numero_cpu,2000000,z80_1.clock,NOTIMER_2,CTC0_TRG01);
+ctc_0.change_calls(pio_int_main);
 z80pio_init(0,pio_int_main,pio_read_porta);
-z80daisy_init(Z80_PIO_TYPE,Z80_CTC_TYPE);
+z80daisy_init(Z80_PIO_TYPE,Z80_CTC0_TYPE);
 //Chip CPU
 sn_76496_0:=sn76496_chip.Create(2000000);
 sn_76496_1:=sn76496_chip.Create(2000000);

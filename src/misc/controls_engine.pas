@@ -1,8 +1,13 @@
 unit controls_engine;
+
 interface
-uses lib_sdl2,main_engine,timer_engine{$ifdef fpc},sound_engine{$endif}{$ifdef windows},windows{$endif},sysutils;
+
+uses {$ifdef windows}windows,controls,{$endif}lib_sdl2,main_engine,
+     {$ifdef fpc}sound_engine,{$else}uchild,{$endif}timer_engine,sysutils;
+
 const
   NUM_PLAYERS=2-1;
+  NUM_JOYSTICKS=10-1;
   KEYBOARD_A=4;
   KEYBOARD_B=5;
   KEYBOARD_C=6;
@@ -104,19 +109,7 @@ const
   KEYBOARD_NDOT=99;
   //Reservada la ultima para indicar que no hay tecla
   KEYBOARD_NONE=255;
-  {$ifndef fpc}
-  //Cursor del raton
-  CDATA:array[0..31] of byte=(
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0);
-  CMASK:array[0..31] of byte=(
-        3,192,15,240,28,56,56,28,
-        113,142,225,135,193,131,206,115,
-        206,115,193,131,225,135,113,142,
-        56,28,28,56,15,240,3,192);
-  {$endif}
+
 type
     def_mouse = record
         x,y:word;
@@ -125,11 +118,10 @@ type
     def_event = record
         mouse,keyboard,arcade:boolean;
         emouse,ejoystick,ekeyboard,earcade:boolean;
-        num_joysticks:byte;
     end;
     def_arcade = record
         coin,start,up,down,left,right,but0,but1,but2,but3,but4,but5,use_key:array[0..NUM_PLAYERS] of boolean;
-        ncoin,nstart,nup,ndown,nleft,nright,nbut0,nbut1,nbut2,nbut3,nbut4,nbut5,jbut0,jbut1,jbut2,jbut3,jbut4,jbut5,num_joystick:array[0..NUM_PLAYERS] of byte;
+        ncoin,nstart,nup,ndown,nleft,nright,nbut0,nbut1,nbut2,nbut3,nbut4,nbut5,jcoin,jstart,jbut0,jbut1,jbut2,jbut3,jbut4,jbut5,num_joystick:array[0..NUM_PLAYERS] of byte;
         joy_up,joy_down,joy_left,joy_right:array[0..NUM_PLAYERS] of integer;
     end;
     def_marcade=record
@@ -150,6 +142,12 @@ type
         cpu:byte;
         clock:dword;
     end;
+    def_joysticks=record
+        num:byte;
+        nombre:array[0..NUM_JOYSTICKS] of string;
+        buttons:array[0..NUM_JOYSTICKS] of integer;
+    end;
+
 var
     keyboard:array [0..255] of boolean;
     marcade:def_marcade;
@@ -157,11 +155,14 @@ var
     arcade_input:def_arcade;
     analog:def_analog;
     raton:def_mouse;
-    joystick_def:array[0..NUM_PLAYERS] of libsdlp_joystick;
+    joystick:def_joysticks;
+    joystick_def:array[0..NUM_JOYSTICKS] of libsdlp_joystick;
+
+procedure controls_start;
 procedure evalue_controls;
 procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arcade:boolean);
-procedure open_joystick(player:byte);
-procedure close_joystick(num:byte);
+//Joystick
+procedure close_joystick;
 //Mouse cursor
 procedure show_mouse_cursor;
 procedure hide_mouse_cursor;
@@ -172,42 +173,97 @@ procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+
 implementation
 uses principal;
+
 var
-   keystate:pbyte=nil;
-   new_cursor:libsdlP_cursor;
+  keystate:pbyte=nil;
+
 procedure show_mouse_cursor;
+{$ifdef fpc}
+var
+  new_cursor:libSDLP_Cursor;
 begin
-{$ifndef fpc}
-new_cursor:=sdl_createcursor(@CDATA,@CMASK,16,16,7,7);
+new_cursor:=SDL_CreateSystemcursor(3);
+SDL_SetCursor(new_cursor);
+SDL_ShowCursor(1);
 {$else}
-new_cursor:=sdl_createsystemcursor(3);
+begin
+//No funciona en delphi (se vuelve muuuuuuuuuy lento)
+//child.Cursor:=crCross;
 {$endif}
-sdl_setcursor(new_cursor);
-sdl_showcursor(1);
 end;
+
 procedure hide_mouse_cursor;
+{$ifdef fpc}
+var
+  new_cursor:libSDLP_Cursor;
 begin
-if new_cursor<>nil then begin
-  sdl_freecursor(new_cursor);
-  new_cursor:=nil;
-end;
-sdl_showcursor(0);
-end;
-procedure open_joystick(player:byte);
+new_cursor:=SDL_CreateSystemcursor(1);
+SDL_SetCursor(new_cursor);
+SDL_ShowCursor(1);
+{$else}
 begin
-  joystick_def[player]:=SDL_JoystickOpen(arcade_input.num_joystick[player]);
+child.Cursor:=crDefault;
+{$endif}
 end;
-procedure close_joystick(num:byte);
+
+procedure close_joystick;
+var
+  f:byte;
 begin
-  SDL_JoystickClose(joystick_def[num]);
-  joystick_def[num]:=nil;
+for f:=0 to NUM_JOYSTICKS do begin
+  if joystick_def[f]<>nil then begin
+    SDL_JoystickClose(joystick_def[f]);
+    joystick_def[f]:=nil;
+  end;
 end;
+end;
+
+procedure controls_start;
+var
+  f:byte;
+function extract_joy_name(nombre:pansichar):string;
+var
+  ptemp:pbyte;
+  cadena:string;
+begin
+  if nombre=nil then begin
+    extract_joy_name:='None';
+    exit;
+  end;
+  ptemp:=pbyte(nombre);
+  cadena:='';
+  while ptemp^<>0 do begin
+    cadena:=cadena+chr(ptemp^);
+    inc(ptemp);
+  end;
+  extract_joy_name:=cadena;
+end;
+begin
+if keystate=nil then keystate:=pbyte(SDL_GetKeyboardState(nil));
+//Abro los joysticks
+close_joystick;
+joystick.num:=SDL_NumJoysticks;
+if joystick.num<>0 then begin
+  for f:=0 to (joystick.num-1) do begin
+    joystick_def[f]:=SDL_JoystickOpen(f);
+    joystick.nombre[f]:=extract_joy_name(SDL_JoystickName(joystick_def[f]))+'-'+inttohex(f,1);
+    joystick.buttons[f]:=sdl_joysticknumbuttons(joystick_def[f]);
+  end;
+end;
+for f:=0 to NUM_PLAYERS do if joystick_def[arcade_input.num_joystick[f]]=nil then arcade_input.use_key[f]:=true;
+end;
+
 procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arcade:boolean);
 var
   f:byte;
 begin
+event.emouse:=evalue_mouse;
+event.ekeyboard:=evalue_keyboard;
+event.ejoystick:=evalue_joystick;
+event.earcade:=evalue_arcade;
 for f:=0 to NUM_PLAYERS do begin
   arcade_input.up[f]:=false;
   arcade_input.down[f]:=false;
@@ -229,34 +285,25 @@ raton.y:=0;
 event.mouse:=false;
 event.arcade:=false;
 event.keyboard:=false;
-event.emouse:=evalue_mouse;
-event.ekeyboard:=evalue_keyboard;
-event.ejoystick:=evalue_joystick;
-event.earcade:=evalue_arcade;
-event.num_joysticks:=SDL_NumJoysticks;
-if keystate=nil then keystate:=pbyte(SDL_GetKeyboardState(nil));
 fillchar(keyboard[0],256,0);
-for f:=0 to NUM_PLAYERS do if joystick_def[f]<>nil then close_joystick(arcade_input.num_joystick[f]);
-for f:=0 to NUM_PLAYERS do open_joystick(f);
-for f:=0 to NUM_PLAYERS do if joystick_def[f]=nil then arcade_input.use_key[f]:=true;
 end;
-procedure evaluar_arcade_basic;
-var
-   f:byte;
+
+procedure evaluar_arcade_keyb_extra(player:byte);
 begin
-for f:=0 to NUM_PLAYERS do begin
-    if (arcade_input.coin[f]<>(keyboard[arcade_input.ncoin[f]])) then begin
-       arcade_input.coin[f]:=keyboard[arcade_input.ncoin[f]];
-       event.arcade:=true;
-    end;
-    if (arcade_input.start[f]<>(keyboard[arcade_input.nstart[f]])) then begin
-       arcade_input.start[f]:=keyboard[arcade_input.nstart[f]];
-       event.arcade:=true;
-    end;
+//System
+if (arcade_input.coin[player]<>(keyboard[arcade_input.ncoin[player]])) then begin
+  arcade_input.coin[player]:=keyboard[arcade_input.ncoin[player]];
+  event.arcade:=true;
+end;
+if (arcade_input.start[player]<>(keyboard[arcade_input.nstart[player]])) then begin
+  arcade_input.start[player]:=keyboard[arcade_input.nstart[player]];
+  event.arcade:=true;
 end;
 end;
+
 procedure evaluar_arcade_keyb(player:byte);
 begin
+//Joystick
 if (arcade_input.up[player]<>(keyboard[arcade_input.nup[player]])) then begin
     arcade_input.up[player]:=keyboard[arcade_input.nup[player]];
     event.arcade:=true;
@@ -325,76 +372,97 @@ end else begin
   end;
 end;
 end;
+
+procedure evaluar_arcade_joy_extra(tevent:integer;player:byte);
+var
+  tempb:boolean;
+  player_joy:byte;
+begin
+player_joy:=arcade_input.num_joystick[player];
+case tevent of
+  libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
+      //System
+      tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jcoin[player])<>0;
+      if (arcade_input.coin[player]<>tempb) then begin
+        arcade_input.coin[player]:=tempb;
+        event.arcade:=true;
+      end;
+      tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jstart[player])<>0;
+      if (arcade_input.start[player]<>tempb) then begin
+        arcade_input.start[player]:=tempb;
+        event.arcade:=true;
+      end;
+  end;
+end;
+end;
+
 procedure evaluar_arcade_joy(tevent:integer;player:byte);
 var
   valor:integer;
   tempb:boolean;
+  player_joy:byte;
 begin
-if event.num_joysticks=0 then exit;
-SDL_JoystickUpdate();
+player_joy:=arcade_input.num_joystick[player];
 case tevent of
   libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
+      //Buttons
       if timers.autofire_enabled[0+(player*6)] then begin
-        timers.autofire_status[0+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut0[player])<>0;
+        timers.autofire_status[0+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut0[player])<>0;
       end else begin
-        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut0[player])<>0;
+        tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut0[player])<>0;
         if arcade_input.but0[player]<>tempb then begin
           arcade_input.but0[player]:=tempb;
           event.arcade:=true;
         end;
       end;
       if timers.autofire_enabled[1+(player*6)] then begin
-        timers.autofire_status[1+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut1[player])<>0;
+        timers.autofire_status[1+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut1[player])<>0;
       end else begin
-        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut1[player])<>0;
+        tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut1[player])<>0;
         if arcade_input.but1[player]<>tempb then begin
           arcade_input.but1[player]:=tempb;
           event.arcade:=true;
         end;
       end;
       if timers.autofire_enabled[2+(player*6)] then begin
-        timers.autofire_status[2+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut2[player])<>0;
+        timers.autofire_status[2+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut2[player])<>0;
       end else begin
-        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut2[player])<>0;
+        tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut2[player])<>0;
         if arcade_input.but2[player]<>tempb then begin
           arcade_input.but2[player]:=tempb;
           event.arcade:=true;
         end;
-        event.arcade:=true;
       end;
       if timers.autofire_enabled[3+(player*6)] then begin
-        timers.autofire_status[3+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut3[player])<>0;
+        timers.autofire_status[3+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut3[player])<>0;
       end else begin
-        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut3[player])<>0;
+        tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut3[player])<>0;
         if arcade_input.but3[player]<>tempb then begin
           arcade_input.but3[player]:=tempb;
           event.arcade:=true;
         end;
-        event.arcade:=true;
       end;
       if timers.autofire_enabled[4+(player*6)] then begin
-        timers.autofire_status[4+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut4[player])<>0;
+        timers.autofire_status[4+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut4[player])<>0;
       end else begin
-        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut4[player])<>0;
+        tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut4[player])<>0;
         if arcade_input.but4[player]<>tempb then begin
           arcade_input.but4[player]:=tempb;
           event.arcade:=true;
         end;
-        event.arcade:=true;
       end;
       if timers.autofire_enabled[5+(player*6)] then begin
-        timers.autofire_status[5+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut5[player])<>0;
+        timers.autofire_status[5+(player*6)]:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut5[player])<>0;
       end else begin
-        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut5[player])<>0;
+        tempb:=SDL_JoystickGetButton(joystick_def[player_joy],arcade_input.jbut5[player])<>0;
         if arcade_input.but5[player]<>tempb then begin
           arcade_input.but5[player]:=tempb;
           event.arcade:=true;
         end;
-        event.arcade:=true;
       end;
   end;
   libSDL_JOYAXISMOTION:begin
-    valor:=SDL_JoystickGetAxis(joystick_def[player],0);
+    valor:=SDL_JoystickGetAxis(joystick_def[player_joy],0);
     tempb:=valor<arcade_input.joy_left[player];
     if tempb<>arcade_input.left[player] then begin
       event.arcade:=true;
@@ -405,7 +473,7 @@ case tevent of
       event.arcade:=true;
       arcade_input.right[player]:=tempb;
     end;
-    valor:=SDL_JoystickGetAxis(joystick_def[player],1);
+    valor:=SDL_JoystickGetAxis(joystick_def[player_joy],1);
     tempb:=valor<arcade_input.joy_up[player];
     if tempb<>arcade_input.up[player] then begin
       event.arcade:=true;
@@ -419,40 +487,31 @@ case tevent of
   end;
 end;
 end;
+
 procedure evalue_controls;
 var
-   f:byte;
-var
-  sdl_event:libSDL_Event;
-  sc_mul:byte;
-function video_mult:byte;
+   f,sc_mul:byte;
+   sdl_event:libSDL_Event;
+procedure video_mult;
 begin
   case main_screen.video_mode of
-    2,4,6:video_mult:=2;
-    5:video_mult:=3;
-    else video_mult:=1;
+    2,4:sc_mul:=2;
+    5:sc_mul:=3;
+    else sc_mul:=1;
   end;
 end;
-procedure evalue_joy;
-var
-   f:byte;
+
 begin
-for f:=0 to NUM_PLAYERS do begin
-if not(arcade_input.use_key[f]) then evaluar_arcade_joy(sdl_event.type_,f)
-  else evaluar_arcade_keyb(f);
-end;
-end;
-begin
-  if SDL_PollEvent(@sdl_event)=0 then exit;
   event.arcade:=false;
   event.keyboard:=false;
   event.mouse:=false;
+  if SDL_PollEvent(@sdl_event)=0 then exit;
   {$ifdef fpc}
   if sdl_event.type_=libSDL_WINDOWEVENT then
     if ((sdl_event.window.event<>libSDL_WINDOWEVENT_ENTER) and (sdl_event.window.event<>libSDL_WINDOWEVENT_LEAVE)) then SDL_ClearQueuedAudio(sound_device);
   {$endif}
   //Rellenar el teclado interno
-  //principal1.statusbar1.panels[2].text:=inttostr(sdl_event.key.keysym.scancode);
+  //principal1.statusbar1.panels[2].text:=inttostr(analog.c[0].x[0]);
   for f:=0 to $ff do
       if keyboard[f]<>(keystate[f]<>0) then begin
         event.keyboard:=true;
@@ -475,16 +534,25 @@ begin
      if keyboard[KEYBOARD_F10] then if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
      if keyboard[KEYBOARD_F11] then principal1.fSlow(nil);
   end;
-  //Arcade
-  if event.earcade then begin
-    evaluar_arcade_basic;
-    evalue_joy;
+  //Joy Stick
+  if (event.ejoystick or event.earcade) then begin
+    for f:=0 to NUM_PLAYERS do begin
+      if not(arcade_input.use_key[f]) then begin
+        evaluar_arcade_joy(sdl_event.type_,f);
+        if event.earcade then evaluar_arcade_joy_extra(sdl_event.type_,f);
+      end else begin
+        if event.keyboard then begin
+          evaluar_arcade_keyb(f);
+          if event.earcade then evaluar_arcade_keyb_extra(f);
+        end;
+      end;
+    end;
   end;
   //Raton
   if event.emouse then begin
     case sdl_event.type_ of
       libSDL_MOUSEMOTION:begin  //Movimiento
-                            sc_mul:=video_mult;
+                            video_mult;
                             raton.x:=sdl_event.motion.x div sc_mul;
                             raton.y:=sdl_event.motion.y div sc_mul;
                             event.mouse:=true;
@@ -505,9 +573,8 @@ begin
                              end;
     end;
   end;
-  //Joy Stick
-  if event.ejoystick then evalue_joy;
 end;
+
 procedure analog_read_0;
 var
   f:byte;
@@ -639,6 +706,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_1;
 var
   f:byte;
@@ -658,6 +726,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_2;
 var
   f:byte;
@@ -677,6 +746,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_3;
 var
   f:byte;
@@ -696,6 +766,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_4;
 var
   f:byte;
@@ -715,11 +786,13 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure init_analog(cpu:byte;cpu_clock:integer);
 begin
 analog.cpu:=cpu;
 analog.clock:=cpu_clock;
 end;
+
 procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted_x:boolean=false;inverted_y:boolean=false);
 var
    f:byte;
@@ -738,6 +811,7 @@ for f:=0 to NUM_PLAYERS do begin
 end;
 analog.c[0].return_center:=return_center;
 end;
+
 procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -749,6 +823,7 @@ analog.c[1].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[1].val[f]:=min_val;
 analog.c[1].return_center:=return_center;
 end;
+
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -760,6 +835,7 @@ analog.c[2].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[2].val[f]:=min_val;
 analog.c[2].return_center:=return_center;
 end;
+
 procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -771,6 +847,7 @@ analog.c[3].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[3].val[f]:=min_val;
 analog.c[3].return_center:=return_center;
 end;
+
 procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -782,4 +859,5 @@ analog.c[4].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[4].val[f]:=min_val;
 analog.c[4].return_center:=return_center;
 end;
+
 end.

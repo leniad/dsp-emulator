@@ -34,7 +34,7 @@ var
  adpcm_rom:array[0..1] of pbyte;
  nmk112_bank:array[0..7] of byte;
 
-procedure bank_nmk112(offset,valor:byte);inline;
+procedure bank_nmk112(offset,valor:byte);
 var
   chip,banknum:byte;
   bankaddr:dword;
@@ -59,7 +59,7 @@ begin
   copymemory(ptemp2,ptemp,$100);
 end;
 
-procedure draw_sprites(priority:byte);inline;
+procedure draw_sprites(priority:byte);
 var
 	f:word;
   sx,sy,code,color,w,h,pri,x:word;
@@ -95,7 +95,7 @@ begin
 	end;
 end;
 
-procedure update_video_sbombers;inline;
+procedure update_video_sbombers;
 var
   f,color,x,y,nchar,atrib:word;
   bank:byte;
@@ -181,7 +181,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin

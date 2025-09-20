@@ -202,7 +202,7 @@ begin
     end;
 end;
 
-procedure update_video;inline;
+procedure update_video;
 var
   x_temp:word;
 begin

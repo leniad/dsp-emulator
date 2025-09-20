@@ -69,7 +69,12 @@ var
  scroll_x:word;
  bg_video,fg_video:array[0..$3ff] of byte;
 
-procedure draw_sprites(prio:byte);inline;
+procedure update_video_brkthru;
+var
+  x,y,atrib:byte;
+  f,nchar,color:word;
+
+procedure draw_sprites(prio:byte);
 var
   f,x,y,nchar,color:word;
   atrib:byte;
@@ -104,10 +109,6 @@ begin
 	end;
 end;
 
-procedure update_video_brkthru;inline;
-var
-  x,y,atrib:byte;
-  f,nchar,color:word;
 begin
 for f:=0 to $1ff do begin
     if gfx[1].buffer[f] then begin

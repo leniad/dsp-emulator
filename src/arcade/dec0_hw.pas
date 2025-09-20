@@ -748,14 +748,14 @@ case direccion of
                       $a000,$1a000,$2a000,$3a000:slyspy_state:=0;
                       //State 0
                       $0..$7:begin
-                                if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
+                                if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                 bac06_0.tile_2.change_control0((direccion and 7) shr 1,tempw);
                              end;
                       $10..$17:begin
-                                  if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_2.control_1[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_2.control_1[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
+                                  if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_2.control_1[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_2.control_1[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                   bac06_0.tile_2.change_control1((direccion and 7) shr 1,tempw,true);
                                end;
@@ -766,22 +766,22 @@ case direccion of
                                       bac06_0.tile_2.buffer[(direccion and $1fff) shr 1]:=true;
                                    end;
                       $8000..$8007:begin
-                                      if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.control_0[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.control_0[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
+                                      if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.control_0[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.control_0[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                       bac06_0.tile_1.change_control0((direccion and 7) shr 1,tempw);
                                    end;
                       $8010..$8017:begin
-                                      if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.control_1[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.control_1[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
+                                      if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.control_1[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.control_1[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                       bac06_0.tile_1.change_control1((direccion and 7) shr 1,tempw);
                                    end;
                       $c000..$c07f:bac06_0.tile_1.colscroll[(direccion and $7f) shr 1]:=valor;
                       $c400..$c7ff:bac06_0.tile_1.rowscroll[(direccion and $3ff) shr 1]:=valor;
                       $e000..$ffff:begin
-                                       if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
+                                       if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                        if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>tempw then begin
                                           bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
@@ -790,8 +790,8 @@ case direccion of
                                    end;
                       //State 1
                       $18000..$19fff:begin
-                                       if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
+                                       if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                        if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>tempw then begin
                                           bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
@@ -808,8 +808,8 @@ case direccion of
                                       bac06_0.tile_2.buffer[(direccion and $1fff) shr 1]:=true;
                                    end;
                       $22000..$23fff:begin
-                                       if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
+                                       if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                        if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>tempw then begin
                                           bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
@@ -817,8 +817,8 @@ case direccion of
                                        end;
                                    end;
                       $2e000..$2ffff:begin
-                                       if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
+                                       if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                        if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>tempw then begin
                                           bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
@@ -827,8 +827,8 @@ case direccion of
                                    end;
                       // State 3
                       $30000..$31fff:begin
-                                       if m68000_0.access_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
-                                        else if m68000_0.access_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
+                                       if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff) or (valor and $ff00)
+                                        else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
                                        if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>tempw then begin
                                           bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;

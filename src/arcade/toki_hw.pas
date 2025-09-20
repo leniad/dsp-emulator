@@ -43,7 +43,7 @@ var
  scroll_x2:array[0..$ff] of word;
  prioridad_pant:boolean;
 
-procedure update_video_toki;inline;
+procedure update_video_toki;
 var
   f,color,sy,x,y,nchar,atrib,atrib2,atrib3:word;
 begin
@@ -171,7 +171,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure toki_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -186,7 +188,6 @@ begin
   end;
 end;
 
-procedure toki_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$5ffff:; //ROM

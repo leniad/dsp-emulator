@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,file_engine,pokey;
 
-procedure cargar_foodf;
+function iniciar_foodf:boolean;
 
 implementation
 const
@@ -35,6 +35,10 @@ var
  analog_data:array[0..7] of byte;
  analog_select:byte;
 
+procedure update_video_foodf;
+var
+  f,color,x,y,nchar,atrib:word;
+
 procedure draw_sprites(prio:byte);
 var
   color,atrib,atrib2:word;
@@ -55,9 +59,6 @@ for f:=$10 to $3f do begin
 end;
 end;
 
-procedure update_video_foodf;
-var
-  f,color,x,y,nchar,atrib:word;
 begin
 for f:=$0 to $3ff do begin
    atrib:=bg_ram[f];
@@ -140,7 +141,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos,data:word);inline;
+procedure foodf_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
   bit0,bit1,bit2:byte;
@@ -163,7 +166,6 @@ begin
     if pos<64 then buffer_color[pos]:=true;
 end;
 
-procedure foodf_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3fffff:case (direccion and $1ffff) of
@@ -216,16 +218,26 @@ begin
  analog_select:=0;
 end;
 
+procedure cerrar_foodf;
+begin
+write_file(Directory.Arcade_nvram+'foodf.nv',@nvram,$100);
+end;
+
 function iniciar_foodf:boolean;
 var
   memoria_temp:array[0..$3ffff] of byte;
   longitud:integer;
 const
   pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
-  ps_x:array[0..15] of dword=(8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7, 0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+  ps_x:array[0..15] of dword=(8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7,
+                              0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+                              8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
   resistances:array[0..2] of integer=(1000,470,220);
 begin
+llamadas_maquina.bucle_general:=foodf_principal;
+llamadas_maquina.close:=cerrar_foodf;
+llamadas_maquina.reset:=reset_foodf;
 iniciar_foodf:=false;
 iniciar_audio(false);
 //Pantallas
@@ -272,19 +284,6 @@ if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Dir
 //final
 reset_foodf;
 iniciar_foodf:=true;
-end;
-
-procedure cerrar_foodf;
-begin
-write_file(Directory.Arcade_nvram+'foodf.nv',@nvram,$100);
-end;
-
-procedure Cargar_foodf;
-begin
-llamadas_maquina.iniciar:=iniciar_foodf;
-llamadas_maquina.bucle_general:=foodf_principal;
-llamadas_maquina.close:=cerrar_foodf;
-llamadas_maquina.reset:=reset_foodf;
 end;
 
 end.

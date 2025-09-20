@@ -42,7 +42,7 @@ type
   end;
 
 var
-  mos6526_0:mos6526_chip;
+  mos6526_0,mos6526_1:mos6526_chip;
 
 implementation
 uses commodore64,mos6566;

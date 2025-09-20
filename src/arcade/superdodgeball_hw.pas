@@ -329,7 +329,7 @@ const
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 var
   colores:tpaleta;
-  offs,bit0,bit1,bit2,bit3:byte;
+  bit0,bit1,bit2,bit3:byte;
   f:word;
   memoria_temp:array[0..$3ffff] of byte;
 begin

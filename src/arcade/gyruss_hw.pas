@@ -43,7 +43,7 @@ var
   mem_opcodes:array[0..$1fff] of byte;
   mem_sound_sub:array[0..$fff] of byte;
 
-procedure update_video_gyruss;inline;
+procedure update_video_gyruss;
 var
     x,y,atrib:byte;
     f,nchar,color:word;

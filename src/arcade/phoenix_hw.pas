@@ -9,7 +9,7 @@ function phoenix_iniciar:boolean;
 
 implementation
 var
- banco_pal,scroll_y,banco,sound_latch_b:byte;
+ banco_pal,scroll_y,banco{$IFDEF PHOENIX_DEBUG},sound_latch_b{$ENDIF}:byte;
  mem_video:array[0..1,0..$fff] of byte;
 
 const
@@ -47,7 +47,7 @@ const
         (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-procedure update_video_phoenix;inline;
+procedure update_video_phoenix;
 var
     nchar:byte;
     color,f,x,y:word;
@@ -182,8 +182,10 @@ end;
 end;
 
 procedure pleiads_putbyte(direccion:word;valor:byte);
+{$IFDEF PHOENIX_DEBUG}
 var
   pitch,note:byte;
+{$ENDIF}
 begin
 direccion:=direccion and $7fff;
 case direccion of

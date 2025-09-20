@@ -41,7 +41,7 @@ var
  ram:array[0..$7fff] of word;
  oki1_mem,oki2_mem:pbyte;
 
-procedure update_video_boogwing;inline;
+procedure update_video_boogwing;
 begin
 deco16ic_0.update_pf_2(3,false);
 deco16ic_0.update_pf_1(3,true);
@@ -106,7 +106,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function boogwing_protection_region_0_104_r(real_address:word):word;inline;
+function boogwing_protection_region_0_104_r(real_address:word):word;
 var
   deco146_addr,data:word;
   cs:byte;
@@ -132,7 +132,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
+procedure cambiar_color(numero:word);
 var
   color:tcolor;
 begin
@@ -146,7 +146,7 @@ begin
   end;
 end;
 
-procedure boogwing_protection_region_0_104_w(real_address,data:word);inline;
+procedure boogwing_protection_region_0_104_w(real_address,data:word);
 var
   deco146_addr:word;
   cs:byte;

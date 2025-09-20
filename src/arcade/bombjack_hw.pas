@@ -42,7 +42,7 @@ var
  numero_fondo,sound_latch:byte;
  fondo_activo,nmi_vblank:boolean;
 
-procedure update_video_bombjack;inline;
+procedure update_video_bombjack;
 var
   x,y,atrib:byte;
   f,nchar,color:word;
@@ -83,7 +83,7 @@ actualiza_trozo_final(16,0,224,256,3);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_bombjack;inline;
+procedure eventos_bombjack;
 begin
 if event.arcade then begin
   //p1
@@ -145,7 +145,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -160,7 +160,7 @@ begin
   buffer_color[(dir shr 3) and $f]:=true;
 end;
 
-procedure cambia_fondo(base:word);inline;
+procedure cambia_fondo(base:word);
 var
     x,y,color,nchar,f:byte;
 begin

@@ -41,7 +41,7 @@ var
  ram:array[0..$3fff] of byte;
  sound_latch:byte;
 
-procedure update_video_actfancer;inline;
+procedure update_video_actfancer;
 begin
   bac06_0.tile_1.update_pf(1,false,false);
   bac06_0.tile_2.update_pf(0,true,false);
@@ -131,7 +131,10 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure actfancer_putbyte(direccion:dword;valor:byte);
+var
+  tempw:word;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -148,10 +151,6 @@ begin
     $100..$1ff:bac06_0.tile_1.buffer_color[(dir shr 4) and $f]:=true;
   end;
 end;
-
-procedure actfancer_putbyte(direccion:dword;valor:byte);
-var
-  tempw:word;
 begin
 case direccion of
   0..$2ffff:;

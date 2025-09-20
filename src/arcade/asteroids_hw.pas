@@ -32,7 +32,7 @@ var
   ram_bank:byte;
   linea:word;
 
-procedure update_video_as;inline;
+procedure update_video_as;
 var
   color,posicion,opcode:word;
   istack:array[0..3] of word;

@@ -1,3 +1,9 @@
+function sshr(num:integer;fac:byte):integer;
+begin
+  if num<0 then sshr:=-(abs(num) shr fac)
+    else sshr:=num shr fac;
+end;
+
 function m680x_neg(valor:byte;cc:pband_m6809):byte;
 var
   tempw:word;
@@ -306,8 +312,7 @@ var
 begin
 tempw:=valor;
 if (numero<>0) then begin
-   if (valor and (1 shl numero))<>0 then cc.c:=true
-      else cc.c:=false;
+   cc.c:=(valor and (1 shl (numero-1)))<>0;
    if numero<16 then tempw:=valor shr numero
       else tempw:=0;
    cc.n:=(tempw and $8000)<>0;
@@ -322,13 +327,12 @@ var
 begin
 tempw:=valor;
 if (numero<>0) then begin  //asld
-   if (valor and ($10000 shr numero))<>0 then cc.c:=true
-      else cc.c:=false;
+   cc.c:=(valor and ($10000 shr numero))<>0;
    if numero<16 then tempw:=valor shl numero
       else tempw:=0;
    cc.n:=(valor and $8000)<>0;
    cc.z:=(valor=0);
-   cc.v:=((0 xor valor xor valor xor (valor shr 1)) and $8000)<>0;
+   cc.v:=((0 xor tempw xor tempw xor (tempw shr 1)) and $8000)<>0;
 end;
 m680x_asld:=tempw;
 end;
@@ -374,7 +378,7 @@ begin
 tempw:=abs(smallint(valor));
 cc.c:=false;
 cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $8000)<>0;
-cc.n:=false;
+cc.n:=(tempw and $8000)<>0;
 cc.z:=(tempw=0);
 m680x_abs16:=tempw;
 end;
@@ -386,7 +390,7 @@ begin
 tempb:=abs(shortint(valor));
 cc.c:=false;
 cc.v:=((0 xor valor xor tempb xor (tempb shr 1)) and $80)<>0;
-cc.n:=false;
+cc.n:=(tempb and $80)<>0;
 cc.z:=(tempb=0);
 m680x_abs8:=tempb;
 end;
@@ -397,9 +401,8 @@ var
 begin
 tempw:=valor;
 if (numero<>0) then begin
-   if (valor and (1 shl numero))<>0 then cc.c:=true
-      else cc.c:=false;
-   if numero<16 then tempw:=valor shr numero
+   cc.c:=(valor and (1 shl (numero-1)))<>0;
+   if numero<16 then tempw:=sshr(smallint(valor),numero)
       else if (smallint(valor)<0) then tempw:=$ffff
            else tempw:=0;
    cc.n:=(tempw and $8000)<>0;

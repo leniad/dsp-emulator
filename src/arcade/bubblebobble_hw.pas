@@ -43,7 +43,7 @@ var
  ddr1,ddr2,ddr3,ddr4:byte;
  port1_in,port1_out,port2_in,port2_out,port3_in,port3_out,port4_in,port4_out:byte;
 
-procedure update_video_bublbobl;inline;
+procedure update_video_bublbobl;
 var
     nchar,color:word;
     sx,x,goffs,gfx_offs:word;
@@ -172,7 +172,19 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+function bublbobl_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$7fff,$c000..$f7ff,$fc00..$ffff:bublbobl_getbyte:=memoria[direccion];
+  $8000..$bfff:bublbobl_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
+  $f800..$f9ff:bublbobl_getbyte:=buffer_paleta[direccion and $1ff];
+  $fa00:bublbobl_getbyte:=sound_stat;
+end;
+end;
+
+procedure bublbobl_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -185,17 +197,6 @@ begin
   set_pal_color(color,dir shr 1);
 end;
 
-function bublbobl_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$7fff,$c000..$f7ff,$fc00..$ffff:bublbobl_getbyte:=memoria[direccion];
-  $8000..$bfff:bublbobl_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
-  $f800..$f9ff:bublbobl_getbyte:=buffer_paleta[direccion and $1ff];
-  $fa00:bublbobl_getbyte:=sound_stat;
-end;
-end;
-
-procedure bublbobl_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
         0..$bfff:; //ROM

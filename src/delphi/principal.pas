@@ -1,6 +1,6 @@
 unit principal;
 //{$SetPeFlags $20}
-{$DEFINE FINAL}
+//{$DEFINE FINAL}
 interface
 
 uses
@@ -31,9 +31,7 @@ type
     NES1: TMenuItem;
     Timer1: TTimer;
     Spectrum128K1: TMenuItem;
-    N110251: TMenuItem;
-    N220501: TMenuItem;
-    N441001: TMenuItem;
+    consonido1: TMenuItem;
     BombJack1: TMenuItem;
     PacmanHW1: TMenuItem;
     Emulacion1: TMenuItem;
@@ -222,7 +220,7 @@ type
     hopmappy1: TMenuItem;
     skykiddx1: TMenuItem;
     RocnRope1: TMenuItem;
-    Repulse1: TMenuItem;
+    kyugohw1: TMenuItem;
     heNewZelandStoryHardware1: TMenuItem;
     tnzs1: TMenuItem;
     InsectorX1: TMenuItem;
@@ -239,7 +237,6 @@ type
     RodLand1: TMenuItem;
     SaintDragon1: TMenuItem;
     TimePilot1: TMenuItem;
-    Timer4: TTimer;
     Pengo1: TMenuItem;
     Scramble1: TMenuItem;
     scobra1: TMenuItem;
@@ -488,6 +485,27 @@ type
     Senjyo1: TMenuItem;
     StarForce1: TMenuItem;
     Baluba1: TMenuItem;
+    Joust1: TMenuItem;
+    Robotron1: TMenuItem;
+    Stargate1: TMenuItem;
+    MCR1: TMenuItem;
+    tapper1: TMenuItem;
+    Image2: TImage;
+    Arkanoid1: TMenuItem;
+    SideArms1: TMenuItem;
+    SpeedRumbler1: TMenuItem;
+    ChinaGate1: TMenuItem;
+    MagMax1: TMenuItem;
+    Repulse1: TMenuItem;
+    SRDMission1: TMenuItem;
+    Airwolf1: TMenuItem;
+    Ambush1: TMenuItem;
+    SuperDuck1: TMenuItem;
+    HangOnHW1: TMenuItem;
+    HangOn1: TMenuItem;
+    EnduroRacer1: TMenuItem;
+    SpaceHarrier1: TMenuItem;
+    N64thStreet1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -511,7 +529,6 @@ type
     procedure fLoadCartucho(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
-    procedure Timer4Timer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
   private
     { Private declarations }
@@ -549,29 +566,45 @@ Init_sdl_lib;
 timers:=timer_eng.create;
 EmuStatus:=EsStoped;
 main_vars.cadena_dir:='\';
-directory.Base:=extractfiledir(application.ExeName)+'\';
+directory.Base:=ExtractFilePath(application.ExeName);
 file_ini_load;
 if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
 if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
 if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
 leer_idioma;
-principal1.idiomaclick(nil);
+cambiar_idioma(main_vars.idioma);
+fix_screen_pos(415,325);
+case main_screen.video_mode of
+  1,3,5,6:begin
+        principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
+        principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
+      end;
+  2,4:begin
+        principal1.Left:=(screen.Width div 2)-principal1.Width;
+        principal1.Top:=(screen.Height div 2)-principal1.Height;
+      end;
+end;
+//No puedo evitar este timer... Hasta que no está creada la ventana de la aplicacion no puedo crear la ventana interior
 principal1.timer2.Enabled:=true;
 end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 principal1.BitBtn3.Glyph:=nil;
-if EmuStatus=EsRuning then begin //Pausa
+if EmuStatus=EsRuning then begin //Cambiar a pausa
   timer1.Enabled:=false;
   EmuStatus:=EsPause;
   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
-end else begin //Play
+  principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[1];
+end else begin //Cambiar a play
   EmuStatus:=EsRuning;
   timer1.Enabled:=true;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
-  if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
+  principal1.BitBtn3.Hint:=leng[main_vars.idioma].hints[2];
+  if @llamadas_maquina.bucle_general<>nil then begin
+    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+    llamadas_maquina.bucle_general;
+  end;
 end;
 end;
 
@@ -587,12 +620,14 @@ if main_vars.tipo_maquina<>tipo then begin
     if tape_window1.Showing then tape_window1.close;
     if lenslock1.Showing then lenslock1.close;
   end;
+  //Pongo la emulacion en pausa para que terminen todos los procesos, y luego ejecuto el timer3 para cambio de driver
   if main_vars.driver_ok then EmuStatus:=EsPause;
   tipo_new:=tipo;
   timer3.Enabled:=true;
 end;
 end;
 
+//Timer para poner mensajes...
 procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
   velocidad:word;
@@ -604,16 +639,23 @@ statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
 main_vars.frames_sec:=0;
 end;
 
+//Inicializar DSP...
 procedure Tprincipal1.Timer2Timer(Sender: TObject);
 var
   tipo:word;
 begin
-//Inicializa las ventanas
 timer2.Enabled:=false;
-//Inicializo SDL
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
-  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
+  SDL_SetHint(libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,'1');
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE)<0) then begin
+    MessageDlg('SDL2 library can not be initialized.', mtError,[mbOk], 0);
+    halt(0);
+  end;
+  controls_start;
+end;
 Child:=TfrChild.Create(application);
+child.Width:=1;
+child.Height:=1;
 principal1.Caption:=principal1.Caption+DSP_VERSION;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;
@@ -624,6 +666,7 @@ end;
 load_game(tipo);
 end;
 
+//Cambio de maquina...
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
@@ -633,9 +676,6 @@ reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
 main_vars.driver_ok:=false;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
-timers.autofire_init;
-QueryPerformanceFrequency(cont_micro);
-valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
@@ -652,21 +692,30 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
-  principal1.timer1.Enabled:=true;
-  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+  timers.autofire_init;
+  QueryPerformanceFrequency(cont_micro);
+  valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
   QueryPerformanceCounter(cont_sincroniza);
-  principal1.ejecutar1click(nil);
+  principal1.BitBtn3.Glyph:=nil;
+  principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
+  timer1.Enabled:=true;
+  principal1.Enabled:=true;
+  EmuStatus:=EsRuning;
+  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+  llamadas_maquina.bucle_general;
 end;
 end;
 
-procedure Tprincipal1.Timer4Timer(Sender: TObject);
+//Continuar con la emulacion...
+procedure restart_emu;
 begin
-timer4.Enabled:=false;
-if not(main_vars.driver_ok) then exit;
-EmuStatus:=EmuStatusTemp;
-timer1.Enabled:=true;
+principal1.Enabled:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-llamadas_maquina.bucle_general;
+if main_vars.driver_ok then begin
+  EmuStatus:=EsRuning;
+  principal1.timer1.Enabled:=true;
+  llamadas_maquina.bucle_general;
+end;
 end;
 
 procedure Tprincipal1.CambiaAudio(Sender: TObject);
@@ -674,26 +723,22 @@ var
   tmp_audio:byte;
 begin
 if sound_status.hay_tsonido then begin
-  if sender<>nil then tmp_audio:= Tmenuitem(sender).Tag
-    else begin
-      tmp_audio:=sound_status.calidad_audio;
-      sound_status.calidad_audio:=255;
-    end;
-  if tmp_audio<>sound_status.calidad_audio then begin
-    sound_status.calidad_audio:=tmp_audio;
-    if sound_status.calidad_audio=3 then begin
-      SinSonido1.Checked:=true;
-      sound_status.hay_sonido:=false;
-    end;
-    if sound_status.calidad_audio<>3 then begin
-      sound_status.hay_sonido:=true;
-      close_audio;
-      if sound_status.stereo then iniciar_audio(true)
-        else iniciar_audio(false);
-    end;
+  if sender<>nil then tmp_audio:=Tmenuitem(sender).Tag
+    else tmp_audio:=byte(sound_status.hay_sonido);
+  case tmp_audio of
+    0:if sound_status.hay_sonido then begin ////No sound
+        SinSonido1.Checked:=true;
+        ConSonido1.Checked:=false;
+        sound_status.hay_sonido:=false;
+      end;
+    1:if not(sound_status.hay_sonido) then begin //Sound
+        SinSonido1.Checked:=false;
+        ConSonido1.Checked:=true;
+        sound_status.hay_sonido:=true;
+      end;
   end;
 end;
-Windows.SetFocus(child.Handle);
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.Reset1Click(Sender: TObject);
@@ -705,12 +750,7 @@ end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
-timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
-EmuStatus:=EsPause;
-aboutbox.show;
-while aboutbox.Showing do application.ProcessMessages;
-timer4.Enabled:=true;
+aboutbox.showmodal;
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);
@@ -722,7 +762,7 @@ procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
 begin
-if sender<>nil then tmp_idioma:= Tmenuitem(sender).tag
+if sender<>nil then tmp_idioma:=Tmenuitem(sender).tag
   else begin
     tmp_idioma:=main_vars.idioma;
     main_vars.idioma:=255;
@@ -731,17 +771,12 @@ if main_vars.idioma<>tmp_idioma then begin
   main_vars.idioma:=tmp_idioma;
   cambiar_idioma(main_vars.idioma);
 end;
-if child<>nil then Windows.SetFocus(child.Handle);
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
-timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
-EmuStatus:=EsPause;
-FLoadRom.Show;
-while FLoadRom.Showing do application.ProcessMessages;
-Windows.SetFocus(child.Handle);
+FLoadRom.Showmodal;
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -752,22 +787,12 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
-if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
-if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
+close_joystick;
 SDL_DestroyWindow(window_render);
 SDL_VideoQuit;
 SDL_Quit;
 close_sdl_lib;
 halt(0);
-end;
-
-procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
-begin
-timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
-EmuStatus:=EsPause;
-if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
-timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fPoke(Sender: TObject);
@@ -782,12 +807,7 @@ end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
-timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
-EmuStatus:=EsPause;
-MConfig.Show;
-while MConfig.Showing do application.ProcessMessages;
-timer4.enabled:=true;
+MConfig.Showmodal;
 end;
 
 procedure Tprincipal1.fSaveGif(Sender: TObject);
@@ -803,8 +823,8 @@ var
   JPG:TJPEGImage;
   imagen1:tbitmap;
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if SaveRom(StBitmap,nombre,indice) then begin
   case indice of
@@ -815,12 +835,12 @@ if SaveRom(StBitmap,nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
-      Windows.SetFocus(child.Handle);
+      restart_emu;
       exit;
     end;
     deletefile(nombre);
   end;
-  Directory.spectrum_image:=extractfiledir(nombre)+main_vars.cadena_dir;
+  Directory.spectrum_image:=ExtractFilePath(nombre);
   rect2.x:=0;
   rect2.y:=0;
   case main_screen.video_mode of
@@ -868,7 +888,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-timer4.Enabled:=true;
+restart_emu;
 end;
 
 procedure Tprincipal1.ffastload(Sender: TObject);
@@ -914,35 +934,42 @@ end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if @llamadas_maquina.cartuchos<>nil then
-  if not(llamadas_maquina.cartuchos) then MessageDlg('ROM/Cartucho/Snapshot no valido'+chr(10)+chr(13)+'ROM/Cartrigde/Snapshot not valid',mtError,[mbOk],0);
-timer4.Enabled:=true;
+if @llamadas_maquina.cartuchos<>nil then llamadas_maquina.cartuchos;
+restart_emu;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if @llamadas_maquina.cintas<>nil then
-  if not(llamadas_maquina.cintas) then MessageDlg('Cinta/Snapshot no valido'+chr(10)+chr(13)+'Tape/Snapshot not valid',mtError,[mbOk],0);
-timer4.Enabled:=true;
+if @llamadas_maquina.cintas<>nil then llamadas_maquina.cintas;
+restart_emu;
 end;
 
 procedure Tprincipal1.fConfigurar(Sender: TObject);
 begin
 if (@llamadas_maquina.configurar=nil) then begin
-    Windows.SetFocus(child.Handle);
+    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
     exit;
 end;
+principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
-timer4.Enabled:=true;
+restart_emu;
+end;
+
+procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
+begin
+principal1.Enabled:=false;
+timer1.Enabled:=false;
+EmuStatus:=EsPause;
+if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
+restart_emu;
 end;
 
 end.

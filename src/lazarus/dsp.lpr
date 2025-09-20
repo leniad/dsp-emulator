@@ -20,6 +20,7 @@ uses
 {$IFDEF UNIX}{$R dsp.res}{$ENDIF}
 
 begin
+  Application.Scaled:=True;
   Application.Title:='DSP Emulator';
   Application.Initialize;
   Application.CreateForm(Tprincipal1, principal1);

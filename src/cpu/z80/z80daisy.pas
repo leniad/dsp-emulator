@@ -13,7 +13,7 @@ const
   Z80_DAISY_IEO=$02;		// interrupt disable mask (IEO) */
 
   Z80_PIO_TYPE=0;
-  Z80_CTC_TYPE=1;
+  Z80_CTC0_TYPE=$10;
   Z80_DAISY_NONE=$FF;
 
   Z80_MAX_DAISY=3-1;
@@ -37,10 +37,10 @@ case tipo of
                   z80daisy_llamadas[pos].reti:=z80pio_irq_reti;
                   z80daisy_llamadas[pos].state:=z80pio_irq_state;
                end;
-  Z80_CTC_TYPE:begin
-                  z80daisy_llamadas[pos].state:=z80ctc_irq_state;
-                  z80daisy_llamadas[pos].ack:=z80ctc_irq_ack;
-                  z80daisy_llamadas[pos].reti:=z80ctc_irq_reti;
+  Z80_CTC0_TYPE:begin
+                  z80daisy_llamadas[pos].state:=ctc0_irq_state;
+                  z80daisy_llamadas[pos].ack:=ctc0_irq_ack;
+                  z80daisy_llamadas[pos].reti:=ctc0_irq_reti;
                end;
   Z80_DAISY_NONE:begin
                   z80daisy_llamadas[pos].ack:=nil;

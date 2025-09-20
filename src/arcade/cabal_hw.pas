@@ -48,7 +48,7 @@ var
  bg_ram:array[0..$1ff] of word;
  fg_ram:array[0..$3ff] of word;
 
-procedure update_video_cabal;inline;
+procedure update_video_cabal;
 var
   f,color,x,y,nchar,atrib:word;
 begin
@@ -165,7 +165,9 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(tmp_color,numero:word);inline;
+procedure cabal_putword(direccion:dword;valor:word);
+
+procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
 begin
@@ -179,7 +181,6 @@ begin
   end;
 end;
 
-procedure cabal_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$3ffff:; //ROM

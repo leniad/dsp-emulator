@@ -1,10 +1,14 @@
 unit solomonkey_hw;
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine;
+
 function iniciar_solomon:boolean;
+
 implementation
+
 const
         solomon_rom:array[0..2] of tipo_roms=(
         (n:'6.3f';l:$4000;p:0;crc:$645eb0f3),(n:'7.3h';l:$8000;p:$4000;crc:$1bf5c482),
@@ -32,7 +36,8 @@ const
 var
  sound_latch:byte;
  nmi_enable:boolean;
-procedure update_video_solomon;inline;
+
+procedure update_video_solomon;
 var
   f,color,nchar,x,y:word;
   atrib:byte;
@@ -74,6 +79,7 @@ end;
 actualiza_trozo_final(0,16,256,224,3);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
+
 procedure eventos_solomon;
 begin
 if event.arcade then begin
@@ -98,6 +104,7 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
 end;
 end;
+
 procedure solomon_principal;
 var
   f:byte;
@@ -123,6 +130,7 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 //Main
 function solomon_getbyte(direccion:word):byte;
 var
@@ -144,7 +152,10 @@ case direccion of
   $e606:;
 end;
 end;
-procedure cambiar_color(dir:word);inline;
+
+procedure solomon_putbyte(direccion:word;valor:byte);
+
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -161,7 +172,7 @@ begin
     $80..$ff:buffer_color[((dir shr 4) and $7)+8]:=true;
   end;
 end;
-procedure solomon_putbyte(direccion:word;valor:byte);
+
 begin
 case direccion of
    0..$bfff:; //ROM
@@ -187,6 +198,7 @@ case direccion of
    $f000..$ffff:;
 end;
 end;
+
 //Sound
 function solomon_snd_getbyte(direccion:word):byte;
 begin
@@ -195,6 +207,7 @@ case direccion of
   $8000:solomon_snd_getbyte:=sound_latch;
 end;
 end;
+
 procedure solomon_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -202,6 +215,7 @@ case direccion of
   $4000..$47ff:mem_snd[direccion]:=valor;
 end;
 end;
+
 procedure solomon_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -213,16 +227,19 @@ case (puerto and $ff) of
 	$31:ay8910_2.write(valor);
 end;
 end;
+
 procedure solomon_snd_irq;
 begin
   z80_1.change_irq(HOLD_LINE);
 end;
+
 procedure solomon_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
   ay8910_2.update;
 end;
+
 //Main
 procedure reset_solomon;
 begin
@@ -238,6 +255,7 @@ begin
  sound_latch:=0;
  nmi_enable:=true;
 end;
+
 function iniciar_solomon:boolean;
 var
     memoria_temp:array[0..$13fff] of byte;
@@ -303,4 +321,5 @@ marcade.dswb_val:=@solomon_dip_b;
 reset_solomon;
 iniciar_solomon:=true;
 end;
+
 end.

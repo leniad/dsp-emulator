@@ -41,7 +41,7 @@ var
  irq_ena:boolean;
  mem_opcodes:array[0..$9fff] of byte;
 
-procedure update_video_rocnrope;inline;
+procedure update_video_rocnrope;
 var
   x,y,atrib:byte;
   f:word;

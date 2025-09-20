@@ -36,7 +36,8 @@ var
  mem_decode:array[0..$5fff] of byte;
  scroll_y:array[0..$1f] of word;
 
-procedure draw_sprites;inline;
+procedure update_video_cclimber;
+procedure draw_sprites;
 var
   f,x,y,nchar,attr,attr2,color:byte;
   flipx,flipy:boolean;
@@ -55,7 +56,6 @@ for f:=$7 downto 0 do begin
 end;
 end;
 
-procedure update_video_cclimber;inline;
 var
   f,tile_index,nchar:word;
   color,attr,x,y:byte;
@@ -112,7 +112,7 @@ end;
 actualiza_trozo_final(0,16,256,224,3);
 end;
 
-procedure eventos_cclimber;inline;
+procedure eventos_cclimber;
 begin
 if event.arcade then begin
   //P1

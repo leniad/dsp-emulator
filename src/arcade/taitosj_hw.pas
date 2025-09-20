@@ -83,7 +83,7 @@ var
  mcu_toz80,mcu_zready,mcu_zaccept,mcu_address,mcu_busreq,mcu_fromz80,mcu_portA_in,
  mcu_portA_out:byte;
 
-procedure conv_chars1;inline;
+procedure conv_chars1;
 begin
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
   convert_gfx(0,0,@memoria[$9000],@ps_x,@ps_y,false,false);
@@ -92,7 +92,7 @@ begin
   convert_gfx(1,0,@memoria[$9000],@ps_x,@ps_y,false,false);
 end;
 
-procedure conv_chars2;inline;
+procedure conv_chars2;
 begin
   //Chars 2
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
@@ -288,7 +288,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   val,bit0,bit1,bit2:byte;
   color:tcolor;
