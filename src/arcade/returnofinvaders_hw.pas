@@ -28,21 +28,21 @@ const
         (n:'a37-17.gfxboard.ic36';l:$400;p:0;crc:$c63cf10e),(n:'a37-18.gfxboard.ic37';l:$400;p:$800;crc:$6db07bd1),
         (n:'a37-19.gfxboard.ic83';l:$400;p:$400;crc:$a92aea27),(n:'a37-20.gfxboard.ic84';l:$400;p:$c00;crc:$77a7aaf6));
         //Dip
-        retofinv_dip_a:array [0..5] of def_dip2=(
+        retofinv_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(3,2,1,0);name4:('30K 80K 80K+','30K 80K','30K','None')),
         (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('No','Yes')),
         (mask:$18;name:'Lives';number:4;val4:($18,$10,8,0);name4:('1','2','3','5')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        retofinv_dip_b:array [0..2] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        retofinv_dip_b:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:($f,$e,$d,$c,$b,$a,9,8,0,1,2,3,4,5,6,7);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),());
-        retofinv_dip_c:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')));
+        retofinv_dip_c:array [0..4] of def_dip2=(
         (mask:1;name:'Push Start to Skip Stage';number:2;val2:(1,0);name2:('Off','On')),
         (mask:$10;name:'Coin Per Play Display';number:2;val2:(0,$10);name2:('No','Yes')),
         (mask:$20;name:'Year Display';number:2;val2:(0,$20);name2:('No','Yes')),
         (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Coinage';number:2;val2:($80,0);name2:('A and B','A only')),());
+        (mask:$80;name:'Coinage';number:2;val2:($80,0);name2:('A and B','A only')));
 
 var
   sound_latch,sound_return,bg_bank,fg_bank:byte;
@@ -312,6 +312,7 @@ begin
 llamadas_maquina.bucle_general:=principal_retofinv;
 llamadas_maquina.reset:=reset_retofinv;
 llamadas_maquina.fps_max:=60.58;
+llamadas_maquina.scanlines:=224;
 iniciar_retofinv:=false;
 iniciar_audio(false);
 screen_init(1,224,288,true);
@@ -319,21 +320,21 @@ screen_init(2,224,288);
 screen_init(3,512,512,false,true);
 iniciar_video(224,288);
 //Main CPU
-z80_0:=cpu_z80.create(18432000 div 6,224);
+z80_0:=cpu_z80.create(18432000 div 6);
 z80_0.change_ram_calls(getbyte_retofinv,putbyte_retofinv);
 if not(roms_load(@memoria,retofinv_rom)) then exit;
 //Sub
-z80_1:=cpu_z80.create(18432000 div 6,224);
+z80_1:=cpu_z80.create(18432000 div 6);
 z80_1.change_ram_calls(getbyte_sub_retofinv,putbyte_sub_retofinv);
 if not(roms_load(@mem_misc,retofinv_sub)) then exit;
 //Sound CPU
-z80_2:=cpu_z80.Create(18432000 div 6,224);
+z80_2:=cpu_z80.Create(18432000 div 6);
 z80_2.change_ram_calls(getbyte_snd_retofinv,putbyte_snd_retofinv);
 z80_2.init_sound(retofinv_sound_update);
 timers.init(z80_2.numero_cpu,(18432000 div 6)/(2*60),retofinv_snd_nmi,nil,true);
 if not(roms_load(@mem_snd,retofinv_snd)) then exit;
 //MCU CPU
-taito_68705_0:=taito_68705p.create(18432000 div 6,224);
+taito_68705_0:=taito_68705p.create(18432000 div 6);
 if not(roms_load(taito_68705_0.get_rom_addr,retofinv_mcu)) then exit;
 //Sound Chips
 sn_76496_0:=sn76496_chip.Create(18432000 div 6);
@@ -373,12 +374,9 @@ for f:=0 to $7ff do begin
     gfx[2].colores[f]:=memoria_temp[$1000+bitswap16(f,15,14,13,12,11,10,9,8,7,6,5,4,3,0,1,2)];
 end;
 //Dip
-marcade.dswa:=$6f;
-marcade.dswb:=0;
-marcade.dswc:=$ff;
-marcade.dswa_val2:=@retofinv_dip_a;
-marcade.dswb_val2:=@retofinv_dip_b;
-marcade.dswc_val2:=@retofinv_dip_c;
+init_dips(1,retofinv_dip_a,$6f);
+init_dips(2,retofinv_dip_b,0);
+init_dips(3,retofinv_dip_c,$ff);
 //final
 reset_retofinv;
 iniciar_retofinv:=true;

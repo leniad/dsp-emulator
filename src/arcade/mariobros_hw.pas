@@ -26,11 +26,11 @@ const
         (nombre:'tune13.wav';restart:true),(nombre:'tune14.wav';restart:true),(nombre:'tune15.wav';restart:true),(nombre:'tune16.wav';restart:true),(nombre:'tune17.wav'),(nombre:'tune18.wav'),(nombre:'tune19.wav'),
         (nombre:'coin.wav'),(nombre:'insert_coin.wav'),(nombre:'turtle.wav'),(nombre:'crab.wav'),(nombre:'fly.wav'));
         //Dip
-        mario_dip_a:array [0..4] of def_dip2=(
+        mario_dip:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$c;name:'Coinage';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('20K','30K','40K','None')),
-        (mask:$c0;name:'Difficulty';number:4;val4:(0,$80,$40,$c0);name4:('Easy','Medium','Hard','Hardest')),());
+        (mask:$c0;name:'Difficulty';number:4;val4:(0,$80,$40,$c0);name4:('Easy','Medium','Hard','Hardest')));
 var
  haz_nmi:boolean;
  gfx_bank,palette_bank,scroll_y,death_val,skid_val:byte;
@@ -272,14 +272,14 @@ llamadas_maquina.reset:=reset_mario;
 llamadas_maquina.save_qsnap:=mario_qsave;
 llamadas_maquina.load_qsnap:=mario_qload;
 llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.scanlines:=264;
 iniciar_mario:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,264);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(mario_getbyte,mario_putbyte);
 //cargar roms
 if not(roms_load(@memoria,mario_rom)) then exit;
@@ -313,8 +313,7 @@ for f:=0 to $1ff do begin
 end;
 set_pal(colores,$200);
 //DIP
-marcade.dswa:=0;
-marcade.dswa_val2:=@mario_dip_a;
+init_dips(1,mario_dip,0);
 //final
 iniciar_mario:=true;
 end;

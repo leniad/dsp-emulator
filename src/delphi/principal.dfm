@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 318
+  ClientHeight = 293
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 257
+    Height = 232
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -666,7 +666,7 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 395
+    ExplicitWidth = 391
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -1228,12 +1228,12 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 257
+    Height = 232
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitLeft = 346
-    ExplicitHeight = 249
+    ExplicitLeft = 342
+    ExplicitHeight = 215
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1870,13 +1870,13 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 299
+    Top = 274
     Width = 397
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 291
-    ExplicitWidth = 395
+    ExplicitTop = 257
+    ExplicitWidth = 391
     DesignSize = (
       397
       19)
@@ -2141,6 +2141,10 @@ object principal1: Tprincipal1
             Caption = 'Oric Atmos'
             OnClick = CambiarMaquina
           end
+        end
+        object MSX1_1: TMenuItem
+          Caption = 'MSX - Sanyo MPC-100'
+          OnClick = CambiarMaquina
         end
       end
       object Arcade1: TMenuItem
@@ -2495,10 +2499,21 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
-          object BubbleBobble1: TMenuItem
-            Caption = 'Bubble Bobble'
+          object BubbleBobbleHW1: TMenuItem
+            Caption = 'Bubble Bobble HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object BubbleBobble1: TMenuItem
+              Caption = 'Bubble Bobble'
+              OnClick = CambiarMaquina
+            end
+            object Tokio1: TMenuItem
+              Caption = 'Tokio'
+              OnClick = CambiarMaquina
+            end
+            object SuperBobleBoble1: TMenuItem
+              Caption = 'Super Boble Boble'
+              OnClick = CambiarMaquina
+            end
           end
           object RallyXHardware1: TMenuItem
             Caption = 'Rally X HW'
@@ -3710,6 +3725,18 @@ object principal1: Tprincipal1
               Caption = 'The Punisher'
               OnClick = CambiarMaquina
             end
+            object Willow1: TMenuItem
+              Caption = 'Willow'
+              OnClick = CambiarMaquina
+            end
+            object N1941: TMenuItem
+              Caption = '1941: Counter Attack'
+              OnClick = CambiarMaquina
+            end
+            object Nemo1: TMenuItem
+              Caption = 'Nemo'
+              OnClick = CambiarMaquina
+            end
           end
           object SegaSystem161: TMenuItem
             Caption = 'Sega System16A HW'
@@ -3774,6 +3801,18 @@ object principal1: Tprincipal1
             end
             object Cotton1: TMenuItem
               Caption = 'Cotton'
+              OnClick = CambiarMaquina
+            end
+            object BayRoute1: TMenuItem
+              Caption = 'Bay Route'
+              OnClick = CambiarMaquina
+            end
+            object SonicBoom1: TMenuItem
+              Caption = 'Sonic Boom'
+              OnClick = CambiarMaquina
+            end
+            object timescanner1: TMenuItem
+              Caption = 'Time Scanner'
               OnClick = CambiarMaquina
             end
           end

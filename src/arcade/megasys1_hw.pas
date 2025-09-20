@@ -366,7 +366,6 @@ const
   scan_val_8:array[0..3] of byte=(8,4,4,2);
   scan_val_8_col:array[0..3] of byte=(1,2,2,4);
 var
-  mask_x,mask_y:word;
   cols:byte;
 begin
 layer_scr[layer].info:=valor;
@@ -378,9 +377,7 @@ end else begin
   layer_scr[layer].filas:=scan_val_8[valor and $3];
   cols:=scan_val_8_col[valor and $3];
 end;
-mask_x:=(layer_scr[layer].filas*256)-1;
-mask_y:=(cols*256)-1;
-screen_mod_scroll(layer+1,layer_scr[layer].filas*256,256,mask_x,cols*256,256,mask_y);
+mod_screen(layer+1,layer_scr[layer].filas*256,cols*256);
 fillchar(gfx[layer].buffer,$2000,1);
 end;
 
@@ -807,19 +804,17 @@ iniciar_megasys1:=false;
 llamadas_maquina.bucle_general:=megasys1_a_principal;
 llamadas_maquina.reset:=reset_megasys1;
 llamadas_maquina.fps_max:=56.191350;
+llamadas_maquina.scanlines:=262;
 iniciar_audio(true);
 screen_init(1,4096,4096,true);
-screen_mod_scroll(1,512,256,511,512,256,511);
 screen_init(2,4096,4096,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,4096,4096,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(256,224);
 getmem(memoria_temp,$100000);
 getmem(memoria_w,$60000);
 //Sound CPU
-m68000_1:=cpu_m68000.create(7000000,262);
+m68000_1:=cpu_m68000.create(7000000);
 m68000_1.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
 m68000_1.init_sound(megasys1_sound_update);
 //Sound Chips
@@ -830,7 +825,7 @@ ym2151_0.change_irq_func(snd_irq);
 case main_vars.tipo_maquina of
   138:begin //P-47
         //Main CPU
-        m68000_0:=cpu_m68000.create(6000000,262);
+        m68000_0:=cpu_m68000.create(6000000);
         m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
         //cargar roms
         if not(roms_load16w(@rom,p47_rom)) then exit;
@@ -860,7 +855,7 @@ case main_vars.tipo_maquina of
       end;
   139:begin  //Rodland
         //Main CPU
-        m68000_0:=cpu_m68000.create(6000000,262);
+        m68000_0:=cpu_m68000.create(6000000);
         m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
         //cargar roms
         if not(roms_load16w(memoria_w,rodland_rom)) then exit;
@@ -896,7 +891,7 @@ case main_vars.tipo_maquina of
       end;
   140:begin //Saint Dragon
         //Main CPU
-        m68000_0:=cpu_m68000.create(6000000,262);
+        m68000_0:=cpu_m68000.create(6000000);
         m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
         //cargar roms
         if not(roms_load16w(memoria_w,stdragon_rom)) then exit;
@@ -927,7 +922,7 @@ case main_vars.tipo_maquina of
   337:begin //64th street
         llamadas_maquina.bucle_general:=megasys1_c_principal;
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,262);
+        m68000_0:=cpu_m68000.create(12000000);
         m68000_0.change_ram16_calls(megasys1_c_getword,megasys1_c_putword);
         //cargar roms
         if not(roms_load16w(@rom,th64_rom)) then exit;

@@ -181,6 +181,7 @@ begin
 llamadas_maquina.bucle_general:=pengo_principal;
 llamadas_maquina.reset:=reset_pengo;
 llamadas_maquina.fps_max:=18432000/3/384/264;
+llamadas_maquina.scanlines:=264;
 iniciar_pengo:=false;
 iniciar_audio(false);
 screen_init(1,224,288);
@@ -188,7 +189,7 @@ screen_init(2,224,288,false,true);
 screen_mod_sprites(2,256,512,$ff,$1ff);
 iniciar_video(224,288);
 //Main CPU
-z80_0:=cpu_z80.create(18432000 div 6,264);
+z80_0:=cpu_z80.create(18432000 div 6);
 z80_0.change_ram_calls(pengo_getbyte,pengo_putbyte);
 z80_0.init_sound(pengo_sound_update);
 //cargar roms

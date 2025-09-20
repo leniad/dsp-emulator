@@ -25,18 +25,18 @@ const
         (n:'82s129.k3';l:$100;p:0;crc:$5aab7b41),(n:'82s129.k2';l:$100;p:$100;crc:$ababb072),
         (n:'82s129.k1';l:$100;p:$200;crc:$d311ed0d));
         //DIP
-        flower_dipa:array [0..5] of def_dip2=(
+        flower_dipa:array [0..4] of def_dip2=(
         (mask:8;name:'Energy Decrease';number:2;val2:(8,0);name2:('Slow','Fast')),
         (mask:$10;name:'Invulnerability';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Keep Weapons When Destroyed';number:2;val2:($20,0);name2:('No','Yes')),
         (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),
-        (mask:$80;name:'Shot Range';number:2;val2:($80,0);name2:('Short','Long')),());
-        flower_dipb:array [0..5] of def_dip2=(
+        (mask:$80;name:'Shot Range';number:2;val2:($80,0);name2:('Short','Long')));
+        flower_dipb:array [0..4] of def_dip2=(
         (mask:7;name:'Lives';number:8;val8:(7,6,5,4,3,6,1,0);name8:('1','2','3','4','5','2','7','Infinite')),
         (mask:$18;name:'Coinage';number:4;val4:(0,8,$18,$10);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
         (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Bonus Life';number:2;val2:($80,0);name2:('30K 50K+','50K 80K+')),());
+        (mask:$80;name:'Bonus Life';number:2;val2:($80,0);name2:('30K 50K+','50K 80K+')));
         CPU_SYNC=4;
         CPU_DIV=5;
 
@@ -300,26 +300,25 @@ begin
 llamadas_maquina.bucle_general:=flower_principal;
 llamadas_maquina.reset:=flower_reset;
 llamadas_maquina.fps_max:=60.6060606060606;
+llamadas_maquina.scanlines:=264*CPU_SYNC;
 iniciar_flower:=false;
 iniciar_audio(false);
 screen_init(1,288,224,true);
 screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
 //Si pongo 3Mhz, a veces en la demo la nave muere, pero no se da cuenta y entra en un bucle sin fin y ya no responde a nada
-z80_0:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
+z80_0:=cpu_z80.create(18432000 div CPU_DIV);
 z80_0.change_ram_calls(flower_getbyte,flower_putbyte);
 if not(roms_load(@memoria,flower_rom)) then exit;
 //Sub CPU
-z80_1:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
+z80_1:=cpu_z80.create(18432000 div CPU_DIV);
 z80_1.change_ram_calls(flower_getbyte_sub,flower_putbyte);
 if not(roms_load(@mem_misc,flower_rom2)) then exit;
 //Sound CPU
-z80_2:=cpu_z80.create(18432000 div CPU_DIV,264*CPU_SYNC);
+z80_2:=cpu_z80.create(18432000 div CPU_DIV);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.init_sound(flower_update_sound);
 timers.init(z80_2.numero_cpu,18432000/CPU_DIV/90,flower_snd_irq,nil,true);
@@ -357,10 +356,8 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,$100);
 //DIP
-marcade.dswa:=$f8;
-marcade.dswa_val2:=@flower_dipa;
-marcade.dswb:=$9d;
-marcade.dswb_val2:=@flower_dipb;
+init_dips(1,flower_dipa,$f8);
+init_dips(2,flower_dipb,$9d);
 //final
 iniciar_flower:=true;
 end;

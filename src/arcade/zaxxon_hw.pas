@@ -607,7 +607,6 @@ begin
     sn_76496_1.reset;
  end;
  pia8255_0.reset;
- reset_game_general;
  irq_vblank:=false;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -710,6 +709,7 @@ end;
 begin
 llamadas_maquina.reset:=reset_zaxxon;
 llamadas_maquina.fps_max:=59.999408;
+llamadas_maquina.scanlines:=264;
 iniciar_zaxxon:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -717,13 +717,13 @@ screen_init(2,256,256,false,true);
 screen_init(3,256,256);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(3041250,264);
+z80_0:=cpu_z80.create(3041250);
 case main_vars.tipo_maquina of
   175:begin  //Congo
         llamadas_maquina.bucle_general:=congo_principal;
         z80_0.change_ram_calls(congo_getbyte,congo_putbyte);
         //Sound
-        z80_1:=cpu_z80.create(4000000,264);
+        z80_1:=cpu_z80.create(4000000);
         z80_1.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
         timers.init(z80_1.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,nil,true);
         pia8255_0:=pia8255_chip.create;

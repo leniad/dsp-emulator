@@ -53,7 +53,7 @@ type
   end;
   npreg_z80=^nreg_z80;
   cpu_z80=class(cpu_class)
-          constructor create(clock:dword;frames_div:single);
+          constructor create(clock:dword);
           destructor free;
         public
           procedure change_irq_vector(estado:byte;irq_vector:byte);
@@ -581,13 +581,13 @@ begin
   self.irq_vector_cb:=z80daisy_ack;
 end;
 
-constructor cpu_z80.create(clock:dword;frames_div:single);
+constructor cpu_z80.create(clock:dword);
 begin
 getmem(self.r,sizeof(nreg_z80));
 fillchar(self.r^,sizeof(nreg_z80),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.in_port:=res_ff;
 self.out_port:=out_ff;
 self.despues_instruccion:=nil;

@@ -27,17 +27,17 @@ const
         (n:'kj-12.bin';l:$4000;p:$8000;crc:$33367c41));
         knjoe_sound:tipo_roms=(n:'kj-13.bin';l:$2000;p:$6000;crc:$0a0be3f5);
         //Dip
-        knjoe_dip_a:array [0..4] of def_dip2=(
+        knjoe_dip_a:array [0..3] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(0,4,2,6,7,3,5,1);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 5C')),
         (mask:$18;name:'Coin B';number:4;val4:(0,$10,$18,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Infinite Energy';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Free Play (not working)';number:2;val2:($40,0);name2:('Off','On')),());
-        knjoe_dip_b:array [0..5] of def_dip2=(
+        (mask:$40;name:'Free Play (not working)';number:2;val2:($40,0);name2:('Off','On')));
+        knjoe_dip_b:array [0..4] of def_dip2=(
         (mask:2;name:'Cabinet';number:2;val2:(2,0);name2:('Upright','Cocktail')),
         (mask:4;name:'Lives';number:2;val2:(4,0);name2:('3','5')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('10K 20K+','20K 40K+','30K 60K+','40K 80K+')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$80;name:'Demo Sound';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sound';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  sound_command,val_port1,val_port2,tile_bank,sprite_bank:byte;
@@ -246,7 +246,6 @@ begin
  ay8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -273,19 +272,19 @@ const
 begin
 llamadas_maquina.bucle_general:=knjoe_principal;
 llamadas_maquina.reset:=reset_knjoe;
+llamadas_maquina.scanlines:=256;
 iniciar_knjoe:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 screen_mod_sprites(2,256,0,$ff,0);
 iniciar_video(240,256);
 //Main CPU deberia ser 6Mhz!!
-z80_0:=cpu_z80.create(7000000,256);
+z80_0:=cpu_z80.create(7000000);
 z80_0.change_ram_calls(knjoe_getbyte,knjoe_putbyte);
 if not(roms_load(@memoria,knjoe_rom)) then exit;
 //Sound CPU
-m6800_0:=cpu_m6800.create(3579545,256,TCPU_M6803);
+m6800_0:=cpu_m6800.create(3579545,TCPU_M6803);
 m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(knjoe_sound_update);
@@ -343,10 +342,8 @@ for f:=0 to $7f do begin
   gfx[2].colores[f]:=(memoria_temp[f+$320] and $f)+$80;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7f;
-marcade.dswa_val2:=@knjoe_dip_a;
-marcade.dswb_val2:=@knjoe_dip_b;
+init_dips(1,knjoe_dip_a,$ff);
+init_dips(2,knjoe_dip_b,$7f);
 //final
 reset_knjoe;
 iniciar_knjoe:=true;

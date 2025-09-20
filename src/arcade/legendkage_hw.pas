@@ -18,22 +18,22 @@ const
         (n:'a54-05-1.84';l:$4000;p:0;crc:$0033c06a),(n:'a54-06-1.85';l:$4000;p:$4000;crc:$9f04d9ad),
         (n:'a54-07-1.86';l:$4000;p:$8000;crc:$b20561a4),(n:'a54-08-1.87';l:$4000;p:$c000;crc:$3ff3b230));
         //Dip
-        lk_dip_a:array [0..5] of def_dip2=(
+        lk_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(3,2,1,0);name4:('200K 700K 500K+','200K 900K 700K+','300K 1000K 700K+','300K 1300K 1000K+')),
         (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
         (mask:$18;name:'Lives';number:4;val4:($18,$10,8,0);name4:('3','4','5','255')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        lk_dip_b:array [0..2] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        lk_dip_b:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:($f,$e,$d,$c,$b,$a,9,8,0,1,2,3,4,5,6,7);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),());
-        lk_dip_c:array [0..6] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')));
+        lk_dip_c:array [0..5] of def_dip2=(
         (mask:2;name:'Initial Season';number:2;val2:(2,0);name2:('Spring','Winter')),
         (mask:8;name:'Difficulty';number:2;val2:(8,0);name2:('Easy','Normal')),
         (mask:$10;name:'Coinage Display';number:2;val2:(0,$10);name2:('No','Yes')),
         (mask:$20;name:'Year Display';number:2;val2:(0,$20);name2:('1985','MCMLXXXIV')),
-        (mask:$40;name:'Invulnerability (Cheat)';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Coin Slots';number:2;val2:(0,$80);name2:('1','2')),());
+        (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Coin Slots';number:2;val2:(0,$80);name2:('1','2')));
 
 var
  scroll_val:array[0..5] of byte;
@@ -347,28 +347,26 @@ const
 begin
 llamadas_maquina.bucle_general:=lk_hw_principal;
 llamadas_maquina.reset:=reset_lk_hw;
+llamadas_maquina.scanlines:=256;
 iniciar_lk_hw:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,$100);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_ram_calls(lk_getbyte,lk_putbyte);
 z80_0.change_io_calls(lk_inbyte,nil);
 if not(roms_load(@memoria,lk_rom)) then exit;
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,$100);
+z80_1:=cpu_z80.create(4000000);
 z80_1.change_ram_calls(snd_lk_hw_getbyte,snd_lk_hw_putbyte);
 z80_1.init_sound(lk_hw_sound_update);
 if not(roms_load(@mem_snd,lk_snd)) then exit;
 //MCU CPU
-taito_68705_0:=taito_68705p.create(3000000,$100);
+taito_68705_0:=taito_68705p.create(3000000);
 if not(roms_load(taito_68705_0.get_rom_addr,lk_mcu)) then exit;
 //Sound Chips
 ym2203_0:=ym2203_chip.create(4000000);
@@ -388,12 +386,9 @@ gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,$200*32*8*1,$200*32*8*0,$200*32*8*3,$200*32*8*2);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$7f;
-marcade.dswb:=0;
-marcade.dswc:=$ff;
-marcade.dswa_val2:=@lk_dip_a;
-marcade.dswb_val2:=@lk_dip_b;
-marcade.dswc_val2:=@lk_dip_c;
+init_dips(1,lk_dip_a,$7f);
+init_dips(2,lk_dip_b,0);
+init_dips(3,lk_dip_c,$ff);
 iniciar_lk_hw:=true;
 end;
 

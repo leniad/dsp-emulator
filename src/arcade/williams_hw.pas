@@ -460,15 +460,16 @@ llamadas_maquina.bucle_general:=williams_principal;
 llamadas_maquina.reset:=reset_williams;
 llamadas_maquina.close:=close_williams;
 llamadas_maquina.fps_max:=60.096154;
+llamadas_maquina.scanlines:=260*CPU_SYNC;
 iniciar_williams:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=249 then main_screen.rot270_screen:=true;
 screen_init(1,304,247,false,true);
 iniciar_video(292,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(12000000 div 3 div 4,260*CPU_SYNC,TCPU_MC6809E);
+m6809_0:=cpu_m6809.Create(12000000 div 3 div 4,TCPU_MC6809E);
 //Sound CPU
-m6800_0:=cpu_m6800.create(3579545,260*CPU_SYNC,TCPU_M6808);
+m6800_0:=cpu_m6800.create(3579545,TCPU_M6808);
 m6800_0.change_ram_calls(williams_snd_getbyte,williams_snd_putbyte);
 m6800_0.init_sound(williams_sound);
 //Misc

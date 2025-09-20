@@ -19,7 +19,7 @@ const
         (n:'ua0-12.u14';l:$40000;p:$80000;crc:$00b5381c),(n:'ua0-13.u15';l:$40000;p:$c0000;crc:$8f9a0ed3),
         (n:'ua0-6.u8';l:$40000;p:$100000;crc:$14ecc7bb),(n:'ua0-7.u9';l:$40000;p:$140000;crc:$ff1a4e68),
         (n:'ua0-8.u10';l:$40000;p:$180000;crc:$936e1884),(n:'ua0-9.u11';l:$40000;p:$1c0000;crc:$e812371c));
-        tndrcade_dip:array [0..10] of def_dip2=(
+        tndrcade_dip:array [0..9] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$c;name:'Bonus Life';number:4;val4:($c,4,0,8);name4:('50K','50K 150K+','70K 200K+','100K')),
         (mask:$30;name:'Lives';number:4;val4:($10,0,$30,$20);name4:('1','2','3','5')),
@@ -29,7 +29,7 @@ const
         (mask:$200;name:'Flip Screen';number:2;val2:($200,0);name2:('Off','On')),
         (mask:$800;name:'Demo Sounds';number:2;val2:($800,0);name2:('Off','On')),
         (mask:$3000;name:'Coin A';number:4;val4:($1000,$3000,0,$2000);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$c000;name:'Coin B';number:4;val4:($4000,$c000,0,$8000);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
+        (mask:$c000;name:'Coin B';number:4;val4:($4000,$c000,0,$8000);name4:('2C 1C','1C 1C','2C 3C','1C 2C')));
         //Twin Eagle
         twineagl_rom:tipo_roms=(n:'ua2-1';l:$80000;p:0;crc:$5c3fe531);
         twineagl_snd:tipo_roms=(n:'ua2-2';l:$2000;p:0;crc:$783ca84e);
@@ -41,7 +41,7 @@ const
         (n:'ua2-9';l:$80000;p:$100000;crc:$a451eae9),(n:'ua2-10';l:$80000;p:$100001;crc:$5bbe1f56));
         twineagl_pcm:array[0..1] of tipo_roms=(
         (n:'ua2-11';l:$80000;p:0;crc:$624e6057),(n:'ua2-12';l:$80000;p:$80000;crc:$3068ff64));
-        twineagl_dip:array [0..10] of def_dip2=(
+        twineagl_dip:array [0..9] of def_dip2=(
         (mask:1;name:'Copyright / License';number:2;val2:(0,1);name2:('Taito America/Romstar','Taito Corp Japan')),
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),
@@ -51,7 +51,7 @@ const
         (mask:$c00;name:'Bonus Life';number:4;val4:($c00,$800,$400,0);name4:('Never','500K','1000K','500K 1500K')),
         (mask:$3000;name:'Lives';number:4;val4:($1000,0,$3000,$2000);name4:('1','2','3','5')),
         (mask:$4000;name:'Licensor Option';number:2;val2:($4000,0);name2:('Option 1','Option 2')),
-        (mask:$8000;name:'Coinage Type';number:2;val2:($8000,0);name2:('Coin Mode 2','Coin Mode 2')),());
+        (mask:$8000;name:'Coinage Type';number:2;val2:($8000,0);name2:('Coin Mode 2','Coin Mode 2')));
         //Thunder & Lightning
         thunderl_rom:array[0..1] of tipo_roms=(
         (n:'m4';l:$8000;p:0;crc:$1e6b9462),(n:'m5';l:$8000;p:$1;crc:$7e82793e));
@@ -60,10 +60,10 @@ const
         (n:'t15';l:$20000;p:$40001;crc:$b97a7b56),(n:'t14';l:$20000;p:$40000;crc:$79c707be));
         thunderl_pcm:array[0..1] of tipo_roms=(
         (n:'r28';l:$80000;p:0;crc:$a043615d),(n:'r27';l:$80000;p:$80000;crc:$cb8425a3));
-        thunderl_dip_a:array [0..2] of def_dip2=(
+        thunderl_dip_a:array [0..1] of def_dip2=(
         (mask:$10;name:'Force 1 Life';number:2;val2:(0,$10);name2:('Off','On')),
-        (mask:$e0;name:'Copyright';number:8;val8:($80,$c0,$e0,$a0,$60,$40,$20,0);name8:('Romstar','Seta (Romstar License)','Seta (Visco License)','Visco','None','None','None','None')),());
-        thunderl_dip_b:array [0..8] of def_dip2=(
+        (mask:$e0;name:'Copyright';number:8;val8:($80,$c0,$e0,$a0,$60,$40,$20,0);name8:('Romstar','Seta (Romstar License)','Seta (Visco License)','Visco','None','None','None','None')));
+        thunderl_dip_b:array [0..7] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:($c,$d,8,$e,9,4,0,5,$a,$f,1,6,2,$b,7,3);name16:('4C 1C','3C 1C','4C 2C','2C 1C','3C 2C','4C 3C','4C 4C','3C 3C','3C 3C','1C 1C','3C 4C','2C 3C','2C 4C','1C 2C','1C 3C','1C 4C')),
         (mask:$f0;name:'Coin B';number:16;val16:($c0,$d0,$80,$e0,$90,$40,0,$50,$a0,$f0,$10,$60,$20,$b0,$70,$30);name16:('4C 1C','3C 1C','4C 2C','2C 1C','3C 2C','4C 3C','4C 4C','3C 3C','3C 3C','1C 1C','3C 4C','2C 3C','2C 4C','1C 2C','1C 3C','1C 4C')),
         (mask:$200;name:'Flip Screen';number:2;val2:(0,$200);name2:('Off','On')),
@@ -71,7 +71,7 @@ const
         (mask:$800;name:'Controls';number:2;val2:($800,0);name2:('2','1')),
         (mask:$1000;name:'Demo Sounds';number:2;val2:($1000,0);name2:('Off','On')),
         (mask:$2000;name:'Lives';number:2;val2:($2000,0);name2:('3','2')),
-        (mask:$c000;name:'Difficulty';number:4;val4:($8000,$c000,$4000,0);name4:('Easy','Normal','Hard','Hardest')),());
+        (mask:$c000;name:'Difficulty';number:4;val4:($8000,$c000,$4000,0);name4:('Easy','Normal','Hard','Hardest')));
 
 var
  rom:array[0..$4ffff] of word;
@@ -588,20 +588,18 @@ case main_vars.tipo_maquina of
       end;
   304:llamadas_maquina.bucle_general:=seta_principal;
 end;
+llamadas_maquina.scanlines:=256;
 iniciar_seta:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,256,false,true);
 case main_vars.tipo_maquina of
-  303:begin
-        screen_init(2,1024,512,false,false);
-        screen_mod_scroll(2,1024,512,1023,512,256,511);
-      end;
+  303:screen_init(2,1024,512,false,false);
 end;
 main_screen.rot270_screen:=true;
 iniciar_video(384,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(16000000 div 2,256);
+m68000_0:=cpu_m68000.create(16000000 div 2);
 getmem(ptemp,$200000);
 case main_vars.tipo_maquina of
   302:begin
@@ -610,7 +608,7 @@ case main_vars.tipo_maquina of
         m68000_0.change_ram16_calls(tndrcade_getword,tndrcade_putword);
         if not(roms_load16w(@rom,tndrcade_rom)) then exit;
         //Sound CPU
-        m6502_0:=cpu_m6502.create(16000000 div 8,256,TCPU_M65C02);
+        m6502_0:=cpu_m6502.create(16000000 div 8,TCPU_M65C02);
         m6502_0.change_ram_calls(tndrcade_snd_getbyte,tndrcade_snd_putbyte);
         m6502_0.init_sound(tndrcade_sound_update);
         if not(roms_load(@memoria_temp,tndrcade_snd)) then exit;
@@ -627,8 +625,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(ptemp,tndrcade_sprites)) then exit;
         convert_sprites($4000);
         //DIP
-        marcade.dswa:=$f77f;
-        marcade.dswa_val2:=@tndrcade_dip;
+        init_dips(1,tndrcade_dip,$f77f);
     end;
     303:begin  //Twin Eagle
         scanlines_proc:=twineagl_scan_lines;
@@ -636,7 +633,7 @@ case main_vars.tipo_maquina of
         m68000_0.change_ram16_calls(twineagl_getword,twineagl_putword);
         if not(roms_load_swap_word(@rom,twineagl_rom)) then exit;
         //Sound CPU
-        m6502_0:=cpu_m6502.create(16000000 div 8,256,TCPU_M65C02);
+        m6502_0:=cpu_m6502.create(16000000 div 8,TCPU_M65C02);
         m6502_0.change_ram_calls(twineagl_snd_getbyte,twineagl_snd_putbyte);
         m6502_0.init_sound(seta_sound_update);
         if not(roms_load(@memoria_temp,twineagl_snd)) then exit;
@@ -658,8 +655,7 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,16*16*4,0,4,8,12);
         convert_gfx(1,0,ptemp,@ps_x_te,@ps_y_te,false,false);
         //DIP
-        marcade.dswa:=$bff7;
-        marcade.dswa_val2:=@twineagl_dip;
+        init_dips(1,twineagl_dip,$bff7);
     end;
     304:begin
         scanlines_proc:=thunderl_scan_lines;
@@ -677,10 +673,8 @@ case main_vars.tipo_maquina of
         if not(roms_load16w(pword(ptemp),thunderl_sprites)) then exit;
         convert_sprites($1000);
         //DIP
-        marcade.dswa:=$e0;
-        marcade.dswa_val2:=@thunderl_dip_a;
-        marcade.dswb:=$e9ff;
-        marcade.dswb_val2:=@thunderl_dip_b;
+        init_dips(1,thunderl_dip_a,$e0);
+        init_dips(2,thunderl_dip_b,$e9ff);
     end;
 end;
 freemem(ptemp);

@@ -269,15 +269,15 @@ begin
 iniciar_puzz3x3:=false;
 llamadas_maquina.bucle_general:=puzz3x3_principal;
 llamadas_maquina.reset:=reset_puzz3x3;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,512,511);
 screen_init(2,512,256,true);
 screen_init(3,512,256,true);
 screen_init(4,512,512,false,true);
 iniciar_video(512,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,$100);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(puzz3x3_getword,puzz3x3_putword);
 m68000_0.init_sound(puzz3x3_sound_update);
 //OKI rom

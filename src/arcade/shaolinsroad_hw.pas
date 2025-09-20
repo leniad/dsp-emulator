@@ -21,18 +21,18 @@ const
         (n:'477j12.a14';l:$100;p:$200;crc:$83e95ea8),(n:'477j09.b8';l:$100;p:$300;crc:$aa900724),
         (n:'477j08.f16';l:$100;p:$400;crc:$80009cf5));
         //Dip
-        shaolin_dip_a:array [0..5] of def_dip2=(
+        shaolin_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 70K+','40K 80K+','40K','50K')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        shaolin_dip_b:array [0..2] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        shaolin_dip_b:array [0..1] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')),());
-        shaolin_dip_c:array [0..2] of def_dip2=(
+        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')));
+        shaolin_dip_c:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
 
 var
  banco_pal,scroll:byte;
@@ -76,15 +76,15 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or 8);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYS
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
@@ -215,7 +215,6 @@ begin
  frame_main:=m6809_0.tframes;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
  banco_pal:=0;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -241,14 +240,14 @@ llamadas_maquina.bucle_general:=shaolin_principal;
 llamadas_maquina.reset:=reset_shaolin;
 llamadas_maquina.save_qsnap:=shaolin_qsave;
 llamadas_maquina.load_qsnap:=shaolin_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_shaolin:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_MC6809E);
+m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_MC6809E);
 m6809_0.change_ram_calls(shaolin_getbyte,shaolin_putbyte);
 m6809_0.init_sound(shaolin_sound);
 if not(roms_load(@memoria,shaolin_rom)) then exit;
@@ -303,12 +302,9 @@ for bit1:=0 to 255 do begin
 	bit0:=bit0+1;
 end;
 //DIP
-marcade.dswa:=$5a;
-marcade.dswb:=$f;
-marcade.dswc:=$ff;
-marcade.dswa_val2:=@shaolin_dip_a;
-marcade.dswb_val2:=@shaolin_dip_b;
-marcade.dswc_val2:=@shaolin_dip_c;
+init_dips(1,shaolin_dip_a,$5a);
+init_dips(2,shaolin_dip_b,$f);
+init_dips(3,shaolin_dip_c,$ff);
 //final
 reset_shaolin;
 iniciar_shaolin:=true;

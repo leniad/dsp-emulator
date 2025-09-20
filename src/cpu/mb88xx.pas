@@ -24,7 +24,7 @@ type
      end;
      preg_mb88xx=^reg_mb88xx;
      cpu_mb88xx=class(cpu_class)
-          constructor create(clock:dword;frames_div:word;serial_cb:exec_type_simple=nil);
+          constructor create(clock:dword;serial_cb:exec_type_simple=nil);
           destructor free;
         public
           port_k,port_p_r:cpu_inport_call;
@@ -102,13 +102,13 @@ begin
 	end;
 end;
 
-constructor cpu_mb88xx.create(clock:dword;frames_div:word;serial_cb:exec_type_simple=nil);
+constructor cpu_mb88xx.create(clock:dword;serial_cb:exec_type_simple=nil);
 begin
 getmem(self.r,sizeof(reg_mb88xx));
 fillchar(self.r^,sizeof(reg_mb88xx),0);
 self.numero_cpu:=cpu_main_init(clock div 6);
 self.clock:=clock div 6;
-self.tframes:=(clock/6/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/6/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 if @serial_cb<>nil then self.timer_serial:=timers.init(self.numero_cpu,self.clock/SERIAL_PRESCALE,serial_cb,nil,false);
 self.port_k:=nil;
 self.port_p_r:=nil;

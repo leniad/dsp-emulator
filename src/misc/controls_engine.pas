@@ -128,7 +128,7 @@ type
         in0,in1,in2,in3,in4:word;
         dswa,dswb,dswc:word;
         dswa_val,dswb_val,dswc_val:pdef_dip;
-        dswa_val2,dswb_val2,dswc_val2:pdef_dip2;
+        dipsw_a,dipsw_b,dipsw_c:array of def_dip2;
     end;
     def_analog_control=record
         x,y:array[0..NUM_PLAYERS] of integer;
@@ -175,9 +175,11 @@ procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+//DIPs
+procedure init_dips(pos:byte;dip_sw:array of def_dip2;val:word);
 
 implementation
-uses principal;
+uses principal,file_engine;
 
 var
   keystate:pbyte=nil;
@@ -882,6 +884,35 @@ analog.c[4].max_val:=max_val;
 analog.c[4].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[4].val[f]:=min_val;
 analog.c[4].return_center:=return_center;
+end;
+
+procedure init_dips(pos:byte;dip_sw:array of def_dip2;val:word);
+var
+  f,val_dw:word;
+begin
+  case pos of
+    1:begin
+        setlength(marcade.dipsw_a,length(dip_sw));
+        for f:=0 to (length(dip_sw))-1 do marcade.dipsw_a[f]:=dip_sw[f];
+        val_dw:=1;
+        if file_ini_load_dip(val_dw) then marcade.dswa:=val_dw
+          else marcade.dswa:=val;
+    end;
+    2:begin
+        setlength(marcade.dipsw_b,length(dip_sw));
+        for f:=0 to (length(dip_sw))-1 do marcade.dipsw_b[f]:=dip_sw[f];
+        val_dw:=2;
+        if file_ini_load_dip(val_dw) then marcade.dswb:=val_dw
+          else marcade.dswb:=val;
+    end;
+    3:begin
+        setlength(marcade.dipsw_c,length(dip_sw));
+        for f:=0 to (length(dip_sw))-1 do marcade.dipsw_c[f]:=dip_sw[f];
+        val_dw:=3;
+        if file_ini_load_dip(val_dw) then marcade.dswc:=val_dw
+          else marcade.dswc:=val;
+    end;
+  end;
 end;
 
 end.

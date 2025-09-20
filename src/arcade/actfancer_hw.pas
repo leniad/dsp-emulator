@@ -25,16 +25,16 @@ const
         (n:'06';l:$10000;p:$18000;crc:$8cb6dd87),(n:'07';l:$8000;p:$28000;crc:$dd345def),
         (n:'00';l:$10000;p:$30000;crc:$d50a9550),(n:'01';l:$8000;p:$40000;crc:$34935e93),
         (n:'04';l:$10000;p:$48000;crc:$bcf41795),(n:'05';l:$8000;p:$58000;crc:$d38b94aa));
-        actfancer_dip_a:array [0..5] of def_dip2=(
+        actfancer_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        actfancer_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        actfancer_dip_b:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','100')),
         (mask:$c;name:'Difficulty';number:4;val4:(4,$c,8,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$20;name:'Bonus_Life';number:2;val2:($20,0);name2:('80K','None')),());
+        (mask:$20;name:'Bonus_Life';number:2;val2:($20,0);name2:('80K','None')));
 
 var
  rom:array[0..$2ffff] of byte;
@@ -183,8 +183,8 @@ procedure actfancer_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$7ff:mem_snd[direccion]:=valor;
-  $800:ym2203_0.Control(valor);
-  $801:ym2203_0.Write(valor);
+  $800:ym2203_0.control(valor);
+  $801:ym2203_0.write(valor);
   $1000:ym3812_0.control(valor);
   $1001:ym3812_0.write(valor);
   $3800:oki_6295_0.write(valor);
@@ -195,7 +195,7 @@ end;
 procedure actfancer_sound_update;
 begin
   ym3812_0.update;
-  ym2203_0.Update;
+  ym2203_0.update;
   oki_6295_0.update;
 end;
 
@@ -215,7 +215,6 @@ begin
  ym2203_0.reset;
  oki_6295_0.reset;
  bac06_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$7f;
  marcade.in2:=$ff;
@@ -233,15 +232,16 @@ var
 begin
 llamadas_maquina.bucle_general:=actfancer_principal;
 llamadas_maquina.reset:=reset_actfancer;
+llamadas_maquina.scanlines:=256;
 iniciar_actfancer:=false;
 iniciar_audio(false);
 //El video se inicia en el chip bac06!!!
 bac06_0:=bac06_chip.create(false,false,false,$100,0,0,2,1,1,$200);
 //Main CPU
-h6280_0:=cpu_h6280.create(21477200 div 3,$100);
+h6280_0:=cpu_h6280.create(21477200 div 3);
 h6280_0.change_ram_calls(actfancer_getbyte,actfancer_putbyte);
 //Sound CPU
-m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
 m6502_0.change_ram_calls(actfancer_snd_getbyte,actfancer_snd_putbyte);
 m6502_0.init_sound(actfancer_sound_update);
 //Sound Chips
@@ -276,10 +276,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,32*8,0,$18000*8,$30000*8,$48000*8);
         convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
         //Dip
-        marcade.dswa:=$7f;
-        marcade.dswa_val2:=@actfancer_dip_a;
-        marcade.dswb:=$ff;
-        marcade.dswb_val2:=@actfancer_dip_b;
+        init_dips(1,actfancer_dip_a,$7f);
+        init_dips(2,actfancer_dip_b,$ff);
       end;
 end;
 //final

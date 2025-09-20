@@ -20,17 +20,17 @@ const
         prehisle_sprites:array[0..1] of tipo_roms=(
         (n:'pi8910.k14';l:$80000;p:0;crc:$5a101b0b),(n:'gt.5';l:$20000;p:$80000;crc:$3d3ab273));
         //Dip
-        prehisle_dip_a:array [0..5] of def_dip2=(
+        prehisle_dip_a:array [0..4] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Level Select';number:2;val2:(2,0);name2:('Off','On')),
         (mask:4;name:'Bonus Life';number:2;val2:(4,0);name2:('Only Twice','Allways')),
         (mask:$30;name:'Coinage';number:4;val4:(0,$10,$20,$30);name4:('A 4C/1C B 1C/4C','A 3C/1C B 1C/3C','A 2C/1C B 1C/2C','1C 1C')),
-        (mask:$c0;name:'Lives';number:4;val4:($80,$c0,$40,0);name4:('2','3','4','5')),());
-        prehisle_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:($80,$c0,$40,0);name4:('2','3','4','5')));
+        prehisle_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Standard','Middle','Difficult')),
         (mask:$c;name:'Game Mode';number:4;val4:(8,$c,0,4);name4:('Demo Sounds Off','Demo Sounds On','Freeze','Infinite Lives')),
         (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('100K 200K','150K 300K','300K 500K','None')),
-        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),());
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')));
 
 var
  rom:array[0..$1ffff] of word;
@@ -290,7 +290,6 @@ begin
  frame_snd:=z80_0.tframes;
  ym3812_0.reset;
  upd7759_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$7f;
@@ -315,24 +314,21 @@ begin
 llamadas_maquina.bucle_general:=prehisle_principal;
 llamadas_maquina.reset:=reset_prehisle;
 llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.scanlines:=264;
 iniciar_prehisle:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
 screen_init(2,256,256,true);
-//BG2
-screen_init(4,272,272);
-screen_mod_scroll(4,272,256,255,272,256,255);
-//BG0
-screen_init(5,272,272,true);
-screen_mod_scroll(5,272,256,255,272,256,255);
+screen_init(4,272,272); //BG2
+screen_init(5,272,272,true); //BG0
 iniciar_video(256,224);
 //Main CPU
 getmem(memoria_temp,$100000);
-m68000_0:=cpu_m68000.create(9000000,264);
+m68000_0:=cpu_m68000.create(9000000);
 m68000_0.change_ram16_calls(prehisle_getword,prehisle_putword);
 if not(roms_load16w(@rom,prehisle_rom)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,264);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
 z80_0.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
 z80_0.init_sound(prehisle_sound_update);
@@ -369,10 +365,8 @@ gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7f;
-marcade.dswa_val2:=@prehisle_dip_a;
-marcade.dswb_val2:=@prehisle_dip_b;
+init_dips(1,prehisle_dip_a,$ff);
+init_dips(2,prehisle_dip_b,$7f);
 //final
 freemem(memoria_temp);
 reset_prehisle;

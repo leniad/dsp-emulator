@@ -37,15 +37,15 @@ const
         pleiads_pal:array[0..1] of tipo_roms=(
         (n:'7611-5.33';l:$100;p:0;crc:$e38eeb83),(n:'7611-5.26';l:$100;p:$100;crc:$7a1bcb1e));
         //Dip
-        phoenix_dip_a:array [0..3] of def_dip2=(
+        phoenix_dip_a:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('3k 30k','4k 40k','5k 50k','6k 60k')),
-        (mask:$10;name:'Coinage';number:2;val2:($10,0);name2:('2C 1C','1C 1C')),());
-        pleiads_dip_a:array [0..4] of def_dip2=(
+        (mask:$10;name:'Coinage';number:2;val2:($10,0);name2:('2C 1C','1C 1C')));
+        pleiads_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('3K 30K','4K 40K','5K 50K','6K 60K')),
         (mask:$10;name:'Coinage';number:2;val2:($10,0);name2:('2C 1C','1C 1C')),
-        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')),());
+        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')));
 
 procedure update_video_phoenix;
 var
@@ -258,15 +258,15 @@ begin
 llamadas_maquina.close:=phoenix_cerrar;
 llamadas_maquina.reset:=phoenix_reset;
 llamadas_maquina.fps_max:=61.035156;
+llamadas_maquina.scanlines:=256;
 iniciar_phoenix:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(208,248);
 //Main CPU
-z80_0:=cpu_z80.create(5500000,256);
+z80_0:=cpu_z80.create(5500000);
 z80_0.init_sound(phoenix_sound_update);
 case main_vars.tipo_maquina of
   11:begin //Phoenix
@@ -289,8 +289,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,phoenix_pal)) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and 7) or (f and $60);
         //DIP
-        marcade.dswa:=$e0;
-        marcade.dswa_val2:=@phoenix_dip_a;
+        init_dips(1,phoenix_dip_a,$e0);
   end;
   202:begin //Pleiads
         llamadas_maquina.bucle_general:=pleiads_principal;
@@ -311,8 +310,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,pleiads_pal)) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and 7) or (f and $e0);
         //DIP
-        marcade.dswa:=$e0;
-        marcade.dswa_val2:=@pleiads_dip_a;
+        init_dips(1,pleiads_dip_a,$e0);
   end;
 end;
 for f:=0 to $ff do begin

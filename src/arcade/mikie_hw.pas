@@ -22,18 +22,18 @@ const
         (n:'d20.2i';l:$100;p:$200;crc:$676a0669),(n:'d22.12h';l:$100;p:$300;crc:$872be05c),
         (n:'d18.f9';l:$100;p:$400;crc:$7396b374));
         //Dip
-        mikie_dip_a:array [0..2] of def_dip2=(
+        mikie_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-        mikie_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')));
+        mikie_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 70K 50K+','30K 90K 60K+','30K Only','40K Only')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        mikie_dip_c:array [0..2] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        mikie_dip_c:array [0..1] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(0,1);name2:('Off','On')),
-        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')),());
+        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')));
 
 var
  banco_pal,sound_latch,sound_trq:byte;
@@ -264,7 +264,6 @@ begin
  frame_snd:=z80_0.tframes;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
  banco_pal:=0;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -293,19 +292,19 @@ llamadas_maquina.reset:=reset_mikie;
 llamadas_maquina.save_qsnap:=mikie_qsave;
 llamadas_maquina.load_qsnap:=mikie_qload;
 llamadas_maquina.fps_max:=60.59;
+llamadas_maquina.scanlines:=256;
 iniciar_mikie:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,256,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(mikie_getbyte,mikie_putbyte);
 if not(roms_load(@memoria,mikie_rom)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(14318180 div 4,256);
+z80_0:=cpu_z80.create(14318180 div 4);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(sound_update);
 if not(roms_load(@mem_snd,mikie_sound)) then exit;
@@ -358,12 +357,9 @@ for bit1:=0 to $ff do begin
   end;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7b;
-marcade.dswc:=$fe;
-marcade.dswa_val2:=@mikie_dip_a;
-marcade.dswb_val2:=@mikie_dip_b;
-marcade.dswc_val2:=@mikie_dip_c;
+init_dips(1,mikie_dip_a,$ff);
+init_dips(2,mikie_dip_b,$7b);
+init_dips(3,mikie_dip_c,$fe);
 //final
 reset_mikie;
 iniciar_mikie:=true;

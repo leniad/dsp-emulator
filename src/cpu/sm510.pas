@@ -16,7 +16,7 @@ type
         end;
         preg_sm510=^reg_sm510;
         cpu_sm510=class(cpu_class)
-                constructor create(clock:dword;type_:byte;frames:single);
+                constructor create(clock:dword;type_:byte);
                 destructor free;
             public
                 procedure run(maximo:single);
@@ -89,13 +89,13 @@ begin
 	end;
 end;
 
-constructor cpu_sm510.create(clock:dword;type_:byte;frames:single);
+constructor cpu_sm510.create(clock:dword;type_:byte);
 begin
 getmem(self.r,sizeof(reg_sm510));
 fillchar(self.r^,sizeof(reg_sm510),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock div 2;
-self.tframes:=clock/2/llamadas_maquina.fps_max/frames;
+self.tframes:=clock/2/llamadas_maquina.fps_max/llamadas_maquina.scanlines;
 self.div_timer:=timers.init(self.numero_cpu,clock/clock,div_timer_cb_0,nil,true);
 self.lcd_timer:=timers.init(self.numero_cpu,clock/$200,lcd_timer_cb_0,nil,true);
 self.r.pc:=0;

@@ -324,18 +324,18 @@ case pos of
       case (self.control_0[3] and $3) of
         0:begin
             tempw:=1024*self.mult;
-            screen_mod_scroll(self.screen,tempw,256,tempw-1,256,256,255);
-            screen_mod_scroll(self.screen_pri,tempw,256,tempw-1,256,256,255);
+            mod_screen(self.screen,tempw,256);
+            mod_screen(self.screen_pri,tempw,256);
           end;
         1:begin
             tempw:=512*self.mult;
-            screen_mod_scroll(self.screen,tempw,256,tempw-1,512,256,511);
-            screen_mod_scroll(self.screen_pri,tempw,256,tempw-1,512,256,511);
+            mod_screen(self.screen,tempw,512);
+            mod_screen(self.screen_pri,tempw,512);
           end;
         2:begin
             tempw:=256*self.mult;
-            screen_mod_scroll(self.screen,tempw,256,tempw-1,1024,256,1023);
-            screen_mod_scroll(self.screen_pri,tempw,256,tempw-1,1024,256,1023);
+            mod_screen(self.screen,tempw,1024);
+            mod_screen(self.screen_pri,tempw,1024);
           end;
       end;
   end;

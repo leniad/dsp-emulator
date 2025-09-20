@@ -21,7 +21,7 @@ const
         toki_sound:array[0..1] of tipo_roms=(
         (n:'tokijp.008';l:$2000;p:0;crc:$6c87c4c5),(n:'tokijp.007';l:$10000;p:$10000;crc:$a67969c4));
         toki_adpcm:tipo_roms=(n:'tokijp.009';l:$20000;p:0;crc:$ae7a6b8b);
-        toki_dip:array [0..9] of def_dip2=(
+        toki_dip:array [0..8] of def_dip2=(
         (mask:$1f;name:'Coinage';number:32;val32:($15,$17,$19,$1b,3,$1d,5,7,$1f,9,$13,$11,$f,$d,$b,$1e,$14,$a,0,1,2,4,6,8,$c,$e,$10,$12,$16,$18,$1a,$1c);
           name32:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','A 1C 1C/B 1/2','A 2C 1C/B 1/3','A 3C 1C/B 1/5','A 5C 1C/B 1/6','Free Play','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid')),
         (mask:$20;name:'Joysticks';number:2;val2:($20,0);name2:('1','2')),
@@ -31,7 +31,7 @@ const
         (mask:$c00;name:'Bonus Life';number:4;val4:($800,0,$c00,$400);name4:('50K 150K','70K 140K 210K','70K','100K 200K')),
         (mask:$3000;name:'Difficulty';number:4;val4:($2000,$3000,$1000,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$4000;name:'Allow Continue';number:2;val2:(0,$4000);name2:('No','Yes')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')),());
+        (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')));
 
 var
  rom:array[0..$2ffff] of word;
@@ -231,7 +231,6 @@ begin
  m68000_0.reset;
  seibu_snd_0.reset;
  frame_main:=m68000_0.tframes;
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  seibu_snd_0.input:=0;
@@ -257,23 +256,22 @@ begin
 llamadas_maquina.bucle_general:=toki_principal;
 llamadas_maquina.reset:=reset_toki;
 llamadas_maquina.fps_max:=59.61;
+llamadas_maquina.scanlines:=256;
 iniciar_toki:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,false,true);
 screen_init(4,512,512,true);
-screen_mod_scroll(4,512,256,511,512,256,511);
 iniciar_video(256,224);
 getmem(memoria_temp,$100000);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(toki_getword,toki_putword);
 if not(roms_load16w(@rom,toki_rom)) then exit;
 //sound
 if not(roms_load(memoria_temp,toki_sound)) then exit;
-seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,3579545,256,memoria_temp,true);
+seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,3579545,memoria_temp,true);
 copymemory(@seibu_snd_0.sound_rom[0,0],@memoria_temp[$10000],$8000);
 copymemory(@seibu_snd_0.sound_rom[1,0],@memoria_temp[$18000],$8000);
 if not(roms_load(memoria_temp,toki_adpcm)) then exit;
@@ -302,8 +300,7 @@ init_gfx(3,16,16,4096);
 gfx[3].trans[15]:=true;
 convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$ffdf;
-marcade.dswa_val2:=@toki_dip;
+init_dips(1,toki_dip,$ffdf);
 //final
 freemem(memoria_temp);
 reset_toki;

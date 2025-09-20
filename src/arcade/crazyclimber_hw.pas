@@ -23,12 +23,11 @@ const
         (n:'cc02';l:$800;p:0;crc:$14f3ecc9),(n:'cc01';l:$800;p:$800;crc:$21c0f9fb));
         cclimber_samples:array[0..1] of tipo_roms=(
         (n:'cc13';l:$1000;p:0;crc:$e0042f75),(n:'cc12';l:$1000;p:$1000;crc:$5da13aaa));
-        cclimber_dip_a:array [0..3] of def_dip2=(
+        cclimber_dip_a:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 1C','1C 2C','1C 3C','Free Play')),());
-        cclimber_dip_b:array [0..1] of def_dip2=(
-        (mask:$10;name:'Cabinet';number:2;val2:($10,0);name2:('Upright','Cocktail')),());
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 1C','1C 2C','1C 3C','Free Play')));
+        cclimber_dip_b:def_dip2=(mask:$10;name:'Cabinet';number:2;val2:($10,0);name2:('Upright','Cocktail'));
 
 var
  nmi_mask:boolean;
@@ -290,16 +289,15 @@ const
 begin
 llamadas_maquina.bucle_general:=cclimber_principal;
 llamadas_maquina.reset:=reset_cclimber;
+llamadas_maquina.scanlines:=256;
 iniciar_cclimber:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(18432000 div 3 div 2,256);
+z80_0:=cpu_z80.create(18432000 div 3 div 2);
 z80_0.change_ram_calls(cclimber_getbyte,cclimber_putbyte);
 z80_0.change_io_calls(cclimber_inbyte,cclimber_outbyte);
 z80_0.init_sound(cclimber_sound_update);
@@ -349,10 +347,8 @@ for f:=0 to $5f do begin
 end;
 set_pal(colores,$60);
 //DIP
-marcade.dswa:=0;
-marcade.dswb:=$10;
-marcade.dswa_val2:=@cclimber_dip_a;
-marcade.dswb_val2:=@cclimber_dip_b;
+init_dips(1,cclimber_dip_a,0);
+init_dips(2,cclimber_dip_b,$10);
 //final
 iniciar_cclimber:=true;
 end;

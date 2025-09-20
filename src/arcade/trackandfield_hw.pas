@@ -24,16 +24,15 @@ const
         (n:'361b18.e15';l:$100;p:$120;crc:$053e5861));
         trackfield_vlm:tipo_roms=(n:'c9_d15.bin';l:$2000;p:0;crc:$f546a56b);
         trackfield_snd:tipo_roms=(n:'c2_d13.bin';l:$2000;p:0;crc:$95bf79b6);
-        trackfield_dip_a:array [0..1] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-        trackfield_dip_b:array [0..7] of def_dip2=(
+        trackfield_dip_a:def_dip2=(mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play'));
+        trackfield_dip_b:array [0..6] of def_dip2=(
         (mask:1;name:'Lives';number:2;val2:(1,0);name2:('1','2')),
         (mask:2;name:'After Last Event';number:2;val2:(2,0);name2:('Game Over','Game Continues')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('None','100K')),
         (mask:$10;name:'World Records';number:2;val2:($10,0);name2:('Don''t Erase','Erase on Reset')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  irq_ena:boolean;
@@ -315,18 +314,18 @@ llamadas_maquina.reset:=reset_trackfield;
 llamadas_maquina.close:=close_trackfield;
 llamadas_maquina.save_qsnap:=trackfield_qsave;
 llamadas_maquina.load_qsnap:=trackfield_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(trackfield_getbyte,trackfield_putbyte);
 if not(roms_load(@memoria,trackfield_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes,$a000);
 //Sound CPU
-z80_0:=cpu_z80.create(14318180 div 4,$100);
+z80_0:=cpu_z80.create(14318180 div 4);
 z80_0.change_ram_calls(trackfield_snd_getbyte,trackfield_snd_putbyte);
 z80_0.init_sound(trackfield_sound_update);
 if not(roms_load(@mem_snd,trackfield_snd)) then exit;
@@ -373,11 +372,8 @@ for f:=0 to $ff do begin
     gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
 end;
 //DIP
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$59;
-marcade.dswa_val2:=@trackfield_dip_a;
-marcade.dswb_val2:=@trackfield_dip_b;
+init_dips(1,trackfield_dip_a,$ff);
+init_dips(2,trackfield_dip_b,$59);
 //final
 iniciar_trackfield:=true;
 end;

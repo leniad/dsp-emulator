@@ -23,15 +23,15 @@ const
         (n:'ms16';l:$2000;p:$8000;crc:$2f470b0f),(n:'ms17';l:$2000;p:$a000;crc:$38966d1b));
         ms_pal:tipo_roms=(n:'ic61';l:$20;p:0;crc:$e802d6cf);
         //Dip
-        ms_dip_a:array [0..3] of def_dip2=(
+        ms_dip_a:array [0..2] of def_dip2=(
         (mask:1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
         (mask:2;name:'Difficulty';number:2;val2:(2,0);name2:('Easy','Hard')),
-        (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),());
-        ms_dip_b:array [0..4] of def_dip2=(
+        (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')));
+        ms_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$20;name:'Flip Screen';number:2;val2:(0,$20);name2:('Off','On')),
-        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')));
 
 var
   scroll,soundlatch,last,char_color:byte;
@@ -297,7 +297,6 @@ m6502_0.reset;
 frame_main:=m6502_0.tframes;
 ay8910_0.reset;
 ay8910_1.reset;
-reset_game_general;
 scroll:=0;
 last:=0;
 soundlatch:=0;
@@ -323,15 +322,15 @@ llamadas_maquina.reset:=reset_ms;
 llamadas_maquina.fps_max:=12000000/2/384/272;
 llamadas_maquina.save_qsnap:=ms_qsave;
 llamadas_maquina.load_qsnap:=ms_qload;
+llamadas_maquina.scanlines:=272;
 iniciar_ms:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,256,512,false,true);
 screen_init(3,256,256,true);
 iniciar_video(240,256);
 //Main CPU
-m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_ms,putbyte_ms);
 m6502_0.init_sound(ms_sound_update);
 //Sound Chip
@@ -365,10 +364,8 @@ for f:=24 to 63 do begin
   cambiar_color(f);
 end;
 //DIP
-marcade.dswa:=$fb;
-marcade.dswb:=$1f;
-marcade.dswa_val2:=@ms_dip_a;
-marcade.dswb_val2:=@ms_dip_b;
+init_dips(1,ms_dip_a,$fb);
+init_dips(2,ms_dip_b,$1f);
 //final
 reset_ms;
 iniciar_ms:=true;

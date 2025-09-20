@@ -14,13 +14,13 @@ const
         blockout_sound:tipo_roms=(n:'bo29e3-0.bin';l:$8000;p:0;crc:$3ea01f78);
         blockout_oki:tipo_roms=(n:'bo29e2-0.bin';l:$20000;p:0;crc:$15c5a99d);
         //DIP
-        blockout_dipa:array [0..3] of def_dip2=(
+        blockout_dipa:array [0..2] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$10;name:'1 Coint to Continue';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),());
-        blockout_dipb:array [0..2] of def_dip2=(
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')));
+        blockout_dipb:array [0..1] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:4;name:'Rotate Buttons';number:2;val2:(0,4);name2:('2','3')),());
+        (mask:4;name:'Rotate Buttons';number:2;val2:(0,4);name2:('2','3')));
 
 var
  rom:array[0..$1ffff] of word;
@@ -256,6 +256,7 @@ function iniciar_blockout:boolean;
 begin
 llamadas_maquina.bucle_general:=blockout_principal;
 llamadas_maquina.reset:=reset_blockout;
+llamadas_maquina.scanlines:=256;
 iniciar_blockout:=false;
 iniciar_audio(false);
 //Pantallas
@@ -264,10 +265,10 @@ screen_init(2,320,256,true);
 screen_init(3,320,256,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(blockout_getword,blockout_putword);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(blockout_snd_getbyte,blockout_snd_putbyte);
 z80_0.init_sound(blockout_sound_update);
 //Sound Chips
@@ -280,10 +281,8 @@ if not(roms_load16w(@rom,blockout_rom)) then exit;
 //cargar sonido
 if not(roms_load(@mem_snd,blockout_sound)) then exit;
 //DIP
-marcade.dswa:=$ffff;
-marcade.dswa_val2:=@blockout_dipa;
-marcade.dswb:=$ffff;
-marcade.dswb_val2:=@blockout_dipb;
+init_dips(1,blockout_dipa,$ffff);
+init_dips(2,blockout_dipb,$ffff);
 //final
 iniciar_blockout:=true;
 end;

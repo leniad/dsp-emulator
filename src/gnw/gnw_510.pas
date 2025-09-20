@@ -181,8 +181,9 @@ var
 begin
 iniciar_gnw_510:=false;
 iniciar_audio(false);
+llamadas_maquina.scanlines:=1;
 //Main CPU
-sm510_0:=cpu_sm510.Create(32768,SM_510,1);
+sm510_0:=cpu_sm510.Create(32768,SM_510);
 sm510_0.change_io_calls(nil,input_r,input_w,speaker_level,lcd_segment_w,lcd_segment_w,lcd_segment_w,lcd_segment_w);
 //Sound
 sm510_0.init_sound(gnw_sound);

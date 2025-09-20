@@ -21,13 +21,11 @@ const
         galaxian_samples:array[0..8] of tipo_nombre_samples=(
         (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'),
         (nombre:'kill.wav';restart:true),(nombre:'coin.wav'),(nombre:'music.wav'),(nombre:'extra.wav'));
-        galaxian_dip_a:array [0..1] of def_dip2=(
-        (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),());
-        galaxian_dip_b:array [0..1] of def_dip2=(
-        (mask:$c0;name:'Coinage';number:4;val4:($40,0,$80,$c0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),());
-        galaxian_dip_c:array [0..2] of def_dip2=(
+        galaxian_dip_a:def_dip2=(mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail'));
+        galaxian_dip_b:def_dip2=(mask:$c0;name:'Coinage';number:4;val4:($40,0,$80,$c0);name4:('2C 1C','1C 1C','1C 2C','Free Play'));
+        galaxian_dip_c:array [0..1] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(0,1,2,3);name4:('7K','10K','12K','20K')),
-        (mask:4;name:'Lives';number:2;val2:(0,4);name2:('2','3')),());
+        (mask:4;name:'Lives';number:2;val2:(0,4);name2:('2','3')));
         //Jump Bug
         jumpbug_rom:array[0..6] of tipo_roms=(
         (n:'jb1';l:$1000;p:0;crc:$415aa1b7),(n:'jb2';l:$1000;p:$1000;crc:$b1c27510),
@@ -39,11 +37,10 @@ const
         (n:'jbn';l:$800;p:$1000;crc:$155186e0),(n:'jbi';l:$800;p:$1800;crc:$7749b111),
         (n:'jbj';l:$800;p:$2000;crc:$06e8d7df),(n:'jbk';l:$800;p:$2800;crc:$b8dbddf3));
         jumpbug_pal:tipo_roms=(n:'l06_prom.bin';l:$20;p:0;crc:$6a0c7d87);
-        jumpbug_dip_b:array [0..1] of def_dip2=(
-        (mask:$40;name:'Difficulty';number:2;val2:(0,1);name2:('Easy','Hard')),());
-        jumpbug_dip_c:array [0..2] of def_dip2=(
+        jumpbug_dip_b:def_dip2=(mask:$40;name:'Difficulty';number:2;val2:(0,1);name2:('Easy','Hard'));
+        jumpbug_dip_c:array [0..1] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,2,3,0);name4:('3','4','5','Infinite')),
-        (mask:$c;name:'Coinage';number:4;val4:(4,8,0,$c);name4:('A 2C 1C-B 2C 1C','A 2C 1C-B 1C 3C','A 1C 1C-B 1C 1C','A 1C 1C-B 1C 6C')),());
+        (mask:$c;name:'Coinage';number:4;val4:(4,8,0,$c);name4:('A 2C 1C-B 2C 1C','A 2C 1C-B 1C 3C','A 1C 1C-B 1C 1C','A 1C 1C-B 1C 6C')));
         //Moon Cresta
         mooncrst_rom:array[0..7] of tipo_roms=(
         (n:'mc1';l:$800;p:0;crc:$7d954a7a),(n:'mc2';l:$800;p:$800;crc:$44bb7cfa),
@@ -56,12 +53,12 @@ const
         mooncrst_pal:tipo_roms=(n:'l06_prom.bin';l:$20;p:0;crc:$6a0c7d87);
         mooncrst_samples:array[0..4] of tipo_nombre_samples=(
         (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'ship1.wav'),(nombre:'enemy1.wav'),(nombre:'back3.wav'));
-        mooncrst_dip_b:array [0..2] of def_dip2=(
+        mooncrst_dip_b:array [0..1] of def_dip2=(
         (mask:$40;name:'Bonus Life';number:2;val2:(0,$40);name2:('30K','50K')),
-        (mask:$80;name:'Language';number:2;val2:($80,0);name2:('English','Japanese')),());
-        mooncrst_dip_c:array [0..2] of def_dip2=(
+        (mask:$80;name:'Language';number:2;val2:($80,0);name2:('English','Japanese')));
+        mooncrst_dip_c:array [0..1] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(3,2,1,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('1C 1C','1C 2C','1C 3C','Free Play')),());
+        (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('1C 1C','1C 2C','1C 3C','Free Play')));
         //Scramble
         scramble_rom:array[0..7] of tipo_roms=(
         (n:'s1.2d';l:$800;p:0;crc:$ea35ccaa),(n:'s2.2e';l:$800;p:$800;crc:$e7bba1b3),
@@ -74,11 +71,10 @@ const
         (n:'ot1.5c';l:$800;p:0;crc:$bcd297f0),(n:'ot2.5d';l:$800;p:$800;crc:$de7912da),
         (n:'ot3.5e';l:$800;p:$1000;crc:$ba2fa933));
         scramble_pal:tipo_roms=(n:'c01s.6e';l:$20;p:0;crc:$4e3caeab);
-        scramble_dip_a:array [0..1] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','255')),());
-        scramble_dip_b:array [0..2] of def_dip2=(
+        scramble_dip_a:def_dip2=(mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','255'));
+        scramble_dip_b:array [0..1] of def_dip2=(
         (mask:6;name:'Coinage';number:4;val4:(0,2,4,6);name4:('A 1C/1C-B 2C/1C-C 1C/1C','A 1C/2C-B 1C/1C-C 1C/2C','A 1C/3C-B 3C/1C-C 1C/3C','A 1C/4C-B 4C/1C-C 1C/4C')),
-        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),());
+        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')));
         //Super Cobra
         scobra_rom:array[0..5] of tipo_roms=(
         (n:'epr1265.2c';l:$1000;p:0;crc:$a0744b3f),(n:'2e';l:$1000;p:$1000;crc:$8e7245cd),
@@ -90,12 +86,12 @@ const
         scobra_char:array[0..1] of tipo_roms=(
         (n:'epr1274.5h';l:$800;p:0;crc:$64d113b4),(n:'epr1273.5f';l:$800;p:$800;crc:$a96316d3));
         scobra_pal:tipo_roms=(n:'82s123.6e';l:$20;p:0;crc:$9b87f90d);
-        scobra_dip_a:array [0..2] of def_dip2=(
+        scobra_dip_a:array [0..1] of def_dip2=(
         (mask:1;name:'Allow Continue';number:2;val2:(0,1);name2:('No','4 Times')),
-        (mask:2;name:'Lives';number:2;val2:(0,2);name2:('3','4')),());
-        scobra_dip_b:array [0..2] of def_dip2=(
+        (mask:2;name:'Lives';number:2;val2:(0,2);name2:('3','4')));
+        scobra_dip_b:array [0..1] of def_dip2=(
         (mask:6;name:'Coinage';number:4;val4:(4,6,2,0);name4:('2C 1C','4C 3C','1C 1C','99 Credits')),
-        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),());
+        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')));
         //Frogger
         frogger_rom:array[0..2] of tipo_roms=(
         (n:'frogger.26';l:$1000;p:0;crc:$597696d6),(n:'frogger.27';l:$1000;p:$1000;crc:$b6e6fcc3),
@@ -106,11 +102,10 @@ const
         frogger_sound:array[0..2] of tipo_roms=(
         (n:'frogger.608';l:$800;p:0;crc:$e8ab0256),(n:'frogger.609';l:$800;p:$800;crc:$7380a48f),
         (n:'frogger.610';l:$800;p:$1000;crc:$31d7eb27));
-        frogger_dip_a:array [0..1] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','5','7','256')),());
-        frogger_dip_b:array [0..2] of def_dip2=(
+        frogger_dip_a:def_dip2=(mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','5','7','256'));
+        frogger_dip_b:array [0..1] of def_dip2=(
         (mask:6;name:'Coinage';number:4;val4:(2,4,0,6);name4:('A 2C/1C-B 2C/1C-C 2C/1C','A 2C/1C-B 1C/3C-C 2C/1C','A 1C/1C-B 1C/1C-C 1C/1C','A 1C/1C-B 1C/6C-C 1C/1C')),
-        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),());
+        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')));
         //Amidar
         amidar_rom:array[0..4] of tipo_roms=(
         (n:'1.2c';l:$1000;p:0;crc:$621b74de),(n:'2.2e';l:$1000;p:$1000;crc:$38538b98),
@@ -121,15 +116,14 @@ const
         amidar_pal:tipo_roms=(n:'amidar.clr';l:32;p:0;crc:$f940dcc3);
         amidar_sound:array[0..1] of tipo_roms=(
         (n:'s1.5c';l:$1000;p:0;crc:$8ca7b750),(n:'s2.5d';l:$1000;p:$1000;crc:$9b5bdc0a));
-        amidar_dip_a:array [0..1] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255')),());
-        amidar_dip_b:array [0..3] of def_dip2=(
+        amidar_dip_a:def_dip2=(mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255'));
+        amidar_dip_b:array [0..2] of def_dip2=(
         (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
         (mask:4;name:'Bonus Life';number:2;val2:(0,4);name2:('30K 70K+','50K 80K+')),
-        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),());
-        amidar_dip_c:array [0..2] of def_dip2=(
+        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')));
+        amidar_dip_c:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(4,$a,1,2,8,$f,$c,$e,7,6,$b,3,$d,5,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($40,$a0,$10,$20,$80,$f0,$c0,$e0,$70,$60,$b0,$30,$d0,$50,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
+        (mask:$f0;name:'Coin B';number:16;val16:($40,$a0,$10,$20,$80,$f0,$c0,$e0,$70,$60,$b0,$30,$d0,$50,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
         //Ant Eater
         anteater_rom:array[0..3] of tipo_roms=(
         (n:'ra1-2c';l:$1000;p:0;crc:$58bc9393),(n:'ra1-2e';l:$1000;p:$1000;crc:$574fc6f6),
@@ -139,11 +133,10 @@ const
         anteater_sound:array[0..1] of tipo_roms=(
         (n:'ra4-5c';l:$800;p:0;crc:$87300b4f),(n:'ra4-5d';l:$800;p:$800;crc:$af4e5ffe));
         anteater_pal:tipo_roms=(n:'colr6f.cpu';l:$20;p:0;crc:$fce333c7);
-        anteater_dip_a:array [0..2] of def_dip2=(
+        anteater_dip_a:array [0..1] of def_dip2=(
         (mask:1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
-        (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),());
-        anteater_dip_b:array [0..1] of def_dip2=(
-        (mask:6;name:'Coinage';number:4;val4:(2,0,4,6);name4:('A 1C/1C-B 1C/1C','A 1C/2C-B 2C/1C','A 1C/3C-B 3C/1C','A 1C/4C-B 4C/1C')),());
+        (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')));
+        anteater_dip_b:def_dip2=(mask:6;name:'Coinage';number:4;val4:(2,0,4,6);name4:('A 1C/1C-B 1C/1C','A 1C/2C-B 2C/1C','A 1C/3C-B 3C/1C','A 1C/4C-B 4C/1C'));
         //Armored Car
         armoredcar_rom:array[0..4] of tipo_roms=(
         (n:'cpu.2c';l:$1000;p:0;crc:$0d7bfdfb),(n:'cpu.2e';l:$1000;p:$1000;crc:$76463213),
@@ -154,9 +147,9 @@ const
         armoredcar_sound:array[0..1] of tipo_roms=(
         (n:'sound.5c';l:$800;p:0;crc:$54ee7753),(n:'sound.5d';l:$800;p:$800;crc:$5218fec0));
         armoredcar_pal:tipo_roms=(n:'82s123.6e';l:$20;p:0;crc:$9b87f90d);
-        armoredcar_dip_b:array [0..2] of def_dip2=(
+        armoredcar_dip_b:array [0..1] of def_dip2=(
         (mask:6;name:'Coinage';number:4;val4:(2,0,4,6);name4:('A 1C/1C-B 1C/1C','A 1C/2C-B 2C/1C','A 1C/3C-B 3C/1C','A 1C/4C-B 4C/1C')),
-        (mask:8;name:'Cabinet';number:2;val2:(8,0);name2:('Upright','Cocktail')),());
+        (mask:8;name:'Cabinet';number:2;val2:(8,0);name2:('Upright','Cocktail')));
         //The End
         theend_rom:array[0..5] of tipo_roms=(
         (n:'ic13_1t.bin';l:$800;p:0;crc:$93e555ba),(n:'ic14_2t.bin';l:$800;p:$800;crc:$2de7ad27),
@@ -167,11 +160,10 @@ const
         theend_sound:array[0..1] of tipo_roms=(
         (n:'ic56_1.bin';l:$800;p:0;crc:$7a141f29),(n:'ic55_2.bin';l:$800;p:$800;crc:$218497c1));
         theend_pal:tipo_roms=(n:'6331-1j.86';l:$20;p:0;crc:$24652bc4);
-        theend_dip_a:array [0..1] of def_dip2=(
-        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','256')),());
-        theend_dip_b:array [0..2] of def_dip2=(
+        theend_dip_a:def_dip2=(mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','256'));
+        theend_dip_b:array [0..1] of def_dip2=(
         (mask:6;name:'Coinage';number:4;val4:(4,2,0,6);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')),());
+        (mask:8;name:'Cabinet';number:2;val2:(0,8);name2:('Upright','Cocktail')));
         //Battle of Atlantis
         atlantis_rom:array[0..5] of tipo_roms=(
         (n:'2c';l:$800;p:0;crc:$0e485b9a),(n:'2e';l:$800;p:$800;crc:$c1640513),
@@ -183,11 +175,10 @@ const
         (n:'ot1.5c';l:$800;p:0;crc:$bcd297f0),(n:'ot2.5d';l:$800;p:$800;crc:$de7912da),
         (n:'ot3.5e';l:$800;p:$1000;crc:$ba2fa933));
         atlantis_pal:tipo_roms=(n:'c01s.6e';l:$20;p:0;crc:$4e3caeab);
-        atlantis_dip_a:array [0..2] of def_dip2=(
+        atlantis_dip_a:array [0..1] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
-        (mask:2;name:'Lives';number:2;val2:(2,0);name2:('3','5')),());
-        atlantis_dip_b:array [0..1] of def_dip2=(
-        (mask:$e;name:'Coinage';number:4;val4:(2,0,4,8);name4:('A 1C/3C-B 2C/1C','A 1C/6C-B 1C/1C','A 1C/99C-B 1C/99C','Invalid')),());
+        (mask:2;name:'Lives';number:2;val2:(2,0);name2:('3','5')));
+        atlantis_dip_b:def_dip2=(mask:$e;name:'Coinage';number:4;val4:(2,0,4,8);name4:('A 1C/3C-B 2C/1C','A 1C/6C-B 1C/1C','A 1C/99C-B 1C/99C','Invalid'));
         //Calipso
         calipso_rom:array[0..5] of tipo_roms=(
         (n:'calipso.2c';l:$1000;p:0;crc:$0fcb703c),(n:'calipso.2e';l:$1000;p:$1000;crc:$c6622f14),
@@ -198,11 +189,10 @@ const
         calipso_sound:array[0..1] of tipo_roms=(
         (n:'calipso.5c';l:$800;p:0;crc:$9cbc65ab),(n:'calipso.5d';l:$800;p:$800;crc:$a225ee3b));
         calipso_pal:tipo_roms=(n:'calipso.clr';l:$20;p:0;crc:$01165832);
-        calipso_dip_a:array [0..2] of def_dip2=(
+        calipso_dip_a:array [0..1] of def_dip2=(
         (mask:1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
-        (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),());
-        calipso_dip_b:array [0..1] of def_dip2=(
-        (mask:6;name:'Coinage';number:4;val4:(2,0,4,6);name4:('A 1C/1C-B 1C/1C','A 1C/2C-B 2C/1C','A 1C/3C-B 3C/1C','A 1C/4C-B 4C/1C')),());
+        (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')));
+        calipso_dip_b:def_dip2=(mask:6;name:'Coinage';number:4;val4:(2,0,4,6);name4:('A 1C/1C-B 1C/1C','A 1C/2C-B 2C/1C','A 1C/3C-B 3C/1C','A 1C/4C-B 4C/1C'));
         //Cavelon
         cavelon_rom:array[0..2] of tipo_roms=(
         (n:'2.bin';l:$2000;p:0;crc:$a3b353ac),(n:'1.bin';l:$2000;p:$2000;crc:$3f62efd6),
@@ -211,11 +201,10 @@ const
         (n:'h.bin';l:$1000;p:0;crc:$d44fcd6f),(n:'k.bin';l:$1000;p:$1000;crc:$59bc7f9e));
         cavelon_sound:tipo_roms=(n:'1c_snd.bin';l:$800;p:0;crc:$f58dcf55);
         cavelon_pal:tipo_roms=(n:'cavelon.clr';l:$20;p:0;crc:$d133356b);
-        cavelon_dip_a:array [0..2] of def_dip2=(
+        cavelon_dip_a:array [0..1] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
-        (mask:2;name:'Coinage';number:2;val2:(0,2);name2:('A 1C/1C-B 1C/6C','A 2C/1C-B 1C/3C')),());
-        cavelon_dip_b:array [0..1] of def_dip2=(
-        (mask:6;name:'Lives';number:4;val4:(0,4,2,6);name4:('5','4','3','2')),());
+        (mask:2;name:'Coinage';number:2;val2:(0,2);name2:('A 1C/1C-B 1C/6C','A 2C/1C-B 1C/3C')));
+        cavelon_dip_b:def_dip2=(mask:6;name:'Lives';number:4;val4:(0,4,2,6);name4:('5','4','3','2'));
         BACK_COLOR=35;
 
 var
@@ -1234,7 +1223,6 @@ procedure reset_galaxian;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
- reset_game_general;
  haz_nmi:=false;
  if main_vars.tipo_maquina<>14 then galaxian_stars_0.reset;
  scramble_background:=false;
@@ -1311,6 +1299,7 @@ draw_bullet:=scramble_draw_bullet;
 galaxian_update_video:=update_video_galaxian;
 llamadas_maquina.close:=cerrar_galaxian;
 llamadas_maquina.reset:=reset_galaxian;
+llamadas_maquina.scanlines:=256;
 backgroud_type:=0;
 llamadas_maquina.fps_max:=60.6060606060;
 iniciar_galaxian:=false;
@@ -1319,7 +1308,7 @@ screen_init(1,256,512,true,true);
 screen_init(2,512,256,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,256);
+z80_0:=cpu_z80.create(3072000);
 marcade.dswc:=$ff;
 case main_vars.tipo_maquina of
   14:begin  //frogger
@@ -1331,7 +1320,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(frogger_getbyte,frogger_putbyte);
       if not(roms_load(@memoria,frogger_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_FROGGER,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_FROGGER,1789750);
       if not(roms_load(@konamisnd_0.memoria,frogger_sound)) then exit;
       //Las ROMS tienen lineas movidas...
       for f:=0 to $7ff do konamisnd_0.memoria[f]:=BITSWAP8(konamisnd_0.memoria[f],7,6,5,4,3,2,0,1);
@@ -1350,10 +1339,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,frogger_pal)) then exit;
       //DIP
-      marcade.dswa:=0;
-      marcade.dswa_val2:=@scramble_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@scramble_dip_b;
+      init_dips(1,scramble_dip_a,0);
+      init_dips(2,scramble_dip_b,0);
   end;
   47:begin  //galaxian
       llamadas_maquina.bucle_general:=galaxian_principal;
@@ -1370,12 +1357,9 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,galaxian_pal)) then exit;
       //DIP
-      marcade.dswa:=0;
-      marcade.dswa_val2:=@galaxian_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@galaxian_dip_b;
-      marcade.dswc:=4;
-      marcade.dswc_val2:=@galaxian_dip_c;
+      init_dips(1,galaxian_dip_a,0);
+      init_dips(2,galaxian_dip_b,0);
+      init_dips(3,galaxian_dip_c,4);
   end;
   48:begin //Jump Bug
       llamadas_maquina.bucle_general:=galaxian_principal;
@@ -1394,12 +1378,9 @@ case main_vars.tipo_maquina of
       convert_sprt($c0);
       if not(roms_load(@memoria_temp,jumpbug_pal)) then exit;
       //DIP
-      marcade.dswa:=0;
-      marcade.dswa_val2:=@galaxian_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@jumpbug_dip_b;
-      marcade.dswc:=1;
-      marcade.dswc_val2:=@jumpbug_dip_c;
+      init_dips(1,galaxian_dip_a,0);
+      init_dips(2,jumpbug_dip_b,0);
+      init_dips(3,jumpbug_dip_c,1);
   end;
   49:begin  //mooncrst
       llamadas_maquina.bucle_general:=galaxian_principal;
@@ -1427,12 +1408,9 @@ case main_vars.tipo_maquina of
       convert_sprt($80);
       if not(roms_load(@memoria_temp,mooncrst_pal)) then exit;
       //DIP
-      marcade.dswa:=0;
-      marcade.dswa_val2:=@galaxian_dip_a;
-      marcade.dswb:=$80;
-      marcade.dswb_val2:=@mooncrst_dip_b;
-      marcade.dswc:=0;
-      marcade.dswc_val2:=@mooncrst_dip_c;
+      init_dips(1,galaxian_dip_a,0);
+      init_dips(2,mooncrst_dip_b,$80);
+      init_dips(3,mooncrst_dip_c,0);
   end;
   143:begin  //scramble
       backgroud_type:=1;
@@ -1440,7 +1418,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scramble_getbyte,scramble_putbyte);
       if not(roms_load(@memoria,scramble_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,scramble_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1453,10 +1431,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,scramble_pal)) then exit;
       //DIP
-      marcade.dswa:=0;
-      marcade.dswa_val2:=@scramble_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@scramble_dip_b;
+      init_dips(1,scramble_dip_a,0);
+      init_dips(2,scramble_dip_b,0);
   end;
   144:begin  //super cobra
       backgroud_type:=1;
@@ -1464,7 +1440,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scobra_getbyte,scobra_putbyte);
       if not(roms_load(@memoria,scobra_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,scobra_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1477,10 +1453,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,scobra_pal)) then exit;
       //DIP
-      marcade.dswa:=1;
-      marcade.dswa_val2:=@scobra_dip_a;
-      marcade.dswb:=2;
-      marcade.dswb_val2:=@scobra_dip_b;
+      init_dips(1,scobra_dip_a,1);
+      init_dips(2,scobra_dip_b,2);
   end;
   145:begin  //amidar
       backgroud_type:=2;
@@ -1488,7 +1462,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(amidar_getbyte,amidar_putbyte);
       if not(roms_load(@memoria,amidar_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,amidar_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1501,12 +1475,9 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,amidar_pal)) then exit;
       //DIP
-      marcade.dswa:=3;
-      marcade.dswa_val2:=@amidar_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@amidar_dip_b;
-      marcade.dswc:=$ff;
-      marcade.dswc_val2:=@amidar_dip_c;
+      init_dips(1,amidar_dip_a,3);
+      init_dips(2,amidar_dip_b,0);
+      init_dips(3,amidar_dip_c,$ff);
   end;
   363:begin  //ant eater
       backgroud_type:=3;
@@ -1515,7 +1486,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scobra_getbyte,scobra_putbyte);
       if not(roms_load(@memoria,anteater_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,anteater_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1535,10 +1506,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,anteater_pal)) then exit;
       //DIP
-      marcade.dswa:=1;
-      marcade.dswa_val2:=@anteater_dip_a;
-      marcade.dswb:=2;
-      marcade.dswb_val2:=@anteater_dip_b;
+      init_dips(1,anteater_dip_a,1);
+      init_dips(2,anteater_dip_b,2);
   end;
   366:begin  //armored car
       backgroud_type:=1;
@@ -1546,7 +1515,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scobra_getbyte,scobra_putbyte);
       if not(roms_load(@memoria,armoredcar_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,armoredcar_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1559,10 +1528,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,armoredcar_pal)) then exit;
       //DIP
-      marcade.dswa:=1;
-      marcade.dswa_val2:=@anteater_dip_a;
-      marcade.dswb:=$a;
-      marcade.dswb_val2:=@armoredcar_dip_b;
+      init_dips(1,anteater_dip_a,1);
+      init_dips(2,armoredcar_dip_b,$a);
   end;
   369:begin  //the end
       backgroud_type:=1;
@@ -1571,7 +1538,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scramble_getbyte,scramble_putbyte);
       if not(roms_load(@memoria,theend_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,theend_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1584,10 +1551,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,theend_pal)) then exit;
       //DIP
-      marcade.dswa:=0;
-      marcade.dswa_val2:=@theend_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@theend_dip_b;
+      init_dips(1,theend_dip_a,0);
+      init_dips(2,theend_dip_b,0);
   end;
   370:begin  //Battle of Atlantis
       backgroud_type:=1;
@@ -1595,7 +1560,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scramble_getbyte,scramble_putbyte);
       if not(roms_load(@memoria,atlantis_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,atlantis_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1608,10 +1573,8 @@ case main_vars.tipo_maquina of
       convert_sprt($40);
       if not(roms_load(@memoria_temp,atlantis_pal)) then exit;
       //DIP
-      marcade.dswa:=2;
-      marcade.dswa_val2:=@atlantis_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val2:=@atlantis_dip_b;
+      init_dips(1,atlantis_dip_a,2);
+      init_dips(2,atlantis_dip_b,0);
   end;
   382:begin  //calipso
       backgroud_type:=1;
@@ -1621,7 +1584,7 @@ case main_vars.tipo_maquina of
       z80_0.change_ram_calls(scobra_getbyte,scobra_putbyte);
       if not(roms_load(@memoria,calipso_rom)) then exit;
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,calipso_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1637,10 +1600,8 @@ case main_vars.tipo_maquina of
       convert_sprt($100);
       if not(roms_load(@memoria_temp,calipso_pal)) then exit;
       //DIP
-      marcade.dswa:=1;
-      marcade.dswa_val2:=@calipso_dip_a;
-      marcade.dswb:=$fa;
-      marcade.dswb_val2:=@calipso_dip_b;
+      init_dips(1,calipso_dip_a,1);
+      init_dips(2,calipso_dip_b,$fa);
   end;
   385:begin  //cavelon
       backgroud_type:=1;
@@ -1652,7 +1613,7 @@ case main_vars.tipo_maquina of
       copymemory(@roms[1,$2000],@memoria_temp[$2000],$2000);
       copymemory(@roms[1,0],@memoria_temp[$4000],$2000);
       //Sound
-      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750,256);
+      konamisnd_0:=konamisnd_chip.create(2,TIPO_SCRAMBLE,1789750);
       if not(roms_load(@konamisnd_0.memoria,cavelon_sound)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
@@ -1665,10 +1626,8 @@ case main_vars.tipo_maquina of
       convert_sprt($80);
       if not(roms_load(@memoria_temp,cavelon_pal)) then exit;
       //DIP
-      marcade.dswa:=1;
-      marcade.dswa_val2:=@cavelon_dip_a;
-      marcade.dswb:=2;
-      marcade.dswb_val2:=@cavelon_dip_b;
+      init_dips(1,cavelon_dip_a,1);
+      init_dips(2,cavelon_dip_b,2);
   end;
 end;
 //iniciar las estrellas de fondo

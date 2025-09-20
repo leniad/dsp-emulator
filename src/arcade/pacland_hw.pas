@@ -24,19 +24,18 @@ const
         (n:'pl1-2.1t';l:$400;p:$0;crc:$472885de),(n:'pl1-1.1r';l:$400;p:$400;crc:$a78ebdaf),
         (n:'pl1-5.5t';l:$400;p:$800;crc:$4b7ee712),(n:'pl1-4.4n';l:$400;p:$c00;crc:$3a7be418),
         (n:'pl1-3.6l';l:$400;p:$1000;crc:$80558da8));
-        pacland_dip_a:array [0..4] of def_dip2=(
+        pacland_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coin B';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:4;name:'Demo Sounds';number:2;val2:(0,4);name2:('Off','On')),
         (mask:$18;name:'Coin A';number:4;val4:(0,8,$18,$10);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-        (mask:$60;name:'Lives';number:4;val4:($40,$60,$20,0);name4:('2','3','4','5')),());
-        pacland_dip_b:array [0..5] of def_dip2=(
+        (mask:$60;name:'Lives';number:4;val4:($40,$60,$20,0);name4:('2','3','4','5')));
+        pacland_dip_b:array [0..4] of def_dip2=(
         (mask:1;name:'Trip Select';number:2;val2:(0,1);name2:('Off','On')),
         (mask:2;name:'Freeze';number:2;val2:(2,0);name2:('Off','On')),
         (mask:4;name:'Round Select';number:2;val2:(4,0);name2:('Off','On')),
         (mask:$18;name:'Difficulty';number:4;val4:($10,$18,8,0);name4:('B (Easy)','A (Average)','C (Hard)','D (Very Hard)')),
-        (mask:$e0;name:'Bonus Life';number:8;val8:($e0,$80,$40,$c0,$a0,$20,0,$60);name8:('30K 80K 150K 300K 500K 1M','30K 80K 100K+','30K 80K 150K','30K 100K 200K 400K 600K 1M','40K 100K 180K 300K 500K 1M','40K 100K 200K','40K','50K 150K 200K+')),());
-        pacland_dip_c:array [0..1] of def_dip2=(
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
+        (mask:$e0;name:'Bonus Life';number:8;val8:($e0,$80,$40,$c0,$a0,$20,0,$60);name8:('30K 80K 150K 300K 500K 1M','30K 80K 100K+','30K 80K 150K','30K 100K 200K 400K 600K 1M','40K 100K 180K 300K 500K 1M','40K 100K 200K','40K','50K 150K 200K+')));
+        pacland_dip_c:def_dip2=(mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail'));
 
 var
  rom_bank:array[0..7,0..$1fff] of byte;
@@ -193,14 +192,14 @@ for f:=0 to $7ff do begin
 end;
 fill_full_screen(3,0);
 draw_sprites(0);
-scroll__x(1,3,scroll_x2-3);
-scroll__x_part(2,3,0,0,0,40);
-scroll__x_part(2,3,scroll_x1,0,40,192);
-scroll__x_part(2,3,0,0,232,16);
+scroll_x_cut(1,3,scroll_x2-3,40,192);
+scroll_x_cut(2,3,scroll_x1,40,192);
+actualiza_trozo(0,0,312,40,2,0,0,312,40,3);
+actualiza_trozo(0,232,312,16,2,0,232,312,16,3);
 draw_sprites(1);
-scroll__x_part(4,3,0,0,0,40);
-scroll__x_part(4,3,scroll_x1,0,40,192);
-scroll__x_part(4,3,0,0,232,16);
+scroll_x_cut(4,3,scroll_x1,40,192);
+actualiza_trozo(0,0,312,40,4,0,0,312,40,3);
+actualiza_trozo(0,232,312,16,4,0,232,312,16,3);
 draw_sprites(2);
 actualiza_trozo_final(24,16,288,224,3);
 end;
@@ -391,20 +390,18 @@ iniciar_pacland:=false;
 llamadas_maquina.bucle_general:=pacland_principal;
 llamadas_maquina.reset:=reset_pacland;
 llamadas_maquina.fps_max:=60.60606060606060;
+llamadas_maquina.scanlines:=264;
 iniciar_audio(false);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,256,256,255);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false,true);
 screen_init(4,512,256,true);
-screen_mod_scroll(4,512,512,511,256,256,255);
 iniciar_video(288,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,264,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1536000,TCPU_M6809);
 m6809_0.change_ram_calls(pacland_getbyte,pacland_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(6144000,264,TCPU_HD63701V);
+m6800_0:=cpu_m6800.create(6144000,TCPU_HD63701V);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
 m6800_0.init_sound(pacland_sound_update);
@@ -445,12 +442,9 @@ for f:=$0 to $3ff do begin
   gfx[2].colores[f]:=memoria_temp[$1000+f];
 end;
 //Dip
-marcade.dswa:=$ff;
-marcade.dswa_val2:=@pacland_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val2:=@pacland_dip_b;
-marcade.dswc:=$80;
-marcade.dswc_val2:=@pacland_dip_c;
+init_dips(1,pacland_dip_a,$ff);
+init_dips(2,pacland_dip_b,$ff);
+init_dips(3,pacland_dip_c,$80);
 //final
 iniciar_pacland:=true;
 end;

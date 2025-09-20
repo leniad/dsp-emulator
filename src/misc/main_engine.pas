@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.24WIP1';
+        DSP_VERSION='0.24WIP2';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -40,7 +40,7 @@ type
         TMain_vars=record
             mensaje_principal,cadena_dir,caption:string;
             frames_sec,tipo_maquina:word;
-            idioma:integer;
+            idioma,idioma_sel:integer;
             vactual:byte;
             service1,driver_ok,auto_exec,show_crc_error,center_screen,console_init:boolean;
             sort:word;
@@ -78,6 +78,8 @@ type
             c64_disk:string;
             //Oric
             oric_tap:string;
+            //msx
+            msx_tap:string;
             //PV1000
             pv1000:string;
             //PV2000
@@ -91,6 +93,7 @@ type
            cintas,cartuchos,bucle_general,reset,close,grabar_snapshot:procedure;
            caption:string;
            fps_max:single;
+           scanlines:word;
            save_qsnap,load_qsnap:procedure(nombre:string);
            end;
         tmain_screen=record
@@ -119,7 +122,6 @@ type
             32:(val32:array[0..31] of word;name32:array[0..31] of string[30];);
         end;
         pdef_dip=^def_dip;
-        pdef_dip2=^def_dip2;
         TEmuStatus=(EsPause,EsRunning,EsStoped);
 
 //Video
@@ -130,7 +132,7 @@ procedure change_video_size(x,y:word);
 procedure change_video_clock(fps:single);
 procedure pasar_pantalla_completa;
 procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false;alpha:boolean=false);
-procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
+procedure mod_screen(num:byte;x,y:word);
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
 procedure actualiza_video;
 //Update final screen
@@ -235,6 +237,7 @@ long:=long-1;
 //Comprobar si he llegado al final y debo pasarlo
 if long<>0 then directory.arcade_list_roms[total]:=test_dir(copy(dir,old_pos,long))+main_vars.cadena_dir;
 end;
+
 function get_all_dirs:string;
 var
    f:byte;
@@ -272,10 +275,10 @@ end;
 {$ifdef fpc}
 //En linux uso la pantalla de SDL...
 case main_vars.tipo_maquina of
-     0..9,1000..1008,2000..2002,3000:begin
+     0..9,1000..1008,2000..2002,3000..3003:begin
              fix_screen_pos(400,100);
-             principal1.Panel2.width:=400;
-             principal1.Panel2.height:=55;
+             principal1.Panel2.width:=principal1.Width;
+             principal1.Panel2.height:=principal1.bitbtn9.height;
           end;
      else fix_screen_pos(400,70);
 end;
@@ -386,6 +389,10 @@ if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,x,y,0);
 {$endif}
 cambiar_video;
+if main_screen.video_mode=6 then begin
+  main_screen.video_mode:=2;
+  pasar_pantalla_completa;
+end;
 //Creo la pantalla de los sprites
 if alpha then begin
   pantalla[PANT_SPRITES_ALPHA]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,32,$ff,$ff00,$ff0000,$ff000000);
@@ -405,8 +412,8 @@ for f:=1 to MAX_PANT_VISIBLE do
       p_final[f].x:=p_final[f].x+(ADD_SPRITE*2);
       p_final[f].y:=p_final[f].y+(ADD_SPRITE*2);
     end;
-    if p_final[f].scroll.mask_x=0 then p_final[f].scroll.mask_x:=$ffff;
-    if p_final[f].scroll.mask_y=0 then p_final[f].scroll.mask_y:=$ffff;
+    if p_final[f].mask_x=0 then p_final[f].mask_x:=$ffff;
+    if p_final[f].mask_y=0 then p_final[f].mask_y:=$ffff;
     if p_final[f].alpha then pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,32,$ff,$ff00,$ff0000,$ff000000)
       else pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
     //Y si son transparentes las creo
@@ -421,17 +428,26 @@ begin
   p_final[num].y:=y;
   p_final[num].trans:=trans;
   p_final[num].final_mix:=final_mix;
+  if final_mix then begin
+    scroll_final_x:=x;
+    scroll_final_y:=y;
+  end;
   p_final[num].alpha:=alpha;
+  //Esto es completamente arbitrario!!! :-)
+  if (x mod 256)>127 then p_final[num].mask_x:=(((x div 256)+1)*256)-1
+    else p_final[num].mask_x:=((x div 256)*256)-1;
+  if (y mod 256)>127 then p_final[num].mask_y:=(((y div 256)+1)*256)-1
+    else p_final[num].mask_y:=((y div 256)*256)-1;
 end;
 
-procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
+procedure mod_screen(num:byte;x,y:word);
 begin
-  p_final[num].scroll.long_x:=long_x;
-  p_final[num].scroll.max_x:=max_x;
-  p_final[num].scroll.mask_x:=mask_x;
-  p_final[num].scroll.long_y:=long_y;
-  p_final[num].scroll.max_y:=max_y;
-  p_final[num].scroll.mask_y:=mask_y;
+  p_final[num].x:=x;
+  p_final[num].y:=y;
+  if (x mod 256)>127 then p_final[num].mask_x:=(((x div 256)+1)*256)-1
+    else p_final[num].mask_x:=((x div 256)*256)-1;
+  if (y mod 256)>127 then p_final[num].mask_y:=(((y div 256)+1)*256)-1
+    else p_final[num].mask_y:=((y div 256)*256)-1;
 end;
 
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
@@ -903,9 +919,9 @@ timers.clear;
 marcade.dswa_val:=nil;
 marcade.dswb_val:=nil;
 marcade.dswc_val:=nil;
-marcade.dswa_val2:=nil;
-marcade.dswb_val2:=nil;
-marcade.dswc_val2:=nil;
+setlength(marcade.dipsw_a,0);
+setlength(marcade.dipsw_b,0);
+setlength(marcade.dipsw_c,0);
 {$ifndef windows}
 cont_sincroniza:=sdl_getticks();
 {$endif}

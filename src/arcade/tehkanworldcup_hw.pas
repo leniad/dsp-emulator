@@ -9,31 +9,31 @@ function iniciar_tehkanwc:boolean;
 
 implementation
 const
-        tehkanwc_rom:array[0..3] of tipo_roms=(
+        tehkanwc_rom:array[0..2] of tipo_roms=(
         (n:'twc-1.bin';l:$4000;p:0;crc:$34d6d5ff),(n:'twc-2.bin';l:$4000;p:$4000;crc:$7017a221),
-        (n:'twc-3.bin';l:$4000;p:$8000;crc:$8b662902),());
+        (n:'twc-3.bin';l:$4000;p:$8000;crc:$8b662902));
         tehkanwc_cpu2:tipo_roms=(n:'twc-4.bin';l:$8000;p:0;crc:$70a9f883);
         tehkanwc_sound:tipo_roms=(n:'twc-6.bin';l:$4000;p:0;crc:$e3112be2);
         tehkanwc_chars:tipo_roms=(n:'twc-12.bin';l:$4000;p:0;crc:$a9e274f8);
-        tehkanwc_sprites:array[0..2] of tipo_roms=(
-        (n:'twc-8.bin';l:$8000;p:0;crc:$055a5264),(n:'twc-7.bin';l:$8000;p:$8000;crc:$59faebe7),());
-        tehkanwc_tiles:array[0..2] of tipo_roms=(
-        (n:'twc-11.bin';l:$8000;p:0;crc:$669389fc),(n:'twc-9.bin';l:$8000;p:$8000;crc:$347ef108),());
+        tehkanwc_sprites:array[0..1] of tipo_roms=(
+        (n:'twc-8.bin';l:$8000;p:0;crc:$055a5264),(n:'twc-7.bin';l:$8000;p:$8000;crc:$59faebe7));
+        tehkanwc_tiles:array[0..1] of tipo_roms=(
+        (n:'twc-11.bin';l:$8000;p:0;crc:$669389fc),(n:'twc-9.bin';l:$8000;p:$8000;crc:$347ef108));
         tehkanwc_adpcm:tipo_roms=(n:'twc-5.bin';l:$4000;p:0;crc:$444b5544);
         //DIP
-        tehkanwc_dipa:array [0..3] of def_dip2=(
+        tehkanwc_dipa:array [0..2] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(1,7,0,6,5,4,3,2);name8:('2C 1C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$38;name:'Coin B';number:8;val8:(8,$38,0,$30,$28,$20,$18,$10);name8:('2C 1C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
-        (mask:$c0;name:'Start Credits P1&&P2/Extra';number:4;val4:($80,$c0,$40,0);name4:('1&1/200%','1&2/100%','2&2/100%','2&3/67%')),());
-        tehkanwc_dipb:array [0..3] of def_dip2=(
+        (mask:$c0;name:'Start Credits P1&&P2/Extra';number:4;val4:($80,$c0,$40,0);name4:('1&1/200%','1&2/100%','2&2/100%','2&3/67%')));
+        tehkanwc_dipb:array [0..2] of def_dip2=(
         (mask:3;name:'1P Game Time';number:4;val4:(0,1,3,2);name4:('2:30','2:00','1:30','1:00')),
         (mask:$7c;name:'2P Game Time';number:32;val32:(0,$60,$20,$40,4,$64,$24,$44,$1c,$7c,$3c,$5c,$8,$68,$28,$48,$c,$6c,$2c,$4c,$10,$70,$30,$50,$14,$74,$34,$54,$18,$78,$38,$58);
           name32:('5:00/3:00 Extra','5:00/2:45 Extra','5:00/2:35 Extra','5:00/2:30 Extra','4:00/2:30 Extra','4:00/2:15 Extra','4:00/2:05 Extra','4:00/2:00 Extra','3:30/2:15 Extra','3:30/2:00 Extra','3:30/1:50 Extra','3:30/1:45 Extra','3:00/2:00 Extra','3:00/1:45 Extra','3:00/1:35 Extra','3:00/1:30 Extra','2:30/1:45 Extra','2:30/1:30 Extra','2:30/1:20 Extra','2:30/1:15 Extra','2:00/1:30 Extra','2:00/1:15 Extra','2:00/1:05 Extra','2:00/1:00 Extra','1:30/1:15 Extra','1:30/1:00 Extra','1:30/0:50 Extra','1:30/0:45 Extra','1:00/1:00 Extra','1:00/0:45 Extra','1:00/0:35 Extra','1:00/0:30 Extra')),
-        (mask:$80;name:'Game Type';number:2;val2:($80,0);name2:('Timer In','Credit In')),());
-        tehkanwc_dipc:array [0..3] of def_dip2=(
+        (mask:$80;name:'Game Type';number:2;val2:($80,0);name2:('Timer In','Credit In')));
+        tehkanwc_dipc:array [0..2] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:4;name:'Timer Speed';number:2;val2:(4,0);name2:('60/60','55/60')),
-        (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),());
+        (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')));
         CPU_SYNC=4;
 
 var
@@ -313,7 +313,6 @@ begin
  ay8910_0.reset;
  ay8910_1.reset;
  msm5205_0.reset;
- reset_game_general;
  marcade.in0:=$20;
  marcade.in1:=$20;
  marcade.in2:=$f;
@@ -334,25 +333,25 @@ var
 begin
 llamadas_maquina.bucle_general:=tehkanwc_principal;
 llamadas_maquina.reset:=reset_tehkanwc;
+llamadas_maquina.scanlines:=256*CPU_SYNC;
 iniciar_tehkanwc:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 screen_init(3,256,256,true);
 screen_init(4,256,256,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4608000,$100*CPU_SYNC);
+z80_0:=cpu_z80.create(4608000);
 z80_0.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
 //Misc CPU
-z80_1:=cpu_z80.create(4608000,$100*CPU_SYNC);
+z80_1:=cpu_z80.create(4608000);
 z80_1.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
 //analog
 init_analog(z80_0.numero_cpu,z80_0.clock);
 analog_0(100,10,0,63,-63,true);
 //Sound CPU
-z80_2:=cpu_z80.create(4608000,$100*CPU_SYNC);
+z80_2:=cpu_z80.create(4608000);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.change_io_calls(snd_inbyte,snd_outbyte);
 z80_2.init_sound(tehkanwc_sound_update);
@@ -388,12 +387,9 @@ init_gfx(2,16,8,1024);
 gfx_set_desc_data(4,0,64*8,0,1,2,3);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswa_val2:=@tehkanwc_dipa;
-marcade.dswb:=$ff;
-marcade.dswb_val2:=@tehkanwc_dipb;
-marcade.dswc:=$f;
-marcade.dswc_val2:=@tehkanwc_dipc;
+init_dips(1,tehkanwc_dipa,$ff);
+init_dips(2,tehkanwc_dipb,$ff);
+init_dips(3,tehkanwc_dipc,$f);
 reset_tehkanwc;
 iniciar_tehkanwc:=true;
 end;

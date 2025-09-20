@@ -329,18 +329,17 @@ end;
 begin
 llamadas_maquina.bucle_general:=pirates_principal;
 llamadas_maquina.reset:=reset_pirates;
+llamadas_maquina.scanlines:=256;
 iniciar_pirates:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,288,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(16000000,256);
+m68000_0:=cpu_m68000.create(16000000);
 m68000_0.init_sound(pirates_sound_update);
 //sound
 oki_6295_0:=snd_okim6295.Create(1333333,OKIM6295_PIN7_LOW);

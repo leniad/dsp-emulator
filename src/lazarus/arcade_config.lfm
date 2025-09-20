@@ -1,65 +1,64 @@
 object config_arcade: Tconfig_arcade
   Left = 351
-  Height = 470
+  Height = 376
   Top = 290
-  Width = 1020
+  Width = 816
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Arcade Config'
-  ClientHeight = 470
-  ClientWidth = 1020
-  DesignTimePPI = 120
+  ClientHeight = 376
+  ClientWidth = 816
   Font.CharSet = ANSI_CHARSET
-  Font.Height = -14
+  Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   Position = poScreenCenter
-  LCLVersion = '4.0.0.3'
+  LCLVersion = '4.0.0.4'
   OnClose = FormClose
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   object GroupBox1: TGroupBox
-    Left = 10
-    Height = 371
-    Top = 10
-    Width = 321
+    Left = 8
+    Height = 297
+    Top = 8
+    Width = 257
     Caption = 'DIP A'
     TabOrder = 0
   end
   object GroupBox2: TGroupBox
-    Left = 350
-    Height = 371
-    Top = 10
-    Width = 321
+    Left = 280
+    Height = 297
+    Top = 8
+    Width = 257
     Caption = 'DIP B'
     TabOrder = 1
     Visible = False
   end
   object GroupBox3: TGroupBox
-    Left = 690
-    Height = 371
-    Top = 10
-    Width = 321
+    Left = 552
+    Height = 297
+    Top = 8
+    Width = 257
     Caption = 'DIP C'
     TabOrder = 2
     Visible = False
   end
   object Button2: TButton
-    Left = 620
-    Height = 51
-    Top = 400
-    Width = 151
+    Left = 496
+    Height = 41
+    Top = 320
+    Width = 121
     Caption = 'CANCEL'
     TabOrder = 3
     TabStop = False
     OnClick = Button2Click
   end
   object Button1: TButton
-    Left = 260
-    Height = 51
-    Top = 400
-    Width = 151
+    Left = 208
+    Height = 41
+    Top = 320
+    Width = 121
     Caption = 'OK'
     TabOrder = 4
     TabStop = False

@@ -18,7 +18,7 @@ type
         end;
         preg_mcs48=^reg_mcs48;
         cpu_mcs48=class(cpu_class)
-                constructor create(clock:dword;frames_div:word;chip_type:byte);
+                constructor create(clock:dword;chip_type:byte);
                 destructor free;
             public
                 //N7751 port extender
@@ -117,13 +117,13 @@ var
 
 implementation
 
-constructor cpu_mcs48.create(clock:dword;frames_div:word;chip_type:byte);
+constructor cpu_mcs48.create(clock:dword;chip_type:byte);
 begin
 getmem(self.r,sizeof(reg_mcs48));
 fillchar(self.r^,sizeof(reg_mcs48),0);
 self.numero_cpu:=cpu_main_init(clock div 15);
 self.clock:=clock div 15;
-self.tframes:=(clock/15/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/15/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.in_port:=nil;
 self.out_port:=nil;
 self.ext_inport:=nil;

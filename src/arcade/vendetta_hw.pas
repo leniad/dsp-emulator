@@ -310,25 +310,24 @@ llamadas_maquina.close:=cerrar_vendetta;
 llamadas_maquina.reset:=reset_vendetta;
 llamadas_maquina.bucle_general:=vendetta_principal;
 llamadas_maquina.fps_max:=59.17;
+llamadas_maquina.scanlines:=256;
 iniciar_vendetta:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(true);
 //Main CPU
-konami_0:=cpu_konami.create(12000000,256);
+konami_0:=cpu_konami.create(12000000);
 konami_0.change_ram_calls(vendetta_getbyte,vendetta_putbyte);
 konami_0.change_set_lines(vendetta_bank);
 if not(roms_load(@memoria_temp,vendetta_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[$38000],$8000);
 for f:=0 to 27 do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(vendetta_snd_getbyte,vendetta_snd_putbyte);
 z80_0.init_sound(vendetta_sound_update);
 if not(roms_load(@mem_snd,vendetta_sound)) then exit;

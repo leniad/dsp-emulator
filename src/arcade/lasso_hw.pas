@@ -19,16 +19,16 @@ const
         (n:'2';l:$2000;p:$4000;crc:$7db77256),(n:'wm2';l:$2000;p:$6000;crc:$9e7d0b6f));
         lasso_pal:array[0..1] of tipo_roms=(
         (n:'82s123.69';l:$20;p:0;crc:$1eabb04d),(n:'82s123.70';l:$20;p:$20;crc:$09060f8c));
-        lasso_dip_a:array [0..5] of def_dip2=(
+        lasso_dip_a:array [0..4] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
         (mask:$e;name:'Coin A';number:8;val8:(2,0,8,4,$c,6,$a,$e);name8:('2C 1C','1C 1C','1C 2C','1C 3C','1C 6C','ND','ND','ND')),
         (mask:$30;name:'Lives';number:4;val4:(0,$10,$20,$30);name4:('3','4','5','ND')),
         (mask:$40;name:'Coin B';number:2;val2:($40,0);name2:('2C 1C','1C 1C')),
-        (mask:$80;name:'Warm-Up Instructions';number:2;val2:(0,$80);name2:('No','yes')),());
-        lasso_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Warm-Up Instructions';number:2;val2:(0,$80);name2:('No','yes')));
+        lasso_dip_b:array [0..2] of def_dip2=(
         (mask:1;name:'Warm-Up';number:2;val2:(1,0);name2:('No','Yes')),
         (mask:2;name:'Warm-Up Language';number:2;val2:(0,2);name2:('English','German')),
-        (mask:8;name:'Invulnerability';number:2;val2:(0,8);name2:('Off','On')),());
+        (mask:8;name:'Invulnerability';number:2;val2:(0,8);name2:('Off','On')));
         chameleo_rom:array[0..3] of tipo_roms=(
         (n:'chamel4.bin';l:$2000;p:$4000;crc:$97379c47),(n:'chamel5.bin';l:$2000;p:$6000;crc:$0a2cadfd),
         (n:'chamel6.bin';l:$2000;p:$8000;crc:$b023c354),(n:'chamel7.bin';l:$2000;p:$a000;crc:$a5a03375));
@@ -39,13 +39,12 @@ const
         (n:'chamel8.bin';l:$2000;p:$4000;crc:$dc67916b),(n:'chamel9.bin';l:$2000;p:$6000;crc:$6b559bf1));
         chameleo_pal:array[0..1] of tipo_roms=(
         (n:'chambprm.bin';l:$20;p:0;crc:$e3ad76df),(n:'chamaprm.bin';l:$20;p:$20;crc:$c7063b54));
-        chameleon_dip_a:array [0..4] of def_dip2=(
+        chameleon_dip_a:array [0..3] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
         (mask:$e;name:'Coin A';number:8;val8:(2,0,8,4,$c,6,$a,$e);name8:('2C 1C','1C 1C','1C 2C','1C 3C','1C 6C','ND','ND','ND')),
         (mask:$30;name:'Lives';number:4;val4:(0,$30,$10,$20);name4:('3','5','ND','Infinite')),
-        (mask:$40;name:'Coin B';number:2;val2:($40,0);name2:('2C 1C','1C 1C')),());
-        chameleon_dip_b:array [0..1] of def_dip2=(
-        (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),());
+        (mask:$40;name:'Coin B';number:2;val2:($40,0);name2:('2C 1C','1C 1C')));
+        chameleon_dip_b:def_dip2=(mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On'));
 
 var
   chip_data,back_color,gfxbank,soundlatch:byte;
@@ -443,6 +442,7 @@ end;
 begin
 llamadas_maquina.reset:=reset_lasso;
 llamadas_maquina.fps_max:=57;
+llamadas_maquina.scanlines:=256;
 iniciar_lasso:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=390 then main_screen.rot90_screen:=true;
@@ -451,9 +451,9 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6502_0:=cpu_m6502.create(11289000 div 16,256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(11289000 div 16,TCPU_M6502);
 //Sound CPU
-m6502_1:=cpu_m6502.create(600000,256,TCPU_M6502);
+m6502_1:=cpu_m6502.create(600000,TCPU_M6502);
 m6502_1.init_sound(lasso_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(2000000);
@@ -466,7 +466,7 @@ case main_vars.tipo_maquina of
         m6502_1.change_ram_calls(getbyte_sndlasso,putbyte_sndlasso);
         if not(roms_load(@mem_snd,lasso_snd)) then exit;
         //Sub CPU
-        m6502_2:=cpu_m6502.create(11289000 div 16,256,TCPU_M6502);
+        m6502_2:=cpu_m6502.create(11289000 div 16,TCPU_M6502);
         m6502_2.change_ram_calls(getbyte_sublasso,putbyte_sublasso);
         if not(roms_load(@mem_misc,lasso_sub)) then exit;
         //Cargar chars
@@ -481,10 +481,8 @@ case main_vars.tipo_maquina of
         copymemory(@memoria_temp[$3800],@memoria_temp[$7800],$800);
         convert_char_sprites;
         //DIP
-        marcade.dswa:=$81;
-        marcade.dswb:=0;
-        marcade.dswa_val2:=@lasso_dip_a;
-        marcade.dswb_val2:=@lasso_dip_b;
+        init_dips(1,lasso_dip_a,$81);
+        init_dips(2,lasso_dip_b,0);
         //poner la paleta
         if not(roms_load(@memoria_temp,lasso_pal)) then exit;
       end;
@@ -506,10 +504,8 @@ case main_vars.tipo_maquina of
         copymemory(@memoria_temp[$3000],@memoria_temp[$7800],$800);
         convert_char_sprites;
         //DIP
-        marcade.dswa:=1;
-        marcade.dswb:=0;
-        marcade.dswa_val2:=@chameleon_dip_a;
-        marcade.dswb_val2:=@chameleon_dip_b;
+        init_dips(1,chameleon_dip_a,1);
+        init_dips(2,chameleon_dip_b,0);
         //poner la paleta
         if not(roms_load(@memoria_temp,chameleo_pal)) then exit;
       end;

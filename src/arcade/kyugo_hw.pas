@@ -388,19 +388,19 @@ end;
 begin
 llamadas_maquina.bucle_general:=kyugo_hw_principal;
 llamadas_maquina.reset:=reset_kyugo_hw;
+llamadas_maquina.scanlines:=256;
 iniciar_kyugo_hw:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true);
 screen_init(2,512,256);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false,true);
 if ((main_vars.tipo_maquina=128) or (main_vars.tipo_maquina=330)) then main_screen.rot90_screen:=true;
 iniciar_video(288,224);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,256);
+z80_0:=cpu_z80.create(3072000);
 z80_0.change_io_calls(nil,kyugo_outbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3072000,256);
+z80_1:=cpu_z80.create(3072000);
 z80_1.init_sound(kyugo_snd_update);
 timers.init(z80_1.numero_cpu,3072000/(60*4),kyugo_snd_irq,nil,true);
 //Sound Chip

@@ -29,16 +29,16 @@ const
         speedr_prom:array[0..1] of tipo_roms=(
         (n:'63s141.12a';l:$100;p:$0;crc:$8421786f),(n:'63s141.13a';l:$100;p:$100;crc:$6048583f));
         //Dip
-        speedr_dip_a:array [0..3] of def_dip2=(
+        speedr_dip_a:array [0..2] of def_dip2=(
         (mask:7;name:'Coin B';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:$38;name:'Coin A';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
-        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
-        speedr_dip_b:array [0..5] of def_dip2=(
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')));
+        speedr_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 70K+','30K 80K+','20K 80K','30K 80K')),
         (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')),());
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')));
 
 var
  memoria_rom:array[0..$3f,0..$fff] of byte;
@@ -286,22 +286,21 @@ const
 begin
 llamadas_maquina.bucle_general:=speedr_principal;
 llamadas_maquina.reset:=reset_speedr;
+llamadas_maquina.scanlines:=256;
 iniciar_speedr:=false;
 iniciar_audio(false);
 //Background
 screen_init(1,256,512,true);
 //Foreground
 screen_init(2,1024,1024);
-screen_mod_scroll(2,1024,256,1023,1024,512,1023);
 screen_init(3,1024,1024,true);
-screen_mod_scroll(3,1024,256,1023,1024,512,1023);
 screen_init(4,256,512,false,true); //Final
 iniciar_video(240,352);
 //Main CPU
-m6809_0:=cpu_m6809.Create(8000000,256,TCPU_MC6809);
+m6809_0:=cpu_m6809.Create(8000000,TCPU_MC6809);
 m6809_0.change_ram_calls(speedr_getbyte,speedr_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(speedr_sound_update);
 //Sound Chip
@@ -334,10 +333,8 @@ gfx[2].trans[15]:=true;
 gfx_set_desc_data(4,0,32*8,$1800*32*8,$1000*32*8,$800*32*8,$0*32*8);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //Dip
-marcade.dswa:=$ff;
-marcade.dswb:=$73;
-marcade.dswa_val2:=@speedr_dip_a;
-marcade.dswb_val2:=@speedr_dip_b;
+init_dips(1,speedr_dip_a,$ff);
+init_dips(2,speedr_dip_b,$73);
 //final
 iniciar_speedr:=true;
 end;

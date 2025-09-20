@@ -371,7 +371,11 @@ uses
   msm5232 in '..\snd\msm5232.pas',
   taito_b_hw in '..\arcade\taito_b_hw.pas',
   taito_tc0180vcu in '..\arcade\misc\taito_tc0180vcu.pas',
-  ym_2610 in '..\snd\ym_2610.pas';
+  ym_2610 in '..\snd\ym_2610.pas',
+  principal_misc in '..\misc\principal_misc.pas',
+  configgeneral_misc in '..\misc\configgeneral_misc.pas',
+  arcadeconfig_misc in '..\misc\arcadeconfig_misc.pas',
+  msx1 in '..\ordenadores\msx1.pas';
 
 {$R *.res}
 begin

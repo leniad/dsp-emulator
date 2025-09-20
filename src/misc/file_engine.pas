@@ -3,7 +3,7 @@ unit file_engine;
 interface
 uses {$IFDEF windows}windows,{$endif}
      {$ifdef fpc}
-     zipper,zdeflate,zinflate,zbase,ziputils,unzip2,
+     zipper,zdeflate,zinflate,zbase,ziputils,unzip,
      {$else}
      Zlib,zip,
      {$endif}
@@ -22,6 +22,8 @@ function load_hi(nombre:string;posicion:pbyte;longitud:word):boolean;
 //Iniciar fichero INI
 procedure file_ini_load;
 procedure file_ini_save;
+function file_ini_load_dip(var number:word):boolean;
+procedure file_ini_save_dip;
 //Ficheros normales
 function read_file_size(nombre_file:string;var longitud:integer):boolean;
 function read_file(nombre_file:string;donde:pbyte;var longitud:integer):boolean;
@@ -40,7 +42,7 @@ var
   zip_find_files_data:tzip_find_files;
 
 implementation
-uses spectrum_misc,principal,amstrad_cpc,sms,gb;
+uses spectrum_misc,principal,amstrad_cpc,sms,gb,init_games;
 
 //Hi-score
 procedure save_hi(nombre:string;posicion:pbyte;longitud:dword);
@@ -73,6 +75,59 @@ load_hi:=true;
 end;
 
 //INI Files
+function file_ini_load_dip(var number:word):boolean;
+var
+  fich_ini:Tinifile;
+  f:word;
+  res,nombre:string;
+  ires:integer;
+begin
+res:='-1';
+if fileexists(directory.Base+'dsp_dipsw.ini') then begin
+  fich_ini:=Tinifile.Create(directory.Base+'dsp_dipsw.ini');
+  for f:=1 to GAMES_CONT do begin
+    if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+      nombre:=GAMES_DESC[f].zip;
+      break;
+    end;
+  end;
+  case number of
+    1:res:=fich_ini.readString(nombre,'dip1','-1');
+    2:res:=fich_ini.readString(nombre,'dip2','-1');
+    3:res:=fich_ini.readString(nombre,'dip3','-1');
+  end;
+  fich_ini.free;
+end;
+ires:=strtoint(res);
+if (ires<>-1) then begin
+  file_ini_load_dip:=true;
+  number:=ires;
+end else file_ini_load_dip:=false;
+end;
+
+procedure file_ini_save_dip;
+var
+  fich_ini:Tinifile;
+  f:word;
+  nombre:string;
+begin
+fich_ini:=Tinifile.Create(directory.base+'dsp_dipsw.ini');
+if @fich_ini=nil then begin
+  MessageDlg('Error writing INI file!', mtError,[mbOk], 0);
+  exit;
+end;
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre:=GAMES_DESC[f].zip;
+    break;
+  end;
+end;
+fich_ini.WriteInteger(nombre,'dip1',marcade.dswa);
+fich_ini.WriteInteger(nombre,'dip2',marcade.dswb);
+fich_ini.WriteInteger(nombre,'dip3',marcade.dswc);
+fich_ini.free;
+end;
+
 procedure file_ini_load;
 var
   fich_ini:Tinifile;
@@ -107,6 +162,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.c64_tap:=fich_ini.readString('dir','c64_tap',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.c64_disk:=fich_ini.readString('dir','c64_disk',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.oric_tap:=fich_ini.readString('dir','oric_tap',directory.Base+'oric'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.msx_tap:=fich_ini.readString('dir','msx_tap',directory.Base+'msx'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.pv1000:=fich_ini.readString('dir','pv1000',directory.Base+'pv1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.pv2000:=fich_ini.readString('dir','pv2000',directory.Base+'pv2000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
@@ -116,7 +172,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   if sound_status.sonido_activo then principal1.consonido1.checked:=true
     else principal1.SinSonido1.Checked:=true;
   main_screen.video_mode:=fich_ini.ReadInteger('dsp','video',1);
-  if ((main_screen.video_mode<1) or (main_screen.video_mode>5)) then main_screen.video_mode:=1;
+  if ((main_screen.video_mode<1) or (main_screen.video_mode>6)) then main_screen.video_mode:=1;
   main_screen.pantalla_completa:=false;
   main_vars.tipo_maquina:=fich_ini.ReadInteger('dsp','maquina',0);
   main_vars.auto_exec:=(fich_ini.ReadInteger('dsp','auto_exec',0)=1);
@@ -149,8 +205,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
   arcade_input.nleft[0]:=fich_ini.ReadInteger('keyboard','left_0',KEYBOARD_LEFT) and $ff;
   arcade_input.nright[0]:=fich_ini.ReadInteger('keyboard','right_0',KEYBOARD_RIGHT) and $ff;
-  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',KEYBOARD_LALT) and $ff;
-  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',KEYBOARD_LCTRL) and $ff;
+  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',KEYBOARD_LCTRL) and $ff;
+  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',KEYBOARD_LALT) and $ff;
   arcade_input.nbut2[0]:=fich_ini.ReadInteger('keyboard','but2_0',KEYBOARD_LSHIFT) and $ff;
   arcade_input.nbut3[0]:=fich_ini.ReadInteger('keyboard','but3_0',KEYBOARD_A) and $ff;
   arcade_input.nbut4[0]:=fich_ini.ReadInteger('keyboard','but4_0',KEYBOARD_S) and $ff;
@@ -239,6 +295,7 @@ end else begin
   Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
   Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
   Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
+  Directory.msx_tap:=directory.base+'msx'+main_vars.cadena_dir;
   Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
   Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
   main_vars.idioma:=1;
@@ -360,6 +417,7 @@ if ((Directory.amstrad_rom='') or (directory.amstrad_rom=main_vars.cadena_dir)) 
 if ((Directory.c64_tap='') or (directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
 if ((Directory.c64_disk='') or (directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
 if ((Directory.oric_tap='') or (directory.oric_tap=main_vars.cadena_dir)) then Directory.oric_tap:=directory.base+'oric'+main_vars.cadena_dir;
+if ((Directory.msx_tap='') or (directory.msx_tap=main_vars.cadena_dir)) then Directory.msx_tap:=directory.base+'msx'+main_vars.cadena_dir;
 if ((Directory.pv1000='') or (directory.pv1000=main_vars.cadena_dir)) then Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
 if ((Directory.pv2000='') or (directory.pv2000=main_vars.cadena_dir)) then Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
 end;
@@ -412,6 +470,7 @@ fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
 fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
 fich_ini.Writestring('dir','oric_tap',test_dir(Directory.oric_tap));
+fich_ini.Writestring('dir','msx_tap',test_dir(Directory.msx_tap));
 fich_ini.Writestring('dir','pv1000',test_dir(Directory.pv1000));
 fich_ini.Writestring('dir','pv2000',test_dir(Directory.pv2000));
 //Config general
@@ -774,10 +833,7 @@ begin
   if not(find) then begin
     ZipFile.Close;
     ZipFile.Free;
-    if warning then begin
-      MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-      //principal1.Enabled:=true;
-    end;
+    if warning then MessageDlg(leng.errores[0]+' "'+nombre_file+'" '+leng.errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
     exit;
   end;
   longitud:=ZipFile.FileInfos[f].UncompressedSize;
@@ -834,7 +890,6 @@ begin
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
     if warning then MessageDlg(leng.errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
-    //principal1.Enabled:=true;
     exit;
   end;
   find:=false;

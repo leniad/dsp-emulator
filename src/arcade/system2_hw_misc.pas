@@ -89,7 +89,7 @@ begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
   for f:=0 to 259 do begin
-    eventos_system1;
+    eventos_system2;
     if f=224 then begin
       z80_0.change_irq(HOLD_LINE);
       if type_row_scroll then update_video_row_scroll
@@ -168,16 +168,17 @@ end;
 begin
 iniciar_system2:=false;
 iniciar_audio(false);
+llamadas_maquina.scanlines:=260;
 //Fondo normal y encima
 screen_init(1,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(20000000 div 5,260);
+z80_0:=cpu_z80.create(20000000 div 5);
 z80_0.change_ram_calls(system2_getbyte,system2_putbyte);
 z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
 z80_0.change_misc_calls(nil,nil,system1_adjust_cycle);
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,260);
+z80_1:=cpu_z80.create(4000000);
 z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
 z80_1.init_sound(system1_sound_update);
 timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,nil,true);

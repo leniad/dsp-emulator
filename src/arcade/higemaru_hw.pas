@@ -154,7 +154,6 @@ begin
  z80_0.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -173,6 +172,7 @@ const
 begin
 llamadas_maquina.bucle_general:=higemaru_principal;
 llamadas_maquina.reset:=reset_higemaru;
+llamadas_maquina.scanlines:=256;
 iniciar_higemaru:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -180,7 +180,7 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(3000000,256);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(higemaru_getbyte,higemaru_putbyte);
 z80_0.init_sound(higemaru_sound);
 //Sound Chips

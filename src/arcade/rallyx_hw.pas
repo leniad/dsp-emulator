@@ -19,11 +19,11 @@ const
         (n:'5k';l:$800;p:0;crc:$924262bf),(n:'5m';l:$800;p:$800;crc:$131a08ac));
         jungler_sound:tipo_roms=(n:'1b';l:$1000;p:0;crc:$f86999c3);
         jungler_dots:tipo_roms=(n:'82s129.10g';l:$100;p:0;crc:$c59c51b7);
-        jungler_dip:array [0..4] of def_dip2=(
+        jungler_dip:array [0..3] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(1,2,3,0,7,6,5,4);name8:('4C 1C','3C 1C','2C 1C','4C 3C','1C 1C','1C 2C','1C 3C','1C 4C')),
         (mask:$38;name:'Coin B';number:8;val8:(8,$10,$18,0,$38,$30,$28,$20);name8:('4C 1C','3C 1C','2C 1C','4C 3C','1C 1C','1C 2C','1C 3C','1C 4C')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'255 Lives';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'255 Lives';number:2;val2:($80,0);name2:('Off','On')));
         //Rally X
         rallyx_rom:array[0..3] of tipo_roms=(
         (n:'1b';l:$1000;p:0;crc:$5882700d),(n:'rallyxn.1e';l:$1000;p:$1000;crc:$ed1eba2b),
@@ -45,16 +45,15 @@ const
         nrallyx_sound:tipo_roms=(n:'rx1-5.3p';l:$100;p:0;crc:$4bad7017);
         nrallyx_dots:tipo_roms=(n:'rx1-6.8m';l:$100;p:0;crc:$3c16f62c);
         //Dip
-        rallyx_dip_a:array [0..1] of def_dip2=(
-        (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),());
-        rallyx_dip_b:array [0..3] of def_dip2=(
+        rallyx_dip_a:def_dip2=(mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail'));
+        rallyx_dip_b:array [0..2] of def_dip2=(
         (mask:6;name:'Bonus Life';number:4;val4:(2,4,6,0);name4:('15K-20K-10K-15K-20K-10K-15K-20K','30K-40K-20K-30K-40K-20K-30K-40K','40K-60K-30K-40K-60K-30K-50K-60K','Invalid')),
         (mask:$c0;name:'Coinage';number:4;val4:($40,$c0,$80,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$38;name:'Difficulty';number:8;val8:($10,$28,0,$18,$30,8,$20,$38);name8:('1 Car, Medium','1 Car, Hard','2 Car, Easy','2 Car, Medium','2 Car, Hard','3 Car, Easy','3 Car, Medium','3 Car, Hard')),());
-        nrallyx_dip_b:array [0..3] of def_dip2=(
+        (mask:$38;name:'Difficulty';number:8;val8:($10,$28,0,$18,$30,8,$20,$38);name8:('1 Car, Medium','1 Car, Hard','2 Car, Easy','2 Car, Medium','2 Car, Hard','3 Car, Easy','3 Car, Medium','3 Car, Hard')));
+        nrallyx_dip_b:array [0..2] of def_dip2=(
         (mask:6;name:'Bonus Life';number:4;val4:(2,4,6,0);name4:('20K/80K-20K-20K/80K','20K/100K-40K-20K/100K','20K/120K-60K-20K/120K','Invalid')),
         (mask:$c0;name:'Coinage';number:4;val4:($40,$c0,$80,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$38;name:'Difficulty';number:8;val8:($10,$28,$18,$30,0,$20,$38,8);name8:('1 Car, Medium','1 Car, Hard','2 Car, Medium','2 Car, Hard','3 Car, Easy','3 Car, Medium','3 Car, Hard','4 Car, Easy')),());
+        (mask:$38;name:'Difficulty';number:8;val8:($10,$28,$18,$30,0,$20,$38,8);name8:('1 Car, Medium','1 Car, Hard','2 Car, Medium','2 Car, Hard','3 Car, Easy','3 Car, Medium','3 Car, Hard','4 Car, Easy')));
 
 var
  irq_vector,last,scroll_x,scroll_y:byte;
@@ -385,7 +384,6 @@ begin
         namco_snd_0.reset;
   end;
  end;
- reset_game_general;
  last:=0;
  hacer_int:=false;
  scroll_x:=0;
@@ -450,23 +448,22 @@ begin
          end;
  end;
  llamadas_maquina.reset:=reset_rallyxh;
+ llamadas_maquina.scanlines:=256;
  iniciar_rallyxh:=false;
  iniciar_audio(false);
  if main_vars.tipo_maquina=29 then main_screen.rot90_screen:=true;
  screen_init(1,256,256);
- screen_mod_scroll(1,256,256,255,256,256,255);
  screen_init(2,64,256);
  screen_init(3,256,256,true);
- screen_mod_scroll(3,256,256,255,256,256,255);
  screen_init(4,512,512,false,true);
  iniciar_video(288,224);
  //Main CPU
- z80_0:=cpu_z80.create(3072000,$100);
+ z80_0:=cpu_z80.create(3072000);
  case main_vars.tipo_maquina of
    29:begin //jungler
          z80_0.change_ram_calls(jungler_getbyte,jungler_putbyte);
          //Sound Chip
-         konamisnd_0:=konamisnd_chip.create(2,TIPO_JUNGLER,1789772,$100);
+         konamisnd_0:=konamisnd_chip.create(2,TIPO_JUNGLER,1789772);
          if not(roms_load(@konamisnd_0.memoria,jungler_sound)) then exit;
          //cargar roms
          if not(roms_load(@memoria,jungler_rom)) then exit;
@@ -481,8 +478,7 @@ begin
          //poner la paleta
          if not(roms_load(@memoria_temp,jungler_pal)) then exit;
          //DIP
-         marcade.dswa:=$bf;
-         marcade.dswa_val2:=@jungler_dip;
+         init_dips(1,jungler_dip,$bf);
    end;
    50:begin //rallyx
          z80_0.change_ram_calls(rallyx_getbyte,rallyx_putbyte);
@@ -504,10 +500,8 @@ begin
          cargar_disparo;
          //poner la paleta
          if not(roms_load(@memoria_temp,rallyx_pal)) then exit;
-         marcade.dswa:=1;
-         marcade.dswb:=$cb;
-         marcade.dswa_val2:=@rallyx_dip_a;
-         marcade.dswb_val2:=@rallyx_dip_b;
+         init_dips(1,rallyx_dip_a,1);
+         init_dips(2,rallyx_dip_b,$cb);
       end;
    70:begin  //new rally x
          z80_0.change_ram_calls(rallyx_getbyte,rallyx_putbyte);
@@ -537,10 +531,8 @@ begin
          cargar_disparo;
          //poner la paleta
          if not(roms_load(@memoria_temp,nrallyx_pal)) then exit;
-         marcade.dswa:=1;
-         marcade.dswb:=$c3;
-         marcade.dswa_val2:=@rallyx_dip_a;
-         marcade.dswb_val2:=@nrallyx_dip_b;
+         init_dips(1,rallyx_dip_a,1);
+         init_dips(2,nrallyx_dip_b,$c3);
       end;
  end;
  for f:=0 to 31 do begin

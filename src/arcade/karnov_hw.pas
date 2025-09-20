@@ -44,7 +44,7 @@ const
         chelnov_proms:array[0..1] of tipo_roms=(
         (n:'ee21.k8';l:$400;p:0;crc:$b1db6586),(n:'ee20.l6';l:$400;p:$400;crc:$41816132));
         //DIP
-        karnov_dip:array [0..9] of def_dip2=(
+        karnov_dip:array [0..8] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
@@ -53,8 +53,8 @@ const
         (mask:$c00;name:'Bonus Life';number:4;val4:($c00,$800,$400,0);name4:('50 "K"','70 "K"','90 "K"','100 "K"')),
         (mask:$3000;name:'Difficulty';number:4;val4:($2000,$3000,$1000,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$4000;name:'Demo Sounds';number:2;val2:(0,$4000);name2:('Off','On')),
-        (mask:$8000;name:'Time Speed';number:2;val2:($8000,0);name2:('Normal','Fast')),());
-        chelnov_dip:array [0..8] of def_dip2=(
+        (mask:$8000;name:'Time Speed';number:2;val2:($8000,0);name2:('Normal','Fast')));
+        chelnov_dip:array [0..7] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('1C 6C','1C 2C','1C 3C','1C 4C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('1C 4C','1C 1C','2C 1C','3C 1C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('On','Off')),
@@ -62,7 +62,7 @@ const
         (mask:$80;name:'Cainet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),
         (mask:$300;name:'Lives';number:4;val4:($100,$300,$200,0);name4:('1','3','5','Infinite')),
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$1000;name:'Allow Continue';number:2;val2:(0,$1000);name2:('No','Yes')),());
+        (mask:$1000;name:'Allow Continue';number:2;val2:(0,$1000);name2:('No','Yes')));
 
 var
  rom:array[0..$2ffff] of word;
@@ -378,22 +378,22 @@ end;
 begin
 llamadas_maquina.bucle_general:=karnov_principal;
 llamadas_maquina.reset:=reset_karnov;
+llamadas_maquina.scanlines:=256;
 iniciar_karnov:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(256,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(karnov_getword,karnov_putword);
 //Sound CPU
-m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
 m6502_0.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
 m6502_0.init_sound(karnov_sound_update);
 //MCU
-mcs51_0:=cpu_mcs51.create(I8X51,8000000,256);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000);
 mcs51_0.change_io_calls(in_port0,in_port1,nil,in_port3,out_port0,out_port1,out_port2,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
@@ -419,8 +419,7 @@ case main_vars.tipo_maquina of
         //Paleta
         if not(roms_load(@memoria_temp,karnov_proms)) then exit;
         //DIP
-        marcade.dswa:=$ffbf;
-        marcade.dswa_val2:=@karnov_dip;
+        init_dips(1,karnov_dip,$ffbf);
       end;
   220:begin  //Chelnov
         //MCU ROM
@@ -441,8 +440,7 @@ case main_vars.tipo_maquina of
         //Paleta
         if not(roms_load(@memoria_temp,chelnov_proms)) then exit;
         //DIP
-        marcade.dswa:=$ff7f;
-        marcade.dswa_val2:=@chelnov_dip;
+        init_dips(1,chelnov_dip,$ff7f);
       end;
 end;
 //poner la paleta

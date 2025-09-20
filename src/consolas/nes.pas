@@ -250,7 +250,6 @@ begin
   n2a03_0.reset;
   ppu_nes_0.reset;
   frame_main:=n2a03_0.m6502.tframes;
-  reset_game_general;
   nes_0.joy1:=0;
   nes_0.joy2:=0;
   nes_0.joy1_read:=0;
@@ -436,12 +435,13 @@ begin
   llamadas_maquina.cartuchos:=abrir_nes;
   llamadas_maquina.grabar_snapshot:=grabar_nes;
   llamadas_maquina.fps_max:=NTSC_REFRESH;
+  llamadas_maquina.scanlines:=NTSC_LINES;
   iniciar_audio(false);
   screen_init(1,512,1,true);
   screen_init(2,256,240);
   iniciar_video(256,240);
   //Main CPU
-  n2a03_0:=cpu_n2a03.create(NTSC_clock,NTSC_lines);
+  n2a03_0:=cpu_n2a03.create(NTSC_clock);
   n2a03_0.m6502.change_ram_calls(nes_getbyte,nes_putbyte);
   n2a03_0.change_internals(nes_getbyte);
   ppu_nes_0:=nesppu_chip.create;

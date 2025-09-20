@@ -29,16 +29,16 @@ const
         (n:'82s137.3d';l:$400;p:$800;crc:$70b537b9),(n:'82s137.3e';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s131.3b';l:$200;p:$1000;crc:$9dfffaff),(n:'82s131.3a';l:$200;p:$1200;crc:$712bad47),
         (n:'82s131.2a';l:$200;p:$1400;crc:$ac843ca6),(n:'82s131.1a';l:$200;p:$1600;crc:$50452ff8));
-        wardner_dip_a:array [0..5] of def_dip2=(
+        wardner_dip_a:array [0..4] of def_dip2=(
         (mask:$1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
         (mask:$2;name:'Flip Screen';number:2;val2:(0,2);name2:('Off','On')),
         (mask:$8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
-        wardner_dip_b:array [0..3] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')));
+        wardner_dip_b:array [0..2] of def_dip2=(
         (mask:$3;name:'Difficulty';number:4;val4:(1,0,2,3);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('30K 80K 50K+','50K 100K 50K+','30K','50K')),
-        (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('1','3','4','5')),());
+        (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('1','3','4','5')));
 
 var
  mem_rom:array[0..7,0..$7fff] of byte;
@@ -428,7 +428,6 @@ begin
  frame_snd:=z80_1.tframes;
  frame_mcu:=tms32010_0.tframes;
  ym3812_0.reset;
- reset_game_general;
  txt_scroll_x:=0;
  txt_scroll_y:=0;
  bg_scroll_x:=0;
@@ -466,18 +465,16 @@ begin
 llamadas_maquina.bucle_general:=wardnerhw_principal;
 llamadas_maquina.reset:=reset_wardnerhw;
 llamadas_maquina.fps_max:=(14000000/2)/(446*286);
+llamadas_maquina.scanlines:=286;
 iniciar_wardnerhw:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,256,256,255);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512);
-screen_mod_scroll(3,512,512,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-z80_0:=cpu_z80.create(24000000 div 4,286);
+z80_0:=cpu_z80.create(24000000 div 4);
 z80_0.change_ram_calls(wardner_getbyte,wardner_putbyte);
 z80_0.change_io_calls(wardner_inbyte,wardner_outbyte);
 if not(roms_load(@memoria_temp,wardner_rom)) then exit;
@@ -485,13 +482,13 @@ copymemory(@memoria,@memoria_temp,$8000);
 for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
 copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
 //Sound CPU
-z80_1:=cpu_z80.create(14000000 div 4,286);
+z80_1:=cpu_z80.create(14000000 div 4);
 z80_1.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
 z80_1.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
 z80_1.init_sound(wardner_sound_update);
 if not(roms_load(@mem_snd,wardner_snd_rom)) then exit;
 //MCU CPU
-tms32010_0:=cpu_tms32010.create(14000000,286);
+tms32010_0:=cpu_tms32010.create(14000000);
 tms32010_0.change_io_calls(wardner_bio_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
 if not(roms_load(@memoria_temp,wardner_mcu_rom)) then exit;
 for f:=0 to $3ff do
@@ -530,8 +527,8 @@ convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=1;
 marcade.dswb:=0;
-marcade.dswa_val2:=@wardner_dip_a;
-marcade.dswb_val2:=@wardner_dip_b;
+init_dips(1,wardner_dip_a,1);
+init_dips(2,wardner_dip_b,0);
 //final
 reset_wardnerhw;
 iniciar_wardnerhw:=true;

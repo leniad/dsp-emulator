@@ -346,15 +346,12 @@ llamadas_maquina.bucle_general:=steelforce_principal;
 llamadas_maquina.reset:=reset_steelforce;
 llamadas_maquina.close:=cerrar_steelforce;
 llamadas_maquina.fps_max:=58;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,256,256,255);
 screen_init(2,1024,256);
-screen_mod_scroll(2,1024,512,1023,256,256,255);
 screen_init(3,1024,256,true);
-screen_mod_scroll(3,1024,512,1023,256,256,255);
 screen_init(4,1024,256,true);
-screen_mod_scroll(4,1024,512,1023,256,256,255);
 screen_init(5,512,512,false,true);
 if main_vars.tipo_maquina<>359 then begin
   cpu_clock:=15000000;
@@ -371,7 +368,7 @@ end else begin
 end;
 iniciar_video(x_size,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(cpu_clock,$100);
+m68000_0:=cpu_m68000.create(cpu_clock);
 m68000_0.init_sound(steelforce_sound_update);
 m68000_0.change_ram16_calls(steelforce_getword,steelforce_putword);
 //Sound

@@ -21,16 +21,16 @@ const
         tutan_sound:array[0..1] of tipo_roms=(
         (n:'s1.7a';l:$1000;p:0;crc:$b52d01fa),(n:'s2.8a';l:$1000;p:$1000;crc:$9db5c0ce));
         //Dip
-        tutan_dip_a:array [0..2] of def_dip2=(
+        tutan_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        tutan_dip_b:array [0..6] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
+        tutan_dip_b:array [0..5] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,1,2,0);name4:('3','4','5','255')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('30K','40K')),
         (mask:$30;name:'Difficulty';number:4;val4:($30,$20,$10,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$40;name:'Flash Bomb';number:2;val2:($40,0);name2:('1 per Life','1 per Game')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  irq_enable:boolean;
@@ -180,28 +180,27 @@ var
 begin
 llamadas_maquina.bucle_general:=tutankham_principal;
 llamadas_maquina.reset:=reset_tutankham;
+llamadas_maquina.scanlines:=256;
 iniciar_tutankham:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1536000,TCPU_M6809);
 m6809_0.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
 if not(roms_load(@memoria_temp,tutan_rom)) then exit;
 copymemory(@memoria[$a000],@memoria_temp[0],$6000);
 for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
 //Sound Chip
-konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,$100);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772);
 if not(roms_load(@konamisnd_0.memoria,tutan_sound)) then exit;
 //Stars
 galaxian_stars_0:=gal_stars.create(m6809_0.numero_cpu,m6809_0.clock,SCRAMBLE);
 galaxian_stars_0.create_pal($10);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7b;
-marcade.dswa_val2:=@tutan_dip_a;
-marcade.dswb_val2:=@tutan_dip_b;
+init_dips(1,tutan_dip_a,$ff);
+init_dips(2,tutan_dip_b,$7b);
 //final
 iniciar_tutankham:=true;
 end;

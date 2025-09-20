@@ -41,25 +41,25 @@ const
         (n:'silkworm.6';l:$10000;p:0;crc:$1138d159),(n:'silkworm.7';l:$10000;p:$10000;crc:$d96214f7),
         (n:'silkworm.8';l:$10000;p:$20000;crc:$0494b38e),(n:'silkworm.9';l:$10000;p:$30000;crc:$8ce3cdf5));
         //Dip
-        rygar_dip_a:array [0..4] of def_dip2=(
+        rygar_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(1,0,2,3);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
-        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),());
-        rygar_dip_b:array [0..4] of def_dip2=(
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')));
+        rygar_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(0,1,2,3);name4:('50K 200K 500K','100K 300K 600K','200K 500K','100K')),
         (mask:$30;name:'Difficulty';number:4;val4:(0,$10,$20,$30);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$40;name:'2P Can Start Anytime';number:2;val2:($40,0);name2:('Yes','No')),
-        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('Yes','No')),());
-        sw_dip_a:array [0..4] of def_dip2=(
+        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('Yes','No')));
+        sw_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(1,0,2,3);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('On','Off')),());
-        sw_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('On','Off')));
+        sw_dip_b:array [0..2] of def_dip2=(
         (mask:7;name:'Bonus Life';number:8;val8:(0,1,2,3,4,5,6,7);name8:('50K 200K 500K','100K 300K 800K','50K 200K','100K 300K','50K','100K','200K','None')),
         (mask:$70;name:'Difficulty';number:8;val8:($10,$20,$30,$40,$50,$60,$70,0);name8:('1','2','3','4','5','Invalid','Invalid','Invalid')),
-        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('No','Yes')),());
+        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('No','Yes')));
 
 var
  bank_rom:array[0..$1f,0..$7ff] of byte;
@@ -469,18 +469,17 @@ begin
 llamadas_maquina.bucle_general:=tecmo_principal;
 llamadas_maquina.reset:=reset_tecmo;
 llamadas_maquina.fps_max:=59.185608;
+llamadas_maquina.scanlines:=256;
 iniciar_tecmo:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,256+48,511,256,256,255);
 screen_init(6,256,256,true); //chars
 //foreground
 screen_init(7,512,256,true);
-screen_mod_scroll(7,512,256+48,511,256,256,255);
 iniciar_video(256,224);
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,$100);
+z80_1:=cpu_z80.create(4000000);
 z80_1.init_sound(snd_sound_play);
 //Sound Chip
 if main_vars.tipo_maquina=26 then ym3812_0:=ym3812_chip.create(YM3526_FM,4000000)
@@ -491,7 +490,7 @@ msm5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,$8000);
 case main_vars.tipo_maquina of
   26:begin
       //Main
-      z80_0:=cpu_z80.create(6000000,$100);
+      z80_0:=cpu_z80.create(6000000);
       z80_0.change_ram_calls(rygar_getbyte,rygar_putbyte);
       if not(roms_load(@memoria_temp,rygar_rom)) then exit;
       copymemory(@memoria,@memoria_temp,$c000);
@@ -515,14 +514,12 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria_temp,rygar_tiles2)) then exit;
       tile_convert(3,$400);
       //DIP
-      marcade.dswa:=$40;
-      marcade.dswb:=$80;
-      marcade.dswa_val2:=@rygar_dip_a;
-      marcade.dswb_val2:=@rygar_dip_b;
+      init_dips(1,rygar_dip_a,$40);
+      init_dips(2,rygar_dip_b,$80);
   end;
   97:begin  //Silk Worm
       //Main
-      z80_0:=cpu_z80.create(8000000,$100);
+      z80_0:=cpu_z80.create(8000000);
       z80_0.change_ram_calls(sw_getbyte,sw_putbyte);
       if not(roms_load(@memoria_temp,sw_rom)) then exit;
       copymemory(@memoria,@memoria_temp,$10000);
@@ -546,10 +543,8 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria_temp,sw_tiles2)) then exit;
       tile_convert(3,$800);
       //DIP
-      marcade.dswa:=$80;
-      marcade.dswb:=$30;
-      marcade.dswa_val2:=@sw_dip_a;
-      marcade.dswb_val2:=@sw_dip_b;
+      init_dips(1,sw_dip_a,$80);
+      init_dips(2,sw_dip_b,$30);
      end;
 end;
 iniciar_tecmo:=true;

@@ -13,16 +13,16 @@ const
         (n:'a1.i7';l:$2000;p:0;crc:$31b85d9d),(n:'a2.g7';l:$2000;p:$2000;crc:$8328d88a),
         (n:'a3.f7';l:$2000;p:$4000;crc:$8db57ab5),(n:'a4.e7';l:$2000;p:$6000;crc:$4a34d2a4));
         ambush_gfx:array[0..1] of tipo_roms=(
-        (n:'fa1.m4';l:$2000;p:$0;crc:$ad10969e),(n:'fa2.n4';l:$2000;p:$2000;crc:$e7f134ba));
+        (n:'fa1.m4';l:$2000;p:0;crc:$ad10969e),(n:'fa2.n4';l:$2000;p:$2000;crc:$e7f134ba));
         ambush_proms:array[0..1] of tipo_roms=(
-        (n:'a.bpr';l:$100;p:$0;crc:$5f27f511),(n:'b.bpr';l:$100;p:$100;crc:$1b03fd3b));
+        (n:'a.bpr';l:$100;p:0;crc:$5f27f511),(n:'b.bpr';l:$100;p:$100;crc:$1b03fd3b));
         //Dip
-        ambush_dip:array [0..5] of def_dip2=(
-        (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
+        ambush_dip:array [0..4] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$1c;name:'Coinage';number:8;val8:($10,0,$14,4,$18,8,$c,$1c);name8:('2C 1C','1C 1C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','Service Mode/Free Play')),
         (mask:$20;name:'Difficulty';number:2;val2:(0,$20);name2:('Easy','Hard')),
         (mask:$40;name:'Bonus Life';number:2;val2:($40,0);name2:('80K','120K')),
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')));
 
 var
   color_bank:byte;
@@ -40,7 +40,7 @@ for f:=0 to $3ff do begin
     y:=f div 32;
     atrib:=memoria[$c100+(((f shr 2) and $e0) or (f and $1f))];
     nchar:=((atrib and $60) shl 3) or memoria[$c400+f];
-    color:=(color_bank shl 4) or (atrib and $0f);
+    color:=(color_bank shl 4) or (atrib and $f);
     put_gfx(x*8,y*8,nchar,color shl 2,1,0);
     if (atrib and $10)<>0 then put_gfx_trans(x*8,y*8,nchar,color shl 2,2,0)
       else put_gfx_block_trans(x*8,y*8,2,8,8);
@@ -63,7 +63,7 @@ for f:=$7f downto 0 do begin
   end else begin
     y:=240-y;
   end;
-  color:=(color_bank shl 4) or (atrib and $0f);
+  color:=(color_bank shl 4) or (atrib and $f);
   put_gfx_sprite(nchar,color shl 2,(memoria[$c201+(f*4)] and $40)<>0,(memoria[$c201+(f*4)] and $80)<>0,ngfx);
   actualiza_gfx_sprite(x,y,3,ngfx);
 end;
@@ -75,19 +75,19 @@ procedure eventos_ambush;
 begin
 if event.arcade then begin
   //botones
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //players
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
@@ -137,7 +137,7 @@ case direccion of
                 memoria[direccion]:=valor;
                 gfx[0].buffer[direccion and $3ff]:=true;
                end;
-  $cc00..$cc07:case (direccion and $7) of
+  $cc00..$cc07:case (direccion and 7) of
                   4:main_screen.flip_main_screen:=(valor and 1)<>0;
                   5:if color_bank<>(valor and 3) then begin
                       color_bank:=valor and 3;
@@ -150,7 +150,7 @@ end;
 function ambush_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $0:ambush_inbyte:=ay8910_0.read;
+  0:ambush_inbyte:=ay8910_0.read;
   $80:ambush_inbyte:=ay8910_1.read;
 end;
 end;
@@ -158,8 +158,8 @@ end;
 procedure ambush_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-  $0:ay8910_0.control(valor);
-  $1:ay8910_0.write(valor);
+  0:ay8910_0.control(valor);
+  1:ay8910_0.write(valor);
   $80:ay8910_1.control(valor);
   $81:ay8910_1.write(valor);
 end;
@@ -207,16 +207,15 @@ var
 begin
 llamadas_maquina.bucle_general:=ambush_principal;
 llamadas_maquina.reset:=reset_ambush;
+llamadas_maquina.scanlines:=264;
 iniciar_ambush:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(18432000 div 6,264);
+z80_0:=cpu_z80.create(18432000 div 6);
 z80_0.change_ram_calls(ambush_getbyte,ambush_putbyte);
 z80_0.change_io_calls(ambush_inbyte,ambush_outbyte);
 z80_0.init_sound(ambush_sound_update);
@@ -242,24 +241,23 @@ gfx[1].trans[0]:=true;
 if not(roms_load(@memoria_temp,ambush_proms)) then exit;
 for f:=0 to $ff do begin
 		// red component
-		bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
+		bit0:=(memoria_temp[f] shr 0) and 1;
+		bit1:=(memoria_temp[f] shr 1) and 1;
+		bit2:=(memoria_temp[f] shr 2) and 1;
 		colores[f].r:=$21*bit0+$47*bit1+$97*bit2;
 		// green component
-		bit0:=(memoria_temp[f] shr 3) and $01;
-		bit1:=(memoria_temp[f] shr 4) and $01;
-		bit2:=(memoria_temp[f] shr 5) and $01;
+		bit0:=(memoria_temp[f] shr 3) and 1;
+		bit1:=(memoria_temp[f] shr 4) and 1;
+		bit2:=(memoria_temp[f] shr 5) and 1;
 		colores[f].g:=$21*bit0+$47*bit1+$97*bit2;
 		// blue component
     bit0:=0;
-		bit1:=(memoria_temp[f] shr 6) and $01;
-		bit2:=(memoria_temp[f] shr 7) and $01;
+		bit1:=(memoria_temp[f] shr 6) and 1;
+		bit2:=(memoria_temp[f] shr 7) and 1;
 		colores[f].b:=$21*bit0+$47*bit1+$97*bit2;
 end;
 set_pal(colores,$100);
-marcade.dswa:=$c4;
-marcade.dswa_val2:=@ambush_dip;
+init_dips(1,ambush_dip,$c4);
 //final
 iniciar_ambush:=true;
 end;

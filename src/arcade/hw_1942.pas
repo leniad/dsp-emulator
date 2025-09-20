@@ -293,7 +293,6 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -323,17 +322,17 @@ llamadas_maquina.bucle_general:=hw1942_principal;
 llamadas_maquina.reset:=reset_hw1942;
 llamadas_maquina.save_qsnap:=hw1942_qsave;
 llamadas_maquina.load_qsnap:=hw1942_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 screen_init(1,256,512,false,true);
 screen_init(2,256,512);
-screen_mod_scroll(2,256,256,255,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,$100);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(hw1942_getbyte,hw1942_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,$100);
+z80_1:=cpu_z80.create(3000000);
 z80_1.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
 z80_1.init_sound(hw1942_sound_update);
 //Sound Chips

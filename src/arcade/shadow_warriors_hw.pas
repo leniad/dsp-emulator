@@ -26,14 +26,14 @@ const
         (n:'10.3r';l:$20000;p:$80000;crc:$a6451dec),(n:'11.1r';l:$20000;p:$80001;crc:$7fbfdf5e),
         (n:'12.3s';l:$20000;p:$c0000;crc:$94a836d8),(n:'13.1s';l:$20000;p:$c0001;crc:$e9caea3b));
         shadoww_oki:tipo_roms=(n:'4.4a';l:$20000;p:0;crc:$b0e0faf9);
-        shadoww_dip:array [0..7] of def_dip2=(
+        shadoww_dip:array [0..6] of def_dip2=(
         (mask:1;name:'Demo Sounds';number:2;val2:(0,1);name2:('Off','On')),
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$1c;name:'Coin B';number:8;val8:(0,$10,8,4,$1c,$c,$14,$18);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
         (mask:$e0;name:'Coin A';number:8;val8:(0,$80,$40,$20,$e0,$60,$a0,$c0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
         (mask:$c00;name:'Difficulty';number:4;val4:($c00,$400,$800,0);name4:('Normal','TBL 1','TBL 2','TBL 3')),
         (mask:$3000;name:'Energy';number:4;val4:(0,$3000,$1000,$2000);name4:('2','3','4','5')),
-        (mask:$c000;name:'Lives';number:4;val4:(0,$c000,$4000,$8000);name4:('1','2','3','4')),());
+        (mask:$c000;name:'Lives';number:4;val4:(0,$c000,$4000,$8000);name4:('1','2','3','4')));
         wildfang_rom:array[0..1] of tipo_roms=(
         (n:'1.3st';l:$20000;p:0;crc:$ab876c9b),(n:'2.5st';l:$20000;p:1;crc:$1dc74b3b));
         wildfang_sound:tipo_roms=(n:'tkni3.bin';l:$10000;p:0;crc:$15623ec7);
@@ -45,7 +45,7 @@ const
         wildfang_sprites:array[0..1] of tipo_roms=(
         (n:'tkni9.bin';l:$80000;p:0;crc:$d22f4239),(n:'tkni8.bin';l:$80000;p:1;crc:$4931b184));
         wildfang_oki:tipo_roms=(n:'tkni4.bin';l:$20000;p:0;crc:$a7a1dbcf);
-        wildfang_dip:array [0..8] of def_dip2=(
+        wildfang_dip:array [0..7] of def_dip2=(
         (mask:1;name:'Demo Sounds';number:2;val2:(0,1);name2:('Off','On')),
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$1c;name:'Coin B';number:8;val8:(0,$10,8,4,$1c,$c,$14,$18);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
@@ -53,7 +53,7 @@ const
         (mask:$100;name:'Title';number:2;val2:($100,0);name2:('Wild Fang','Tecmo Knight')),
         (mask:$c00;name:'Difficulty (Wild Fang)';number:4;val4:($c00,$400,$800,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$3000;name:'Difficulty (Tecmo Knight)';number:4;val4:($3000,$1000,$2000,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c000;name:'Lives';number:4;val4:($8000,$c000,$4000,0);name4:('1','2','3','Invalid')),());
+        (mask:$c000;name:'Lives';number:4;val4:($8000,$c000,$4000,0);name4:('1','2','3','Invalid')));
 
 var
  scroll_x_txt,scroll_y_txt,scroll_x_bg,scroll_y_bg,scroll_x_fg,scroll_y_fg:word;
@@ -451,20 +451,18 @@ begin
 llamadas_maquina.bucle_general:=shadoww_principal;
 llamadas_maquina.reset:=reset_shadoww;
 llamadas_maquina.fps_max:=59.169998;
+llamadas_maquina.scanlines:=256;
 iniciar_shadoww:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,1024,512,true);
-screen_mod_scroll(2,1024,512,1023,512,512,511);
 screen_init(3,1024,512,true);
-screen_mod_scroll(3,1024,512,1023,512,512,511);
 screen_init(4,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(18432000 div 2,256);
+m68000_0:=cpu_m68000.create(18432000 div 2);
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(shadoww_snd_getbyte,shadoww_snd_putbyte);
 z80_0.init_sound(shadoww_sound_update);
 //Sound Chips
@@ -493,8 +491,7 @@ case main_vars.tipo_maquina of
       if not(roms_load16b(ptemp,shadoww_sprites)) then exit;
       convert_8($8000,3);
       //DIP
-      marcade.dswa:=$ffff;
-      marcade.dswa_val2:=@shadoww_dip;
+      init_dips(1,shadoww_dip,$ffff);
   end;
   339:begin //Wild Fang/Tecmo Knight
       //cargar roms
@@ -515,8 +512,7 @@ case main_vars.tipo_maquina of
       if not(roms_load16b(ptemp,wildfang_sprites)) then exit;
       convert_8($8000,3);
       //DIP
-      marcade.dswa:=$ffff;
-      marcade.dswa_val2:=@wildfang_dip;
+      init_dips(1,wildfang_dip,$ffff);
   end;
 end;
 freemem(ptemp);

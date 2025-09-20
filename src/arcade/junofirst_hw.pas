@@ -282,13 +282,14 @@ var
 begin
 llamadas_maquina.bucle_general:=junofrst_principal;
 llamadas_maquina.reset:=reset_junofrst;
+llamadas_maquina.scanlines:=256;
 iniciar_junofrst:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1500000,TCPU_M6809);
 m6809_0.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
 if not(roms_load(@memoria,junofrst_rom)) then exit;
 konami1_decode(@memoria[$a000],@mem_opcodes,$6000);
@@ -300,12 +301,12 @@ for f:=0 to $f do begin
 end;
 if not(roms_load(@blit_mem,junofrst_blit)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(1789750,$100);
+z80_0:=cpu_z80.create(1789750);
 z80_0.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
 z80_0.init_sound(junofrst_sound_update);
 if not(roms_load(@mem_snd,junofrst_sound)) then exit;
 //Sound CPU 2
-mcs48_0:=cpu_mcs48.create(8000000,$100,I8039);
+mcs48_0:=cpu_mcs48.create(8000000,I8039);
 mcs48_0.change_ram_calls(junofrst_sound2_getbyte,nil);
 mcs48_0.change_io_calls(nil,junofrst_sound2_outport,junofrst_sound2_inport,nil);
 if not(roms_load(@mem_snd_sub,junofrst_sound_sub)) then exit;

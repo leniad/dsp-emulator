@@ -26,7 +26,7 @@ const
         terracre_sprites:array[0..3] of tipo_roms=(
         (n:'2a_6e.rom';l:$4000;p:0;crc:$bcf7740b),(n:'2a_7e.rom';l:$4000;p:$4000;crc:$a70b565c),
         (n:'2a_6g.rom';l:$4000;p:$8000;crc:$4a9ec3e6),(n:'2a_7g.rom';l:$4000;p:$c000;crc:$450749fc));
-        terracre_dip:array [0..10] of def_dip2=(
+        terracre_dip:array [0..9] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:($c,8,4,0);name4:('20K 60K+','30K 70K+','40K 80K+','50K 90K+')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
@@ -36,7 +36,7 @@ const
         (mask:$1000;name:'Difficulty';number:2;val2:($1000,0);name2:('Easy','Hard')),
         (mask:$2000;name:'Flip Screen';number:2;val2:($2000,0);name2:('Off','On')),
         (mask:$4000;name:'Complete Invulnerability';number:2;val2:($4000,0);name2:('Off','On')),
-        (mask:$8000;name:'Base Ship Invulnerability';number:2;val2:($8000,0);name2:('Off','On')),());
+        (mask:$8000;name:'Base Ship Invulnerability';number:2;val2:($8000,0);name2:('Off','On')));
         //Amazon
         amazon_rom:array[0..3] of tipo_roms=(
         (n:'11.4d';l:$8000;p:0;crc:$6c7f85c5),(n:'9.4b';l:$8000;p:1;crc:$e1b7a989),
@@ -56,7 +56,7 @@ const
         (n:'clr.12f';l:$100;p:$200;crc:$7d38621b),(n:'2g';l:$100;p:$300;crc:$44ca16b9),
         (n:'4e';l:$100;p:$400;crc:$035f2c7b));
         amazon_prot:tipo_roms=(n:'16.18g';l:$2000;p:0;crc:$1d8d592b);
-        amazon_dip:array [0..10] of def_dip2=(
+        amazon_dip:array [0..9] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:($c,8,4,0);name4:('20K 40K+','50K 40K+','20K 70K+','50K 70K+')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
@@ -66,7 +66,7 @@ const
         (mask:$1000;name:'Difficulty';number:2;val2:($1000,0);name2:('Easy','Hard')),
         (mask:$2000;name:'Flip Screen';number:2;val2:($2000,0);name2:('Off','On')),
         (mask:$4000;name:'Level';number:2;val2:($4000,0);name2:('Low','High')),
-        (mask:$8000;name:'Sprite Test';number:2;val2:($8000,0);name2:('Off','On')),());
+        (mask:$8000;name:'Sprite Test';number:2;val2:($8000,0);name2:('Off','On')));
 
 var
  scroll_x,scroll_y:word;
@@ -386,7 +386,6 @@ begin
   else ym3812_0.reset;
  dac_0.reset;
  dac_1.reset;
- reset_game_general;
  marcade.in0:=$ff00;
  marcade.in1:=$ffff;
  marcade.in2:=$ffff;
@@ -435,17 +434,17 @@ llamadas_maquina.bucle_general:=terracre_principal;
 llamadas_maquina.reset:=reset_terracre;
 llamadas_maquina.save_qsnap:=terracre_qsave;
 llamadas_maquina.load_qsnap:=terracre_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_terracre:=false;
 iniciar_audio(false);
 screen_init(1,512,1024);
-screen_mod_scroll(1,512,256,511,1024,256,1023);
 screen_init(2,256,256,true);
 screen_init(3,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000);
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
 case main_vars.tipo_maquina of
   41:begin //Terra Cresta
@@ -468,8 +467,7 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria_temp,terracre_sprites)) then exit;
       convert_sprites;
       //DIP
-      marcade.dswa:=$ffdf;
-      marcade.dswa_val2:=@terracre_dip;
+      init_dips(1,terracre_dip,$ffdf);
       //poner la paleta
       if not(roms_load(@memoria_temp,terracre_pal)) then exit;
       copymemory(@spritebank,@memoria_temp[$400],$100);
@@ -497,15 +495,14 @@ case main_vars.tipo_maquina of
       if not(roms_load(@prot_mem,amazon_prot)) then exit;
       nb1412m2_0:=tnb1412_m2.create(@prot_mem);
       //DIP
-      marcade.dswa:=$ffdf;
-      marcade.dswa_val2:=@amazon_dip;
+      init_dips(1,amazon_dip,$ffdf);
       //poner la paleta
       if not(roms_load(@memoria_temp,amazon_pal)) then exit;
       copymemory(@spritebank,@memoria_temp[$400],$100);
       end;
 end;
-dac_0:=dac_chip.Create(0.5);
-dac_1:=dac_chip.Create(0.5);
+dac_0:=dac_chip.Create(1);
+dac_1:=dac_chip.Create(1);
 timers.init(z80_0.numero_cpu,4000000/(4000000/512),terracre_snd_timer,nil,true);
 for f:=0 to $ff do begin
   colores[f].r:=pal4bit(memoria_temp[f]);

@@ -34,13 +34,13 @@ const
         sbagman_sprites:array[0..1] of tipo_roms=(
         (n:'1.1c';l:$1000;p:0;crc:$a046ff44),(n:'3.1f';l:$1000;p:$1000;crc:$a4422da4));
         //DIP
-        bagman_dip:array [0..6] of def_dip2=(
+        bagman_dip:array [0..5] of def_dip2=(
         (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','4','5')),
         (mask:$4;name:'Coinage';number:2;val2:(0,4);name2:('2C/1C 1C/1C 1C/3C 1C/7C','1C/1C 1C/2C 1C/6C 1C/14C')),
         (mask:$18;name:'Difficulty';number:4;val4:($18,$10,8,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$20;name:'Language';number:2;val2:($20,0);name2:('English','French')),
         (mask:$40;name:'Bonus Life';number:2;val2:($40,0);name2:('30K','40K')),
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')));
 var
  irq_enable,video_enable:boolean;
 
@@ -182,7 +182,6 @@ procedure reset_bagman;
 begin
  z80_0.reset;
  ay8910_0.reset;
- reset_game_general;
  irq_enable:=true;
  video_enable:=true;
  marcade.in0:=$ff;
@@ -231,13 +230,14 @@ begin
 llamadas_maquina.bucle_general:=bagman_principal;
 llamadas_maquina.reset:=reset_bagman;
 llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.scanlines:=264;
 iniciar_bagman:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,264);
+z80_0:=cpu_z80.create(3072000);
 z80_0.change_ram_calls(bagman_getbyte,bagman_putbyte);
 z80_0.change_io_calls(bagman_inbyte,bagman_outbyte);
 z80_0.init_sound(bagman_sound);
@@ -304,8 +304,7 @@ for f:=0 to $3f do begin
 end;
 set_pal(colores,$40);
 //DIP
-marcade.dswa:=$fe;
-marcade.dswa_val2:=@bagman_dip;
+init_dips(1,bagman_dip,$fe);
 //final
 reset_bagman;
 iniciar_bagman:=true;

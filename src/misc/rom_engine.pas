@@ -86,7 +86,7 @@ for f:=0 to (roms_size-1) do begin
     ptemp:=sitio;
     inc(ptemp,ctipo_roms[f].p);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,integer(ctipo_roms[f].crc),warning)) then
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc,warning)) then
         if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc,warning)) then exit;
 end;
 roms_load:=true;

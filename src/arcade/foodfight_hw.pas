@@ -20,11 +20,11 @@ const
         (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf));
         foodf_nvram:tipo_roms=(n:'foodf.nv';l:$100;p:0;crc:$a4186b13);
         //DIP
-        foodf_dip:array [0..4] of def_dip2=(
+        foodf_dip:array [0..3] of def_dip2=(
         (mask:7;name:'Bonus Coins';number:8;val8:(0,5,2,1,6,3,4,7);name8:('None','1 for every 2','1 for every 4','1 for every 5','2 for every 4','Invalid','Invalid','Invalid')),
         (mask:8;name:'Coin A';number:2;val2:(0,8);name2:('1C 1C','1C 2C')),
         (mask:$30;name:'Coin B';number:4;val4:(0,$20,$10,$30);name4:('1C 1C','1C 4C','1C 5C','1C 6C')),
-        (mask:$c0;name:'Coinage';number:4;val4:($80,0,$c0,$40);name4:('2C 1C','1C 1C','1C 2C','FreePlay')),());
+        (mask:$c0;name:'Coinage';number:4;val4:($80,0,$c0,$40);name4:('2C 1C','1C 1C','1C 2C','FreePlay')));
 
 var
  rom:array[0..$ffff] of word;
@@ -233,15 +233,15 @@ begin
 llamadas_maquina.bucle_general:=foodf_principal;
 llamadas_maquina.close:=cerrar_foodf;
 llamadas_maquina.reset:=reset_foodf;
+llamadas_maquina.scanlines:=259;
 iniciar_foodf:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(12096000 div 2,259);
+m68000_0:=cpu_m68000.create(12096000 div 2);
 m68000_0.change_ram16_calls(foodf_getword,foodf_putword);
 m68000_0.init_sound(foodf_sound_update);
 if not(roms_load16w(@rom,foodf_rom)) then exit;
@@ -270,8 +270,7 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances[0],@gweights,0,0,
 			2,@resistances[1],@bweights,0,0);
 //DIP
-marcade.dswa:=0;
-marcade.dswa_val2:=@foodf_dip;
+init_dips(1,foodf_dip,0);
 //NVRAM
 if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram,longitud)
   else if not(roms_load(@nvram,foodf_nvram)) then exit;

@@ -14,6 +14,7 @@ object MConfig: TMConfig
   Font.Style = []
   KeyPreview = True
   Position = poMainFormCenter
+  OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   TextHeight = 13
@@ -681,22 +682,6 @@ object MConfig: TMConfig
             OnChange = ComboBox1Change
           end
         end
-        object Button9: TButton
-          Left = 33
-          Top = 356
-          Width = 75
-          Height = 30
-          TabOrder = 13
-          OnClick = Button9Click
-        end
-        object Button10: TButton
-          Left = 138
-          Top = 356
-          Width = 75
-          Height = 30
-          TabOrder = 14
-          OnClick = Button10Click
-        end
         object BitBtn16: TBitBtn
           Left = 139
           Top = 300
@@ -736,6 +721,22 @@ object MConfig: TMConfig
           Height = 30
           TabOrder = 6
           OnClick = BitBtn9Click
+        end
+        object BitBtn23: TBitBtn
+          Left = 33
+          Top = 356
+          Width = 75
+          Height = 30
+          TabOrder = 13
+          OnClick = BitBtn23Click
+        end
+        object BitBtn24: TBitBtn
+          Left = 138
+          Top = 356
+          Width = 75
+          Height = 30
+          TabOrder = 14
+          OnClick = BitBtn24Click
         end
       end
       object GroupBox2: TGroupBox
@@ -854,8 +855,8 @@ object MConfig: TMConfig
         end
         object BitBtn12: TBitBtn
           Left = 37
-          Top = 240
-          Width = 74
+          Top = 242
+          Width = 75
           Height = 30
           TabOrder = 6
           OnClick = BitBtn12Click
@@ -863,7 +864,7 @@ object MConfig: TMConfig
         object BitBtn13: TBitBtn
           Left = 37
           Top = 270
-          Width = 74
+          Width = 75
           Height = 30
           TabOrder = 7
           OnClick = BitBtn13Click
@@ -871,7 +872,7 @@ object MConfig: TMConfig
         object BitBtn14: TBitBtn
           Left = 37
           Top = 300
-          Width = 74
+          Width = 75
           Height = 30
           TabOrder = 8
           OnClick = BitBtn14Click
@@ -879,7 +880,7 @@ object MConfig: TMConfig
         object BitBtn18: TBitBtn
           Left = 148
           Top = 240
-          Width = 74
+          Width = 75
           Height = 30
           TabOrder = 9
           OnClick = BitBtn18Click
@@ -887,7 +888,7 @@ object MConfig: TMConfig
         object BitBtn19: TBitBtn
           Left = 148
           Top = 270
-          Width = 74
+          Width = 75
           Height = 30
           TabOrder = 10
           OnClick = BitBtn19Click
@@ -895,7 +896,7 @@ object MConfig: TMConfig
         object BitBtn20: TBitBtn
           Left = 148
           Top = 300
-          Width = 74
+          Width = 75
           Height = 30
           TabOrder = 11
           OnClick = BitBtn20Click
@@ -929,21 +930,21 @@ object MConfig: TMConfig
             OnClick = Button8Click
           end
         end
-        object Button11: TButton
+        object BitBtn25: TBitBtn
           Left = 37
           Top = 356
           Width = 75
           Height = 30
           TabOrder = 13
-          OnClick = Button11Click
+          OnClick = BitBtn25Click
         end
-        object Button12: TButton
+        object BitBtn26: TBitBtn
           Left = 148
           Top = 356
           Width = 75
           Height = 30
           TabOrder = 14
-          OnClick = Button12Click
+          OnClick = BitBtn26Click
         end
       end
     end

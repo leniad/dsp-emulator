@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 type
     cchip_chip=class
-        constructor create(clock:dword;frame:word);
+        constructor create(clock:dword);
         destructor free;
       public
         upd7810:cpu_upd7810;
@@ -148,13 +148,13 @@ begin
   cchip_0.upd7810.set_input_line(UPD7810_INTF1,CLEAR_LINE);
 end;
 
-constructor cchip_chip.create(clock:dword;frame:word);
+constructor cchip_chip.create(clock:dword);
 var
   dir:string;
 begin
   dir:=directory.arcade_list_roms[find_rom_multiple_dirs('cchip.zip')];
   carga_rom_zip(dir+'cchip.zip',tcchip_rom.n,@self.cchip_rom,tcchip_rom.l,tcchip_rom.crc,false);
-  self.upd7810:=cpu_upd7810.create(clock,frame,CPU_7810);
+  self.upd7810:=cpu_upd7810.create(clock,CPU_7810);
   self.upd7810.change_ram_calls(cchip_getbyte,cchip_putbyte);
   self.upd7810.change_an(an_0,an_1,an_2,an_3,an_4,an_5,an_6,an_7);
   self.upd7810.change_in(ca_cb,cb_cb,cc_cb,cd_cb,cf_cb);

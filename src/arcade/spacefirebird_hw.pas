@@ -23,11 +23,11 @@ const
         spacefb_samples:array[0..3] of tipo_nombre_samples=(
         (nombre:'ekilled.wav';restart:true),(nombre:'explode1.wav'),(nombre:'explode2.wav'),(nombre:'shipfire.wav';restart:true));
         //Dip
-        spacefb_dip:array [0..4] of def_dip2=(
+        spacefb_dip:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$c;name:'Coinage';number:4;val4:(8,4,0,$c);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$10;name:'Bonus Life';number:2;val2:(0,$10);name2:('5K','8K')),
-        (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')),());
+        (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')));
 
 var
  mem_snd_mcu:array[0..$3ff] of byte;
@@ -354,15 +354,16 @@ iniciar_spacefb:=false;
 llamadas_maquina.bucle_general:=spacefb_principal;
 llamadas_maquina.reset:=reset_spacefb;
 llamadas_maquina.fps_max:=61.523438;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(6000000 div 2,256);
+z80_0:=cpu_z80.create(6000000 div 2);
 z80_0.change_ram_calls(spacefb_getbyte,spacefb_putbyte);
 z80_0.change_io_calls(spacefb_inbyte,spacefb_outbyte);
 //MCU
-mcs48_0:=cpu_mcs48.create(6000000,256,I8035);
+mcs48_0:=cpu_mcs48.create(6000000,I8035);
 mcs48_0.change_ram_calls(spacefb_snd_getbyte,nil);
 mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport,nil,nil);
 mcs48_0.init_sound(spacefb_sound_update);
@@ -378,8 +379,7 @@ if not(roms_load(@gfx1,spacefb_gfx)) then exit;
 if not(roms_load(@gfx2,spacefb_bullet)) then exit;
 if not(roms_load(@prom,spacefb_prom)) then exit;
 //DIP
-marcade.dswa:=$20;
-marcade.dswa_val2:=@spacefb_dip;
+init_dips(1,spacefb_dip,$20);
 //Calcular paleta
 compute_resistor_weights(0,	255, -1.0,
 			3,@resistances_rg[0],@rgweights[0],470,0,

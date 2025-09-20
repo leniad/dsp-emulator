@@ -32,7 +32,7 @@ type
         end;
         preg_hd6309=^reg_hd6309;
         cpu_hd6309=class(cpu_class)
-                constructor create(clock:dword;frames_div:word;tipo:byte);
+                constructor create(clock:dword;tipo:byte);
                 destructor free;
             public
                 procedure reset;
@@ -149,7 +149,7 @@ const
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,4,  //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3); //f0
 
-constructor cpu_hd6309.create(clock:dword;frames_div:word;tipo:byte);
+constructor cpu_hd6309.create(clock:dword;tipo:byte);
 begin
 getmem(self.r,sizeof(reg_hd6309));
 fillchar(self.r^,sizeof(reg_hd6309),0);
@@ -159,7 +159,7 @@ case tipo of
 end;
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 destructor cpu_hd6309.free;

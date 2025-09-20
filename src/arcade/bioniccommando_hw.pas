@@ -28,7 +28,7 @@ const
         (n:'tse_20.13j';l:$8000;p:$20000;crc:$b03db778),(n:'tsu_19.11j';l:$8000;p:$28000;crc:$b5c82722),
         (n:'tse_22.17j';l:$8000;p:$30000;crc:$d4dedeb3),(n:'tsu_21.15j';l:$8000;p:$38000;crc:$98777006));
         //DIP
-        bionicc_dip:array [0..8] of def_dip2=(
+        bionicc_dip:array [0..7] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),
@@ -36,7 +36,7 @@ const
         (mask:$400;name:'Cabinet';number:2;val2:($400,0);name2:('Upright','Cocktail')),
         (mask:$1800;name:'Bonus Life';number:4;val4:($1800,$1000,$800,0);name4:('20K 40K 100K 60K+','30K 50K 120K 70K+','20K 60K','30K 70K')),
         (mask:$6000;name:'Difficulty';number:4;val4:($4000,$6000,$2000,0);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$8000;name:'Freeze';number:2;val2:($8000,0);name2:('Off','On')),());
+        (mask:$8000;name:'Freeze';number:2;val2:($8000,0);name2:('Off','On')));
 
 var
  scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
@@ -359,7 +359,6 @@ begin
  frame_snd:=z80_0.tframes;
  frame_mcu:=mcs51_0.tframes;
  ym2151_0.reset;
- reset_game_general;
  marcade.in0:=$ffff;
  scroll_fg_x:=0;
  scroll_fg_y:=0;
@@ -387,29 +386,27 @@ begin
 llamadas_maquina.bucle_general:=bionicc_principal;
 llamadas_maquina.reset:=reset_bionicc;
 llamadas_maquina.fps_max:=59.637405;
+llamadas_maquina.scanlines:=260;
 iniciar_bionicc:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
 screen_init(2,256+8,256+8,true);
-screen_mod_scroll(2,264,256,255,264,256,255);
 screen_init(3,256+16,256+16,true);
-screen_mod_scroll(3,272,256,255,272,256,255);
 screen_init(4,256+16,256+16,true);
-screen_mod_scroll(4,272,256,255,272,256,255);
 screen_init(5,512,512,false,true);
 iniciar_video(256,224);
 //Main
-m68000_0:=cpu_m68000.create(12000000,260);
+m68000_0:=cpu_m68000.create(12000000);
 m68000_0.change_ram16_calls(bionicc_getword,bionicc_putword);
 if not(roms_load16w(@rom,bionicc_rom)) then exit;
 //MCU
-mcs51_0:=cpu_mcs51.create(I8X51,6000000,260);
+mcs51_0:=cpu_mcs51.create(I8X51,6000000);
 mcs51_0.change_io_calls(nil,in_port1,nil,nil,nil,out_port1,nil,out_port3);
 mcs51_0.change_ram_calls(mcu_ext_ram_read,mcu_ext_ram_write);
 if not(roms_load(mcs51_0.get_rom_addr,bionicc_mcu)) then exit;
 //Sound
-z80_0:=cpu_z80.create(3579545,260);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(bionicc_snd_getbyte,bionicc_snd_putbyte);
 z80_0.init_sound(bionicc_sound_update);
 if not(roms_load(@mem_snd,bionicc_sound)) then exit;
@@ -445,8 +442,7 @@ gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
 convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$dfff;
-marcade.dswa_val2:=@bionicc_dip;
+init_dips(1,bionicc_dip,$dfff);
 //final
 iniciar_bionicc:=true;
 end;

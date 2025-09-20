@@ -23,18 +23,18 @@ const
         (n:'ssb4.b2';l:$20;p:0;crc:$c8eaf234),(n:'ssb5.b1';l:$20;p:$20;crc:$0e434add),
         (n:'ssb2.c4';l:$100;p:$40;crc:$c53321c6),(n:'ssb3.h7';l:$100;p:$140;crc:$7d2c324a));
         //Dip
-        sonson_dip_a:array [0..5] of def_dip2=(
+        sonson_dip_a:array [0..4] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
         (mask:$10;name:'Coinage affects';number:2;val2:($10,0);name2:('Coin A','Coin B')),
         (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
         (mask:$40;name:'Service';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
-        sonson_dip_b:array [0..5] of def_dip2=(
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')));
+        sonson_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
         (mask:4;name:'2 Players Game';number:2;val2:(4,0);name2:('1 Credit','2 Credit')),
         (mask:$18;name:'Bonus Life';number:4;val4:(8,0,$18,$10);name4:('20K 80K 100K','30K 90K 120K','20K','30K')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  soundlatch,last,scroll_x:byte;
@@ -249,7 +249,6 @@ begin
  frame_snd:=m6809_1.tframes;
  ay8910_0.reset;
  ay8910_1.reset;
- reset_game_general;
  soundlatch:=0;
  last:=0;
  scroll_x:=0;
@@ -274,17 +273,17 @@ llamadas_maquina.bucle_general:=sonson_principal;
 llamadas_maquina.reset:=reset_sonson;
 llamadas_maquina.save_qsnap:=sonson_qsave;
 llamadas_maquina.load_qsnap:=sonson_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_sonson:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
 screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,256,256,255);
 iniciar_video(240,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(12000000 div 8,256,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(12000000 div 8,TCPU_M6809);
 m6809_0.change_ram_calls(sonson_getbyte,sonson_putbyte);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(12000000 div 8,256,TCPU_M6809);
+m6809_1:=cpu_m6809.Create(12000000 div 8,TCPU_M6809);
 m6809_1.change_ram_calls(ssonson_getbyte,ssonson_putbyte);
 m6809_1.init_sound(sonson_sound_update);
 //IRQ Sound CPU
@@ -320,10 +319,8 @@ for f:=0 to 255 do begin
   gfx[1].colores[f]:=memoria_temp[$140+f]+16;
 end;
 //DIP
-marcade.dswa:=$df;
-marcade.dswb:=$cb;
-marcade.dswa_val2:=@sonson_dip_a;
-marcade.dswb_val2:=@sonson_dip_b;
+init_dips(1,sonson_dip_a,$df);
+init_dips(2,sonson_dip_b,$cb);
 //final
 reset_sonson;
 iniciar_sonson:=true;

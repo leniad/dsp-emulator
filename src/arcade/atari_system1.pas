@@ -493,19 +493,19 @@ iniciar_atari_sys1:=false;
 llamadas_maquina.bucle_general:=atari_sys1_principal;
 llamadas_maquina.reset:=reset_atari_sys1;
 llamadas_maquina.fps_max:=59.922743;
+llamadas_maquina.scanlines:=262*CPU_SYNC;
 iniciar_audio(true);
 screen_init(1,512,256,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,512,511,512,512,511);
 screen_init(3,512,512,false,true);
 iniciar_video(336,240);
 //cargar BIOS
 if not(roms_load16w(@rom,atari_sys1_bios)) then exit;
 //Main CPU
-m68000_0:=cpu_m68000.create(14318180 div 2,262*CPU_SYNC);
+m68000_0:=cpu_m68000.create(14318180 div 2);
 m68000_0.change_ram16_calls(atari_sys1_getword,atari_sys1_putword);
 //Sound CPU
-m6502_0:=cpu_m6502.create(14318180 div 8,262*CPU_SYNC,TCPU_M6502);
+m6502_0:=cpu_m6502.create(14318180 div 8,TCPU_M6502);
 m6502_0.change_ram_calls(atari_sys1_snd_getbyte,atari_sys1_snd_putbyte);
 m6502_0.init_sound(atari_sys1_sound_update);
 //Sound Chips

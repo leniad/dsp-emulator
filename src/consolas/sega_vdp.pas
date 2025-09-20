@@ -461,7 +461,8 @@ if self.tms.vdp_mode then begin
   end else if linea>=(self.LINEA_BORDE_DOWN+19) then begin //Borde superior
       single_line(0,linea-(self.LINEA_BORDE_DOWN+19),paleta[self.current_pal[$10+self.tms.regs[7] and $f]],PIXELS_VISIBLES_TOTAL,self.tms.pant);
   end;
-end else self.tms.refresh(linea);
+end else if self.is_pal then self.tms.refresh_pal(linea)
+            else self.tms.refresh_ntsc(linea);
 end;
 
 procedure vdp_chip.video_change;

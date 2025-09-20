@@ -256,13 +256,14 @@ llamadas_maquina.bucle_general:=pang_principal;
 llamadas_maquina.reset:=reset_pang;
 llamadas_maquina.close:=close_pang;
 llamadas_maquina.fps_max:=57.42;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,256,true);
 screen_init(2,512,256,false,true);
 iniciar_video(384,240);
 //Main CPU
-z80_0:=cpu_z80.create(8000000,256);
+z80_0:=cpu_z80.create(8000000);
 z80_0.change_ram_calls(pang_getbyte,pang_putbyte);
 z80_0.change_io_calls(pang_inbyte,pang_outbyte);
 z80_0.init_sound(pang_sound_update);

@@ -33,17 +33,16 @@ const
         (n:'861a07.a';l:$10000;p:0;crc:$5d035d69),(n:'861a07.b';l:$10000;p:$10000;crc:$6337dd91));
         hw88games_upd7759_1:array[0..1] of tipo_roms=(
         (n:'861a07.c';l:$10000;p:0;crc:$5067a38b),(n:'861a07.d';l:$10000;p:$10000;crc:$86731451));
-        hw88games_dip_a:array [0..2] of def_dip=(
-        (mask:$10;name:'Flip Screen';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'World Records';number:2;dip:((dip_val:$20;dip_name:'Don''t Erase'),(dip_val:$0;dip_name:'Erase on Reset'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        hw88games_dip_b:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin'))),());
-        hw88games_dip_c:array [0..3] of def_dip=(
-        (mask:$6;name:'Cabinet';number:4;dip:((dip_val:$6;dip_name:'Cocktail'),(dip_val:$4;dip_name:'Cocktail (A)'),(dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Upright (D)'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
+        hw88games_dip_a:array [0..1] of def_dip2=(
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'World Records';number:2;val2:($20,0);name2:('Don''t Erase','Erase on Reset')));
+        hw88games_dip_b:array [0..1] of def_dip2=(
+        (mask:$0f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$30,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin')));
+        hw88games_dip_c:array [0..2] of def_dip2=(
+        (mask:$6;name:'Cabinet';number:4;val4:(6,4,2,0);name4:('Cocktail','Cocktail (A)','Upright','Upright (D)')),
+        (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  zoom_rom,tiles_rom,sprite_rom:pbyte;
@@ -303,27 +302,25 @@ llamadas_maquina.close:=cerrar_hw88games;
 llamadas_maquina.reset:=reset_hw88games;
 llamadas_maquina.bucle_general:=hw88games_principal;
 llamadas_maquina.fps_max:=60;
+llamadas_maquina.scanlines:=256;
 iniciar_hw88games:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(5,512,512,true); //Para el K051316
-screen_mod_scroll(5,512,512,511,512,512,511);
 screen_init(4,1024,1024,false,true);
 iniciar_video(320,224,true);
 iniciar_audio(true);
 //Main CPU
-konami_0:=cpu_konami.create(12000000,256);
+konami_0:=cpu_konami.create(12000000);
 konami_0.change_ram_calls(hw88games_getbyte,hw88games_putbyte);
 konami_0.change_set_lines(hw88games_bank);
 if not(roms_load(@memoria_temp,hw88games_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[0],$8000);
 for f:=0 to $7 do copymemory(@rom_bank_mem[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(hw88games_snd_getbyte,hw88games_snd_putbyte);
 z80_0.init_sound(hw88games_sound_update);
 if not(roms_load(@mem_snd,hw88games_sound)) then exit;
@@ -344,12 +341,9 @@ getmem(zoom_rom,$40000);
 if not(roms_load(zoom_rom,hw88games_zoom)) then exit;
 k051316_0:=k051316_chip.create(5,2,hw88games_k051316_cb,zoom_rom,$40000,BPP4);
 //DIP
-marcade.dswa:=$f0;
-marcade.dswa_val:=@hw88games_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val:=@hw88games_dip_b;
-marcade.dswc:=$7b;
-marcade.dswc_val:=@hw88games_dip_c;
+init_dips(1,hw88games_dip_a,$f0);
+init_dips(2,hw88games_dip_b,$ff);
+init_dips(3,hw88games_dip_c,$7b);
 //final
 iniciar_hw88games:=true;
 end;

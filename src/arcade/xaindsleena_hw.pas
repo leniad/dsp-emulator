@@ -31,18 +31,18 @@ const
         (n:'pg-0.ic109';l:$8000;p:$20000;crc:$4d977f33),(n:'ph-0.ic108';l:$8000;p:$28000;crc:$3f3b62a0),
         (n:'pi-0.ic107';l:$8000;p:$30000;crc:$76641ee3),(n:'pj-0.ic106';l:$8000;p:$38000;crc:$37671f36));
         //Dip
-        xain_dip_a:array [0..6] of def_dip2=(
+        xain_dip_a:array [0..5] of def_dip2=(
         (mask:3;name:'Coin B';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin A';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
         (mask:$20;name:'Allow Continue';number:2;val2:(0,$20);name2:('No','Yes')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Flip Screen';number:2;val2:(0,$80);name2:('Off','On')),());
-        xain_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Flip Screen';number:2;val2:(0,$80);name2:('Off','On')));
+        xain_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(3,2,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$c;name:'Game Time';number:4;val4:($c,8,4,0);name4:('Slow','Normal','Fast','Very Fast')),
         (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('20k 70k+','30k 80k+','20k 80k','30k 80k')),
-        (mask:$c0;name:'Lives';number:4;val4:($c0,$80,$40,0);name4:('3','4','6','Infinite')),());
+        (mask:$c0;name:'Lives';number:4;val4:($c0,$80,$40,0);name4:('3','4','6','Infinite')));
         CPU_SYNC=4;
 
 var
@@ -201,8 +201,8 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
@@ -210,8 +210,8 @@ if event.arcade then begin
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
@@ -501,35 +501,34 @@ begin
 llamadas_maquina.bucle_general:=xain_principal;
 llamadas_maquina.reset:=reset_xain;
 llamadas_maquina.fps_max:=6000000/384/272;
+llamadas_maquina.scanlines:=272*CPU_SYNC;
 iniciar_xain:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 screen_mod_sprites(4,256,256,$ff,$ff);
 iniciar_video(256,240);
 //Main CPU
-m6809_0:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_0:=cpu_m6809.create(1500000,TCPU_M6809);
 m6809_0.change_ram_calls(xain_getbyte,xain_putbyte);
 if not(roms_load(@memoria_temp,xain_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp,$8000);
 for f:=0 to 1 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sub CPU
-m6809_1:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_1:=cpu_m6809.create(1500000,TCPU_M6809);
 m6809_1.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
 if not(roms_load(@memoria_temp,xain_sub)) then exit;
 copymemory(@mem_misc[$8000],@memoria_temp,$8000);
 for f:=0 to 1 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sound CPU
-m6809_2:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_2:=cpu_m6809.create(1500000,TCPU_M6809);
 m6809_2.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
 m6809_2.init_sound(xain_sound_update);
 if not(roms_load(@mem_snd,xain_snd)) then exit;
 //MCU CPU
-m6805_0:=cpu_m6805.create(3000000,272*CPU_SYNC,tipo_m68705);
+m6805_0:=cpu_m6805.create(3000000,tipo_m68705);
 m6805_0.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
 if not(roms_load(@mcu_mem,xain_mcu)) then exit;
 //Sound Chip
@@ -559,10 +558,8 @@ init_gfx(3,16,16,$800);
 gfx[3].trans[0]:=true;
 convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$3f;
-marcade.dswb:=$ff;
-marcade.dswa_val2:=@xain_dip_a;
-marcade.dswb_val2:=@xain_dip_b;
+init_dips(1,xain_dip_a,$3f);
+init_dips(2,xain_dip_b,$ff);
 //final
 iniciar_xain:=true;
 end;

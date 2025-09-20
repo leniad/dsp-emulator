@@ -23,17 +23,17 @@ const
         (n:'a03_ee06.bin';l:$4000;p:0;crc:$6039bdd1),(n:'a02_ee05.bin';l:$4000;p:$4000;crc:$b32d8252));
         exedexes_tilesbg_pos:array[0..1] of tipo_roms=(
         (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907));
-        exedexes_dip_a:array [0..5] of def_dip2=(
+        exedexes_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$c;name:'Lives';number:4;val4:(8,4,$c,0);name4:('1','2','3','5')),
         (mask:$10;name:'2 Players Game';number:2;val2:(0,$10);name2:('1 Credit','2 Credit')),
         (mask:$20;name:'Languaje';number:2;val2:(0,$20);name2:('English','Japanese')),
-        (mask:$40;name:'Freeze';number:2;val2:($40,0);name2:('Off','On')),());
-        exedexes_dip_b:array [0..4] of def_dip2=(
+        (mask:$40;name:'Freeze';number:2;val2:($40,0);name2:('Off','On')));
+        exedexes_dip_b:array [0..3] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')));
 var
  scroll_x,scroll_y,scroll_bg:word;
  sound_command:byte;
@@ -219,7 +219,6 @@ begin
  ay8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -283,20 +282,19 @@ end;
 begin
 llamadas_maquina.bucle_general:=exedexes_hw_principal;
 llamadas_maquina.reset:=reset_exedexes_hw;
+llamadas_maquina.scanlines:=256;
 iniciar_exedexes_hw:=false;
 iniciar_audio(false);
 screen_init(1,2048,2048);
-screen_mod_scroll(1,2048,256,2047,2048,256,2047);
 screen_init(2,2048,2048,true);
-screen_mod_scroll(2,2048,256,2047,2048,256,2047);
 screen_init(3,256,256,true);
 screen_init(4,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(exedexes_getbyte,exedexes_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,256);
+z80_1:=cpu_z80.create(3000000);
 z80_1.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
 z80_1.init_sound(exedexes_sound);
 //Sound Chips
@@ -349,10 +347,8 @@ if not(roms_load(@memoria_temp,exedexes_tilesbg_pos)) then exit;
 poner_bg;
 poner_fg;
 //DIP
-marcade.dswa:=$df;
-marcade.dswa_val2:=@exedexes_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val2:=@exedexes_dip_b;
+init_dips(1,exedexes_dip_a,$df);
+init_dips(2,exedexes_dip_b,$ff);
 //final
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;

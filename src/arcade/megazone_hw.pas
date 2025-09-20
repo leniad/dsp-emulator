@@ -23,14 +23,13 @@ const
         megazone_pal:array[0..2] of tipo_roms=(
         (n:'319b18.a16';l:$20;p:0;crc:$23cb02af),(n:'319b16.c6';l:$100;p:$20;crc:$5748e933),
         (n:'319b17.a11';l:$100;p:$120;crc:$1fbfce73));
-        megazone_dip_a:array [0..1] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-        megazone_dip_b:array [0..5] of def_dip2=(
+        megazone_dip_a:def_dip2=(mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play'));
+        megazone_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 70K 70K+','20K 80K 80K+','30K 90K 90K+','30K 100K 100K+')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  mem_opcodes:array[0..$bfff] of byte;
@@ -288,27 +287,27 @@ iniciar_megazone:=false;
 llamadas_maquina.bucle_general:=megazone_principal;
 llamadas_maquina.reset:=reset_megazone;
 llamadas_maquina.fps_max:=60.60606060606;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,48);
 screen_init(3,256,288,false,true);
 screen_mod_sprites(3,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(megazone_getbyte,megazone_putbyte);
 if not(roms_load(@memoria,megazone_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$c000);
 //Sound CPU
-z80_0:=cpu_z80.create(18432000 div 6,$100);
+z80_0:=cpu_z80.create(18432000 div 6);
 z80_0.change_ram_calls(megazone_snd_getbyte,megazone_snd_putbyte);
 z80_0.change_io_calls(megazone_sound_inbyte,megazone_sound_outbyte);
 z80_0.init_sound(megazone_sound_update);
 if not(roms_load(@mem_snd,megazone_snd)) then exit;
 //Sound CPU 2
-mcs48_0:=cpu_mcs48.create(14318000 div 2,$100,I8039);
+mcs48_0:=cpu_mcs48.create(14318000 div 2,I8039);
 mcs48_0.change_ram_calls(megazone_sound2_getbyte,nil);
 mcs48_0.change_io_calls(nil,megazone_sound2_outport,megazone_sound2_inport,nil);
 if not(roms_load(@mem_snd_sub,megazone_snd_sub)) then exit;
@@ -356,10 +355,8 @@ for f:=0 to $ff do begin
     gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$5b;
-marcade.dswa_val2:=@megazone_dip_a;
-marcade.dswb_val2:=@megazone_dip_b;
+init_dips(1,megazone_dip_a,$ff);
+init_dips(2,megazone_dip_b,$5b);
 //final
 iniciar_megazone:=true;
 end;

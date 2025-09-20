@@ -49,7 +49,7 @@ f:=(principal1.top+(principal1.Height div 2))-(AboutBox.Height div 2);
 if f<0 then AboutBox.Top:=0
   else AboutBox.Top:=f;
 label1.Caption:='v'+dsp_version;
-aboutbox.caption:=leng.archivo[3];
+aboutbox.caption:=leng.archivo[1];
 end;
 
 procedure TAboutbox.OKButtonClick(Sender: TObject);

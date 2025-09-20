@@ -1,0 +1,62 @@
+What's New!!! DSP Emulator
+
+DSP 0.24b2 20/09/25
+**********
+-General
+    +Merged Delphi & Lazarus forms functions
+    +Simplified general reset
+    +Fixed language selection
+    +DIP switches
+        -Updated all functions; now DIP switch values are saved
+        -Simplified DIP switch declarations
+        -Migrated more games to the new system
+    +Controls Engine
+        -Fixed joystick button redefinition
+            +Added a 5-second countdown to press a joystick button
+            +If no input is received, the redefinition is canceled
+    +CPU engine
+        -Removed scanlines from CPU declarations (now shared across all CPUs in the same machine)
+    +TAP/TZX
+        -Added block type $4b for MSX tape format
+        -Some small code cleaning
+    +GFX engine
+        -Rewrited scroll functions
+        -Simplified scroll declarations; separate variables for each layer are no longer required
+        -DECO sprites: removed masks
+    +Video
+        -TMS99XX
+            +Added PAL timings
+            +Fixed NTSC timings
+-Amstrad CPC
+    +Remapped function keys, now are mapped using right shift + number
+-Commodore 64
+    +Remapped function keys, now are mapped using right shift + number
+-MSX 1
+    +Added driver for Sanyo MPC-100
+    +Support for TZX, TSX, CAS and WAV file formats for tape loading
+    +Support 32Kb ROMs size or less (mappers don't work yet)
+-Bubble Bobble HW
+    +Bubble Bobble: added memory mirroring
+    +Tokio: Added driver
+    +Super Bobble Bobble: Added driver
+-Boogie Wings
+    +Fixed Sprites and GFXs
+    +Added colors, but still are wrong
+    +Fixed screen priority, missing transparency
+-CPS1
+    +Added dipswitches
+    +Removed dedicated sprite buffer; now using the general sprite buffer
+    +Fixed rowscroll (Fixes SF2 background)
+    +Added stars layer
+    +Willow: Added driver
+    +1941 Counter Attack: Added driver
+    +Nemo: Added driver
+-Popeye HW
+    +Fixed background
+-Sega System 16b
+    +Added rowscroll (fixes 'Cotton' intro and 'Dynamite Dux' hiscore intro)
+    +Simplified 315-5195 read/write memory functions
+    +Fixed open bus read
+    +Bay Route: Added driver
+    +Sonic Boom: Added driver
+    +Time Scanner: Added driver

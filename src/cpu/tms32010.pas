@@ -21,7 +21,7 @@ type
         preg_tms32010=^reg_tms32010;
         type_bio=function:boolean;
         cpu_tms32010=class(cpu_class)
-                constructor create(clock:dword;frames_div:word);
+                constructor create(clock:dword);
                 destructor free;
             public
                 procedure run(maximo:single);
@@ -72,7 +72,7 @@ const
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
           0,0,0,0,2,2,2,0,2,2,2,2,2,2,2,2);
 
-constructor cpu_tms32010.create(clock:dword;frames_div:word);
+constructor cpu_tms32010.create(clock:dword);
 begin
 getmem(self.r,sizeof(reg_tms32010));
 fillchar(self.r^,sizeof(reg_tms32010),0);
@@ -95,7 +95,7 @@ self.out_port[5]:=nil;
 self.out_port[6]:=nil;
 self.out_port[7]:=nil;
 self.clock:=clock div 4;
-self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/4/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 destructor cpu_tms32010.free;

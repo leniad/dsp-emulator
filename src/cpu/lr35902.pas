@@ -15,7 +15,7 @@ type
   end;
   preg_lr=^reg_lr;
   cpu_lr=class(cpu_class)
-        constructor Create(clock:dword;frames_div:word);
+        constructor Create(clock:dword);
         destructor free;
       public
         speed:byte;
@@ -95,12 +95,12 @@ const
 	 8, 8, 8, 8, 8, 8,16, 8, 8, 8, 8, 8, 8, 8,16, 8,  //e
 	 8, 8, 8, 8, 8, 8,16, 8, 8, 8, 8, 8, 8, 8,16, 8); //f
 
-constructor cpu_lr.create(clock:dword;frames_div:word);
+constructor cpu_lr.create(clock:dword);
 begin
 fillchar(self.r,sizeof(reg_lr),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 destructor cpu_lr.free;

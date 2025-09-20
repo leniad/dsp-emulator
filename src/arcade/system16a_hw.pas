@@ -341,16 +341,16 @@ if event.arcade then begin
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $80);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
   //P2
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $ff7f) else marcade.in2:=(marcade.in2 or $80);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ffbf) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or $1);
   //Service
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
@@ -686,6 +686,7 @@ end;
 
 procedure ppi8255_wportc(valor:byte);
 begin
+//row_scroll:=not((valor and 2)<>0);
 if (valor and $80)<>0 then z80_0.change_nmi(CLEAR_LINE)
   else z80_0.change_nmi(ASSERT_LINE);
 end;
@@ -788,6 +789,7 @@ convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 begin
 llamadas_maquina.reset:=reset_system16a;
+llamadas_maquina.scanlines:=262*CPU_SYNC;
 iniciar_system16a:=false;
 iniciar_audio(false);
 //text
@@ -795,21 +797,17 @@ screen_init(1,512,256,true);
 screen_init(2,512,256,true);
 //Background
 screen_init(3,1024,512);
-screen_mod_scroll(3,1024,512,1023,512,256,511);
 screen_init(4,1024,512,true);
-screen_mod_scroll(4,1024,512,1023,512,256,511);
 //Foreground
 screen_init(5,1024,512,true);
-screen_mod_scroll(5,1024,512,1023,512,256,511);
 screen_init(6,1024,512,true);
-screen_mod_scroll(6,1024,512,1023,512,256,511);
 //Final
 screen_init(7,512,256,false,true);
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,262*CPU_SYNC);
+m68000_0:=cpu_m68000.create(10000000);
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,262*CPU_SYNC);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
 //PPI 825
 pia8255_0:=pia8255_chip.create;
@@ -820,7 +818,7 @@ if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.t
   ym2151_0:=ym2151_chip.create(4000000);
   ym2151_0.change_port_func(ym2151_snd_port);
   //Creo el segundo chip de sonido
-  mcs48_0:=cpu_mcs48.create(6000000,262*CPU_SYNC,N7751);
+  mcs48_0:=cpu_mcs48.create(6000000,N7751);
   mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport,nil,nil);
   mcs48_0.i8243.change_calls(nil,n7751_rom_offset_w);
   dac_0:=dac_chip.Create(1);

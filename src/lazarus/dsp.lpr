@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, principal, acercade, LoadRom, config_general, redefine, cargar_dsk,
   tape_window, cargar_spec, lenslock, config, arcade_config,
-  config_sms, config_cpc, misc_functions, config_gb;
+  config_sms, config_cpc, misc_functions, principal_misc, config_gb;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}
@@ -18,7 +18,6 @@ uses
 {$ENDIF}
 
 {$IFDEF UNIX}{$R dsp.res}{$ENDIF}
-
 begin
   Application.Scaled:=True;
   Application.Title:='DSP Emulator';

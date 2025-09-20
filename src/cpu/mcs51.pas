@@ -13,7 +13,7 @@ type
         end;
         preg_mcs51=^reg_mcs51;
         cpu_mcs51=class(cpu_class)
-                constructor create(tipo:byte;clock:dword;frames_div:word);
+                constructor create(tipo:byte;clock:dword);
                 destructor free;
             public
                 procedure run(maximo:single);
@@ -149,13 +149,13 @@ const
   FEATURE_I80C52=2;
   FEATURE_CMOS=4;
 
-constructor cpu_mcs51.create(tipo:byte;clock:dword;frames_div:word);
+constructor cpu_mcs51.create(tipo:byte;clock:dword);
 begin
 getmem(self.r,sizeof(reg_mcs51));
 fillchar(self.r^,sizeof(reg_mcs51),0);
 self.clock:=clock div 12;
 self.numero_cpu:=cpu_main_init(clock div 12);
-self.tframes:=(clock/12/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/12/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.in_port0:=nil;
 self.in_port1:=nil;
 self.in_port2:=nil;

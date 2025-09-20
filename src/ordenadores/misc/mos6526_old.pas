@@ -1,6 +1,8 @@
 unit mos6526_old;
+//{$DEFINE DEBUG}
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}dialogs,sysutils,cpu_misc,main_engine;
+
 type
   mos6526_chip=class
       constructor create(clock:dword);
@@ -38,8 +40,10 @@ type
       procedure update_interrupt;
       procedure clock_pipeline;
   end;
+
 var
   mos6526_0,mos6526_1:mos6526_chip;
+
 implementation
 const
   PRA_=0;
@@ -75,9 +79,11 @@ constructor mos6526_chip.create(clock:dword);
 begin
   self.clock:=clock;
 end;
+
 destructor mos6526_chip.free;
 begin
 end;
+
 procedure mos6526_chip.change_calls(pa_read,pb_read:cpu_inport_call;pa_write,pb_write,irq_call:cpu_outport_call);
 begin
   self.pa_read:=pa_read;
@@ -86,6 +92,7 @@ begin
   self.pb_write:=pb_write;
   self.irq_call:=irq_call;
 end;
+
 procedure mos6526_chip.reset;
 begin
   self.tod_stopped:=true;
@@ -136,6 +143,7 @@ begin
   self.cnt:=1;
   self.flag:=1;
 end;
+
 procedure mos6526_chip.sync(frame:word);
 var
   f:word;
@@ -154,6 +162,7 @@ begin
   	self.clock_pipeline;
   end;
 end;
+
 procedure mos6526_chip.clock_ta;
 begin
 	if (self.count_a3<>0) then self.ta:=self.ta-1;
@@ -173,6 +182,7 @@ begin
 		self.ta:=self.ta_latch;
 	end;
 end;
+
 procedure mos6526_chip.clock_tb;
 begin
 	if (self.count_b3<>0) then self.tb:=self.tb-1;
@@ -208,6 +218,7 @@ begin
 	if ((self.tb_out<>0) and not(self.icr_read)) then self.icr:=self.icr or ICR_TB;
 	self.icr_read:=false;
 end;
+
 procedure mos6526_chip.clock_pipeline;
 begin
 	// timer A pipeline
@@ -241,6 +252,7 @@ begin
   if (self.icr and self.imr)<>0 then self.ir0:=1
     else self.ir0:=0;
 end;
+
 procedure mos6526_chip.update_pa;
 var
   pa:byte;
@@ -251,6 +263,7 @@ begin
 		if addr(self.pa_write)<>nil then self.pa_write(pa);
 	end;
 end;
+
 procedure mos6526_chip.update_pb;
 var
   pb,pb6,pb7:byte;
@@ -273,6 +286,7 @@ begin
 		self.pb:=pb;
 	end;
 end;
+
 procedure mos6526_chip.write_tod(offset,data:byte);
 var
   shift:byte;
@@ -281,24 +295,26 @@ begin
 	if (self.crb and $80)<>0 then self.alarm:=(self.alarm and not($ff shl shift)) or (data shl shift)
 	  else self.tod:=(self.tod and not($ff shl shift)) or (data shl shift);
 end;
+
 procedure mos6526_chip.set_cra(data:byte);
 begin
 	if (((self.cra and 1)=0) and ((data and 1)<>0)) then self.ta_pb6:=1;
 	// switching to serial output mode causes sp to go high?
 	if (((self.cra and $40)=0) and ((data and $40)<>0)) then begin
 		self.bits:=0;
-    MessageDlg('writesp 1', mtInformation,[mbOk], 0);
+    {$IFDEF DEBUG}MessageDlg('writesp 1', mtInformation,[mbOk], 0);{$ENDIF}
 		//m_write_sp(1);
 	end;
 	// lower sp again when switching back to input?
 	if (((self.cra and $40)<>0) and ((data and $40)=0)) then begin
 		self.bits:=0;
-    MessageDlg('writesp 0', mtInformation,[mbOk], 0);
+    {$IFDEF DEBUG}MessageDlg('writesp 0', mtInformation,[mbOk], 0);{$ENDIF}
 		//m_write_sp(0);
 	end;
 	self.cra:=data;
 	self.update_pb;
 end;
+
 procedure mos6526_chip.flag_w(valor:byte);
 begin
 	if (self.flag<>valor) then begin
@@ -306,6 +322,7 @@ begin
     self.flag:=valor;
   end;
 end;
+
 procedure mos6526_chip.clock_tod;
 function bcd_increment(value:byte):byte;
 begin
@@ -346,12 +363,14 @@ begin
 	end;
 	self.tod:=(subsecond shl 0) or (second shl 8) or (minute shl 16) or (hour or 24);
 end;
+
 procedure mos6526_chip.set_crb(data:byte);
 begin
 	if (((self.crb and 1)=0) and ((data and $1)<>0)) then self.tb_pb7:=1;
 	self.crb:=data;
 	self.update_pb;
 end;
+
 function mos6526_chip.read(direccion:byte):byte;
 var
   res,tempb,pb6,pb7:byte;
@@ -407,10 +426,11 @@ case (direccion and $f) of
   end;
   CRA_:res:=self.cra;
   CRB_:res:=self.crb;
-  else MessageDlg('read mos6526 desconocido '+inttohex(direccion,4), mtInformation,[mbOk], 0);
+  {$IFDEF DEBUG}else MessageDlg('read mos6526 desconocido '+inttohex(direccion,4), mtInformation,[mbOk], 0);{$ENDIF}
 end;
   read:=res;
 end;
+
 procedure mos6526_chip.write(direccion,valor:byte);
 begin
 case (direccion and $f) of
@@ -472,7 +492,8 @@ case (direccion and $f) of
       end;
   CRA_:self.set_cra(valor);
   CRB_:self.set_crb(valor);
-  else MessageDlg('write mos6526 desconocido '+inttohex(direccion,4), mtInformation,[mbOk], 0);
+  {$IFDEF DEBUG}else MessageDlg('write mos6526 desconocido '+inttohex(direccion,4), mtInformation,[mbOk], 0);{$ENDIF}
 end;
 end;
+
 end.

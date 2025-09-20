@@ -181,7 +181,6 @@ begin
  z80_r.a:=$14;
  sn_76496_0.reset;
  vdp_0.reset;
- reset_game_general;
  gg_0.mapper.slot2_ram:=false;
  gg_0.keys[0]:=$ff;
  gg_0.keys[1]:=$80;
@@ -288,11 +287,12 @@ llamadas_maquina.reset:=reset_gg;
 llamadas_maquina.cartuchos:=abrir_gg;
 llamadas_maquina.grabar_snapshot:=gg_grabar_snapshot;
 llamadas_maquina.fps_max:=FPS_NTSC;
+llamadas_maquina.scanlines:=LINES_NTSC;
 iniciar_audio(false);
 screen_init(1,284,243);
 iniciar_video(160,144);
 //Main CPU
-z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
+z80_0:=cpu_z80.create(CLOCK_NTSC);
 z80_0.change_ram_calls(gg_getbyte,gg_putbyte);
 z80_0.change_io_calls(gg_inbyte,gg_outbyte);
 z80_0.init_sound(gg_sound_update);

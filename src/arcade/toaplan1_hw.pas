@@ -322,20 +322,18 @@ iniciar_toaplan1:=false;
 llamadas_maquina.bucle_general:=toaplan1_principal;
 llamadas_maquina.reset:=reset_toaplan1;
 llamadas_maquina.fps_max:=57.613171;
+llamadas_maquina.scanlines:=270;
 iniciar_audio(false);
 //Pantallas
-for f:=1 to 17 do begin
-  screen_init(f,512,512,true);
-  screen_mod_scroll(f,512,512,511,512,512,511);
-end;
+for f:=1 to 17 do screen_init(f,512,512,true);
 screen_init(18,512,512,false,true);
 //if ((main_vars.tipo_maquina=275) or (main_vars.tipo_maquina=278)) then main_screen.rol90_screen:=true;
 iniciar_video(320,240);
 //iniciar_video(512,512);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,270);
+m68000_0:=cpu_m68000.create(10000000);
 //Sound CPU
-z80_0:=cpu_z80.create(3500000,270);
+z80_0:=cpu_z80.create(3500000);
 z80_0.change_ram_calls(toaplan1_snd_getbyte,toaplan1_snd_putbyte);
 z80_0.change_io_calls(toaplan1_snd_in,toaplan1_snd_out);
 z80_0.init_sound(toaplan1_sound_update);

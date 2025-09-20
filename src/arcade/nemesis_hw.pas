@@ -262,17 +262,17 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fffd);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fffb);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $fff7);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ffef);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ffef);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $ffdf);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $ffbf);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $ffbf);
   //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fffe);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fffd);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fffb);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $fff7);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ffef);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ffef);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $ffdf);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $40) else marcade.in2:=(marcade.in2 and $ffbf);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $40) else marcade.in2:=(marcade.in2 and $ffbf);
 end;
 end;
 
@@ -880,19 +880,17 @@ case main_vars.tipo_maquina of
 end;
 llamadas_maquina.reset:=reset_nemesis;
 llamadas_maquina.fps_max:=60.60606060606060;
+llamadas_maquina.scanlines:=256;
 iniciar_nemesis:=false;
 iniciar_audio(false);
-for f:=1 to 8 do begin
-  screen_init(f,512,256,true);
-  screen_mod_scroll(f,512,512,511,256,256,255);
-end;
+for f:=1 to 8 do screen_init(f,512,256,true);
 screen_init(9,512,512,false,true);
 if main_vars.tipo_maquina=205 then main_screen.rot90_screen:=true;
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(18432000 div 2,256);
+m68000_0:=cpu_m68000.create(18432000 div 2);
 //Sound CPU
-z80_0:=cpu_z80.create(14318180 div 4,256);
+z80_0:=cpu_z80.create(14318180 div 4);
 case main_vars.tipo_maquina of
   204:begin //nemesis
         if not(roms_load16w(@rom,nemesis_rom)) then exit;

@@ -198,7 +198,7 @@ end;
 
 function namcoio_50xx_init(num:byte;zip_name:string):boolean;
 begin
-namco_50xx[num].mb88:=cpu_mb88xx.Create(1536000,264);
+namco_50xx[num].mb88:=cpu_mb88xx.Create(1536000);
 namco_50xx[num].frames:=namco_50xx[num].mb88.tframes;
 //namco 50XX clock 1536000*0.000021=32.256
 case num of
@@ -533,7 +533,7 @@ end;
 
 function namcoio_53xx_init(port_k:cpu_inport_call;port_r_r:type_mb88xx_inport_r;zip_name:string):boolean;
 begin
-namco_53xx.mb88:=cpu_mb88xx.Create(1536000,264);
+namco_53xx.mb88:=cpu_mb88xx.Create(1536000);
 namco_53xx.mb88.change_io_calls(port_k,namco_53xx_o_w,nil,nil,port_r_r,nil);
 namco_53xx.frame:=namco_53xx.mb88.tframes;
 //namco 53XX clock 1536000*0.000021=32.256
@@ -608,7 +608,7 @@ end;
 
 function namcoio_54xx_init(zip_name:string):boolean;
 begin
-namco_54xx.mb88:=cpu_mb88xx.Create(1536000,264);
+namco_54xx.mb88:=cpu_mb88xx.Create(1536000);
 namco_54xx.mb88.change_io_calls(namco_54xx_k_r,namco_54xx_o_w,nil,nil,namco_54xx_r_r,namco_54xx_r_w);
 namco_54xx.frame:=namco_54xx.mb88.tframes;
 //namco 54XX clock 1536000*0.000021=32.256

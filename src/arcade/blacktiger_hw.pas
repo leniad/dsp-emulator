@@ -26,17 +26,17 @@ const
         blktiger_snd:tipo_roms=(n:'bd-06.1l';l:$8000;p:0;crc:$2cf54274);
         blktiger_mcu:tipo_roms=(n:'bd.6k';l:$1000;p:0;crc:$ac7d14f1);
         //Dip
-        blktiger_dip_a:array [0..4] of def_dip2=(
+        blktiger_dip_a:array [0..3] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Test';number:2;val2:($80,0);name2:('Off','On')),());
-        blktiger_dip_b:array [0..5] of def_dip2=(
+        (mask:$80;name:'Test';number:2;val2:($80,0);name2:('Off','On')));
+        blktiger_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','5','7')),
         (mask:$1c;name:'Difficulty';number:8;val8:($1c,$18,$14,$10,$c,8,4,0);name8:('Very Easy','Easy 3','Easy 2','Easy 1','Normal','Difficult 1','Difficult 2','Very Difficult')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
 
 var
  scroll_ram:array[0..$3fff] of byte;
@@ -495,31 +495,28 @@ llamadas_maquina.reset:=reset_blktiger;
 llamadas_maquina.save_qsnap:=blktiger_qsave;
 llamadas_maquina.load_qsnap:=blktiger_qload;
 llamadas_maquina.fps_max:=24000000/4/384/262;
+llamadas_maquina.scanlines:=262;
 iniciar_blktiger:=false;
 iniciar_audio(false);
-//Background
 screen_init(1,272,272,true);
-screen_mod_scroll(1,272,256,255,272,256,255);
-//Foreground
 screen_init(2,272,272,true);
-screen_mod_scroll(2,272,256,255,272,256,255);
 screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,262);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
 z80_0.change_io_calls(blktiger_inbyte,blktiger_outbyte);
 if not(roms_load(@memoria_temp,blktiger_rom)) then exit;
 copymemory(@memoria,@memoria_temp,$8000);
 for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sound CPU
-z80_1:=cpu_z80.create(3579545,262);
+z80_1:=cpu_z80.create(3579545);
 z80_1.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
 z80_1.init_sound(blktiger_sound_update);
 if not(roms_load(@mem_snd,blktiger_snd)) then exit;
 //MCU
-mcs51_0:=cpu_mcs51.create(I8X51,24000000 div 3,262);
+mcs51_0:=cpu_mcs51.create(I8X51,24000000 div 3);
 mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 if not(roms_load(mcs51_0.get_rom_addr,blktiger_mcu)) then exit;
 //Sound Chip
@@ -551,10 +548,8 @@ for f:=12 to 15 do gfx[2].trans_alt[3,f]:=true;
 gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$6f;
-marcade.dswa_val2:=@blktiger_dip_a;
-marcade.dswb_val2:=@blktiger_dip_b;
+init_dips(1,blktiger_dip_a,$ff);
+init_dips(2,blktiger_dip_b,$6f);
 //final
 iniciar_blktiger:=true;
 end;

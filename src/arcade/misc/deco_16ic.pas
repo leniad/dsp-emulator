@@ -48,7 +48,6 @@ constructor type_pf.create(pant:byte;col_bank:byte;call_bank:tipo_deco16ic_bank)
 begin
 self.pant:=pant;
 screen_init(pant,1024,512,true);
-screen_mod_scroll(pant,1024,1024,1023,512,512,511);
 self.color_bank:=col_bank;
 self.call_bank:=call_bank;
 end;
@@ -102,17 +101,17 @@ if pos=6 then begin
   if (self.control[6] and $80)<>(valor and $80) then fillchar(self.pf1.buffer[0],$800,1);
   if (self.control[6] and $8000)<>(valor and $8000) then fillchar(self.pf2.buffer[0],$800,1);
   if (valor and $80)<>0 then begin  //8x8
-    screen_mod_scroll(self.pf1.pant,512,512,511,256,256,255);
+    mod_screen(self.pf1.pant,512,256);
     self.pf1.is_8x8:=true;
   end else begin  //16x16
-    screen_mod_scroll(self.pf1.pant,1024,1024,1023,512,512,511);
+    mod_screen(self.pf1.pant,1024,512);
     self.pf1.is_8x8:=false;
   end;
   if (valor and $8000)<>0 then begin //8x8
-    screen_mod_scroll(self.pf2.pant,512,512,511,256,256,255);
+    mod_screen(self.pf2.pant,512,256);
     self.pf2.is_8x8:=true;
   end else begin //16x16
-    screen_mod_scroll(self.pf2.pant,1024,1024,1023,512,512,511);
+    mod_screen(self.pf2.pant,1024,512);
     self.pf2.is_8x8:=false;
   end;
 end;

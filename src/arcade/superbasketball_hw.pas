@@ -57,7 +57,7 @@ for f:=0 to $3ff do begin
 end;
 //La parte de arriba es fija...
 actualiza_trozo(0,0,256,48,1,0,0,256,48,2);
-scroll__x_part2(1,2,208,@scroll_x,0,0,48);
+scroll_x_cut(1,2,scroll_x,48,208);
 offset:=sprite_select*$100;
 for f:=0 to $3f do begin
   atrib:=memoria[$3801+offset+(f*4)];
@@ -280,7 +280,6 @@ begin
  z80_0.reset;
  vlm5030_0.reset;
  dac_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -310,17 +309,17 @@ llamadas_maquina.bucle_general:=sbasketb_principal;
 llamadas_maquina.reset:=reset_sbasketb;
 llamadas_maquina.save_qsnap:=sbasketb_qsave;
 llamadas_maquina.load_qsnap:=sbasketb_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_sbasketb:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1400000,$100,TCPU_MC6809E);
+m6809_0:=cpu_m6809.Create(1400000,TCPU_MC6809E);
 m6809_0.change_ram_calls(sbasketb_getbyte,sbasketb_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,$100);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(sbasketb_snd_getbyte,sbasketb_snd_putbyte);
 z80_0.init_sound(sbasketb_sound_update);
 //Sound Chip

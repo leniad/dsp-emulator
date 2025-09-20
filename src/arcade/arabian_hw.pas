@@ -17,16 +17,16 @@ const
         (n:'tvg-93.ic86';l:$2000;p:$4000;crc:$71acd48d),(n:'tvg-94.ic87';l:$2000;p:$6000;crc:$82160b9a));
         arabian_mcu:tipo_roms=(n:'sun-8212.ic3';l:$800;p:0;crc:$8869611e);
         //Dip
-        arabian_dip_a:array [0..5] of def_dip2=(
+        arabian_dip_a:array [0..4] of def_dip2=(
         (mask:$1;name:'Lives';number:2;val2:(0,1);name2:('3','5')),
         (mask:$2;name:'Cabinet';number:2;val2:(2,0);name2:('Upright','Cocktail')),
         (mask:$4;name:'Flip Screen';number:2;val2:(4,0);name2:('Off','On')),
         (mask:$8;name:'Difficulty';number:2;val2:(8,0);name2:('Hard','Easy')),
-        (mask:$f0;name:'Coinage';number:16;val16:($10,$20,0,$30,$40,$50,$60,$70,$80,$90,$a0,$e0,$b0,$c0,$d0,$f0);name16:('A 2/1 B 2/1','A 2/1 B 1/3','A 1/1 B 1/1','A 1/1 B 1/2','A 1/1 B 1/3','A 1/1 B 1/4','A 1/1 B 1/5','A 1/1 B 1/6','A 1/2 B 1/2','A 1/2 B 1/4','A 1/2 B 1/5','A 1/2 B 1/6','A 1/2 B 1/10','A 1/2 B 1/11','A 1/2 B 1/12','Free Play')),());
-        arabian_dip_b:array [0..3] of def_dip2=(
+        (mask:$f0;name:'Coinage';number:16;val16:($10,$20,0,$30,$40,$50,$60,$70,$80,$90,$a0,$e0,$b0,$c0,$d0,$f0);name16:('A 2/1 B 2/1','A 2/1 B 1/3','A 1/1 B 1/1','A 1/1 B 1/2','A 1/1 B 1/3','A 1/1 B 1/4','A 1/1 B 1/5','A 1/1 B 1/6','A 1/2 B 1/2','A 1/2 B 1/4','A 1/2 B 1/5','A 1/2 B 1/6','A 1/2 B 1/10','A 1/2 B 1/11','A 1/2 B 1/12','Free Play')));
+        arabian_dip_b:array [0..2] of def_dip2=(
         (mask:$1;name:'Coin Counters';number:2;val2:(1,0);name2:('1','2')),
         (mask:$2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
-        (mask:$c;name:'Bonus Life';number:4;val4:($c,4,8,0);name4:('30K 70K 40K+','20K Only','40K Only','None')),());
+        (mask:$c;name:'Bonus Life';number:4;val4:($c,4,8,0);name4:('30K 70K 40K+','20K Only','40K Only','None')));
 
 var
  blitter:array[0..7] of byte;
@@ -289,7 +289,6 @@ begin
  z80_0.reset;
  mb88xx_0.reset;
  ay8910_0.reset;
- reset_game_general;
  video_control:=0;
  mcu_port_p:=0;
  mcu_port_o:=0;
@@ -383,17 +382,18 @@ end;
 begin
 llamadas_maquina.bucle_general:=arabian_principal;
 llamadas_maquina.reset:=reset_arabian;
+llamadas_maquina.scanlines:=256;
 iniciar_arabian:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(234,256);
 //Main CPU
-z80_0:=cpu_z80.create(3000000,256);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(arabian_getbyte,arabian_putbyte);
 z80_0.change_io_calls(nil,arabian_outbyte);
 z80_0.init_sound(arabian_sound_update);
 //MCU
-mb88xx_0:=cpu_mb88xx.Create(2000000,256);
+mb88xx_0:=cpu_mb88xx.Create(2000000);
 mb88xx_0.change_io_calls(mcu_port_k_r,mcu_port_o_w,nil,mcu_port_p_w,mcu_port_r_r,mcu_port_r_w);
 //Audio chips
 ay8910_0:=ay8910_chip.create(1500000,AY8910);
@@ -406,10 +406,8 @@ if not(roms_load(mb88xx_0.get_rom_addr,arabian_mcu)) then exit;
 if not(roms_load(@memoria_temp,arabian_gfx)) then exit;
 convert_gfx_arabian;
 create_palette;
-marcade.dswa:=$06;
-marcade.dswb:=$0f;
-marcade.dswa_val2:=@arabian_dip_a;
-marcade.dswb_val2:=@arabian_dip_b;
+init_dips(1,arabian_dip_a,6);
+init_dips(2,arabian_dip_b,$f);
 //final
 reset_arabian;
 iniciar_arabian:=true;

@@ -340,12 +340,13 @@ llamadas_maquina.bucle_general:=principal_ccastles;
 llamadas_maquina.reset:=reset_ccastles;
 llamadas_maquina.fps_max:=61.035156;
 llamadas_maquina.close:=close_ccastles;
+llamadas_maquina.scanlines:=256;
 iniciar_ccastles:=false;
 iniciar_audio(false);
 screen_init(1,320,256);
 iniciar_video(256,232);
 //Main CPU
-m6502_0:=cpu_m6502.create(10000000 div 8,256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(10000000 div 8,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_ccastles,putbyte_ccastles);
 m6502_0.init_sound(ccastles_sound_update);
 //analog

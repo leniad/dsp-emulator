@@ -184,7 +184,6 @@ procedure reset_rastan;
 begin
  m68000_0.reset;
  tc0140syt_0.reset;
- reset_game_general;
  marcade.in0:=$1f;
  marcade.in1:=$ff;
  scroll_x1:=0;
@@ -205,21 +204,20 @@ var
 begin
 llamadas_maquina.bucle_general:=rastan_principal;
 llamadas_maquina.reset:=reset_rastan;
+llamadas_maquina.scanlines:=256;
 iniciar_rastan:=false;
 iniciar_audio(false);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(rastan_getword,rastan_putword);
 if not(roms_load16w(@rom,rastan_rom)) then exit;
 //rom[$05FF9F shr 1]:=$fa;  //Cheeeeeeeeat
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256,SOUND_RASTAN);
+tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_RASTAN);
 if not(roms_load(msm5205_0.rom_data,rastan_adpcm)) then exit;
 //cargar sonido+ponerlas en su banco
 if not(roms_load(@memoria_temp,rastan_sound)) then exit;

@@ -475,6 +475,7 @@ begin
 iniciar_freekick:=false;
 llamadas_maquina.bucle_general:=freekick_principal;
 llamadas_maquina.reset:=reset_freekick;
+llamadas_maquina.scanlines:=263;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
@@ -490,7 +491,7 @@ end else begin
   llamadas_maquina.fps_max:=59.410646;
 end;
 //Main CPU
-z80_0:=cpu_z80.create(clock,263);
+z80_0:=cpu_z80.create(clock);
 z80_0.init_sound(freekick_sound_update);
 //Sound Chips
 sn_76496_0:=sn76496_chip.create(clock);

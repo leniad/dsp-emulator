@@ -32,7 +32,7 @@ type
         end;
         preg_nec=^reg_nec;
         cpu_nec=class(cpu_class)
-            constructor create(clock:dword;frames_div:word;tipo:byte);
+            constructor create(clock:dword;tipo:byte);
             destructor free;
           public
             procedure reset;
@@ -178,13 +178,13 @@ begin
     MessageDlg('out word sin funcion',mtInformation,[mbOk],0);
 end;
 
-constructor cpu_nec.create(clock:dword;frames_div:word;tipo:byte);
+constructor cpu_nec.create(clock:dword;tipo:byte);
 begin
 getmem(self.r,sizeof(reg_nec));
 fillchar(self.r^,sizeof(reg_nec),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 case tipo of
     0:;
     1:begin

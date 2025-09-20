@@ -51,7 +51,7 @@ type
         preg_m68000=^reg_m68000;
         treset_call=procedure;
         cpu_m68000=class(cpu_class)
-            constructor create(clock:dword;frames_div:word;tipo:byte=0);
+            constructor create(clock:dword;tipo:byte=0);
             destructor free;
           public
             getword_:tgetword;
@@ -133,13 +133,13 @@ const
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff);
   addr_mask=$fffffe;
 
-constructor cpu_m68000.create(clock:dword;frames_div:word;tipo:byte=0);
+constructor cpu_m68000.create(clock:dword;tipo:byte=0);
 begin
 getmem(self.r,sizeof(reg_m68000));
 fillchar(self.r^,sizeof(reg_m68000),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.tipo:=tipo;
 self.reset_call:=nil;
 end;
@@ -801,7 +801,7 @@ case dir of
               end;
             end;
   $38:begin
-        res:=smallint(self.getword(r.pc.l));
+        res:=dword(smallint(self.getword(r.pc.l)));
         r.pc.l:=r.pc.l+2;
       end;
   $39:begin
@@ -995,6 +995,10 @@ if self.halt then begin
 end;
 self.opcode:=true;
 r.ppc:=r.pc;
+{if r.pc.l=$10070 then begin
+  r.pc.l:=$1;
+  r.pc.l:=$10070;
+end;}
 instruccion:=self.getword(r.pc.l);
 r.pc.l:=r.pc.l+2;
 dir:=instruccion and $3f;
@@ -1880,7 +1884,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     $39:self.contador:=self.contador+16;
                   end;
                 case dir of
-                  $10..$17,$28..$37,$39:begin  //$30..$37 Añadido 13/07
+                  $10..$17,$28..$37,$38,$39:begin  //$30..$37 Añadido 13/07
                               templ:=self.leerdir_ea(dir);
                               if (tempw and $0001)<>0 then begin
                                 self.putword(templ,r.d[0].wh);
@@ -2138,7 +2142,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     $39:self.contador:=self.contador+20;
                   end;
                 case dir of
-                $10..$17,$28..$37,$39,$3a:begin
+                $10..$17,$28..$37,$38,$39,$3a:begin
                       templ:=self.leerdir_ea(dir);
                       if (tempw and $0001)<>0 then begin
                          r.d[0].wh:=self.getword(templ);

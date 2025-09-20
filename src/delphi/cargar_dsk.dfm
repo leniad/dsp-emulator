@@ -12,6 +12,7 @@ object load_dsk: Tload_dsk
   Font.Style = []
   KeyPreview = True
   Position = poDesigned
+  OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   TextHeight = 13

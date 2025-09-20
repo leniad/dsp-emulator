@@ -219,7 +219,6 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$7f;
  marcade.in2:=$ff;
@@ -264,15 +263,15 @@ end;
 begin
 llamadas_maquina.bucle_general:=ladybug_principal;
 llamadas_maquina.reset:=reset_ladybug;
+llamadas_maquina.scanlines:=256;
 iniciar_ladybug:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 if main_vars.tipo_maquina<>34 then main_screen.rot90_screen:=true;
 iniciar_video(192,240);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(ladybug_getbyte,ladybug_putbyte);
 z80_0.init_sound(ladybug_sound_update);
 //Audio chips

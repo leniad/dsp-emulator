@@ -23,19 +23,19 @@ const
         (n:'vg_b-1d-.ic2';l:$10000;p:0;crc:$81b1ee5c),(n:'vg_b-1f-.ic3';l:$10000;p:$10000;crc:$d0d33673),
         (n:'vg_b-1h-.ic4';l:$10000;p:$20000;crc:$aae81695));
         //Dip
-        vigilante_dip_a:array[0..4] of def_dip2=(
+        vigilante_dip_a:array[0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','4','5')),
         (mask:4;name:'Difficulty';number:2;val2:(4,0);name2:('Normal','Hard')),
         (mask:8;name:'Decrease of Energy';number:2;val2:(8,0);name2:('Slow','Fast')),
-        (mask:$f0;name:'Coinage';number:16;val16:($a0,$b0,$c0,$d0,$10,$e0,$20,$30,$f0,$40,$90,$80,$70,$60,$50,0);name16:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 5C','Free Play')),());
-        vigilante_dip_b:array [0..7] of def_dip2=(
+        (mask:$f0;name:'Coinage';number:16;val16:($a0,$b0,$c0,$d0,$10,$e0,$20,$30,$f0,$40,$90,$80,$70,$60,$50,0);name16:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 5C','Free Play')));
+        vigilante_dip_b:array [0..6] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),
         (mask:4;name:'Coin Mode';number:2;val2:(4,0);name2:('Mode 1','Mode 2')),
         (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),
         (mask:$20;name:'Stop Mode';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),());
+        (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')));
 
 var
  rom_bank:array[0..3,0..$3fff] of byte;
@@ -307,7 +307,6 @@ begin
  z80_0.reset;
  z80_1.reset;
  ym2151_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -345,22 +344,20 @@ begin
 llamadas_maquina.bucle_general:=vigilante_principal;
 llamadas_maquina.reset:=reset_vigilante;
 llamadas_maquina.fps_max:=55;
+llamadas_maquina.scanlines:=256;
 iniciar_vigilante:=false;
 iniciar_audio(true);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,256+128,511,256,256,255);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,256+128,511,256,256,255);
 screen_init(3,512,512,false,true);
 screen_init(4,512*4,256);
-screen_mod_scroll(4,2048,512,2047,256,256,255);
 iniciar_video(256,256);
 //Main CPU
-z80_0:=cpu_z80.create(3579645,256);
+z80_0:=cpu_z80.create(3579645);
 z80_0.change_ram_calls(vigilante_getbyte,vigilante_putbyte);
 z80_0.change_io_calls(vigilante_inbyte,vigilante_outbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3579645,256);
+z80_1:=cpu_z80.create(3579645);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(snd_despues_instruccion);
@@ -405,10 +402,8 @@ init_gfx(2,32,1,3*512*8);
 gfx_set_desc_data(4,0,16*8,0,2,4,6);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pc_y,false,false);
 //Dips
-marcade.dswa:=$ff;
-marcade.dswb:=$fd;
-marcade.dswa_val2:=@vigilante_dip_a;
-marcade.dswb_val2:=@vigilante_dip_b;
+init_dips(1,vigilante_dip_a,$ff);
+init_dips(2,vigilante_dip_b,$fd);
 //final
 reset_vigilante;
 iniciar_vigilante:=true;

@@ -344,7 +344,6 @@ begin
     marcade.in1:=$7f00;
     marcade.in2:=$7f00;
  end;
- reset_game_general;
  sound_latch:=0;
 end;
 
@@ -373,6 +372,7 @@ end;
 begin
 llamadas_maquina.reset:=reset_snowbros;
 llamadas_maquina.fps_max:=57.5;
+llamadas_maquina.scanlines:=262;
 iniciar_snowbros:=false;
 iniciar_audio(false);
 screen_init(1,512,512,true,true);
@@ -381,10 +381,10 @@ case main_vars.tipo_maquina of
   54,386:begin
             llamadas_maquina.bucle_general:=snowbros_principal;
             //Main CPU
-            m68000_0:=cpu_m68000.create(8000000,262);
+            m68000_0:=cpu_m68000.create(8000000);
             m68000_0.change_ram16_calls(snowbros_getword,snowbros_putword);
             //Sound CPU
-            z80_0:=cpu_z80.create(6000000,262);
+            z80_0:=cpu_z80.create(6000000);
             z80_0.change_ram_calls(snowbros_snd_getbyte,snowbros_snd_putbyte);
             z80_0.change_io_calls(snowbros_snd_inbyte,snowbros_snd_outbyte);
             z80_0.init_sound(snowbros_sound_act);
@@ -395,10 +395,10 @@ case main_vars.tipo_maquina of
   387:begin
         llamadas_maquina.bucle_general:=hyperpac_principal;
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,262);
+        m68000_0:=cpu_m68000.create(12000000);
         m68000_0.change_ram16_calls(snowbros_getword,hyperpac_putword);
         //Sound CPU
-        z80_0:=cpu_z80.create(4000000,262);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(hyperpac_snd_getbyte,hyperpac_snd_putbyte);
         z80_0.init_sound(hyperpac_sound_act);
         //Sound Chips
@@ -445,7 +445,7 @@ case main_vars.tipo_maquina of
     end;
     387:begin //Hyper Pacman
         //MCU
-        mcs51_0:=cpu_mcs51.create(I8XC52,16000000,262);
+        mcs51_0:=cpu_mcs51.create(I8XC52,16000000);
         mcs51_0.change_io_calls(nil,nil,nil,nil,hyperpac_out_port0,hyperpac_out_port1,hyperpac_out_port2,nil);
         if not(roms_load(mcs51_0.get_rom_addr,hyperpac_mcu)) then exit;
         //cargar roms

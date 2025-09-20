@@ -21,16 +21,16 @@ const
         (n:'23j9-0.101';l:$20000;p:$40000;crc:$8caf6097),(n:'23ja-0.100';l:$20000;p:$60000;crc:$f678594f));
         chinagate_adpcm:array[0..1] of tipo_roms=(
         (n:'23j1-0.53';l:$20000;p:0;crc:$f91f1001),(n:'23j2-0.52';l:$20000;p:$20000;crc:$8b6f26e9));
-        chinagate_dip_a:array [0..4] of def_dip2=(
+        chinagate_dip_a:array [0..3] of def_dip2=(
         (mask:$7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
-        chinagate_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')));
+        chinagate_dip_b:array [0..3] of def_dip2=(
         (mask:$3;name:'Difficulty';number:4;val4:(1,3,2,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$4;name:'Demo Sounds';number:2;val2:(0,4);name2:('Off','On')),
         (mask:$30;name:'Timer';number:4;val4:(0,$20,$30,$10);name4:('50','55','60','70')),
-        (mask:$c0;name:'Lives';number:4;val4:(0,$c0,$80,$40);name4:('1','2','3','4')),());
+        (mask:$c0;name:'Lives';number:4;val4:(0,$c0,$80,$40);name4:('1','2','3','4')));
         CPU_SYNC=4;
 
 var
@@ -330,27 +330,27 @@ begin
 llamadas_maquina.bucle_general:=chinagate_principal;
 llamadas_maquina.reset:=reset_chinagate;
 llamadas_maquina.fps_max:=6000000/384/272;
+llamadas_maquina.scanlines:=272*CPU_SYNC;
 iniciar_chinagate:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(256,240);
 //Main CPU
-hd6309_0:=cpu_hd6309.create(12000000 div 2,272*CPU_SYNC,TCPU_HD6309);
+hd6309_0:=cpu_hd6309.create(12000000 div 2,TCPU_HD6309);
 hd6309_0.change_ram_calls(chinagate_getbyte,chinagate_putbyte);
 if not(roms_load(@memoria_temp,chinagate_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[$18000],$8000);
 for f:=0 to 5 do copymemory(@rom[f,0],@memoria_temp[(f*$4000)],$4000);
 //Sub CPU
-hd6309_1:=cpu_hd6309.create(12000000 div 2,272*CPU_SYNC,TCPU_HD6309);
+hd6309_1:=cpu_hd6309.create(12000000 div 2,TCPU_HD6309);
 hd6309_1.change_ram_calls(chinagate_sub_getbyte,chinagate_sub_putbyte);
 if not(roms_load(@memoria_temp,chinagate_sub)) then exit;
 copymemory(@mem_misc[$8000],@memoria_temp[$18000],$8000);
 for f:=0 to 5 do copymemory(@rom_sub[f,0],@memoria_temp[(f*$4000)],$4000);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,272*CPU_SYNC);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(chinagate_snd_getbyte,chinagate_snd_putbyte);
 z80_0.init_sound(chinagate_sound_update);
 if not(roms_load(@mem_snd,chinagate_snd)) then exit;
@@ -377,10 +377,8 @@ gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$1000*64*8+0,$1000*64*8+4,0,4);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //DIP
-marcade.dswa:=$bf;
-marcade.dswb:=$e7;
-marcade.dswa_val2:=@chinagate_dip_a;
-marcade.dswb_val2:=@chinagate_dip_b;
+init_dips(1,chinagate_dip_a,$bf);
+init_dips(2,chinagate_dip_b,$e7);
 //final
 iniciar_chinagate:=true;
 end;

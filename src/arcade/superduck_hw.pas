@@ -25,12 +25,12 @@ const
         superduck_oki:array[0..1] of tipo_roms=(
         (n:'2.su12';l:$20000;p:0;crc:$745d42fb),(n:'1.su13';l:$80000;p:$20000;crc:$7fb1ed42));
         //DIP
-        superduck_dip:array [0..5] of def_dip2=(
+        superduck_dip:array [0..4] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(0,1,2,3,7,6,5,4);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
         (mask:$20;name:'Game Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$c0;name:'Lives';number:4;val4:($c0,$80,$40,0);name4:('2','3','4','5')),
-        (mask:$4000;name:'Character Test';number:2;val2:($4000,0);name2:('Off','On')),());
+        (mask:$4000;name:'Character Test';number:2;val2:($4000,0);name2:('Off','On')));
 
 var
  scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
@@ -326,21 +326,20 @@ begin
 llamadas_maquina.bucle_general:=superduck_principal;
 llamadas_maquina.reset:=reset_superduck;
 llamadas_maquina.fps_max:=6000000/384/262;
+llamadas_maquina.scanlines:=262;
 iniciar_superduck:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
 screen_init(2,288,288);
-screen_mod_scroll(2,288,256,255,288,256,255);
 screen_init(3,288,288,true);
-screen_mod_scroll(3,288,256,255,288,256,255);
 screen_init(4,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,262);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(superduck_getword,superduck_putword);
 //Sound CPU
-z80_0:=cpu_z80.create(2000000,262);
+z80_0:=cpu_z80.create(2000000);
 z80_0.change_ram_calls(superduck_snd_getbyte,superduck_snd_putbyte);
 z80_0.init_sound(superduck_sound_update);
 getmem(memoria_temp,$1000000);
@@ -378,8 +377,7 @@ gfx_set_desc_data(4,0,16*16*4,0,8,16,24);
 convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 freemem(memoria_temp);
 //DIP
-marcade.dswa:=$ffbf;
-marcade.dswa_val2:=@superduck_dip;
+init_dips(1,superduck_dip,$ffbf);
 //final
 iniciar_superduck:=true;
 end;

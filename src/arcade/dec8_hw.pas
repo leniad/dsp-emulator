@@ -23,18 +23,18 @@ const
         (n:'dy07.h16';l:$8000;p:0;crc:$97eaba60),(n:'dy06.h14';l:$8000;p:$8000;crc:$c279541b),
         (n:'dy09.k13';l:$8000;p:$10000;crc:$d30d1745),(n:'dy08.k11';l:$8000;p:$18000;crc:$71d645fd),
         (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8));
-        srd_dip_a:array [0..5] of def_dip2=(
+        srd_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(3,2,1,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        srd_dip_b:array [0..5] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        srd_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','5','28')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$10;name:'Bonus Life';number:2;val2:($10,0);name2:('Every 50K','Every 100K')),
         (mask:$20;name:'After Stage 10';number:2;val2:($20,0);name2:('Back to Stager 1','Game Over')),
-        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('No','Yes')),());
+        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('No','Yes')));
         //Last Mission
         lastmisn_rom:array[0..1] of tipo_roms=(
         (n:'last_mission_dl03-8.13h';l:$8000;p:0;crc:$a4f8d54b),(n:'last_mission_dl04-5.7h';l:$10000;p:$8000;crc:$7dea1552));
@@ -48,18 +48,18 @@ const
         lastmisn_tiles:array[0..3] of tipo_roms=(
         (n:'last_mission_dl09-.12k';l:$10000;p:0;crc:$6a5a0c5d),(n:'last_mission_dl08-.14k';l:$10000;p:$20000;crc:$3b38cfce),
         (n:'last_mission_dl07-.15k';l:$10000;p:$40000;crc:$1b60604d),(n:'last_mission_dl06-.17k';l:$10000;p:$60000;crc:$c43c26a7));
-        lastmisn_dip_a:array [0..6] of def_dip2=(
+        lastmisn_dip_a:array [0..5] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('1C 5C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('4C 1C','1C 1C','2C 1C','3C 1C')),
         (mask:$10;name:'Demo Sounds';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
         (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Infinite Lives';number:2;val2:($80,0);name2:('Off','On')),());
-        lastmisn_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Infinite Lives';number:2;val2:($80,0);name2:('Off','On')));
+        lastmisn_dip_b:array [0..3] of def_dip2=(
         (mask:$1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
         (mask:$6;name:'Bonus Life';number:4;val4:(6,4,2,0);name4:('30K 70K 70K+','40K 90K 90K+','40K 80K','50K')),
         (mask:$18;name:'Difficulty';number:4;val4:($18,$10,8,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('No','Yes')),());
+        (mask:$80;name:'Allow Continue';number:2;val2:($80,0);name2:('No','Yes')));
         //Shackled
         shackled_rom:array[0..4] of tipo_roms=(
         (n:'dk-02.13h';l:$8000;p:0;crc:$87f8fa85),(n:'dk-06.7h';l:$10000;p:$8000;crc:$69ad62d1),
@@ -77,13 +77,13 @@ const
         shackled_tiles:array[0..3] of tipo_roms=(
         (n:'dk-11.12k';l:$10000;p:0;crc:$5cf5719f),(n:'dk-10.14k';l:$10000;p:$20000;crc:$408e6d08),
         (n:'dk-09.15k';l:$10000;p:$40000;crc:$c1557fac),(n:'dk-08.17k';l:$10000;p:$60000;crc:$5e54e9f5));
-        shackled_dip_a:array [0..2] of def_dip2=(
+        shackled_dip_a:array [0..1] of def_dip2=(
         (mask:$1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')),());
-        shackled_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')));
+        shackled_dip_b:array [0..2] of def_dip2=(
         (mask:$6;name:'Coin/Heart/Help/6-Help';number:8;val8:(0,1,2,3,7,6,5,4);name8:('2/100/50/200','4/100/60/300','6/200/70/300','8/200/80/400','10/200/100/500','12/300/100/600','18/400/200/700','20/500/200/800')),
         (mask:$30;name:'Difficulty';number:4;val4:($30,$20,$10,0);name4:('Normal','Hard','very Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
         //Gondomania
         gondo_rom:array[0..3] of tipo_roms=(
         (n:'dt00-e.f3';l:$8000;p:0;crc:$912a7eee),(n:'dt01.f5';l:$10000;p:$8000;crc:$c39bb877),
@@ -101,16 +101,16 @@ const
         (n:'dt16.f9';l:$10000;p:$20000;crc:$e9955d8f),(n:'dt18-e.f12';l:$8000;p:$30000;crc:$2b2d1468),
         (n:'dt15.f8';l:$10000;p:$40000;crc:$a54b2eb6),(n:'dt17-e.f11';l:$8000;p:$50000;crc:$75ae349a),
         (n:'dt21.f16';l:$10000;p:$60000;crc:$1c5f682d),(n:'dt22-e.f18';l:$8000;p:$70000;crc:$c8ffb148));
-        gondo_dip_a:array [0..5] of def_dip2=(
+        gondo_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,2,3,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Swap buttons';number:2;val2:($80,0);name2:('Off','On')),());
-        gondo_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Swap buttons';number:2;val2:($80,0);name2:('Off','On')));
+        gondo_dip_b:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','5','99')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$10;name:'Allow Continue';number:2;val2:($10,0);name2:('No','Yes')),());
+        (mask:$10;name:'Allow Continue';number:2;val2:($10,0);name2:('No','Yes')));
         //Garyo Retsuden
         garyoret_rom:array[0..4] of tipo_roms=(
         (n:'dv00';l:$8000;p:0;crc:$cceaaf05),(n:'dv01';l:$10000;p:$8000;crc:$c33fc18a),
@@ -129,14 +129,14 @@ const
         (n:'dv20';l:$10000;p:$20000;crc:$451a2d8c),(n:'dv19';l:$8000;p:$30000;crc:$14e1475b),
         (n:'dv18';l:$10000;p:$40000;crc:$7043bead),(n:'dv17';l:$8000;p:$50000;crc:$28f449d7),
         (n:'dv16';l:$10000;p:$60000;crc:$37e4971e),(n:'dv15';l:$8000;p:$70000;crc:$ca41b6ac));
-        garyoret_dip_a:array [0..4] of def_dip2=(
+        garyoret_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,2,3,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
-        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),());
-        garyoret_dip_b:array [0..2] of def_dip2=(
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')));
+        garyoret_dip_b:array [0..1] of def_dip2=(
         (mask:1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
-        (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),());
+        (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')));
         //Captain Silver
         csilver_rom:array[0..2] of tipo_roms=(
         (n:'dx03-12.18d';l:$8000;p:0;crc:$2d926e7c),(n:'dx01.12d';l:$10000;p:$8000;crc:$570fb50c),
@@ -152,17 +152,17 @@ const
         (n:'dx06.5f';l:$10000;p:0;crc:$b6fb208c),(n:'dx07.7f';l:$10000;p:$10000;crc:$ee3e1817),
         (n:'dx08.8f';l:$10000;p:$20000;crc:$705900fe),(n:'dx09.10f';l:$10000;p:$30000;crc:$3192571d),
         (n:'dx10.12f';l:$10000;p:$40000;crc:$3ef77a32),(n:'dx11.13f';l:$10000;p:$50000;crc:$9cf3d5b8));
-        csilver_dip_a:array [0..5] of def_dip2=(
+        csilver_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(3,2,1,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        csilver_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        csilver_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','5','255')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),
-        (mask:$40;name:'No key for door';number:2;val2:($40,0);name2:('Off','On')),());
+        (mask:$40;name:'No key for door';number:2;val2:($40,0);name2:('Off','On')));
         //Cobra Command
         cobracom_rom:array[0..2] of tipo_roms=(
         (n:'el11-5.5j';l:$8000;p:0;crc:$af0a8b05),(n:'el12-4.7j';l:$10000;p:$8000;crc:$7a44ef38),
@@ -177,17 +177,17 @@ const
         (n:'el04.13a';l:$10000;p:$40000;crc:$d80a49ce),(n:'el07.18a';l:$10000;p:$60000;crc:$6d771fc3));
         cobracom_tiles2:array[0..1] of tipo_roms=(
         (n:'el08.7d';l:$10000;p:0;crc:$cb0dcf4c),(n:'el09.9d';l:$10000;p:$10000;crc:$1fae5be7));
-        cobracom_dip_a:array [0..5] of def_dip2=(
+        cobracom_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        cobracom_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        cobracom_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','99')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),
-        (mask:$20;name:'Bonus Life';number:2;val2:($20,0);name2:('50K 150K','100K 200K')),());
+        (mask:$20;name:'Bonus Life';number:2;val2:($20,0);name2:('50K 150K','100K 200K')));
         //The Real Ghostbusters
         ghostb_rom:array[0..4] of tipo_roms=(
         (n:'dz01-22.1d';l:$8000;p:0;crc:$fc65fdf2),(n:'dz02.3d';l:$10000;p:$8000;crc:$8e117541),
@@ -206,15 +206,15 @@ const
         (n:'dz09.15f';l:$10000;p:$20000;crc:$bb6efc02),(n:'dz10.17f';l:$10000;p:$30000;crc:$6ef9963b));
         ghostb_proms:array[0..1] of tipo_roms=(
         (n:'dz19a.10d';l:$400;p:0;crc:$47e1f83b),(n:'dz20a.11d';l:$400;p:$400;crc:$d8fe2d99));
-        ghostb_dip_a:array [0..2] of def_dip2=(
+        ghostb_dip_a:array [0..1] of def_dip2=(
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
-        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),());
-        ghostb_dip_b:array [0..5] of def_dip2=(
+        (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')));
+        ghostb_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','5','Invulnerability')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$30;name:'Max Scene Time';number:4;val4:(0,$10,$30,$20);name4:('4:00','4:30','5:00','6:00')),
         (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
-        (mask:$80;name:'Energy Bonus';number:2;val2:($80,0);name2:('None','+25%')),());
+        (mask:$80;name:'Energy Bonus';number:2;val2:($80,0);name2:('None','+25%')));
         //Psycho-Nicks Oscar
         oscar_rom:array[0..1] of tipo_roms=(
         (n:'du10';l:$8000;p:0;crc:$120040d8),(n:'ed09';l:$10000;p:$8000;crc:$e2d4bba9));
@@ -227,19 +227,19 @@ const
         oscar_tiles:array[0..3] of tipo_roms=(
         (n:'ed01';l:$10000;p:0;crc:$d3a58e9e),(n:'ed03';l:$10000;p:$20000;crc:$4fc4fb0f),
         (n:'ed00';l:$10000;p:$40000;crc:$ac201f2d),(n:'ed02';l:$10000;p:$60000;crc:$7ddc5651));
-        oscar_dip_a:array [0..6] of def_dip2=(
+        oscar_dip_a:array [0..5] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(3,2,1,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$10;name:'Freeze Mode';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        oscar_dip_b:array [0..5] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        oscar_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','5','Infinite')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('40K 100K 60K+','60K 160K 100K+','90K 240K 150K+','50K')),
         (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')),());
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')));
         CPU_SYNC=10;
 
 var
@@ -1838,14 +1838,13 @@ begin
 iniciar_dec8:=false;
 llamadas_maquina.reset:=reset_dec8;
 llamadas_maquina.fps_max:=57.444853;
+llamadas_maquina.scanlines:=272*CPU_SYNC;
 iniciar_audio(false);
 case main_vars.tipo_maquina of
   91,392,393,394,395,396:begin
         screen_init(1,256,256,true);
         screen_init(2,512,512);
-        screen_mod_scroll(2,512,256,511,512,256,511);
         screen_init(3,512,512,true);
-        screen_mod_scroll(3,512,256,511,512,256,511);
         if ((main_vars.tipo_maquina<>393) and (main_vars.tipo_maquina<>395) and (main_vars.tipo_maquina<>396)) then main_screen.rot270_screen:=true;
         screen_init(4,512,512,false,true);
         iniciar_video(256,240);
@@ -1865,13 +1864,13 @@ case main_vars.tipo_maquina of
 end;
 //Main CPU
 case main_vars.tipo_maquina of
-  91,392,393,397:m6809_0:=cpu_m6809.create(2000000,272*CPU_SYNC,TCPU_MC6809E);
-  394,395,398:hd6309_0:=cpu_hd6309.create(3000000,272*CPU_SYNC,TCPU_HD6309E);
-  396:m6809_0:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_MC6809E);
-  399:hd6309_0:=cpu_hd6309.create(6000000,272*CPU_SYNC,TCPU_HD6309E);
+  91,392,393,397:m6809_0:=cpu_m6809.create(2000000,TCPU_MC6809E);
+  394,395,398:hd6309_0:=cpu_hd6309.create(3000000,TCPU_HD6309E);
+  396:m6809_0:=cpu_m6809.create(1500000,TCPU_MC6809E);
+  399:hd6309_0:=cpu_hd6309.create(6000000,TCPU_HD6309E);
 end;
 //Sound CPU
-m6502_0:=cpu_m6502.create(1500000,272*CPU_SYNC,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
 if (main_vars.tipo_maquina=396) then m6502_0.init_sound(csilver_sound_update)
   else m6502_0.init_sound(dec8_sound_update);
 //Sound Chip
@@ -1882,7 +1881,7 @@ case main_vars.tipo_maquina of
 end;
 ym3812_0.change_irq_calls(snd_irq);
 //MCU
-if ((main_vars.tipo_maquina<>397) and (main_vars.tipo_maquina<>399)) then mcs51_0:=cpu_mcs51.create(I8X51,8000000,272*CPU_SYNC);
+if ((main_vars.tipo_maquina<>397) and (main_vars.tipo_maquina<>399)) then mcs51_0:=cpu_mcs51.create(I8X51,8000000);
 case main_vars.tipo_maquina of
   91:begin
       llamadas_maquina.bucle_general:=principal_srd;
@@ -1926,10 +1925,8 @@ case main_vars.tipo_maquina of
       gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,0*8);
       convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
       //DIP
-      marcade.dswa:=$7f;
-      marcade.dswb:=$ff;
-      marcade.dswa_val2:=@srd_dip_a;
-      marcade.dswb_val2:=@srd_dip_b;
+      init_dips(1,srd_dip_a,$7f);
+      init_dips(2,srd_dip_b,$ff);
   end;
   392:begin
       llamadas_maquina.bucle_general:=principal_lastmisn;
@@ -1944,7 +1941,7 @@ case main_vars.tipo_maquina of
       copymemory(@rom[2,0],@memoria_temp[$10000],$4000);
       copymemory(@rom[3,0],@memoria_temp[$14000],$4000);
       //Sub CPU
-      m6809_1:=cpu_m6809.create(2000000,272*CPU_SYNC,TCPU_MC6809E);
+      m6809_1:=cpu_m6809.create(2000000,TCPU_MC6809E);
       m6809_1.change_ram_calls(getbyte_sublastmisn,putbyte_lastmisn);
       if not(roms_load(@mem_misc,lastmisn_sub)) then exit;
       sub_nmi:=false;
@@ -1972,10 +1969,8 @@ case main_vars.tipo_maquina of
       gfx[2].trans[0]:=true;
       freemem(ptemp);
       //DIP
-      marcade.dswa:=$cf;
-      marcade.dswb:=$7f;
-      marcade.dswa_val2:=@lastmisn_dip_a;
-      marcade.dswb_val2:=@lastmisn_dip_b;
+      init_dips(1,lastmisn_dip_a,$cf);
+      init_dips(2,lastmisn_dip_b,$7f);
   end;
   393:begin
       llamadas_maquina.bucle_general:=principal_lastmisn;
@@ -1989,7 +1984,7 @@ case main_vars.tipo_maquina of
       copymemory(@rom[$e,0],@memoria_temp[$38000],$4000);
       copymemory(@rom[$f,0],@memoria_temp[$3c000],$4000);
       //Sub CPU
-      m6809_1:=cpu_m6809.Create(2000000,272*CPU_SYNC,TCPU_MC6809E);
+      m6809_1:=cpu_m6809.Create(2000000,TCPU_MC6809E);
       m6809_1.change_ram_calls(getbyte_sublastmisn,putbyte_lastmisn);
       if not(roms_load(@mem_misc,shackled_sub)) then exit;
       sub_nmi:=false;
@@ -2014,10 +2009,8 @@ case main_vars.tipo_maquina of
       gfx[2].trans[0]:=true;
       freemem(ptemp);
       //DIP
-      marcade.dswa:=$ff;
-      marcade.dswb:=$7f;
-      marcade.dswa_val2:=@shackled_dip_a;
-      marcade.dswb_val2:=@shackled_dip_b;
+      init_dips(1,shackled_dip_a,$ff);
+      init_dips(2,shackled_dip_b,$7f);
   end;
   394:begin
       llamadas_maquina.bucle_general:=principal_gondo;
@@ -2065,10 +2058,8 @@ case main_vars.tipo_maquina of
       gfx[2].trans[0]:=true;
       freemem(ptemp);
       //DIP
-      marcade.dswa:=$ff;
-      marcade.dswb:=$ef;
-      marcade.dswa_val2:=@gondo_dip_a;
-      marcade.dswb_val2:=@gondo_dip_b;
+      init_dips(1,gondo_dip_a,$ff);
+      init_dips(2,gondo_dip_b,$ef);
   end;
   395:begin
       llamadas_maquina.bucle_general:=principal_gondo;
@@ -2121,10 +2112,8 @@ case main_vars.tipo_maquina of
       gfx[2].trans[0]:=true;
       freemem(ptemp);
       //DIP
-      marcade.dswa:=$ff;
-      marcade.dswb:=$ff;
-      marcade.dswa_val2:=@garyoret_dip_a;
-      marcade.dswb_val2:=@garyoret_dip_b;
+      init_dips(1,garyoret_dip_a,$ff);
+      init_dips(2,garyoret_dip_b,$ff);
   end;
   396:begin
       llamadas_maquina.bucle_general:=principal_lastmisn;
@@ -2136,7 +2125,7 @@ case main_vars.tipo_maquina of
       copymemory(@memoria[$8000],@memoria_temp[0],$8000);
       for f:=0 to 7 do copymemory(@rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
       //Sub CPU
-      m6809_1:=cpu_m6809.create(1500000,272*CPU_SYNC,TCPU_MC6809E);
+      m6809_1:=cpu_m6809.create(1500000,TCPU_MC6809E);
       m6809_1.change_ram_calls(getbyte_sublastmisn,putbyte_lastmisn);
       if not(roms_load(@mem_misc,csilver_sub)) then exit;
       sub_nmi:=true;
@@ -2165,10 +2154,8 @@ case main_vars.tipo_maquina of
       gfx[2].trans[0]:=true;
       freemem(ptemp);
       //DIP
-      marcade.dswa:=$7f;
-      marcade.dswb:=$ff;
-      marcade.dswa_val2:=@csilver_dip_a;
-      marcade.dswb_val2:=@csilver_dip_b;
+      init_dips(1,csilver_dip_a,$7f);
+      init_dips(2,csilver_dip_b,$ff);
   end;
   397:begin
       llamadas_maquina.bucle_general:=principal_cobracom;
@@ -2207,10 +2194,8 @@ case main_vars.tipo_maquina of
       freemem(ptemp);
       freemem(ptemp2);
       //DIP
-      marcade.dswa:=$7f;
-      marcade.dswb:=$ff;
-      marcade.dswa_val2:=@cobracom_dip_a;
-      marcade.dswb_val2:=@cobracom_dip_b;
+      init_dips(1,cobracom_dip_a,$7f);
+      init_dips(2,cobracom_dip_b,$ff);
   end;
   398:begin
       llamadas_maquina.bucle_general:=principal_gondo;
@@ -2251,10 +2236,8 @@ case main_vars.tipo_maquina of
       end;
       set_pal(colores,$400);
       //DIP
-      marcade.dswa:=$f0;
-      marcade.dswb:=$bf;
-      marcade.dswa_val2:=@ghostb_dip_a;
-      marcade.dswb_val2:=@ghostb_dip_b;
+      init_dips(1,ghostb_dip_a,$f0);
+      init_dips(2,ghostb_dip_b,$bf);
   end;
   399:begin
       llamadas_maquina.bucle_general:=principal_oscar;
@@ -2264,7 +2247,7 @@ case main_vars.tipo_maquina of
       copymemory(@memoria[$8000],@memoria_temp[0],$8000);
       for f:=0 to 3 do copymemory(@rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
       //Sub CPU
-      hd6309_1:=cpu_hd6309.create(6000000,272*CPU_SYNC,TCPU_HD6309E);
+      hd6309_1:=cpu_hd6309.create(6000000,TCPU_HD6309E);
       hd6309_1.change_ram_calls(getbyte_suboscar,putbyte_suboscar);
       if not(roms_load(@mem_misc,oscar_sub)) then exit;
       //Sound CPU
@@ -2287,10 +2270,8 @@ case main_vars.tipo_maquina of
       gfx[2].trans[0]:=true;
       freemem(ptemp);
       //DIP
-      marcade.dswa:=$7f;
-      marcade.dswb:=$ff;
-      marcade.dswa_val2:=@oscar_dip_a;
-      marcade.dswb_val2:=@oscar_dip_b;
+      init_dips(1,oscar_dip_a,$7f);
+      init_dips(2,oscar_dip_b,$ff);
   end;
 end;
 //final

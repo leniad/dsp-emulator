@@ -22,21 +22,21 @@ const
         (n:'a39_11.ic99';l:$4000;p:0;crc:$af70e1dc),(n:'a39_10.ic78';l:$4000;p:$4000;crc:$a84380fb),
         (n:'a39_09.ic96';l:$4000;p:$8000;crc:$c0cee243),(n:'a39_08.ic75';l:$4000;p:$c000;crc:$0ad69501));
         //Dip
-        wyvernf0_dip_a:array [0..5] of def_dip2=(
+        wyvernf0_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(0,1,2,3);name4:('0','1','2','3')),
         (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
         (mask:$18;name:'Lives';number:4;val4:(0,8,$10,$18);name4:('2','3','4','5')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        wyvernf0_dip_b:array [0..2] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        wyvernf0_dip_b:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:($f,$e,$d,$c,$b,$a,9,8,0,1,2,3,4,5,6,7);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')),());
-        wyvernf0_dip_c:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,0,$10,$20,$30,$40,$50,$60,$70);name16:('9C 1C','8C 1C','7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C')));
+        wyvernf0_dip_c:array [0..4] of def_dip2=(
         (mask:8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$10;name:'Coinage Display';number:2;val2:(0,$10);name2:('No','Yes')),
         (mask:$20;name:'Copyright';number:2;val2:(0,$20);name2:('Taito Corporation','Taito Corp. 1985')),
         (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Coin Slots';number:2;val2:(0,$80);name2:('1','2')),());
+        (mask:$80;name:'Coin Slots';number:2;val2:(0,$80);name2:('1','2')));
 
 var
  memoria_rom:array [0..7,0..$1fff] of byte;
@@ -319,30 +319,29 @@ const
 begin
 llamadas_maquina.bucle_general:=wyvernf0_principal;
 llamadas_maquina.reset:=reset_wyvernf0;
+llamadas_maquina.scanlines:=255;
 iniciar_wyvernf0:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true,false);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true,false);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,512,512,false,true);
 main_screen.rot270_screen:=true;
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(48000000 div 8,255);
+z80_0:=cpu_z80.create(48000000 div 8);
 z80_0.change_ram_calls(wyvernf0_getbyte,wyvernf0_putbyte);
 if not(roms_load(@memoria_temp,wyvernf0_rom)) then exit;
 copymemory(@memoria,@memoria_temp,$8000);
 for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,255);
+z80_1:=cpu_z80.create(4000000);
 z80_1.change_ram_calls(wyvernf0_snd_getbyte,wyvernf0_snd_putbyte);
 z80_1.init_sound(wyvernf0_sound_update);
 if not(roms_load(@mem_snd,wyvernf0_snd)) then exit;
 fillchar(mem_snd[$e000],$2000,$ff);
 timers.init(z80_1.numero_cpu,4000000/180,snd_irq,nil,true);
 //MCU
-taito_68705_0:=taito_68705p.create(3000000,255);
+taito_68705_0:=taito_68705p.create(3000000);
 if not(roms_load(taito_68705_0.get_rom_addr,wyvernf0_mcu)) then exit;
 //Sound chips
 msm5232_0:=msm5232_chip.create(2000000,4);
@@ -363,12 +362,9 @@ gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,$800*8*8*0,$800*8*8*1,$800*8*8*2,$800*8*8*3);
 convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //DIP
-marcade.dswa:=$6f;
-marcade.dswa_val2:=@wyvernf0_dip_a;
-marcade.dswb:=0;
-marcade.dswb_val2:=@wyvernf0_dip_b;
-marcade.dswc:=$d4;
-marcade.dswc_val2:=@wyvernf0_dip_c;
+init_dips(1,wyvernf0_dip_a,$6f);
+init_dips(2,wyvernf0_dip_b,0);
+init_dips(3,wyvernf0_dip_c,$d4);
 //final
 iniciar_wyvernf0:=true;
 end;

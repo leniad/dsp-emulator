@@ -9,7 +9,7 @@ const
 
 type
       taito_68705p=class
-          constructor create(clock:dword;frames_div:word;mcu_type:byte=0);
+          constructor create(clock:dword;mcu_type:byte=0);
           destructor free;
         public
           main_sent,mcu_sent:boolean;
@@ -149,9 +149,9 @@ case direccion of
 end;
 end;
 
-constructor taito_68705p.create(clock:dword;frames_div:word;mcu_type:byte=0);
+constructor taito_68705p.create(clock:dword;mcu_type:byte=0);
 begin
-self.m68705:=cpu_m6805.create(clock,frames_div,tipo_m68705);
+self.m68705:=cpu_m6805.create(clock,tipo_m68705);
 self.m68705.change_ram_calls(getbyte,putbyte);
 self.write_addr_0:=nil;
 case mcu_type of

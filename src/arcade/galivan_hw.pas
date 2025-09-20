@@ -344,20 +344,20 @@ end;
 begin
 llamadas_maquina.bucle_general:=galivan_principal;
 llamadas_maquina.reset:=reset_galivan;
+llamadas_maquina.scanlines:=256;
 iniciar_galivan:=false;
 iniciar_audio(false);
 screen_init(1,2048,2048);
-screen_mod_scroll(1,2048,2048,2047,2048,2048,2047);
 screen_init(2,256,256,true);
 screen_init(3,256,256,true);
 screen_init(4,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,256);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_io_calls(galivan_inbyte,galivan_outbyte);
 z80_0.change_ram_calls(galivan_getbyte,galivan_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,256);
+z80_1:=cpu_z80.create(4000000);
 z80_1.change_ram_calls(galivan_snd_getbyte,galivan_snd_putbyte);
 z80_1.change_io_calls(galivan_snd_inbyte,galivan_snd_outbyte);
 z80_1.init_sound(galivan_sound_update);

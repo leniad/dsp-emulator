@@ -100,7 +100,7 @@ while EmuStatus=EsRunning do begin
       eventos_coleco;
       z80_0.run(frame_main);
       frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-      tms_0.refresh(f);
+      tms_0.refresh_ntsc(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
   video_sync;
@@ -355,12 +355,13 @@ llamadas_maquina.close:=cerrar_coleco;
 llamadas_maquina.cartuchos:=abrir_coleco;
 llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
 llamadas_maquina.fps_max:=10738635/2/342/262;
+llamadas_maquina.scanlines:=262;
 iniciar_coleco:=false;
 iniciar_audio(false);
 screen_init(1,284,243);
 iniciar_video(284,243);
 //Main CPU
-z80_0:=cpu_z80.create(3579545,262);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(coleco_getbyte,coleco_putbyte);
 z80_0.change_io_calls(coleco_inbyte,coleco_outbyte);
 z80_0.init_sound(coleco_sound_update);

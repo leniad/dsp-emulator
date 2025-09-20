@@ -32,7 +32,7 @@ const
         (n:'9.18d';l:$2000;p:$4000;crc:$9ecc9ab8),(n:'10.20d';l:$2000;p:$6000;crc:$e2ff7293),
         (n:'11.15f';l:$2000;p:$8000;crc:$91f3edb6),(n:'12.17f';l:$2000;p:$a000;crc:$99771eff),
         (n:'13.18f';l:$2000;p:$c000;crc:$75f30159),(n:'14.20f';l:$2000;p:$e000;crc:$96babcba));
-        magmax_dip:array [0..9] of def_dip2=(
+        magmax_dip:array [0..8] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
         (mask:$c;name:'Bonus Life';number:4;val4:($c,8,4,0);name4:('30K 80K 50K+','50K 120K 70K+','70K 160K 90K+','90K 200K 110K+')),
         (mask:$10;name:'Demo Sounds';number:2;val2:(0,$10);name2:('Off','On')),
@@ -41,7 +41,7 @@ const
         (mask:$c00;name:'Coin B';number:4;val4:(0,$400,$c00,$800);name4:('3C 1C','2C 3C','1C 3C','1C 6C')),
         (mask:$1000;name:'Difficulty';number:2;val2:($1000,0);name2:('Easy','Hard')),
         (mask:$2000;name:'Flip Screen';number:2;val2:($2000,0);name2:('Off','On')),
-        (mask:$8000;name:'Debug Mode';number:2;val2:($8000,0);name2:('No','Yes')),());
+        (mask:$8000;name:'Debug Mode';number:2;val2:($8000,0);name2:('No','Yes')));
 
 var
  gain_control,vreg,scroll_x,scroll_y:word;
@@ -330,6 +330,7 @@ const
 begin
 llamadas_maquina.bucle_general:=magmax_principal;
 llamadas_maquina.reset:=reset_magmax;
+llamadas_maquina.scanlines:=256;
 iniciar_magmax:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -338,11 +339,11 @@ screen_init(3,256,256,true);
 screen_init(4,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(magmax_getword,magmax_putword);
 if not(roms_load16w(@rom,magmax_rom)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(2500000,256);
+z80_0:=cpu_z80.create(2500000);
 z80_0.change_ram_calls(magmax_snd_getbyte,magmax_snd_putbyte);
 z80_0.change_io_calls(magmax_snd_inbyte,magmax_snd_outbyte);
 z80_0.init_sound(magmax_sound_update);
@@ -382,8 +383,7 @@ set_pal(colores,$100);
 //color lookup de sprites
 for f:=0 to $ff do gfx[1].colores[f]:=(memoria_temp[$300+f] and $f) or $10;
 //DIP
-marcade.dswa:=$ffdf;
-marcade.dswa_val2:=@magmax_dip;
+init_dips(1,magmax_dip,$ffdf);
 //final
 iniciar_magmax:=true;
 end;

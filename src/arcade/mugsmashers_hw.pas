@@ -22,19 +22,19 @@ const
         mugsmash_oki:array[0..1] of tipo_roms=(
         (n:'mugs_02.bin';l:$20000;p:0;crc:$f92a7f4a),(n:'mugs_01.bin';l:$20000;p:$20000;crc:$1a3a0b39));
         //Dip
-        mugsmash_dip_a:array [0..4] of def_dip2=(
+        mugsmash_dip_a:array [0..3] of def_dip2=(
         (mask:$100;name:'Draw Objects';number:2;val2:($100,0);name2:('Off','On')),
         (mask:$200;name:'Freeze';number:2;val2:($200,0);name2:('Off','On')),
         (mask:$1000;name:'Color Test';number:2;val2:($1000,0);name2:('Off','On')),
-        (mask:$2000;name:'Draw SF.';number:2;val2:($2000,0);name2:('Off','On')),());
-        mugsmash_dip_b:array [0..3] of def_dip2=(
+        (mask:$2000;name:'Draw SF.';number:2;val2:($2000,0);name2:('Off','On')));
+        mugsmash_dip_b:array [0..2] of def_dip2=(
         (mask:$e00;name:'Coinage';number:8;val8:($c00,$a00,$800,0,$200,$400,$600,$e00);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','Free Play')),
         (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('No','Yes')),
-        (mask:$2000;name:'Sound Test';number:2;val2:($2000,0);name2:('Off','On')),());
-        mugsmash_dip_c:array [0..3] of def_dip2=(
+        (mask:$2000;name:'Sound Test';number:2;val2:($2000,0);name2:('Off','On')));
+        mugsmash_dip_c:array [0..2] of def_dip2=(
         (mask:$100;name:'Demo Sounds';number:2;val2:($100,0);name2:('Off','On')),
         (mask:$600;name:'Lives';number:4;val4:(0,$200,$400,$600);name4:('1','2','3','4')),
-        (mask:$3000;name:'Difficulty';number:4;val4:(0,$1000,$2000,$3000);name4:('Very Easy','Easy','Hard','Very Hard')),());
+        (mask:$3000;name:'Difficulty';number:4;val4:(0,$1000,$2000,$3000);name4:('Very Easy','Easy','Hard','Very Hard')));
 
 var
  rom:array[0..$3ffff] of word;
@@ -253,21 +253,20 @@ var
 begin
 llamadas_maquina.bucle_general:=mugsmash_principal;
 llamadas_maquina.reset:=reset_mugsmash;
+llamadas_maquina.scanlines:=256;
 iniciar_mugsmash:=false;
 iniciar_audio(true);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,512,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,512,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 getmem(memoria_temp,$300000);
 //Main CPU
-m68000_0:=cpu_m68000.create(12000000,$100);
+m68000_0:=cpu_m68000.create(12000000);
 m68000_0.change_ram16_calls(mugsmash_getword,mugsmash_putword);
 if not(roms_load16w(@rom,mugsmash_rom)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,$100);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(mugsmash_snd_getbyte,mugsmash_snd_putbyte);
 z80_0.init_sound(mugsmash_sound_update);
 if not(roms_load(@mem_snd,mugsmash_sound)) then exit;
@@ -289,12 +288,9 @@ gfx_set_desc_data(4,0,16*64,0,1,2,3);
 convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 gfx[1].trans[0]:=true;
 //DIP
-marcade.dswa:=$3300;
-marcade.dswa_val2:=@mugsmash_dip_a;
-marcade.dswb:=$2000;
-marcade.dswb_val2:=@mugsmash_dip_b;
-marcade.dswc:=$daff;
-marcade.dswc_val2:=@mugsmash_dip_c;
+init_dips(1,mugsmash_dip_a,$3300);
+init_dips(2,mugsmash_dip_b,$2000);
+init_dips(3,mugsmash_dip_c,$daff);
 //final
 freemem(memoria_temp);
 iniciar_mugsmash:=true;

@@ -28,16 +28,16 @@ const
         (n:'tc09';l:$8000;p:$10000;crc:$170c01db),(n:'tc10';l:$8000;p:$18000;crc:$44f5accd));
         twincobr_mcu_rom:array[0..1] of tipo_roms=(
         (n:'dsp_22.bin';l:$800;p:0;crc:$79389a71),(n:'dsp_21.bin';l:$800;p:1;crc:$2d135376));
-        twincobr_dip_a:array [0..4] of def_dip2=(
+        twincobr_dip_a:array [0..3] of def_dip2=(
         (mask:2;name:'Flip Screen';number:2;val2:(0,2);name2:('Off','On')),
         (mask:8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
-        twincobr_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')));
+        twincobr_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(1,0,2,3);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('50K 200K 150K+','70K 270K 200K+','50K','100K')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$20,$10);name4:('2','3','4','5')),
-        (mask:$40;name:'Dip Switch Display';number:2;val2:(0,$40);name2:('Off','On')),());
+        (mask:$40;name:'Dip Switch Display';number:2;val2:(0,$40);name2:('Off','On')));
         //Flying Shark
         fshark_rom:array[0..1] of tipo_roms=(
         (n:'b02_18-1.m8';l:$10000;p:0;crc:$04739e02),(n:'b02_17-1.p8';l:$10000;p:1;crc:$fd6ef7a8));
@@ -59,18 +59,18 @@ const
         (n:'82s137-3.mcu';l:$400;p:$800;crc:$70b537b9),(n:'82s137-4.mcu';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s137-5.mcu';l:$400;p:$1000;crc:$f35b978a),(n:'82s137-6.mcu';l:$400;p:$1400;crc:$0459e51b),
         (n:'82s137-7.mcu';l:$400;p:$1800;crc:$cbf3184b),(n:'82s137-8.mcu';l:$400;p:$1c00;crc:$8246a05c));
-        fshark_dip_a:array [0..5] of def_dip2=(
+        fshark_dip_a:array [0..4] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
         (mask:2;name:'Flip Screen';number:2;val2:(0,2);name2:('Off','On')),
         (mask:8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
-        fshark_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')));
+        fshark_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(1,0,2,3);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,4,8,$c);name4:('50K 200K 150K+','70K 270K 200K+','50K','100K')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$20,$10);name4:('2','3','1','5')),
         (mask:$40;name:'Dip Switch Display';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')),());
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')));
 
 var
  rom:array[0..$17fff] of word;
@@ -410,7 +410,6 @@ begin
  frame_snd:=z80_0.tframes;
  frame_mcu:=tms32010_0.tframes;
  ym3812_0.reset;
- reset_game_general;
  txt_scroll_y:=457;
  txt_scroll_x:=226;
  bg_scroll_x:=40;
@@ -472,25 +471,23 @@ iniciar_twincobra:=false;
 llamadas_maquina.bucle_general:=twincobra_principal;
 llamadas_maquina.reset:=reset_twincobra;
 llamadas_maquina.fps_max:=(28000000/4)/(446*286);
+llamadas_maquina.scanlines:=286;
 iniciar_audio(false);
 screen_init(1,256,512,true);
-screen_mod_scroll(1,256,256,255,512,512,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,512,511);
 screen_init(3,512,512);
-screen_mod_scroll(3,512,256,511,512,512,511);
 screen_init(4,512,512,false,true);
 iniciar_video(240,320);
 //Main CPU
-m68000_0:=cpu_m68000.create(24000000 div 4,286);
+m68000_0:=cpu_m68000.create(24000000 div 4);
 m68000_0.change_ram16_calls(twincobr_getword,twincobr_putword);
 //Sound CPU
-z80_0:=cpu_z80.create(3500000,286);
+z80_0:=cpu_z80.create(3500000);
 z80_0.change_ram_calls(twincobr_snd_getbyte,twincobr_snd_putbyte);
 z80_0.change_io_calls(twincobr_snd_inbyte,twincobr_snd_outbyte);
 z80_0.init_sound(twincobr_update_sound);
 //TMS MCU
-tms32010_0:=cpu_tms32010.create(14000000,286);
+tms32010_0:=cpu_tms32010.create(14000000);
 tms32010_0.change_io_calls(twincobr_bio_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
@@ -515,10 +512,8 @@ case main_vars.tipo_maquina of
           //convertir tiles sprites
           if not(roms_load(@memoria_temp,twincobr_sprites)) then exit;
           convert_sprites;
-          marcade.dswa:=0;
-          marcade.dswb:=0;
-          marcade.dswa_val2:=@twincobr_dip_a;
-          marcade.dswb_val2:=@twincobr_dip_b;
+          init_dips(1,twincobr_dip_a,0);
+          init_dips(2,twincobr_dip_b,0);
     end;
     147:begin
           //cargar roms
@@ -548,10 +543,8 @@ case main_vars.tipo_maquina of
           //convertir tiles sprites
           if not(roms_load(@memoria_temp,fshark_sprites)) then exit;
           convert_sprites;
-          marcade.dswa:=1;
-          marcade.dswb:=$80;
-          marcade.dswa_val2:=@fshark_dip_a;
-          marcade.dswb_val2:=@fshark_dip_b;
+          init_dips(1,fshark_dip_a,1);
+          init_dips(2,fshark_dip_b,$80);
     end;
 end;
 //final

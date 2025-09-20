@@ -725,7 +725,6 @@ begin
  case main_vars.tipo_maquina of
   190,191:dac_0.reset;
  end;
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x1:=0;
@@ -754,24 +753,21 @@ begin
 iniciar_irem_m72:=false;
 llamadas_maquina.reset:=reset_irem_m72;
 llamadas_maquina.fps_max:=55.017606;
+llamadas_maquina.scanlines:=284;
 llamadas_maquina.bucle_general:=irem_m72_principal;
 iniciar_audio(false);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,true);
-screen_mod_scroll(3,512,512,511,512,256,511);
 screen_init(4,512,512,true);
-screen_mod_scroll(4,512,512,511,512,256,511);
 screen_init(5,1024,512,false,true);
 screen_init(6,384,256);
 iniciar_video(384,256);
 //iniciar_video(1024,512);
 //Main CPU
-nec_0:=cpu_nec.create(8000000,284,NEC_V30);
+nec_0:=cpu_nec.create(8000000,NEC_V30);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,284);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(irem_m72_snd_getbyte,irem_m72_snd_putbyte);
 timer_sound:=timers.init(z80_0.numero_cpu,1,sound_irq_ack,nil,true);
 getmem(memoria_temp,$100000);

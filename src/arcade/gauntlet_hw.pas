@@ -46,8 +46,7 @@ const
         (n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),(n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),
         (n:'82s129-136043-1103.4r';l:$100;p:$400;crc:$32ae1fa9));
         //DIP
-        gauntlet_dip:array [0..1] of def_dip2=(
-        (mask:8;name:'Service';number:2;val2:(8,0);name2:('Off','On')),());
+        gauntlet_dip:def_dip2=(mask:8;name:'Service';number:2;val2:(8,0);name2:('Off','On'));
         gauntlet_mo_config:atari_motion_objects_config=(
         	gfxindex:1;               // index to which gfx system
 	        bankcount:1;              // number of motion object banks
@@ -428,6 +427,7 @@ llamadas_maquina.bucle_general:=gauntlet_principal;
 llamadas_maquina.reset:=reset_gauntlet;
 llamadas_maquina.close:=cerrar_gauntlet;
 llamadas_maquina.fps_max:=59.922743;
+llamadas_maquina.scanlines:=262*CPU_SYNC;
 iniciar_gauntlet:=false;
 iniciar_audio(true);
 //Chars
@@ -435,17 +435,15 @@ screen_init(1,512,256,true);
 screen_init(2,512,256,true);
 //Back
 screen_init(3,512,512,true);
-screen_mod_scroll(3,512,512,511,512,256,511);
 screen_init(4,512,512,true);
-screen_mod_scroll(4,512,512,511,512,256,511);
 //Final
 screen_init(5,512,512,false,true);
 iniciar_video(336,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(14318180 div 2,262*CPU_SYNC,TCPU_68010);
+m68000_0:=cpu_m68000.create(14318180 div 2,TCPU_68010);
 m68000_0.change_ram16_calls(gauntlet_getword,gauntlet_putword);
 //Sound CPU
-m6502_0:=cpu_m6502.create(14318180 div 8,262*CPU_SYNC,TCPU_M6502);
+m6502_0:=cpu_m6502.create(14318180 div 8,TCPU_M6502);
 m6502_0.change_ram_calls(gauntlet_snd_getbyte,gauntlet_snd_putbyte);
 m6502_0.init_sound(gauntlet_sound_update);
 //Sound Chips
@@ -478,8 +476,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'gauntlet.nv',longitud) then read_file(Directory.Arcade_nvram+'gauntlet.nv',@eeprom_ram,longitud)
           else fillchar(eeprom_ram[0],$800,$ff);
         //DIP
-        marcade.dswa:=8;
-        marcade.dswa_val2:=@gauntlet_dip;
+        init_dips(1,gauntlet_dip,8);
       end;
   245:begin //Gauntlet II
         //Slapstic
@@ -506,8 +503,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'gaunt2.nv',longitud) then read_file(Directory.Arcade_nvram+'gaunt2.nv',@eeprom_ram,longitud)
           else fillchar(eeprom_ram[0],$800,$ff);
         //DIP
-        marcade.dswa:=8;
-        marcade.dswa_val2:=@gauntlet_dip;
+        init_dips(1,gauntlet_dip,8);
       end;
 end;
 //atari mo

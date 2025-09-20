@@ -315,7 +315,6 @@ llamadas_maquina.iniciar:=iniciar_k31945;
 llamadas_maquina.reset:=reset_k31945;
 iniciar_audio(false);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,512,511);
 screen_init(2,512,512,false,true);
 screen_mod_sprites(2,512,256,511,255);
 if main_vars.tipo_maquina=283 then begin
@@ -326,13 +325,14 @@ end else begin
   y_size:=240;
   llamadas_maquina.fps_max:=49.603176;
 end;
+llamadas_maquina.scanlines:=262;
 iniciar_video(320,y_size);
 //mem aux
 getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   283:begin //1945k III
         //Main CPU
-        m68000_0:=cpu_m68000.create(16000000,262);
+        m68000_0:=cpu_m68000.create(16000000);
         m68000_0.change_ram16_calls(k31945_getword,k31945_putword);
         m68000_0.init_sound(k31945_sound_update);
         if not(roms_load16w(@rom,k31945_rom)) then exit;
@@ -364,8 +364,9 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@k31945_dip_a;
       end;
   284:begin //96 flag rally
+        llamadas_maquina.scanlines:=315;
         //Main CPU
-        m68000_0:=cpu_m68000.create(16000000,315);
+        m68000_0:=cpu_m68000.create(16000000);
         m68000_0.change_ram16_calls(flagrall_getword,flagrall_putword);
         m68000_0.init_sound(flagrall_sound_update);
         if not(roms_load16w(@rom,flagrall_rom)) then exit;

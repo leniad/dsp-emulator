@@ -186,26 +186,25 @@ end;
 begin
 llamadas_maquina.bucle_general:=rastan_principal;
 llamadas_maquina.reset:=reset_taito_b;
+llamadas_maquina.scanlines:=256;
 iniciar_taito_b:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=418 then main_screen.rot270_screen:=true;
 screen_init(1,1024,1024);
-screen_mod_scroll(1,1024,1024,1023,1024,1024,1023);
 screen_init(2,1024,1024,true);
-screen_mod_scroll(1,1024,1024,1023,1024,1024,1023);
 screen_init(3,512,256,true);
 screen_init(4,1024,1024,false,true);
 //iniciar_video(320,224);
 iniciar_video(512,512);
 //Main CPU
 getmem(ptemp,$100000);
-m68000_0:=cpu_m68000.create(12000000,256);
+m68000_0:=cpu_m68000.create(12000000);
 case main_vars.tipo_maquina of
   417:begin //Nastar
         m68000_0.change_ram16_calls(nastar_getword,nastar_putword);
         if not(roms_load16w(@rom,nastar_rom)) then exit;
         //Sound
-        tc0140syt_0:=tc0140syt_chip.create(4000000,256,SOUND_TAITOB);
+        tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_TAITOB);
         //cargar sonido+ponerlas en su banco
         if not(roms_load(ptemp,nastar_sound)) then exit;
         copymemory(@tc0140syt_0.snd_rom[0],@ptemp[0],$4000);
@@ -225,7 +224,7 @@ case main_vars.tipo_maquina of
         m68000_0.change_ram16_calls(masterw_getword,masterw_putword);
         if not(roms_load16w(@rom,masterw_rom)) then exit;
         //Sound
-        tc0140syt_0:=tc0140syt_chip.create(6000000,256,SOUND_MASTERW);
+        tc0140syt_0:=tc0140syt_chip.create(6000000,SOUND_MASTERW);
         //cargar sonido+ponerlas en su banco
         if not(roms_load(ptemp,masterw_sound)) then exit;
         copymemory(@tc0140syt_0.snd_rom[0],@ptemp[0],$4000);

@@ -426,6 +426,7 @@ begin
 llamadas_maquina.bucle_general:=snk68_principal;
 llamadas_maquina.reset:=reset_snk68;
 llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.scanlines:=264;
 iniciar_snk68:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -435,9 +436,9 @@ if main_vars.tipo_maquina=150 then main_screen.rot90_screen:=true;
 iniciar_video(256,224);
 //Main CPU
 getmem(memoria_temp,$400000);
-m68000_0:=cpu_m68000.create(9000000,264);
+m68000_0:=cpu_m68000.create(9000000);
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,264);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
 z80_0.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
 z80_0.init_sound(snk68_sound_update);

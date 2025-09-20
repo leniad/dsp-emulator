@@ -27,10 +27,8 @@ const
         (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf));
         cabal_adpcm:array[0..1] of tipo_roms=(
         (n:'2-1s';l:$10000;p:0;crc:$850406b4),(n:'1-1u';l:$10000;p:$10000;crc:$8b3e0789));
-        cabal_dip_a:array [0..9] of def_dip2=(
+        cabal_dip_a:array [0..8] of def_dip2=(
         (mask:$f;name:'Coinage';number:16;val16:($a,$b,$c,$d,1,$e,2,3,$f,4,9,8,7,6,5,0);name16:('6C 1C','5C 1C','4C 1C','3C 1C','8C 3C','2C 1C','5C 3C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play')),
-        //(mask:3;name:'Coin A';number:4;dip:((dip_val:0;dip_name:'5C 1C'),(dip_val:1;dip_name:'3C 1C'),(dip_val:2;dip_name:'2C 1C'),(dip_val:3;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        //(mask:$c;name:'Coin B';number:4;dip:((dip_val:$c;dip_name:'1C 2C'),(dip_val:8;dip_name:'1C 3C'),(dip_val:4;dip_name:'1C 5C'),(dip_val:0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Coin Mode';number:2;val2:($10,0);name2:('Mode 1','Mode 2')),
         (mask:$20;name:'Invert Buttons';number:2;val2:($20,0);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
@@ -38,7 +36,7 @@ const
         (mask:$300;name:'Lives';number:4;val4:($200,$300,$100,0);name4:('2','3','5','121')),
         (mask:$c00;name:'Bonus Life';number:4;val4:($c00,$800,$400,0);name4:('150K 650K 500K+','200K 800K 600K+','300K 1000K 700K+','300K')),
         (mask:$3000;name:'Difficulty';number:4;val4:($3000,$2000,$1000,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')),());
+        (mask:$8000;name:'Demo Sounds';number:2;val2:(0,$8000);name2:('Off','On')));
 
 var
  rom:array[0..$1ffff] of word;
@@ -223,6 +221,7 @@ begin
 llamadas_maquina.bucle_general:=cabal_principal;
 llamadas_maquina.reset:=reset_cabal;
 llamadas_maquina.fps_max:=59.60;
+llamadas_maquina.scanlines:=256;
 iniciar_cabal:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -230,12 +229,12 @@ screen_init(2,256,256,true);
 screen_init(3,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(cabal_getword,cabal_putword);
 if not(roms_load16w(@rom,cabal_rom)) then exit;
 //Sound Chips
 if not(roms_load(@memoria_temp,cabal_sound)) then exit;
-seibu_snd_0:=seibu_snd_type.create(SEIBU_ADPCM,3579545,256,@memoria_temp,true);
+seibu_snd_0:=seibu_snd_type.create(SEIBU_ADPCM,3579545,@memoria_temp,true);
 copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
 //adpcm
 if not(roms_load(@memoria_temp,cabal_adpcm)) then exit;
@@ -258,8 +257,7 @@ init_gfx(2,16,16,$1000);
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //Dip
-marcade.dswa:=$efff;
-marcade.dswa_val2:=@cabal_dip_a;
+init_dips(1,cabal_dip_a,$efff);
 //final
 iniciar_cabal:=true;
 end;

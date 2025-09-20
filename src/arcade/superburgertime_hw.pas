@@ -10,35 +10,35 @@ function iniciar_supbtime:boolean;
 implementation
 const
         supbtime_rom:array[0..1] of tipo_roms=(
-        (n:'gk03';l:$20000;p:0;crc:$aeaeed61),(n:'gk04';l:$20000;p:$1;crc:$2bc5a4eb));
-        supbtime_sound:tipo_roms=(n:'gc06.bin';l:$10000;p:$0;crc:$e0e6c0f4);
+        (n:'gk03';l:$20000;p:0;crc:$aeaeed61),(n:'gk04';l:$20000;p:1;crc:$2bc5a4eb));
+        supbtime_sound:tipo_roms=(n:'gc06.bin';l:$10000;p:0;crc:$e0e6c0f4);
         supbtime_char:tipo_roms=(n:'mae02.bin';l:$80000;p:0;crc:$a715cca0);
         supbtime_oki:tipo_roms=(n:'gc05.bin';l:$20000;p:0;crc:$2f2246ff);
         supbtime_sprites:array[0..1] of tipo_roms=(
-        (n:'mae00.bin';l:$80000;p:1;crc:$30043094),(n:'mae01.bin';l:$80000;p:$0;crc:$434af3fb));
+        (n:'mae00.bin';l:$80000;p:1;crc:$30043094),(n:'mae01.bin';l:$80000;p:0;crc:$434af3fb));
         supbtime_dip_a:array [0..8] of def_dip=(
-        (mask:$0001;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Cocktail'),(dip_val:$0;dip_name:'Upright'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$0002;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$001c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$04;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$08;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$00e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 5C'),(dip_val:$40;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$0100;name:'Demo Sounds';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$0200;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$200;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:1;name:'Cabinet';number:2;dip:((dip_val:1;dip_name:'Cocktail'),(dip_val:$0;dip_name:'Upright'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:2;name:'Flip Screen';number:2;dip:((dip_val:2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$04;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$08;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 5C'),(dip_val:$40;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$100;name:'Demo Sounds';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$200;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$200;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$1000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Normal'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c000;name:'Lives';number:4;dip:((dip_val:$8000;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$c000;dip_name:'3'),(dip_val:$4000;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
         tumblep_rom:array[0..1] of tipo_roms=(
-        (n:'hl00-1.f12';l:$40000;p:0;crc:$fd697c1b),(n:'hl01-1.f13';l:$40000;p:$1;crc:$d5a62a3f));
-        tumblep_sound:tipo_roms=(n:'hl02-.f16';l:$10000;p:$0;crc:$a5cab888);
+        (n:'hl00-1.f12';l:$40000;p:0;crc:$fd697c1b),(n:'hl01-1.f13';l:$40000;p:1;crc:$d5a62a3f));
+        tumblep_sound:tipo_roms=(n:'hl02-.f16';l:$10000;p:0;crc:$a5cab888);
         tumblep_char:tipo_roms=(n:'map-02.rom';l:$80000;p:0;crc:$dfceaa26);
         tumblep_oki:tipo_roms=(n:'hl03-.j15';l:$20000;p:0;crc:$01b81da0);
         tumblep_sprites:array[0..1] of tipo_roms=(
-        (n:'map-01.rom';l:$80000;p:0;crc:$e81ffa09),(n:'map-00.rom';l:$80000;p:$1;crc:$8c879cfe));
+        (n:'map-01.rom';l:$80000;p:0;crc:$e81ffa09),(n:'map-00.rom';l:$80000;p:1;crc:$8c879cfe));
         tumblep_dip_a:array [0..8] of def_dip=(
-        (mask:$0001;name:'Start Price';number:2;dip:((dip_val:$1;dip_name:'1 Coin'),(dip_val:$0;dip_name:'2 Coin'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$0002;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$001c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$04;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$08;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$00e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 5C'),(dip_val:$40;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
-        (mask:$0100;name:'Demo Sounds';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$0200;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$200;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:1;name:'Start Price';number:2;dip:((dip_val:1;dip_name:'1 Coin'),(dip_val:$0;dip_name:'2 Coin'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:2;name:'Flip Screen';number:2;dip:((dip_val:2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$04;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$08;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 5C'),(dip_val:$40;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$100;name:'Demo Sounds';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$200;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$200;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$1000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Normal'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c000;name:'Lives';number:4;dip:((dip_val:$8000;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$c000;dip_name:'3'),(dip_val:$4000;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
@@ -64,15 +64,14 @@ begin
   actualiza_trozo_final(0,8,319,240,3);
 end;
 
-
 procedure eventos_supbtime;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
@@ -85,33 +84,30 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
 end;
 end;
 
 procedure supbtime_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 273 do begin
    case f of
+      8:marcade.in1:=marcade.in1 and $f7;
       248:begin
             m68000_0.irq[6]:=HOLD_LINE;
             video_update;
-            marcade.in1:=marcade.in1 or $8;
+            marcade.in1:=marcade.in1 or 8;
           end;
-      8:marcade.in1:=marcade.in1 and $f7;
    end;
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   h6280_0.run(frame_s);
-   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(frame_snd);
+   frame_snd:=frame_snd+h6280_0.tframes-h6280_0.contador;
  end;
  eventos_supbtime;
  video_sync;
@@ -121,7 +117,7 @@ end;
 function supbtime_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$3ffff:supbtime_getword:=rom[direccion shr 1];
+  0..$3ffff:supbtime_getword:=rom[direccion shr 1];
   $100000..$103fff:supbtime_getword:=ram[(direccion and $3fff) shr 1];
   $120000..$1207ff:supbtime_getword:=deco_sprites_0.ram[(direccion and $7ff) shr 1];
   $140000..$1407ff:supbtime_getword:=buffer_paleta[(direccion and $7ff) shr 1];
@@ -184,12 +180,12 @@ end;
 function tumblep_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$7ffff:tumblep_getword:=rom[direccion shr 1];
+  0..$7ffff:tumblep_getword:=rom[direccion shr 1];
   $120000..$123fff:tumblep_getword:=ram[(direccion and $3fff) shr 1];
   $180000..$18000f:case (direccion and $f) of
-                    $0:tumblep_getword:=marcade.in0;
-                    $2:tumblep_getword:=marcade.dswa;
-                    $8:tumblep_getword:=marcade.in1;
+                    0:tumblep_getword:=marcade.in0;
+                    2:tumblep_getword:=marcade.dswa;
+                    8:tumblep_getword:=marcade.in1;
                     $a,$c:tumblep_getword:=0;
                       else tumblep_getword:=$ffff;
                    end;
@@ -232,10 +228,10 @@ end;
 procedure reset_supbtime;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  deco16ic_0.reset;
  deco_sprites_0.reset;
  deco16_snd_simple_reset;
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
 end;
@@ -278,15 +274,16 @@ iniciar_supbtime:=false;
 llamadas_maquina.bucle_general:=supbtime_principal;
 llamadas_maquina.reset:=reset_supbtime;
 llamadas_maquina.fps_max:=58;
+llamadas_maquina.scanlines:=274;
 iniciar_audio(false);
 deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
-deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
+deco_sprites_0:=tdeco16_sprite.create(2,3,304,0);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(14000000,274);
+m68000_0:=cpu_m68000.create(14000000);
 //Sound CPU
-deco16_snd_simple_init(32220000 div 8,32220000,nil,274);
+deco16_snd_simple_init(32220000 div 8,32220000,nil);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   161:begin //Superburger Time

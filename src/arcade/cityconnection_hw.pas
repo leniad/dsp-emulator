@@ -22,13 +22,13 @@ const
         (n:'c2';l:$8000;p:0;crc:$f2da4f23),(n:'c3';l:$4000;p:$8000;crc:$7ef3ac1b),
         (n:'c5';l:$2000;p:$c000;crc:$c03d8b1b));
         //Dip
-        citycon_dip_a:array [0..3] of def_dip2=(
+        citycon_dip_a:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','Infinite')),
         (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
-        citycon_dip_b:array [0..2] of def_dip2=(
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')));
+        citycon_dip_b:array [0..1] of def_dip2=(
         (mask:7;name:'Coinage';number:8;val8:(7,6,5,4,0,1,2,3);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')),
-        (mask:8;name:'Difficulty';number:2;val2:(0,8);name2:('Easy','Hard')),());
+        (mask:8;name:'Difficulty';number:2;val2:(0,8);name2:('Easy','Hard')));
 
 var
  fondo,soundlatch,soundlatch2:byte;
@@ -84,7 +84,7 @@ for f:=$fff downto 0 do begin
  end;
 end;
 actualiza_trozo(0,0,256,48,1,0,0,256,48,3);
-scroll__x_part2(1,3,208,@scroll_x,0,0,48);
+scroll_x_cut(1,3,scroll_x,48,208);
 for f:=$3f downto 0 do begin
     x:=memoria[$2803+(f*4)];
     y:=239-memoria[$2800+(f*4)];
@@ -323,7 +323,6 @@ begin
  frame_snd:=m6809_1.tframes;
  ym2203_0.reset;
  ay8910_0.reset;
- reset_game_general;
  fillchar(lines_color_look[0],$100,0);
  marcade.in0:=$ff;
  marcade.in1:=$80;
@@ -350,20 +349,19 @@ llamadas_maquina.reset:=reset_citycon;
 llamadas_maquina.save_qsnap:=citycon_qsave;
 llamadas_maquina.load_qsnap:=citycon_qload;
 llamadas_maquina.fps_max:=59.637405;
+llamadas_maquina.scanlines:=262;
 iniciar_citycon:=false;
 iniciar_audio(false);
 screen_init(1,1024,256,true);
-screen_mod_scroll(1,1024,256,1023,256,256,255);
 screen_init(2,1024,256);
-screen_mod_scroll(2,1024,256,1023,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.create(8000000,262,TCPU_MC6809);
+m6809_0:=cpu_m6809.create(8000000,TCPU_MC6809);
 m6809_0.change_ram_calls(citycon_getbyte,citycon_putbyte);
 if not(roms_load(@memoria,citycon_rom)) then exit;
 //Sound CPU
-m6809_1:=cpu_m6809.create(20000000 div 30,262,TCPU_MC6809E); //deberia ser 32...
+m6809_1:=cpu_m6809.create(20000000 div 30,TCPU_MC6809E); //deberia ser 32...
 m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 m6809_1.init_sound(citycon_sound_update);
 if not(roms_load(@mem_snd,citycon_sonido)) then exit;
@@ -394,10 +392,8 @@ for f:=0 to 1 do begin
   convert_gfx(2,$80*16*8*f,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 //DIP
-marcade.dswa:=0;
-marcade.dswb:=$80;
-marcade.dswa_val2:=@citycon_dip_a;
-marcade.dswb_val2:=@citycon_dip_b;
+init_dips(1,citycon_dip_a,0);
+init_dips(2,citycon_dip_b,$80);
 //final
 reset_citycon;
 iniciar_citycon:=true;

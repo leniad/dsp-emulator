@@ -19,18 +19,18 @@ const
         yiear_pal:tipo_roms=(n:'yiear.clr';l:$20;p:0;crc:$c283d71f);
         yiear_vlm:tipo_roms=(n:'a12_9.bin';l:$2000;p:0;crc:$f75a1539);
         //Dip
-        yiear_dip_a:array [0..2] of def_dip2=(
+        yiear_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        yiear_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
+        yiear_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('30K 80K','40K 90K')),
         (mask:$30;name:'Difficulty';number:4;val4:($30,$10,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        yiear_dip_c:array [0..2] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        yiear_dip_c:array [0..1] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')),());
+        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')));
 
 var
  irq_ena,nmi_ena:boolean;
@@ -219,7 +219,6 @@ begin
  frame_main:=m6809_0.tframes;
  sn_76496_0.reset;
  vlm5030_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -245,13 +244,14 @@ llamadas_maquina.reset:=reset_yiear;
 llamadas_maquina.fps_max:=60.58;
 llamadas_maquina.save_qsnap:=yiear_qsave;
 llamadas_maquina.load_qsnap:=yiear_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_yiear:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
 m6809_0.init_sound(yiear_sound_update);
 timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
@@ -289,12 +289,9 @@ for f:=0 to 31 do begin
 end;
 set_pal(colores,32);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$5b;
-marcade.dswc:=$ff;
-marcade.dswa_val2:=@yiear_dip_a;
-marcade.dswb_val2:=@yiear_dip_b;
-marcade.dswc_val2:=@yiear_dip_c;
+init_dips(1,yiear_dip_a,$ff);
+init_dips(2,yiear_dip_b,$5b);
+init_dips(3,yiear_dip_c,$ff);
 //final
 reset_yiear;
 iniciar_yiear:=true;

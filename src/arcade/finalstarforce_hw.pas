@@ -19,18 +19,18 @@ const
         finalstarforce_sprites:array[0..1] of tipo_roms=(
         (n:'fstarf09.rom';l:$80000;p:0;crc:$d51341d2),(n:'fstarf06.rom';l:$80000;p:1;crc:$07e40e87));
         finalstarforce_oki:tipo_roms=(n:'fstarf08.rom';l:$20000;p:0;crc:$f0ad5693);
-        finalstarforce_dip_a:array [0..6] of def_dip2=(
+        finalstarforce_dip_a:array [0..5] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(3,2,1,0);name4:('1C 1C','1C 2C','1C 3C','1C 4C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
-        (mask:$80;name:'Free Play';number:2;val2:($80,0);name2:('Off','On')),());
-        finalstarforce_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Free Play';number:2;val2:($80,0);name2:('Off','On')));
+        finalstarforce_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,3,2,1);name4:('2','3','4','5')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$30;name:'Level Up Speed';number:4;val4:($30,$20,$10,0);name4:('Fast','Fastest','Slow','Slowest')),
-        (mask:$c0;name:'Bonus Life';number:4;val4:($c0,$80,$40,0);name4:('200K 1000K','220K 1200K','240K 1400K','500K+ once at highest score')),());
+        (mask:$c0;name:'Bonus Life';number:4;val4:($c0,$80,$40,0);name4:('200K 1000K','220K 1200K','240K 1400K','500K+ once at highest score')));
 
 var
  scroll_x_txt,scroll_y_txt,scroll_x_bg,scroll_y_bg,scroll_x_fg,scroll_y_fg:word;
@@ -378,21 +378,19 @@ begin
 llamadas_maquina.bucle_general:=finalstarforce_principal;
 llamadas_maquina.reset:=reset_finalstarforce;
 llamadas_maquina.fps_max:=59.17;
+llamadas_maquina.scanlines:=256;
 iniciar_finalstarforce:=false;
 iniciar_audio(true);
-screen_init(1,512,256,true);
-screen_mod_scroll(1,512,256,511,256,256,255);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
 main_screen.rot90_screen:=true;
+screen_init(1,512,256,true);
+screen_init(2,512,512,true);
+screen_init(3,512,512,true);
 screen_init(4,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(24000000 div 2,256);
+m68000_0:=cpu_m68000.create(24000000 div 2);
 //Sound CPU
-z80_0:=cpu_z80.create(24000000 div 6,256);
+z80_0:=cpu_z80.create(24000000 div 6);
 z80_0.change_ram_calls(finalstarforce_snd_getbyte,finalstarforce_snd_putbyte);
 z80_0.init_sound(finalstarforce_sound_update);
 //Sound Chips
@@ -418,10 +416,8 @@ case main_vars.tipo_maquina of
       if not(roms_load16b(ptemp,finalstarforce_sprites)) then exit;
       convert_8($8000,3);
       //DIP
-      marcade.dswa:=$ff;
-      marcade.dswa_val2:=@finalstarforce_dip_a;
-      marcade.dswb:=$ff;
-      marcade.dswb_val2:=@finalstarforce_dip_b;
+      init_dips(1,finalstarforce_dip_a,$ff);
+      init_dips(2,finalstarforce_dip_b,$ff);
   end;
 end;
 freemem(ptemp);

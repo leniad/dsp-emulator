@@ -44,7 +44,7 @@ procedure one_shot_timer_0(cpu:byte;time:single;final_procedure:exec_type_simple
 procedure one_shot_timer_1(cpu:byte;time:single;final_procedure:exec_type_simple);
 
 implementation
-uses controls_engine,cpu_misc;
+uses controls_engine;
 
 var
   one_shot_0,one_shot_1:ttimers;

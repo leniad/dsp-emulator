@@ -22,16 +22,16 @@ const
         mrdo_sprites:array[0..1] of tipo_roms=(
         (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04));
         //Dip
-        mrdo_dip_a:array [0..6] of def_dip2=(
+        mrdo_dip_a:array [0..5] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(3,2,1,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:4;name:'Rack Test';number:2;val2:(4,0);name2:('Off','On')),
         (mask:8;name:'Special';number:2;val2:(8,0);name2:('Easy','Hard')),
         (mask:$10;name:'Extra';number:2;val2:($10,0);name2:('Easy','Hard')),
         (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
-        (mask:$c0;name:'Lives';number:4;val4:(0,$c0,$80,$40);name4:('2','3','4','5')),());
-        mrdo_dip_b:array [0..2] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:(0,$c0,$80,$40);name4:('2','3','4','5')));
+        mrdo_dip_b:array [0..1] of def_dip2=(
         (mask:$f0;name:'Coin A';number:16;val16:($60,$80,$a0,$70,$f0,$90,$e0,$d0,$c0,$b0,0,$10,$20,$30,$40,$50);name16:('4C 1C','3C 1C','2C 1C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','Free Play','Invalid','Invalid','Invalid','Invalid','Invalid')),
-        (mask:$f;name:'Coin B';number:16;val16:(6,8,$a,7,$f,9,$e,$d,$c,$b,0,1,2,3,4,5);name16:('4C 1C','3C 1C','2C 1C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','Free Play','Invalid','Invalid','Invalid','Invalid','Invalid')),());
+        (mask:$f;name:'Coin B';number:16;val16:(6,8,$a,7,$f,9,$e,$d,$c,$b,0,1,2,3,4,5);name16:('4C 1C','3C 1C','2C 1C','3C 2C','1C 1C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','Free Play','Invalid','Invalid','Invalid','Invalid','Invalid')));
 
 var
   scroll_x,scroll_y,prot:byte;
@@ -182,7 +182,6 @@ begin
  frame_main:=z80_0.tframes;
  sn_76496_0.reset;
  sn_76496_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -254,18 +253,17 @@ begin
 llamadas_maquina.bucle_general:=mrdo_principal;
 llamadas_maquina.reset:=reset_mrdo;
 llamadas_maquina.fps_max:=59.94323742;
+llamadas_maquina.scanlines:=262;
 iniciar_mrdo:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 screen_init(4,256,256,true);
-screen_mod_scroll(4,256,256,255,256,256,255);
 screen_init(5,256,256,true);
 iniciar_video(192,240);
 //Main CPU
-z80_0:=cpu_z80.create(4100000,262);
+z80_0:=cpu_z80.create(4100000);
 z80_0.change_ram_calls(mrdo_getbyte,mrdo_putbyte);
 z80_0.init_sound(mrdo_update_sound);
 //Sound Chips
@@ -295,10 +293,8 @@ convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 if not(roms_load(@memoria_temp,mrdo_pal)) then exit;
 calc_paleta;
 //dip
-marcade.dswa:=$df;
-marcade.dswb:=$ff;
-marcade.dswa_val2:=@mrdo_dip_a;
-marcade.dswb_val2:=@mrdo_dip_b;
+init_dips(1,mrdo_dip_a,$df);
+init_dips(2,mrdo_dip_b,$ff);
 //final
 reset_mrdo;
 iniciar_mrdo:=true;

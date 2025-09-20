@@ -143,62 +143,128 @@ const
         (n:'opr-13853.a2';l:$20000;p:$140001;crc:$7ea93200),(n:'opr-13874.b11';l:$20000;p:$140000;crc:$4fd59bff),
         (n:'opr-13891.a3';l:$20000;p:$180001;crc:$c6b3c414),(n:'opr-13894.b12';l:$20000;p:$180000;crc:$e3d0bee2),
         (n:'opr-13855.a4';l:$20000;p:$1c0001;crc:$856f3ee2),(n:'opr-13876.b13';l:$20000;p:$1c0000;crc:$1c5ffad8));
+        //Bay Route
+        bayroute_rom:array[0..3] of tipo_roms=(
+        (n:'bootleg_epr-12517.a7';l:$20000;p:0;crc:$7e90b39d),(n:'bootleg_epr-12516.a5';l:$20000;p:1;crc:$34afc1fd),
+        (n:'epr-12458.a8';l:$20000;p:$40000;crc:$e7c7476a),(n:'epr-12456.a6';l:$20000;p:$40001;crc:$25dc2eaf));
+        bayroute_sound:array[0..2] of tipo_roms=(
+        (n:'epr-12459.a10';l:$8000;p:0;crc:$3e1d29d0),(n:'mpr-12460.a11';l:$20000;p:$8000;crc:$0bae570d),
+        (n:'mpr-12461.a12';l:$20000;p:$28000;crc:$b03b8b46));
+        bayroute_tiles:array[0..2] of tipo_roms=(
+        (n:'opr-12462.a14';l:$10000;p:0;crc:$a19943b5),(n:'opr-12463.a15';l:$10000;p:$10000;crc:$62f8200d),
+        (n:'opr-12464.a16';l:$10000;p:$20000;crc:$c8c59703));
+        bayroute_sprites:array[0..3] of tipo_roms=(
+        (n:'mpr-12465.b1';l:$20000;p:1;crc:$11d61b45),(n:'mpr-12467.b5';l:$20000;p:0;crc:$c3b4e4c0),
+        (n:'mpr-12466.b2';l:$20000;p:$40001;crc:$a57f236f),(n:'mpr-12468.b6';l:$20000;p:$40000;crc:$d89c77de));
+        //Sonic Boom
+        sonicbom_rom:array[0..3] of tipo_roms=(
+        (n:'bootleg_epr-11342.a4';l:$10000;p:0;crc:$089158ef),(n:'bootleg_epr-11340.a1';l:$10000;p:1;crc:$253cbd27),
+        (n:'epr-11343.a5';l:$10000;p:$20000;crc:$edfeb7d4),(n:'epr-11341.a2';l:$10000;p:$20001;crc:$0338f771));
+        sonicbom_sound:array[0..2] of tipo_roms=(
+        (n:'epr-11347.a7';l:$8000;p:0;crc:$b41f0ced),(n:'epr-11348.a8';l:$8000;p:$8000;crc:$89924588),
+        (n:'epr-11349.a9';l:$8000;p:$10000;crc:$8e4b6204));
+        sonicbom_tiles:array[0..2] of tipo_roms=(
+        (n:'opr-11344.b9';l:$10000;p:0;crc:$59a9f940),(n:'opr-11345.b10';l:$10000;p:$10000;crc:$b44c068b),
+        (n:'opr-11346.b11';l:$10000;p:$20000;crc:$e5ada66c));
+        sonicbom_sprites:array[0..7] of tipo_roms=(
+        (n:'opr-11350.b1';l:$10000;p:1;crc:$525ba1df),(n:'opr-11354.b5';l:$10000;p:0;crc:$793fa3ac),
+        (n:'opr-11351.b2';l:$10000;p:$20001;crc:$63b1f1ca),(n:'opr-11355.b6';l:$10000;p:$20000;crc:$fe0fa332),
+        (n:'opr-11352.b3';l:$10000;p:$40001;crc:$047fa4b0),(n:'opr-11356.b7';l:$10000;p:$40000;crc:$aea3c39d),
+        (n:'opr-11353.b4';l:$10000;p:$60001;crc:$4e0791f8),(n:'opr-11357.b8';l:$10000;p:$60000;crc:$a7c5ea41));
+        //Time Scanner
+        timescan_rom:array[0..5] of tipo_roms=(
+        (n:'epr-10853.a4';l:$8000;p:0;crc:$24d7c5fb),(n:'epr-10850.a1';l:$8000;p:1;crc:$f1575732),
+        (n:'epr-10854.a5';l:$8000;p:$10000;crc:$82d0b237),(n:'epr-10851.a2';l:$8000;p:$10001;crc:$f5ce271b),
+        (n:'epr-10855.a6';l:$8000;p:$20000;crc:$63e95a53),(n:'epr-10852.a3';l:$8000;p:$20001;crc:$7cd1382b));
+        timescan_sound:array[0..1] of tipo_roms=(
+        (n:'epr-10562.a7';l:$8000;p:0;crc:$3f5028bf),(n:'epr-10563.a8';l:$8000;p:$10000;crc:$9db7eddf));
+        timescan_tiles:array[0..2] of tipo_roms=(
+        (n:'epr-10543.b9';l:$8000;p:0;crc:$07dccc37),(n:'epr-10544.b10';l:$8000;p:$8000;crc:$84fb9a3a),
+        (n:'epr-10545.b11';l:$8000;p:$10000;crc:$c8694bc0));
+        timescan_sprites:array[0..7] of tipo_roms=(
+        (n:'epr-10548.b1';l:$8000;p:1;crc:$aa150735),(n:'epr-10552.b5';l:$8000;p:0;crc:$6fcbb9f7),
+        (n:'epr-10549.b2';l:$8000;p:$20001;crc:$2f59f067),(n:'epr-10553.b6';l:$8000;p:$20000;crc:$8a220a9f),
+        (n:'epr-10550.b3';l:$8000;p:$40001;crc:$f05069ff),(n:'epr-10554.b7';l:$8000;p:$40000;crc:$dc64f809),
+        (n:'epr-10551.b4';l:$8000;p:$60001;crc:$435d811f),(n:'epr-10555.b8';l:$8000;p:$60000;crc:$2143c471));
         //Dip
-        system16b_dip_a:array [0..2] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(7,8,9,5,4,$f,3,2,1,6,$e,$d,$c,$b,$a,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin B too) or 1C 1C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C - 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin A too) or 1C 1C')),());
-        altbeast_dip_b:array [0..5] of def_dip2=(
+        system16b_dip_a:array [0..1] of def_dip2=(
+        (mask:$f;name:'Coin A';number:16;val16:(7,8,9,5,4,$f,3,2,1,6,$e,$d,$c,$b,$a,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play or 1C 1C')),
+        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C - 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play or 1C 1C')));
+        altbeast_dip_b:array [0..4] of def_dip2=(
         (mask:1;name:'Credits Needed';number:2;val2:(1,0);name2:('1 Credit To Start','2 Credit To Start')),
         (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$c;name:'Lives';number:4;val4:(8,$c,4,0);name4:('2','3','4','Free Play')),
         (mask:$30;name:'Player Meter';number:4;val4:($20,$30,$10,0);name4:('2','3','4','5')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
-        goldnaxe_dip_b:array [0..3] of def_dip2=(
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')));
+        goldnaxe_dip_b:array [0..2] of def_dip2=(
         (mask:1;name:'Credits Needed';number:2;val2:(1,0);name2:('1 Credit To Start','2 Credit To Start')),
         (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
-        (mask:$3c;name:'Difficulty';number:8;val8:(0,$14,$1c,$34,$3c,$38,$2c,$28);name8:('Special','Easiest','Easier','Easy','Normal','Hard','Harder','Hardest')),());
-        ddux_dip_b:array [0..4] of def_dip2=(
+        (mask:$3c;name:'Difficulty';number:8;val8:(0,$14,$1c,$34,$3c,$38,$2c,$28);name8:('Special','Easiest','Easier','Easy','Normal','Hard','Harder','Hardest')));
+        ddux_dip_b:array [0..3] of def_dip2=(
         (mask:1;name:'Demo Sounds';number:2;val2:(1,0);name2:('Off','On')),
         (mask:6;name:'Difficulty';number:4;val4:(4,6,2,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$18;name:'Lives';number:4;val4:($10,$18,8,0);name4:('2','3','4','5')),
-        (mask:$60;name:'Bonus Life';number:4;val4:($40,$60,$20,0);name4:('150K','200K','300K','400K')),());
-        eswat_dip_b:array [0..6] of def_dip2=(
+        (mask:$60;name:'Bonus Life';number:4;val4:($40,$60,$20,0);name4:('150K','200K','300K','400K')));
+        eswat_dip_b:array [0..5] of def_dip2=(
         (mask:1;name:'Credits Needed';number:2;val2:(1,0);name2:('1 Credit To Start','2 Credit To Start')),
         (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
         (mask:4;name:'Flip Screen';number:2;val2:(4,0);name2:('Off','On')),
         (mask:8;name:'Timer';number:2;val2:(8,0);name2:('Normal','Hard')),
         (mask:$30;name:'Difficulty';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c0;name:'Lives';number:4;val4:(0,$40,$c0,$80);name4:('1','2','3','4')),());
-        passsht_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:(0,$40,$c0,$80);name4:('1','2','3','4')));
+        passsht_dip_b:array [0..3] of def_dip2=(
         (mask:1;name:'Demo Sounds';number:2;val2:(1,0);name2:('Off','On')),
         (mask:$e;name:'Initial Point';number:8;val8:(6,$a,$c,$e,8,4,2,0);name8:('2000','3000','4000','5000','6000','7000','8000','9000')),
         (mask:$30;name:'Point Table';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
-        aurail_dip_b:array [0..7] of def_dip2=(
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')));
+        aurail_dip_b:array [0..6] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
         (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$c;name:'Lives';number:4;val4:(0,$c,8,4);name4:('2','3','4','5')),
         (mask:$10;name:'Bonus Life';number:2;val2:($10,0);name2:('80K 200K 500K 1000K','100K 300K 700K 1000K')),
         (mask:$20;name:'Difficulty';number:2;val2:($20,0);name2:('Normal','Hard')),
         (mask:$40;name:'Controller';number:2;val2:($40,0);name2:('1 Player Side','2 Players Side')),
-        (mask:$80;name:'Special Function Mode';number:2;val2:($80,0);name2:('Off','On')),());
-        riotcity_dip_b:array [0..6] of def_dip2=(
+        (mask:$80;name:'Special Function Mode';number:2;val2:($80,0);name2:('Off','On')));
+        riotcity_dip_b:array [0..5] of def_dip2=(
         (mask:1;name:'Demo Sounds';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Cancel per Credit';number:2;val2:(0,2);name2:('2','3')),
         (mask:4;name:'Timer Speed';number:2;val2:(4,0);name2:('20 seconds','30 seconds')),
         (mask:8;name:'PCM Voice';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Omikuji Difficulty';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
-        sdi_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')));
+        sdi_dip_b:array [0..4] of def_dip2=(
         (mask:1;name:'Allow Continue';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
-        (mask:$c;name:'Lives';number:4;val4:($8,$c,$4,0);name4:('2','3','4','Free')),
+        (mask:$c;name:'Lives';number:4;val4:(8,$c,4,0);name4:('2','3','4','Free')),
         (mask:$30;name:'Difficulty';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c0;name:'Bonus Life';number:4;val4:($80,$c0,$40,0);name4:('50K+','50K','100K','None')),());
-        cotton_dip_b:array [0..3] of def_dip2=(
+        (mask:$c0;name:'Bonus Life';number:4;val4:($80,$c0,$40,0);name4:('50K+','50K','100K','None')));
+        cotton_dip_b:array [0..2] of def_dip2=(
         (mask:1;name:'Demo Sounds';number:2;val2:(1,0);name2:('Off','On')),
         (mask:6;name:'Lives';number:4;val4:(4,6,2,0);name4:('2','3','4','5')),
-        (mask:$18;name:'Difficulty';number:4;val4:($10,$18,$8,0);name4:('Easy','Normal','Hard','Hardest')),());
+        (mask:$18;name:'Difficulty';number:4;val4:($10,$18,8,0);name4:('Easy','Normal','Hard','Hardest')));
+        bayroute_dip_b:array [0..4] of def_dip2=(
+        (mask:1;name:'Allow Continue';number:2;val2:(0,1);name2:('Off','On')),
+        (mask:2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:$c;name:'Lives';number:4;val4:(4,$c,8,0);name4:('1','3','5','Free Play')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('100K','150K','200K','None')),
+        (mask:$80;name:'Difficulty';number:4;val4:($c0,$80,$40,0);name4:('Easy','Normal','Hard','Hardest')));
+        sonicbom_dip_b:array [0..3] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(6,7,5,4,3,2,1,0);name8:('Easy','Normal','Hard 1','Hard 2','Hard 3','Hard 4','Hard 5','Hardest')),
+        (mask:$18;name:'Lives';number:4;val4:($10,$18,8,0);name4:('2','3','4','5')),
+        (mask:$60;name:'Bonus Life';number:4;val4:($40,$60,$20,0);name4:('30K','40K','50K','80K')),
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        timescan_dip_b:array [0..4] of def_dip2=(
+        (mask:1;name:'Cabinet';number:2;val2:(1,0);name2:('Upright','Cocktail')),
+        (mask:$1e;name:'Extended Score';number:16;val16:($16,$14,$12,$10,$1c,$1e,$1a,$18,$e,$c,$a,8,6,4,1,0);name16:('Credit 1000000/2000000','Credit 1200000/2500000','Credit 1500000/3000000','Credit 2000000/4000000','Credit 1000000','Credit 1200000','Credit 1500000','Credit 1800000','Ball 100000','Ball 200000','Ball 300000','Ball 400000','Ball 500000','Ball 600000','Ball 700000','None')),
+        (mask:$20;name:'Number Match';number:2;val2:(0,$20);name2:('No','Yes')),
+        (mask:$40;name:'Pin Rebound';number:2;val2:($40,0);name2:('Well','A Little')),
+        (mask:$80;name:'Lives';number:2;val2:($80,0);name2:('3','5')));
+        timescan_dip_c:array [0..3] of def_dip2=(
+        (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
+        (mask:2;name:'Out Lane Pin';number:2;val2:(2,0);name2:('Near','Far')),
+        (mask:$c;name:'Special';number:4;val4:(8,$c,4,0);name4:('3 Credits','2 Credits','1 Credits','2000000 Points')),
+        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')));
+        CPU_SYNC=4;
 
 type
   tsystem16_info=record
@@ -221,8 +287,8 @@ var
  sprite_bank:array[0..$f] of byte;
  s16_info:tsystem16_info;
  sound_bank:array[0..$f,0..$3fff] of byte;
- sound_bank_num:byte;
- sound_latch:byte;
+ sound_bank_num,sound_latch,tile_shr,text_shr:byte;
+ text_mask:word;
  s315_5248_regs:array[0..1] of word;
  s315_5250_regs:array[0..$f] of word;
  s315_5250_bit:byte;
@@ -233,7 +299,7 @@ var
  region1_write:procedure(direccion:dword;valor:word);
  region2_write:procedure(direccion:dword;valor:word);
  sound_bank_calc:function(valor:byte):byte;
- region1_rom_pos,region2_rom_pos:dword;
+ region1_rom_pos,region2_rom_pos,region1_rom_mask,region2_rom_mask:dword;
 
 procedure update_video_system16b;
 procedure draw_sprites(pri:byte);
@@ -351,7 +417,7 @@ begin
   pos:=s16_info.screen[num]*$800;
   for f:=0 to $7ff do begin
     data:=tile_ram[pos+f];
-    color:=(data shr 6) and $7f;
+    color:=(data shr tile_shr) and $7f;
     if (s16_info.tile_buffer[num,f] or buffer_color[color]) then begin
       x:=((f and $3f) shl 3)+px;
       y:=((f shr 6) shl 3)+py;
@@ -368,6 +434,8 @@ end;
 
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
+  row_x_back,row_x_fore:boolean;
+  row_x_data_back,row_x_data_fore:array[0..$3f] of word;
 begin
 if not(s16_info.screen_enabled) then begin
   fill_full_screen(7,$1000);
@@ -379,39 +447,55 @@ draw_tiles(0,0,256,3,false);
 draw_tiles(1,512,256,3,false);
 draw_tiles(2,0,0,3,false);
 draw_tiles(3,512,0,3,false);
-scroll_x1:=char_ram[$74d] and $3ff;
-scroll_x1:=(704-scroll_x1) and $3ff;
+if (char_ram[$74d] and $8000)=0 then begin
+  scroll_x1:=char_ram[$74d] and $3ff;
+  scroll_x1:=(704-scroll_x1) and $3ff;
+  row_x_back:=false;
+end else begin
+  for f:=0 to $3f do row_x_data_back[f]:=(704-(char_ram[$7e0+f] and $3ff)) and $3ff;
+  row_x_back:=true;
+end;
 scroll_y1:=char_ram[$749] and $1ff;
 //Foreground
 draw_tiles(4,0,256,5,true);
 draw_tiles(5,512,256,5,true);
 draw_tiles(6,0,0,5,true);
 draw_tiles(7,512,0,5,true);
-scroll_x2:=char_ram[$74c] and $3ff;
-scroll_x2:=(704-scroll_x2) and $3ff;
+if (char_ram[$74c] and $8000)=0 then begin
+  scroll_x2:=char_ram[$74c] and $3ff;
+  scroll_x2:=(704-scroll_x2) and $3ff;
+  row_x_fore:=false;
+end else begin
+  for f:=0 to $3f do row_x_data_fore[f]:=(704-(char_ram[$7c0+f] and $3ff)) and $3ff;
+  row_x_fore:=true;
+end;
 scroll_y2:=char_ram[$748] and $1ff;
 //text
 for f:=0 to $6ff do begin
   atrib:=char_ram[f];
-  color:=(atrib shr 9) and 7;
+  color:=(atrib shr text_shr) and 7;
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
     x:=(f and $3f) shl 3;
     y:=(f shr 6) shl 3;
-    nchar:=s16_info.tile_bank[0]*$1000+(atrib and $1ff);
+    nchar:=s16_info.tile_bank[0]*$1000+(atrib and text_mask);
     put_gfx_trans(x,y,nchar,color shl 3,1,0);
     if (atrib and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
       else put_gfx_block_trans(x,y,2,8,8);
     gfx[0].buffer[f]:=false;
   end;
 end;
-//Lo pongo todo con prioridades, falta scrollrow y scrollcol!!
-scroll_x_y(3,7,scroll_x1,scroll_y1); //B0
+//Lo pongo todo con prioridades, falta scrollcol
+if row_x_back then scroll__x_part2(3,7,8,@row_x_data_back,0,scroll_y1)
+  else scroll_x_y(3,7,scroll_x1,scroll_y1); //B0
 draw_sprites(0);
-scroll_x_y(4,7,scroll_x1,scroll_y1); //B1
+if row_x_back then scroll__x_part2(4,7,8,@row_x_data_back,0,scroll_y1)
+  else scroll_x_y(4,7,scroll_x1,scroll_y1); //B1
 draw_sprites(1);
-scroll_x_y(5,7,scroll_x2,scroll_y2);  //F0
+if row_x_fore then scroll__x_part2(5,7,8,@row_x_data_fore,0,scroll_y2)
+  else scroll_x_y(5,7,scroll_x2,scroll_y2);  //F0
 draw_sprites(2);
-scroll_x_y(6,7,scroll_x2,scroll_y2); //F1
+if row_x_fore then scroll__x_part2(6,7,8,@row_x_data_fore,0,scroll_y2)
+  else scroll_x_y(6,7,scroll_x2,scroll_y2); //F1
 actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //T0
 draw_sprites(3);
 actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //T1
@@ -425,8 +509,8 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.but3[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
@@ -434,8 +518,8 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $80);
   //P2
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or 1);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or 2);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or 4);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.but3[1] then marcade.in2:=(marcade.in2 and $fff7) else marcade.in2:=(marcade.in2 or 8);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
@@ -455,6 +539,7 @@ end;
 procedure system16b_principal_mcu;
 var
   f:word;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
@@ -464,15 +549,17 @@ while EmuStatus=EsRunning do begin
        mcs51_0.change_irq0(HOLD_LINE);
        update_video_system16b;
      end;
-     //main
-     m68000_0.run(frame_main);
-     frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-     //sound
-     z80_0.run(frame_snd);
-     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
-     //MCU
-     mcs51_0.run(frame_mcu);
-     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
+     for h:=1 to CPU_SYNC do begin
+        //main
+        m68000_0.run(frame_main);
+        frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+        //sound
+        z80_0.run(frame_snd);
+        frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+        //MCU
+        mcs51_0.run(frame_mcu);
+        frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
+     end;
   end;
   video_sync;
 end;
@@ -481,6 +568,7 @@ end;
 procedure system16b_principal;
 var
   f:word;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 while EmuStatus=EsRunning do begin
@@ -490,12 +578,14 @@ while EmuStatus=EsRunning do begin
        m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16b;
      end;
-     //main
-     m68000_0.run(frame_main);
-     frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-     //sound
-     z80_0.run(frame_snd);
-     frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+     for h:=1 to CPU_SYNC do begin
+        //main
+        m68000_0.run(frame_main);
+        frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+        //sound
+        z80_0.run(frame_snd);
+        frame_snd:=frame_snd+z80_0.tframes-z80_0.contador;
+     end;
   end;
   video_sync;
 end;
@@ -505,12 +595,11 @@ function standar_s16_io_r(direccion:word):word;
 var
   res:word;
 begin
-res:=$ffff;
 case (direccion and $1800) of
 	$800:case (direccion and 3) of
           0:res:=marcade.in0; //SERVICE
           1:res:=marcade.in1; //P1
-          2:; //UNUSED
+          2:res:=marcade.dswc; //Time Scanner / Sin uso
           3:res:=marcade.in2; //P2
        end;
   $1000:case (direccion and 1) of
@@ -628,49 +717,42 @@ if direccion=$741 then begin
 end;
 end;
 
-function region0_5704_read(direccion:dword):word;
+function s16_region0_read(direccion:dword):word;
 begin
-direccion:=(direccion and $3ffff) shr 1;
-region0_5704_read:=rom[direccion];
+s16_region0_read:=rom[direccion shr 1];
 end;
 
-function region0_5797_read(direccion:dword):word;
+function s16_region1_read(direccion:dword):word;
 begin
-direccion:=(direccion and $7ffff) shr 1;
-region0_5797_read:=rom[direccion];
+direccion:=(direccion and region1_rom_mask) shr 1;
+s16_region1_read:=rom[direccion+region1_rom_pos];
 end;
 
-function region0_5358_read(direccion:dword):word;
+function s16_region2_read(direccion:dword):word;
 begin
-direccion:=(direccion and $1ffff) shr 1;
-region0_5358_read:=rom[direccion];
+direccion:=(direccion and region2_rom_mask) shr 1;
+s16_region2_read:=rom[direccion+region2_rom_pos];
 end;
 
 function region0_5358_read_fd(direccion:dword):word;
 begin
-direccion:=(direccion and $1ffff) shr 1;
+direccion:=direccion shr 1;
 if m68000_0.opcode then region0_5358_read_fd:=rom[direccion]
   else region0_5358_read_fd:=rom_data[direccion];
 end;
 
 function region1_5358_read_fd(direccion:dword):word;
 begin
-direccion:=(direccion and $ffff) shr 1;
+direccion:=(direccion and region1_rom_mask) shr 1;
 if m68000_0.opcode then region1_5358_read_fd:=rom[direccion+region1_rom_pos]
   else region1_5358_read_fd:=rom_data[direccion+region1_rom_pos];
 end;
 
 function region2_5358_read_fd(direccion:dword):word;
 begin
-direccion:=(direccion and $1ffff) shr 1;
+direccion:=(direccion and region2_rom_mask) shr 1;
 if m68000_0.opcode then region2_5358_read_fd:=rom[direccion+region2_rom_pos]
   else region2_5358_read_fd:=rom_data[direccion+region2_rom_pos];
-end;
-
-function region1_5704_read(direccion:dword):word;
-begin
-direccion:=(direccion and $3ffff) shr 1;
-region1_5704_read:=rom[direccion+region1_rom_pos];
 end;
 
 function region1_5797_read(direccion:dword):word;
@@ -695,9 +777,9 @@ procedure exec(history:boolean=false);
 var
   min,max,bound1,bound2,value:smallint;
 begin
-	bound1:= smallint(s315_5250_regs[0]);
-	bound2:= smallint(s315_5250_regs[1]);
-	value:= smallint(s315_5250_regs[2]);
+	bound1:=smallint(s315_5250_regs[0]);
+	bound2:=smallint(s315_5250_regs[1]);
+	value:=smallint(s315_5250_regs[2]);
   if (bound1<bound2) then min:=bound1
     else min:=bound2;
   if (bound1>bound2) then max:=bound1
@@ -712,7 +794,7 @@ begin
 		      s315_5250_regs[7]:=value;
 		      s315_5250_regs[3]:=0;
       end;
-	if (history) then begin
+	if history then begin
     s315_5250_regs[4]:=s315_5250_regs[4] or (byte(s315_5250_regs[3]=0) shl s315_5250_bit);
     s315_5250_bit:=s315_5250_bit+1;
   end;
@@ -1051,7 +1133,7 @@ var
   m68k:preg_m68000;
 begin
   m68k:=m68000_0.get_internal_r;
-  system16b_open_bus:=rom[m68k.pc.l];
+  system16b_open_bus:=rom[m68k.pc.l shr 1];
 end;
 
 //Main
@@ -1084,6 +1166,7 @@ begin
  s16_info.tile_bank[0]:=0;
  s16_info.tile_bank[1]:=1;
  fillchar(s16_info.tile_buffer,$4000,1);
+ fillchar(ram,$20000,0);
  fillchar(s315_5248_regs,4,0);
  fillchar(s315_5250_regs,$20,0);
  sound_bank_num:=0;
@@ -1100,8 +1183,8 @@ var
   fd1089_key:array[0..$1fff] of byte;
   i0,i1,i2,i3,i4:integer;
 const
-  resistances_normal:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2,1000 div 4, 0);
-	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
+  resistances_normal:array[0..5] of integer=(3900,2000,1000,1000 div 2,1000 div 4,0);
+	resistances_sh:array[0..5] of integer=(3900,2000,1000,1000 div 2,1000 div 4,470);
 procedure convert_chars(n:byte);
 const
   pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
@@ -1115,10 +1198,11 @@ end;
 begin
 case main_vars.tipo_maquina of
   292,293,294:llamadas_maquina.bucle_general:=system16b_principal_mcu;
-  295,296,297,408,409,410:llamadas_maquina.bucle_general:=system16b_principal;
+  295,296,297,408,409,410,419,420,421:llamadas_maquina.bucle_general:=system16b_principal;
 end;
 llamadas_maquina.reset:=reset_system16b;
 llamadas_maquina.fps_max:=60.05439;
+llamadas_maquina.scanlines:=262*CPU_SYNC;
 iniciar_system16b:=false;
 iniciar_audio(false);
 //text
@@ -1126,51 +1210,51 @@ screen_init(1,512,256,true);
 screen_init(2,512,256,true);
 //Background
 screen_init(3,1024,512);
-screen_mod_scroll(3,1024,512,1023,512,256,511);
 screen_init(4,1024,512,true);
-screen_mod_scroll(4,1024,512,1023,512,256,511);
 //Foreground
 screen_init(5,1024,512,true);
-screen_mod_scroll(5,1024,512,1023,512,256,511);
 screen_init(6,1024,512,true);
-screen_mod_scroll(6,1024,512,1023,512,256,511);
 //Final
-screen_init(7,512,256,false,true);
-if main_vars.tipo_maquina=296 then main_screen.rot270_screen:=true;
+screen_init(7,512,512,false,true);
+if ((main_vars.tipo_maquina=296) or (main_vars.tipo_maquina=420) or (main_vars.tipo_maquina=421)) then main_screen.rot270_screen:=true;
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,262);
+m68000_0:=cpu_m68000.create(10000000);
+m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
 //Sound CPU
-z80_0:=cpu_z80.create(5000000,262);
+z80_0:=cpu_z80.create(5000000);
 z80_0.change_ram_calls(system16b_snd_getbyte,system16b_snd_putbyte);
 z80_0.change_io_calls(system16b_snd_inbyte,system16b_snd_outbyte);
 z80_0.init_sound(system16b_sound_act);
 //Memory Mapper
 s315_5195_0:=t315_5195.create(m68000_0,system16b_snd_irq);
 s315_5195_0.change_open_bus(system16b_open_bus);
+region0_read:=s16_region0_read;
+region1_read:=nil;
+region1_write:=nil;
+region2_read:=nil;
+region2_write:=nil;
+region7_read:=standar_s16_io_r;
 //MCU
-mcs51_0:=cpu_mcs51.create(I8X51,8000000,262);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000);
 mcs51_0.change_ram_calls(system16b_mcu_getbyte,system16b_mcu_putbyte);
 mcs51_0.change_io_calls(nil,in_port1,nil,nil,nil,nil{out_port1},nil,nil);
 //Sound
 ym2151_0:=ym2151_chip.create(4000000);
 upd7759_0:=upd7759_chip.create(0.9,0,upd7759_drq);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswa_val2:=@system16b_dip_a;
-region1_read:=nil;
-region1_write:=nil;
-region2_read:=nil;
-region2_write:=nil;
-region7_read:=standar_s16_io_r;
-getmem(memoria_temp,$100000);
+init_dips(1,system16b_dip_a,$ff);
+marcade.dswc:=$ffff;
+//Video
 s16_info.mb_type:=0;
+tile_shr:=6;
+text_shr:=9;
+text_mask:=$1ff;
+getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   292:begin  //Altered Beast
-        //Main CPU
         m68000_0.change_ram16_calls(system16b_getword,system16b_putword_mcu);
         if not(roms_load16w(@rom,altbeast_rom)) then exit;
-        region0_read:=region0_5704_read;
         region2_write:=region2_5704_write;
         //Sound CPU
         if not(roms_load(memoria_temp,altbeast_sound)) then exit;
@@ -1186,14 +1270,11 @@ case main_vars.tipo_maquina of
         //Sprite ROM
         if not(roms_load16w(@sprite_rom,altbeast_sprites)) then exit;
         s16_info.s_banks:=8;
-        marcade.dswb:=$fd;
-        marcade.dswb_val2:=@altbeast_dip_b;
+        init_dips(2,altbeast_dip_b,$fd);
   end;
   293:begin  //Golden Axe
-        //Main CPU
         m68000_0.change_ram16_calls(system16b_getword,system16b_putword_mcu);
         if not(roms_load16w(@rom,goldnaxe_rom)) then exit;
-        region0_read:=region0_5797_read;
         region1_read:=region1_5797_read;
         region1_write:=region1_5797_write;
         //Sound CPU
@@ -1224,17 +1305,15 @@ case main_vars.tipo_maquina of
         copymemory(@sprite_rom[$180000 shr 1],ptemp,$40000);
         freemem(memoria_temp2);
         s16_info.s_banks:=16;
-        marcade.dswb:=$fd;
-        marcade.dswb_val2:=@goldnaxe_dip_b;
+        init_dips(2,goldnaxe_dip_b,$fd);
   end;
   294:begin  //Dynamite Dux
-        //Main CPU
         m68000_0.change_ram16_calls(system16b_getword,system16b_putword_mcu);
         if not(roms_load16w(@rom,ddux_rom)) then exit;
-        region0_read:=region0_5704_read;
-        region1_read:=region1_5704_read;
-        region2_write:=region2_5704_write;
+        region1_read:=s16_region1_read;
         region1_rom_pos:=$40000 shr 1;
+        region1_rom_mask:=$3ffff;
+        region2_write:=region2_5704_write;
         //Sound CPU
         if not(roms_load(@mem_snd,ddux_sound)) then exit;
         sound_bank_calc:=system16b_sound_5704;
@@ -1247,14 +1326,10 @@ case main_vars.tipo_maquina of
         //Sprite ROM
         if not(roms_load16w(@sprite_rom,ddux_sprites)) then exit;
         s16_info.s_banks:=4;
-        marcade.dswb:=$fe;
-        marcade.dswb_val2:=@ddux_dip_b;
+        init_dips(2,ddux_dip_b,$fe);
   end;
   295:begin  //Eswat
-        //Main CPU
-        m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
         if not(roms_load16w(@rom,eswat_rom)) then exit;
-        region0_read:=region0_5797_read;
         region1_read:=region1_5797_read;
         region1_write:=region1_5797_write;
         //Sound CPU
@@ -1283,19 +1358,15 @@ case main_vars.tipo_maquina of
         copymemory(@sprite_rom[$180000 shr 1],ptemp,$40000);
         freemem(memoria_temp2);
         s16_info.s_banks:=16;
-        marcade.dswb:=$fd;
-        marcade.dswb_val2:=@eswat_dip_b;
+        init_dips(2,eswat_dip_b,$fd);
   end;
   296:begin  //Passing Shot
-        //Main CPU
-        m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
         if not(roms_load16w(@rom,passsht_rom)) then exit;
-        region0_read:=region0_5358_read;
         //Sound CPU
         fillchar(memoria_temp^,$30000,0);
         if not(roms_load(memoria_temp,passsht_sound)) then exit;
         copymemory(@mem_snd,@memoria_temp[0],$8000);
-        for f:=0 to 7 do copymemory(@sound_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        for f:=0 to $f do copymemory(@sound_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         sound_bank_calc:=system16b_sound_5358;
         //tiles
         if not(roms_load(memoria_temp,passsht_tiles)) then exit;
@@ -1304,19 +1375,16 @@ case main_vars.tipo_maquina of
         //Sprite ROM
         if not(roms_load16w(@sprite_rom,passsht_sprites)) then exit;
         s16_info.s_banks:=3;
-        marcade.dswb:=$fe;
-        marcade.dswb_val2:=@passsht_dip_b;
+        init_dips(2,passsht_dip_b,$fe);
         //La placa 5358 usa un tipo diferente de banco de sprites!!
         s16_info.mb_type:=1;
   end;
   297:begin  //Aurail
-        //Main CPU
-        m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
         if not(roms_load16w(@rom,aurail_rom)) then exit;
-        region0_read:=region0_5704_read;
-        region1_read:=region1_5704_read;
-        region2_write:=region2_5704_write;
+        region1_read:=s16_region1_read;
         region1_rom_pos:=$40000 shr 1;
+        region1_rom_mask:=$3ffff;
+        region2_write:=region2_5704_write;
         //Sound CPU
         if not(roms_load(memoria_temp,aurail_sound)) then exit;
         copymemory(@mem_snd,@memoria_temp[0],$8000);
@@ -1329,17 +1397,14 @@ case main_vars.tipo_maquina of
         //Sprite ROM
         if not(roms_load16w(@sprite_rom,aurail_sprites)) then exit;
         s16_info.s_banks:=16;
-        marcade.dswb:=$fd;
-        marcade.dswb_val2:=@aurail_dip_b;
+        init_dips(2,aurail_dip_b,$fd);
   end;
   408:begin  //Riot City
-        //Main CPU
-        m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
         if not(roms_load16w(@rom,riotcity_rom)) then exit;
-        region0_read:=region0_5704_read;
-        region1_read:=region1_5704_read;
-        region2_write:=region2_5704_write;
+        region1_read:=s16_region1_read;
         region1_rom_pos:=$40000 shr 1;
+        region1_rom_mask:=$3ffff;
+        region2_write:=region2_5704_write;
         //Sound CPU
         if not(roms_load(memoria_temp,riotcity_sound)) then exit;
         copymemory(@mem_snd,@memoria_temp[0],$10000);
@@ -1366,23 +1431,24 @@ case main_vars.tipo_maquina of
         copymemory(@sprite_rom[$180000 shr 1],ptemp,$40000);
         freemem(memoria_temp2);
         s16_info.s_banks:=16;
-        marcade.dswb:=$fd;
-        marcade.dswb_val2:=@riotcity_dip_b;
+        init_dips(2,riotcity_dip_b,$fd);
   end;
   409:begin  //SDI
         //Controls
         init_analog(m68000_0.numero_cpu,m68000_0.clock);
         analog_0(75,5,$80,$ff,0,false,true,false,true);
         //Main CPU
-        m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
         if not(roms_load16w(pword(memoria_temp),sdi_rom)) then exit;
         if not(roms_load(@fd1089_key,sdi_key)) then exit;
         fd1089_decrypt($30000,pword(memoria_temp),@rom,@rom_data,@fd1089_key,fd_typeA);
         region0_read:=region0_5358_read_fd;
-        region1_rom_pos:=$10000 shr 1;
         region1_read:=region1_5358_read_fd;
-        region2_rom_pos:=$20000 shr 1;
+        region1_rom_pos:=$10000 shr 1;
+        region1_rom_mask:=$ffff;
         region2_read:=region2_5358_read_fd;
+        region2_rom_pos:=$20000 shr 1;
+        region2_rom_pos:=$1ffff;
+        region7_read:=sdi_s16_io_r;
         //Sound CPU
         if not(roms_load(@mem_snd,sdi_sound)) then exit;
         sound_bank_calc:=nil;
@@ -1393,20 +1459,16 @@ case main_vars.tipo_maquina of
         //Sprite ROM
         if not(roms_load16w(@sprite_rom,sdi_sprites)) then exit;
         s16_info.s_banks:=3;
-        marcade.dswb:=$fd;
-        marcade.dswb_val2:=@sdi_dip_b;
+        init_dips(2,sdi_dip_b,$fd);
         //La placa 5358 usa un tipo diferente de banco de sprites!!
         s16_info.mb_type:=1;
-        region7_read:=sdi_s16_io_r;
   end;
   410:begin  //Cotton
-        //Main CPU
-        m68000_0.change_ram16_calls(system16b_getword,system16b_putword);
         if not(roms_load16w(@rom,cotton_rom)) then exit;
-        region0_read:=region0_5704_read;
-        region1_read:=region1_5704_read;
-        region2_write:=region2_5704_write;
+        region1_read:=s16_region1_read;
         region1_rom_pos:=$40000 shr 1;
+        region1_rom_mask:=$3ffff;
+        region2_write:=region2_5704_write;
         //Sound CPU
         if not(roms_load(memoria_temp,cotton_sound)) then exit;
         copymemory(@mem_snd,@memoria_temp[0],$8000);
@@ -1419,9 +1481,80 @@ case main_vars.tipo_maquina of
         //Sprite ROM
         if not(roms_load16w(@sprite_rom,cotton_sprites)) then exit;
         s16_info.s_banks:=16;
-        marcade.dswb:=$fe;
-        marcade.dswb_val2:=@cotton_dip_b;
+        init_dips(2,cotton_dip_b,$fe);
   end;
+  419:begin  //Bay Route
+        if not(roms_load16w(@rom,bayroute_rom)) then exit;
+        region1_read:=s16_region1_read;
+        region1_rom_pos:=$40000 shr 1;
+        region1_rom_mask:=$3ffff;
+        region2_write:=region2_5704_write;
+        //Sound CPU
+        if not(roms_load(memoria_temp,bayroute_sound)) then exit;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        for f:=0 to $f do copymemory(@sound_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        sound_bank_calc:=system16b_sound_5704;
+        //tiles
+        if not(roms_load(memoria_temp,bayroute_tiles)) then exit;
+        convert_chars(2);
+        s16_info.t_banks:=1;
+        //Sprite ROM
+        if not(roms_load16w(@sprite_rom,bayroute_sprites)) then exit;
+        s16_info.s_banks:=4;
+        init_dips(2,bayroute_dip_b,$bd);
+  end;
+  420:begin  //Sonic Boom
+        if not(roms_load16w(@rom,sonicbom_rom)) then exit;
+        region1_read:=s16_region1_read;
+        region1_rom_pos:=$20000 shr 1;
+        region1_rom_mask:=$1ffff;
+        //Sound CPU
+        fillchar(memoria_temp^,$30000,0);
+        if not(roms_load(memoria_temp,sonicbom_sound)) then exit;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        for f:=0 to 3 do copymemory(@sound_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        sound_bank_calc:=system16b_sound_5358;
+        //tiles
+        if not(roms_load(memoria_temp,sonicbom_tiles)) then exit;
+        convert_chars(2);
+        s16_info.t_banks:=1;
+        //Sprite ROM
+        if not(roms_load16w(@sprite_rom,sonicbom_sprites)) then exit;
+        s16_info.s_banks:=4;
+        init_dips(2,sonicbom_dip_b,$7f);
+        //La placa 5358 usa un tipo diferente de banco de sprites!!
+        s16_info.mb_type:=1;
+      end;
+  421:begin  //Time Scanner
+        if not(roms_load16w(@rom,timescan_rom)) then exit;
+        region1_read:=s16_region1_read;
+        region1_rom_pos:=$10000 shr 1;
+        region1_rom_mask:=$ffff;
+        region2_read:=s16_region2_read;
+        region2_rom_pos:=$20000 shr 1;
+        region2_rom_mask:=$ffff;
+        //Sound CPU
+        fillchar(memoria_temp^,$30000,0);
+        if not(roms_load(memoria_temp,timescan_sound)) then exit;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        for f:=0 to 1 do copymemory(@sound_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        sound_bank_calc:=system16b_sound_5358;
+        //tiles
+        if not(roms_load(memoria_temp,timescan_tiles)) then exit;
+        convert_chars(1);
+        s16_info.t_banks:=1;
+        //Sprite ROM
+        fillchar(sprite_rom,$200000,0);
+        if not(roms_load16w(@sprite_rom,timescan_sprites)) then exit;
+        s16_info.s_banks:=4;
+        init_dips(2,timescan_dip_b,$ff);
+        init_dips(3,timescan_dip_c,$ff);
+        //La placa 5358 usa un tipo diferente de banco de sprites!!
+        s16_info.mb_type:=1;
+        tile_shr:=5;
+        text_shr:=8;
+        text_mask:=$ff;
+      end;
 end;
 freemem(memoria_temp);
 //poner la paleta

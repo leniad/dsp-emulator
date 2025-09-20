@@ -612,7 +612,6 @@ begin
     ym3812_0.reset;
  end;
  oki_6295_0.reset;
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  scroll_x0:=1;
@@ -658,20 +657,18 @@ case main_vars.tipo_maquina of
   end;
 end;
 llamadas_maquina.reset:=reset_gaelco_hw;
+llamadas_maquina.scanlines:=512;
 iniciar_gaelco_hw:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=78 then pants:=15
   else pants:=8;
-for f:=1 to pants do begin
-  screen_init(f,336,272,true);
-  screen_mod_scroll(f,336,336,511,272,272,511);
-end;
+for f:=1 to pants do screen_init(f,336,272,true);
 //Final
 screen_init(17,512,512,false,true);
 iniciar_video(320,240);
 marcade.dswa:=$00ff;
 //Main CPU
-m68000_0:=cpu_m68000.create(12000000,$200);
+m68000_0:=cpu_m68000.create(12000000);
 getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   78:begin  //Big Karnak
@@ -680,7 +677,7 @@ case main_vars.tipo_maquina of
       m68000_0.change_ram16_calls(bigk_getword,bigk_putword);
       //Sound CPU
       if not(roms_load(@mem_snd,bigkarnak_sound)) then exit;
-      m6809_0:=cpu_m6809.Create(2000000,$200,TCPU_M6809);
+      m6809_0:=cpu_m6809.Create(2000000,TCPU_M6809);
       m6809_0.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
       m6809_0.init_sound(bigk_sound_update);
       //Sound Chips

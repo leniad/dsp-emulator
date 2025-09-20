@@ -20,19 +20,19 @@ const
         (n:'b73_04.1f';l:$10000;p:$1a0000;crc:$f7badbb2),(n:'b73_05.1h';l:$10000;p:$1c0000;crc:$b8e829d2));
         hvyunit_gfx1:tipo_roms=(n:'b73_09.2p';l:$80000;p:0;crc:$537c647f);
         //Dip
-        hvyunit_dip_a:array [0..6] of def_dip2=(
+        hvyunit_dip_a:array [0..5] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
         (mask:2;name:'Flip_Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:4;name:'Service Mode';number:2;val2:(0,4);name2:('On','Off')),
         (mask:8;name:'Coin Mode';number:2;val2:(8,0);name2:('Mode 1','Mode 2')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$10,$20,$30);name4:('1C 6C(Mode 1)/1C 4C(Mode 2)','1C 2C(Mode 1)/1C 3C(Mode 2)','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($40,$80,$c0,0);name4:('1C 2(Mode 1)/1C 3C(Mode 2)','2C 1C','1C 1C','1C 6C(Mode 1)/1C 4C(Mode 2)')),());
-        hvyunit_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($40,$80,$c0,0);name4:('1C 2(Mode 1)/1C 3C(Mode 2)','2C 1C','1C 1C','1C 6C(Mode 1)/1C 4C(Mode 2)')));
+        hvyunit_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:4;name:'Allow Continue';number:2;val2:(0,4);name2:('Off','On')),
         (mask:8;name:'Bonus';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$30;name:'Lives';number:4;val4:(0,$10,$20,$30);name4:('7','5','4','3')),
-        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')),());
+        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')));
 
 var
  sound_latch,nrom_cpu1,nrom_cpu2,nrom_cpu3,scroll_port,scroll_x,scroll_y:byte;
@@ -388,33 +388,33 @@ begin
 llamadas_maquina.bucle_general:=hvyunit_principal;
 llamadas_maquina.reset:=reset_hvyunit;
 llamadas_maquina.fps_max:=58;
+llamadas_maquina.scanlines:=256;
 iniciar_hvyunit:=false;
 iniciar_audio(false);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,256,511,512,256,511);
 screen_init(2,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,$100);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_ram_calls(hvyunit_getbyte,hvyunit_putbyte);
 z80_0.change_io_calls(nil,hvyunit_outbyte);
 if not(roms_load(@memoria_temp,hvyunit_cpu1)) then exit;
 for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);
 //Misc CPU
-z80_1:=cpu_z80.create(6000000,$100);
+z80_1:=cpu_z80.create(6000000);
 z80_1.change_ram_calls(hvyunit_misc_getbyte,hvyunit_misc_putbyte);
 z80_1.change_io_calls(hvyunit_misc_inbyte,hvyunit_misc_outbyte);
 if not(roms_load(@memoria_temp,hvyunit_cpu2)) then exit;
 for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
 //Sound CPU
-z80_2:=cpu_z80.create(6000000,$100);
+z80_2:=cpu_z80.create(6000000);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.change_io_calls(snd_inbyte,snd_outbyte);
 z80_2.init_sound(hvyunit_sound_update);
 if not(roms_load(@memoria_temp,hvyunit_sound)) then exit;
 for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
 //mcu cpu
-mcs51_0:=cpu_mcs51.create(I8X51,6000000,$100);
+mcs51_0:=cpu_mcs51.create(I8X51,6000000);
 mcs51_0.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
 if not(roms_load(mcs51_0.get_rom_addr,hvyunit_mermaid)) then exit;
 //pandora
@@ -436,10 +436,8 @@ gfx[1].trans[0]:=true;
 convert_gfx(1,0,ptemp,@pg_x,@pg_y,false,false);
 freemem(ptemp);
 //dip
-marcade.dswa:=$fe;
-marcade.dswb:=$f7;
-marcade.dswa_val2:=@hvyunit_dip_a;
-marcade.dswb_val2:=@hvyunit_dip_b;
+init_dips(1,hvyunit_dip_a,$fe);
+init_dips(2,hvyunit_dip_b,$f7);
 //reset
 iniciar_hvyunit:=true;
 end;

@@ -395,31 +395,30 @@ end;
 begin
 llamadas_maquina.bucle_general:=firetrap_principal;
 llamadas_maquina.reset:=reset_firetrap;
+llamadas_maquina.scanlines:=272*CPU_SYNC;
 iniciar_firetrap:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,512,511);
 screen_init(3,512,512);
-screen_mod_scroll(3,512,512,511,512,512,511);
 screen_init(4,512,512,false,true);
 main_screen.rot90_screen:=true;
 iniciar_video(256,240);
 //Main CPU
-z80_0:=cpu_z80.create(12000000 div 2,272*CPU_SYNC);
+z80_0:=cpu_z80.create(12000000 div 2);
 z80_0.change_ram_calls(firetrap_getbyte,firetrap_putbyte);
 if not(roms_load(@memoria_temp,firetrap_rom)) then exit;
 copymemory(@memoria[0],@memoria_temp[0],$8000);
 for f:=0 to 3 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sound CPU
-m6502_0:=cpu_m6502.create(12000000 div 8,272*CPU_SYNC,TCPU_M6502);
+m6502_0:=cpu_m6502.create(12000000 div 8,TCPU_M6502);
 m6502_0.change_ram_calls(firetrap_snd_getbyte,firetrap_snd_putbyte);
 m6502_0.init_sound(firetrap_sound_update);
 if not(roms_load(@memoria_temp,firetrap_snd)) then exit;
 copymemory(@mem_snd[$8000],@memoria_temp[0],$8000);
 for f:=0 to 1 do copymemory(@snd_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //MCU
-mcs51_0:=cpu_mcs51.create(I8X51,8000000,272*CPU_SYNC);
+mcs51_0:=cpu_mcs51.create(I8X51,8000000);
 mcs51_0.change_io_calls(in_port0,nil,in_port2,nil,nil,out_port1,nil,out_port3);
 if not(roms_load(mcs51_0.get_rom_addr,firetrap_mcu)) then exit;
 //Sound Chips

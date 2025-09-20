@@ -103,67 +103,61 @@ const
         piranha_sprites:array[0..1] of tipo_roms=(
         (n:'pir10.5f';l:$800;p:0;crc:$d19399fb),(n:'pir12.5j';l:$800;p:$800;crc:$cfb4403d));
         //DIP
-        pacman_dip_a:array [0..5] of def_dip2=(
+        pacman_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','None')),
         (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),
-        (mask:$80;name:'Ghost Names';number:2;val2:($80,0);name2:('Normal','Alternate')),());
-        pacman_dip_b:array [0..1] of def_dip2=(
-        (mask:$10;name:'Rack Test';number:2;val2:($10,0);name2:('Off','On')),());
-        pacman_dip_c:array [0..1] of def_dip2=(
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
-        mspacman_dip:array [0..4] of def_dip2=(
+        (mask:$80;name:'Ghost Names';number:2;val2:($80,0);name2:('Normal','Alternate')));
+        pacman_dip_b:def_dip2=(mask:$10;name:'Rack Test';number:2;val2:($10,0);name2:('Off','On'));
+        pacman_dip_c:def_dip2=(mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail'));
+        mspacman_dip:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','None')),
-        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),());
-        crush_dip_a:array [0..4] of def_dip2=(
+        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')));
+        crush_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('3','4','5','6')),
         (mask:$10;name:'First Pattern';number:2;val2:($10,0);name2:('Easy','Hard')),
-        (mask:$20;name:'Teleport Holes';number:2;val2:($20,0);name2:('Off','On')),());
-        crush_dip_b:array [0..1] of def_dip2=(
-        (mask:$10;name:'Cabinet';number:2;val2:(0,$10);name2:('Upright','Cocktail')),());
-        mspactwin_dip_a:array [0..3] of def_dip2=(
+        (mask:$20;name:'Teleport Holes';number:2;val2:($20,0);name2:('Off','On')));
+        crush_dip_b:def_dip2=(mask:$10;name:'Cabinet';number:2;val2:(0,$10);name2:('Upright','Cocktail'));
+        mspactwin_dip_a:array [0..2] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
-        (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','None')),());
-        mspactwin_dip_b:array [0..1] of def_dip2=(
-        (mask:$10;name:'Jama';number:2;val2:($10,0);name2:('Slow','Fast')),());
-        mspactwin_dip_c:array [0..1] of def_dip2=(
-        (mask:$80;name:'Skip Screen';number:2;val2:($80,0);name2:('Off','On')),());
-        birdiy_dip_a:array [0..4] of def_dip2=(
+        (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','None')));
+        mspactwin_dip_b:def_dip2=(mask:$10;name:'Jama';number:2;val2:($10,0);name2:('Slow','Fast'));
+        mspactwin_dip_c:def_dip2=(mask:$80;name:'Skip Screen';number:2;val2:($80,0);name2:('Off','On'));
+        birdiy_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
         (mask:$10;name:'Cabinet';number:2;val2:(0,$10);name2:('Upright','Cocktail')),
-        (mask:$20;name:'Skip Screen';number:2;val2:($20,0);name2:('Off','On')),());
-        ponpoko_dip_a:array [0..3] of def_dip2=(
+        (mask:$20;name:'Skip Screen';number:2;val2:($20,0);name2:('Off','On')));
+        ponpoko_dip_a:array [0..2] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(1,2,3,0);name4:('10K','30K','50K','None')),
         (mask:$30;name:'Lives';number:4;val4:(0,$10,$20,$30);name4:('2','3','4','5')),
-        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),());
-        ponpoko_dip_b:array [0..2] of def_dip2=(
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')));
+        ponpoko_dip_b:array [0..1] of def_dip2=(
         (mask:$f;name:'Coinage';number:16;val16:(4,$e,$f,2,$d,7,$b,$c,1,6,5,$a,8,9,3,0);name16:('A 3/1 B 3/1','A 3/1 B 1/2','A 3/1 B 1/4','A 2/1 B 2/1','A 2/1 B 1/1','A 2/1 B 1/3','A 2/1 B 1/5','A 2/1 B 1/6','A 1/1 B 1/1','A 1/1 B 4/5','A 1/1 B 2/3','A 1/1 B 1/3','A 1/1 B 1/5','A 1/1 B 1/6','A 1/2 B 1/2','Free Play')),
-        (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')),());
-        woodpeck_dip_a:array [0..4] of def_dip2=(
+        (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')));
+        woodpeck_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('5K','10K','15K','None')),
-        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),());
-        eyes_dip_a:array [0..4] of def_dip2=(
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')));
+        eyes_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(1,3,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:($c,8,4,0);name4:('2','3','4','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('50K','75K','100K','125K')),
-        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),());
-        alibaba_dip_a:array [0..4] of def_dip2=(
+        (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')));
+        alibaba_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','None')),
-        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),());
-        piranha_dip_a:array [0..3] of def_dip2=(
-        (mask:3;name:'Coinage';number:4;val4:(0,1,2,3);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
-        (mask:$c;name:'Lives';number:4;val4:($c,4,8,0);name4:('1','2','3','5')),
-        (mask:$30;name:'Bonus Life';number:4;val4:($30,$10,$20,0);name4:('10K','15K','20K','None')),());
+        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')));
+        piranha_dip_a:array [0..2] of def_dip2=(
+        (mask:3;name:'Coinage';number:4;val4:(0,1,2,3);name4:('2C 1C','1C 1C','1C 2C','Free Play')),        (mask:$c;name:'Lives';number:4;val4:($c,4,8,0);name4:('1','2','3','5')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$10,$20,0);name4:('10K','15K','20K','None')));
 
 var
  irq_vblank,dec_enable,croller_disable_protection:boolean;
@@ -804,6 +798,7 @@ begin
 llamadas_maquina.bucle_general:=pacman_principal;
 llamadas_maquina.reset:=reset_pacman;
 llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.scanlines:=264;
 llamadas_maquina.save_qsnap:=pacman_qsave;
 llamadas_maquina.load_qsnap:=pacman_qload;
 iniciar_pacman:=false;
@@ -813,7 +808,7 @@ if (main_vars.tipo_maquina<>401) then main_screen.rot90_screen:=true;
 screen_init(2,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,264);
+z80_0:=cpu_z80.create(3072000);
 z80_0.change_ram_calls(pacman_gen_getbyte,pacman_gen_putbyte);
 z80_0.change_io_calls(nil,pacman_outbyte);
 z80_0.init_sound(pacman_sound_update);
@@ -838,12 +833,9 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,pacman_pal)) then exit;
         //DIP
         read_events:=eventos_pacman;
-        marcade.dswa:=$c9;
-        marcade.dswb:=$10;
-        marcade.dswc:=$80;
-        marcade.dswa_val2:=@pacman_dip_a;
-        marcade.dswb_val2:=@pacman_dip_b;
-        marcade.dswc_val2:=@pacman_dip_c;
+        init_dips(1,pacman_dip_a,$c9);
+        init_dips(2,pacman_dip_b,$10);
+        init_dips(3,pacman_dip_c,$80);
      end;
      88:begin  //MS Pacman
         z80_0.change_ram_calls(mspacman_getbyte,mspacman_putbyte);
@@ -877,12 +869,9 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,pacman_pal)) then exit;
         //DIP
         read_events:=eventos_mspacman;
-        marcade.dswa:=$c9;
-        marcade.dswb:=$10;
-        marcade.dswc:=$80;
-        marcade.dswa_val2:=@mspacman_dip;
-        marcade.dswb_val2:=@pacman_dip_b;
-        marcade.dswc_val2:=@pacman_dip_c;
+        init_dips(1,mspacman_dip,$c9);
+        init_dips(2,pacman_dip_b,$10);
+        init_dips(3,pacman_dip_c,$80);
      end;
      234:begin  //Crush Roller
         read_io:=crush_read_io;
@@ -901,10 +890,8 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,crush_pal)) then exit;
         //DIP
         read_events:=eventos_mspacman;
-        marcade.dswa:=$31;
-        marcade.dswb:=0;
-        marcade.dswa_val2:=@crush_dip_a;
-        marcade.dswb_val2:=@crush_dip_b;
+        init_dips(1,crush_dip_a,$31);
+        init_dips(2,crush_dip_b,0);
      end;
      305:begin  //MS Pacman Twin
         z80_0.change_ram_calls(mspactwin_getbyte,mspactwin_putbyte);
@@ -936,12 +923,9 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,mspactwin_pal)) then exit;
         //DIP
         read_events:=eventos_mspacman;
-        marcade.dswa:=$c9;
-        marcade.dswa_val2:=@mspactwin_dip_a;
-        marcade.dswb:=$10;
-        marcade.dswb_val2:=@mspactwin_dip_b;
-        marcade.dswc:=$80;
-        marcade.dswc_val2:=@mspactwin_dip_c;
+        init_dips(1,mspactwin_dip_a,$c9);
+        init_dips(2,mspactwin_dip_b,$10);
+        init_dips(3,mspactwin_dip_c,$80);
      end;
      353:begin  //Birdiy
         read_io:=birdiy_read_io;
@@ -955,8 +939,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,birdiy_pal)) then exit;
         read_events:=eventos_mspacman;
         y_hack:=0;
-        marcade.dswa:=$e9;
-        marcade.dswa_val2:=@birdiy_dip_a;
+        init_dips(1,birdiy_dip_a,$e9);
         marcade.dswb:=$ff;
      end;
      401:begin  //Ponpoko
@@ -987,11 +970,9 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,ponpoko_pal)) then exit;
         read_events:=eventos_ponpoko;
         x_hack:=0;
-        y_hack:=+1;
-        marcade.dswa:=$e1;
-        marcade.dswa_val2:=@ponpoko_dip_a;
-        marcade.dswb:=$b1;
-        marcade.dswb_val2:=@ponpoko_dip_b;
+        y_hack:=1;
+        init_dips(1,ponpoko_dip_a,$e1);
+        init_dips(2,ponpoko_dip_b,$b1);
      end;
      402:begin  //Woodpecker
         read_io:=birdiy_read_io;
@@ -1006,8 +987,7 @@ case main_vars.tipo_maquina of
         conv_sprites;
         if not(roms_load(@memoria_temp,woodpeck_pal)) then exit;
         read_events:=eventos_mspacman;
-        marcade.dswa:=$c9;
-        marcade.dswa_val2:=@woodpeck_dip_a;
+        init_dips(1,woodpeck_dip_a,$c9);
         marcade.dswb:=0;
      end;
      403:begin  //Eyes
@@ -1024,12 +1004,9 @@ case main_vars.tipo_maquina of
         conv_sprites;
         if not(roms_load(@memoria_temp,eyes_pal)) then exit;
         read_events:=eventos_mspacman;
-        marcade.dswa:=$fb;
-        marcade.dswb:=$10;
-        marcade.dswc:=$80;
-        marcade.dswa_val2:=@eyes_dip_a;
-        marcade.dswb_val2:=@pacman_dip_b;
-        marcade.dswc_val2:=@pacman_dip_c;
+        init_dips(1,eyes_dip_a,$fb);
+        init_dips(2,pacman_dip_b,$10);
+        init_dips(3,pacman_dip_c,$80);
      end;
      404:begin  //Alibaba
         z80_0.change_ram_calls(alibaba_getbyte,alibaba_putbyte);
@@ -1041,12 +1018,9 @@ case main_vars.tipo_maquina of
         conv_sprites;
         if not(roms_load(@memoria_temp,alibaba_pal)) then exit;
         read_events:=eventos_pacman;
-        marcade.dswa:=$c9;
-        marcade.dswb:=$10;
-        marcade.dswc:=$80;
-        marcade.dswa_val2:=@alibaba_dip_a;
-        marcade.dswb_val2:=@pacman_dip_b;
-        marcade.dswc_val2:=@pacman_dip_c;
+        init_dips(1,alibaba_dip_a,$c9);
+        init_dips(2,pacman_dip_b,$10);
+        init_dips(3,pacman_dip_c,$80);
      end;
      405:begin  //Piranha
         read_io:=birdiy_read_io;
@@ -1063,12 +1037,9 @@ case main_vars.tipo_maquina of
         conv_sprites;
         if not(roms_load(@memoria_temp,piranha_pal)) then exit;
         read_events:=eventos_mspacman;
-        marcade.dswa:=$c9;
-        marcade.dswb:=$10;
-        marcade.dswc:=$80;
-        marcade.dswa_val2:=@piranha_dip_a;
-        marcade.dswb_val2:=@pacman_dip_b;
-        marcade.dswc_val2:=@pacman_dip_c;
+        init_dips(1,piranha_dip_a,$c9);
+        init_dips(2,pacman_dip_b,$10);
+        init_dips(3,pacman_dip_c,$80);
      end;
 end;
 compute_resistor_weights(0,	255, -1.0,

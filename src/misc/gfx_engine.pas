@@ -63,8 +63,8 @@ procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:
 //Scroll
 procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0;adj_x:word=0;adj_y:word=0);
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
-procedure scroll__x_part(porigen,pdestino:byte;scroll_x,scroll_y:word;orgy,sizey:word);
-procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0;inc_y:word=0);
+procedure scroll_x_cut(porigen,pdestino:byte;scroll_x,pos_y,size_y:word);
+procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0);
 procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
 procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
 procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
@@ -250,33 +250,48 @@ procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;
 var
   long_x,long_y,long_x2,long_y2:word;
 begin
-scroll_x:=scroll_x and p_final[porigen].scroll.mask_x;
-scroll_y:=scroll_y and p_final[porigen].scroll.mask_y;
-if ((scroll_x+p_final[porigen].scroll.max_x)>p_final[porigen].scroll.long_x) then long_x:=p_final[porigen].scroll.long_x-scroll_x
-  else long_x:=p_final[porigen].scroll.max_x;
-if ((scroll_y+p_final[porigen].scroll.max_y)>p_final[porigen].scroll.long_y) then long_y:=p_final[porigen].scroll.long_y-scroll_y
-  else long_y:=p_final[porigen].scroll.max_y;
-long_x2:=p_final[porigen].scroll.max_x-long_x;
-long_y2:=p_final[porigen].scroll.max_y-long_y;
+scroll_x:=scroll_x and p_final[porigen].mask_x;
+scroll_y:=scroll_y and p_final[porigen].mask_y;
+if ((scroll_x+scroll_final_x)>p_final[porigen].x) then long_x:=scroll_final_x-((scroll_x+scroll_final_x)-p_final[porigen].x)
+  else long_x:=scroll_final_x;
+if ((scroll_y+scroll_final_y)>p_final[porigen].y) then long_y:=scroll_final_y-((scroll_y+scroll_final_y)-p_final[porigen].y)
+  else long_y:=scroll_final_y;
+long_x2:=scroll_final_x-long_x;
+long_y2:=scroll_final_y-long_y;
 actualiza_trozo(scroll_x,scroll_y,long_x,long_y,porigen,diff_x,diff_y,long_x,long_y,pdestino);
-if long_x<p_final[porigen].scroll.max_x then actualiza_trozo(adj_x,scroll_y,long_x2,long_y,porigen,long_x+diff_x,diff_y,long_x2,long_y,pdestino);
-if long_y<p_final[porigen].scroll.max_y then actualiza_trozo(scroll_x,adj_y,long_x,long_y2,porigen,diff_x,long_y+diff_y,long_x,long_y2,pdestino);
-if ((long_x<p_final[porigen].scroll.max_x) and (long_y<p_final[porigen].scroll.max_y)) then
+if long_x<scroll_final_x then actualiza_trozo(adj_x,scroll_y,long_x2,long_y,porigen,long_x+diff_x,diff_y,long_x2,long_y,pdestino);
+if long_y<scroll_final_y then actualiza_trozo(scroll_x,adj_y,long_x,long_y2,porigen,diff_x,long_y+diff_y,long_x,long_y2,pdestino);
+if ((long_x<scroll_final_x) and (long_y<scroll_final_y)) then
   actualiza_trozo(adj_x,adj_y,long_x2,long_y2,porigen,long_x+diff_x,long_y+diff_y,long_x2,long_y2,pdestino);
+end;
+
+procedure scroll_x_cut(porigen,pdestino:byte;scroll_x,pos_y,size_y:word);
+var
+  long_x,long_x2:word;
+begin
+scroll_x:=scroll_x and p_final[porigen].mask_x;
+if ((scroll_x+scroll_final_x)>p_final[porigen].x) then begin
+  long_x:=p_final[porigen].x-scroll_x;
+  long_x2:=scroll_final_x-long_x;
+  actualiza_trozo(0,pos_y,long_x2,size_y,porigen,long_x,pos_y,long_x2,size_y,pdestino);
+end else begin
+  long_x:=scroll_final_x;
+end;
+actualiza_trozo(scroll_x,pos_y,long_x,size_y,porigen,0,pos_y,long_x,size_y,pdestino);
 end;
 
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
 var
   long_x,long_x2,long_y:word;
 begin
-long_y:=p_final[porigen].scroll.max_y;
-scroll_x:=scroll_x and p_final[porigen].scroll.mask_x;
-if ((scroll_x+p_final[porigen].scroll.max_x)>p_final[porigen].scroll.long_x) then begin
-  long_x:=p_final[porigen].scroll.long_x-scroll_x;
-  long_x2:=p_final[porigen].scroll.max_x-long_x;
+long_y:=p_final[porigen].y;
+scroll_x:=scroll_x and p_final[porigen].mask_x;
+if ((scroll_x+scroll_final_x)>p_final[porigen].x) then begin
+  long_x:=p_final[porigen].x-scroll_x;
+  long_x2:=scroll_final_x-long_x;
   actualiza_trozo(0,0,long_x2,long_y,porigen,long_x,0,long_x2,long_y,pdestino);
 end else begin
-  long_x:=p_final[porigen].scroll.max_x;
+  long_x:=scroll_final_x;
 end;
 actualiza_trozo(scroll_x,0,long_x,long_y,porigen,0,0,long_x,long_y,pdestino);
 end;
@@ -285,59 +300,37 @@ procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
 var
   long_x,long_y,long_y2:word;
 begin
-long_x:=p_final[porigen].scroll.max_x;
-scroll_y:=scroll_y and p_final[porigen].scroll.mask_y;
-if ((scroll_y+p_final[porigen].scroll.max_y)>p_final[porigen].scroll.long_y) then begin
-  long_y:=p_final[porigen].scroll.long_y-scroll_y;
-  long_y2:=p_final[porigen].scroll.max_y-long_y;
+long_x:=scroll_final_x;
+scroll_y:=scroll_y and p_final[porigen].mask_y;
+if ((scroll_y+scroll_final_y)>p_final[porigen].y) then begin
+  long_y:=p_final[porigen].y-scroll_y;
+  long_y2:=scroll_final_y-long_y;
   actualiza_trozo(0,0,long_x,long_y2,porigen,0,long_y,long_x,long_y2,pdestino);
 end else begin
-    long_y:=p_final[porigen].scroll.max_y;
+    long_y:=scroll_final_y;
 end;
 actualiza_trozo(0,scroll_y,long_x,long_y,porigen,0,0,long_x,long_y,pdestino);
 end;
 
-procedure scroll__x_part(porigen,pdestino:byte;scroll_x,scroll_y:word;orgy,sizey:word);
+procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0);
 var
-  long_x,long_x2,scroll_y2:word;
-begin
-scroll_x:=scroll_x and p_final[porigen].scroll.mask_x;
-scroll_y:=(p_final[porigen].scroll.long_y-scroll_y) and p_final[porigen].scroll.mask_y;
-scroll_y2:=scroll_y+orgy;
-if (scroll_y2>p_final[porigen].scroll.long_y) then scroll_y2:=scroll_y2-p_final[porigen].scroll.max_y;
-if ((scroll_x+p_final[porigen].scroll.max_x)>=p_final[porigen].scroll.long_x) then begin
-  long_x:=p_final[porigen].scroll.long_x-scroll_x;
-  long_x2:=p_final[porigen].scroll.max_x-long_x;
-  actualiza_trozo(0,orgy,long_x2,sizey,porigen,long_x,scroll_y2,long_x2,sizey,pdestino);
-end else begin
-  long_x:=p_final[porigen].scroll.max_x;
-end;
-actualiza_trozo(scroll_x,orgy,long_x,sizey,porigen,0,scroll_y2,long_x,sizey,pdestino);
-end;
-
-procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0;inc_y:word=0);
-var
-  pos_y:word;
+  pos_y,posicion_x_def,posicion_y_def,size_of_y,long_x,long_x2:word;
   temp_pos_x:pword;
-  posicion_x_def,posicion_y_def,size_of_y,long_x,long_x2:word;
 begin
 temp_pos_x:=posicion_x;
-pos_y:=inc_y;
-while (pos_y<p_final[porigen].scroll.max_x) do begin
-    posicion_x_def:=(temp_pos_x^+scroll_x) and p_final[porigen].scroll.mask_x;
-    posicion_y_def:=(pos_y+scroll_y) and p_final[porigen].scroll.mask_y;
-    if ((posicion_y_def+long_bloque_y)>p_final[porigen].scroll.max_y) then size_of_y:=p_final[porigen].scroll.max_y-posicion_y_def
+pos_y:=0;
+while (pos_y<scroll_final_y) do begin
+    posicion_x_def:=(temp_pos_x^+scroll_x) and p_final[porigen].mask_x;
+    posicion_y_def:=(pos_y+scroll_y) and p_final[porigen].mask_y;
+    if ((posicion_y_def+long_bloque_y)>p_final[porigen].y) then size_of_y:=long_bloque_y-((posicion_y_def+long_bloque_y)-p_final[porigen].y)
       else size_of_y:=long_bloque_y;
-    if ((posicion_x_def+p_final[porigen].scroll.max_x)>p_final[porigen].scroll.long_x) then begin
-      long_x:=p_final[porigen].scroll.long_x-posicion_x_def;
-      long_x2:=p_final[porigen].scroll.max_x-long_x;
+    if ((posicion_x_def+scroll_final_x)>p_final[porigen].x) then begin
+      long_x:=p_final[porigen].x-posicion_x_def;
+      long_x2:=scroll_final_x-long_x;
       actualiza_trozo(0,posicion_y_def,long_x2,size_of_y,porigen,long_x,pos_y,long_x2,size_of_y,pdestino);
-      if (size_of_y<>long_bloque_y) then actualiza_trozo(0,0,long_x2,long_bloque_y-size_of_y,porigen,long_x,pos_y+size_of_y,long_x2,size_of_y,pdestino);
-    end else begin
-      long_x:=p_final[porigen].scroll.max_x;
-    end;
+    end else long_x:=scroll_final_x;
+    if (size_of_y<long_bloque_y) then actualiza_trozo(0,posicion_y_def,long_x,size_of_y,porigen,long_x,pos_y+size_of_y,long_x2,size_of_y,pdestino);
     actualiza_trozo(posicion_x_def,posicion_y_def,long_x,size_of_y,porigen,0,pos_y,long_x,size_of_y,pdestino);
-    if (size_of_y<>long_bloque_y) then actualiza_trozo(posicion_x_def,0,long_x,long_bloque_y-size_of_y,porigen,0,pos_y+size_of_y,long_x,size_of_y,pdestino);
     pos_y:=pos_y+long_bloque_y;
     inc(temp_pos_x);
 end;
@@ -350,21 +343,18 @@ var
 begin
 temp_pos_y:=posicion_y;
 pos_x:=0;
-while (pos_x<p_final[porigen].scroll.max_x) do begin
-    posicion_y_def:=(temp_pos_y^+scroll_y) and p_final[porigen].scroll.mask_y;
-    posicion_x_def:=(pos_x+scroll_x) and p_final[porigen].scroll.mask_x;
-    if ((posicion_x_def+long_bloque_x)>p_final[porigen].scroll.max_x) then size_of_x:=p_final[porigen].scroll.max_x-posicion_x_def
+while (pos_x<scroll_final_x) do begin
+    posicion_y_def:=(temp_pos_y^+scroll_y) and p_final[porigen].mask_y;
+    posicion_x_def:=(pos_x+scroll_x) and p_final[porigen].mask_x;
+    if ((posicion_x_def+long_bloque_x)>scroll_final_x) then size_of_x:=long_bloque_x-((posicion_x_def+long_bloque_x)-scroll_final_x)
       else size_of_x:=long_bloque_x;
-    if ((posicion_y_def+p_final[porigen].scroll.max_y)>p_final[porigen].scroll.long_y) then begin
-      long_y:=p_final[porigen].scroll.long_y-posicion_y_def;
-      long_y2:=p_final[porigen].scroll.max_y-long_y;
+    if ((posicion_y_def+scroll_final_y)>p_final[porigen].y) then begin
+      long_y:=p_final[porigen].y-posicion_y_def;
+      long_y2:=scroll_final_y-long_y;
       actualiza_trozo(posicion_x_def,0,size_of_x,long_y2,porigen,pos_x,long_y,size_of_x,long_y2,pdestino);
-      if size_of_x<>long_bloque_x then actualiza_trozo(0,0,long_bloque_x-size_of_x,long_y2,porigen,pos_x+size_of_x,long_y,size_of_x,long_y2,pdestino);
-    end else begin
-      long_y:=p_final[porigen].scroll.max_y;
-    end;
+    end else long_y:=scroll_final_y;
+    if (size_of_x<long_bloque_x) then actualiza_trozo(0,posicion_y_def,size_of_x,long_y2,porigen,pos_x+size_of_x,long_y,size_of_x,long_y2,pdestino);
     actualiza_trozo(posicion_x_def,posicion_y_def,size_of_x,long_y,porigen,pos_x,0,size_of_x,long_y,pdestino);
-    if size_of_x<>long_bloque_x then actualiza_trozo(0,posicion_y_def,long_bloque_x-size_of_x,long_y,porigen,pos_x+size_of_x,0,size_of_x,long_y,pdestino);
     pos_x:=pos_x+long_bloque_x;
     inc(temp_pos_y);
 end;
@@ -372,21 +362,19 @@ end;
 
 procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
 var
-  pos_y,pos_x:word;
+  pos_y,pos_x,posicion_x_def,posicion_y_def,long_def_x,long_def_y:word;
   temp_pos_x:pword;
-  posicion_x_def,posicion_y_def:word;
-  long_def_x,long_def_y:word;
 begin
 pos_y:=0;
-while (pos_y<p_final[porigen].scroll.max_y) do begin
+while (pos_y<scroll_final_y) do begin
   temp_pos_x:=posicion_x;
   pos_x:=0;
-  while (pos_x<p_final[porigen].scroll.max_x) do begin
-    posicion_x_def:=(temp_pos_x^+pos_y+scroll_x) and p_final[porigen].scroll.mask_x;
-    posicion_y_def:=(posicion_y^+pos_x+scroll_y) and p_final[porigen].scroll.mask_y;
-    if (posicion_y_def+long_bloque_x)>p_final[porigen].scroll.mask_y then long_def_y:=p_final[porigen].scroll.mask_y-posicion_y_def
+  while (pos_x<scroll_final_x) do begin
+    posicion_x_def:=(temp_pos_x^+pos_y+scroll_x) and p_final[porigen].mask_x;
+    posicion_y_def:=(posicion_y^+pos_x+scroll_y) and p_final[porigen].mask_y;
+    if (posicion_y_def+long_bloque_x)>scroll_final_y then long_def_y:=long_bloque_x-((posicion_y_def+long_bloque_x)-scroll_final_y)
       else long_def_y:=long_bloque_x;
-    if (posicion_x_def+long_bloque_y)>p_final[porigen].scroll.mask_x then long_def_x:=p_final[porigen].scroll.mask_x-posicion_x_def
+    if (posicion_x_def+long_bloque_y)>scroll_final_x then long_def_x:=long_bloque_y-((posicion_x_def+long_bloque_y)-scroll_final_x)
       else long_def_x:=long_bloque_y;
     actualiza_trozo(posicion_x_def,posicion_y_def,long_def_x,long_def_y,porigen,pos_y,pos_x,long_def_x,long_def_y,pdestino);
     if long_def_x<long_bloque_y then actualiza_trozo(0,posicion_y_def,long_bloque_y-long_def_x,long_def_y,porigen,pos_y+long_def_x,pos_x,long_bloque_y-long_def_x,long_def_y,pdestino);
@@ -401,7 +389,7 @@ end;
 //put pixel especial interno solo para los gfx...
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
 var
-   punt:pword;
+  punt:pword;
 begin
 //SDL_LockSurface(pantalla[sitio]);
 punt:=pantalla[sitio].pixels;

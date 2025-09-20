@@ -19,13 +19,13 @@ const
         (n:'a75-07.ic24';l:$200;p:0;crc:$0af8b289),(n:'a75-08.ic23';l:$200;p:$200;crc:$abb002fb),
         (n:'a75-09.ic22';l:$200;p:$400;crc:$a7c6c277));
         //Dip
-        arkanoid_dip_a:array [0..6] of def_dip2=(
+        arkanoid_dip_a:array [0..5] of def_dip2=(
         (mask:1;name:'Allow Continue';number:2;val2:(1,0);name2:('No','Yes')),
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:8;name:'Difficulty';number:2;val2:(8,0);name2:('Easy','Hard')),
         (mask:$10;name:'Bonus Life';number:2;val2:($10,0);name2:('20K 60K 60K+','20K')),
         (mask:$20;name:'Lives';number:2;val2:($20,0);name2:('3','5')),
-        (mask:$c0;name:'Coinage';number:4;val4:($40,$c0,$80,0);name4:('2C 1C','1C 1C','1C 2C','1C 6C')),());
+        (mask:$c0;name:'Coinage';number:4;val4:($40,$c0,$80,0);name4:('2C 1C','1C 1C','1C 2C','1C 6C')));
 
 var
   paddle_select,palettebank,gfxbank:byte;
@@ -189,18 +189,19 @@ begin
 llamadas_maquina.bucle_general:=principal_arkanoid;
 llamadas_maquina.reset:=reset_arkanoid;
 llamadas_maquina.fps_max:=59.185608;
+llamadas_maquina.scanlines:=264;
 iniciar_arkanoid:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(12000000 div 2,264);
+z80_0:=cpu_z80.create(12000000 div 2);
 z80_0.change_ram_calls(getbyte_arkanoid,putbyte_arkanoid);
 z80_0.init_sound(arkanoid_sound_update);
 if not(roms_load(@memoria,arkanoid_rom)) then exit;
 //MCU CPU
-taito_68705_0:=taito_68705p.create(3000000,264,ARKANOID);
+taito_68705_0:=taito_68705p.create(3000000,ARKANOID);
 taito_68705_0.arkanoid_call:=arkanoid_read_prot;
 if not(roms_load(taito_68705_0.get_rom_addr,arkanoid_mcu)) then exit;
 //Sound Chip
@@ -224,8 +225,7 @@ for f:=0 to $1ff do begin
 end;
 set_pal(colores,$200);
 //Dip
-marcade.dswa:=$fe;
-marcade.dswa_val2:=@arkanoid_dip_a;
+init_dips(1,arkanoid_dip_a,$fe);
 //final
 iniciar_arkanoid:=true;
 end;

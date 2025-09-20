@@ -150,15 +150,15 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYSTEM
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
@@ -433,7 +433,6 @@ begin
  z80_1.reset;
  ym2203_0.reset;
  ym2203_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -458,6 +457,7 @@ begin
 llamadas_maquina.bucle_general:=psychic5_principal;
 llamadas_maquina.reset:=reset_psychic5;
 llamadas_maquina.fps_max:=54.001512;
+llamadas_maquina.scanlines:=256;
 llamadas_maquina.save_qsnap:=psychic5_qsave;
 llamadas_maquina.load_qsnap:=psychic5_qload;
 iniciar_psychic5:=false;
@@ -465,14 +465,13 @@ iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
 screen_init(3,512,1024);
-screen_mod_scroll(3,512,256,511,1024,256,1023);
 screen_init(4,512,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,256);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_ram_calls(psychic5_getbyte,psychic5_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(5000000,256);
+z80_1:=cpu_z80.create(5000000);
 z80_1.change_ram_calls(psychic5_snd_getbyte,psychic5_snd_putbyte);
 z80_1.change_io_calls(nil,psychic5_outbyte);
 z80_1.init_sound(psychic5_sound_update);

@@ -17,7 +17,7 @@ type
       msm5205_num:byte;
   end;
   seibu_snd_type=class(snd_chip_class)
-      constructor create(snd_type:byte;clock,cpu_sync:dword;snd_rom:pbyte;encrypted:boolean;amp:single=1);
+      constructor create(snd_type:byte;clock:dword;snd_rom:pbyte;encrypted:boolean;amp:single=1);
       destructor free;
    public
       adpcm_0,adpcm_1:seibu_adpcm_chip;
@@ -162,9 +162,9 @@ begin
 	end else seibu_m0_vector:=0;
 end;
 
-constructor seibu_snd_type.create(snd_type:byte;clock,cpu_sync:dword;snd_rom:pbyte;encrypted:boolean;amp:single=1);
+constructor seibu_snd_type.create(snd_type:byte;clock:dword;snd_rom:pbyte;encrypted:boolean;amp:single=1);
 begin
-  self.z80:=cpu_z80.create(clock,cpu_sync);
+  self.z80:=cpu_z80.create(clock);
   self.z80.change_misc_calls(nil,nil,nil,seibu_m0_vector);
   self.snd_type:=snd_type;
   copymemory(@self.decrypt,snd_rom,$2000);

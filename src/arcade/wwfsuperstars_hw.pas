@@ -273,18 +273,18 @@ begin
 llamadas_maquina.bucle_general:=wwfsstar_principal;
 llamadas_maquina.reset:=reset_wwfsstar;
 llamadas_maquina.fps_max:=57.444853;
+llamadas_maquina.scanlines:=272;
 iniciar_wwfsstar:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,false,true);
 screen_init(3,512,512);
-screen_mod_scroll(3,512,256,511,512,256,511);
 iniciar_video(256,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,272);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(wwfsstar_getword,wwfsstar_putword);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,272);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(wwfsstar_snd_getbyte,wwfsstar_snd_putbyte);
 z80_0.init_sound(wwfsstar_sound_update);
 //Sound Chips

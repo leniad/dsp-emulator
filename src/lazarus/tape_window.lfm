@@ -15,7 +15,7 @@ object tape_window1: Ttape_window1
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
-  LCLVersion = '4.0.0.1'
+  LCLVersion = '4.0.0.3'
   OnClose = FormClose
   OnShow = FormShow
   object Edit1: TEdit

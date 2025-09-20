@@ -54,7 +54,7 @@ while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
       z80_0.run(frame_main);
       frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-      tms_0.refresh(f);
+      tms_0.refresh_ntsc(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
   video_sync;
@@ -116,7 +116,6 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  tms_0.reset;
- reset_game_general;
  frame_main:=z80_0.tframes;
  sg1000_0.keys[0]:=$ff;
  sg1000_0.keys[1]:=$ff;
@@ -178,11 +177,12 @@ llamadas_maquina.reset:=reset_sg;
 llamadas_maquina.cartuchos:=abrir_sg;
 llamadas_maquina.grabar_snapshot:=sg1000_grabar_snapshot;
 llamadas_maquina.fps_max:=59.922743;
+llamadas_maquina.scanlines:=262;
 iniciar_audio(false);
 screen_init(1,284,243);
 iniciar_video(284,243);
 //Main CPU
-z80_0:=cpu_z80.create(3579545,262);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(sg_getbyte,sg_putbyte);
 z80_0.change_io_calls(sg_inbyte,sg_outbyte);
 z80_0.init_sound(sg_sound_update);

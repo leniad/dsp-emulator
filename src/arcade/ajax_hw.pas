@@ -42,18 +42,18 @@ const
         (n:'770c11-e.b7';l:$10000;p:$40000;crc:$dd553541),(n:'770c11-f.b6';l:$10000;p:$50000;crc:$3f78bd0f),
         (n:'770c11-g.b5';l:$10000;p:$60000;crc:$078c51b2),(n:'770c11-h.b4';l:$10000;p:$70000;crc:$7300c2e1));
         //DIP
-        ajax_dip_a:array [0..2] of def_dip2=(
+        ajax_dip_a:array [0..1] of def_dip2=(
         (mask:$0f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin')),());
-        ajax_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','No Coin')));
+        ajax_dip_b:array [0..4] of def_dip2=(
         (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
         (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 150K','10K 200K','30K','50K')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        ajax_dip_c:array [0..2] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        ajax_dip_c:array [0..1] of def_dip2=(
         (mask:$1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:$8;name:'Control in 3D Stages';number:2;val2:(8,0);name2:('Normal','Inverted')),());
+        (mask:$8;name:'Control in 3D Stages';number:2;val2:(8,0);name2:('Normal','Inverted')));
 
 var
  tiles_rom,sprite_rom,k007232_1_rom,k007232_2_rom,zoom_rom:pbyte;
@@ -367,35 +367,33 @@ llamadas_maquina.close:=cerrar_ajax;
 llamadas_maquina.reset:=reset_ajax;
 llamadas_maquina.bucle_general:=ajax_principal;
 llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.scanlines:=256;
 iniciar_ajax:=false;
 main_screen.rot90_screen:=true;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,512,512,true); //Para el K051316
-screen_mod_scroll(4,512,512,511,512,512,511);
 screen_init(5,1024,1024,false,true);
 iniciar_video(304,224,true);
 iniciar_audio(true);
 //Main CPU
-konami_0:=cpu_konami.create(12000000,256);
+konami_0:=cpu_konami.create(12000000);
 konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
 if not(roms_load(@temp_mem,ajax_rom)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
 for f:=0 to 3 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 for f:=0 to 7 do copymemory(@rom_bank[4+f,0],@temp_mem[$10000+(f*$2000)],$2000);
 //Sub CPU
-hd6309_0:=cpu_hd6309.create(3000000,256,TCPU_HD6309E);
+hd6309_0:=cpu_hd6309.create(3000000,TCPU_HD6309E);
 hd6309_0.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
 if not(roms_load(@temp_mem,ajax_sub)) then exit;
 copymemory(@mem_misc[$a000],@temp_mem[$2000],$6000);
 copymemory(@rom_sub_bank[8,0],@temp_mem[0],$2000);
 for f:=0 to 7 do copymemory(@rom_sub_bank[f,0],@temp_mem[$8000+(f*$2000)],$2000);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(ajax_snd_getbyte,ajax_snd_putbyte);
 z80_0.init_sound(ajax_sound_update);
 if not(roms_load(@mem_snd,ajax_sound)) then exit;
@@ -419,12 +417,9 @@ getmem(zoom_rom,$80000);
 if not(roms_load(zoom_rom,ajax_zoom)) then exit;
 k051316_0:=k051316_chip.create(4,2,ajax_k051316_cb,zoom_rom,$80000,BPP7);
 //DIP
-marcade.dswa:=$ff;
-marcade.dswa_val2:=@ajax_dip_a;
-marcade.dswb:=$5a;
-marcade.dswb_val2:=@ajax_dip_b;
-marcade.dswc:=$ff;
-marcade.dswc_val2:=@ajax_dip_c;
+init_dips(1,ajax_dip_a,$ff);
+init_dips(2,ajax_dip_b,$5a);
+init_dips(3,ajax_dip_c,$ff);
 //final
 iniciar_ajax:=true;
 end;

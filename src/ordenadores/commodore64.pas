@@ -58,14 +58,14 @@ if event.keyboard then begin
   //Line 0
   if keyboard[KEYBOARD_BACKSPACE] then c64_keyboard[0]:=(c64_keyboard[0] and $fe) else c64_keyboard[0]:=(c64_keyboard[0] or $1);
   if keyboard[KEYBOARD_RETURN] then c64_keyboard[0]:=(c64_keyboard[0] and $fd) else c64_keyboard[0]:=(c64_keyboard[0] or $2);
-  //if keyboard[KEYBOARD_J] then c64_keyboard[0]:=(c64_keyboard[0] and $fb) else c64_keyboard[0]:=(c64_keyboard[0] or $4);
-  if keyboard[KEYBOARD_N7] then c64_keyboard[0]:=(c64_keyboard[0] and $f7) else c64_keyboard[0]:=(c64_keyboard[0] or $8);
-  if keyboard[KEYBOARD_N1] then c64_keyboard[0]:=(c64_keyboard[0] and $ef) else c64_keyboard[0]:=(c64_keyboard[0] or $10);
-  if keyboard[KEYBOARD_N3] then c64_keyboard[0]:=(c64_keyboard[0] and $df) else c64_keyboard[0]:=(c64_keyboard[0] or $20);
-  if keyboard[KEYBOARD_N1] then c64_keyboard[0]:=(c64_keyboard[0] and $bf) else c64_keyboard[0]:=(c64_keyboard[0] or $40);
-  //if keyboard[KEYBOARD_N] then c64_keyboard[0]:=(c64_keyboard[0] and $7f) else c64_keyboard[0]:=(c64_keyboard[0] or $80);
+  //if keyboard[KEYBOARD_CRSR RT] then c64_keyboard[0]:=(c64_keyboard[0] and $fb) else c64_keyboard[0]:=(c64_keyboard[0] or $4);
+  if (keyboard[KEYBOARD_7] and keyboard[KEYBOARD_RSHIFT]) then c64_keyboard[0]:=(c64_keyboard[0] and $f7) else c64_keyboard[0]:=(c64_keyboard[0] or $8);
+  if (keyboard[KEYBOARD_1] and keyboard[KEYBOARD_RSHIFT]) then c64_keyboard[0]:=(c64_keyboard[0] and $ef) else c64_keyboard[0]:=(c64_keyboard[0] or $10);
+  if (keyboard[KEYBOARD_3] and keyboard[KEYBOARD_RSHIFT]) then c64_keyboard[0]:=(c64_keyboard[0] and $df) else c64_keyboard[0]:=(c64_keyboard[0] or $20);
+  if (keyboard[KEYBOARD_1] and keyboard[KEYBOARD_RSHIFT]) then c64_keyboard[0]:=(c64_keyboard[0] and $bf) else c64_keyboard[0]:=(c64_keyboard[0] or $40);
+  //if keyboard[KEYBOARD_CRSR DN] then c64_keyboard[0]:=(c64_keyboard[0] and $7f) else c64_keyboard[0]:=(c64_keyboard[0] or $80);
   //Line 1
-  if keyboard[KEYBOARD_3] then c64_keyboard[1]:=(c64_keyboard[1] and $fe) else c64_keyboard[1]:=(c64_keyboard[1] or $1);
+  if (keyboard[KEYBOARD_3] and not(keyboard[KEYBOARD_RSHIFT])) then c64_keyboard[1]:=(c64_keyboard[1] and $fe) else c64_keyboard[1]:=(c64_keyboard[1] or $1);
   if keyboard[KEYBOARD_W] then c64_keyboard[1]:=(c64_keyboard[1] and $fd) else c64_keyboard[1]:=(c64_keyboard[1] or $2);
   if keyboard[KEYBOARD_A] then c64_keyboard[1]:=(c64_keyboard[1] and $fb) else c64_keyboard[1]:=(c64_keyboard[1] or $4);
   if keyboard[KEYBOARD_4] then c64_keyboard[1]:=(c64_keyboard[1] and $f7) else c64_keyboard[1]:=(c64_keyboard[1] or $8);
@@ -74,7 +74,7 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_E] then c64_keyboard[1]:=(c64_keyboard[1] and $bf) else c64_keyboard[1]:=(c64_keyboard[1] or $40);
   if keyboard[KEYBOARD_LSHIFT] then c64_keyboard[1]:=(c64_keyboard[1] and $7f) else c64_keyboard[1]:=(c64_keyboard[1] or $80);
   //Line 2
-  if keyboard[KEYBOARD_5] then c64_keyboard[2]:=(c64_keyboard[2] and $fe) else c64_keyboard[2]:=(c64_keyboard[2] or $1);
+  if (keyboard[KEYBOARD_5] and not(keyboard[KEYBOARD_RSHIFT])) then c64_keyboard[2]:=(c64_keyboard[2] and $fe) else c64_keyboard[2]:=(c64_keyboard[2] or $1);
   if keyboard[KEYBOARD_R] then c64_keyboard[2]:=(c64_keyboard[2] and $fd) else c64_keyboard[2]:=(c64_keyboard[2] or $2);
   if keyboard[KEYBOARD_D] then c64_keyboard[2]:=(c64_keyboard[2] and $fb) else c64_keyboard[2]:=(c64_keyboard[2] or $4);
   if keyboard[KEYBOARD_6] then c64_keyboard[2]:=(c64_keyboard[2] and $f7) else c64_keyboard[2]:=(c64_keyboard[2] or $8);
@@ -83,7 +83,7 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_T] then c64_keyboard[2]:=(c64_keyboard[2] and $bf) else c64_keyboard[2]:=(c64_keyboard[2] or $40);
   if keyboard[KEYBOARD_X] then c64_keyboard[2]:=(c64_keyboard[2] and $7f) else c64_keyboard[2]:=(c64_keyboard[2] or $80);
   //Line 3
-  if keyboard[KEYBOARD_7] then c64_keyboard[3]:=(c64_keyboard[3] and $fe) else c64_keyboard[3]:=(c64_keyboard[3] or $1);
+  if (keyboard[KEYBOARD_7] and not(keyboard[KEYBOARD_RSHIFT])) then c64_keyboard[3]:=(c64_keyboard[3] and $fe) else c64_keyboard[3]:=(c64_keyboard[3] or $1);
   if keyboard[KEYBOARD_Y] then c64_keyboard[3]:=(c64_keyboard[3] and $fd) else c64_keyboard[3]:=(c64_keyboard[3] or $2);
   if keyboard[KEYBOARD_G] then c64_keyboard[3]:=(c64_keyboard[3] and $fb) else c64_keyboard[3]:=(c64_keyboard[3] or $4);
   if keyboard[KEYBOARD_8] then c64_keyboard[3]:=(c64_keyboard[3] and $f7) else c64_keyboard[3]:=(c64_keyboard[3] or $8);
@@ -101,42 +101,42 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_O] then c64_keyboard[4]:=(c64_keyboard[4] and $bf) else c64_keyboard[4]:=(c64_keyboard[4] or $40);
   if keyboard[KEYBOARD_N] then c64_keyboard[4]:=(c64_keyboard[4] and $7f) else c64_keyboard[4]:=(c64_keyboard[4] or $80);
   //Line 5
-  if keyboard[KEYBOARD_FILA1_T2] then c64_keyboard[5]:=(c64_keyboard[5] and $fe) else c64_keyboard[5]:=(c64_keyboard[5] or $1);
+  if keyboard[KEYBOARD_FILA1_T2]{+} then c64_keyboard[5]:=(c64_keyboard[5] and $fe) else c64_keyboard[5]:=(c64_keyboard[5] or $1);
   if keyboard[KEYBOARD_P] then c64_keyboard[5]:=(c64_keyboard[5] and $fd) else c64_keyboard[5]:=(c64_keyboard[5] or $2);
   if keyboard[KEYBOARD_L] then c64_keyboard[5]:=(c64_keyboard[5] and $fb) else c64_keyboard[5]:=(c64_keyboard[5] or $4);
-  if keyboard[KEYBOARD_FILA3_T3] then c64_keyboard[5]:=(c64_keyboard[5] and $f7) else c64_keyboard[5]:=(c64_keyboard[5] or $8);
-  if keyboard[KEYBOARD_FILA3_T2] then c64_keyboard[5]:=(c64_keyboard[5] and $ef) else c64_keyboard[5]:=(c64_keyboard[5] or $10);
-  //if keyboard[KEYBOARD_K] then c64_keyboard[5]:=(c64_keyboard[5] and $df) else c64_keyboard[5]:=(c64_keyboard[5] or $20);
-  //if keyboard[KEYBOARD_O] then c64_keyboard[5]:=(c64_keyboard[5] and $bf) else c64_keyboard[5]:=(c64_keyboard[5] or $40);
-  if keyboard[KEYBOARD_FILA3_T1] then c64_keyboard[5]:=(c64_keyboard[5] and $7f) else c64_keyboard[5]:=(c64_keyboard[5] or $80);
+  if keyboard[KEYBOARD_FILA3_T3]{-} then c64_keyboard[5]:=(c64_keyboard[5] and $f7) else c64_keyboard[5]:=(c64_keyboard[5] or $8);
+  if keyboard[KEYBOARD_FILA3_T2]{.} then c64_keyboard[5]:=(c64_keyboard[5] and $ef) else c64_keyboard[5]:=(c64_keyboard[5] or $10);
+  //if keyboard[KEYBOARD_:] then c64_keyboard[5]:=(c64_keyboard[5] and $df) else c64_keyboard[5]:=(c64_keyboard[5] or $20);
+  //if keyboard[KEYBOARD_@] then c64_keyboard[5]:=(c64_keyboard[5] and $bf) else c64_keyboard[5]:=(c64_keyboard[5] or $40);
+  if keyboard[KEYBOARD_FILA3_T1]{,} then c64_keyboard[5]:=(c64_keyboard[5] and $7f) else c64_keyboard[5]:=(c64_keyboard[5] or $80);
   //Line 6
-  //if keyboard[KEYBOARD_9] then c64_keyboard[6]:=(c64_keyboard[6] and $fe) else c64_keyboard[6]:=(c64_keyboard[6] or $1);
-  //if keyboard[KEYBOARD_I] then c64_keyboard[6]:=(c64_keyboard[6] and $fd) else c64_keyboard[6]:=(c64_keyboard[6] or $2);
-  //if keyboard[KEYBOARD_J] then c64_keyboard[6]:=(c64_keyboard[6] and $fb) else c64_keyboard[6]:=(c64_keyboard[6] or $4);
-  //if keyboard[KEYBOARD_0] then c64_keyboard[6]:=(c64_keyboard[6] and $f7) else c64_keyboard[6]:=(c64_keyboard[6] or $8);
-  if keyboard[KEYBOARD_RSHIFT] then c64_keyboard[6]:=(c64_keyboard[6] and $ef) else c64_keyboard[6]:=(c64_keyboard[6] or $10);
-  //if keyboard[KEYBOARD_K] then c64_keyboard[6]:=(c64_keyboard[6] and $df) else c64_keyboard[6]:=(c64_keyboard[6] or $20);
-  //if keyboard[KEYBOARD_O] then c64_keyboard[6]:=(c64_keyboard[6] and $bf) else c64_keyboard[6]:=(c64_keyboard[6] or $40);
-  //if keyboard[KEYBOARD_N] then c64_keyboard[6]:=(c64_keyboard[6] and $7f) else c64_keyboard[6]:=(c64_keyboard[6] or $80);
+  //if keyboard[KEYBOARD_libra] then c64_keyboard[6]:=(c64_keyboard[6] and $fe) else c64_keyboard[6]:=(c64_keyboard[6] or $1);
+  //if keyboard[KEYBOARD_*] then c64_keyboard[6]:=(c64_keyboard[6] and $fd) else c64_keyboard[6]:=(c64_keyboard[6] or $2);
+  //if keyboard[KEYBOARD_;] then c64_keyboard[6]:=(c64_keyboard[6] and $fb) else c64_keyboard[6]:=(c64_keyboard[6] or $4);
+  //if keyboard[KEYBOARD_HOME] then c64_keyboard[6]:=(c64_keyboard[6] and $f7) else c64_keyboard[6]:=(c64_keyboard[6] or $8);
+  //if keyboard[KEYBOARD_RSHIFT] then c64_keyboard[6]:=(c64_keyboard[6] and $ef) else c64_keyboard[6]:=(c64_keyboard[6] or $10);
+  //if keyboard[KEYBOARD_=] then c64_keyboard[6]:=(c64_keyboard[6] and $df) else c64_keyboard[6]:=(c64_keyboard[6] or $20);
+  //if keyboard[KEYBOARD_^] then c64_keyboard[6]:=(c64_keyboard[6] and $bf) else c64_keyboard[6]:=(c64_keyboard[6] or $40);
+  //if keyboard[KEYBOARD_/] then c64_keyboard[6]:=(c64_keyboard[6] and $7f) else c64_keyboard[6]:=(c64_keyboard[6] or $80);
   //Line 7
-  if keyboard[KEYBOARD_1] then begin
+  if (keyboard[KEYBOARD_1] and not(keyboard[KEYBOARD_RSHIFT])) then begin
     c64_keyboard[7]:=(c64_keyboard[7] and $fe);
     c64_keyboard_i[0]:=(c64_keyboard_i[0] and $fe);
    end else begin
-    c64_keyboard[7]:=(c64_keyboard[7] or $1);
-    c64_keyboard_i[0]:=(c64_keyboard_i[0] or $1);
+    c64_keyboard[7]:=(c64_keyboard[7] or 1);
+    c64_keyboard_i[0]:=(c64_keyboard_i[0] or 1);
    end;
-  //if keyboard[KEYBOARD_I] then c64_keyboard[7]:=(c64_keyboard[7] and $fd) else c64_keyboard[7]:=(c64_keyboard[7] or $2);
-  if keyboard[KEYBOARD_RCTRL] then c64_keyboard[7]:=(c64_keyboard[7] and $fb) else c64_keyboard[7]:=(c64_keyboard[7] or $4);
+  //if keyboard[KEYBOARD_<-] then c64_keyboard[7]:=(c64_keyboard[7] and $fd) else c64_keyboard[7]:=(c64_keyboard[7] or $2);
+  if keyboard[KEYBOARD_LCTRL] then c64_keyboard[7]:=(c64_keyboard[7] and $fb) else c64_keyboard[7]:=(c64_keyboard[7] or $4);
   if keyboard[KEYBOARD_2] then begin
     c64_keyboard[7]:=(c64_keyboard[7] and $f7);
     c64_keyboard_i[3]:=(c64_keyboard_i[3] and $f7);
   end else begin
-    c64_keyboard[7]:=(c64_keyboard[7] or $8);
-    c64_keyboard_i[3]:=(c64_keyboard_i[3] or $8);
+    c64_keyboard[7]:=(c64_keyboard[7] or 8);
+    c64_keyboard_i[3]:=(c64_keyboard_i[3] or 8);
   end;
   if keyboard[KEYBOARD_SPACE] then c64_keyboard[7]:=(c64_keyboard[7] and $ef) else c64_keyboard[7]:=(c64_keyboard[7] or $10);
-  //if keyboard[KEYBOARD_K] then c64_keyboard[7]:=(c64_keyboard[7] and $df) else c64_keyboard[7]:=(c64_keyboard[7] or $20);
+  //if keyboard[KEYBOARD_C=] then c64_keyboard[7]:=(c64_keyboard[7] and $df) else c64_keyboard[7]:=(c64_keyboard[7] or $20);
   if keyboard[KEYBOARD_Q] then c64_keyboard[7]:=(c64_keyboard[7] and $bf) else c64_keyboard[7]:=(c64_keyboard[7] or $40);
   if keyboard[KEYBOARD_ESCAPE] then c64_keyboard[7]:=(c64_keyboard[7] and $7f) else c64_keyboard[7]:=(c64_keyboard[7] or $80);
 end;
@@ -362,7 +362,6 @@ mos6526_1.reset;
 {$ENDIF}
 mos6566_0.reset;
 sid_0.reset;
-reset_game_general;
 for f:=0 to 7 do begin
   c64_keyboard[f]:=$ff;
   c64_keyboard_i[f]:=$ff;
@@ -455,6 +454,7 @@ begin
   llamadas_maquina.close:=c64_cerrar;
   llamadas_maquina.reset:=c64_reset;
   llamadas_maquina.fps_max:=985248/(312*63);
+  llamadas_maquina.scanlines:=312;
   llamadas_maquina.cintas:=c64_tapes;
   llamadas_maquina.cartuchos:=c64_loaddisk;
   iniciar_c64:=false;
@@ -479,7 +479,7 @@ begin
   //  ---------> Total visible  284
   screen_init(1,384,270);
   iniciar_video(384,270);
-  m6502_0:=cpu_m6502.create(985248,312,TCPU_M6502);
+  m6502_0:=cpu_m6502.create(985248,TCPU_M6502);
   m6502_0.change_ram_calls(c64_getbyte,c64_putbyte);
   m6502_0.change_despues_instruccion(c64_despues_instruccion);
   m6502_0.init_sound(c64_sound_update);

@@ -655,13 +655,12 @@ end;
 begin
 llamadas_maquina.close:=cerrar_tmnt;
 llamadas_maquina.reset:=reset_tmnt;
+llamadas_maquina.scanlines:=256;
 iniciar_tmnt:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 case main_vars.tipo_maquina of
   214:begin //TMNT
@@ -669,10 +668,10 @@ case main_vars.tipo_maquina of
         iniciar_video(320,224,true);
         iniciar_audio(false); //Sonido mono
         //Main CPU
-        m68000_0:=cpu_m68000.create(8000000,256);
+        m68000_0:=cpu_m68000.create(8000000);
         m68000_0.change_ram16_calls(tmnt_getword,tmnt_putword);
         //Sound CPU
-        z80_0:=cpu_z80.create(3579545,256);
+        z80_0:=cpu_z80.create(3579545);
         z80_0.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
         z80_0.init_sound(tmnt_sound_update);
         //cargar roms
@@ -743,10 +742,10 @@ case main_vars.tipo_maquina of
         iniciar_video(288,224,true);
         iniciar_audio(true); //Sonido stereo
         //Main CPU
-        m68000_0:=cpu_m68000.create(16000000,256);
+        m68000_0:=cpu_m68000.create(16000000);
         m68000_0.change_ram16_calls(ssriders_getword,ssriders_putword);
         //Sound CPU
-        z80_0:=cpu_z80.create(8000000,256);
+        z80_0:=cpu_z80.create(8000000);
         z80_0.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
         z80_0.init_sound(ssriders_sound_update);
         //cargar roms

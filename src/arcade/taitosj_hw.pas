@@ -604,22 +604,17 @@ case main_vars.tipo_maquina of
   189:llamadas_maquina.bucle_general:=taitosj_nomcu_principal;
 end;
 llamadas_maquina.reset:=taitosj_reset;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
-//Back
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
-//Mid
-screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
-//Front
-screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
+screen_init(1,256,256,true); //Back
+screen_init(2,256,256,true); //Mid
+screen_init(3,256,256,true); //Front
 screen_init(4,256,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,256);
+z80_1:=cpu_z80.create(3000000);
 z80_1.change_ram_calls(taitosj_snd_getbyte,taitosj_snd_putbyte);
 z80_1.init_sound(taitosj_sound_update);
 //IRQ sonido
@@ -648,7 +643,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@mem_snd,elevator_sonido)) then exit;
         //MCU CPU
         if not(roms_load(@mcu_mem,elevator_mcu)) then exit;
-        m6805_0:=cpu_m6805.create(3000000,256,tipo_m68705);
+        m6805_0:=cpu_m6805.create(3000000,tipo_m68705);
         m6805_0.change_ram_calls(mcu_taitosj_getbyte,mcu_taitosj_putbyte);
         //cargar chars
         if not(roms_load(@gfx_rom,elevator_char)) then exit;

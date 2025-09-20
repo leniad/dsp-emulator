@@ -17,10 +17,10 @@ const
         (nombre:'1.wav'),(nombre:'2.wav'),(nombre:'3.wav'),(nombre:'4.wav'),(nombre:'5.wav'),
         (nombre:'6.wav'),(nombre:'7.wav'),(nombre:'8.wav'),(nombre:'9.wav'));
         //DIP
-        spaceinv_dip:array [0..3] of def_dip2=(
+        spaceinv_dip:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('1000','1500')),
-        (mask:$80;name:'Display Coinage';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Display Coinage';number:2;val2:($80,0);name2:('Off','On')));
 
 var
   shift_data:word;
@@ -28,8 +28,7 @@ var
 
 procedure update_video_spaceinv;
 var
-  x,y,video_data:byte;
-  i,pos_temp,val:byte;
+  x,y,video_data,i,pos_temp,val:byte;
   pos:word;
   pen:array[0..$ffff] of word;
 begin
@@ -108,7 +107,7 @@ procedure spaceinv_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7fff;
 case direccion of
-  0..$1fff,$4000..$5fff:exit;
+  0..$1fff,$4000..$5fff:;
   $2000..$3fff,$6000..$7fff:memoria[$2000+(direccion and $1fff)]:=valor;
 end;
 end;
@@ -220,13 +219,14 @@ iniciar_spaceinv:=false;
 llamadas_maquina.bucle_general:=spaceinv_principal;
 llamadas_maquina.reset:=reset_spaceinv;
 llamadas_maquina.fps_max:=59.541985;
+llamadas_maquina.scanlines:=262;
 llamadas_maquina.save_qsnap:=spaceinv_qsave;
 llamadas_maquina.load_qsnap:=spaceinv_qload;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(1996800,262);
+z80_0:=cpu_z80.create(1996800);
 z80_0.change_io_calls(spaceinv_inbyte,spaceinv_outbyte);
 z80_0.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
 //cargar roms
@@ -234,8 +234,7 @@ if not(roms_load(@memoria,spaceinv_rom)) then exit;
 //Sound
 if (load_samples(spaceinv_samples)) then z80_0.init_sound(spaceinv_sound_update);
 //DIP
-marcade.dswa:=0;
-marcade.dswa_val2:=@spaceinv_dip;
+init_dips(1,spaceinv_dip,0);
 colores[0].r:=0;
 colores[0].g:=0;
 colores[0].b:=0;

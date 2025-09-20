@@ -22,17 +22,17 @@ const
         solomon_tiles:array[0..1] of tipo_roms=(
         (n:'10.3p';l:$8000;p:0;crc:$8310c2a1),(n:'9.3m';l:$8000;p:$8000;crc:$ab7e6c42));
         //Dip
-        solomon_dip_a:array [0..5] of def_dip2=(
+        solomon_dip_a:array [0..4] of def_dip2=(
         (mask:1;name:'Demo Sound';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Cabinet';number:2;val2:(2,0);name2:('Upright','Cocktail')),
         (mask:$c;name:'Lives';number:4;val4:($c,0,8,4);name4:('2','3','4','5')),
         (mask:$30;name:'Coin B';number:4;val4:($20,0,$10,$30);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
-        (mask:$c0;name:'Coin A';number:4;val4:($80,0,$40,$c0);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),());
-        solomon_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Coin A';number:4;val4:($80,0,$40,$c0);name4:('2C 1C','1C 1C','1C 2C','1C 3C')));
+        solomon_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,0,1,3);name4:('Easy','Normal','Harder','Difficult')),
         (mask:$c;name:'Time Speed';number:4;val4:(8,0,4,$c);name4:('Slow','Normal','Faster','Fastest')),
         (mask:$10;name:'Extra';number:2;val2:(0,$10);name2:('Normal','Difficult')),
-        (mask:$e0;name:'Bonus Life';number:8;val8:(0,$80,$40,$c0,$20,$a0,$60,$e0);name8:('30K 200K 500K','100K 300K 800K','30K 200K','100K 300K','30K','100K','200K','None')),());
+        (mask:$e0;name:'Bonus Life';number:8;val8:(0,$80,$40,$c0,$20,$a0,$60,$e0);name8:('30K 200K 500K','100K 300K 800K','30K 200K','100K 300K','30K','100K','200K','None')));
 
 var
  sound_latch:byte;
@@ -268,6 +268,7 @@ const
 begin
 llamadas_maquina.bucle_general:=solomon_principal;
 llamadas_maquina.reset:=reset_solomon;
+llamadas_maquina.scanlines:=256;
 iniciar_solomon:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -275,7 +276,7 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(solomon_getbyte,solomon_putbyte);
 if not(roms_load(@memoria_temp,solomon_rom)) then exit;
 copymemory(@memoria,@memoria_temp,$4000);
@@ -283,7 +284,7 @@ copymemory(@memoria[$4000],@memoria_temp[$8000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$f000],@memoria_temp[$c000],$1000);
 //Sound CPU
-z80_1:=cpu_z80.create(3072000,256);
+z80_1:=cpu_z80.create(3072000);
 z80_1.change_ram_calls(solomon_snd_getbyte,solomon_snd_putbyte);
 z80_1.change_io_calls(nil,solomon_snd_outbyte);
 z80_1.init_sound(solomon_sound_update);
@@ -310,10 +311,8 @@ gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,512*32*8,2*512*32*8,3*512*32*8);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=2;
-marcade.dswa_val2:=@solomon_dip_a;
-marcade.dswb:=0;
-marcade.dswb_val2:=@solomon_dip_b;
+init_dips(1,solomon_dip_a,2);
+init_dips(2,solomon_dip_b,0);
 //final
 iniciar_solomon:=true;
 end;

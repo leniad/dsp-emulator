@@ -18,7 +18,7 @@ type
   upd7810_cb_3=function(mask:byte):byte;
   npreg_upd7810=^nreg_upd7810;
   cpu_upd7810=class(cpu_class)
-                constructor create(clock:dword;frames_div:single;cpu:byte);
+                constructor create(clock:dword;cpu:byte);
                 destructor free;
               public
                 ram:array[0..$ff] of byte;
@@ -149,7 +149,7 @@ const
   UPD7810_PORTD=3;
   UPD7810_PORTF=4;
 
-constructor cpu_upd7810.create(clock:dword;frames_div:single;cpu:byte);
+constructor cpu_upd7810.create(clock:dword;cpu:byte);
 var
   divisor:byte;
 begin
@@ -161,7 +161,7 @@ begin
   fillchar(self.r^,sizeof(nreg_upd7810),0);
   self.numero_cpu:=cpu_main_init(clock div divisor);
   self.clock:=clock div divisor;
-  self.tframes:=(clock/divisor/frames_div)/llamadas_maquina.fps_max;
+  self.tframes:=(clock/divisor/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
   self.cpu_type:=cpu;
   pa_in_cb:=nil;
   pb_in_cb:=nil;

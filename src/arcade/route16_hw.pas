@@ -18,12 +18,12 @@ const
         route16_proms:array[0..1] of tipo_roms=(
         (n:'mb7052.59';l:$100;p:0;crc:$08793ef7),(n:'mb7052.61';l:$100;p:$100;crc:$08793ef7));
         //Dip
-        route16_dip_a:array [0..5] of def_dip2=(
+        route16_dip_a:array [0..4] of def_dip2=(
         (mask:$1;name:'Lives';number:2;val2:(0,1);name2:('3','5')),
         (mask:$18;name:'Coinage';number:4;val4:(8,0,$10,$18);name4:('2C 1C','1C 1C','1C 2C','2C 1C')),
         (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')),
         (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')));
         //Speak and rescue
         speakres_cpu1:array[0..5] of tipo_roms=(
         (n:'speakres.1';l:$800;p:0;crc:$6026e4ea),(n:'speakres.2';l:$800;p:$800;crc:$93f0d4da),
@@ -34,13 +34,13 @@ const
         speakres_proms:array[0..1] of tipo_roms=(
         (n:'im5623.f10';l:$100;p:0;crc:$08793ef7),(n:'im5623.f12';l:$100;p:$100;crc:$08793ef7));
         //Dip
-        speakres_dip_a:array [0..6] of def_dip2=(
+        speakres_dip_a:array [0..5] of def_dip2=(
         (mask:$3;name:'Lives';number:4;val4:(0,1,2,3);name4:('3','4','5','6')),
         (mask:$c;name:'2 Attackers at Wave';number:4;val4:(0,4,8,$c);name4:('2','3','4','5')),
         (mask:$10;name:'Bonus Life';number:2;val2:(0,$10);name2:('5K','8K')),
         (mask:$20;name:'Cabinet';number:2;val2:($20,0);name2:('Upright','Cocktail')),
         (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('Off','On')),
-        (mask:$80;name:'Demo Voices';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Demo Voices';number:2;val2:(0,$80);name2:('Off','On')));
 
 var
  pal1,pal2:byte;
@@ -273,14 +273,15 @@ begin
 llamadas_maquina.bucle_general:=route16_hw_principal;
 llamadas_maquina.reset:=reset_route16_hw;
 llamadas_maquina.fps_max:=57;
+llamadas_maquina.scanlines:=256;
 iniciar_route16_hw:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(256,256);
 //Main CPU
-z80_0:=cpu_z80.create(10000000 div 4,256);
+z80_0:=cpu_z80.create(10000000 div 4);
 z80_0.change_io_calls(nil,route16_outbyte);
-z80_1:=cpu_z80.create(10000000 div 4,256);
+z80_1:=cpu_z80.create(10000000 div 4);
 case main_vars.tipo_maquina of
   258:begin
       z80_0.change_ram_calls(route16_cpu1_getbyte,route16_cpu1_putbyte);
@@ -302,8 +303,7 @@ case main_vars.tipo_maquina of
       if not(roms_load(@mem_snd,route16_cpu2)) then exit;
       if not(roms_load(@proms,route16_proms)) then exit;
       update_video:=update_video_route16;
-      marcade.dswa:=$a0;
-      marcade.dswa_val2:=@route16_dip_a;
+      init_dips(1,route16_dip_a,$a0);
   end;
   259:begin
       z80_0.change_ram_calls(speakres_cpu1_getbyte,speakres_cpu1_putbyte);
@@ -315,8 +315,7 @@ case main_vars.tipo_maquina of
       if not(roms_load(@mem_snd,speakres_cpu2)) then exit;
       if not(roms_load(@proms,speakres_proms)) then exit;
       update_video:=update_video_speakres;
-      marcade.dswa:=$20;
-      marcade.dswa_val2:=@speakres_dip_a;
+      init_dips(1,speakres_dip_a,$20);
   end;
 end;
 //Sound Chips

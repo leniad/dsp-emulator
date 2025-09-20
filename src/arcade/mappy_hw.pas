@@ -251,14 +251,14 @@ end;
 actualiza_trozo(32,0,224,16,1,0,0,224,16,3);
 actualiza_trozo(32,272,224,16,1,0,272,224,16,3);
 //Pantalla principal
-scroll__x_part(1,3,scroll_x,0,16,256);
+scroll_x_cut(1,3,scroll_x,16,256);
 //Los sprites
 draw_sprites_mappy;
 //Las lineas de arriba y abajo fijas transparentes...
 actualiza_trozo(32,0,224,16,2,0,0,224,16,3);
 actualiza_trozo(32,272,224,16,2,0,272,224,16,3);
 //Pantalla principal transparente
-scroll__x_part(2,3,scroll_x,0,16,256);
+scroll_x_cut(2,3,scroll_x,16,256);
 //final, lo pego todooooo
 actualiza_trozo_final(0,0,224,288,3);
 end;
@@ -573,7 +573,6 @@ begin
  namco_snd_0.reset;
  namco_5x_0.reset;
  namco_5x_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$3;
@@ -636,20 +635,19 @@ begin
 llamadas_maquina.bucle_general:=mappy_principal;
 llamadas_maquina.reset:=reset_mappyhw;
 llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.scanlines:=264;
 iniciar_mappyhw:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,288);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,288,true);
-screen_mod_scroll(2,512,256,511,256,256,255);
 screen_init(3,512,512,false,true);
 screen_mod_sprites(3,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,264,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1536000,TCPU_M6809);
 //Sound CPU
-m6809_1:=cpu_m6809.create(1536000,264,TCPU_M6809);
+m6809_1:=cpu_m6809.create(1536000,TCPU_M6809);
 m6809_1.change_ram_calls(sound_getbyte,sound_putbyte);
 m6809_1.init_sound(mappy_sound_update);
 namco_snd_0:=namco_snd_chip.create(8);

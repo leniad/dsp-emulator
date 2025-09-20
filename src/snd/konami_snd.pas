@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}ay_8910,sound_engine,nz80,misc_functions;
 
 type
     konamisnd_chip=class(snd_chip_class)
-        constructor create(amp,ntipo:byte;clock:integer;frame_div:word);
+        constructor create(amp,ntipo:byte;clock:integer);
         destructor free;
     public
           sound_latch,pedir_irq:byte;
@@ -160,10 +160,10 @@ begin
   end;
 end;
 
-constructor konamisnd_chip.create(amp,ntipo:byte;clock:integer;frame_div:word);
+constructor konamisnd_chip.create(amp,ntipo:byte;clock:integer);
 begin
 self.tipo:=ntipo;
-self.z80:=cpu_z80.create(clock,frame_div);
+self.z80:=cpu_z80.create(clock);
 self.z80.init_sound(konamisnd_update);
 ay8910_0:=ay8910_chip.create(clock,AY8910,amp);
 ay8910_0.change_io_calls(konamisnd0_porta,konamisnd0_portb,nil,nil);

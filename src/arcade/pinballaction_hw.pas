@@ -22,17 +22,17 @@ const
         (n:'a-j5.bin';l:$4000;p:0;crc:$21efe866),(n:'a-j6.bin';l:$4000;p:$4000;crc:$7f984c80),
         (n:'a-j7.bin';l:$4000;p:$8000;crc:$df69e51b),(n:'a-j8.bin';l:$4000;p:$c000;crc:$0094cb8b));
         //DIP
-        pinballaction_dipa:array [0..5] of def_dip2=(
+        pinballaction_dipa:array [0..4] of def_dip2=(
         (mask:3;name:'Coin B';number:4;val4:(0,1,2,3);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
         (mask:$c;name:'Coin A';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
         (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        pinballaction_dipb:array [0..4] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        pinballaction_dipb:array [0..3] of def_dip2=(
         (mask:7;name:'Bonus Life';number:8;val8:(1,4,0,3,6,2,5,7);name8:('70K 200K 1000K','100K 300K 1000K','70K 200K','100K 300K','200K 1000K','100K','200K','None')),
         (mask:8;name:'Extra';number:2;val2:(8,0);name2:('Hard','Easy')),
         (mask:$30;name:'Flippers';number:4;val4:(0,$10,$20,$30);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$c0;name:'Difficulty (Outlanes)';number:4;val4:(0,$40,$80,$c0);name4:('Easy','Medium','Hard','Hardest')),());
+        (mask:$c0;name:'Difficulty (Outlanes)';number:4;val4:(0,$40,$80,$c0);name4:('Easy','Medium','Hard','Hardest')));
 
 var
  sound_latch,scroll_y:byte;
@@ -263,20 +263,19 @@ var
 begin
 llamadas_maquina.bucle_general:=pinballaction_principal;
 llamadas_maquina.reset:=reset_pinballaction;
+llamadas_maquina.scanlines:=256;
 iniciar_pinballaction:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,$100);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(pinballaction_getbyte,pinballaction_putbyte);
 if not(roms_load(@memoria,pinballaction_rom)) then exit;
 //Sound CPU
-z80_1:=cpu_z80.create(3072000,$100);
+z80_1:=cpu_z80.create(3072000);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(nil,snd_outbyte);
 z80_1.init_sound(pinballaction_sound_update);
@@ -309,10 +308,8 @@ gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,0,128*8,$40*0*8*128,$40*1*8*128,$40*2*8*128);
 convert_gfx(3,0,@memoria_temp[$1000],@psd_x,@psd_y,true,false);
 //DIP
-marcade.dswa:=$40;
-marcade.dswa_val2:=@pinballaction_dipa;
-marcade.dswb:=0;
-marcade.dswb_val2:=@pinballaction_dipb;
+init_dips(1,pinballaction_dipa,$40);
+init_dips(2,pinballaction_dipb,0);
 iniciar_pinballaction:=true;
 end;
 

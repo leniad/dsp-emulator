@@ -794,25 +794,23 @@ begin
 llamadas_maquina.bucle_general:=upl_principal;
 llamadas_maquina.reset:=reset_upl;
 llamadas_maquina.fps_max:=59.61;
+llamadas_maquina.scanlines:=256;
 iniciar_upl:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);  //FG
 screen_init(2,512,512);  //BG0
-screen_mod_scroll(2,512,256,511,512,256,511);
 if main_vars.tipo_maquina=307 then begin
   screen_init(5,512,512,true); //BG1
-  screen_mod_scroll(5,512,256,511,512,256,511);
   screen_init(6,512,512,true); //BG2
-  screen_mod_scroll(6,512,256,511,512,256,511);
 end;
 screen_init(3,512,256,false,true);
 screen_init(4,512,256,true); //Sprites
 iniciar_video(256,192);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,256);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_ram_calls(upl_getbyte,upl_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(5000000,256);
+z80_1:=cpu_z80.create(5000000);
 z80_1.change_ram_calls(upl_snd_getbyte,upl_snd_putbyte);
 z80_1.change_io_calls(upl_snd_inbyte,upl_snd_outbyte);
 if main_vars.tipo_maquina=120 then z80_1.init_sound(ninjakid2_sound_update)

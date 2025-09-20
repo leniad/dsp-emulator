@@ -24,16 +24,16 @@ const
         (n:'gg1_11.4d';l:$1000;p:0;crc:$ad447c80),(n:'gg1_10.4f';l:$1000;p:$1000;crc:$dd6f1afc));
         galaga_samples:array[0..1] of tipo_nombre_samples=(
         (nombre:'bang.wav'),(nombre:'init.wav'));
-        galaga_dip_a:array [0..5] of def_dip2=(
+        galaga_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(3,0,1,2);name4:('Easy','Medium','Hard','Hardest')),
         (mask:8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$10;name:'Freeze';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Rack test';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
-        galaga_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')));
+        galaga_dip_b:array [0..2] of def_dip2=(
         (mask:7;name:'Coinage';number:8;val8:(4,2,6,7,1,3,5,0);name8:('4C 1C','3C 1C','2C 1C','1C 1C','2C 3C','1C 2C','1C 3C','Free Play')),
         (mask:$38;name:'Bonus Life';number:8;val8:($20,$18,$10,$30,$38,8,$28,0);name8:('20K 60K 60K+','20K 60K','20K 70K 70K+','20K 80K 80K+','20K 80K','30K 100K 100K+','30K 120K 120K+','None')),
-        (mask:$c0;name:'Lives';number:4;val4:(0,$80,$40,$c0);name4:('2','3','4','5')),());
+        (mask:$c0;name:'Lives';number:4;val4:(0,$80,$40,$c0);name4:('2','3','4','5')));
         //Dig Dug
         digdug_rom:array[0..3] of tipo_roms=(
         (n:'dd1a.1';l:$1000;p:0;crc:$a80ec984),(n:'dd1a.2';l:$1000;p:$1000;crc:$559f00bd),
@@ -51,17 +51,17 @@ const
         (n:'dd1.13';l:$1000;p:$2000;crc:$458499e9),(n:'dd1.12';l:$1000;p:$3000;crc:$c58252a0));
         digdug_chars2:tipo_roms=(n:'dd1.11';l:$1000;p:0;crc:$7b383983);
         digdug_background:tipo_roms=(n:'dd1.10b';l:$1000;p:0;crc:$2cf399c2);
-        digdug_dip_a:array [0..3] of def_dip2=(
+        digdug_dip_a:array [0..2] of def_dip2=(
         (mask:7;name:'Coin B';number:8;val8:(7,3,1,5,6,2,4,0);name8:('3C 1C','2C 1C','1C 1C','2C 3C','1C 2C','1C 3C','1C 6C','1C 7C')),
         (mask:$38;name:'Bonus Life';number:8;val8:($20,$10,$30,8,$28,$18,$38,0);name8:('10K 40K 40K+','10K 50K 50K+','20K 60K 60K+','20K 70K 70K+','10K 40K','20K 60K','10K','None')),
-        (mask:$c0;name:'Lives';number:4;val4:(0,$40,$80,$c0);name4:('1','2','3','5')),());
-        digdug_dip_b:array [0..6] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:(0,$40,$80,$c0);name4:('1','2','3','5')));
+        digdug_dip_b:array [0..5] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(0,2,1,3);name4:('Easy','Medium','Hard','Hardest')),
         (mask:4;name:'Cabinet';number:2;val2:(4,0);name2:('Upright','Cocktail')),
         (mask:8;name:'Allow Continue';number:2;val2:(8,0);name2:('No','Yes')),
         (mask:$10;name:'Demo Sounds';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Freeze';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$c0;name:'Coin A';number:4;val4:($40,0,$c0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
+        (mask:$c0;name:'Coin A';number:4;val4:($40,0,$c0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')));
         //Xevious
         xevious_rom:array[0..3] of tipo_roms=(
         (n:'xvi_1.3p';l:$1000;p:0;crc:$09964dda),(n:'xvi_2.3m';l:$1000;p:$1000;crc:$60ecce84),
@@ -86,16 +86,16 @@ const
         (n:'xvi_11.2c';l:$1000;p:$3000;crc:$31e244dd));
         xevious_samples:array[0..1] of tipo_nombre_samples=(
         (nombre:'explo2.wav'),(nombre:'explo1.wav'));
-        xevious_dip_a:array [0..4] of def_dip2=(
+        xevious_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(1,3,0,2);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
         (mask:$1c;name:'Bonus Life';number:8;val8:($18,$14,$10,$1c,$c,8,4,0);name8:('10K 40K 40K+','10K 50K 50K+','20K 50K 50K+','20K 60K 60K+','20K 70K 70+','20K 80K 80K+','20K 60K','None')),
         (mask:$60;name:'Lives';number:4;val4:($40,$20,$60,0);name4:('1','2','3','5')),
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
-        xevious_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')));
+        xevious_dip_b:array [0..3] of def_dip2=(
         (mask:2;name:'Flags Award Bonus Life';number:2;val2:(0,1);name2:('No','Yes')),
         (mask:$c;name:'Coin B';number:4;val4:(4,$c,0,8);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
         (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')));
         //Bosconian
         bosco_rom:array[0..3] of tipo_roms=(
         (n:'bos3_1.3n';l:$1000;p:0;crc:$96021267),(n:'bos1_2.3m';l:$1000;p:$1000;crc:$2d8f3ebe),
@@ -115,27 +115,27 @@ const
         (n:'bos1_11.5k';l:$1000;p:$2000;crc:$17ac9511));
         bosco_samples:array[0..2] of tipo_nombre_samples=(
         (nombre:'bigbang.wav'),(nombre:'midbang.wav'),(nombre:'shot.wav';restart:true;loop:false));
-        bosco_dip_a:array [0..5] of def_dip2=(
+        bosco_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(1,3,2,0);name4:('Easy','Medium','Hardest','Auto')),
         (mask:4;name:'Allow Continue';number:2;val2:(0,4);name2:('No','Yes')),
         (mask:8;name:'Demo Sounds';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$10;name:'Freeze';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
-        bosco_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')));
+        bosco_dip_b:array [0..2] of def_dip2=(
         (mask:7;name:'Coinage';number:8;val8:(1,2,3,7,4,6,5,0);name8:('4C 1C','3C 1C','2C 1C','1C 1C','2C 3C','1C 2C','1C 3C','Free Play')),
         (mask:$38;name:'Bonus Fighter';number:8;val8:($30,$38,8,$10,$18,$20,$28,0);name8:('15K 50K','20K 70K','10K 50K 50K+','15K 50K 50K+','15K 70K 70+','20K 70K 70K+','30K 100K 100K+','None')),
-        (mask:$c0;name:'Lives';number:4;val4:(0,$80,$40,$c0);name4:('2','3','4','5')),());
+        (mask:$c0;name:'Lives';number:4;val4:(0,$80,$40,$c0);name4:('2','3','4','5')));
         //Super Xevious
         sxevious_rom:array[0..3] of tipo_roms=(
         (n:'cpu_3p.rom';l:$1000;p:0;crc:$1c8d27d5),(n:'cpu_3m.rom';l:$1000;p:$1000;crc:$fd04e615),
         (n:'xv3_3.2m';l:$1000;p:$2000;crc:$294d5404),(n:'xv3_4.2l';l:$1000;p:$3000;crc:$6a44bf92));
         sxevious_sub:array[0..1] of tipo_roms=(
         (n:'xv3_5.3f';l:$1000;p:$0;crc:$d4bd3d81),(n:'xv3_6.3j';l:$1000;p:$1000;crc:$af06be5f));
-        sxevious_dip_b:array [0..4] of def_dip2=(
-        (mask:2;name:'Flags Award Bonus Life';number:2;val2:(0,1);name2:('No','Yes')),
+        sxevious_dip_b:array [0..3] of def_dip2=(
+        (mask:1;name:'Flags Award Bonus Life';number:2;val2:(0,1);name2:('No','Yes')),
         (mask:$c;name:'Coin B';number:4;val4:($c,8,4,0);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
         (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Freeze';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Freeze';number:2;val2:(0,$80);name2:('Off','On')));
         MAX_STARS=252;
 
 var
@@ -1067,7 +1067,6 @@ begin
           namcoio_06xx_reset(1);
        end;
  end;
- reset_game_general;
  main_irq:=false;
  sub_irq:=false;
  sub2_nmi:=false;
@@ -1134,6 +1133,7 @@ iniciar_audio(false);
 llamadas_maquina.close:=cerrar_galagahw;
 llamadas_maquina.reset:=reset_galagahw;
 llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.scanlines:=264;
 case main_vars.tipo_maquina of
   65,167:begin
           screen_init(1,224,288,true);
@@ -1144,30 +1144,26 @@ case main_vars.tipo_maquina of
         end;
   231,350:begin
             screen_init(1,256,512,true);
-            screen_mod_scroll(1,256,256,255,512,512,511);
             screen_init(2,256,512,true);
-            screen_mod_scroll(2,256,256,255,512,512,511);
             screen_init(3,256,512,false,true);
             llamadas_maquina.bucle_general:=xevious_principal;
           end;
   250:begin
             screen_init(1,256,256,true);
-            screen_mod_scroll(1,256,256,255,256,256,255);
             screen_init(2,64,256,true);
             screen_init(3,512,512,false,true);
             screen_init(4,256,256);
-            screen_mod_scroll(4,256,256,255,256,256,255);
             llamadas_maquina.bucle_general:=bosco_principal;
           end;
 end;
 if main_vars.tipo_maquina<>250 then iniciar_video(224,288)
   else iniciar_video(285,224);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,264);
+z80_0:=cpu_z80.create(3072000);
 //Sub CPU
-z80_2:=cpu_z80.create(3072000,264);
+z80_2:=cpu_z80.create(3072000);
 //Sub2 CPU
-z80_1:=cpu_z80.create(3072000,264);
+z80_1:=cpu_z80.create(3072000);
 //IO's
 //namcoio_51xx_init(@marcade.in1,@marcade.in0,'galaga.zip');
 namcoio_51xx_init(@marcade.in0,@marcade.in1);
@@ -1223,10 +1219,8 @@ case main_vars.tipo_maquina of
             gfx[1].colores[f]:=memoria_temp[$120+f];
           end;
           //Dip
-          marcade.dswa:=$f7;
-          marcade.dswa_val2:=@galaga_dip_a;
-          marcade.dswb:=$97;
-          marcade.dswb_val2:=@galaga_dip_b;
+          init_dips(1,galaga_dip_a,$f7);
+          init_dips(2,galaga_dip_b,$97);
        end;
     167:begin //DigDug
           //Main
@@ -1280,10 +1274,8 @@ case main_vars.tipo_maquina of
             gfx[2].colores[f]:=memoria_temp[$120+f];    //background
           end;
           //Dip
-          marcade.dswa:=$99;
-          marcade.dswa_val2:=@digdug_dip_a;
-          marcade.dswb:=$24;
-          marcade.dswb_val2:=@digdug_dip_b;
+          init_dips(1,digdug_dip_a,$99);
+          init_dips(2,digdug_dip_b,$24);
         end;
     231,350:begin  //Xevious
           //Main
@@ -1361,17 +1353,9 @@ case main_vars.tipo_maquina of
               else gfx[2].colores[f]:=$80;
           end;
           //Dip
-          marcade.dswa:=$ff;
-          if main_vars.tipo_maquina=231 then begin
-            marcade.dswa_val2:=@xevious_dip_a;
-            marcade.dswb:=$ee;
-            marcade.dswb_val2:=@xevious_dip_b;
-          end else begin
-            //Dip
-            marcade.dswa_val2:=@xevious_dip_a;
-            marcade.dswb:=$62;
-            marcade.dswb_val2:=@xevious_dip_b;
-          end;
+          init_dips(1,xevious_dip_a,$ff);
+          if main_vars.tipo_maquina=231 then init_dips(2,xevious_dip_b,$ee)
+            else init_dips(2,sxevious_dip_b,$62);
        end;
     250:begin  //Bosconian
           //Main
@@ -1444,10 +1428,8 @@ case main_vars.tipo_maquina of
           end;
           for f:=0 to 3 do gfx[2].colores[f]:=31-f;
           //Dip
-          marcade.dswa:=$f7;
-          marcade.dswa_val2:=@bosco_dip_a;
-          marcade.dswb:=$a7;
-          marcade.dswb_val2:=@bosco_dip_b;
+          init_dips(1,bosco_dip_a,$f7);
+          init_dips(2,bosco_dip_b,$a7);
        end;
 end;
 //final

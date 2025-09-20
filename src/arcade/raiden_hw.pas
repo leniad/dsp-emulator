@@ -280,17 +280,16 @@ begin
 iniciar_raiden:=false;
 llamadas_maquina.reset:=reset_raiden;
 llamadas_maquina.fps_max:=59.599998;
+llamadas_maquina.scanlines:=256*CPU_SYNC;
 llamadas_maquina.bucle_general:=raiden_principal;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-nec_0:=cpu_nec.create(10000000,256*CPU_SYNC,NEC_V30);
+nec_0:=cpu_nec.create(10000000,NEC_V30);
 nec_0.change_ram_calls(raiden_getbyte,raiden_putbyte);
 if not(roms_load16b(@main_rom,raiden_rom_main)) then exit;
 ptemp:=@main_rom[$20000];
@@ -302,7 +301,7 @@ for f:=0 to $1ffff do begin
   inc(ptemp);
 end;
 //Sub CPU
-nec_1:=cpu_nec.create(10000000,256*CPU_SYNC,NEC_V30);
+nec_1:=cpu_nec.create(10000000,NEC_V30);
 nec_1.change_ram_calls(raiden_sub_getbyte,raiden_sub_putbyte);
 if not(roms_load16b(@sub_rom,raiden_rom_sub)) then exit;
 ptemp:=@sub_rom[0];
@@ -317,7 +316,7 @@ getmem(memoria_temp,$100000);
 //sound
 if not(roms_load(memoria_temp,raiden_sound)) then exit;
 copymemory(@mem_snd,memoria_temp,$8000);
-seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,3579545,256*CPU_SYNC,memoria_temp,true);
+seibu_snd_0:=seibu_snd_type.create(SEIBU_OKI,3579545,memoria_temp,true);
 //La memoria superior tambien esta encriptada, en teoria tanto opcodes como datos,
 //pero no ejecuta codigo, solo usa los datos. Los desencripto aqui.
 copymemory(@seibu_snd_0.sound_rom[0,0],@memoria_temp[$8000],$8000);

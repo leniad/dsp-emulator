@@ -22,15 +22,13 @@ const
         (n:'jrp2c.bin';l:$2000;p:0;crc:$0527ff9b),(n:'jrp2e.bin';l:$2000;p:$2000;crc:$73477193));
         jrpacman_sound:tipo_roms=(n:'jrprom.7p';l:$100;p:0;crc:$a9cc86bf);
         //DIP
-        jrpacman_dip_a:array [0..1] of def_dip2=(
-        (mask:$10;name:'Rack Test (Cheat)';number:2;val2:($10,0);name2:('Off','On')),());
-        jrpacman_dip_b:array [0..1] of def_dip2=(
-        (mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail')),());
-        jrpacman_dip_c:array [0..4] of def_dip2=(
+        jrpacman_dip_a:def_dip2=(mask:$10;name:'Rack Test';number:2;val2:($10,0);name2:('Off','On'));
+        jrpacman_dip_b:def_dip2=(mask:$80;name:'Cabinet';number:2;val2:($80,0);name2:('Upright','Cocktail'));
+        jrpacman_dip_c:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(3,1,2,0);name4:('2C 1C','1C 1C','1C 2C','Free Play')),
         (mask:$c;name:'Lives';number:4;val4:(0,4,8,$c);name4:('1','2','3','5')),
         (mask:$30;name:'Bonus Life';number:4;val4:(0,$10,$20,$30);name4:('10K','15K','20K','30K')),
-        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')),());
+        (mask:$40;name:'Difficulty';number:2;val2:($40,0);name2:('Normal','Hard')));
 
 var
  irq_vblank,bg_prio:boolean;
@@ -90,14 +88,14 @@ for x:=0 to 53 do begin
   end;
 end;
 if bg_prio then begin
-  scroll__x_part(1,2,scroll_x,0,16,256);
+  scroll_x_cut(1,2,scroll_x,16,256);
   actualiza_trozo(208,0,224,16,1,0,0,224,16,2);
   actualiza_trozo(208,272,224,16,1,0,272,224,16,2);
   draw_sprites;
 end else begin
   fill_full_screen(2,$3ff);
   draw_sprites;
-  scroll__x_part(1,2,scroll_x,0,16,256);
+  scroll_x_cut(1,2,scroll_x,16,256);
   actualiza_trozo(208,0,224,16,1,0,0,224,16,2);
   actualiza_trozo(208,272,224,16,1,0,272,224,16,2);
 end;
@@ -267,15 +265,15 @@ begin
 llamadas_maquina.bucle_general:=jrpacman_principal;
 llamadas_maquina.reset:=reset_jrpacman;
 llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.scanlines:=224;
 iniciar_jrpacman:=false;
 iniciar_audio(false);
 screen_init(1,432,288,true);
-screen_mod_scroll(1,512,256,511,256,256,255);
-screen_init(2,224,288,false,true);
+screen_init(2,512,512,false,true);
 screen_mod_sprites(2,256,512,$ff,$1ff);
 iniciar_video(224,288);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,224);
+z80_0:=cpu_z80.create(3072000);
 z80_0.change_ram_calls(jrpacman_getbyte,jrpacman_putbyte);
 z80_0.change_io_calls(nil,jrpacman_outbyte);
 z80_0.init_sound(jrpacman_sound_update);
@@ -331,12 +329,9 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,$100);
 //DIP
-marcade.dswa:=$10;
-marcade.dswb:=$80;
-marcade.dswc:=$c9;
-marcade.dswa_val2:=@jrpacman_dip_a;
-marcade.dswb_val2:=@jrpacman_dip_b;
-marcade.dswc_val2:=@jrpacman_dip_c;
+init_dips(1,jrpacman_dip_a,$10);
+init_dips(2,jrpacman_dip_b,$80);
+init_dips(3,jrpacman_dip_c,$c9);
 //final
 iniciar_jrpacman:=true;
 end;

@@ -514,23 +514,21 @@ end;
 begin
 llamadas_maquina.bucle_general:=lastduel_principal;
 llamadas_maquina.reset:=reset_lastduel;
+llamadas_maquina.scanlines:=256;
 iniciar_lastduel:=false;
 iniciar_audio(false);
 screen_init(1,512,512,true);
 if main_vars.tipo_maquina=268 then x_size:=1024
   else x_size:=512;
 screen_init(2,x_size,1024,true);
-screen_mod_scroll(2,x_size,512,x_size-1,1024,512,1023);
 screen_init(3,x_size,1024,true);
-screen_mod_scroll(3,x_size,512,x_size-1,1024,512,1023);
 screen_init(4,x_size,1024,true);
-screen_mod_scroll(4,x_size,512,x_size-1,1024,512,1023);
 screen_init(5,512,512,false,true);
 iniciar_video(240,384);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0:=cpu_m68000.create(10000000);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 case main_vars.tipo_maquina of
   268:begin //Last Duel
       lastduel_hw_update_video:=update_video_lastduel;

@@ -13,27 +13,27 @@ const
         (n:'035822-03e.kl1';l:$800;p:$6000;crc:$1a2f599a),(n:'035823-02.ln1';l:$800;p:$6800;crc:$82e552bb),
         (n:'035824-02.np1';l:$800;p:$7000;crc:$606e42e0),(n:'035825-02.r1';l:$800;p:$7800;crc:$f752eaeb));
         missilec_prom:tipo_roms=(n:'035826-01.l6';l:$20;p:0;crc:$86a22140);
-        missilec_dip_a:array [0..4] of def_dip2=(
+        missilec_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(0,2,1,3);name4:('1C 1C','Free Play','2C 1C','1C 2C')),
         (mask:$c;name:'Right Coin';number:4;val4:(0,4,8,$c);name4:('x1','x4','x5','x6')),
         (mask:$10;name:'Center Coin';number:2;val2:(0,$10);name2:('x1','x2')),
-        (mask:$60;name:'Lenguaje';number:4;val4:(0,$20,$40,$60);name4:('English','French','German','Spanish')),());
-        missilec_dip_b:array [0..5] of def_dip2=(
+        (mask:$60;name:'Lenguaje';number:4;val4:(0,$20,$40,$60);name4:('English','French','German','Spanish')));
+        missilec_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Cities';number:4;val4:(2,1,3,0);name4:('4','5','6','7')),
         (mask:4;name:'Bonus Credit for 4 Coins';number:2;val2:(4,0);name2:('No','Yes')),
         (mask:8;name:'Trackball Size';number:2;val2:(0,8);name2:('Mini','Large')),
         (mask:$70;name:'Bonus City';number:8;val8:($10,$70,$60,$50,$40,$30,$20,0);name8:('8K','10k','12K','14K','15K','18K','20K','None')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
         suprmatk_rom:array[0..7] of tipo_roms=(
         (n:'035820-02.c1';l:$800;p:$5000;crc:$7a62ce6a),(n:'035821-02.b1';l:$800;p:$5800;crc:$df3bd57f),
         (n:'035822-02.a1';l:$800;p:$6000;crc:$a1cd384a),(n:'035823-02.a5';l:$800;p:$6800;crc:$82e552bb),
         (n:'035824-02.b5';l:$800;p:$7000;crc:$606e42e0),(n:'035825-02.c5';l:$800;p:$7800;crc:$f752eaeb),
         (n:'e0.d5';l:$800;p:$8000;crc:$d0b20179),(n:'e1.e5';l:$800;p:$8800;crc:$c6c818a3));
-        suprmatk_dip_a:array [0..4] of def_dip2=(
+        suprmatk_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(0,2,1,3);name4:('1C 1C','Free Play','2C 1C','1C 2C')),
         (mask:$c;name:'Right Coin';number:4;val4:(0,4,8,$c);name4:('x1','x4','x5','x6')),
         (mask:$10;name:'Center Coin';number:2;val2:(0,$10);name2:('x1','x2')),
-        (mask:$c0;name:'Game';number:4;val4:(0,$40,$80,$c0);name4:('Missile Command','Easy Super Missile Attack','Reg. Super Missile Attack','Hard Super Missile Attack')),());
+        (mask:$c0;name:'Game';number:4;val4:(0,$40,$80,$c0);name4:('Missile Command','Easy Super Missile Attack','Reg. Super Missile Attack','Hard Super Missile Attack')));
 
 var
   videoram:array[0..$ffff] of byte;
@@ -276,12 +276,13 @@ begin
 llamadas_maquina.bucle_general:=principal_missilec;
 llamadas_maquina.reset:=reset_missilec;
 llamadas_maquina.fps_max:=61.035156;
+llamadas_maquina.scanlines:=256;
 iniciar_missilec:=false;
 iniciar_audio(false);
 screen_init(1,256,231,false,true);
 iniciar_video(256,231);
 //Main CPU
-m6502_0:=cpu_m6502.create(1250000,256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1250000,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_missilec,putbyte_missilec);
 m6502_0.init_sound(missilec_sound);
 init_analog(m6502_0.numero_cpu,m6502_0.clock);
@@ -294,8 +295,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria,missilec_rom)) then exit;
         if not(roms_load(@writeprom,missilec_prom)) then exit;
         //dip
-        marcade.dswa:=$81;
-        marcade.dswa_val2:=@missilec_dip_a;
+        init_dips(1,missilec_dip_a,$81);
       end;
   345:begin //Super Missile Attack
         //cargar roms
@@ -304,12 +304,10 @@ case main_vars.tipo_maquina of
         //Decrypt
         for f:=0 to $3f do copymemory(@memoria[suprmatk_table[f]],@memoria[$8000+f*$40],$40);
         //dip
-        marcade.dswa:=$61;
-        marcade.dswa_val2:=@suprmatk_dip_a;
+        init_dips(1,suprmatk_dip_a,$61);
       end;
 end;
-marcade.dswb:=$73;
-marcade.dswb_val2:=@missilec_dip_b;
+init_dips(2,missilec_dip_b,$73);
 //final
 iniciar_missilec:=true;
 end;

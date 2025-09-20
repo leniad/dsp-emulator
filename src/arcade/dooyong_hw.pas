@@ -68,28 +68,29 @@ const
         flytiger_fg0:tipo_roms=(n:'dy-ft-m2.11g';l:$80000;p:0;crc:$7545f9c9);
         flytiger_oki:tipo_roms=(n:'4.9n';l:$20000;p:0;crc:$cd95cf9a);
         //Dip
-        bluehawk_dip_a:array [0..5] of def_dip=(
-        (mask:$2;name:'Coinage Type';number:2;dip:((dip_val:$2;dip_name:'Type A'),(dip_val:$0;dip_name:'Type B'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Flip Screen';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'2C 1C/3C 1C'),(dip_val:$30;dip_name:'1C 1C/1C 1C'),(dip_val:$0;dip_name:'2C 3C/4C 1C'),(dip_val:$20;dip_name:'1C 2C/2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'2C 1C/1C 4C'),(dip_val:$c0;dip_name:'1C 1C/1C 2C'),(dip_val:$0;dip_name:'2C 3C/1C 6C'),(dip_val:$80;dip_name:'1C 2C/1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        bluehawk_dip_b:array [0..3] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$80;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        lastday_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'200K+'),(dip_val:$20;dip_name:'240K+'),(dip_val:$10;dip_name:'280K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Speed';number:2;dip:((dip_val:$0;dip_name:'Low'),(dip_val:$40;dip_name:'High'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$80;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        gulfstorm_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'300K+'),(dip_val:$20;dip_name:'400K+'),(dip_val:$10;dip_name:'500K+'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Power Rise';number:2;dip:((dip_val:$40;dip_name:'1'),(dip_val:$0;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$80;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bluehawk_dip_a:array [0..4] of def_dip2=(
+        (mask:$2;name:'Coinage Type';number:2;val2:(2,0);name2:('Type A','Type B')),
+        (mask:$4;name:'Demo Sounds';number:2;val2:(0,4);name2:('Off','On')),
+        (mask:$8;name:'Flip Screen';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$30;name:'Coin A';number:4;val4:($10,$30,0,$20);name4:('2C 1C/3C 1C','1C 1C/1C 1C','2C 3C/4C 1C','1C 2C/2C 1C')),
+        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C/1C 4C','1C 1C/1C 2C','2C 3C/1C 6C','1C 2C/1C 3C')));
+        bluehawk_dip_b:array [0..2] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(0,2,3,1);name4:('1','2','3','4')),
+        (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')));
+        lastday_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(0,2,3,1);name4:('1','2','3','4')),
+        (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('200K+','240K+','280K','None')),
+        (mask:$40;name:'Speed';number:2;val2:(0,$40);name2:('Low','High')),
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')
+        ));
+        gulfstorm_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(0,2,3,1);name4:('1','2','3','4')),
+        (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('300K+','400K+','500K+','None')),
+        (mask:$40;name:'Power Rise';number:2;val2:($40,0);name2:('1','2')),
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')));
 
 type
   tile_info=record
@@ -870,24 +871,22 @@ begin
 llamadas_maquina.bucle_general:=dooyong_principal;
 llamadas_maquina.reset:=reset_dooyong;
 llamadas_maquina.fps_max:=60;
+llamadas_maquina.scanlines:=256;
 iniciar_dooyong:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,1024,256,true);
-screen_mod_scroll(1,1024,512,1023,256,256,255);
 screen_init(2,1024,256,true);
-screen_mod_scroll(2,1024,512,1023,256,256,255);
 screen_init(3,1024,256,true);
-screen_mod_scroll(3,1024,512,1023,256,256,255);
 screen_init(4,512,256,true);
 screen_init(5,512,512,false,true);
 main_screen.rot270_screen:=true;
 iniciar_video(384,240);
 //Main CPU
-z80_0:=cpu_z80.create(8000000,256);
+z80_0:=cpu_z80.create(8000000);
 //Sound CPU
-if main_vars.tipo_maquina=373 then z80_1:=cpu_z80.create(8000000,256)
-  else z80_1:=cpu_z80.create(4000000,256);
+if main_vars.tipo_maquina=373 then z80_1:=cpu_z80.create(8000000)
+  else z80_1:=cpu_z80.create(4000000);
 sprite_12bit:=false;
 sprite_height:=false;
 sprite_yshift_bw:=false;
@@ -946,10 +945,8 @@ case main_vars.tipo_maquina of
           tile_rom[2].mask_tile:=$1ff;
           tile_rom[2].color:=0;
           //DIP
-          marcade.dswa:=$ff;
-          marcade.dswb:=$ff;
-          marcade.dswa_val:=@bluehawk_dip_a;
-          marcade.dswb_val:=@bluehawk_dip_b;
+          init_dips(1,bluehawk_dip_a,$ff);
+          init_dips(2,bluehawk_dip_b,$ff);
       end;
   372:begin //The Last Day
           update_video:=update_video_lastday;
@@ -991,10 +988,8 @@ case main_vars.tipo_maquina of
           tile_rom[1].mask_tile:=$1ff;
           tile_rom[1].color:=$200;
           //DIP
-          marcade.dswa:=$ff;
-          marcade.dswb:=$ff;
-          marcade.dswa_val:=@bluehawk_dip_a;
-          marcade.dswb_val:=@lastday_dip_b;
+          init_dips(1,bluehawk_dip_a,$ff);
+          init_dips(2,lastday_dip_b,$ff);
       end;
   373:begin //Gulf Storm
           update_video:=update_video_lastday;
@@ -1036,10 +1031,8 @@ case main_vars.tipo_maquina of
           tile_rom[1].mask_tile:=$1ff;
           tile_rom[1].color:=$200;
           //DIP
-          marcade.dswa:=$ff;
-          marcade.dswb:=$ff;
-          marcade.dswa_val:=@bluehawk_dip_a;
-          marcade.dswb_val:=@gulfstorm_dip_b;
+          init_dips(1,bluehawk_dip_a,$ff);
+          init_dips(2,gulfstorm_dip_b,$ff);
       end;
       374:begin //Pollux
           update_video:=update_video_pollux;
@@ -1085,10 +1078,8 @@ case main_vars.tipo_maquina of
           tile_rom[1].mask_tile:=$3ff;
           tile_rom[1].color:=$200;
           //DIP
-          marcade.dswa:=$ff;
-          marcade.dswb:=$ff;
-          marcade.dswa_val:=@bluehawk_dip_a;
-          marcade.dswb_val:=@bluehawk_dip_b;
+          init_dips(1,bluehawk_dip_a,$ff);
+          init_dips(2,bluehawk_dip_b,$ff);
       end;
       375:begin //Flying Tiger
           update_video:=update_video_flytiger;
@@ -1136,10 +1127,8 @@ case main_vars.tipo_maquina of
           tile_rom[1].mask_tile:=$3ff;
           tile_rom[1].color:=$200;
           //DIP
-          marcade.dswa:=$ff;
-          marcade.dswb:=$ff;
-          marcade.dswa_val:=@bluehawk_dip_a;
-          marcade.dswb_val:=@bluehawk_dip_b;
+          init_dips(1,bluehawk_dip_a,$ff);
+          init_dips(2,bluehawk_dip_b,$ff);
       end;
 end;
 //final

@@ -23,6 +23,7 @@ type
     procedure StringGrid1DblClick(Sender: TObject);
     procedure DirectoryListBox1Change(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -174,6 +175,11 @@ freemem(datos_dsk);
 datos_dsk:=nil;
 end;
 
+procedure Tload_dsk.FormCreate(Sender: TObject);
+begin
+ cargar_dsk_idioma;
+end;
+
 procedure Tload_dsk.FormKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
@@ -197,10 +203,6 @@ if main_vars.tipo_maquina<>3000 then filelistbox1.Mask:='*.zip;*.dsk;*.ipf'
   else filelistbox1.Mask:='*.zip;*.d64;*.ipf';
 stringgrid1.ColWidths[0]:=stringgrid1.Width-60;
 stringgrid1.ColWidths[1]:=60;
-stringgrid1.Cells[0,0]:=leng.varios[0];
-stringgrid1.Cells[1,0]:=leng.varios[1];
-Button2.Caption:=leng.mensajes[7];
-Button1.Caption:=leng.mensajes[8];
 case main_vars.tipo_maquina of
   2:DirectoryListBox1.Directory:=Directory.spectrum_disk;
   8,9:DirectoryListBox1.Directory:=Directory.amstrad_disk;

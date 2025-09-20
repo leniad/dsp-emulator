@@ -19,33 +19,33 @@ const
         (n:'b53-22.4';l:$20000;p:$80000;crc:$59d2aef6),(n:'b53-23.3';l:$20000;p:$a0000;crc:$74acfb9b),
         (n:'b53-20.2';l:$20000;p:$c0000;crc:$095d0dc0),(n:'b53-21.1';l:$20000;p:$e0000;crc:$9800c54d));
         //Dip
-        tnzs_dip_a:array [0..5] of def_dip2=(
+        tnzs_dip_a:array [0..4] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
         (mask:2;name:'Flip_Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:8;name:'Invulnerability';number:2;val2:(8,0);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$10,$20,$30);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
-        tnzs_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')));
+        tnzs_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,$c,4,8);name4:('50K 150K 150K+','70K 200K 200K+','100K 250K 250K+','200K 300K 300K+')),
         (mask:$30;name:'Lives';number:4;val4:($20,$30,0,$10);name4:('2','3','4','5')),
-        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),());
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')));
         //Insector X
         insectorx_rom:tipo_roms=(n:'b97-03.u32';l:$20000;p:0;crc:$18eef387);
         insectorx_sub:tipo_roms=(n:'b97-07.u38';l:$10000;p:0;crc:$324b28c9);
         insectorx_gfx:array[0..1] of tipo_roms=(
         (n:'b97-01.u1';l:$80000;p:0;crc:$d00294b1),(n:'b97-02.u2';l:$80000;p:$80000;crc:$db5a7434));
         //Dip
-        insectorx_dip_a:array [0..5] of def_dip2=(
+        insectorx_dip_a:array [0..4] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
         (mask:2;name:'Flip_Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:8;name:'Demo_Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$10,$20,$30);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')),());
-        insectorx_dip_b:array [0..3] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C 2C','1C 3C','1C 4C','1C 6C')));
+        insectorx_dip_b:array [0..2] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(1,3,2,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$c;name:'Bonus Life';number:4;val4:(8,$c,4,0);name4:('40K 240K 200K+','60K 360K 300K+','100K 500K 400K+','150K 650K 500K+')),
-        (mask:$30;name:'Lives';number:4;val4:(0,$10,$30,$20);name4:('1','2','3','4')),());
+        (mask:$30;name:'Lives';number:4;val4:(0,$10,$30,$20);name4:('1','2','3','4')));
         //Extermination
         extrmatn_rom:array[0..1] of tipo_roms=(
         (n:'b06-05.11c';l:$10000;p:0;crc:$918e1fe3),(n:'b06-06.9c';l:$10000;p:$10000;crc:$8842e105));
@@ -56,13 +56,13 @@ const
         (n:'b06-03.7a';l:$20000;p:$40000;crc:$ee80ab9d),(n:'b06-04.4a';l:$20000;p:$60000;crc:$3697ace4));
         extrmatn_pal:array[0..1] of tipo_roms=(
         (n:'b06-09.15f';l:$200;p:0;crc:$f388b361),(n:'b06-08.17f';l:$200;p:$200;crc:$10c9aac3));
-        extrmatn_dip_a:array [0..3] of def_dip2=(
+        extrmatn_dip_a:array [0..2] of def_dip2=(
         (mask:2;name:'Flip_Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($10,$30,0,$20);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
-        extrmatn_dip_b:array [0..2] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')));
+        extrmatn_dip_b:array [0..1] of def_dip2=(
         (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$c0;name:'Damage Multiplier';number:4;val4:($c0,$80,$40,0);name4:('x1','x1.5','x2','x3')),());
+        (mask:$c0;name:'Damage Multiplier';number:4;val4:($c0,$80,$40,0);name4:('x1','x1.5','x2','x3')));
         //Arkanoid II
         {arknoid2_rom:tipo_roms=(n:'b08__05.11c';l:$10000;p:0;crc:$136edf9d);
         arknoid2_sub:tipo_roms=(n:'b08__13.3e';l:$10000;p:0;crc:$e8035ef1);
@@ -528,15 +528,16 @@ const
       16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16);
 begin
 llamadas_maquina.reset:=reset_tnzs;
+llamadas_maquina.scanlines:=256*CPU_SYNC;
 iniciar_tnzs:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
 if main_vars.tipo_maquina=306 then main_screen.rot270_screen:=true;
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);
+z80_0:=cpu_z80.create(6000000);
 //Sound CPU
-z80_1:=cpu_z80.create(6000000,$100*CPU_SYNC);
+z80_1:=cpu_z80.create(6000000);
 //Video chips
 if main_vars.tipo_maquina=306 then seta_sprite0:=tseta_sprites.create(0,1,$800 div $40)
   else seta_sprite0:=tseta_sprites.create(0,1,$800 div $40);
@@ -555,7 +556,7 @@ case main_vars.tipo_maquina of
         copymemory(@mem_misc,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@aux_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //Sound CPU
-        z80_2:=cpu_z80.create(6000000,$100*CPU_SYNC);
+        z80_2:=cpu_z80.create(6000000);
         z80_2.change_ram_calls(tnzs_snd_getbyte,tnzs_snd_putbyte);
         z80_2.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
         z80_2.init_sound(tnzs_sound_update);
@@ -571,10 +572,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,32*8,$2000*32*8*3,$2000*32*8*2,$2000*32*8,0);
         convert_gfx(0,0,ptemp,@pt_x,@pt_y,false,false);
         freemem(ptemp);
-        marcade.dswa:=$fe;
-        marcade.dswb:=$ff;
-        marcade.dswa_val2:=@tnzs_dip_a;
-        marcade.dswb_val2:=@tnzs_dip_b;
+        init_dips(1,tnzs_dip_a,$fe);
+        init_dips(2,tnzs_dip_b,$ff);
   end;
   130:begin   //Insector X
         llamadas_maquina.bucle_general:=insectorx_principal;
@@ -600,10 +599,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,64*8,8,0,$2000*64*8+8,$2000*64*8+0);
         convert_gfx(0,0,ptemp,@pt2_x,@pt2_y,false,false);
         freemem(ptemp);
-        marcade.dswa:=$fe;
-        marcade.dswb:=$ff;
-        marcade.dswa_val2:=@insectorx_dip_a;
-        marcade.dswb_val2:=@insectorx_dip_b;
+        init_dips(1,insectorx_dip_a,$fe);
+        init_dips(2,insectorx_dip_b,$ff);
   end;
   306:begin   //Extermination
         llamadas_maquina.bucle_general:=extrmatn_principal_mcu;
@@ -619,7 +616,7 @@ case main_vars.tipo_maquina of
         copymemory(@mem_snd,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@aux_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //MCU
-        mcs48_0:=cpu_mcs48.create(6000000,$100*CPU_SYNC,I8042);
+        mcs48_0:=cpu_mcs48.create(6000000,I8042);
         mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport,nil,nil);
         if not(roms_load(mcs48_0.get_rom_addr,extrmatn_mcu)) then exit;
         //Sound chip
@@ -633,10 +630,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,32*8,$1000*32*8*3,$1000*32*8*2,$1000*32*8,0);
         convert_gfx(0,0,ptemp,@pt_x,@pt_y,false,false);
         freemem(ptemp);
-        marcade.dswa:=$ff;
-        marcade.dswb:=$ff;
-        marcade.dswa_val2:=@extrmatn_dip_a;
-        marcade.dswb_val2:=@extrmatn_dip_b;
+        init_dips(1,extrmatn_dip_a,$ff);
+        init_dips(2,extrmatn_dip_b,$ff);
         if not(roms_load(@memoria_temp,extrmatn_pal)) then exit;
         for f:=0 to $1ff do begin
           tempw:=(memoria_temp[f] shl 8) or memoria_temp[f+512];

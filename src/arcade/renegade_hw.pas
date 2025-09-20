@@ -29,15 +29,14 @@ const
         (n:'n3-5.ic33';l:$8000;p:0;crc:$78fd6190),(n:'n4-5.ic32';l:$8000;p:$8000;crc:$6557564c),
         (n:'n5-5.ic31';l:$8000;p:$10000;crc:$7ee43a3c));
         //Dip
-        renegade_dip_a:array [0..6] of def_dip2=(
+        renegade_dip_a:array [0..5] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$10;name:'Lives';number:2;val2:($10,0);name2:('1','2')),
         (mask:$20;name:'Bonus';number:2;val2:($20,0);name2:('30K','None')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
-        renegade_dip_b:array [0..1] of def_dip2=(
-        (mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard')),());
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')));
+        renegade_dip_b:def_dip2=(mask:3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Very Hard'));
 
 var
   rom_mem:array[0..1,0..$3fff] of byte;
@@ -324,27 +323,27 @@ begin
 llamadas_maquina.bucle_general:=principal_renegade;
 llamadas_maquina.reset:=reset_renegade;
 llamadas_maquina.fps_max:=57.444853;
+llamadas_maquina.scanlines:=272;
 iniciar_renegade:=false;
 iniciar_audio(false);
 screen_init(1,1024,256);
-screen_mod_scroll(1,1024,256,1023,256,256,255);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(256,238);
 //Main CPU
-m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_renegade,putbyte_renegade);
 if not(roms_load(@memoria_temp,renegade_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 copymemory(@rom_mem[0,0],@memoria_temp[0],$4000);
 copymemory(@rom_mem[1,0],@memoria_temp[$4000],$4000);
 //Sound CPU
-m6809_0:=cpu_m6809.Create(1500000,272,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1500000,TCPU_M6809);
 m6809_0.change_ram_calls(getbyte_snd_renegade,putbyte_snd_renegade);
 m6809_0.init_sound(renegade_sound_update);
 if not(roms_load(@mem_snd,renegade_snd)) then exit;
 //MCU CPU
-taito_68705_0:=taito_68705p.create(3000000,272);
+taito_68705_0:=taito_68705p.create(3000000);
 if not(roms_load(taito_68705_0.get_rom_addr,renegade_mcu)) then exit;
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
@@ -386,10 +385,8 @@ for f:=0 to 3 do begin
   convert_gfx(2,(f*$400*16*16)+($300*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
 end;
 //Dip
-marcade.dswa:=$bf;
-marcade.dswb:=$8f;
-marcade.dswa_val2:=@renegade_dip_a;
-marcade.dswb_val2:=@renegade_dip_b;
+init_dips(1,renegade_dip_a,$bf);
+init_dips(2,renegade_dip_b,$8f);
 //final
 reset_renegade;
 iniciar_renegade:=true;

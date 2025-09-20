@@ -24,15 +24,15 @@ const
         (n:'388_e11.14a';l:$2000;p:$4000;crc:$9a220b39),(n:'388_e12.15a';l:$2000;p:$6000;crc:$fac98397));
         tp84_sound:tipo_roms=(n:'388j13.6a';l:$2000;p:0;crc:$c44414da);
         //Dip
-        tp84_dip_a:array [0..2] of def_dip2=(
+        tp84_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        tp84_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
+        tp84_dip_b:array [0..4] of def_dip2=(
         (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
         (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('10K 50K+','20K 60K+','30K 70K+','40K 80K+')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  irq_enable:boolean;
@@ -265,24 +265,24 @@ const
 begin
 llamadas_maquina.bucle_general:=tp84_principal;
 llamadas_maquina.reset:=reset_tp84;
+llamadas_maquina.scanlines:=256;
 iniciar_tp84:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.create(1536000,256,TCPU_M6809);
+m6809_0:=cpu_m6809.create(1536000,TCPU_M6809);
 m6809_0.change_ram_calls(tp84_getbyte,tp84_putbyte);
 if not(roms_load(@memoria,tp84_rom)) then exit;
 //Second CPU
-m6809_1:=cpu_m6809.create(1536000,256,TCPU_M6809);
+m6809_1:=cpu_m6809.create(1536000,TCPU_M6809);
 m6809_1.change_ram_calls(cpu2_tp84_getbyte,cpu2_tp84_putbyte);
 if not(roms_load(@mem_misc,tp84_rom2)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,$100);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(sound_instruccion);
 if not(roms_load(@mem_snd,tp84_sound)) then exit;
@@ -333,10 +333,8 @@ for i:=0 to $1ff do begin
 		end;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$32;
-marcade.dswa_val2:=@tp84_dip_a;
-marcade.dswb_val2:=@tp84_dip_b;
+init_dips(1,tp84_dip_a,$ff);
+init_dips(2,tp84_dip_b,$32);
 //final
 iniciar_tp84:=true;
 end;

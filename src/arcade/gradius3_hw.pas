@@ -334,13 +334,12 @@ begin
 llamadas_maquina.close:=cerrar_gradius3;
 llamadas_maquina.reset:=reset_gradius3;
 llamadas_maquina.bucle_general:=gradius3_principal;
+llamadas_maquina.scanlines:=256;
 iniciar_gradius3:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(320,224,true);
 iniciar_audio(true);
@@ -350,12 +349,12 @@ if not(roms_load16w(@rom_sub,gradius3_rom_sub)) then exit;
 //cargar sonido
 if not(roms_load(@mem_snd,gradius3_sound)) then exit;
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(gradius3_getword,gradius3_putword);
-m68000_1:=cpu_m68000.create(10000000,256);
+m68000_1:=cpu_m68000.create(10000000);
 m68000_1.change_ram16_calls(gradius3_getword_sub,gradius3_putword_sub);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(gradius3_snd_getbyte,gradius3_snd_putbyte);
 z80_0.init_sound(gradius3_sound_update);
 //Sound Chips

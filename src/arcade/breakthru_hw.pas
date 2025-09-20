@@ -20,17 +20,17 @@ const
         (n:'brkthru.8';l:$8000;p:$10000;crc:$f67ee64e));
         brkthru_pal:array[0..1] of tipo_roms=(
         (n:'brkthru.13';l:$100;p:0;crc:$aae44269),(n:'brkthru.14';l:$100;p:$100;crc:$f2d4822a));
-        brkthru_dip_a:array [0..6] of def_dip2=(
+        brkthru_dip_a:array [0..5] of def_dip2=(
         (mask:$3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$10;name:'Enemy Vehicles';number:2;val2:($10,0);name2:('Slow','Fast')),
         (mask:$20;name:'Enemy Bullets';number:2;val2:($20,0);name2:('Slow','Fast')),
         (mask:$40;name:'Control Panel';number:2;val2:($40,0);name2:('1 Player','2 Player')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
-        brkthru_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        brkthru_dip_b:array [0..2] of def_dip2=(
         (mask:$3;name:'Lives';number:4;val4:(2,3,1,0);name4:('2','3','5','99')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,4,$c,8);name4:('20K','10K 20K','20K 30K','20K 40K')),
-        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),());
+        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')));
         //Darwin
         darwin_rom:array[0..3] of tipo_roms=(
         (n:'darw_04.rom';l:$4000;p:$0;crc:$0eabf21c),(n:'darw_05.rom';l:$8000;p:$4000;crc:$e771f864),
@@ -45,16 +45,16 @@ const
         (n:'darw_01.rom';l:$8000;p:$10000;crc:$15a16973));
         darwin_pal:array[0..1] of tipo_roms=(
         (n:'df.12';l:$100;p:0;crc:$89b952ef),(n:'df.13';l:$100;p:$100;crc:$d595e91d));
-        darwin_dip_a:array [0..4] of def_dip2=(
+        darwin_dip_a:array [0..3] of def_dip2=(
         (mask:$3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$20;name:'Cabinet';number:2;val2:(0,$20);name2:('Upright','Cocktail')),
-        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')),());
-        darwin_dip_b:array [0..4] of def_dip2=(
+        (mask:$40;name:'Demo Sounds';number:2;val2:(0,$40);name2:('Off','On')));
+        darwin_dip_b:array [0..3] of def_dip2=(
         (mask:$1;name:'Lives';number:2;val2:(1,0);name2:('3','5')),
         (mask:$2;name:'Bonus Life';number:2;val2:(2,0);name2:('20K 50K+','30K 80K+')),
         (mask:$c;name:'Difficulty';number:4;val4:($c,8,4,0);name4:('Easy','Meidum','Hard','Hardest')),
-        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),());
+        (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')));
 var
  rom:array[0..7,0..$1fff] of byte;
  mem_sprt:array[0..$ff] of byte;
@@ -313,7 +313,6 @@ begin
  m6809_1.reset;
  ym2203_0.reset;
  ym3812_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$e0;
@@ -383,19 +382,18 @@ begin
 llamadas_maquina.bucle_general:=brkthru_principal;
 llamadas_maquina.reset:=reset_brkthru;
 llamadas_maquina.fps_max:=57.444885;
+llamadas_maquina.scanlines:=272;
 iniciar_brkthru:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(240,240);
 //Main CPU
-m6809_0:=cpu_m6809.create(12000000 div 8,272,TCPU_MC6809E);
+m6809_0:=cpu_m6809.create(12000000 div 8,TCPU_MC6809E);
 //Sound CPU
-m6809_1:=cpu_m6809.create(12000000 div 2,272,TCPU_MC6809);
+m6809_1:=cpu_m6809.create(12000000 div 2,TCPU_MC6809);
 m6809_1.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
 m6809_1.init_sound(brkthru_sound_update);
 //Sound Chip
@@ -423,10 +421,8 @@ case main_vars.tipo_maquina of
         //paleta
         if not(roms_load(@memoria_temp,brkthru_pal)) then exit;
         //DIP
-        marcade.dswa:=$3f;
-        marcade.dswa_val2:=@brkthru_dip_a;
-        marcade.dswb:=$1f;
-        marcade.dswb_val2:=@brkthru_dip_b;
+        init_dips(1,brkthru_dip_a,$3f);
+        init_dips(2,brkthru_dip_b,$1f);
      end;
   90:begin
         main_screen.rot270_screen:=true;
@@ -449,10 +445,8 @@ case main_vars.tipo_maquina of
         //paleta
         if not(roms_load(@memoria_temp,darwin_pal)) then exit;
         //DIP
-        marcade.dswa:=$df;
-        marcade.dswa_val2:=@darwin_dip_a;
-        marcade.dswb:=$1f;
-        marcade.dswb_val2:=@darwin_dip_b;
+        init_dips(1,darwin_dip_a,$df);
+        init_dips(2,darwin_dip_b,$1f);
      end;
 end;
 for f:=0 to $ff do begin

@@ -377,7 +377,6 @@ begin
  ym2151_0.reset;
  msm5205_0.reset;
  msm5205_1.reset;
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
  marcade.in2:=$ff7f;
@@ -404,6 +403,7 @@ var
 begin
 llamadas_maquina.bucle_general:=sfighter_principal;
 llamadas_maquina.reset:=reset_sfighter;
+llamadas_maquina.scanlines:=256;
 iniciar_sfighter:=false;
 iniciar_audio(true);
 screen_init(1,512,512,false,true);
@@ -412,14 +412,14 @@ screen_init(3,512,256);
 screen_init(4,512,256,true);
 iniciar_video(384,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(sfighter_getword,sfighter_putword);
 //Sound CPU
-z80_1:=cpu_z80.create(3579545,256);
+z80_1:=cpu_z80.create(3579545);
 z80_1.change_ram_calls(sf_snd_getbyte,sf_snd_putbyte);
 z80_1.init_sound(sound_instruccion);
 //Sub CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
 z80_0.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
 timers.init(z80_0.numero_cpu,3579545/8000,sf_adpcm_timer,nil,true);

@@ -23,17 +23,17 @@ const
         (n:'14_j07b.bin';l:$2000;p:$4000;crc:$101c858d));
         bombjack_tiles_map:tipo_roms=(n:'02_p04t.bin';l:$1000;p:0;crc:$398d4a02);
         bombjack_sonido:tipo_roms=(n:'01_h03t.bin';l:$2000;p:0;crc:$8407917d);
-        bombjack_dipa:array [0..5] of def_dip2=(
+        bombjack_dipa:array [0..4] of def_dip2=(
         (mask:$3;name:'Coin A';number:4;val4:(0,1,2,3);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
         (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
         (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
-        bombjack_dipb:array [0..4] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')));
+        bombjack_dipb:array [0..3] of def_dip2=(
         (mask:$7;name:'Bonus Life';number:8;val8:(2,1,7,5,3,6,4,0);name8:('30K+','100K+','50K 100K 300K','50K 100K','50K','100K 300K','100K','None')),
         (mask:$18;name:'Bird Speed';number:4;val4:(0,8,$10,$18);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$60;name:'Enemies Number && Speed';number:4;val4:($20,0,$40,$60);name4:('Easy','Medium','Hard','Hardest')),
-        (mask:$80;name:'Special Coin';number:2;val2:(0,$80);name2:('Easy','Hard')),());
+        (mask:$80;name:'Special Coin';number:2;val2:(0,$80);name2:('Easy','Hard')));
         //Calorie Kun
         caloriekun_rom:array[0..2] of tipo_roms=(
         (n:'epr10072.1j';l:$4000;p:0;crc:$ade792c1),(n:'epr10073.1k';l:$4000;p:$4000;crc:$b53e109f),
@@ -49,18 +49,18 @@ const
         (n:'epr10071.7m';l:$4000;p:0;crc:$5f55527a),(n:'epr10070.7k';l:$4000;p:$4000;crc:$97f35a23),
         (n:'epr10069.7j';l:$4000;p:$8000;crc:$c0c3deaf));
         caloriekun_tiles_map:tipo_roms=(n:'epr10079.8d';l:$2000;p:0;crc:$3c61a42c);
-        caloriekun_dipa:array [0..5] of def_dip2=(
+        caloriekun_dipa:array [0..4] of def_dip2=(
         (mask:$3;name:'Coin A';number:4;val4:(0,1,2,3);name4:('1C 1C','1C 2C','1C 3C','1C 6C')),
         (mask:$c;name:'Coin B';number:4;val4:($c,0,4,8);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$10;name:'Cabinet';number:2;val2:($10,0);name2:('Upright','Cocktail')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
-        (mask:$c0;name:'Lives';number:4;val4:($c0,0,$40,$80);name4:('2','3','4','5')),());
-        caloriekun_dipb:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:($c0,0,$40,$80);name4:('2','3','4','5')));
+        caloriekun_dipb:array [0..4] of def_dip2=(
         (mask:$3;name:'Bonus Life';number:4;val4:(0,1,3,2);name4:('None','20K','20K 60K','Invalid')),
         (mask:$4;name:'Number of Bombs';number:2;val2:(0,4);name2:('3','5')),
         (mask:$8;name:'Difficulty - Mogura Nian';number:2;val2:(0,8);name2:('Normal','Hard')),
         (mask:$30;name:'Difficulty - Select of Mogura';number:4;val4:(0,$20,$10,$30);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Infinite Lives';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Infinite Lives';number:2;val2:(0,$80);name2:('Off','On')));
 
 var
  memoria_fondo:array[0..$1fff] of byte;
@@ -505,7 +505,6 @@ ay8910_1.reset;
 ay8910_2.reset;
 frame_main:=z80_0.tframes;
 frame_snd:=z80_1.tframes;
-reset_game_general;
 nmi_vblank:=false;
 fondo_activo:=false;
 sound_latch:=0;
@@ -559,6 +558,7 @@ begin
 llamadas_maquina.reset:=bombjack_reset;
 llamadas_maquina.save_qsnap:=bombjack_qsave;
 llamadas_maquina.load_qsnap:=bombjack_qload;
+llamadas_maquina.scanlines:=264;
 iniciar_bombjack:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -567,9 +567,9 @@ screen_init(3,256,256,false,true);
 if main_vars.tipo_maquina=13 then main_screen.rot90_screen:=true;
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,264);
+z80_0:=cpu_z80.create(4000000);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,264);
+z80_1:=cpu_z80.create(3000000);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(bombjack_update_sound);
 //Sound Chip
@@ -598,10 +598,8 @@ case main_vars.tipo_maquina of
         convert_sprites($100);
         mask_sprites:=$1f;
         //DIP
-        marcade.dswa:=$c0;
-        marcade.dswa_val2:=@bombjack_dipa;
-        marcade.dswb:=$50;
-        marcade.dswb_val2:=@bombjack_dipb;
+        init_dips(1,bombjack_dipa,$c0);
+        init_dips(2,bombjack_dipb,$50);
   end;
   383:begin
         llamadas_maquina.bucle_general:=caloriekun_principal;
@@ -624,10 +622,8 @@ case main_vars.tipo_maquina of
         convert_sprites($200);
         mask_sprites:=$3f;
         //DIP
-        marcade.dswa:=$30;
-        marcade.dswa_val2:=@caloriekun_dipa;
-        marcade.dswb:=0;
-        marcade.dswb_val2:=@caloriekun_dipb;
+        init_dips(1,caloriekun_dipa,$30);
+        init_dips(2,caloriekun_dipb,0);
       end;
 end;
 //final

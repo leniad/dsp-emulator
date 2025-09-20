@@ -24,17 +24,17 @@ const
         expraid_proms:array[0..3] of tipo_roms=(
         (n:'cy-17.5b';l:$100;p:0;crc:$da31dfbc),(n:'cy-16.6b';l:$100;p:$100;crc:$51f25b4c),
         (n:'cy-15.7b';l:$100;p:$200;crc:$a6168d7f),(n:'cy-14.9b';l:$100;p:$300;crc:$52aad300));
-        expraid_dip_a:array [0..5] of def_dip2=(
+        expraid_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,$c,8,4);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$10;name:'Coin Mode';number:2;val2:($10,0);name2:('Mode 1','Mode 2')),
         (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),());
-        expraid_dip_b:array [0..4] of def_dip2=(
+        (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')));
+        expraid_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,3,2,0);name4:('1','3','2','Infinite')),
         (mask:4;name:'Bonus Life';number:2;val2:(0,4);name2:('50K 80K','50K')),
         (mask:$18;name:'Difficulty';number:4;val4:($18,$10,8,0);name4:('Easy','Normal','Hard','Very Hard')),
-        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),());
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')));
 
 var
   vb,prot_val,sound_latch,scroll_x,scroll_y,scroll_x2:byte;
@@ -370,6 +370,7 @@ llamadas_maquina.reset:=reset_expraid;
 llamadas_maquina.fps_max:=59.637405;
 llamadas_maquina.save_qsnap:=expraid_qsave;
 llamadas_maquina.load_qsnap:=expraid_qload;
+llamadas_maquina.scanlines:=262;
 iniciar_expraid:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
@@ -379,11 +380,11 @@ screen_init(4,512,512,true);
 screen_init(6,256,256,true);
 iniciar_video(240,240);
 //Main CPU
-m6502_0:=cpu_m6502.create(1500000,262,TCPU_DECO16);
+m6502_0:=cpu_m6502.create(1500000,TCPU_DECO16);
 m6502_0.change_ram_calls(getbyte_expraid,putbyte_expraid);
 m6502_0.change_io_calls(nil,get_io_expraid);
 //Sound CPU
-m6809_0:=cpu_m6809.Create(1500000,262,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1500000,TCPU_M6809);
 m6809_0.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
 m6809_0.init_sound(expraid_sound_update);
 //Sound Chip
@@ -434,10 +435,8 @@ for f:=0 to $ff do begin
 end;
 set_pal(colores,256);
 //DIP
-marcade.dswa:=$bf;
-marcade.dswa_val2:=@expraid_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val2:=@expraid_dip_b;
+init_dips(1,expraid_dip_a,$bf);
+init_dips(2,expraid_dip_b,$ff);
 //final
 reset_expraid;
 iniciar_expraid:=true;

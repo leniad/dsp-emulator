@@ -410,12 +410,13 @@ llamadas_maquina.reset:=reset_oric;
 llamadas_maquina.cintas:=oric_tapes;
 llamadas_maquina.cartuchos:=oric_loaddisk;
 llamadas_maquina.fps_max:=50.080128;
+llamadas_maquina.scanlines:=312;
 iniciar_oric:=false;
 iniciar_audio(false);
 screen_init(1,240,224);
 iniciar_video(240,224);
 //Main CPU
-m6502_0:=cpu_m6502.create(1000000,312,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1000000,TCPU_M6502);
 m6502_0.change_ram_calls(oric_getbyte,oric_putbyte);
 m6502_0.init_sound(oric_sound_update);
 m6502_0.change_despues_instruccion(oric_update_timers);

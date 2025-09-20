@@ -30,17 +30,16 @@ const
         (n:'gp2-2.2n';l:$100;p:$200;crc:$8dabc20b),(n:'gp2-7.6s';l:$100;p:$300;crc:$2faa3e09),
         (n:'gp2-6.6p';l:$200;p:$400;crc:$6f99c2da),(n:'gp2-5.6n';l:$200;p:$600;crc:$c7d31657),
         (n:'gp2-4.3f';l:$100;p:$800;crc:$2d9fbdd8));
-        gaplus_dip_a:array [0..4] of def_dip2=(
+        gaplus_dip_a:array [0..3] of def_dip2=(
         (mask:$3;name:'Coin B';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$10,$30,$20);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
-        (mask:$c0;name:'Lives';number:4;val4:($80,$c0,$40,0);name4:('2','3','4','5')),());
-        gaplus_dip_b:array [0..3] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:($80,$c0,$40,0);name4:('2','3','4','5')));
+        gaplus_dip_b:array [0..2] of def_dip2=(
         (mask:$7;name:'Bonus Life';number:8;val8:(0,1,2,3,4,7,5,6);name8:('30K 70K 70K+','30K 100K 100K+','30K 100K 200K+','50K 100K 100K+','50K 100K 200K+','50K 150K 150K+','50K 150K 300K+','50K 150K')),
         (mask:$8;name:'Round Advance';number:2;val2:(8,0);name2:('Off','On')),
-        (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('0 - Standard','1 - Easiest','2','3','4','5','6','7 - Hardest')),());
-        gaplus_dip_c:array [0..1] of def_dip2=(
-        (mask:$4;name:'Cabinet';number:2;val2:(4,0);name2:('Upright','Cocktail')),());
+        (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('0 - Standard','1 - Easiest','2','3','4','5','6','7 - Hardest')));
+        gaplus_dip_c:def_dip2=(mask:$4;name:'Cabinet';number:2;val2:(4,0);name2:('Upright','Cocktail'));
         gaplus_samples:tipo_nombre_samples=(nombre:'bang.wav');
         STARFIELD_CLIPPING_X=16;
         MAX_STARS=100-1;
@@ -468,17 +467,18 @@ iniciar_gaplus:=false;
 llamadas_maquina.bucle_general:=gaplus_principal;
 llamadas_maquina.reset:=reset_gaplus;
 llamadas_maquina.fps_max:=60.60606060606060;
+llamadas_maquina.scanlines:=224;
 iniciar_audio(false);
 screen_init(1,224,288,true);
 screen_init(2,224,288,true);
 screen_init(3,256,512,false,true);
 iniciar_video(224,288);
 //CPUs
-m6809_0:=cpu_m6809.create(24576000 div 16,224,TCPU_MC6809E);
+m6809_0:=cpu_m6809.create(24576000 div 16,TCPU_MC6809E);
 m6809_0.change_ram_calls(gaplus_getbyte,gaplus_putbyte);
-m6809_1:=cpu_m6809.create(24576000 div 16,224,TCPU_MC6809E);
+m6809_1:=cpu_m6809.create(24576000 div 16,TCPU_MC6809E);
 m6809_1.change_ram_calls(gaplus_sub_getbyte,gaplus_sub_putbyte);
-m6809_2:=cpu_m6809.create(24576000 div 16,224,TCPU_MC6809E);
+m6809_2:=cpu_m6809.create(24576000 div 16,TCPU_MC6809E);
 m6809_2.change_ram_calls(gaplus_sound_getbyte,gaplus_sound_putbyte);
 m6809_2.init_sound(gaplus_sound_update);
 namco_snd_0:=namco_snd_chip.create(8);
@@ -527,12 +527,9 @@ for f:=0 to $ff do begin
   colores[f].b:=$0e*ctemp0+$1f*ctemp1+$43*ctemp2+$8f*ctemp3;
 end;
 set_pal(colores,$100);
-marcade.dswa:=$ff;
-marcade.dswa_val2:=@gaplus_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val2:=@gaplus_dip_b;
-marcade.dswc:=$f;
-marcade.dswc_val2:=@gaplus_dip_c;
+init_dips(1,gaplus_dip_a,$ff);
+init_dips(2,gaplus_dip_b,$ff);
+init_dips(3,gaplus_dip_c,$f);
 //CLUT chars
 for f:=0 to $ff do gfx[0].colores[f]:=$f0+(memoria_temp[$300+f] and $0f);
 //CLUT sprites

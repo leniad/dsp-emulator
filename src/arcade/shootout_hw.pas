@@ -239,7 +239,6 @@ begin
 m6502_0.reset;
 m6502_1.reset;
 ym2203_0.reset;
-reset_game_general;
 marcade.in0:=$ff;
 marcade.in1:=$3f;
 bflicker:=false;
@@ -263,6 +262,7 @@ begin
 llamadas_maquina.bucle_general:=principal_shootout;
 llamadas_maquina.reset:=reset_shootout;
 llamadas_maquina.fps_max:=12000000/2/384/262;
+llamadas_maquina.scanlines:=262;
 iniciar_shootout:=false;
 iniciar_audio(false);
 //Chars trans
@@ -271,10 +271,10 @@ screen_init(2,256,256);
 screen_init(3,256,256,false,true);
 iniciar_video(256,240);
 //Main CPU
-m6502_0:=cpu_m6502.create(2000000,262,TCPU_M6502);
+m6502_0:=cpu_m6502.create(2000000,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_shootout,putbyte_shootout);
 //sound CPU
-m6502_1:=cpu_m6502.create(1500000,262,TCPU_M6502);
+m6502_1:=cpu_m6502.create(1500000,TCPU_M6502);
 m6502_1.change_ram_calls(getbyte_snd_shootout,putbyte_snd_shootout);
 m6502_1.init_sound(shootout_sound_update);
 //Sound Chip

@@ -4,8 +4,8 @@ object config_arcade: Tconfig_arcade
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Arcade Config'
-  ClientHeight = 381
-  ClientWidth = 812
+  ClientHeight = 373
+  ClientWidth = 810
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

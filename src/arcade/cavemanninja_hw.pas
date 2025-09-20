@@ -12,63 +12,63 @@ implementation
 const
         //Caveman Ninja
         cninja_rom:array[0..5] of tipo_roms=(
-        (n:'gn-02-3.1k';l:$20000;p:0;crc:$39aea12a),(n:'gn-05-2.3k';l:$20000;p:$1;crc:$0f4360ef),
+        (n:'gn-02-3.1k';l:$20000;p:0;crc:$39aea12a),(n:'gn-05-2.3k';l:$20000;p:1;crc:$0f4360ef),
         (n:'gn-01-2.1j';l:$20000;p:$40000;crc:$f740ef7e),(n:'gn-04-2.3j';l:$20000;p:$40001;crc:$c98fcb62),
         (n:'gn-00.rom';l:$20000;p:$80000;crc:$0b110b16),(n:'gn-03.rom';l:$20000;p:$80001;crc:$1e28e697));
-        cninja_sound:tipo_roms=(n:'gl-07.rom';l:$10000;p:$0;crc:$ca8bef96);
+        cninja_sound:tipo_roms=(n:'gl-07.rom';l:$10000;p:0;crc:$ca8bef96);
         cninja_chars:array[0..1] of tipo_roms=(
-        (n:'gl-09.rom';l:$10000;p:$0;crc:$5a2d4752),(n:'gl-08.rom';l:$10000;p:1;crc:$33a2b400));
-        cninja_tiles1:tipo_roms=(n:'mag-02.rom';l:$80000;p:$0;crc:$de89c69a);
+        (n:'gl-09.rom';l:$10000;p:0;crc:$5a2d4752),(n:'gl-08.rom';l:$10000;p:1;crc:$33a2b400));
+        cninja_tiles1:tipo_roms=(n:'mag-02.rom';l:$80000;p:0;crc:$de89c69a);
         cninja_tiles2:array[0..1] of tipo_roms=(
-        (n:'mag-00.rom';l:$80000;p:$0;crc:$a8f05d33),(n:'mag-01.rom';l:$80000;p:$80000;crc:$5b399eed));
+        (n:'mag-00.rom';l:$80000;p:0;crc:$a8f05d33),(n:'mag-01.rom';l:$80000;p:$80000;crc:$5b399eed));
         cninja_oki2:tipo_roms=(n:'mag-07.rom';l:$80000;p:0;crc:$08eb5264);
         cninja_oki1:tipo_roms=(n:'gl-06.rom';l:$20000;p:0;crc:$d92e519d);
         cninja_sprites:array[0..3] of tipo_roms=(
-        (n:'mag-03.rom';l:$80000;p:0;crc:$2220eb9f),(n:'mag-05.rom';l:$80000;p:$1;crc:$56a53254),
+        (n:'mag-03.rom';l:$80000;p:0;crc:$2220eb9f),(n:'mag-05.rom';l:$80000;p:1;crc:$56a53254),
         (n:'mag-04.rom';l:$80000;p:$100000;crc:$144b94cc),(n:'mag-06.rom';l:$80000;p:$100001;crc:$82d44749));
-        cninja_dip:array [0..7] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
+        cninja_dip:array [0..6] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$38,$30,$28,$20,$18,$10);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$300;name:'Lives';number:4;val4:($100,0,$300,$200);name4:('1','2','3','4')),
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$1000;name:'Restore Live Meter';number:2;val2:($1000,0);name2:('Off','On')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')),());
+        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')));
         //Robocop 2
         robocop2_rom:array[0..7] of tipo_roms=(
-        (n:'gq-03.k1';l:$20000;p:0;crc:$a7e90c28),(n:'gq-07.k3';l:$20000;p:$1;crc:$d2287ec1),
+        (n:'gq-03.k1';l:$20000;p:0;crc:$a7e90c28),(n:'gq-07.k3';l:$20000;p:1;crc:$d2287ec1),
         (n:'gq-02.j1';l:$20000;p:$40000;crc:$6777b8a0),(n:'gq-06.j3';l:$20000;p:$40001;crc:$e11e27b5),
         (n:'go-01-1.h1';l:$20000;p:$80000;crc:$ab5356c0),(n:'go-05-1.h3';l:$20000;p:$80001;crc:$ce21bda5),
         (n:'go-00.f1';l:$20000;p:$c0000;crc:$a93369ea),(n:'go-04.f3';l:$20000;p:$c0001;crc:$ee2f6ad9));
         robocop2_char:array[0..1] of tipo_roms=(
         (n:'gp10-1.y6';l:$10000;p:1;crc:$d25d719c),(n:'gp11-1.z6';l:$10000;p:0;crc:$030ded47));
-        robocop2_sound:tipo_roms=(n:'gp-09.k13';l:$10000;p:$0;crc:$4a4e0f8d);
+        robocop2_sound:tipo_roms=(n:'gp-09.k13';l:$10000;p:0;crc:$4a4e0f8d);
         robocop2_oki1:tipo_roms=(n:'gp-08.j13';l:$20000;p:0;crc:$365183b1);
         robocop2_oki2:tipo_roms=(n:'mah-11.f13';l:$80000;p:0;crc:$642bc692);
         robocop2_tiles1:array[0..1] of tipo_roms=(
-        (n:'mah-04.z4';l:$80000;p:$0;crc:$9b6ca18c),(n:'mah-03.y4';l:$80000;p:$80000;crc:$37894ddc));
+        (n:'mah-04.z4';l:$80000;p:0;crc:$9b6ca18c),(n:'mah-03.y4';l:$80000;p:$80000;crc:$37894ddc));
         robocop2_tiles2:array[0..2] of tipo_roms=(
         (n:'mah-01.z1';l:$80000;p:0;crc:$26e0dfff),(n:'mah-00.y1';l:$80000;p:$80000;crc:$7bd69e41),
         (n:'mah-02.a1';l:$80000;p:$100000;crc:$328a247d));
         robocop2_sprites:array[0..5] of tipo_roms=(
-        (n:'mah-05.y9';l:$80000;p:$000000;crc:$6773e613),(n:'mah-08.y12';l:$80000;p:$000001;crc:$88d310a5),
+        (n:'mah-05.y9';l:$80000;p:0;crc:$6773e613),(n:'mah-08.y12';l:$80000;p:1;crc:$88d310a5),
         (n:'mah-06.z9';l:$80000;p:$100000;crc:$27a8808a),(n:'mah-09.z12';l:$80000;p:$100001;crc:$a58c43a7),
         (n:'mah-07.a9';l:$80000;p:$200000;crc:$526f4190),(n:'mah-10.a12';l:$80000;p:$200001;crc:$14b770da));
-        robocop2_dip_a:array [0..8] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
+        robocop2_dip_a:array [0..7] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$38,$30,$28,$20,$18,$10);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$40;name:'Flip Screen';number:2;val2:(0,$40);name2:('Off','On')),
         (mask:$300;name:'Lives';number:4;val4:($100,0,$300,$200);name4:('1','2','3','4')),
         (mask:$c00;name:'Time';number:4;val4:($800,$c00,$400,0);name4:('400 Seconds','300 Seconds','200 Seconds','100 Seconds')),
         (mask:$3000;name:'Health';number:4;val4:(0,$1000,$3000,$2000);name4:('17','24','33','40')),
         (mask:$4000;name:'Continues';number:2;val2:(0,$4000);name2:('Off','On')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')),());
-        robocop2_dip_b:array [0..5] of def_dip2=(
-        (mask:$3;name:'Bullets';number:4;val4:(0,1,3,2);name4:('Least','Less','Normal','More')),
+        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')));
+        robocop2_dip_b:array [0..4] of def_dip2=(
+        (mask:3;name:'Bullets';number:4;val4:(0,1,3,2);name4:('Least','Less','Normal','More')),
         (mask:$c;name:'Enemy Movement';number:4;val4:(8,$c,4,0);name4:('Slow','Normal','Fast','Fastest')),
         (mask:$20;name:'Enemy Strength';number:4;val4:($20,$30,$10,0);name4:('Less','Normal','More','Most')),
         (mask:$40;name:'Enemy Weapon Speed';number:2;val2:($40,0);name2:('Normal','Fast')),
-        (mask:$80;name:'Game Over Message';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Game Over Message';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  rom:array[0..$7ffff] of word;
@@ -85,7 +85,7 @@ deco_sprites_0.draw_sprites($80);
 deco16ic_1.update_pf_1(5,true);
 deco_sprites_0.draw_sprites($40);
 deco16ic_0.update_pf_2(5,true);
-deco_sprites_0.draw_sprites($00);
+deco_sprites_0.draw_sprites(0);
 deco16ic_0.update_pf_1(5,true);
 actualiza_trozo_final(0,8,256,240,5);
 end;
@@ -98,7 +98,7 @@ if (prioridad and 4)=0 then deco16ic_1.update_pf_2(5,false)
     fill_full_screen(5,$200);
   end;
 deco_sprites_0.draw_sprites($80);
-if (prioridad and $8)<>0 then begin
+if (prioridad and 8)<>0 then begin
       deco16ic_0.update_pf_2(5,true);
       deco_sprites_0.draw_sprites($40);
       deco16ic_1.update_pf_1(5,true);
@@ -107,7 +107,7 @@ end else begin
       deco_sprites_0.draw_sprites($40);
       deco16ic_0.update_pf_2(5,true);
 end;
-deco_sprites_0.draw_sprites($00);
+deco_sprites_0.draw_sprites(0);
 deco16ic_0.update_pf_1(5,true);
 actualiza_trozo_final(0,8,320,240,5);
 end;
@@ -134,18 +134,14 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
 end;
 end;
 
 procedure cninja_principal;
-var
-  frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for screen_line:=0 to 273 do begin
    case screen_line of
@@ -162,13 +158,13 @@ while EmuStatus=EsRunning do begin
       248:begin
             m68000_0.irq[5]:=HOLD_LINE;
             proc_update_video;
-            marcade.in1:=marcade.in1 or $8;
+            marcade.in1:=marcade.in1 or 8;
           end;
    end;
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   h6280_0.run(trunc(frame_s));
-   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(frame_snd);
+   frame_snd:=frame_snd+h6280_0.tframes-h6280_0.contador;
  end;
  eventos_cninja;
  video_sync;
@@ -190,7 +186,7 @@ end;
 function cninja_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$bffff:cninja_getword:=rom[direccion shr 1];
+  0..$bffff:cninja_getword:=rom[direccion shr 1];
   $144000..$144fff:cninja_getword:=deco16ic_0.pf1.data[(direccion and $fff) shr 1];
   $146000..$146fff:cninja_getword:=deco16ic_0.pf2.data[(direccion and $fff) shr 1];
   $14c000..$14c7ff:cninja_getword:=deco16ic_0.pf1.rowscroll[(direccion and $7ff) shr 1];
@@ -200,7 +196,7 @@ case direccion of
   $15c000..$15c7ff:cninja_getword:=deco16ic_1.pf1.rowscroll[(direccion and $7ff) shr 1];
   $15e000..$15e7ff:cninja_getword:=deco16ic_1.pf2.rowscroll[(direccion and $7ff) shr 1];
   $184000..$187fff:cninja_getword:=ram[(direccion and $3fff) shr 1];
-  $190000..$190007:case ((direccion shr 1) and $7) of
+  $190000..$190007:case ((direccion shr 1) and 7) of
                       1:cninja_getword:=screen_line; // Raster IRQ scanline position
 	                    2:begin // Raster IRQ ACK
                           m68000_0.irq[3]:=CLEAR_LINE;
@@ -224,7 +220,7 @@ begin
   color.r:=buffer_paleta[(numero shl 1)+1] and $ff;
   set_pal_color(color,numero);
   case numero of
-    $000..$0ff:deco16ic_0.pf1.buffer_color[(numero shr 4) and $f]:=true;
+    0..$ff:deco16ic_0.pf1.buffer_color[(numero shr 4) and $f]:=true;
     $100..$1ff:deco16ic_0.pf2.buffer_color[(numero shr 4) and $f]:=true;
     $200..$2ff:deco16ic_1.pf1.buffer_color[(numero shr 4) and $f]:=true;
     $500..$5ff:deco16ic_1.pf2.buffer_color[(numero shr 4) and deco16ic_1.color_mask[2]]:=true;
@@ -259,7 +255,7 @@ case direccion of
   $14e000..$14e7ff:deco16ic_0.pf2.rowscroll[(direccion and $7ff) shr 1]:=valor;
   $150000..$15000f:begin
                       deco16ic_1.control_w((direccion and $f) shr 1,valor);
-                      if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $0080)<>0
+                      if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $80)<>0
                    end;
 	$154000..$154fff:if deco16ic_1.pf1.data[(direccion and $fff) shr 1]<>valor then begin
                       deco16ic_1.pf1.data[(direccion and $fff) shr 1]:=valor;
@@ -276,7 +272,7 @@ case direccion of
 	                    0:irq_mask:=valor and $ff; // IRQ enable:
 	                    1:begin // Raster IRQ scanline position, only valid for values between 1 & 239 (0 and 240-256 do NOT generate IRQ's)
                           irq_line:=valor and $ff;
-                          raster_irq:=(irq_line>0) and (irq_line<240) and ((irq_mask and $2)=0);
+                          raster_irq:=(irq_line>0) and (irq_line<240) and ((irq_mask and 2)=0);
                         end;
                    end;
   $19c000..$19dfff:if (buffer_paleta[(direccion and $1fff) shr 1]<>valor) then begin
@@ -306,7 +302,7 @@ end;
 function robocop2_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$fffff:robocop2_getword:=rom[direccion shr 1];
+  0..$fffff:robocop2_getword:=rom[direccion shr 1];
   $144000..$144fff:robocop2_getword:=deco16ic_0.pf1.data[(direccion and $fff) shr 1];
   $146000..$146fff:robocop2_getword:=deco16ic_0.pf2.data[(direccion and $fff) shr 1];
   $14c000..$14c7ff:robocop2_getword:=deco16ic_0.pf1.rowscroll[(direccion and $7ff) shr 1];
@@ -318,7 +314,7 @@ case direccion of
   $180000..$1807ff:robocop2_getword:=buffer_sprites_w[(direccion and $7ff) shr 1];
   $18c000..$18ffff:robocop2_getword:=robocop2_protection_deco_146_r(direccion-$18c000);
   $1a8000..$1a9fff:robocop2_getword:=buffer_paleta[(direccion and $1fff) shr 1];
-  $1b0000..$1b0007:case ((direccion shr 1) and $7) of
+  $1b0000..$1b0007:case ((direccion shr 1) and 7) of
                       1:robocop2_getword:=screen_line; // Raster IRQ scanline position
 	                    2:begin // Raster IRQ ACK
                           m68000_0.irq[3]:=CLEAR_LINE;
@@ -360,7 +356,7 @@ case direccion of
   $14e000..$14e7ff:deco16ic_0.pf2.rowscroll[(direccion and $7ff) shr 1]:=valor;
   $150000..$15000f:begin
                       deco16ic_1.control_w((direccion and $f) shr 1,valor);
-                      if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $0080)<>0
+                      if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $80)<>0
                    end;
 	$154000..$154fff:if deco16ic_1.pf1.data[(direccion and $fff) shr 1]<>valor then begin
                       deco16ic_1.pf1.data[(direccion and $fff) shr 1]:=valor;
@@ -384,7 +380,7 @@ case direccion of
 	                    0:irq_mask:=valor and $ff; // IRQ enable:
 	                    1:begin // Raster IRQ scanline position, only valid for values between 1 & 239 (0 and 240-256 do NOT generate IRQ's)
                           irq_line:=valor and $ff;
-                          raster_irq:=(irq_line>0) and (irq_line<240) and ((irq_mask and $2)=0);
+                          raster_irq:=(irq_line>0) and (irq_line<240) and ((irq_mask and 2)=0);
                         end;
                    end;
   $1b8000..$1bbfff:ram[(direccion and $3fff) shr 1]:=valor;
@@ -410,7 +406,7 @@ end;
 
 function cninja_video_bank(bank:word):word;
 begin
-  	if ((bank shr 4) and $f)<>0 then cninja_video_bank:=$0 //Only 2 banks
+  	if ((bank shr 4) and $f)<>0 then cninja_video_bank:=0 //Only 2 banks
 	    else cninja_video_bank:=$1000;
 end;
 
@@ -423,6 +419,7 @@ end;
 procedure reset_cninja;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  deco16ic_0.reset;
  deco16ic_1.reset;
  deco_sprites_0.reset;
@@ -432,7 +429,6 @@ begin
  end;
  deco16_snd_double_reset;
  copymemory(oki_6295_1.get_rom_addr,@oki_rom[0],$40000);
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
  irq_mask:=0;
@@ -477,31 +473,32 @@ begin
 llamadas_maquina.bucle_general:=cninja_principal;
 llamadas_maquina.reset:=reset_cninja;
 llamadas_maquina.fps_max:=58;
+llamadas_maquina.scanlines:=274;
 iniciar_cninja:=false;
 iniciar_audio(false);
 case main_vars.tipo_maquina of
   162:begin
         tempw:=256;
-        deco16ic_0:=chip_16ic.create(1,2,$000,$000,$f,$f,0,1,0,16,nil,nil);
-        deco16ic_1:=chip_16ic.create(3,4,$000,$200,$f,$f,0,2,0,48,cninja_video_bank,cninja_video_bank);
-        deco_sprites_0:=tdeco16_sprite.create(3,5,240,$300,$3fff);
+        deco16ic_0:=chip_16ic.create(1,2,0,0,$f,$f,0,1,0,16,nil,nil);
+        deco16ic_1:=chip_16ic.create(3,4,0,$200,$f,$f,0,2,0,48,cninja_video_bank,cninja_video_bank);
+        deco_sprites_0:=tdeco16_sprite.create(3,5,240,$300);
       end;
   163:begin
         tempw:=320;
-        deco16ic_0:=chip_16ic.create(1,2,$000,$000,$f,$f,0,1,0,16,nil,robocop2_video_bank);
-        deco16ic_1:=chip_16ic.create(3,4,$000,$200,$f,$f,0,2,0,48,robocop2_video_bank,robocop2_video_bank);
-        deco_sprites_0:=tdeco16_sprite.create(3,5,304,$300,$7fff);
+        deco16ic_0:=chip_16ic.create(1,2,0,0,$f,$f,0,1,0,16,nil,robocop2_video_bank);
+        deco16ic_1:=chip_16ic.create(3,4,0,$200,$f,$f,0,2,0,48,robocop2_video_bank,robocop2_video_bank);
+        deco_sprites_0:=tdeco16_sprite.create(3,5,304,$300);
       end;
 end;
 screen_init(5,512,512,false,true);
 iniciar_video(tempw,240);
 //Sound CPU
-deco16_snd_double_init(32220000 div 8,32220000,sound_bank_rom,274);
+deco16_snd_double_init(32220000 div 8,32220000,sound_bank_rom);
 getmem(memoria_temp,$300000);
 case main_vars.tipo_maquina of
   162:begin //Caveman Ninja
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,274);
+        m68000_0:=cpu_m68000.create(12000000);
         m68000_0.change_ram16_calls(cninja_getword,cninja_putword);
         proc_update_video:=update_video_cninja;
         //cargar roms
@@ -545,12 +542,11 @@ case main_vars.tipo_maquina of
         //Proteccion deco104
         deco104_0:=cpu_deco_104.create(USE_MAGIC_ADDRESS_XOR);
         //Dip
-        marcade.dswa:=$7fff;
-        marcade.dswa_val2:=@cninja_dip;
+        init_dips(1,cninja_dip,$7fff);
   end;
   163:begin //Robocop 2
         //Main CPU
-        m68000_0:=cpu_m68000.create(14000000,274);
+        m68000_0:=cpu_m68000.create(14000000);
         m68000_0.change_ram16_calls(robocop2_getword,robocop2_putword);
         proc_update_video:=update_video_robocop2;
         //cargar roms
@@ -619,10 +615,8 @@ case main_vars.tipo_maquina of
         //Proteccion deco146
         deco146_0:=cpu_deco_146.create(USE_MAGIC_ADDRESS_XOR);
         //Dip
-        marcade.dswa:=$7fbf;
-        marcade.dswa_val2:=@robocop2_dip_a;
-        marcade.dswb:=$ff;
-        marcade.dswb_val2:=@robocop2_dip_b;
+        init_dips(1,robocop2_dip_a,$7fbf);
+        init_dips(2,robocop2_dip_b,$ff);
   end;
 end;
 //final

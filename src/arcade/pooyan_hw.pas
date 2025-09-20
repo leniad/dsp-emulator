@@ -22,15 +22,15 @@ const
         pooyan_sprites:array[0..1] of tipo_roms=(
         (n:'6.9a';l:$1000;p:0;crc:$b2d8c121),(n:'5.8a';l:$1000;p:$1000;crc:$1097c2b6));
         //Dip
-        pooyan_dip_a:array [0..2] of def_dip2=(
+        pooyan_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        pooyan_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
+        pooyan_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('50K 80K+','30K 70K+')),
         (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('1 (Easy)','2','3','4','5','6','7','8 (Hard)')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  nmi_vblank:boolean;
@@ -168,7 +168,6 @@ procedure reset_pooyan;
 begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
- reset_game_general;
  konamisnd_0.reset;
  nmi_vblank:=false;
  last:=0;
@@ -193,16 +192,17 @@ const
 begin
 llamadas_maquina.bucle_general:=pooyan_principal;
 llamadas_maquina.reset:=reset_pooyan;
+llamadas_maquina.scanlines:=256;
 iniciar_pooyan:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,256);
+z80_0:=cpu_z80.create(3072000);
 z80_0.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
 //Sound Chip
-konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772);
 if not(roms_load(@konamisnd_0.memoria,pooyan_sound)) then exit;
 //cargar roms
 if not(roms_load(@memoria,pooyan_rom)) then exit;
@@ -245,10 +245,8 @@ for f:=0 to $ff do begin
   gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7b;
-marcade.dswa_val2:=@pooyan_dip_a;
-marcade.dswb_val2:=@pooyan_dip_b;
+init_dips(1,pooyan_dip_a,$ff);
+init_dips(2,pooyan_dip_b,$7b);
 //final
 reset_pooyan;
 iniciar_pooyan:=true;

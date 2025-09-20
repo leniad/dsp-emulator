@@ -16,7 +16,7 @@ type
         end;
         preg_h6280=^reg_h6280;
         cpu_h6280=class(cpu_class)
-            constructor create(clock:dword;frames_div:word);
+            constructor create(clock:dword);
             destructor free;
           public
             getbyte:tgetbyte16;
@@ -86,13 +86,13 @@ implementation
         2,7,2,0,4,4,6,7,2,2,2,2,5,5,7,4, //e0
         2,7,7,0,2,4,6,7,2,5,4,2,2,5,7,4);//f0
 
-constructor cpu_h6280.create(clock:dword;frames_div:word);
+constructor cpu_h6280.create(clock:dword);
 begin
 getmem(self.r,sizeof(reg_h6280));
 fillchar(self.r^,sizeof(reg_h6280),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 destructor cpu_h6280.free;

@@ -26,7 +26,7 @@ type
         end;
         preg_m6800=^reg_m6800;
         cpu_m6800=class(cpu_class)
-              constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
+              constructor create(clock:dword;tipo_cpu:byte);
               destructor Free;
             public
               procedure run(maximo:single);
@@ -379,7 +379,7 @@ procedure ret_out_ff(valor:byte);
 begin
 end;
 
-constructor cpu_m6800.create(clock:dword;frames_div:word;tipo_cpu:byte);
+constructor cpu_m6800.create(clock:dword;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6800));
 fillchar(self.r^,sizeof(reg_m6800),0);
@@ -392,7 +392,7 @@ case tipo_cpu of
   TCPU_HD63701Y,TCPU_HD63701V:copymemory(@estados_t[0],@ciclos_63701[0],$100);
     else MessageDlg('Tipo M680X desconocido', mtInformation,[mbOk], 0)
 end;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.out_port[0]:=ret_out_ff;
 self.out_port[1]:=ret_out_ff;
 self.out_port[2]:=ret_out_ff;

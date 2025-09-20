@@ -86,19 +86,19 @@ stringgrid2.ColWidths[0]:=stringgrid1.Width-100;
 stringgrid2.ColWidths[1]:=100;
 stringgrid2.ColCount:=2;
 //stringgrid2.ColWidths[2]:=60;
-tape_window1.StringGrid2.cells[0,0]:=leng.varios[0];  //nombre
-tape_window1.StringGrid2.cells[1,0]:=leng.varios[1];  //longitud
+//tape_window1.StringGrid2.cells[0,0]:=leng.varios[0];  //nombre
+//tape_window1.StringGrid2.cells[1,0]:=leng.varios[1];  //longitud
 //tape_window1.StringGrid2.cells[2,0]:='CRC';  //CRC
 //mensajes
-tape_window1.Caption:=leng.mensajes[2];  //nombre
-tape_window1.label1.Caption:=leng.mensajes[9];  //nombre cinta
+//tape_window1.Caption:=leng.mensajes[2];  //nombre
+//tape_window1.label1.Caption:=leng.mensajes[9];  //nombre cinta
 //Hints
-tape_window1.BitBtn1.Hint:=leng.hints[13];
-tape_window1.BitBtn2.Hint:=leng.hints[14];
-tape_window1.BitBtn3.Hint:=leng.hints[15];
-tape_window1.Edit1.Hint:=leng.hints[16];
-tape_window1.StringGrid1.Hint:=leng.hints[17];
-tape_window1.StringGrid2.Hint:=leng.hints[17];
+//tape_window1.BitBtn1.Hint:=leng.hints[13];
+//tape_window1.BitBtn2.Hint:=leng.hints[14];
+//tape_window1.BitBtn3.Hint:=leng.hints[15];
+//tape_window1.Edit1.Hint:=leng.hints[16];
+//tape_window1.StringGrid1.Hint:=leng.hints[17];
+//tape_window1.StringGrid2.Hint:=leng.hints[17];
 end;
 
 procedure Ttape_window1.fstopcinta(Sender: TObject);

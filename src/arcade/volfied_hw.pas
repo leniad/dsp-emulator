@@ -26,17 +26,17 @@ const
         (n:'c04-10.15';l:$10000;p:$a0000;crc:$429b6b49),(n:'c04-09.14';l:$10000;p:$a0001;crc:$c78cf057));
         {$IFDEF MCU}cchip_eeprom:tipo_roms=(n:'cchip_c04-23';l:$2000;p:0;crc:$46b0b479);{$ENDIF}
         //DIP
-        volfied_dip1:array [0..5] of def_dip2=(
+        volfied_dip1:array [0..4] of def_dip2=(
         (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
         (mask:2;name:'Flip_Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:8;name:'Demo_Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$10,$20,$30);name4:('4C-1C','3C-1C','2C-1C','1C-1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C-2C','1C-3C','1C-4C','1C-6C')),());
-        volfied_dip2:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C-2C','1C-3C','1C-4C','1C-6C')));
+        volfied_dip2:array [0..3] of def_dip2=(
         (mask:3;name:'Bonus Life';number:4;val4:(2,3,1,0);name4:('20K 40K 120K 480K 2400K','50K 150K 600K 3000K','70K 280K 1400K','100K 500K')),
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$70;name:'Lives';number:4;val4:($70,$60,$50,$40);name4:('3','4','5','6')),
-        (mask:$80;name:'Languaje';number:2;val2:(0,$80);name2:('English','Japanese')),());
+        (mask:$80;name:'Languaje';number:2;val2:(0,$80);name2:('English','Japanese')));
         CPU_SYNC=4;
 
 var
@@ -257,17 +257,18 @@ begin
 iniciar_volfied:=false;
 llamadas_maquina.bucle_general:=volfied_principal;
 llamadas_maquina.reset:=reset_volfied;
+llamadas_maquina.scanlines:=256*CPU_SYNC;
 iniciar_audio(false);
 screen_init(1,248,512);
 screen_init(2,512,512,false,true);
 iniciar_video(240,320);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256*CPU_SYNC);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(volfied_getword,volfied_putword);
 if not(roms_load16w(@rom,volfied_rom)) then exit;
 if not(roms_load16w(@rom2,volfied_rom2)) then exit;
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_SYNC,SOUND_VOLFIED);
+tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_VOLFIED);
 ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
 if not(roms_load(@tc0140syt_0.snd_rom,volfied_sound)) then exit;
 //MCU
@@ -289,10 +290,8 @@ gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,true);
 freemem(memoria_temp);
 //DIP
-marcade.dswa:=$fe;
-marcade.dswa_val2:=@volfied_dip1;
-marcade.dswb:=$7f;
-marcade.dswb_val2:=@volfied_dip2;
+init_dips(1,volfied_dip1,$fe);
+init_dips(2,volfied_dip2,$7f);
 //final
 iniciar_volfied:=true;
 end;

@@ -70,7 +70,7 @@ type
     step_mode:integer;
   end;
   cpu_n2a03=class(snd_chip_class)
-      constructor create(clock:dword;frames:word);
+      constructor create(clock:dword);
       destructor free;
     public
       m6502:cpu_m6502;
@@ -254,10 +254,10 @@ begin
   end;
 end;
 
-constructor cpu_n2a03.create(clock:dword;frames:word);
+constructor cpu_n2a03.create(clock:dword);
 begin
   self.clock:=clock;
-  self.m6502:=cpu_m6502.create(clock,frames,TCPU_NES);
+  self.m6502:=cpu_m6502.create(clock,TCPU_NES);
   // Initialize global variables
   self.samps_per_sync:=round(clock/4/llamadas_maquina.fps_max);
   chips_total:=chips_total+1;

@@ -14,6 +14,7 @@ object tape_window1: Ttape_window1
   Font.Style = []
   Position = poDesigned
   OnClose = FormClose
+  OnCreate = FormCreate
   OnShow = FormShow
   TextHeight = 13
   object Label1: TLabel

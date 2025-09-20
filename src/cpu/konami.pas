@@ -8,7 +8,7 @@ type
         tset_lines=procedure (valor:byte);
         cpu_konami=class(cpu_m6809)
           public
-            constructor create(clock:dword;frames_div:word);
+            constructor create(clock:dword);
             procedure run(maximo:single);
             procedure change_set_lines(tset_lines_call:tset_lines);
           private
@@ -66,14 +66,14 @@ const
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //e0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f); //f0
 
-constructor cpu_konami.create(clock:dword;frames_div:word);
+constructor cpu_konami.create(clock:dword);
 begin
   getmem(self.r,sizeof(reg_m6809));
   fillchar(self.r^,sizeof(reg_m6809),0);
   clock:=clock div 4;
   self.numero_cpu:=cpu_main_init(clock);
   self.clock:=clock;
-  self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+  self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 procedure cpu_konami.change_set_lines(tset_lines_call:tset_lines);

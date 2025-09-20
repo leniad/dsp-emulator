@@ -239,7 +239,6 @@ begin
  m68000_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -365,6 +364,7 @@ llamadas_maquina.bucle_general:=nmk16_principal;
 llamadas_maquina.close:=cerrar_nmk16;
 llamadas_maquina.reset:=reset_nmk16;
 llamadas_maquina.fps_max:=56;
+llamadas_maquina.scanlines:=256;
 iniciar_nmk16:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=71 then main_screen.rot270_screen:=true;
@@ -372,7 +372,7 @@ screen_init(1,512,512);
 screen_init(2,512,512,false,true);
 iniciar_video(384,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,$100);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(sbombers_getword,sbombers_putword);
 m68000_0.init_sound(nmk16_update_sound);
 //Sound Chips

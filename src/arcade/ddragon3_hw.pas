@@ -38,7 +38,7 @@ const
         (n:'28j7-0.ic11';l:$40000;p:0;crc:$a8b773f1),(n:'28j6-0.ic13';l:$40000;p:$1;crc:$617530fc),
         (n:'28j5-0.ic12';l:$40000;p:$80000;crc:$cef0a821),(n:'28j4-0.ic14';l:$40000;p:$80001;crc:$b84fda09));
         //DIP
-        ddragon3_dip_a:array [0..9] of def_dip2=(
+        ddragon3_dip_a:array [0..8] of def_dip2=(
         (mask:3;name:'Coinage';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$10;name:'Continue Discount';number:2;val2:($10,0);name2:('Off','On')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
@@ -47,20 +47,20 @@ const
         (mask:$400;name:'Player Vs. Player Damage';number:2;val2:($400,0);name2:('Off','On')),
         (mask:$2000;name:'Stage Clear Energy';number:2;val2:(0,$2000);name2:('0','50')),
         (mask:$4000;name:'Starting Energy';number:2;val2:(0,$4000);name2:('200','230')),
-        (mask:$8000;name:'Players';number:2;val2:($8000,0);name2:('2','3')),());
-        ctribe_dip_a:array [0..3] of def_dip2=(
+        (mask:$8000;name:'Players';number:2;val2:($8000,0);name2:('2','3')));
+        ctribe_dip_a:array [0..2] of def_dip2=(
         (mask:$300;name:'Coinage';number:4;val4:(0,$100,$300,$200);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$1000;name:'Continue Discount';number:2;val2:($1000,0);name2:('Off','On')),
-        (mask:$2000;name:'Demo Sounds';number:2;val2:(0,$2000);name2:('Off','On')),());
-        ctribe_dip_b:array [0..4] of def_dip2=(
+        (mask:$2000;name:'Demo Sounds';number:2;val2:(0,$2000);name2:('Off','On')));
+        ctribe_dip_b:array [0..3] of def_dip2=(
         (mask:$300;name:'Difficulty';number:4;val4:($200,$300,$100,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$400;name:'Timer Speed';number:2;val2:($400,0);name2:('Normal','Fast')),
         (mask:$800;name:'FBI Logo';number:2;val2:(0,$800);name2:('Off','On')),
-        (mask:$2000;name:'Stage Clear Energy';number:2;val2:($2000,0);name2:('0','50')),());
-        ctribe_dip_c:array [0..3] of def_dip2=(
+        (mask:$2000;name:'Stage Clear Energy';number:2;val2:($2000,0);name2:('0','50')));
+        ctribe_dip_c:array [0..2] of def_dip2=(
         (mask:$100;name:'More Stage Clear Energy';number:2;val2:($100,0);name2:('Off','On')),
         (mask:$200;name:'Players';number:2;val2:($200,0);name2:('2','3')),
-        (mask:$1000;name:'Flip Screen';number:2;val2:($1000,0);name2:('Off','On')),());
+        (mask:$1000;name:'Flip Screen';number:2;val2:($1000,0);name2:('Off','On')));
 
 var
  video_update_dd3:procedure;
@@ -595,19 +595,18 @@ llamadas_maquina.reset:=reset_ddragon3;
 llamadas_maquina.fps_max:=57.444853;
 llamadas_maquina.load_qsnap:=ddragon3_qload;
 llamadas_maquina.save_qsnap:=ddragon3_qsave;
+llamadas_maquina.scanlines:=272;
 iniciar_ddragon3:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,512,512,true);
-screen_mod_scroll(1,512,320,511,512,256,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,320,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,272);
+m68000_0:=cpu_m68000.create(10000000);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,272);
+z80_0:=cpu_z80.create(3579545);
 z80_0.init_sound(ddragon3_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545,1);
@@ -638,8 +637,7 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
         convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
         //DIP
-        marcade.dswa:=$ffff;
-        marcade.dswa_val2:=@ddragon3_dip_a;
+        init_dips(1,ddragon3_dip_a,$ffff);
         video_update_dd3:=update_video_ddragon3;
         events_update_dd3:=eventos_ddragon3;
   end;
@@ -665,12 +663,9 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
         convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
         //DIP
-        marcade.dswa:=$ffff;
-        marcade.dswa_val2:=@ctribe_dip_a;
-        marcade.dswb:=$ffff;
-        marcade.dswb_val2:=@ctribe_dip_b;
-        marcade.dswc:=$ffff;
-        marcade.dswc_val2:=@ctribe_dip_c;
+        init_dips(1,ctribe_dip_a,$ffff);
+        init_dips(2,ctribe_dip_b,$ffff);
+        init_dips(3,ctribe_dip_c,$ffff);
         video_update_dd3:=update_video_ctribe;
         events_update_dd3:=eventos_ctribe;
       end;

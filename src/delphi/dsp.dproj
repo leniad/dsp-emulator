@@ -159,12 +159,13 @@
         <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>1123</VerInfo_Build>
+        <VerInfo_Build>1145</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.24.1.1123;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.23;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.24.2.1145;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.24;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <UWP_DelphiLogo44>..\..\icons\main.png</UWP_DelphiLogo44>
         <UWP_DelphiLogo150>..\..\icons\main.png</UWP_DelphiLogo150>
+        <VerInfo_Release>2</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
@@ -1508,6 +1509,10 @@
         <DCCReference Include="..\arcade\taito_b_hw.pas"/>
         <DCCReference Include="..\arcade\misc\taito_tc0180vcu.pas"/>
         <DCCReference Include="..\snd\ym_2610.pas"/>
+        <DCCReference Include="..\misc\principal_misc.pas"/>
+        <DCCReference Include="..\misc\configgeneral_misc.pas"/>
+        <DCCReference Include="..\misc\arcadeconfig_misc.pas"/>
+        <DCCReference Include="..\ordenadores\msx1.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

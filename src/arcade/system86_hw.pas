@@ -42,7 +42,7 @@ const
         rthunder_dip_b:array [0..7] of def_dip=(
         (mask:$1;name:'Continues';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$6;name:'Cabinet';number:4;dip:((dip_val:$6;dip_name:'Upright 1 Player'),(dip_val:$2;dip_name:'Upright 1 Player'),(dip_val:$4;dip_name:'Upright 2 Players'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Level Select (Cheat)';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Level Select';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Difficulty';number:2;dip:((dip_val:$10;dip_name:'Normal'),(dip_val:$0;dip_name:'Easy'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Timer value';number:2;dip:((dip_val:$20;dip_name:'120secs'),(dip_val:$0;dip_name:'150secs'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Bonus Life';number:2;dip:((dip_val:$40;dip_name:'70K 200K'),(dip_val:$0;dip_name:'100K 300K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -66,7 +66,7 @@ const
         (mask:$60;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$60;dip_name:'1C 1C'),(dip_val:$40;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         hopmappy_dip_b:array [0..5] of def_dip=(
         (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Level Select (Cheat)';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Level Select';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Difficulty';number:2;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -89,7 +89,7 @@ const
         skykiddx_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$4;name:'Freeze';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Level Select (Cheat)';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Level Select';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$10;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$60;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$60;dip_name:'1C 1C'),(dip_val:$40;dip_name:'2C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         skykiddx_dip_b:array [0..3] of def_dip=(
@@ -750,25 +750,22 @@ llamadas_maquina.bucle_general:=system86_principal;
 llamadas_maquina.close:=cerrar_system86;
 llamadas_maquina.reset:=reset_system86;
 llamadas_maquina.fps_max:=60.606060;
+llamadas_maquina.scanlines:=264*CPU_SYNC;
 iniciar_system86:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,256,256,255);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,512,256,true);
-screen_mod_scroll(4,512,512,511,256,256,255);
 screen_init(5,512,256,false,true);
 iniciar_video(288,224);
 getmem(memoria_temp,$100000);
 //Main CPU
-m6809_0:=cpu_m6809.Create(49152000 div 32,264*CPU_SYNC,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(49152000 div 32,TCPU_M6809);
 //Sub CPU
-m6809_1:=cpu_m6809.Create(49152000 div 32,264*CPU_SYNC,TCPU_M6809);
+m6809_1:=cpu_m6809.Create(49152000 div 32,TCPU_M6809);
 //MCU CPU
-m6800_0:=cpu_m6800.create(49152000 div 8,264*CPU_SYNC,TCPU_HD63701V);
+m6800_0:=cpu_m6800.create(49152000 div 8,TCPU_HD63701V);
 m6800_0.change_io_calls(system86_in_port1,system86_in_port2,nil,nil,nil,nil,nil,nil);
 if ((main_vars.tipo_maquina=124) or (main_vars.tipo_maquina=290) or (main_vars.tipo_maquina=291)) then m6800_0.init_sound(sound_update_rthunder)
   else m6800_0.init_sound(sound_update_system86);

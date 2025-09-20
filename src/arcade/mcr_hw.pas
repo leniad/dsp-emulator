@@ -95,24 +95,23 @@ const
         (n:'wackovid.1e';l:$2000;p:0;crc:$dca59be7),(n:'wackovid.1d';l:$2000;p:$2000;crc:$a02f1672),
         (n:'wackovid.1b';l:$2000;p:$4000;crc:$7d899790),(n:'wackovid.1a';l:$2000;p:$6000;crc:$080be3ad));
         //DIP
-        tapper_dipa:array [0..3] of def_dip2=(
+        tapper_dipa:array [0..2] of def_dip2=(
         (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),
         (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Coin Meters';number:2;val2:($80,0);name2:('1','2')),());
-        dotron_dipa:array [0..1] of def_dip2=(
-        (mask:1;name:'Coin Meters';number:2;val2:(1,0);name2:('1','2')),());
-        tron_dipa:array [0..3] of def_dip2=(
+        (mask:$80;name:'Coin Meters';number:2;val2:($80,0);name2:('1','2')));
+        dotron_dipa:def_dip2=(mask:1;name:'Coin Meters';number:2;val2:(1,0);name2:('1','2'));
+        tron_dipa:array [0..2] of def_dip2=(
         (mask:1;name:'Coin Meters';number:2;val2:(1,0);name2:('1','2')),
         (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),
-        (mask:4;name:'Allow Continue';number:2;val2:(4,0);name2:('No','Yes')),());
-        shollow_dipa:array [0..2] of def_dip2=(
+        (mask:4;name:'Allow Continue';number:2;val2:(4,0);name2:('No','Yes')));
+        shollow_dipa:array [0..1] of def_dip2=(
         (mask:1;name:'Coin Meters';number:2;val2:(1,0);name2:('1','2')),
-        (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),());
-        domino_dipa:array [0..4] of def_dip2=(
+        (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')));
+        domino_dipa:array [0..3] of def_dip2=(
         (mask:1;name:'Music';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Skin Color';number:2;val2:(2,0);name2:('Light','Dark')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Coin Meters';number:2;val2:($80,0);name2:('1','2')),());
+        (mask:$80;name:'Coin Meters';number:2;val2:($80,0);name2:('1','2')));
         CPU_SYNC=4;
 
 var
@@ -669,6 +668,7 @@ llamadas_maquina.bucle_general:=mcr_principal;
 llamadas_maquina.reset:=mcr_reset;
 llamadas_maquina.fps_max:=30;
 llamadas_maquina.close:=close_mcr;
+llamadas_maquina.scanlines:=480*CPU_SYNC;
 iniciar_mcr:=false;
 iniciar_audio(true);
 if ((main_vars.tipo_maquina=412) or (main_vars.tipo_maquina=414)) then main_screen.rot90_screen:=true;
@@ -676,14 +676,14 @@ screen_init(1,512,480);
 screen_init(2,512,512,false,true);
 iniciar_video(512,480);
 //Main CPU
-z80_0:=cpu_z80.create(5000000,480*CPU_SYNC);
+z80_0:=cpu_z80.create(5000000);
 z80_0.change_io_calls(tapper_inbyte,tapper_outbyte);
 z80_0.enable_daisy;
 ctc_0:=tz80ctc.create(z80_0.numero_cpu,5000000,z80_0.clock,0,CTC0_TRG01);
 ctc_0.change_calls(z80ctc_int);
 z80daisy_init(Z80_CTC0_TYPE);
 //Sound CPU
-z80_1:=cpu_z80.create(2000000,480*CPU_SYNC);
+z80_1:=cpu_z80.create(2000000);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.init_sound(mcr_update_sound);
 timers.init(z80_1.numero_cpu,2000000/(160*2*16*10),mcr_snd_irq,nil,true);
@@ -709,8 +709,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'tapper.nv',longitud) then read_file(Directory.Arcade_nvram+'tapper.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=$c0;
-        marcade.dswa_val2:=@tapper_dipa;
+        init_dips(1,tapper_dipa,$c0);
       end;
   411:begin
         z80_0.change_ram_calls(tapper_getbyte,tapper_putbyte);
@@ -733,8 +732,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'dotron.nv',longitud) then read_file(Directory.Arcade_nvram+'dotron.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswa_val2:=@dotron_dipa;
+        init_dips(1,dotron_dipa,$ff);
       end;
   412:begin
         z80_0.change_ram_calls(tron_getbyte,tron_putbyte);
@@ -756,8 +754,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'tron.nv',longitud) then read_file(Directory.Arcade_nvram+'tron.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=0;
-        marcade.dswa_val2:=@tron_dipa;
+        init_dips(1,tron_dipa,0);
       end;
   413:begin
         z80_0.change_ram_calls(tapper_getbyte,tapper_putbyte);
@@ -777,8 +774,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'timber.nv',longitud) then read_file(Directory.Arcade_nvram+'timber.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=$c0;
-        marcade.dswa_val2:=@tapper_dipa;
+        init_dips(1,tapper_dipa,$c0);
       end;
       414:begin
         z80_0.change_ram_calls(tron_getbyte,tron_putbyte);
@@ -798,8 +794,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'shollow.nv',longitud) then read_file(Directory.Arcade_nvram+'shollow.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=$fd;
-        marcade.dswa_val2:=@shollow_dipa;
+        init_dips(1,shollow_dipa,$fd);
       end;
       415:begin
         z80_0.change_ram_calls(tron_getbyte,tron_putbyte);
@@ -819,8 +814,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'domino.nv',longitud) then read_file(Directory.Arcade_nvram+'domino.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=$3e;
-        marcade.dswa_val2:=@domino_dipa;
+        init_dips(1,domino_dipa,$3e);
       end;
       416:begin
         z80_0.change_ram_calls(tron_getbyte,tron_putbyte);
@@ -842,8 +836,7 @@ case main_vars.tipo_maquina of
         if read_file_size(Directory.Arcade_nvram+'wacko.nv',longitud) then read_file(Directory.Arcade_nvram+'wacko.nv',@nvram,longitud)
           else fillchar(nvram,$800,0);
         //DIP
-        marcade.dswa:=$3e;
-        marcade.dswa_val2:=@domino_dipa;
+        init_dips(1,domino_dipa,$3e);
       end;
 end;
 iniciar_mcr:=true;

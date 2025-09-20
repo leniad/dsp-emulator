@@ -179,7 +179,6 @@ begin
  sn_76496_0.reset;
  vlm5030_0.reset;
  frame_main:=m6809_0.tframes;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -202,14 +201,14 @@ begin
 llamadas_maquina.bucle_general:=jailbreak_principal;
 llamadas_maquina.reset:=reset_jailbreak;
 llamadas_maquina.fps_max:=60.606060606060;
+llamadas_maquina.scanlines:=256;
 iniciar_jailbreak:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
 m6809_0.init_sound(jailbreak_sound);
 if not(roms_load(@memoria,jailbreak_rom)) then exit;

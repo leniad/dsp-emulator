@@ -91,51 +91,50 @@ const
         (n:'a03.bin';l:$40000;p:0;crc:$22b0d089),(n:'a02.bin';l:$40000;p:$40000;crc:$951d6579),
         (n:'a01.bin';l:$40000;p:$80000;crc:$020b5261));
         //DIPs
-        lwings_dip_a:array [0..4] of def_dip2=(
+        lwings_dip_a:array [0..3] of def_dip2=(
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$c;name:'Lives';number:4;val4:($c,4,8,0);name4:('3','4','5','6')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$20,$10,$30);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$c0,$40,$80);name4:('2C 4C','1C 1C','1C 2C','1C 3C')),());
-        lwings_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$c0,$40,$80);name4:('2C 4C','1C 1C','1C 2C','1C 3C')));
+        lwings_dip_b:array [0..3] of def_dip2=(
         (mask:6;name:'Difficulty';number:4;val4:(2,6,4,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$10;name:'Allow Continue';number:2;val2:(0,$10);name2:('No','Yes')),
-        (mask:$e0;name:'Bonus Life';number:8;val8:($e0,$60,$a0,$20,$c0,$40,$80,0);name8:('20K 50K+','20K 60K+','20K 70K+','30K 60K+','30k 70k+','30k 80k+','40k 100k+','None')),());
-        sectionz_dip_a:array [0..4] of def_dip2=(
+        (mask:$e0;name:'Bonus Life';number:8;val8:($e0,$60,$a0,$20,$c0,$40,$80,0);name8:('20K 50K+','20K 60K+','20K 70K+','30K 60K+','30k 70k+','30k 80k+','40k 100k+','None')));
+        sectionz_dip_a:array [0..3] of def_dip2=(
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$c;name:'Lives';number:4;val4:(4,$c,8,0);name4:('2','3','4','5')),
         (mask:$30;name:'Coin A';number:4;val4:(0,$20,$10,$30);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$c0,$40,$80);name4:('2C 4C','1C 1C','1C 2C','1C 3C')),());
-        sectionz_dip_b:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$c0,$40,$80);name4:('2C 4C','1C 1C','1C 2C','1C 3C')));
+        sectionz_dip_b:array [0..3] of def_dip2=(
         (mask:1;name:'Allow Continue';number:2;val2:(0,1);name2:('No','Yes')),
         (mask:6;name:'Difficulty';number:4;val4:(2,6,4,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$38;name:'Bonus Life';number:8;val8:($38,$18,$28,8,$30,$10,$20,0);name8:('20K 50K','20K 60K','20K 70K','30K 60K','30K 70K','30K 80K','40K 100K','None')),
-        (mask:$c0;name:'Cabinet';number:4;val4:(0,$40,$c0,$80);name4:('Upright One Player','Upright Two Player','Cocktail','Invalid')),());
-        trojan_dip_a:array [0..2] of def_dip2=(
+        (mask:$c0;name:'Cabinet';number:4;val4:(0,$40,$c0,$80);name4:('Upright One Player','Upright Two Player','Cocktail','Invalid')));
+        trojan_dip_a:array [0..1] of def_dip2=(
         (mask:3;name:'Cabinet';number:4;val4:(0,2,3,1);name4:('Upright One Player','Upright Two Player','Cocktail','Invalid')),
-        (mask:$1c;name:'Bonus Life';number:8;val8:($10,$c,8,$1c,$18,$14,4,0);name8:('20K 60K','20K 70K','20K 80K','30K 60K','30K 70K','30K 80K','40K 80K','None')),());
-        trojan_dip_b:array [0..5] of def_dip2=(
+        (mask:$1c;name:'Bonus Life';number:8;val8:($10,$c,8,$1c,$18,$14,4,0);name8:('20K 60K','20K 70K','20K 80K','30K 60K','30K 70K','30K 80K','40K 80K','None')));
+        trojan_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,3,2,1);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,8,$c);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$30;name:'Lives';number:4;val4:($20,$30,$10,0);name4:('2','3','4','5')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')),());
-        avengers_dip_a:array [0..3] of def_dip2=(
+        (mask:$80;name:'Allow Continue';number:2;val2:(0,$80);name2:('No','Yes')));
+        avengers_dip_a:array [0..2] of def_dip2=(
         (mask:2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$1c;name:'Coin A';number:8;val8:(0,$10,8,$1c,$c,$14,4,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
-        (mask:$e0;name:'Coin B';number:8;val8:(0,$80,$40,$e0,$60,$a0,$20,$c0);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),());
-        avengers_dip_b:array [0..5] of def_dip2=(
+        (mask:$e0;name:'Coin B';number:8;val8:(0,$80,$40,$e0,$60,$a0,$20,$c0);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')));
+        avengers_dip_b:array [0..4] of def_dip2=(
         (mask:1;name:'Allow Continue';number:2;val2:(0,1);name2:('No','Yes')),
         (mask:2;name:'Demo Sounds';number:2;val2:(0,2);name2:('Off','On')),
         (mask:$c;name:'Difficulty';number:4;val4:(4,$c,8,0);name4:('Easy','Normal','Hard','Very Hard')),
         (mask:$30;name:'Bonus Life';number:4;val4:($30,$10,$20,0);name4:('20K 60K','20K 70K','20K 80K','30K 80K')),
-        (mask:$c0;name:'Lives';number:4;val4:($c0,$40,$80,0);name4:('3','4','5','6')),());
-        fball_dip_a:array [0..4] of def_dip2=(
+        (mask:$c0;name:'Lives';number:4;val4:($c0,$40,$80,0);name4:('3','4','5','6')));
+        fball_dip_a:array [0..3] of def_dip2=(
         (mask:1;name:'Difficulty';number:2;val2:(1,0);name2:('Easy','Hard')),
         (mask:6;name:'Lives';number:4;val4:(0,2,4,6);name4:('1','2','3','4')),
         (mask:$18;name:'Coinage';number:4;val4:(0,8,$10,$18);name4:('1C 1C','1C 1C','1C 2C','1C 4C')),
-        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')),());
-        CPU_SYNC=4;
+        (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('Off','On')));
 
 var
  scroll_x,scroll_y:word;
@@ -154,6 +153,8 @@ var
  //Fire ball
  sprite_bank,oki_bank:byte;
  oki_roms:array[0..7,0..$1ffff] of byte;
+ //Main
+ CPU_SYNC:byte;
 
 procedure eventos_lwings;
 begin
@@ -766,7 +767,6 @@ begin
     mcs51_0.reset;
     frame_mcu:=mcs51_0.tframes;
  end;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -841,7 +841,6 @@ iniciar_audio(false);
 //tiles 4  pri 1
 screen_init(1,512,512,false,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
   59:main_screen.rot90_screen:=true;
@@ -850,33 +849,34 @@ case main_vars.tipo_maquina of
       //La pantallas 2 (la cambio) y 4 son transparentes
       screen_init(2,512,512,true);
       screen_init(4,512,512,true);
-      screen_mod_scroll(4,512,256,511,512,256,511);
       //La pantalla 5 es el fondo
       screen_init(5,512,256);
-      screen_mod_scroll(5,512,256,511,256,256,255);
       if main_vars.tipo_maquina=368 then main_screen.rot90_screen:=true;
      end;
 end;
 iniciar_video(256,240);
+CPU_SYNC:=1;
 //Sound CPU
 case main_vars.tipo_maquina of
   59,60:begin
-          z80_1:=cpu_z80.create(3000000,256);
+          z80_1:=cpu_z80.create(3000000);
           z80_1.init_sound(lwings_sound_update);
         end;
   61:begin
-        z80_1:=cpu_z80.create(3000000,256);
+        z80_1:=cpu_z80.create(3000000);
         z80_1.init_sound(trojan_sound_update);
      end;
   247:begin
-        z80_1:=cpu_z80.create(3000000,256);
+        z80_1:=cpu_z80.create(3000000);
         z80_1.init_sound(fball_sound_update);
       end;
   368:begin
-        z80_1:=cpu_z80.create(3000000,256*CPU_SYNC);
+        CPU_SYNC:=4;
+        z80_1:=cpu_z80.create(3000000);
         z80_1.init_sound(trojan_sound_update);
       end;
 end;
+llamadas_maquina.scanlines:=256*CPU_SYNC;
 if main_vars.tipo_maquina<>247 then begin
   z80_1.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
   timers.init(z80_1.numero_cpu,3000000/222,lwings_snd_irq,nil,true);
@@ -892,7 +892,7 @@ case main_vars.tipo_maquina of
   59:begin //Legendary Wings
         llamadas_maquina.bucle_general:=lwings_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,256);
+        z80_0:=cpu_z80.create(6000000);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(roms_load(@memoria_temp,lwings_rom)) then exit;
         copymemory(@memoria,@memoria_temp,$8000);
@@ -910,15 +910,13 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,lwings_tiles)) then exit;
         convert_tiles_lw;  //$800
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswb:=$ff;
-        marcade.dswa_val2:=@lwings_dip_a;
-        marcade.dswb_val2:=@lwings_dip_b;
+        init_dips(1,lwings_dip_a,$ff);
+        init_dips(2,lwings_dip_b,$ff);
      end;
   60:begin //Section Z
         llamadas_maquina.bucle_general:=lwings_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(3000000,256);
+        z80_0:=cpu_z80.create(3000000);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(roms_load(@memoria_temp,sectionz_rom)) then exit;
         copymemory(@memoria,@memoria_temp,$8000);
@@ -935,18 +933,16 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,sectionz_tiles)) then exit;
         convert_tiles_lw; //$800
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswb:=$3f;
-        marcade.dswa_val2:=@sectionz_dip_a;
-        marcade.dswb_val2:=@sectionz_dip_b;
+        init_dips(1,sectionz_dip_a,$ff);
+        init_dips(2,sectionz_dip_b,$3f);
       end;
   61:begin //Trojan
         llamadas_maquina.bucle_general:=trojan_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(3000000,256);
+        z80_0:=cpu_z80.create(3000000);
         z80_0.change_ram_calls(lwings_getbyte,trojan_putbyte);
         //ADPCM Z80
-        z80_2:=cpu_z80.create(3000000,256);
+        z80_2:=cpu_z80.create(3000000);
         z80_2.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
         z80_2.change_io_calls(trojan_inbyte,trojan_outbyte);
         msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,0.50,$4000);
@@ -977,15 +973,13 @@ case main_vars.tipo_maquina of
         //Map
         if not(roms_load(@trojan_map,trojan_tile_map)) then exit;
         //DIP
-        marcade.dswa:=$fc;
-        marcade.dswb:=$ff;
-        marcade.dswa_val2:=@trojan_dip_a;
-        marcade.dswb_val2:=@trojan_dip_b;
+        init_dips(1,trojan_dip_a,$fc);
+        init_dips(2,trojan_dip_b,$ff);
       end;
   247:begin //Fire ball
         llamadas_maquina.bucle_general:=fball_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,256);
+        z80_0:=cpu_z80.create(6000000);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(roms_load(@memoria_temp,fball_rom)) then exit;
         copymemory(@memoria,@memoria_temp,$8000);
@@ -1012,27 +1006,26 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,fball_tiles)) then exit;
         convert_tiles_lw;  //$800
         //DIP
-        marcade.dswa:=$6d;
+        init_dips(1,fball_dip_a,$6d);
         marcade.dswb:=0;
-        marcade.dswa_val2:=@fball_dip_a;
       end;
   368:begin
         llamadas_maquina.bucle_general:=avengers_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,256*CPU_SYNC);
+        z80_0:=cpu_z80.create(6000000);
         z80_0.change_ram_calls(avengers_getbyte,avengers_putbyte);
         z80_0.change_misc_calls(nil,nil,avenger_m1);
         if not(roms_load(@memoria_temp,avengers_rom)) then exit;
         copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //MCU
-        mcs51_0:=cpu_mcs51.create(I8X51,6000000,256*CPU_SYNC);
+        mcs51_0:=cpu_mcs51.create(I8X51,6000000);
         mcs51_0.change_io_calls(avengers_in_port0,avengers_in_port1,avengers_in_port2,nil,avengers_out_port0,nil,avengers_out_port2,avengers_out_port3);
         if not(roms_load(@memoria_temp,avengers_mcu)) then exit;
         memoria_temp[$b84]:=2;
         copymemory(mcs51_0.get_rom_addr,@memoria_temp,$1000);
         //ADPCM Z80
-        z80_2:=cpu_z80.create(3000000,256*CPU_SYNC);
+        z80_2:=cpu_z80.create(3000000);
         z80_2.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
         z80_2.change_io_calls(avengers_inbyte,trojan_outbyte);
         msm5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,0.50,$8000);
@@ -1060,10 +1053,8 @@ case main_vars.tipo_maquina of
         //Map
         if not(roms_load(@trojan_map,avengers_tile_map)) then exit;
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswb:=$ff;
-        marcade.dswa_val2:=@avengers_dip_a;
-        marcade.dswb_val2:=@avengers_dip_b;
+        init_dips(1,avengers_dip_a,$ff);
+        init_dips(2,avengers_dip_b,$ff);
       end;
 end;
 //final

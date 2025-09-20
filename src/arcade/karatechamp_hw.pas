@@ -32,13 +32,13 @@ const
     (n:'br27';l:$100;p:0;crc:$f683c54a),(n:'br26';l:$100;p:$100;crc:$3ddbb6c4),
     (n:'br25';l:$100;p:$200;crc:$ba4a5651));
     //Dip
-    karatechamp_dip:array [0..6] of def_dip2=(
+    karatechamp_dip:array [0..5] of def_dip2=(
     (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
     (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
     (mask:$10;name:'Difficulty';number:2;val2:(0,$10);name2:('Hard','Normal')),
     (mask:$20;name:'Free Play';number:2;val2:($20,0);name2:('Off','On')),
     (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')),
-    (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
+    (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
 
 var
   sound_latch:byte;
@@ -238,18 +238,19 @@ var
 begin
 llamadas_maquina.bucle_general:=karatechamp_principal;
 llamadas_maquina.reset:=karatechamp_reset;
+llamadas_maquina.scanlines:=256;
 karatechamp_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(12000000 div 4,256);
+z80_0:=cpu_z80.create(12000000 div 4);
 z80_0.change_ram_calls(karatechamp_getbyte,karatechamp_putbyte);
 z80_0.change_io_calls(karatechamp_inbyte,karatechamp_outbyte);
 if not(roms_load(@memoria,karatechamp_rom)) then exit;
 //Sound Chip
-z80_1:=cpu_z80.create(12000000 div 4,256);
+z80_1:=cpu_z80.create(12000000 div 4);
 z80_1.change_ram_calls(karatechamp_getbyte_snd,karatechamp_putbyte_snd);
 z80_1.change_io_calls(karatechamp_inbyte_snd,karatechamp_outbyte_snd);
 z80_1.init_sound(karatechamp_sound_update);
@@ -286,8 +287,7 @@ for f:=0 to 255 do begin
 end;
 set_pal(colores,$100);
 //DIP
-marcade.dswa:=$3f;
-marcade.dswa_val2:=@karatechamp_dip;
+init_dips(1,karatechamp_dip,$3f);
 //Final
 karatechamp_iniciar:=true;
 end;

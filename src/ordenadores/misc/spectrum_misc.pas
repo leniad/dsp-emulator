@@ -557,7 +557,7 @@ llamadas_maquina.close:=spec_cerrar_comun;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.save_qsnap:=spec_qsave;
 llamadas_maquina.load_qsnap:=spec_qload;
-spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
+spec_z80:=cpu_z80_sp.create(clock);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
     0,5:borde.borde_spectrum:=borde_48_full;
@@ -669,7 +669,6 @@ if interface2.hay_if2 then begin
   interface2.retraso:=0;
   copymemory(@memoria[0],@interface2.rom[0],$4000);
 end;
-reset_game_general;
 fillchar(borde.buffer,78000,$80);
 end;
 

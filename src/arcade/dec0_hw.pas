@@ -14,9 +14,9 @@ implementation
 const
         //Robocop
         robocop_rom:array[0..3] of tipo_roms=(
-        (n:'ep05-4.11c';l:$10000;p:0;crc:$29c35379),(n:'ep01-4.11b';l:$10000;p:$1;crc:$77507c69),
+        (n:'ep05-4.11c';l:$10000;p:0;crc:$29c35379),(n:'ep01-4.11b';l:$10000;p:1;crc:$77507c69),
         (n:'ep04-3';l:$10000;p:$20000;crc:$39181778),(n:'ep00-3';l:$10000;p:$20001;crc:$e128541f));
-        robocop_mcu:tipo_roms=(n:'en_24_mb7124e.a2';l:$200;p:$0;crc:$b8e2ca98);
+        robocop_mcu:tipo_roms=(n:'en_24_mb7124e.a2';l:$200;p:0;crc:$b8e2ca98);
         robocop_char:array[0..1] of tipo_roms=(
         (n:'ep23';l:$10000;p:0;crc:$a77e4ab1),(n:'ep22';l:$10000;p:$10000;crc:$9fbd6903));
         robocop_sound:tipo_roms=(n:'ep03-3';l:$8000;p:$8000;crc:$5b164b24);
@@ -28,12 +28,12 @@ const
         (n:'ep14';l:$8000;p:0;crc:$ca56ceda),(n:'ep15';l:$8000;p:$8000;crc:$a945269c),
         (n:'ep16';l:$8000;p:$10000;crc:$e7fa4d58),(n:'ep17';l:$8000;p:$18000;crc:$84aae89d));
         robocop_sprites:array[0..7] of tipo_roms=(
-        (n:'ep07';l:$10000;p:$00000;crc:$495d75cf),(n:'ep06';l:$8000;p:$10000;crc:$a2ae32e2),
+        (n:'ep07';l:$10000;p:0;crc:$495d75cf),(n:'ep06';l:$8000;p:$10000;crc:$a2ae32e2),
         (n:'ep11';l:$10000;p:$20000;crc:$62fa425a),(n:'ep10';l:$8000;p:$30000;crc:$cce3bd95),
         (n:'ep09';l:$10000;p:$40000;crc:$11bed656),(n:'ep08';l:$8000;p:$50000;crc:$c45c7b4c),
         (n:'ep13';l:$10000;p:$60000;crc:$8fca9f28),(n:'ep12';l:$8000;p:$70000;crc:$3cd1d0c3));
-        robocop_dip:array [0..10] of def_dip2=(
-        (mask:$3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        robocop_dip:array [0..9] of def_dip2=(
+        (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,$8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
@@ -42,14 +42,14 @@ const
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('Yes','No')),
         (mask:$2000;name:'Bonus Stage Energy';number:2;val2:(0,$2000);name2:('Low','High')),
-        (mask:$4000;name:'Brink Time';number:2;val2:($4000,0);name2:('Normal','Less')),());
+        (mask:$4000;name:'Brink Time';number:2;val2:($4000,0);name2:('Normal','Less')));
         //Baddudes
         baddudes_rom:array[0..3] of tipo_roms=(
-        (n:'ei04-1.3c';l:$10000;p:0;crc:$4bf158a7),(n:'ei01-1.3a';l:$10000;p:$1;crc:$74f5110c),
+        (n:'ei04-1.3c';l:$10000;p:0;crc:$4bf158a7),(n:'ei01-1.3a';l:$10000;p:1;crc:$74f5110c),
         (n:'ei06.6c';l:$10000;p:$40000;crc:$3ff8da57),(n:'ei03.6a';l:$10000;p:$40001;crc:$f8f2bd94));
         baddudes_char:array[0..1] of tipo_roms=(
         (n:'ei25.15j';l:$8000;p:0;crc:$bcf59a69),(n:'ei26.16j';l:$8000;p:$8000;crc:$9aff67b8));
-        baddudes_mcu:tipo_roms=(n:'ei31.9a';l:$1000;p:$0;crc:$2a8745d2);
+        baddudes_mcu:tipo_roms=(n:'ei31.9a';l:$1000;p:0;crc:$2a8745d2);
         baddudes_sound:tipo_roms=(n:'ei07.8a';l:$8000;p:$8000;crc:$9fb1ef4b);
         baddudes_oki:tipo_roms=(n:'ei08.2c';l:$10000;p:0;crc:$3c87463e);
         baddudes_tiles1:array[0..3] of tipo_roms=(
@@ -58,23 +58,23 @@ const
         baddudes_tiles2:array[0..1] of tipo_roms=(
         (n:'ei30.9j';l:$10000;p:$20000;crc:$982da0d1),(n:'ei28.9f';l:$10000;p:$30000;crc:$f01ebb3b));
         baddudes_sprites:array[0..7] of tipo_roms=(
-        (n:'ei15.16c';l:$10000;p:$00000;crc:$a38a7d30),(n:'ei16.17c';l:$8000;p:$10000;crc:$17e42633),
+        (n:'ei15.16c';l:$10000;p:0;crc:$a38a7d30),(n:'ei16.17c';l:$8000;p:$10000;crc:$17e42633),
         (n:'ei11.16a';l:$10000;p:$20000;crc:$3a77326c),(n:'ei12.17a';l:$8000;p:$30000;crc:$fea2a134),
         (n:'ei13.13c';l:$10000;p:$40000;crc:$e5ae2751),(n:'ei14.14c';l:$8000;p:$50000;crc:$e83c760a),
         (n:'ei09.13a';l:$10000;p:$60000;crc:$6901e628),(n:'ei10.14a';l:$8000;p:$70000;crc:$eeee8a1a));
-        baddudes_dip:array [0..7] of def_dip2=(
-        (mask:$3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        baddudes_dip:array [0..6] of def_dip2=(
+        (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$300;name:'Lives';number:4;val4:($100,$300,$200,0);name4:('1','3','5','Infinite')),
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('Yes','No')),());
+        (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('Yes','No')));
         //Hippodrome
         hippo_rom:array[0..3] of tipo_roms=(
-        (n:'ew02';l:$10000;p:0;crc:$df0d7dc6),(n:'ew01';l:$10000;p:$1;crc:$d5670aa7),
+        (n:'ew02';l:$10000;p:0;crc:$df0d7dc6),(n:'ew01';l:$10000;p:1;crc:$d5670aa7),
         (n:'ew05';l:$10000;p:$20000;crc:$c76d65ec),(n:'ew00';l:$10000;p:$20001;crc:$e9b427a6));
-        hippo_mcu:tipo_roms=(n:'ew08';l:$10000;p:$0;crc:$53010534);
+        hippo_mcu:tipo_roms=(n:'ew08';l:$10000;p:0;crc:$53010534);
         hippo_char:array[0..1] of tipo_roms=(
         (n:'ew14';l:$10000;p:0;crc:$71ca593d),(n:'ew13';l:$10000;p:$10000;crc:$86be5fa7));
         hippo_sound:tipo_roms=(n:'ew04';l:$8000;p:$8000;crc:$9871b98d);
@@ -86,61 +86,61 @@ const
         (n:'ew24';l:$8000;p:0;crc:$4e1bc2a4),(n:'ew25';l:$8000;p:$8000;crc:$9eb47dfb),
         (n:'ew23';l:$8000;p:$10000;crc:$9ecf479e),(n:'ew22';l:$8000;p:$18000;crc:$e55669aa));
         hippo_sprites:array[0..7] of tipo_roms=(
-        (n:'ew15';l:$10000;p:$00000;crc:$95423914),(n:'ew16';l:$10000;p:$10000;crc:$96233177),
+        (n:'ew15';l:$10000;p:0;crc:$95423914),(n:'ew16';l:$10000;p:$10000;crc:$96233177),
         (n:'ew10';l:$10000;p:$20000;crc:$4c25dfe8),(n:'ew11';l:$10000;p:$30000;crc:$f2e007fc),
         (n:'ew06';l:$10000;p:$40000;crc:$e4bb8199),(n:'ew07';l:$10000;p:$50000;crc:$470b6989),
         (n:'ew17';l:$10000;p:$60000;crc:$8c97c757),(n:'ew12';l:$10000;p:$70000;crc:$a2d244bc));
-        hippo_dip:array [0..8] of def_dip2=(
-        (mask:$3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        hippo_dip:array [0..7] of def_dip2=(
+        (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$300;name:'Lives';number:4;val4:($100,$300,$200,0);name4:('1','2','3','5')),
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$3000;name:'Player & Enemy Energy';number:4;val4:($1000,$2000,$3000,0);name4:('Very Low','Low','Medium','High')),
-        (mask:$4000;name:'Enemy Power Decrease on Continue';number:2;val2:($4000,0);name2:('2 Dots','3 Dots')),());
+        (mask:$4000;name:'Enemy Power Decrease on Continue';number:2;val2:($4000,0);name2:('2 Dots','3 Dots')));
         //Slyspy
         slyspy_rom:array[0..3] of tipo_roms=(
-        (n:'fa14-4.17l';l:$10000;p:0;crc:$60f16e31),(n:'fa12-4.9l';l:$10000;p:$1;crc:$b9b9fdcf),
+        (n:'fa14-4.17l';l:$10000;p:0;crc:$60f16e31),(n:'fa12-4.9l';l:$10000;p:1;crc:$b9b9fdcf),
         (n:'fa15.19l';l:$10000;p:$20000;crc:$04a79266),(n:'fa13.11l';l:$10000;p:$20001;crc:$641cc4b3));
         slyspy_char:array[0..1] of tipo_roms=(
         (n:'fa05.11a';l:$8000;p:0;crc:$09802924),(n:'fa04.9a';l:$8000;p:$8000;crc:$ec25b895));
-        slyspy_sound:tipo_roms=(n:'fa10.5h';l:$10000;p:$0;crc:$dfd2ff25);
+        slyspy_sound:tipo_roms=(n:'fa10.5h';l:$10000;p:0;crc:$dfd2ff25);
         slyspy_oki:tipo_roms=(n:'fa11.11k';l:$20000;p:0;crc:$4e547bad);
         slyspy_tiles1:array[0..1] of tipo_roms=(
-        (n:'fa07.17a';l:$10000;p:$0;crc:$e932268b),(n:'fa06.15a';l:$10000;p:$10000;crc:$c4dd38c0));
+        (n:'fa07.17a';l:$10000;p:0;crc:$e932268b),(n:'fa06.15a';l:$10000;p:$10000;crc:$c4dd38c0));
         slyspy_tiles2:array[0..1] of tipo_roms=(
-        (n:'fa09.22a';l:$20000;p:$0;crc:$1395e9be),(n:'fa08.21a';l:$20000;p:$20000;crc:$4d7464db));
+        (n:'fa09.22a';l:$20000;p:0;crc:$1395e9be),(n:'fa08.21a';l:$20000;p:$20000;crc:$4d7464db));
         slyspy_sprites:array[0..3] of tipo_roms=(
-        (n:'fa01.4a';l:$20000;p:$0;crc:$99b0cd92),(n:'fa03.7a';l:$20000;p:$20000;crc:$0e7ea74d),
+        (n:'fa01.4a';l:$20000;p:0;crc:$99b0cd92),(n:'fa03.7a';l:$20000;p:$20000;crc:$0e7ea74d),
         (n:'fa00.2a';l:$20000;p:$40000;crc:$f7df3fd7),(n:'fa02.5a';l:$20000;p:$60000;crc:$84e8da9d));
-        slyspy_dip:array [0..8] of def_dip2=(
-        (mask:$3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
+        slyspy_dip:array [0..7] of def_dip2=(
+        (mask:3;name:'Coin A';number:4;val4:(0,1,3,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(0,4,$c,8);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),
         (mask:$300;name:'Energy';number:4;val4:($200,$300,$100,0);name4:('Low - 8 bars','Medium - 10 bars','High - 12 bars','Very High - 14 bars')),
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('Yes','No')),());
+        (mask:$1000;name:'Allow Continue';number:2;val2:($1000,0);name2:('Yes','No')));
         //Boulder Dash
         bouldash_rom:array[0..5] of tipo_roms=(
-        (n:'fw-15-2.17l';l:$10000;p:0;crc:$ca19a967),(n:'fw-12-2.9l';l:$10000;p:$1;crc:$242bdc2a),
+        (n:'fw-15-2.17l';l:$10000;p:0;crc:$ca19a967),(n:'fw-12-2.9l';l:$10000;p:1;crc:$242bdc2a),
         (n:'fw-16-2.19l';l:$10000;p:$20000;crc:$b7217265),(n:'fw-13-2.11l';l:$10000;p:$20001;crc:$19209ef4),
         (n:'fw-17-2.20l';l:$10000;p:$40000;crc:$78a632a1),(n:'fw-14-2.13l';l:$10000;p:$40001;crc:$69b6112d));
         bouldash_char:array[0..1] of tipo_roms=(
         (n:'fn-04';l:$10000;p:0;crc:$40f5a760),(n:'fn-05';l:$10000;p:$10000;crc:$824f2168));
-        bouldash_sound:tipo_roms=(n:'fn-10';l:$10000;p:$0;crc:$c74106e7);
+        bouldash_sound:tipo_roms=(n:'fn-10';l:$10000;p:0;crc:$c74106e7);
         bouldash_oki:tipo_roms=(n:'fn-11';l:$10000;p:0;crc:$990fd8d9);
         bouldash_tiles1:array[0..1] of tipo_roms=(
-        (n:'fn-07';l:$10000;p:$0;crc:$eac6a3b3),(n:'fn-06';l:$10000;p:$10000;crc:$3feee292));
+        (n:'fn-07';l:$10000;p:0;crc:$eac6a3b3),(n:'fn-06';l:$10000;p:$10000;crc:$3feee292));
         bouldash_tiles2:array[0..1] of tipo_roms=(
-        (n:'fn-09';l:$20000;p:$0;crc:$c2b27bd2),(n:'fn-08';l:$20000;p:$20000;crc:$5ac97178));
+        (n:'fn-09';l:$20000;p:0;crc:$c2b27bd2),(n:'fn-08';l:$20000;p:$20000;crc:$5ac97178));
         bouldash_sprites:array[0..3] of tipo_roms=(
-        (n:'fn-01';l:$10000;p:$0;crc:$9333121b),(n:'fn-03';l:$10000;p:$10000;crc:$254ba60f),
+        (n:'fn-01';l:$10000;p:0;crc:$9333121b),(n:'fn-03';l:$10000;p:$10000;crc:$254ba60f),
         (n:'fn-00';l:$10000;p:$20000;crc:$ec18d098),(n:'fn-02';l:$10000;p:$30000;crc:$4f060cba));
-        bouldash_dip:array [0..9] of def_dip2=(
-        (mask:$7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
+        bouldash_dip:array [0..8] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,7,6,5,4,3,2);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$38,$30,$28,$20,$18,$10);name8:('3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
         (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),
@@ -148,7 +148,7 @@ const
         (mask:$c00;name:'Difficulty';number:4;val4:($800,$c00,$400,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$2000;name:'Game Change Mode';number:2;val2:($2000,0);name2:('Part 1','Part 2')),
         (mask:$4000;name:'Allow Continue';number:2;val2:(0,$4000);name2:('No','Yes')),
-        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')),());
+        (mask:$8000;name:'Demo Sounds';number:2;val2:($8000,0);name2:('Off','On')));
 
 var
  rom:array[0..$2ffff] of word;
@@ -165,23 +165,23 @@ procedure update_video_robocop;
 var
   trans:byte;
 begin
-trans:=(prioridad and $4) shl 1;
+trans:=(prioridad and 4) shl 1;
 if (prioridad and 1)<>0 then begin
   bac06_0.tile_2.update_pf(1,false,false);
   bac06_0.tile_3.update_pf(2,true,false);
   //Pri pant
   bac06_0.tile_2.show_pf;
-  if (prioridad and $02)<>0 then bac06_0.draw_sprites($8,trans,3);
+  if (prioridad and 2)<>0 then bac06_0.draw_sprites(8,trans,3);
   bac06_0.tile_3.show_pf;
 end else begin  //invertidas
   bac06_0.tile_3.update_pf(2,false,false);
   bac06_0.tile_2.update_pf(1,true,false);
   //Pri pant
   bac06_0.tile_3.show_pf;
-  if (prioridad and $02)<>0 then bac06_0.draw_sprites($8,trans,3);
+  if (prioridad and 2)<>0 then bac06_0.draw_sprites(8,trans,3);
   bac06_0.tile_2.show_pf;
 end;
-if (prioridad and $02)<>0 then bac06_0.draw_sprites($8,trans xor $08,3)
+if (prioridad and 2)<>0 then bac06_0.draw_sprites(8,trans xor 8,3)
 	else bac06_0.draw_sprites(0,0,3);
 //chars
 bac06_0.tile_1.update_pf(0,true,false);
@@ -198,9 +198,9 @@ if (prioridad and 1)=0 then begin
   bac06_0.tile_2.show_pf;
   bac06_0.tile_3.show_pf;
   //prioridades
-  if (prioridad and $2)<>0 then bac06_0.tile_2.show_pf_pri;
+  if (prioridad and 2)<>0 then bac06_0.tile_2.show_pf_pri;
   bac06_0.draw_sprites(0,0,3);
-  if (prioridad and $4)<>0 then bac06_0.tile_3.show_pf_pri;
+  if (prioridad and 4)<>0 then bac06_0.tile_3.show_pf_pri;
 end else begin  //invertidas
   bac06_0.tile_3.update_pf(2,false,true);
   bac06_0.tile_2.update_pf(1,true,true);
@@ -208,9 +208,9 @@ end else begin  //invertidas
   bac06_0.tile_3.show_pf;
   bac06_0.tile_2.show_pf;
   //prioridades
-  if (prioridad and $2)<>0 then bac06_0.tile_3.show_pf_pri;
+  if (prioridad and 2)<>0 then bac06_0.tile_3.show_pf_pri;
   bac06_0.draw_sprites(0,0,3);
-  if (prioridad and $4)<>0 then bac06_0.tile_2.show_pf_pri;
+  if (prioridad and 4)<>0 then bac06_0.tile_2.show_pf_pri;
 end;
 //chars
 bac06_0.tile_1.update_pf(0,true,false);
@@ -257,10 +257,10 @@ procedure eventos_dec0;
 begin
 if event.arcade then begin
   //P1+P2
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
@@ -274,10 +274,10 @@ if event.arcade then begin
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
   if arcade_input.but3[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
-  if arcade_input.but4[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but4[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but4[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.but4[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
 end;
@@ -287,10 +287,10 @@ procedure eventos_dec1;
 begin
 if event.arcade then begin
   //P1+P2
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
@@ -304,36 +304,32 @@ if event.arcade then begin
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7eff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
 end;
 end;
 
 procedure baddudes_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=m6502_0.tframes;
-frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   m6502_0.run(frame_s);
-   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-   mcs51_0.run(frame_mcu);
-   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
    case f of
-      7:marcade.in1:=marcade.in1 and $7f;
-      247:begin
+      8:marcade.in1:=marcade.in1 and $7f;
+      248:begin
             m68000_0.irq[6]:=HOLD_LINE;
             update_video_baddudes;
             marcade.in1:=marcade.in1 or $80;
           end;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_snd);
+   frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
+   mcs51_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
  end;
  eventos_dec0;
  video_sync;
@@ -342,30 +338,26 @@ end;
 
 procedure hippodrome_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=m6502_0.tframes;
-frame_mcu:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   m6502_0.run(frame_s);
-   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-   h6280_0.run(frame_mcu);
-   frame_mcu:=frame_mcu+h6280_0.tframes-h6280_0.contador;
    case f of
-      7:marcade.in1:=marcade.in1 and $7f;
-      247:begin
+      8:marcade.in1:=marcade.in1 and $7f;
+      248:begin
             m68000_0.irq[6]:=HOLD_LINE;
             h6280_0.set_irq_line(0,HOLD_LINE);
             update_video_hippo;
             marcade.in1:=marcade.in1 or $80;
           end;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_snd);
+   frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
+   h6280_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+h6280_0.tframes-h6280_0.contador;
  end;
  eventos_dec0;
  video_sync;
@@ -374,29 +366,25 @@ end;
 
 procedure robocop_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=m6502_0.tframes;
-frame_mcu:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   m6502_0.run(frame_s);
-   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-   h6280_0.run(frame_mcu);
-   frame_mcu:=frame_mcu+h6280_0.tframes-h6280_0.contador;
    case f of
-      7:marcade.in1:=marcade.in1 and $7f;
-      247:begin
+      8:marcade.in1:=marcade.in1 and $7f;
+      248:begin
             m68000_0.irq[6]:=HOLD_LINE;
             update_video_robocop;
             marcade.in1:=marcade.in1 or $80;
           end;
    end;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_snd);
+   frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
+   h6280_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+h6280_0.tframes-h6280_0.contador;
  end;
  eventos_dec0;
  video_sync;
@@ -405,18 +393,15 @@ end;
 
 procedure slyspy_principal;
 var
-  frame_m,frame_s:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=m68000_0.tframes;
-frame_s:=h6280_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 271 do begin
-   m68000_0.run(frame_m);
-   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-   h6280_0.run(frame_s);
-   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
+   m68000_0.run(frame_main);
+   frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(frame_snd);
+   frame_snd:=frame_snd+h6280_0.tframes-h6280_0.contador;
    case f of
       7:marcade.in1:=marcade.in1 and $f7;
       247:begin
@@ -440,7 +425,7 @@ begin
   color.b:=buffer_paleta[$400+numero] and $ff;
   set_pal_color(color,numero);
   case numero of
-    $000..$0ff:bac06_0.tile_1.buffer_color[numero shr 4]:=true;
+    0..$ff:bac06_0.tile_1.buffer_color[numero shr 4]:=true;
     $200..$2ff:bac06_0.tile_2.buffer_color[(numero shr 4) and $f]:=true;
     $300..$3ff:bac06_0.tile_3.buffer_color[(numero shr 4) and $f]:=true;
   end;
@@ -449,7 +434,7 @@ end;
 function dec0_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$5ffff:dec0_getword:=rom[direccion shr 1];
+  0..$5ffff:dec0_getword:=rom[direccion shr 1];
   $180000..$180fff:dec0_getword:=mcu_shared_ram[(direccion and $fff) shr 1];
   $242000..$24207f:dec0_getword:=bac06_0.tile_1.colscroll[(direccion and $7f) shr 1];
   $242400..$2427ff:dec0_getword:=bac06_0.tile_1.rowscroll[(direccion and $3ff) shr 1];
@@ -616,7 +601,7 @@ begin
 	if (((valor and $40)<>0) and ((i8751_ports[2] and $40)=0)) then
     i8751_return:=(i8751_return and $ff00) or i8751_ports[0];
 	if (((valor and $80)<>0) and ((i8751_ports[2] and $80)=0)) then
-    i8751_return:=(i8751_return and $00ff) or (i8751_ports[0] shl 8);
+    i8751_return:=(i8751_return and $ff) or (i8751_ports[0] shl 8);
 	i8751_ports[2]:=valor;
 end;
 
@@ -636,7 +621,7 @@ case direccion of
   0..$ffff:; //ROM
   $1f0000..$1f1fff:mcu_ram[direccion and $1fff]:=valor;
   $1f2000..$1f3fff:mcu_shared_ram[direccion and $1fff]:=valor;
-  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
+  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and 3,valor);
 end;
 end;
 
@@ -671,17 +656,17 @@ case direccion of
   0..$ffff:; //ROM
   $180000..$1800ff:mcu_shared_ram[direccion and $ff]:=valor;
   $1a0000..$1a0007:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_0[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_0[(direccion and 7) shr 1] and $ff) or (valor shl 8)
                         else tempw:=(bac06_0.tile_3.control_0[(direccion and 7) shr 1] and $ff00) or valor;
                       bac06_0.tile_3.change_control0((direccion and 7) shr 1,tempw);
                    end;
   $1a0010..$1a001f:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_1[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_1[(direccion and 7) shr 1] and $ff) or (valor shl 8)
                         else tempw:=(bac06_0.tile_3.control_1[(direccion and 7) shr 1] and $ff00) or valor;
                       bac06_0.tile_3.change_control1((direccion and 7) shr 1,tempw);
                    end;
   $1a1000..$1a17ff:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.data[(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.data[(direccion and $7ff) shr 1] and $ff) or (valor shl 8)
                         else tempw:=(bac06_0.tile_3.data[(direccion and $7ff) shr 1] and $ff00) or valor;
                       if bac06_0.tile_3.data[(direccion and $7ff) shr 1]<>tempw then begin
                         bac06_0.tile_3.data[(direccion and $7ff) shr 1]:=tempw;
@@ -690,7 +675,7 @@ case direccion of
                    end;
   $1d0000..$1d00ff:hippodrm_lsb:=valor;
   $1f0000..$1f1fff:mcu_ram[direccion and $1fff]:=valor;
-  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
+  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and 3,valor);
 end;
 end;
 
@@ -704,7 +689,7 @@ begin
   color.b:=pal4bit(buffer_paleta[numero] shr 8);
   set_pal_color(color,numero);
   case numero of
-    $000..$0ff:bac06_0.tile_1.buffer_color[numero shr 4]:=true;
+    0..$ff:bac06_0.tile_1.buffer_color[numero shr 4]:=true;
     $200..$2ff:bac06_0.tile_2.buffer_color[(numero shr 4) and $f]:=true;
     $300..$3ff:bac06_0.tile_3.buffer_color[(numero shr 4) and $f]:=true;
   end;
@@ -713,7 +698,7 @@ end;
 function slyspy_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$5ffff:slyspy_getword:=rom[direccion shr 1];
+  0..$5ffff:slyspy_getword:=rom[direccion shr 1];
   $240000..$24ffff:case ((direccion and $ffff) or (slyspy_state*$10000)) of
                       $4000,$14000,$24000,$34000:slyspy_state:=(slyspy_state+1) and 3;
                    end;
@@ -747,7 +732,7 @@ case direccion of
     $240000..$24ffff:case ((direccion and $ffff) or (slyspy_state*$10000)) of
                       $a000,$1a000,$2a000,$3a000:slyspy_state:=0;
                       //State 0
-                      $0..$7:begin
+                      0..7:begin
                                 if m68000_0.write_8bits_lo_dir then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff) or (valor and $ff00)
                                         else if m68000_0.write_8bits_hi_dir then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff00) or (valor and $ff)
                                           else tempw:=valor;
@@ -867,7 +852,7 @@ end;
 function slyspy_snd_getbyte(direccion:dword):byte;
 begin
 case direccion of
-  $0..$ffff:slyspy_snd_getbyte:=mem_snd[direccion];
+  0..$ffff:slyspy_snd_getbyte:=mem_snd[direccion];
   $80000..$fffff:case ((direccion and $7ffff) or (slyspy_sound_state*$80000)) of
                     $20000,$a0000,$120000,$1a0000:slyspy_sound_state:=(slyspy_sound_state+1) and 3;
                     $50000,$d0000,$150000,$1d0000:slyspy_sound_state:=0;
@@ -926,9 +911,11 @@ end;
 procedure reset_dec0;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  case main_vars.tipo_maquina of
   157:begin
         mcs51_0.reset;
+        frame_mcu:=mcs51_0.tframes;
         i8751_return:=0;
         i8751_command:=0;
         i8751_ports[0]:=0;
@@ -936,13 +923,17 @@ begin
         i8751_ports[2]:=0;
         i8751_ports[3]:=0;
         m6502_0.reset;
+        frame_snd:=m6502_0.tframes;
       end;
   156,158:begin
         h6280_0.reset;
         m6502_0.reset;
+        frame_snd:=m6502_0.tframes;
+        frame_mcu:=h6280_0.tframes;
       end;
   316,317:begin
         h6280_0.reset;
+        frame_mcu:=h6280_0.tframes;
         slyspy_state:=0;
         slyspy_sound_state:=0;
       end;
@@ -951,7 +942,6 @@ begin
  ym2203_0.reset;
  oki_6295_0.reset;
  bac06_0.reset;
- reset_game_general;
  marcade.in0:=$ffff;
  marcade.in1:=$f7;
  sound_latch:=0;
@@ -989,33 +979,29 @@ ym2203_0:=ym2203_chip.create(1500000);
 oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH);
 end;
 begin
-case main_vars.tipo_maquina of
-  156:llamadas_maquina.bucle_general:=robocop_principal;
-  157:llamadas_maquina.bucle_general:=baddudes_principal;
-  158:llamadas_maquina.bucle_general:=hippodrome_principal;
-  316,317:llamadas_maquina.bucle_general:=slyspy_principal;
-end;
 llamadas_maquina.reset:=reset_dec0;
 llamadas_maquina.fps_max:=57.444885;
+llamadas_maquina.scanlines:=272;
 iniciar_dec0:=false;
 iniciar_audio(false);
 //El video se inicia en el chip bac06!!!
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,272);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(dec0_getword,dec0_putword);
 case main_vars.tipo_maquina of
   156:begin  //Robocop
+        llamadas_maquina.bucle_general:=robocop_principal;
         bac06_0:=bac06_chip.create(false,false,false,0,$200,$300,1,1,1,$100);
         //cargar roms
         if not(roms_load16w(@rom,robocop_rom)) then exit;
         //cargar sonido
-        m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+        m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
         m6502_0.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
         m6502_0.init_sound(dec0_sound_update);
         init_sound_chips;
         if not(roms_load(@mem_snd,robocop_sound)) then exit;
         //MCU
-        h6280_0:=cpu_h6280.create(21477200 div 16,272);
+        h6280_0:=cpu_h6280.create(21477200 div 16);
         h6280_0.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
         if not(roms_load(@mem_misc,robocop_mcu)) then exit;
         //OKI rom
@@ -1033,21 +1019,21 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,robocop_sprites)) then exit;
         convert_tiles(3,$1000);
         //Dip
-        marcade.dswa:=$ff7f;
-        marcade.dswa_val2:=@robocop_dip;
+        init_dips(1,robocop_dip,$ff7f);
       end;
   157:begin //Baddudes
+        llamadas_maquina.bucle_general:=baddudes_principal;
         bac06_0:=bac06_chip.create(false,true,true,0,$200,$300,1,1,1,$100);
         //cargar roms
         if not(roms_load16w(@rom,baddudes_rom)) then exit;
         //cargar sonido
-        m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+        m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
         m6502_0.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
         m6502_0.init_sound(dec0_sound_update);
         init_sound_chips;
         if not(roms_load(@mem_snd,baddudes_sound)) then exit;
         //MCU
-        mcs51_0:=cpu_mcs51.create(I8X51,8000000,272);
+        mcs51_0:=cpu_mcs51.create(I8X51,8000000);
         mcs51_0.change_io_calls(in_port0,in_port1,in_port1,in_port1,out_port0,out_port1,out_port2,out_port3);
         if not(roms_load(mcs51_0.get_rom_addr,baddudes_mcu)) then exit;
         //OKI rom
@@ -1061,7 +1047,7 @@ case main_vars.tipo_maquina of
         //tiles 2, ordenar
         if not(roms_load(@memoria_temp,baddudes_tiles2)) then exit;
         copymemory(@memoria_temp[$8000],@memoria_temp[$20000],$8000);
-        copymemory(@memoria_temp[$0],@memoria_temp[$28000],$8000);
+        copymemory(@memoria_temp[0],@memoria_temp[$28000],$8000);
         copymemory(@memoria_temp[$18000],@memoria_temp[$30000],$8000);
         copymemory(@memoria_temp[$10000],@memoria_temp[$38000],$8000);
         convert_tiles(2,$400);
@@ -1069,21 +1055,21 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,baddudes_sprites)) then exit;
         convert_tiles(3,$1000);
         //Dip
-        marcade.dswa:=$ffff;
-        marcade.dswa_val2:=@baddudes_dip;
+        init_dips(1,baddudes_dip,$ffff);
       end;
   158:begin  //Hippodrome
+        llamadas_maquina.bucle_general:=hippodrome_principal;
         bac06_0:=bac06_chip.create(false,false,false,0,$200,$300,1,1,1,$100);
         //cargar roms
         if not(roms_load16w(@rom,hippo_rom)) then exit;
         //cargar sonido
-        m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+        m6502_0:=cpu_m6502.create(1500000,TCPU_M6502);
         m6502_0.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
         m6502_0.init_sound(dec0_sound_update);
         init_sound_chips;
         if not(roms_load(@mem_snd,hippo_sound)) then exit;
         //MCU+decrypt
-        h6280_0:=cpu_h6280.create(21477200 div 16,272);
+        h6280_0:=cpu_h6280.create(21477200 div 16);
         h6280_0.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
         if not(roms_load(@mem_misc,hippo_mcu)) then exit;
         for f:=0 to $ffff do mem_misc[f]:=bitswap8(mem_misc[f],0,6,5,4,3,2,1,7);
@@ -1106,16 +1092,16 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,hippo_sprites)) then exit;
         convert_tiles(3,$1000);
         //Dip
-        marcade.dswa:=$ffff;
-        marcade.dswa_val2:=@hippo_dip;
+        init_dips(1,hippo_dip,$ffff);
       end;
   316:begin //Sly Spy
+        llamadas_maquina.bucle_general:=slyspy_principal;
         bac06_0:=bac06_chip.create(false,true,false,0,$200,$300,1,1,1,$100);
         //cargar roms
         m68000_0.change_ram16_calls(slyspy_getword,slyspy_putword);
         if not(roms_load16w(@rom,slyspy_rom)) then exit;
         //cargar sonido
-        h6280_0:=cpu_h6280.create(12000000 div 4,272);
+        h6280_0:=cpu_h6280.create(12000000 div 4);
         h6280_0.change_ram_calls(slyspy_snd_getbyte,slyspy_snd_putbyte);
         h6280_0.init_sound(dec0_sound_update);
         init_sound_chips;
@@ -1126,8 +1112,8 @@ case main_vars.tipo_maquina of
         if not(roms_load(oki_6295_0.get_rom_addr,slyspy_oki)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp2,slyspy_char)) then exit;
-        copymemory(@memoria_temp[$0],@memoria_temp2[$4000],$4000);
-        copymemory(@memoria_temp[$4000],@memoria_temp2[$0],$4000);
+        copymemory(@memoria_temp[0],@memoria_temp2[$4000],$4000);
+        copymemory(@memoria_temp[$4000],@memoria_temp2[0],$4000);
         copymemory(@memoria_temp[$8000],@memoria_temp2[$c000],$4000);
         copymemory(@memoria_temp[$c000],@memoria_temp2[$8000],$4000);
         convert_chars($800);
@@ -1141,16 +1127,16 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,slyspy_sprites)) then exit;
         convert_tiles(3,$1000);
         //Dip
-        marcade.dswa:=$ff7f;
-        marcade.dswa_val2:=@slyspy_dip;
+        init_dips(1,slyspy_dip,$ff7f);
       end;
   317:begin //Boulder Dash
+        llamadas_maquina.bucle_general:=slyspy_principal;
         bac06_0:=bac06_chip.create(false,true,false,0,$200,$300,1,1,1,$100);
         //cargar roms
         m68000_0.change_ram16_calls(slyspy_getword,slyspy_putword);
         if not(roms_load16w(@rom,bouldash_rom)) then exit;
         //cargar sonido
-        h6280_0:=cpu_h6280.create(12000000 div 4,272);
+        h6280_0:=cpu_h6280.create(12000000 div 4);
         h6280_0.change_ram_calls(slyspy_snd_getbyte,slyspy_snd_putbyte);
         h6280_0.init_sound(dec0_sound_update);
         init_sound_chips;
@@ -1161,8 +1147,8 @@ case main_vars.tipo_maquina of
         if not(roms_load(oki_6295_0.get_rom_addr,bouldash_oki)) then exit;
         //convertir chars
         if not(roms_load(@memoria_temp2,bouldash_char)) then exit;
-        copymemory(@memoria_temp[$0],@memoria_temp2[$8000],$8000);
-        copymemory(@memoria_temp[$8000],@memoria_temp2[$0],$8000);
+        copymemory(@memoria_temp[0],@memoria_temp2[$8000],$8000);
+        copymemory(@memoria_temp[$8000],@memoria_temp2[0],$8000);
         copymemory(@memoria_temp[$18000],@memoria_temp2[$10000],$8000);
         copymemory(@memoria_temp[$10000],@memoria_temp2[$18000],$8000);
         convert_chars($1000);
@@ -1176,8 +1162,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,bouldash_sprites)) then exit;
         convert_tiles(3,$800);
         //Dip
-        marcade.dswa:=$7f7f;
-        marcade.dswa_val2:=@bouldash_dip;
+        init_dips(1,bouldash_dip,$7f7f);
       end;
 end;
 //final

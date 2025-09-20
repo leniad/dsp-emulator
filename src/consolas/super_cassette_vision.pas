@@ -518,12 +518,13 @@ llamadas_maquina.reset:=reset_scv;
 llamadas_maquina.cartuchos:=abrir_scv;
 llamadas_maquina.grabar_snapshot:=scv_grabar_snapshot;
 llamadas_maquina.fps_max:=59.922745;
+llamadas_maquina.scanlines:=262;
 iniciar_audio(false);
 screen_init(1,512,512);
 screen_init(2,192,222,false,true);
 iniciar_video(192,222);
 //Main CPU
-upd7810_0:=cpu_upd7810.create(4000000,262,CPU_7801);
+upd7810_0:=cpu_upd7810.create(4000000,CPU_7801);
 upd7810_0.change_ram_calls(scv_getbyte,scv_putbyte);
 upd7810_0.change_in(nil,scv_portb_in,scv_portc_in,nil,nil);
 upd7810_0.change_out(scv_porta_out,nil,scv_portc_out,nil,nil);

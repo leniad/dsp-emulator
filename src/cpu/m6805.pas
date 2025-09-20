@@ -20,7 +20,7 @@ type
         end;
         preg_m6805=^reg_m6805;
         cpu_m6805=class(cpu_class)
-            constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
+            constructor create(clock:dword;tipo_cpu:byte);
             destructor free;
           public
             procedure run(maximo:single);
@@ -83,14 +83,14 @@ const
          5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 4, 8, 5, 6,
          4, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 3, 7, 4, 5);
 
-constructor cpu_m6805.create(clock:dword;frames_div:word;tipo_cpu:byte);
+constructor cpu_m6805.create(clock:dword;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6805));
 fillchar(self.r^,sizeof(reg_m6805),0);
 self.numero_cpu:=cpu_main_init(clock div 4);
 self.clock:=clock div 4;
 self.tipo_cpu:=tipo_cpu;
-self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/4/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 destructor cpu_m6805.free;

@@ -1,4 +1,78 @@
 # DSP Emulator status #
+<b>20/09/25 - DSP Emulator 0.24WIP2. Updated Windows binary and source.<br>
+<pre>
+-General
+    +Merged Delphi & Lazarus forms functions
+    +Simplified general reset
+    +Fixed language selection
+    +DIP switches
+        -Updated all functions; now DIP switch values are saved
+        -Simplified DIP switch declarations
+        -Migrated more games to the new system
+    +Controls Engine
+        -Fixed joystick button redefinition
+            +Added a 5-second countdown to press a joystick button
+            +If no input is received, the redefinition is canceled
+    +CPU engine
+        -Removed scanlines from CPU declarations (now shared across all CPUs in the same machine)
+    +TAP/TZX
+        -Added block type $4b for MSX tape format
+        -Some small code cleaning
+    +GFX engine
+        -Rewrited scroll functions
+        -Simplified scroll declarations; separate variables for each layer are no longer required
+        -DECO sprites: removed masks
+    +Video
+        -TMS99XX
+            +Added PAL timings
+            +Fixed NTSC timings
+-Amstrad CPC
+    +Remapped function keys, now are mapped using right shift + number
+-Commodore 64
+    +Remapped function keys, now are mapped using right shift + number
+-MSX 1
+    +Added driver for Sanyo MPC-100
+    +Support for TZX, TSX, CAS and WAV file formats for tape loading
+    +Support 32Kb ROMs size or less (mappers don't work yet)
+-Bubble Bobble HW
+    +Bubble Bobble: added memory mirroring
+    +Tokio: Added driver
+    +Super Bobble Bobble: Added driver
+-Boogie Wings
+    +Fixed Sprites and GFXs
+    +Added colors, but still are wrong
+    +Fixed screen priority, missing transparency
+-CPS1
+    +Added dipswitches
+    +Removed dedicated sprite buffer; now using the general sprite buffer
+    +Fixed rowscroll (Fixes SF2 background)
+    +Added stars layer
+    +Willow: Added driver
+    +1941 Counter Attack: Added driver
+    +Nemo: Added driver
+-Popeye HW
+    +Fixed background
+-Sega System 16b
+    +Added rowscroll (fixes 'Cotton' intro and 'Dynamite Dux' hiscore intro)
+    +Simplified 315-5195 read/write memory functions
+    +Fixed open bus read
+    +Bay Route: Added driver
+    +Sonic Boom: Added driver
+    +Time Scanner: Added driver
+
+          Before                                Now
+<img src="https://i.ibb.co/mV7YVGcp/Cotton-before.png"> <img src="https://i.ibb.co/MDRx4HpC/Cotton-after.png">
+<img src="https://i.ibb.co/CsDcTtc4/Dynamite-Dux-before.png"> <img src="https://i.ibb.co/3mZbXFsQ/Dynamite-Dux-after.png">
+<img src="https://i.ibb.co/T5yXF9D/sf2-bef.png"> <img src="https://i.ibb.co/RG1kPXFK/sf2-after.png">
+<img src="https://i.ibb.co/4n231mbb/Strider-before.png"> <img src="https://i.ibb.co/fY7LCbNk/Strider-after.png">
+<img src="https://i.ibb.co/qM1BxjtY/boogwing-bef.png"> <img src="https://i.ibb.co/hJgc5D3h/boogwing-after.png">
+ New
+<img src="https://i.ibb.co/VWyvsTtW/msx.png">
+<img src="https://i.ibb.co/CKsW7Zbt/1941ca.png"> <img src="https://i.ibb.co/Psk54rjW/Sonic-Boom.png"><br>
+<img src="https://i.ibb.co/DDqy0r3k/Nemo.png"> <img src="https://i.ibb.co/vvCgdVpx/BayRoute.png"><br>
+<img src="https://i.ibb.co/gqYPG9n/Super-Bobble-Bobble.png"> <img src="https://i.ibb.co/N2LZymQZ/Willow.png"><br>
+<img src="https://i.ibb.co/vCPDJvkp/Time-Scanner.png"> <img src="https://i.ibb.co/1JXzJ6dw/Tokio.png"><br>
+</pre><br>
 <b>30/04/25 - DSP Emulator 0.24WIP1. Updated Windows binary and source.<br>
 <pre>
 -Lazarus
@@ -1030,63 +1104,3 @@ Please read 'Whats New 0.21' file for full details<br><br>
     +Added sprite buffer
 </pre><br>
 <img src="https://i.ibb.co/3WVdjYP/supduck.png"><br><br>
-<b>06/12/22 - DSP Emulator 0.21WIP4.2. Another fix! Updated Windows binary and source update.<br>
-<pre>
--General
-    +Fixed - Emulator losses focus and keyboard stop working (Thanks to Neville)
-    +Updated SDL library to 2.26.1
--Coleco
-    +Fire button 1 and 2 switched
-    +Fixed error message loading a cartridge
-</pre><br><br>
-<b>05/11/22 - DSP Emulator 0.21WIP4.1. Quick fix! Updated Windows binary and source update.<br>
-<pre>
--Lazarus
-    +Fixed image preview error
-    +Fixed linux sort games
-    +Added check for SDL2 Mixer present, needed for linux and MacOS
--General
-    +Fixed - Emulator stops with no reason (Thanks to Neville)
-    +Better console game files loading, better error handling
-    +Better tape files loading, better error handling
-    +Fixed remembering last open dir for all systems
-    +Better fullscreen mode (Press F6)
-</pre><br><br>
-<b>25/10/22 - DSP Emulator 0.21WIP4. Updated Windows binary and source update.<br>
-<pre>
--General
-    +Update preview images, added images for new drivers
-    +Konami K051316
-        -Begin implementation, still WIP
-    +CPU
-        -HD6309: Fixed opcodes $2c, $2d and $2f
-        -Konami CPU
-              +Fixed opcodes $66, $67, $6e, $6f, $76, $77, $7e, $7f, $b4 and $b5
-              +Added opcodes $74, $bc, $be, $c6, $cc, $cd and $ce (Fixes 'The Simpsons', it's playable to the end)
-        -M6809: Fixed opcodes $2c, $2d, $2e and $2f
-    +Konami 053246
-        -Fixed shadows
-    +Sound
-        -AY8910
-              +Added gain per channel
-              +Fixed AY8912 PORTB channel
--Ajax
-    +Added K051316 video chip
--Ambush
-    +Added driver with sound
--Kyugo HW
-    +S.R.D. Mission: Added driver with sound
-    +AirWolf: Added driver with sound
--Mag Max
-    +Added driver with sound
--Nemesis HW
-    +Rewrite screen flip, fixes TwinBee
--The Simpsons
-    +Fixed video settings
-    +Added sprites dma interrupt enable/disable
--Thunder Cross HW
-    +Fixed sprites priority
-</pre><br>
-<img src="https://i.ibb.co/TgzTxTV/Airwolf.png"> <img src="https://i.ibb.co/PFmVY4f/Ambush.png"><br>
-<img src="https://i.ibb.co/TwdZJMY/magmax.png"> <img src="https://i.ibb.co/yX12fWz/srdmission.png"><br>
-<img src="https://i.ibb.co/pdpvh16/twinbee.png"> <img src="https://i.ibb.co/S332FHp/vendetta.png"><br><br>

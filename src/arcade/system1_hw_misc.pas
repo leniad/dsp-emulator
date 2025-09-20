@@ -338,6 +338,7 @@ end;
 begin
 iniciar_system1:=false;
 iniciar_audio(false);
+llamadas_maquina.scanlines:=260;
 //Pantallas
 screen_init(1,256,256,false,true);
 case main_vars.tipo_maquina of
@@ -348,11 +349,11 @@ case main_vars.tipo_maquina of
   else iniciar_video(256,224);
 end;
 //Main CPU
-z80_0:=cpu_z80.create(20000000 div 5,260);
+z80_0:=cpu_z80.create(20000000 div 5);
 z80_0.change_ram_calls(system1_getbyte,system1_putbyte);
 z80_0.change_misc_calls(nil,nil,system1_adjust_cycle);
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,260);
+z80_1:=cpu_z80.create(4000000);
 z80_1.init_sound(system1_sound_update);
 timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,nil,true);
 //Sound Chip

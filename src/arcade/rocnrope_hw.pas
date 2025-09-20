@@ -24,18 +24,18 @@ const
         (n:'a17_prom.bin';l:$20;p:0;crc:$22ad2c3e),(n:'b16_prom.bin';l:$100;p:$20;crc:$750a9677),
         (n:'rocnrope.pr3';l:$100;p:$120;crc:$b5c75a27));
         //Dip
-        rocnrope_dip_a:array [0..2] of def_dip2=(
+        rocnrope_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        rocnrope_dip_b:array [0..4] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
+        rocnrope_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$78;name:'Difficulty';number:16;val16:($78,$70,$68,$60,$58,$50,$48,$40,$38,$30,$28,$20,$18,$10,8,0);name16:('1 Easy','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16 Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        rocnrope_dip_c:array [0..3] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        rocnrope_dip_c:array [0..2] of def_dip2=(
         (mask:7;name:'First Bonus';number:8;val8:(6,5,4,3,2,1,0,7);name8:('20K','30K','40K','50K','60K','70K','80K','Invalid')),
         (mask:$38;name:'Repeated Bonus';number:8;val8:($20,$18,$10,8,0,$38,$30,$28);name8:('40K','50K','60K','70K','80K','Invalid','Invalid','Invalid')),
-        (mask:$40;name:'Grant Repeated Bonus';number:2;val2:($40,0);name2:('No','Yes')),());
+        (mask:$40;name:'Grant Repeated Bonus';number:2;val2:($40,0);name2:('No','Yes')));
 
 var
  irq_ena:boolean;
@@ -198,19 +198,20 @@ const
 begin
 llamadas_maquina.bucle_general:=rocnrope_principal;
 llamadas_maquina.reset:=reset_rocnrope;
+llamadas_maquina.scanlines:=256;
 iniciar_rocnrope:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 3 div 4,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 3 div 4,TCPU_M6809);
 m6809_0.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
 if not(roms_load(@memoria,rocnrope_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
 mem_opcodes[$703d-$6000]:=$98;  //Patch
 //Sound Chip
-konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,$100);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772);
 if not(roms_load(@konamisnd_0.memoria,rocnrope_snd)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,rocnrope_chars)) then exit;
@@ -250,12 +251,9 @@ for f:=0 to $1ff do begin
   gfx[1].colores[f]:=memoria_temp[$20+f] and $f;  //sprites
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$5b;
-marcade.dswc:=$96;
-marcade.dswa_val2:=@rocnrope_dip_a;
-marcade.dswb_val2:=@rocnrope_dip_b;
-marcade.dswc_val2:=@rocnrope_dip_c;
+init_dips(1,rocnrope_dip_a,$ff);
+init_dips(2,rocnrope_dip_b,$5b);
+init_dips(3,rocnrope_dip_c,$96);
 //final
 iniciar_rocnrope:=true;
 end;

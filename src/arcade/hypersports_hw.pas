@@ -27,14 +27,13 @@ const
         hypersports_vlm:tipo_roms=(n:'c08';l:$2000;p:0;crc:$e8f8ea78);
         hypersports_snd:array[0..1] of tipo_roms=(
         (n:'c10';l:$2000;p:0;crc:$3dc1a6ff),(n:'c09';l:$2000;p:$2000;crc:$9b525c3e));
-        hypersports_dip_a:array [0..1] of def_dip2=(
-        (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-        hypersports_dip_b:array [0..5] of def_dip2=(
+        hypersports_dip_a:def_dip2=(mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play'));
+        hypersports_dip_b:array [0..4] of def_dip2=(
         (mask:1;name:'After Last Event';number:2;val2:(1,0);name2:('Game Over','Game Continues')),
         (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),
         (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),
         (mask:8;name:'World Records';number:2;val2:(8,0);name2:('Don''t Erase','Erase on Reset')),
-        (mask:$f0;name:'Difficulty';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,$70,$60,$50,$40,$30,$20,$10,0);name16:('Easy 1','Easy 2','Easy 3','Easy 4','Normal 1','Normal 2','Normal 3','Normal 4','Normal 5','Normal 6','Normal 7','Normal 8','Difficult 1','Difficult 2','Difficult 3','Difficult 4')),());
+        (mask:$f0;name:'Difficulty';number:16;val16:($f0,$e0,$d0,$c0,$b0,$a0,$90,$80,$70,$60,$50,$40,$30,$20,$10,0);name16:('Easy 1','Easy 2','Easy 3','Easy 4','Normal 1','Normal 2','Normal 3','Normal 4','Normal 5','Normal 6','Normal 7','Normal 8','Difficult 1','Difficult 2','Difficult 3','Difficult 4')));
         roadf_rom:array[0..5] of tipo_roms=(
         (n:'g05_g01.bin';l:$2000;p:$4000;crc:$e2492a06),(n:'g07_f02.bin';l:$2000;p:$6000;crc:$0bf75165),
         (n:'g09_g03.bin';l:$2000;p:$8000;crc:$dde401f8),(n:'g11_f04.bin';l:$2000;p:$a000;crc:$b1283c77),
@@ -48,13 +47,13 @@ const
         (n:'c03_c27.bin';l:$20;p:0;crc:$45d5e352),(n:'j12_c28.bin';l:$100;p:$20;crc:$2955e01f),
         (n:'a09_c29.bin';l:$100;p:$120;crc:$5b3b5f2a));
         roadf_snd:tipo_roms=(n:'a17_d10.bin';l:$2000;p:0;crc:$c33c927e);
-        roadf_dip_b:array [0..6] of def_dip2=(
+        roadf_dip_b:array [0..5] of def_dip2=(
         (mask:1;name:'Allow Continue';number:2;val2:(1,0);name2:('No','Yes')),
         (mask:6;name:'Number of Opponents';number:4;val4:(6,4,2,0);name4:('Few','Normal','Many','Great Many')),
         (mask:8;name:'Speed of Opponents';number:2;val2:(8,0);name2:('Fast','Slow')),
         (mask:$30;name:'Fuel Consumption';number:4;val4:($30,$20,$10,0);name4:('Slow','Normal','Fast','Very Fast')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  flip_screen,irq_ena:boolean;
@@ -439,18 +438,18 @@ llamadas_maquina.reset:=reset_hypersports;
 llamadas_maquina.close:=close_hypersports;
 llamadas_maquina.save_qsnap:=hypersports_qsave;
 llamadas_maquina.load_qsnap:=hypersports_qload;
+llamadas_maquina.scanlines:=256;
 iniciar_hypersports:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 if (main_vars.tipo_maquina=400) then main_screen.rot90_screen:=true;
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.create(18432000 div 12,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(hypersports_getbyte,hypersports_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(14318180 div 4,$100);
+z80_0:=cpu_z80.create(14318180 div 4);
 if (main_vars.tipo_maquina=400) then z80_0.init_sound(roadf_sound_update)
   else z80_0.init_sound(hypersports_sound_update);
 //Sound Chip
@@ -482,10 +481,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,64*8,$8000*8+4,$8000*8+0,4,0);
         convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswb:=$49;
-        marcade.dswa_val2:=@hypersports_dip_a;
-        marcade.dswb_val2:=@hypersports_dip_b;
+        init_dips(1,hypersports_dip_a,$ff);
+        init_dips(2,hypersports_dip_b,$49);
         //paleta
         if not(roms_load(@memoria_temp,hypersports_pal)) then exit;
   end;
@@ -511,10 +508,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
         convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswb:=$2d;
-        marcade.dswa_val2:=@hypersports_dip_a;
-        marcade.dswb_val2:=@roadf_dip_b;
+        init_dips(1,hypersports_dip_a,$ff);
+        init_dips(2,roadf_dip_b,$2d);
         //paleta
         if not(roms_load(@memoria_temp,roadf_pal)) then exit;
   end;

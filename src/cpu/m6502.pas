@@ -18,7 +18,7 @@ type
         end;
         preg_m6502=^reg_m6502;
         cpu_m6502=class(cpu_class)
-            constructor create(clock:dword;frames_div:word;cpu_type:byte);
+            constructor create(clock:dword;cpu_type:byte);
             destructor free;
           public
             after_ei:boolean;
@@ -131,7 +131,7 @@ const
 var
   tipo_dir,estados_t:array[0..$ff] of byte;
 
-constructor cpu_m6502.create(clock:dword;frames_div:word;cpu_type:byte);
+constructor cpu_m6502.create(clock:dword;cpu_type:byte);
 begin
 getmem(self.r,sizeof(reg_m6502));
 fillchar(self.r^,sizeof(reg_m6502),0);
@@ -152,7 +152,7 @@ case cpu_type of
     copymemory(@estados_t,@estados_t_m6502,$100);
   end;
 end;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.in_port0:=nil;
 self.in_port1:=nil;
 end;

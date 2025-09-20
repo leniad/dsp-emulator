@@ -12,10 +12,10 @@ const
         tetris_rom:tipo_roms=(n:'136066-1100.45f';l:$10000;p:0;crc:$2acbdb09);
         tetris_gfx:tipo_roms=(n:'136066-1101.35a';l:$10000;p:0;crc:$84a1939f);
         //Dip
-        tetris_dip_a:array [0..3] of def_dip2=(
+        tetris_dip_a:array [0..2] of def_dip2=(
         (mask:4;name:'Freeze';number:2;val2:(0,4);name2:('Off','On')),
         (mask:8;name:'Freeze Step';number:2;val2:(0,8);name2:('Off','On')),
-        (mask:$80;name:'Service';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Service';number:2;val2:(0,$80);name2:('Off','On')));
 
 var
   rom_mem:array[0..1,0..$3fff] of byte;
@@ -71,17 +71,17 @@ init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
-   m6502_0.run(frame);
-   frame:=frame+m6502_0.tframes-m6502_0.contador;
    case f of
       0:marcade.in0:=marcade.in0 or $40;
-      47,111,175:m6502_0.change_irq(ASSERT_LINE);
-      239:begin
+      48,112,176:m6502_0.change_irq(ASSERT_LINE);
+      240:begin
             update_video_tetris;
             marcade.in0:=marcade.in0 and $bf;
             m6502_0.change_irq(ASSERT_LINE);
           end;
    end;
+   m6502_0.run(frame);
+   frame:=frame+m6502_0.tframes-m6502_0.contador;
  end;
  eventos_tetris;
  video_sync;
@@ -199,13 +199,14 @@ begin
 llamadas_maquina.bucle_general:=principal_tetris;
 llamadas_maquina.reset:=reset_tetris;
 llamadas_maquina.close:=cerrar_tetris;
+llamadas_maquina.scanlines:=262;
 iniciar_tetris:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
 screen_init(2,336,240,false,true);
 iniciar_video(336,240);
 //Main CPU
-m6502_0:=cpu_m6502.create(1789772,262,TCPU_M6502);
+m6502_0:=cpu_m6502.create(1789772,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_tetris,putbyte_tetris);
 m6502_0.init_sound(tetris_sound_update);
 //Slapstic
@@ -229,8 +230,7 @@ init_gfx(0,8,8,$800);
 gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //Dip
-marcade.dswa:=0;
-marcade.dswa_val2:=@tetris_dip_a;
+init_dips(1,tetris_dip_a,0);
 //final
 reset_tetris;
 iniciar_tetris:=true;

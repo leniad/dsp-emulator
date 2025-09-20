@@ -23,17 +23,17 @@ const
         (n:'sauro-8.bin';l:$8000;p:0;crc:$e08b5d5e),(n:'sauro-9.bin';l:$8000;p:$8000;crc:$7c707195),
         (n:'sauro-10.bin';l:$8000;p:$10000;crc:$c93380d1),(n:'sauro-11.bin';l:$8000;p:$18000;crc:$f47982a8));
         //DIP
-        sauro_dip_a:array [0..6] of def_dip2=(
+        sauro_dip_a:array [0..5] of def_dip2=(
         (mask:2;name:'Demo Sounds';number:2;val2:(0,2);name2:('Off','On')),
         (mask:4;name:'Cabinet';number:2;val2:(4,0);name2:('Upright','Cocktail')),
         (mask:8;name:'Free Play';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Difficult';number:4;val4:($30,$20,$10,0);name4:('Very Easy','Easy','Hard','Very Hard')),
         (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
-        (mask:$80;name:'Freeze';number:2;val2:(0,$80);name2:('Off','On')),());
-        sauro_dip_b:array [0..3] of def_dip2=(
+        (mask:$80;name:'Freeze';number:2;val2:(0,$80);name2:('Off','On')));
+        sauro_dip_b:array [0..2] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(0,1,2,3);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
         (mask:$c;name:'Coin B';number:4;val4:($c,8,4,0);name4:('1C 2C','1C 3C','1C 4C','1C 5C')),
-        (mask:$30;name:'Lives';number:4;val4:($30,$20,$10,0);name4:('2','3','4','5')),());
+        (mask:$30;name:'Lives';number:4;val4:($30,$20,$10,0);name4:('2','3','4','5')));
 
 var
  scroll_bg,scroll_fg,sound_latch,pal_bank:byte;
@@ -248,21 +248,20 @@ begin
 llamadas_maquina.bucle_general:=sauro_principal;
 llamadas_maquina.reset:=reset_sauro;
 llamadas_maquina.fps_max:=55.72;
+llamadas_maquina.scanlines:=256;
 iniciar_sauro:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,512,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-z80_0:=cpu_z80.create(5000000,256);
+z80_0:=cpu_z80.create(5000000);
 z80_0.change_ram_calls(sauro_getbyte,sauro_putbyte);
 z80_0.change_io_calls(sauro_inbyte,sauro_outbyte);
 if not(roms_load(@memoria,sauro_rom)) then exit;
 //Sound CPU
-z80_1:=cpu_z80.create(4000000,256);
+z80_1:=cpu_z80.create(4000000);
 z80_1.change_ram_calls(sauro_snd_getbyte,sauro_snd_putbyte);
 z80_1.init_sound(sauro_sound_update);
 if not(roms_load(@mem_snd,sauro_snd_rom)) then exit;
@@ -295,10 +294,8 @@ for f:=0 to $3ff do begin
 end;
 set_pal(colores,$400);
 //DIP
-marcade.dswa:=$66;
-marcade.dswb:=$2f;
-marcade.dswa_val2:=@sauro_dip_a;
-marcade.dswb_val2:=@sauro_dip_b;
+init_dips(1,sauro_dip_a,$66);
+init_dips(2,sauro_dip_b,$2f);
 //final
 iniciar_sauro:=true;
 end;

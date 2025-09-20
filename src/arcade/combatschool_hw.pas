@@ -21,15 +21,14 @@ const
         (n:'611g11.rom';l:$40000;p:0;crc:$69687538),(n:'611g12.rom';l:$40000;p:1;crc:$9c6bf898));
         combatsc_sound:tipo_roms=(n:'611g03.rom';l:$8000;p:0;crc:$2a544db5);
         combatsc_upd:tipo_roms=(n:'611g04.rom';l:$20000;p:0;crc:$2987e158);
-        combatsc_dip_a:array [0..2] of def_dip2=(
+        combatsc_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','None')),());
-        combatsc_dip_b:array [0..3] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','None')));
+        combatsc_dip_b:array [0..2] of def_dip2=(
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        combatsc_dip_c:array [0..1] of def_dip2=(
-        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        combatsc_dip_c:def_dip2=(mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On'));
 
 var
  memoria_rom:array[0..9,0..$3fff] of byte;
@@ -346,26 +345,22 @@ end;
 begin
 llamadas_maquina.bucle_general:=combatsc_principal;
 llamadas_maquina.reset:=reset_combatsc;
+llamadas_maquina.scanlines:=256;
 iniciar_combatsc:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,256,256,true);
-screen_mod_scroll(4,256,256,255,256,256,255);
 screen_init(5,512,256,false,true); //Final
 screen_init(6,256,256,true); //Text
-screen_mod_scroll(6,256,256,255,256,256,255);
 iniciar_video(256,224);
 //Main CPU
-hd6309_0:=cpu_hd6309.create(12000000,$100,TCPU_HD6309);
+hd6309_0:=cpu_hd6309.create(12000000,TCPU_HD6309);
 hd6309_0.change_ram_calls(combatsc_getbyte,combatsc_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,$100);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(combatsc_sound_update);
 //Audio chips
@@ -395,12 +390,9 @@ convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 if not(roms_load(@memoria_temp,combatsc_proms)) then exit;
 clut_combatsc;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7b;
-marcade.dswc:=$10;
-marcade.dswa_val2:=@combatsc_dip_a;
-marcade.dswb_val2:=@combatsc_dip_b;
-marcade.dswc_val2:=@combatsc_dip_c;
+init_dips(1,combatsc_dip_a,$ff);
+init_dips(2,combatsc_dip_b,$7b);
+init_dips(3,combatsc_dip_c,$10);
 iniciar_combatsc:=true;
 end;
 

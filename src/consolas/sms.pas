@@ -309,7 +309,6 @@ begin
  sn_76496_0.reset;
  vdp_0.reset;
  ym2413_0.reset;
- reset_game_general;
  sms_0.keys[0]:=$ff;
  sms_0.keys[1]:=$ff;
  sms_0.mapper.slot2_ram:=false;
@@ -496,12 +495,14 @@ screen_init(1,284,294);
 iniciar_video(284,243);
 if sms_0.model=0 then begin
   //iniciar_video(284,294);
-  z80_0:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
+  llamadas_maquina.scanlines:=LINES_PAL;
+  z80_0:=cpu_z80.create(CLOCK_PAL);
   z80_0.init_sound(sms_sound_update);
   sn_76496_0:=sn76496_chip.create(CLOCK_PAL);
 end else begin
   //iniciar_video(284,243);
-  z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
+  llamadas_maquina.scanlines:=LINES_NTSC;
+  z80_0:=cpu_z80.create(CLOCK_NTSC);
   z80_0.init_sound(sms_sound_update);
   sn_76496_0:=sn76496_chip.create(CLOCK_NTSC);
 end;

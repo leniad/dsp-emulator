@@ -20,17 +20,17 @@ const
         (n:'a85-08.g15';l:$100;p:0;crc:$d15f61a8),(n:'a85-10.g12';l:$100;p:$100;crc:$8fc3fa86),
         (n:'a85-09.g14';l:$100;p:$200;crc:$b931c94d));
         //Dip
-        kikikaikai_dip_a:array [0..4] of def_dip2=(
+        kikikaikai_dip_a:array [0..3] of def_dip2=(
         (mask:$1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Cocktail')),
         (mask:$2;name:'Flip Screen';number:2;val2:(2,0);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($30,$20,$10,0);name4:('1C 1C','1C 2C','2C 1C/3C 1C','2C 3C/4C 1C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C 1C','1C 2C','2C 1C/1C 4C','2C 3C/1C 6C')),());
-        kikikaikai_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($c0,$80,$40,0);name4:('1C 1C','1C 2C','2C 1C/1C 4C','2C 3C/1C 6C')));
+        kikikaikai_dip_b:array [0..4] of def_dip2=(
         (mask:$3;name:'Difficulty';number:4;val4:(2,3,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$c;name:'Bonus Life';number:4;val4:(0,$c,8,4);name4:('50K 100K','70K 150K','70K 200K','100K 300K')),
         (mask:$30;name:'Lives';number:4;val4:(0,$30,$20,$10);name4:('2','3','4','5')),
         (mask:$40;name:'Coinage Type';number:2;val2:($40,0);name2:('Type 1','Type 2')),
-        (mask:$80;name:'Number Match';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Number Match';number:2;val2:($80,0);name2:('Off','On')));
         kickrun_rom:array[0..1] of tipo_roms=(
         (n:'a87-23.h16';l:$10000;p:0;crc:$37182560),(n:'a87-22.h18';l:$10000;p:$10000;crc:$3b5a8354));
         kickrun_snd:tipo_roms=(n:'a87-06.f6';l:$8000;p:0;crc:$1625b587);
@@ -43,17 +43,17 @@ const
         (n:'a87-10.g15';l:$100;p:0;crc:$be6eb1f0),(n:'a87-12.g12';l:$100;p:$100;crc:$3e953444),
         (n:'a87-11.g14';l:$100;p:$200;crc:$14f6c28d));
         //Dip
-        kickrun_dip_a:array [0..4] of def_dip2=(
+        kickrun_dip_a:array [0..3] of def_dip2=(
         (mask:$1;name:'Master/Slave Mode';number:2;val2:(1,0);name2:('Off','On')),
         (mask:$8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$30;name:'Coin A';number:4;val4:($10,$30,0,$20);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),
-        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')),());
-        kickrun_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:($40,$c0,0,$80);name4:('2C 1C','1C 1C','2C 3C','1C 2C')));
+        kickrun_dip_b:array [0..4] of def_dip2=(
         (mask:$3;name:'Difficulty';number:4;val4:(3,2,1,0);name4:('Easy','Normal','Hard','Hardest')),
         (mask:$c;name:'Playing Time';number:4;val4:(0,$c,8,4);name4:('40 Seconds','60 Seconds','80 Seconds','100 Seconds')),
         (mask:$20;name:'Board ID';number:2;val2:($20,0);name2:('Master','Slave')),
         (mask:$40;name:'Number of Matches';number:2;val2:(0,$40);name2:('2','6')),
-        (mask:$80;name:'Single board 4 Players Mode';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Single board 4 Players Mode';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  memoria_rom:array [0..5,$0..$3fff] of byte;
@@ -409,20 +409,21 @@ end;
 begin
 llamadas_maquina.reset:=reset_kikikaikai;
 llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.scanlines:=264;
 iniciar_kikikaikai:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=388 then main_screen.rot90_screen:=true;
 screen_init(1,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,264);
+z80_0:=cpu_z80.create(6000000);
 z80_0.change_ram_calls(kikikaikai_getbyte,kikikaikai_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(6000000,264);
+z80_1:=cpu_z80.create(6000000);
 z80_1.change_ram_calls(kikisnd_getbyte,kikisnd_putbyte);
 z80_1.init_sound(kiki_sound_update);
 //MCU
-m6800_0:=cpu_m6800.create(3000000,264,TCPU_M6801);
+m6800_0:=cpu_m6800.create(3000000,TCPU_M6801);
 m6800_0.change_io_calls(mcu_port1_r,nil,mcu_port3_r,nil,nil,mcu_port2_w,mcu_port3_w,mcu_port4_w);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000,1,0.3);
@@ -447,10 +448,8 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,kikikaikai_chars)) then exit;
         convert_chars;
         //DIP
-        marcade.dswa:=$3e;
-        marcade.dswb:=$7f;
-        marcade.dswa_val2:=@kikikaikai_dip_a;
-        marcade.dswb_val2:=@kikikaikai_dip_b;
+        init_dips(1,kikikaikai_dip_a,$3e);
+        init_dips(2,kikikaikai_dip_b,$7f);
         //Paleta
         if not(roms_load(@memoria_temp,kikikaikai_prom)) then exit;
   end;
@@ -469,7 +468,7 @@ case main_vars.tipo_maquina of
         //Sound
         if not(roms_load(@mem_snd,kickrun_snd)) then exit;
         //Main CPU
-        z80_2:=cpu_z80.create(4000000,264);
+        z80_2:=cpu_z80.create(4000000);
         if not(roms_load(@mem_misc,kickrun_sub)) then exit;
         z80_2.change_ram_calls(kickrun_sub_getbyte,kickrun_sub_putbyte);
         //MCU
@@ -486,10 +485,8 @@ case main_vars.tipo_maquina of
         copymemory(@memoria_temp[$38000],@memoria_temp2[$30000],$8000);
         convert_chars;
         //DIP
-        marcade.dswa:=$ff;
-        marcade.dswb:=$fb;
-        marcade.dswa_val2:=@kickrun_dip_a;
-        marcade.dswb_val2:=@kickrun_dip_b;
+        init_dips(1,kickrun_dip_a,$ff);
+        init_dips(2,kickrun_dip_b,$fb);
         //Paleta
         if not(roms_load(@memoria_temp,kickrun_prom)) then exit;
   end;

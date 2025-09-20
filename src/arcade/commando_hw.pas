@@ -25,17 +25,17 @@ const
         (n:'vt13.7a';l:$4000;p:$8000;crc:$5612dbd2),(n:'vt14.8a';l:$4000;p:$c000;crc:$2b2dee36),
         (n:'vt15.9a';l:$4000;p:$10000;crc:$de70babf),(n:'vt16.10a';l:$4000;p:$14000;crc:$14178237));
         //DIP
-        commando_dip_a:array [0..4] of def_dip2=(
+        commando_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Starting Area';number:4;val4:(3,1,2,0);name4:('0 (Forest 1)','2 (Desert 1)','4 (Forest 2)','6 (Desert 2)')),
         (mask:$c;name:'Lives';number:4;val4:(4,$c,8,0);name4:('2','3','4','5')),
         (mask:$30;name:'Coin B';number:4;val4:(0,$20,$10,$30);name4:('4C 1C','3C 1C','2C 1C','1C 1C')),
-        (mask:$c0;name:'Coin A';number:4;val4:(0,$c0,$40,$80);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),());
-        commando_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Coin A';number:4;val4:(0,$c0,$40,$80);name4:('2C 1C','1C 1C','1C 2C','1C 3C')));
+        commando_dip_b:array [0..4] of def_dip2=(
         (mask:7;name:'Bonus Life';number:8;val8:(7,3,5,1,6,2,4,0);name8:('10K 50K+','10K 60K+','20K 60K+','20K 70K+','30K 70K+','30K 80K+','40K 100K+','None')),
         (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$10;name:'Difficulty';number:2;val2:($10,0);name2:('Normal','Difficult')),
         (mask:$20;name:'Flip Screen';number:2;val2:($20,0);name2:('On','Off')),
-        (mask:$c0;name:'Cabinet';number:4;val4:(0,$40,$c0,$80);name4:('Upright','Upright Two Players','Cocktail','Invalid')),());
+        (mask:$c0;name:'Cabinet';number:4;val4:(0,$40,$c0,$80);name4:('Upright','Upright Two Players','Cocktail','Invalid')));
 
 var
  memoria_dec:array[0..$bfff] of byte;
@@ -216,7 +216,6 @@ begin
  ym2203_1.reset;
  frame_main:=z80_0.tframes;
  frame_snd:=z80_1.tframes;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -243,21 +242,21 @@ begin
 llamadas_maquina.bucle_general:=commando_principal;
 llamadas_maquina.reset:=reset_commando;
 llamadas_maquina.fps_max:=12000000/2/384/262;
+llamadas_maquina.scanlines:=262;
 iniciar_commando:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(3000000,262);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(commando_getbyte,commando_putbyte);
 if not(roms_load(@memoria,commando_rom)) then exit;
 memoria_dec[0]:=memoria[0];
 for f:=1 to $bfff do memoria_dec[f]:=bitswap8(memoria[f],3,2,1,4,7,6,5,0);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,262);
+z80_1:=cpu_z80.create(3000000);
 z80_1.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
 z80_1.init_sound(commando_sound_update);
 if not(roms_load(@mem_snd,commando_snd_rom)) then exit;
@@ -295,10 +294,8 @@ for f:=0 to 63 do begin
   gfx[0].colores[f]:=f+192;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$1f;
-marcade.dswa_val2:=@commando_dip_a;
-marcade.dswb_val2:=@commando_dip_b;
+init_dips(1,commando_dip_a,$ff);
+init_dips(2,commando_dip_b,$1f);
 //final
 reset_commando;
 iniciar_commando:=true;

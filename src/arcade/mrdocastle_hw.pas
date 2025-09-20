@@ -81,7 +81,7 @@ const
         //Dip
         mrdocastle_dip_a:array [0..6] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'1 (Beginner)'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'4 (Advanced)'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Rack Test';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Advance Level on Getting Diamond';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Difficulty of EXTRA';number:2;dip:((dip_val:$10;dip_name:'Easy'),(dip_val:$0;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -99,7 +99,7 @@ const
         (mask:$80;name:'Lives';number:2;dip:((dip_val:$80;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         dowild_dip_a:array [0..7] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'1 (Beginner)'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'4 (Advanced)'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Rack Test';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Flip Screen';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Difficulty of EXTRA';number:2;dip:((dip_val:$10;dip_name:'Easy'),(dip_val:$0;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -107,14 +107,14 @@ const
         (mask:$80;name:'Lives';number:2;dip:((dip_val:$80;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         jjack_dip_a:array [0..6] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'Easy'),(dip_val:$2;dip_name:'Medium'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Rack Test ';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Flip Screen';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Extra';number:2;dip:((dip_val:$10;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
         kickridr_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'Easy'),(dip_val:$2;dip_name:'Medium'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Rack Test';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Flip Screen';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         idsoccer_dip_a:array [0..6] of def_dip=(
@@ -535,6 +535,7 @@ begin
 llamadas_maquina.bucle_general:=mrdocastle_principal;
 llamadas_maquina.reset:=reset_mrdocastle;
 llamadas_maquina.fps_max:=59.659092;
+llamadas_maquina.scanlines:=264*CPU_SYNC;
 iniciar_mrdocastle:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -543,13 +544,13 @@ screen_init(3,256,256,false,true);
 if ((main_vars.tipo_maquina=308) or (main_vars.tipo_maquina=311)) then main_screen.rot270_screen:=true;
 iniciar_video(240,192);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,264*CPU_SYNC);
+z80_0:=cpu_z80.create(4000000);
 //Slave CPU
-z80_1:=cpu_z80.create(4000000,264*CPU_SYNC);
+z80_1:=cpu_z80.create(4000000);
 if (main_vars.tipo_maquina=313) then z80_1.init_sound(idoor_update_sound)
   else z80_1.init_sound(mrdocastle_update_sound);
 //Tercera CPU
-z80_2:=cpu_z80.create(4000000,264*CPU_SYNC);
+z80_2:=cpu_z80.create(4000000);
 z80_2.change_ram_calls(mrdocastle_getbyte_misc,mrdocastle_putbyte_misc);
 //Sound Chips
 sn_76496_0:=sn76496_chip.Create(4000000);

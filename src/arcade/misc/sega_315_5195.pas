@@ -59,12 +59,14 @@ end;
 procedure t315_5195.set_map;
 var
   f:byte;
+  tsize:dword;
 const
   size:array[0..3] of dword=($10000,$20000,$80000,$200000);
 begin
 for f:=0 to 7 do begin
+  tsize:=size[self.regs[$10+(f*2)] and 3];
   self.dirs_start[f]:=self.regs[$11+(f*2)] shl 16;
-  self.dirs_end[f]:=self.dirs_start[f]+size[self.regs[$10+(f*2)] and 3];
+  self.dirs_end[f]:=self.dirs_start[f]+tsize;
 end;
 end;
 

@@ -576,7 +576,6 @@ begin
    dac_2.reset;
    dac_3.reset;
  end;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -620,6 +619,7 @@ var
   memoria_temp:array[0..$7ffff] of byte;
 begin
 llamadas_maquina.reset:=reset_suna_hw;
+llamadas_maquina.scanlines:=256;
 iniciar_suna_hw:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -629,10 +629,10 @@ case main_vars.tipo_maquina of
         llamadas_maquina.bucle_general:=hardhead_principal;
         llamadas_maquina.fps_max:=59.1;
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,256);
+        z80_0:=cpu_z80.create(6000000);
         z80_0.change_ram_calls(hardhead_getbyte,hardhead_putbyte);
         //Sound CPU
-        z80_1:=cpu_z80.create(3000000,256);
+        z80_1:=cpu_z80.create(3000000);
         z80_1.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
         z80_1.init_sound(hardhead_play_sound);
         timers.init(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,nil,true);
@@ -675,16 +675,16 @@ case main_vars.tipo_maquina of
      68:begin
         llamadas_maquina.bucle_general:=hardhead2_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,256);
+        z80_0:=cpu_z80.create(6000000);
         z80_0.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
         //Sound CPU
-        z80_1:=cpu_z80.create(6000000,256);
+        z80_1:=cpu_z80.create(6000000);
         z80_1.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
         z80_1.init_sound(hardhead2_play_sound);
         //cargar sonido
         if not(roms_load(@mem_snd,hardhead2_sound)) then exit;
         //DAC CPU
-        z80_2:=cpu_z80.create(6000000,256);
+        z80_2:=cpu_z80.create(6000000);
         z80_2.change_ram_calls(hardhead2_dac_getbyte,hardhead2_dac_putbyte);
         z80_2.change_io_calls(hardhead2_dac_inbyte,hardhead2_dac_outbyte);
         if not(roms_load(@mem_misc,hardhead2_pcm)) then exit;

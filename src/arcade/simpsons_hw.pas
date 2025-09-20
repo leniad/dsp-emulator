@@ -360,13 +360,12 @@ llamadas_maquina.close:=cerrar_simpsons;
 llamadas_maquina.reset:=reset_simpsons;
 llamadas_maquina.bucle_general:=simpsons_principal;
 llamadas_maquina.fps_max:=59.185606;
+llamadas_maquina.scanlines:=264;
 iniciar_simpsons:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(true);
@@ -379,11 +378,11 @@ if not(roms_load(@memoria_temp,simpsons_sound)) then exit;
 copymemory(@mem_snd,@memoria_temp,$8000);
 for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@memoria_temp[f*$4000],$4000);
 //Main CPU
-konami_0:=cpu_konami.create(12000000,264);
+konami_0:=cpu_konami.create(12000000);
 konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
 konami_0.change_set_lines(simpsons_bank);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,264);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
 z80_0.init_sound(simpsons_sound_update);
 snd_timer:=timers.init(z80_0.numero_cpu,90,simpsons_nmi,nil,false);

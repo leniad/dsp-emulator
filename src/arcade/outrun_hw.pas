@@ -30,13 +30,13 @@ const
         (n:'opr-10193.66';l:$8000;p:$0000;crc:$bcd10dde),(n:'opr-10192.67';l:$8000;p:$10000;crc:$770f1270),
         (n:'opr-10191.68';l:$8000;p:$20000;crc:$20a284ab),(n:'opr-10190.69';l:$8000;p:$30000;crc:$7cab70e2),
         (n:'opr-10189.70';l:$8000;p:$40000;crc:$01366b54),(n:'opr-10188.71';l:$8000;p:$50000;crc:$bad30ad9));
-        outrun_dip_a:array [0..2] of def_dip2=(
+        outrun_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(7,8,9,5,4,$f,3,2,1,6,$e,$d,$c,$b,$a,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin B too) or 1C 1C')),
-        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C - 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin A too) or 1C 1C')),());
-        outrun_dip_b:array [0..3] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C 1C','3C 1C','2C 1C','2C 1C - 5C 3C - 6C 4C','2C 1C - 4C 3C','1C 1C','1C 1C - 5C 6C','1C 1C - 4C 5C','1C 1C - 2C 3C','2C 3C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','Free Play (if Coin A too) or 1C 1C')));
+        outrun_dip_b:array [0..2] of def_dip2=(
         (mask:4;name:'Demo Sounds';number:2;val2:(4,0);name2:('Off','On')),
         (mask:$30;name:'Time Adjust';number:4;val4:($20,$30,$10,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')),());
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Hardest')));
         CPU_SYNC=4;
 
 type
@@ -847,11 +847,12 @@ begin
 		end;
 	end;
 	// set up a dummy road in the last entry
-	fillchar(road_gfx[256*2*512],3,512);
+	fillchar(road_gfx[256*2*512],512,3);
 end;
 begin
 llamadas_maquina.bucle_general:=outrun_principal;
 llamadas_maquina.reset:=reset_outrun;
+llamadas_maquina.scanlines:=262*CPU_SYNC;
 iniciar_outrun:=false;
 iniciar_audio(true);
 //Text
@@ -859,30 +860,26 @@ screen_init(1,512,256,true);
 screen_init(2,512,256,true);
 //Background
 screen_init(3,1024,512,true);
-screen_mod_scroll(3,1024,512,1023,512,256,511);
 screen_init(4,1024,512,true);
-screen_mod_scroll(4,1024,512,1023,512,256,511);
 //Foreground
 screen_init(5,1024,512,true);
-screen_mod_scroll(5,1024,512,1023,512,256,511);
 screen_init(6,1024,512,true);
-screen_mod_scroll(6,1024,512,1023,512,256,511);
 //Road
 screen_init(8,320,256,true);
 //Final
 screen_init(7,512,256,false,true);
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,262*CPU_SYNC);
+m68000_0:=cpu_m68000.create(10000000);
 m68000_0.change_ram16_calls(outrun_getword,outrun_putword);
 m68000_0.change_reset_call(outrun_reset_cpu2);
 if not(roms_load16w(@rom,outrun_rom)) then exit;
 //Sub CPU
-m68000_1:=cpu_m68000.create(10000000,262*CPU_SYNC);
+m68000_1:=cpu_m68000.create(10000000);
 m68000_1.change_ram16_calls(outrun_sub_getword,outrun_sub_putword);
 if not(roms_load16w(@rom2,outrun_sub)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,262*CPU_SYNC);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(outrun_snd_getbyte,outrun_snd_putbyte);
 z80_0.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
 z80_0.init_sound(outrun_sound_act);
@@ -920,10 +917,8 @@ road_info.colorbase2:=$420;
 road_info.colorbase3:=$780;
 road_info.xoff:=0;
 //dip
-marcade.dswa:=$ff;
-marcade.dswa_val2:=@outrun_dip_a;
-marcade.dswb:=$fb;
-marcade.dswb_val2:=@outrun_dip_b;
+init_dips(1,outrun_dip_a,$ff);
+init_dips(2,outrun_dip_b,$fb);
 //poner la paleta
 compute_resistor_weights(0,255,-1.0,
   6,addr(resistances_normal[0]),addr(weights[0]),0,0,

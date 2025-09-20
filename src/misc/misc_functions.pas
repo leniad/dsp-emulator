@@ -28,6 +28,8 @@ const
   SBITMAP=19;
   SGENESIS=20;
   SGANDW=21;
+  SMSX_TAP=22;
+  SMSX_ROM=23;
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
@@ -328,6 +330,17 @@ case system_type of
             ext[3]:='ROM';
             total_ext:=3;
           end;
+  SMSX_TAP:begin
+            ext[1]:='TZX';
+            ext[2]:='TSX';
+            ext[3]:='CAS';
+            ext[4]:='WAV';
+            total_ext:=4;
+        end;
+  SMSX_ROM:begin
+            ext[1]:='ROM';
+            total_ext:=1;
+        end;
   else begin
           MessageDlg('Sistema sin definir!!!', mtInformation,[mbOk], 0);
           extract_data:=false;
@@ -443,6 +456,14 @@ case system_type of
   SPV2000:begin
          opendialog.InitialDir:=directory.pv2000;
          Opendialog.Filter:='PV2000 Game/Snapshot (*.rom;*.bin;*.dsp;*.zip)|*.rom;*.bin;*.dsp;*.zip';
+       end;
+  SMSX_TAP:begin
+         opendialog.InitialDir:=directory.msx_tap;
+         Opendialog.Filter:='MSX Tape (*.tzx;*.tsx;*.cas;*.wav;*.zip)|*.tzx;*.tsx;*.cas;*.wav;*.zip';
+       end;
+  SMSX_ROM:begin
+         opendialog.InitialDir:=directory.msx_tap;
+         Opendialog.Filter:='MSX ROM (*.rom;*.zip)|*.rom;*.zip';
        end;
 end;
 openrom:=opendialog.execute;

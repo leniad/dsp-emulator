@@ -29,14 +29,14 @@ const
         sprite_zoom:tipo_roms=(n:'epr-6844.ic123';l:$2000;p:0;crc:$e3ec7bd6);
         hangon_pcm:array[0..1] of tipo_roms=(
         (n:'epr-6831.ic5';l:$8000;p:$0;crc:$cfef5481),(n:'epr-6832.ic6';l:$8000;p:$8000;crc:$4165aea5));
-        hangon_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$7;dip_name:'4C/1C'),(dip_val:$8;dip_name:'3C/1C'),(dip_val:$9;dip_name:'2C/1C'),(dip_val:$5;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$4;dip_name:'2C/1C 4C/3C'),(dip_val:$f;dip_name:'1C/1C'),(dip_val:$3;dip_name:'1C/1C 5C/6C'),(dip_val:$2;dip_name:'1C/1C 4C/5C'),(dip_val:$1;dip_name:'1C/1C 2C/3C'),(dip_val:$6;dip_name:'2C/3C'),(dip_val:$e;dip_name:'1C/2C'),(dip_val:$d;dip_name:'1C/3C'),(dip_val:$c;dip_name:'1C/4C'),(dip_val:$b;dip_name:'1C/5C'),(dip_val:$a;dip_name:'1C/6C'),())),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$70;dip_name:'4C/1C'),(dip_val:$80;dip_name:'3C/1C'),(dip_val:$90;dip_name:'2C/1C'),(dip_val:$50;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$40;dip_name:'2C/1C 4C/3C'),(dip_val:$f0;dip_name:'1C/1C'),(dip_val:$30;dip_name:'1C/1C 5C/6C'),(dip_val:$20;dip_name:'1C/1C 4C/5C'),(dip_val:$10;dip_name:'1C/1C 2C/3C'),(dip_val:$60;dip_name:'2C/3C'),(dip_val:$e0;dip_name:'1C/2C'),(dip_val:$d0;dip_name:'1C/3C'),(dip_val:$c0;dip_name:'1C/4C'),(dip_val:$b0;dip_name:'1C/5C'),(dip_val:$a0;dip_name:'1C/6C'),())),());
-        hangon_dip_b:array [0..4] of def_dip=(
-        (mask:$1;name:'Demo Sounds';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$6;name:'Difficulty';number:4;dip:((dip_val:$4;dip_name:'Easy'),(dip_val:$6;dip_name:'Medium'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Time Adjust';number:4;dip:((dip_val:$18;dip_name:'Normal'),(dip_val:$10;dip_name:'Medium'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Play Music';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        hangon_dip_a:array [0..1] of def_dip2=(
+        (mask:$f;name:'Coin A';number:16;val16:(7,8,9,5,4,$f,3,2,1,6,$e,$d,$c,$b,$a,0);name16:('4C/1C','3C/1C','2C/1C','2C/1C 5C/3C 6C/4C','2C/1C 4C/3C','1C/1C','1C/1C 5C/6C','1C/1C 4C/5C','1C/1C 2C/3C','2C/3C','1C/2C','1C/3C','1C/4C','1C/5C','1C/6C','Unused')),
+        (mask:$f0;name:'Coin B';number:16;val16:($70,$80,$90,$50,$40,$f0,$30,$20,$10,$60,$e0,$d0,$c0,$b0,$a0,0);name16:('4C/1C','3C/1C','2C/1C','2C/1C 5C/3C 6C/4C','2C/1C 4C/3C','1C/1C','1C/1C 5C/6C','1C/1C 4C/5C','1C/1C 2C/3C','2C/3C','1C/2C','1C/3C','1C/4C','1C/5C','1C/6C','Unused')));
+        hangon_dip_b:array [0..3] of def_dip2=(
+        (mask:1;name:'Demo Sounds';number:2;val2:(1,0);name2:('Off','On')),
+        (mask:6;name:'Difficulty';number:4;val4:(4,6,2,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$18;name:'Time Adjust';number:4;val4:($18,$10,8,0);name4:('Normal','Medium','Hard','Hardest')),
+        (mask:$20;name:'Play Music';number:2;val2:(0,$20);name2:('Off','On')));
         //Enduro Racer
         enduror_rom:array[0..5] of tipo_roms=(
         (n:'epr-7640a.ic97';l:$8000;p:0;crc:$1d1dc5d4),(n:'epr-7636a.ic84';l:$8000;p:$1;crc:$84131639),
@@ -69,12 +69,12 @@ const
         enduror_key:tipo_roms=(n:'317-0013a.key';l:$2000;p:0;crc:$a965b2da);
         enduror_pcm:array[0..1] of tipo_roms=(
         (n:'epr-7681.ic8';l:$8000;p:$0;crc:$bc0c4d12),(n:'epr-7680.ic7';l:$8000;p:$10000;crc:$627b3c8c));
-        enduror_dip_b:array [0..5] of def_dip=(
-        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Wheelie'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$6;name:'Difficulty';number:4;dip:((dip_val:$4;dip_name:'Easy'),(dip_val:$6;dip_name:'Medium'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$18;name:'Time Adjust';number:4;dip:((dip_val:$10;dip_name:'Easy'),(dip_val:$18;dip_name:'Medium'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Time Control';number:4;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$60;dip_name:'Medium'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        enduror_dip_b:array [0..4] of def_dip2=(
+        (mask:1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Wheelie')),
+        (mask:6;name:'Difficulty';number:4;val4:(4,6,2,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$18;name:'Time Adjust';number:4;val4:($10,$18,8,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$60;name:'Time Control';number:4;val4:($40,$60,$20,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
         //Space Harrier
         sharrier_rom:array[0..7] of tipo_roms=(
         (n:'epr-7188a.ic97';l:$8000;p:0;crc:$45e173c3),(n:'epr-7184a.ic84';l:$8000;p:$1;crc:$e1934a51),
@@ -109,13 +109,13 @@ const
         sharrier_mcu:tipo_roms=(n:'315-5163a.ic32';l:$1000;p:0;crc:$203dffeb);
         sharrier_pcm:array[0..1] of tipo_roms=(
         (n:'epr-7231.ic5';l:$8000;p:$0;crc:$871c6b14),(n:'epr-7232.ic6';l:$8000;p:$8000;crc:$4b59340c));
-        sharrier_dip_b:array [0..6] of def_dip=(
-        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Moving'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Lives';number:4;dip:((dip_val:$8;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$4;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$10;dip_name:'5000000'),(dip_val:$0;dip_name:'7000000'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Trial Time';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$c0;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        sharrier_dip_b:array [0..5] of def_dip2=(
+        (mask:$1;name:'Cabinet';number:2;val2:(0,1);name2:('Upright','Moving')),
+        (mask:$2;name:'Demo Sounds';number:2;val2:(2,0);name2:('Off','On')),
+        (mask:$c;name:'Lives';number:4;val4:(8,$c,4,0);name4:('2','3','4','5')),
+        (mask:$10;name:'Bonus Life';number:2;val2:($10,0);name2:('5000K','7000K')),
+        (mask:$20;name:'Trial Time';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Medium','Hard','Hardest')));
         HANG_ON=1;
         SHARRIER=2;
 
@@ -1145,6 +1145,7 @@ end;
 begin
 llamadas_maquina.bucle_general:=hangon_principal;
 llamadas_maquina.reset:=reset_hangon;
+llamadas_maquina.scanlines:=262*CPU_SYNC;
 iniciar_hangon:=false;
 iniciar_audio(true);
 //Text
@@ -1152,10 +1153,8 @@ screen_init(1,512,256,true);
 screen_init(2,512,256,true);
 //Background
 screen_init(3,1024,512,true);
-screen_mod_scroll(3,1024,512,1023,512,256,511);
 //Foreground
 screen_init(4,1024,512,true);
-screen_mod_scroll(4,1024,512,1023,512,256,511);
 //Final
 screen_init(5,512,256,false,true);
 iniciar_video(320,224);
@@ -1168,15 +1167,15 @@ case main_vars.tipo_maquina of
   334:begin //Hang-On
         CPU_SYNC:=2;
         //Main CPU
-        m68000_0:=cpu_m68000.create(25174800 div 4,262*CPU_SYNC);
+        m68000_0:=cpu_m68000.create(25174800 div 4);
         m68000_0.change_ram16_calls(hangon_getword,hangon_putword);
         if not(roms_load16w(@rom,hangon_rom)) then exit;
         //Sub CPU
-        m68000_1:=cpu_m68000.create(25174800 div 4,262*CPU_SYNC);
+        m68000_1:=cpu_m68000.create(25174800 div 4);
         m68000_1.change_ram16_calls(hangon_sub_getword,hangon_sub_putword);
         if not(roms_load16w(@rom2,hangon_sub)) then exit;
         //Sound CPU
-        z80_0:=cpu_z80.create(4000000,262*CPU_SYNC);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(hangon_snd_getbyte,hangon_snd_putbyte);
         z80_0.change_io_calls(hangon_snd_inbyte,nil);
         z80_0.init_sound(hangon_sound_act);
@@ -1206,28 +1205,26 @@ case main_vars.tipo_maquina of
         road_info.xoff:=0;
         road_info.type_:=HANG_ON;
         //dip
-        marcade.dswa:=$ffff;
-        marcade.dswa_val:=@hangon_dip_a;
-        marcade.dswb:=$fffe;
-        marcade.dswb_val:=@hangon_dip_b;
+        init_dips(1,hangon_dip_a,$ffff);
+        init_dips(2,hangon_dip_b,$fffe);
         update_video:=update_video_hangon;
   end;
   335:begin //Enduro Racer
         CPU_SYNC:=12; //Impresionante!!!
         sharrier_controls_update:=enduror_controls;
         //Main CPU
-        m68000_0:=cpu_m68000.create(10000000,262*CPU_SYNC);
+        m68000_0:=cpu_m68000.create(10000000);
         m68000_0.change_ram16_calls(enduror_getword,sharrier_putword);
         if not(roms_load16w(@memoria_temp,enduror_rom)) then exit;
         //Decode fd1089
         if not(roms_load(@fd1089_key,enduror_key)) then exit;
         fd1089_decrypt($40000,@memoria_temp,@rom,@rom_data,@fd1089_key,fd_typeB);
         //Sub CPU
-        m68000_1:=cpu_m68000.create(10000000,262*CPU_SYNC);
+        m68000_1:=cpu_m68000.create(10000000);
         m68000_1.change_ram16_calls(hangon_sub_getword,hangon_sub_putword);
         if not(roms_load16w(@rom2,enduror_sub)) then exit;
         //Sound CPU
-        z80_0:=cpu_z80.create(4000000,262*CPU_SYNC);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(enduror_snd_getbyte,enduror_snd_putbyte);
         z80_0.change_io_calls(enduror_snd_inbyte,enduror_snd_outbyte);
         z80_0.init_sound(enduror_sound_act);
@@ -1257,10 +1254,8 @@ case main_vars.tipo_maquina of
         road_info.xoff:=0;
         road_info.type_:=SHARRIER;
         //dip
-        marcade.dswa:=$ffff;
-        marcade.dswa_val:=@hangon_dip_a;
-        marcade.dswb:=$ff7e;
-        marcade.dswb_val:=@enduror_dip_b;
+        init_dips(1,hangon_dip_a,$ffff);
+        init_dips(2,enduror_dip_b,$ff7e);
         update_video:=update_video_sharrier;
   end;
   336:begin //Space Harrier
@@ -1268,21 +1263,21 @@ case main_vars.tipo_maquina of
         sharrier_controls_update:=sharrier_controls;
         llamadas_maquina.bucle_general:=sharrier_principal;
         //Main CPU
-        m68000_0:=cpu_m68000.create(10000000,262*CPU_SYNC);
+        m68000_0:=cpu_m68000.create(10000000);
         m68000_0.change_ram16_calls(sharrier_getword,sharrier_putword);
         if not(roms_load16w(@rom,sharrier_rom)) then exit;
         //Sub CPU
-        m68000_1:=cpu_m68000.create(10000000,262*CPU_SYNC);
+        m68000_1:=cpu_m68000.create(10000000);
         m68000_1.change_ram16_calls(hangon_sub_getword,hangon_sub_putword);
         if not(roms_load16w(@rom2,sharrier_sub)) then exit;
         //Sound CPU
-        z80_0:=cpu_z80.create(4000000,262*CPU_SYNC);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(hangon_snd_getbyte,hangon_snd_putbyte);
         z80_0.change_io_calls(hangon_snd_inbyte,nil);
         z80_0.init_sound(hangon_sound_act);
         if not(roms_load(@mem_snd,sharrier_sound)) then exit;
         //MCU
-        mcs51_0:=cpu_mcs51.create(I8X51,8000000,262*CPU_SYNC);
+        mcs51_0:=cpu_mcs51.create(I8X51,8000000);
         mcs51_0.change_ram_calls(mcu_ext_ram_read,mcu_ext_ram_write);
         mcs51_0.change_io_calls(nil,nil,nil,nil,nil,sharrier_out_port1,nil,nil);
         if not(roms_load(mcs51_0.get_rom_addr,sharrier_mcu)) then exit;
@@ -1311,10 +1306,8 @@ case main_vars.tipo_maquina of
         road_info.xoff:=0;
         road_info.type_:=SHARRIER;
         //dip
-        marcade.dswa:=$ffff;
-        marcade.dswa_val:=@hangon_dip_a;
-        marcade.dswb:=$fffc;
-        marcade.dswb_val:=@sharrier_dip_b;
+        init_dips(1,hangon_dip_a,$ffff);
+        init_dips(2,sharrier_dip_b,$fffc);
   end;
 end;
 //Controls

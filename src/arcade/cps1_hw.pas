@@ -4,7 +4,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,timer_engine,ym_2151,
      oki6295,kabuki_decript,qsound,rom_engine,misc_functions,pal_engine,
      sound_engine,eepromser;
+
 function iniciar_cps1:boolean;
+
 implementation
 type
   cps1_games_def=record
@@ -31,41 +33,52 @@ const
         GFXTYPE_SCROLL3=1 shl 3;
         GFXTYPE_STARS=1 shl 4;
         //Banks
-        cps1_banks:array [0..10] of cps1_bank_def=(
+        cps1_banks:array [0..13] of cps1_bank_def=(
 {DM620}  (lbank:($8000,$2000,$2000,0);
-          bank:((tipo:GFXTYPE_SCROLL3;start_bank:$8000;end_bank:$bfff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$2000;end_bank:$3fff;num_bank:2),(tipo:GFXTYPE_STARS or GFXTYPE_SPRITES or GFXTYPE_SCROLL1 or GFXTYPE_SCROLL2 or GFXTYPE_SCROLL3;start_bank:$0;end_bank:$1ffff;num_bank:0),(),(),(),() )),
+          bank:((tipo:GFXTYPE_SCROLL3;start_bank:$8000;end_bank:$bfff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$2000;end_bank:$3fff;num_bank:2),(tipo:GFXTYPE_STARS or GFXTYPE_SPRITES or GFXTYPE_SCROLL1 or GFXTYPE_SCROLL2 or GFXTYPE_SCROLL3;start_bank:0;end_bank:$1ffff;num_bank:0),(),(),(),())),
 {S224B}  (lbank:($8000,$0000,$0000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$43ff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$4400;end_bank:$4bff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$4c00;end_bank:$5fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$6000;end_bank:$7fff;num_bank:0),(),(),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$43ff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$4400;end_bank:$4bff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$4c00;end_bank:$5fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$6000;end_bank:$7fff;num_bank:0),(),(),())),
 {KD29B}  (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$8fff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$9000;end_bank:$bfff;num_bank:1),(tipo:GFXTYPE_SCROLL1;start_bank:$c000;end_bank:$d7ff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$d800;end_bank:$ffff;num_bank:1),(),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$8fff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$9000;end_bank:$bfff;num_bank:1),(tipo:GFXTYPE_SCROLL1;start_bank:$c000;end_bank:$d7ff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$d800;end_bank:$ffff;num_bank:1),(),())),
 {STF29}  (lbank:($8000,$8000,$8000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$10000;end_bank:$11fff;num_bank:2),(tipo:GFXTYPE_SCROLL3;start_bank:$2000;end_bank:$3fff;num_bank:2),(tipo:GFXTYPE_SCROLL1;start_bank:$4000;end_bank:$4fff;num_bank:2),(tipo:GFXTYPE_SCROLL2;start_bank:$5000;end_bank:$7fff;num_bank:2),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$10000;end_bank:$11fff;num_bank:2),(tipo:GFXTYPE_SCROLL3;start_bank:$2000;end_bank:$3fff;num_bank:2),(tipo:GFXTYPE_SCROLL1;start_bank:$4000;end_bank:$4fff;num_bank:2),(tipo:GFXTYPE_SCROLL2;start_bank:$5000;end_bank:$7fff;num_bank:2),())),
 {ST24M1} (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_STARS;start_bank:$0000;end_bank:$03ff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$4fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$4000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$0000;end_bank:$7fff;num_bank:1),(tipo:GFXTYPE_SCROLL1;start_bank:$7000;end_bank:$7fff;num_bank:1),(),() )),
+          bank:((tipo:GFXTYPE_STARS;start_bank:$0000;end_bank:$03ff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$4fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$4000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$0000;end_bank:$7fff;num_bank:1),(tipo:GFXTYPE_SCROLL1;start_bank:$7000;end_bank:$7fff;num_bank:1),(),())),
 {RT24B}  (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$53ff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$5400;end_bank:$6fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$7000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$0000;end_bank:$3fff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$2800;end_bank:$7fff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$5400;end_bank:$7fff;num_bank:1),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$53ff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$5400;end_bank:$6fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$7000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$0000;end_bank:$3fff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$2800;end_bank:$7fff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$5400;end_bank:$7fff;num_bank:1),())),
 {CC63B}  (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SCROLL1;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$8000;end_bank:$ffff;num_bank:1),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SCROLL1;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$8000;end_bank:$ffff;num_bank:1),())),
 {KR63B}  (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$8000;end_bank:$9fff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$cfff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$cfff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$d000;end_bank:$ffff;num_bank:1),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$8000;end_bank:$9fff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$cfff;num_bank:1),(tipo:GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$cfff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$d000;end_bank:$ffff;num_bank:1),())),
 {S9263B} (lbank:($8000,$8000,$8000,0);
-          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$10000;end_bank:$11fff;num_bank:2),(tipo:GFXTYPE_SCROLL3;start_bank:$2000;end_bank:$3fff;num_bank:2),(tipo:GFXTYPE_SCROLL1;start_bank:$4000;end_bank:$4fff;num_bank:2),(tipo:GFXTYPE_SCROLL2;start_bank:$5000;end_bank:$7fff;num_bank:2),() )),
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$8000;end_bank:$ffff;num_bank:1),(tipo:GFXTYPE_SPRITES;start_bank:$10000;end_bank:$11fff;num_bank:2),(tipo:GFXTYPE_SCROLL3;start_bank:$2000;end_bank:$3fff;num_bank:2),(tipo:GFXTYPE_SCROLL1;start_bank:$4000;end_bank:$4fff;num_bank:2),(tipo:GFXTYPE_SCROLL2;start_bank:$5000;end_bank:$7fff;num_bank:2),())),
 {CD63B}  (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_SCROLL1;start_bank:$0000;end_bank:$0fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$1000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES OR GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$dfff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$e000;end_bank:$ffff;num_bank:1),(),(),() )),
+          bank:((tipo:GFXTYPE_SCROLL1;start_bank:$0000;end_bank:$0fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$1000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES OR GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$dfff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$e000;end_bank:$ffff;num_bank:1),(),(),())),
 {PS63B}  (lbank:($8000,$8000,$0000,0);
-          bank:((tipo:GFXTYPE_SCROLL1;start_bank:$0000;end_bank:$0fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$1000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES OR GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$dbff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$dc00;end_bank:$ffff;num_bank:1),(),(),() )));
+          bank:((tipo:GFXTYPE_SCROLL1;start_bank:$0000;end_bank:$0fff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$1000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SPRITES OR GFXTYPE_SCROLL2;start_bank:$8000;end_bank:$dbff;num_bank:1),(tipo:GFXTYPE_SCROLL3;start_bank:$dc00;end_bank:$ffff;num_bank:1),(),(),())),
+{WL24B}  (lbank:($8000,$4000,0,0);
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$4fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$5000;end_bank:$6fff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$7000;end_bank:$7fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$0000;end_bank:$3fff;num_bank:1),(),(),())),
+{YI24B}  (lbank:($8000,0,0,0);
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$1fff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$2000;end_bank:$3fff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$4000;end_bank:$4fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$4800;end_bank:$7fff;num_bank:0),(),(),())),
+{NM24B}  (lbank:($8000,0,0,0);
+          bank:((tipo:GFXTYPE_SPRITES;start_bank:$0000;end_bank:$3fff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$0000;end_bank:$3fff;num_bank:0),(tipo:GFXTYPE_SCROLL1;start_bank:$4000;end_bank:$47ff;num_bank:0),(tipo:GFXTYPE_SPRITES;start_bank:$4800;end_bank:$67ff;num_bank:0),(tipo:GFXTYPE_SCROLL2;start_bank:$4800;end_bank:$67ff;num_bank:0),(tipo:GFXTYPE_SCROLL3;start_bank:$6800;end_bank:$7fff;num_bank:0),()))
+          );
         //Games $140
-       cps1_cps_b:array[0..9] of cps1_games_def=(
-{CPS_B_01}      (layerctrl:$166;palctrl:$170;testaddr:$1FF;testval:$0000;mula:$1fF;mulb:$1FF;mull:$1FF;mulh:$1FF;mask_sc1:$02;mask_sc2:$04;mask_sc3:$08;mask_sc4:$30;pri_mask1:$168;pri_mask2:$16a;pri_mask3:$16c;pri_mask4:$16e),
-{CPS_B_04}      (layerctrl:$16e;palctrl:$16a;testaddr:$160;testval:$0004;mula:$1FF;mulb:$1FF;mull:$1FF;mulh:$1FF;mask_sc1:$02;mask_sc2:$04;mask_sc3:$08;mask_sc4:$0;pri_mask1:$166;pri_mask2:$170;pri_mask3:$168;pri_mask4:$172),
-{CPS_B_21_BT2}  (layerctrl:$160;palctrl:$170;testaddr:$1FF;testval:$0000;mula:$15e;mulb:$15c;mull:$15a;mulh:$158;mask_sc1:$30;mask_sc2:$08;mask_sc3:$30;mask_sc4:$0;pri_mask1:$16e;pri_mask2:$16c;pri_mask3:$16a;pri_mask4:$168),
+       cps1_cps_b:array[0..12] of cps1_games_def=(
+{CPS_B_01}      (layerctrl:$166;palctrl:$170;testaddr:$1ff;testval:$0000;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$02;mask_sc2:$04;mask_sc3:$08;mask_sc4:$30;pri_mask1:$168;pri_mask2:$16a;pri_mask3:$16c;pri_mask4:$16e),
+{CPS_B_04}      (layerctrl:$16e;palctrl:$16a;testaddr:$160;testval:$0004;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$02;mask_sc2:$04;mask_sc3:$08;mask_sc4:$0;pri_mask1:$166;pri_mask2:$170;pri_mask3:$168;pri_mask4:$172),
+{CPS_B_21_BT2}  (layerctrl:$160;palctrl:$170;testaddr:$1ff;testval:$0000;mula:$15e;mulb:$15c;mull:$15a;mulh:$158;mask_sc1:$30;mask_sc2:$08;mask_sc3:$30;mask_sc4:$0;pri_mask1:$16e;pri_mask2:$16c;pri_mask3:$16a;pri_mask4:$168),
 {CPS_B_11}      (layerctrl:$166;palctrl:$170;testaddr:$172;testval:$0401;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$08;mask_sc2:$10;mask_sc3:$20;mask_sc4:$0;pri_mask1:$168;pri_mask2:$16a;pri_mask3:$16c;pri_mask4:$16e),
 {CPS_B_21_BT1}  (layerctrl:$168;palctrl:$170;testaddr:$172;testval:$0800;mula:$14e;mulb:$14c;mull:$14a;mulh:$148;mask_sc1:$20;mask_sc2:$04;mask_sc3:$08;mask_sc4:$12;pri_mask1:$166;pri_mask2:$164;pri_mask3:$162;pri_mask4:$160),
 {CPS_B_21_BT3}  (layerctrl:$160;palctrl:$170;testaddr:$1ff;testval:$0000;mula:$146;mulb:$144;mull:$142;mulh:$140;mask_sc1:$20;mask_sc2:$12;mask_sc3:$12;mask_sc4:$0;pri_mask1:$16e;pri_mask2:$16c;pri_mask3:$16a;pri_mask4:$168),
 {CPS_B_21_BT4}  (layerctrl:$168;palctrl:$170;testaddr:$1ff;testval:$0000;mula:$146;mulb:$144;mull:$142;mulh:$140;mask_sc1:$20;mask_sc2:$10;mask_sc3:$82;mask_sc4:$0;pri_mask1:$166;pri_mask2:$164;pri_mask3:$162;pri_mask4:$160),
 {CPS_B_21_DEF}  (layerctrl:$166;palctrl:$170;testaddr:$172;testval:$0000;mula:$140;mulb:$142;mull:$144;mulh:$146;mask_sc1:$02;mask_sc2:$04;mask_sc3:$08;mask_sc4:$30;pri_mask1:$168;pri_mask2:$16a;pri_mask3:$16c;pri_mask4:$16e),
 {CPS_B_21_QS2}  (layerctrl:$14a;palctrl:$144;testaddr:$1ff;testval:$0000;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$16;mask_sc2:$16;mask_sc3:$16;mask_sc4:$0;pri_mask1:$14c;pri_mask2:$14e;pri_mask3:$140;pri_mask4:$142),
-{CPS_B_21_QS3}  (layerctrl:$152;palctrl:$14c;testaddr:$14e;testval:$0c00;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$04;mask_sc2:$02;mask_sc3:$20;mask_sc4:$0;pri_mask1:$154;pri_mask2:$156;pri_mask3:$148;pri_mask4:$14a));
+{CPS_B_21_QS3}  (layerctrl:$152;palctrl:$14c;testaddr:$14e;testval:$0c00;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$04;mask_sc2:$02;mask_sc3:$20;mask_sc4:$0;pri_mask1:$154;pri_mask2:$156;pri_mask3:$148;pri_mask4:$14a),
+{CPS-B-03}      (layerctrl:$170;palctrl:$166;testaddr:$164;testval:$0003;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$20;mask_sc2:$10;mask_sc3:$08;mask_sc4:$0;pri_mask1:$16e;pri_mask2:$16c;pri_mask3:$16a;pri_mask4:$168),
+{CPS-B-05}      (layerctrl:$168;palctrl:$172;testaddr:$160;testval:$0005;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$02;mask_sc2:$08;mask_sc3:$20;mask_sc4:$14;pri_mask1:$16a;pri_mask2:$16c;pri_mask3:$16e;pri_mask4:$170),
+{CPS-B-15}      (layerctrl:$142;palctrl:$14c;testaddr:$14e;testval:$0405;mula:$1ff;mulb:$1ff;mull:$1ff;mulh:$1ff;mask_sc1:$04;mask_sc2:$02;mask_sc3:$20;mask_sc4:$0;pri_mask1:$144;pri_mask2:$146;pri_mask3:$148;pri_mask4:$14a)
+                );
         //Ghouls and ghosts
         ghouls_rom1:array[0..3] of tipo_roms=(
         (n:'dme_29.10h';l:$20000;p:0;crc:$166a58a2),(n:'dme_30.10j';l:$20000;p:$1;crc:$7ac8407a),
@@ -219,22 +232,191 @@ const
         punisher_qsound1:array[0..3] of tipo_roms=(
         (n:'ps-q1.1k';l:$80000;p:$00000;crc:$31fd8726),(n:'ps-q2.2k';l:$80000;p:$80000;crc:$980a9eef),
         (n:'ps-q3.3k';l:$80000;p:$100000;crc:$0dd44491),(n:'ps-q4.4k';l:$80000;p:$180000;crc:$bed42f03));
+        //Willow
+        willow_rom1:array[0..3] of tipo_roms=(
+        (n:'wle_30.11f';l:$20000;p:0;crc:$15372aa2),(n:'wle_35.11h';l:$20000;p:1;crc:$2e64623b),
+        (n:'wlu_31.12f';l:$20000;p:$40000;crc:$0eb48a83),(n:'wlu_36.12h';l:$20000;p:$40001;crc:$36100209));
+        willow_rom2:tipo_roms=(n:'wlm-32.8h';l:$80000;p:$80000;crc:$dfd9f643);
+        willow_sound:tipo_roms=(n:'wl_09.12b';l:$10000;p:0;crc:$f6b3d060);
+        willow_gfx1:array[0..3] of tipo_roms=(
+        (n:'wlm-7.7a';l:$80000;p:$000000;crc:$afa74b73),(n:'wlm-5.9a';l:$80000;p:$000002;crc:$12a0dc0b),
+        (n:'wlm-3.3a';l:$80000;p:$000004;crc:$c6f2abce),(n:'wlm-1.5a';l:$80000;p:$000006;crc:$4aa4c6d3));
+        willow_gfx2:array[0..7] of tipo_roms=(
+        (n:'wl_24.7d';l:$20000;p:$200000;crc:$6f0adee5),(n:'wl_14.7c';l:$20000;p:$200001;crc:$9cf3027d),
+        (n:'wl_26.9d';l:$20000;p:$200002;crc:$f09c8ecf),(n:'wl_16.9c';l:$20000;p:$200003;crc:$e35407aa),
+        (n:'wl_20.3d';l:$20000;p:$200004;crc:$84992350),(n:'wl_10.3c';l:$20000;p:$200005;crc:$b87b5a36),
+        (n:'wl_22.5d';l:$20000;p:$200006;crc:$fd3f89f0),(n:'wl_12.5c';l:$20000;p:$200007;crc:$7da49d69));
+        willow_oki:array[0..1] of tipo_roms=(
+        (n:'wl_18.11c';l:$20000;p:0;crc:$bde23d4d),(n:'wl_19.12c';l:$20000;p:$20000;crc:$683898f5));
+        //1941: Counter Attack
+        ca1941_rom1:array[0..3] of tipo_roms=(
+        (n:'41em_30.11f';l:$20000;p:0;crc:$4249ec61),(n:'41em_35.11h';l:$20000;p:1;crc:$ddbee5eb),
+        (n:'41em_31.12f';l:$20000;p:$40000;crc:$584e88e5),(n:'41em_36.12h';l:$20000;p:$40001;crc:$3cfc31d0));
+        ca1941_rom2:tipo_roms=(n:'41-32m.8h';l:$80000;p:$80000;crc:$4e9648ca);
+        ca1941_sound:tipo_roms=(n:'41_9.12b';l:$10000;p:0;crc:$0f9d8527);
+        ca1941_gfx1:array[0..3] of tipo_roms=(
+        (n:'41-5m.7a';l:$80000;p:$000000;crc:$01d1cb11),(n:'41-7m.9a';l:$80000;p:$000002;crc:$aeaa3509),
+        (n:'41-1m.3a';l:$80000;p:$000004;crc:$ff77985a),(n:'41-3m.5a';l:$80000;p:$000006;crc:$983be58f));
+        ca1941_oki:array[0..1] of tipo_roms=(
+        (n:'41_18.11c';l:$20000;p:0;crc:$d1f15aeb),(n:'41_19.12c';l:$20000;p:$20000;crc:$15aec3a6));
+        //Nemo
+        nemo_rom1:array[0..3] of tipo_roms=(
+        (n:'nme_30a.11f';l:$20000;p:0;crc:$d2c03e56),(n:'nme_35a.11h';l:$20000;p:1;crc:$5fd31661),
+        (n:'nme_31a.12f';l:$20000;p:$40000;crc:$b2bd4f6f),(n:'nme_36a.12h';l:$20000;p:$40001;crc:$ee9450e3));
+        nemo_rom2:tipo_roms=(n:'nm-32m.8h';l:$80000;p:$80000;crc:$d6d1add3);
+        nemo_sound:tipo_roms=(n:'nme_09.12b';l:$10000;p:0;crc:$0f4b0581);
+        nemo_gfx1:array[0..3] of tipo_roms=(
+        (n:'nm-5m.7a';l:$80000;p:$000000;crc:$487b8747),(n:'nm-7m.9a';l:$80000;p:$000002;crc:$203dc8c6),
+        (n:'nm-1m.3a';l:$80000;p:$000004;crc:$9e878024),(n:'nm-3m.5a';l:$80000;p:$000006;crc:$bb01e6b6));
+        nemo_oki:array[0..1] of tipo_roms=(
+        (n:'nme_18.11c';l:$20000;p:0;crc:$bab333d4),(n:'nme_19.12c';l:$20000;p:$20000;crc:$2650a0a8));
+        //DIPs
+        ghouls_dip_b:array [0..1] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(4,5,6,7,3,2,1,0);name8:('1 (Easiest)','2','3','4 (Normal)','5','6','7','8 (Hardest)')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($20,$10,$30,0);name4:('10K 30K 30K+','20K 70K 70K+','30K 60K 70K+','40K 70K 80K+')));
+        ghouls_dip_c:array [0..4] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','6')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('On','Off')),
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        ffight_dip_b:array [0..2] of def_dip2=(
+        (mask:7;name:'Difficulty 1';number:8;val8:(7,6,5,4,3,2,1,0);name8:('Easiest','Easier','Easy','Normal','Medium','Hard','Harder','Hardest')),
+        (mask:$18;name:'Difficulty 2';number:4;val4:($18,$10,8,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$60;name:'Bonus Life';number:4;val4:($60,$40,$20,0);name4:('100K','200K','100K 200K+','None')));
+        kod_dip_a:array [0..3] of def_dip2=(
+        (mask:7;name:'Coinage';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:8;name:'Coin Slots';number:2;val2:(0,8);name2:('1','3')),
+        (mask:$10;name:'Play Mode';number:2;val2:(0,$10);name2:('2 Players','3 Players')),
+        (mask:$40;name:'2 Coins to Start, 1 to Continue';number:2;val2:($40,0);name2:('Off','On')));
+        kod_dip_b:array [0..2] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(7,6,5,4,3,2,1,0);name8:('0 (Easiest)','1','2','3 (Normal)','4','5','6','7 (Hardest)')),
+        (mask:$38;name:'Lives';number:8;val8:($30,$38,$28,$20,$18,$10,8,0);name8:('1','2','3','4','5','6','7','8')),
+        (mask:$c0;name:'Bonus Life';number:4;val4:($80,$40,$c0,0);name4:('80K 400K+','160K 450K','200K 450K','None')));
+        strider_dip_a:array [0..2] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$c0;name:'Cabinet';number:4;val4:($c0,$80,$40,0);name4:('Upright 1 Player','Upright 2 Player','Cocktail','Cocktail')));
+        strider_dip_b:array [0..2] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(4,5,6,7,3,2,1,0);name8:('1 (Easiest)','2','3','4 (Normal)','5','6','7','8 (Hardest)')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('20K 40K 60K+','30K 50K 70K','20K 60K','30K 60K')),
+        (mask:$c0;name:'Internal Diff. on Life Loss';number:4;val4:($c0,$40,0,$80);name4:('-3','-1','-1','Default')));
+        strider_dip_c:array [0..6] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(0,3,2,1);name4:('2','3','4','5')),
+        (mask:4;name:'Freeze';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:8;name:'Free Play';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        wonder3_dip_a:array [0..3] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$40;name:'2 Coins to Start, 1 to Continue';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Freeze';number:2;val2:($80,0);name2:('Off','On')));
+        wonder3_dip_b:array [0..3] of def_dip2=(
+        (mask:3;name:'Lives (Midnight Wanderers)';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
+        (mask:$c;name:'Difficulty (Midnight Wanderers)';number:4;val4:($c,8,4,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$30;name:'Lives (Chariot)';number:4;val4:($30,$20,$10,0);name4:('1','2','3','5')),
+        (mask:$c0;name:'Difficulty (Chariot)';number:4;val4:($c0,$80,$40,0);name4:('Easy','Normal','Hard','Hardest')));
+        wonder3_dip_c:array [0..5] of def_dip2=(
+        (mask:3;name:'Lives (Don''t Pull)';number:4;val4:(3,2,1,0);name4:('1','2','3','5')),
+        (mask:$c;name:'Difficulty (Don''t Pull)';number:4;val4:($c,8,4,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        captcomm_dip_b:array [0..2] of def_dip2=(
+        (mask:7;name:'Difficulty 1';number:8;val8:(7,6,5,4,3,2,1,0);name8:('1 (Easiest)','2','3','4 (Normal)','5','6','7','8 (Hardest)')),
+        (mask:$18;name:'Difficulty 2';number:4;val4:($18,$10,8,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$c0;name:'Play Mode';number:4;val4:($40,$c0,$80,0);name4:('1 Players','2 Players','3 Players','4 Players')));
+        knights_dip_a:array [0..1] of def_dip2=(
+        (mask:7;name:'Coinage';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$40;name:'2 Coins to Start, 1 to Continue';number:2;val2:($40,0);name2:('Off','On')));
+        knights_dip_b:array [0..3] of def_dip2=(
+        (mask:7;name:'Enemy''s attack frequency';number:8;val8:(7,6,5,4,3,2,1,0);name8:('1 (Easiest)','2','3','4 (Normal)','5','6','7','8 (Hardest)')),
+        (mask:$38;name:'Enemy''s attack power';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('1 (Easiest)','2','3','4 (Normal)','5','6','7','8 (Hardest)')),
+        (mask:$40;name:'Coin Slots';number:2;val2:(0,$40);name2:('1','3')),
+        (mask:$80;name:'Play Mode';number:2;val2:(0,$80);name2:('2 Players','3 Players')));
+        knights_dip_c:array [0..6] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(0,3,2,1);name4:('1','2','3','4')),
+        (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:8;name:'Freeze';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        sf2_dip_a:array [0..2] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$18);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
+        (mask:$40;name:'2 Coins to Start, 1 to Continue';number:2;val2:($40,0);name2:('Off','On')));
+        sf2_dip_b:def_dip2=(mask:7;name:'Difficulty';number:8;val8:(7,6,5,4,3,2,1,0);name8:('0 (Easiest)','1','2','3 (Normal)','4','5','6','7 (Hardest)'));
+        sf2_dip_c:array [0..5] of def_dip2=(
+        (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:8;name:'Freeze';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        punisher_dip_c:def_dip2=(mask:8;name:'Freeze';number:2;val2:(8,0);name2:('Off','On'));
+        willow_dip_a:array [0..2] of def_dip2=(
+        (mask:7;name:'Coin A';number:8;val8:(1,2,3,0,7,6,5,4);name8:('4C 1C','3C 1C','2C 1C','2C 1C (1 Continue)','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$38;name:'Coin B';number:8;val8:(8,$10,$18,0,$38,$30,$28,$20);name8:('4C 1C','3C 1C','2C 1C','2C 1C (1 Continue)','1C 1C','1C 2C','1C 3C','1C 4C')),
+        (mask:$c0;name:'Cabinet';number:4;val4:($c0,$80,$40,0);name4:('Upright 1 Player','Upright 2 Player','Cocktail','Cocktail')));
+        willow_dip_b:array [0..2] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(4,5,6,7,3,2,1,0);name8:('1 (Easiest)','2','3','4 (Normal)','5','6','7','8 (Hardest)')),
+        (mask:$18;name:'Nando Speed';number:4;val4:($10,$18,0,$20);name4:('Slow','Fast','Very Fast','Unused')),
+        (mask:$80;name:'Stage Magic Continue';number:2;val2:($80,0);name2:('Off','On')));
+        willow_dip_c:array [0..5] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(2,3,1,0);name4:('1','2','3','4')),
+        (mask:$c;name:'Vitality';number:4;val4:(0,$c,8,4);name4:('2','3','4','5')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:(0,$20);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:(0,$40);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        ca1941_dip_b:array [0..3] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(7,6,5,4,3,2,1,0);name8:('0 (Easiest)','1','2','3 (Normal)','4','5','6','7 (Hardest)')),
+        (mask:$18;name:'Level Up Timer';number:4;val4:($18,$10,8,0);name4:('More Slowly','Slowly','Quickly','More Quickly')),
+        (mask:$60;name:'Bullet''s Speed';number:4;val4:($60,$40,$20,0);name4:('Very Slow','Slow','Fast','Very Fast')),
+        (mask:$80;name:'Initial Vitality';number:2;val2:($80,0);name2:('3 Bars','4 Bars')));
+        ca1941_dip_c:array [0..6] of def_dip2=(
+        (mask:1;name:'Throttle Game Speed';number:2;val2:(1,0);name2:('Off','On')),
+        (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:8;name:'Freeze';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+        nemo_dip_b:array [0..1] of def_dip2=(
+        (mask:7;name:'Difficulty';number:8;val8:(7,6,5,4,3,2,1,0);name8:('0 (Easiest)','1','2','3 (Normal)','4','5','6','7 (Hardest)')),
+        (mask:$18;name:'Life Bar';number:4;val4:(0,$18,$10,8);name4:('Minimum','Medium','Medium','Maximum')));
+        nemo_dip_c:array [0..6] of def_dip2=(
+        (mask:3;name:'Lives';number:4;val4:(2,3,2,0);name4:('1','2','3','4')),
+        (mask:4;name:'Free Play';number:2;val2:(4,0);name2:('Off','On')),
+        (mask:8;name:'Freeze';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$10;name:'Flip Screen';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Allow Continue';number:2;val2:($40,0);name2:('No','Yes')),
+        (mask:$80;name:'Game Mode';number:2;val2:($80,0);name2:('Game','Test')));
+
 var
  nbank,cps_b:byte;
- scroll_x1,scroll_y1,scroll_x2,scroll_y2,scroll_x3,scroll_y3:word;
+ stars_x1,stars_x2,stars_y1,stars_y2,scroll_x1,scroll_y1,scroll_x2,scroll_y2,scroll_x3,scroll_y3:word;
  rom:array[0..$1fffff] of word;
  ram:array[0..$7fff] of word;
+ stars:array[0..$7fff] of byte;
  vram:array[0..$17fff] of word;
  snd_rom:array[0..5,0..$3fff] of byte;
- sprite_buffer:array[0..$3ff] of word;
  qram1,qram2:array[0..$fff] of byte;
  qsnd_opcode,qsnd_data:array[0..$7fff] of byte;
- sound_latch,sound_latch2,sound_bank,dswa,dswb,dswc:byte;
+ sound_latch,sound_latch2,sound_bank:byte;
  cps1_sprites,cps1_scroll1,cps1_scroll2,cps1_scroll3,cps1_rowscroll,cps1_pal:dword;
  cps1_mula,cps1_mulb,cps1_layer,scroll_pri_x,scroll_pri_y:word;
  cps1_palcltr,pri_mask0,pri_mask1,pri_mask2,pri_mask3:word;
  cps1_rowscrollstart:word;
- pal_change,mask_change,sprites_pri_draw,rowscroll_ena:boolean;
+ stars_enabled,pal_change,mask_change,sprites_pri_draw,rowscroll_ena:boolean;
+ cps1_frame:dword;
+
 procedure update_video_cps1;
 var
   l0,l1,l2,l3:byte;
@@ -304,22 +486,22 @@ begin
 //Find last sprite
 last_sprite:=$fe;
 for f:=0 to $fe do begin
-  color:=sprite_buffer[(f*4)+3];
+  color:=buffer_sprites_w[(f*4)+3];
   if color=$ff00 then begin
       last_sprite:=f;
       break;
   end;
 end;
 for f:=last_sprite downto 0 do begin
-	 nchar:=sprite_buffer[(f shl 2)+2];
+	 nchar:=buffer_sprites_w[(f shl 2)+2];
    nchar:=gfx_bank(GFXTYPE_SPRITES,nchar);
    if nchar<>-1 then begin
-     color:=sprite_buffer[(f shl 2)+3];
-     x:=sprite_buffer[(f shl 2)+0];
-  	 y:=sprite_buffer[(f shl 2)+1];
+     color:=buffer_sprites_w[(f shl 2)+3];
+     x:=buffer_sprites_w[(f shl 2)+0];
+  	 y:=buffer_sprites_w[(f shl 2)+1];
      col:=(color and $1f) shl 4;
-     rx:=(color shr 8) and $F;
-     ry:=(color shr 12) and $F;
+     rx:=(color shr 8) and $f;
+     ry:=(color shr 12) and $f;
      if (color and $20)<>0 then begin  //flip_x
        flipx:=true;
        x:=x+(rx shl 4);
@@ -366,7 +548,7 @@ var
 begin
 case nlayer of
   0:draw_sprites;
-  1:if (cps1_layer and cps1_cps_b[cps_b].mask_sc1)=cps1_cps_b[cps_b].mask_sc1 then begin
+  1:if (cps1_layer and cps1_cps_b[cps_b].mask_sc1)<>0 then begin
       if (sprite_next and mask_change) then begin
         mask_change:=false;
         fillchar(gfx[0].buffer,$1000,1);
@@ -411,12 +593,10 @@ case nlayer of
         mask_change:=false;
         fillchar(gfx[2].buffer,$1000,1);
       end;
-      for f:=0 to $1cf do begin
-        x:=f mod 29;
-        y:=f div 29;
-        sx:=x+((scroll_x2 and $3f0) div 16);
-        sy:=y+((scroll_y2 and $3f0) div 16);
-        pos:=(sy and $0f)+((sx and $3f) shl 4)+((sy and $30) shl 6);
+      for f:=0 to $fff do begin
+        x:=f mod $40;
+        y:=f div $40;
+        pos:=(y and $f)+((x and $3f) shl 4)+((y and $30) shl 6);
         address:=cps1_scroll2+(pos*4);
         atrib:=vram[(address+2) shr 1];
         color:=atrib and $1f;
@@ -441,13 +621,13 @@ case nlayer of
       end;
       if sprite_next then begin
         sprites_pri_draw:=true;
-        scroll_pri_x:=scroll_x2 and $f;
-        scroll_pri_y:=scroll_y2 and $f;
+        scroll_pri_x:=scroll_x2;
+        scroll_pri_y:=scroll_y2;
       end;
-      if not(rowscroll_ena) then scroll_x_y(2,5,scroll_x2 and $f,scroll_y2 and $f)
+      if not(rowscroll_ena) then scroll_x_y(2,5,scroll_x2,scroll_y2)
         else begin
-          for f:=0 to $3ff do scroll_data_x[(f-scroll_y2) and $3ff]:=vram[((cps1_rowscroll+cps1_rowscrollstart) shr 1)+f] and $3ff;
-          scroll__x_part2(2,5,1,@scroll_data_x,scroll_x2 and $f,scroll_y2 and $f);
+          copymemory(@scroll_data_x[0],@vram[cps1_rowscroll+cps1_rowscrollstart],$800);
+          scroll__x_part2(2,5,1,@scroll_data_x,scroll_x2,scroll_y2);
         end;
     end;
   3:if (cps1_layer and cps1_cps_b[cps_b].mask_sc3)<>0 then begin
@@ -496,6 +676,36 @@ case nlayer of
     end;
 end;
 end;
+procedure draw_stars;
+var
+  f,x,y,col:word;
+  cnt:byte;
+begin
+  for f:=0 to $fff do begin
+    col:=stars[8*f+4];
+    if (col and $1f)<>$f then begin
+      x:=(f div 256)*32;
+      y:=f mod 256;
+      x:=(x-stars_x2+(col and $1f)) and $1ff;
+      y:=(y-stars_y2) and $ff;
+      if (col and $80)<>0 then cnt:=(cps1_frame div 16) mod 15
+        else cnt:=(cps1_frame div 16) mod 16;
+      col:=paleta[$a00+((col and $e0) shr 1)+cnt];
+      putpixel(x,y,1,@col,5);
+    end;
+    col:=stars[8*f];
+    if (col and $1f)<>$f then begin
+      x:=(f div 256)*32;
+      y:=f mod 256;
+      x:=(x-stars_x1+(col and $1f)) and $1ff;
+      y:=(y-stars_y1) and $ff;
+      if (col and $80)<>0 then cnt:=(cps1_frame div 16) mod 15
+        else cnt:=(cps1_frame div 16) mod 16;
+      col:=paleta[$800+((col and $e0) shr 1)+cnt];
+      putpixel(x,y,1,@col,5);
+    end;
+  end;
+end;
 begin
   if pal_change then pal_calc;
   fill_full_screen(5,$bff);
@@ -503,7 +713,7 @@ begin
   l1:=(cps1_layer shr 8) and 3;
   l2:=(cps1_layer shr $a) and 3;
   l3:=(cps1_layer shr $c) and 3;
-  //draw_starts
+  if (stars_enabled and ((cps1_layer and cps1_cps_b[cps_b].mask_sc4)<>0)) then draw_stars;
   draw_layer(l0,l1=0);
   draw_layer(l1,l2=0);
   draw_layer(l2,l3=0);
@@ -511,14 +721,15 @@ begin
   actualiza_trozo_final(64,16,384,224,5);
   fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
+
 procedure eventos_cps1;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
@@ -531,9 +742,9 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
   //Extra buttons
-  if arcade_input.but3[0] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.but4[0] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.but5[0] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but3[0] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.but4[0] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or 2);
+  if arcade_input.but5[0] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or 4);
   if arcade_input.but3[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but4[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but5[1] then marcade.in2:=(marcade.in2 and $ffbf) else marcade.in2:=(marcade.in2 or $40);
@@ -544,6 +755,7 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
 end;
 end;
+
 procedure calc_mask(mask:word;index:byte);
 var
   f:byte;
@@ -557,6 +769,7 @@ copymemory(@gfx[1].trans_alt[index][0],@gfx[0].trans_alt[index][0],16);
 copymemory(@gfx[2].trans_alt[index][0],@gfx[0].trans_alt[index][0],16);
 copymemory(@gfx[3].trans_alt[index][0],@gfx[0].trans_alt[index][0],16);
 end;
+
 procedure cps1_principal;
 var
   frame_m,frame_s:single;
@@ -567,33 +780,35 @@ frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to 261 do begin
+    eventos_cps1;
+    if f=240 then begin
+       m68000_0.irq[2]:=HOLD_LINE;
+       update_video_cps1;
+       copymemory(@buffer_sprites_w,@vram[cps1_sprites],$400*2);
+    end;
     //main
     m68000_0.run(frame_m);
     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
-       m68000_0.irq[2]:=HOLD_LINE;
-       update_video_cps1;
-       copymemory(@sprite_buffer,@vram[cps1_sprites shr 1],$400*2);
-    end;
  end;
- eventos_cps1;
+ cps1_frame:=cps1_frame+1;
  video_sync;
 end;
 end;
+
 function cps1_read_io_w(dir:word):word;
 var
   res:word;
 begin
 res:=$ffff;
 case dir of
-  $000,$002,$004,$006:res:=marcade.in1; //P1+P2
-  $018:res:=marcade.in0; //SYS
-  $01a:res:=(dswa shl 8)+$ff; //DSWA
-  $01c:res:=(dswb shl 8)+$ff; //DSWB
-  $01e:res:=(dswc shl 8)+$ff; //DSWC
+  0,2,4,6:res:=marcade.in1; //P1+P2
+  $18:res:=marcade.in0; //SYS
+  $1a:res:=(marcade.dswa shl 8)+$ff; //DSWA
+  $1c:res:=(marcade.dswb shl 8)+$ff; //DSWB
+  $1e:res:=(marcade.dswc shl 8)+$ff; //DSWC
   $176:res:=marcade.in2; //Extra buttons
 end;
 if (dir=cps1_cps_b[cps_b].testaddr) then res:=cps1_cps_b[cps_b].testval;
@@ -601,19 +816,21 @@ if (dir=cps1_cps_b[cps_b].mull) then res:=(cps1_mula*cps1_mulb) and $ffff;
 if (dir=cps1_cps_b[cps_b].mulh) then res:=(cps1_mula*cps1_mulb) shr 16;
 cps1_read_io_w:=res;
 end;
+
 function cps1_getword(direccion:dword):word;
 begin
 case direccion of
-    $000000..$3fffff:cps1_getword:=rom[direccion shr 1];
+    0..$3fffff:cps1_getword:=rom[direccion shr 1];
     $800000..$8001ff:cps1_getword:=cps1_read_io_w(direccion and $1fe);
     $900000..$92ffff:cps1_getword:=vram[(direccion and $3ffff) shr 1];
     $ff0000..$ffffff:cps1_getword:=ram[(direccion and $ffff) shr 1];
 end;
 end;
+
 procedure cps1_write_io_w(dir,val:word);
 begin
   case dir of
-    $100:cps1_sprites:=(val*256)-$900000;
+    $100:cps1_sprites:=((val*256)-$900000) shr 1;
     $102:if cps1_scroll1<>(((val*256) and not($3fff))-$900000) then begin
             cps1_scroll1:=((val*256) and not($3fff))-$900000;
             fillchar(gfx[0].buffer,$1000,1);
@@ -626,37 +843,35 @@ begin
             cps1_scroll3:=((val*256) and not($3fff))-$900000;
             fillchar(gfx[3].buffer,$1000,1);
          end;
-    $108:cps1_rowscroll:=((val*256) and not($3fff))-$900000;
-    $10A:if cps1_pal<>(((val*256)-$900000) and $1ffff) then begin
+    $108:cps1_rowscroll:=((val*256)-$900000) shr 1;
+    $10a:if cps1_pal<>(((val*256)-$900000) and $1ffff) then begin
             cps1_pal:=((val*256)-$900000) and $1ffff;
             fillchar(buffer_paleta,$200*6,1);
             pal_change:=true;
          end;
-    $10C:if scroll_x1<>(val and $1ff) then begin
+    $10c:if scroll_x1<>(val and $1ff) then begin
             if abs((scroll_x1 and $1f8)-(val and $1f8))>7 then fillchar(gfx[0].buffer,$1000,1);
             scroll_x1:=val and $1ff;
          end;
-    $10E:if scroll_y1<>(val and $1ff) then begin
+    $10e:if scroll_y1<>(val and $1ff) then begin
             if abs((scroll_y1 and $1f8)-(val and $1f8))>7 then fillchar(gfx[0].buffer,$1000,1);
             scroll_y1:=val and $1ff;
          end;
-    $110:if scroll_x2<>(val and $3ff) then begin
-            if abs((scroll_x2 and $3f0)-(val and $3f0))>15 then fillchar(gfx[2].buffer,$1000,1);
-            scroll_x2:=val and $3ff;
-         end;
-    $112:if scroll_y2<>(val and $3ff) then begin
-            if abs((scroll_y2 and $3f0)-(val and $3f0))>15 then fillchar(gfx[2].buffer,$1000,1);
-            scroll_y2:=val and $3ff;
-         end;
+    $110:scroll_x2:=val and $3ff;
+    $112:scroll_y2:=val and $3ff;
     $114:if scroll_x3<>(val and $7ff) then begin
             if abs((scroll_x3 and $7e0)-(val and $7e0))>31 then fillchar(gfx[3].buffer,$1000,1);
             scroll_x3:=val and $7ff;
          end;
     $116:if scroll_y3<>(val and $7ff) then begin
             if abs((scroll_y3 and $7e0)-(val and $7e0))>31 then fillchar(gfx[3].buffer,$1000,1);
-            scroll_y3:=(val and $7ff);
+            scroll_y3:=val and $7ff;
          end;
-    $120:cps1_rowscrollstart:=val;
+    $118:stars_x1:=val;
+    $11a:stars_y1:=val;
+    $11c:stars_x2:=val;
+    $11e:stars_y2:=val;
+    $120:cps1_rowscrollstart:=val and $7ff;
     $122:begin  //cps1_vidctrl
             main_screen.flip_main_screen:=(val and $8000)<>0;
             rowscroll_ena:=(val and 1)<>0;
@@ -703,6 +918,7 @@ begin
     end;
   end;
 end;
+
 procedure test_buffers(direccion:dword);
 begin
   if ((direccion>=cps1_pal) and (direccion<(cps1_pal+$1800))) then begin
@@ -714,10 +930,11 @@ begin
   if ((direccion>=cps1_scroll2) and (direccion<(cps1_scroll2+$4000))) then gfx[2].buffer[(direccion-cps1_scroll2) shr 2]:=true;
   if ((direccion>=cps1_scroll3) and (direccion<(cps1_scroll3+$4000))) then gfx[3].buffer[(direccion-cps1_scroll3) shr 2]:=true;
 end;
+
 procedure cps1_putword(direccion:dword;valor:word);
 begin
 case direccion of
-    $000000..$3fffff:; //ROM
+    0..$3fffff:; //ROM
     $800000..$8001ff:cps1_write_io_w(direccion and $1fe,valor);
     $900000..$92ffff:if (vram[(direccion and $3ffff) shr 1]<>valor) then begin
                           vram[(direccion and $3ffff) shr 1]:=valor;
@@ -726,11 +943,12 @@ case direccion of
     $ff0000..$ffffff:ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
+
 //Sonido
 function cps1_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$7fff,$d000..$d7ff:cps1_snd_getbyte:=mem_snd[direccion];
+  0..$7fff,$d000..$d7ff:cps1_snd_getbyte:=mem_snd[direccion];
   $8000..$bfff:cps1_snd_getbyte:=snd_rom[sound_bank,direccion and $3fff];
   $f001:cps1_snd_getbyte:=ym2151_0.status;
   $f002:cps1_snd_getbyte:=oki_6295_0.read;
@@ -738,6 +956,7 @@ case direccion of
   $f00a:cps1_snd_getbyte:=sound_latch2;
 end;
 end;
+
 procedure cps1_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -750,20 +969,23 @@ case direccion of
   $f006:oki_6295_0.change_pin7(valor and 1);
 end;
 end;
+
 procedure cps1_ym2151_snd_irq(irqstate:byte);
 begin
   z80_0.change_irq(irqstate);
 end;
+
 procedure cps1_sound_update;
 begin
   ym2151_0.update;
   oki_6295_0.update;
 end;
+
 //Qsound
 function cps1_qsnd_getword(direccion:dword):word;
 begin
 case direccion of
-    $000000..$17ffff:cps1_qsnd_getword:=rom[direccion shr 1];
+    0..$17ffff:cps1_qsnd_getword:=rom[direccion shr 1];
     $800000..$8001ff:cps1_qsnd_getword:=cps1_read_io_w(direccion and $1fe);
     $900000..$92ffff:cps1_qsnd_getword:=vram[(direccion and $3ffff) shr 1];
     //qsound
@@ -774,10 +996,11 @@ case direccion of
     $ff0000..$ffffff:cps1_qsnd_getword:=ram[(direccion and $ffff) shr 1];
 end;
 end;
+
 procedure cps1_qsnd_putword(direccion:dword;valor:word);
 begin
 case direccion of
-    $000000..$17ffff:; //ROM
+    0..$17ffff:; //ROM
     $800000..$8001ff:cps1_write_io_w(direccion and $1fe,valor);
     $900000..$92ffff:if (vram[(direccion and $3ffff) shr 1]<>valor) then begin
                           vram[(direccion and $3ffff) shr 1]:=valor;
@@ -793,10 +1016,11 @@ case direccion of
     $ff0000..$ffffff:ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
+
 function cps1_qz80_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0000..$7fff:if z80_0.opcode then cps1_qz80_getbyte:=qsnd_opcode[direccion]
+  0..$7fff:if z80_0.opcode then cps1_qz80_getbyte:=qsnd_opcode[direccion]
                   else cps1_qz80_getbyte:=qsnd_data[direccion];
   $8000..$bfff:cps1_qz80_getbyte:=snd_rom[sound_bank,direccion and $3fff];
   $c000..$cfff:cps1_qz80_getbyte:=qram1[direccion and $fff];
@@ -804,6 +1028,7 @@ case direccion of
   $f000..$ffff:cps1_qz80_getbyte:=qram2[direccion and $fff];
 end;
 end;
+
 procedure cps1_qz80_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -814,10 +1039,12 @@ case direccion of
   $f000..$ffff:qram2[direccion and $fff]:=valor;
 end;
 end;
+
 procedure cps1_qsnd_int;
 begin
   z80_0.change_irq(HOLD_LINE);
 end;
+
 //Main
 procedure reset_cps1;
 begin
@@ -845,13 +1072,18 @@ begin
  scroll_y2:=0;
  scroll_x3:=0;
  scroll_y3:=0;
+ stars_x1:=0;
+ stars_x2:=0;
+ stars_y1:=0;
+ stars_y2:=0;
+ cps1_frame:=0;
  cps1_sprites:=$ffff;
  cps1_scroll1:=$ffff;
  cps1_scroll2:=$ffff;
  cps1_scroll3:=$ffff;
  cps1_rowscroll:=0;
  cps1_pal:=$ffff;
- //cps1_rowscrollstart:=0;
+ cps1_rowscrollstart:=0;
  cps1_mula:=0;
  cps1_mulb:=0;
  cps1_layer:=0;
@@ -870,6 +1102,7 @@ begin
  calc_mask(0,2);
  calc_mask(0,3);
 end;
+
 procedure cps1_gfx_decode(memoria_temp:pbyte;gfxsize:dword);
 var
   i:dword;
@@ -921,7 +1154,7 @@ end;
 
 function iniciar_cps1:boolean;
 var
-  memoria_temp,ptemp:pbyte;
+  memoria_temp:pbyte;
   f:byte;
 const
   pt_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
@@ -938,6 +1171,7 @@ procedure poner_roms_word;
 var
   rom_size:dword;
   tempw:word;
+  ptemp:pbyte;
 begin
 //es una mierda... Lo cargo todo como bytes y luego lo convierto a word...
 ptemp:=memoria_temp;
@@ -978,41 +1212,38 @@ llamadas_maquina.bucle_general:=cps1_principal;
 llamadas_maquina.close:=cerrar_cps1;
 llamadas_maquina.reset:=reset_cps1;
 llamadas_maquina.fps_max:=59.61;
+llamadas_maquina.scanlines:=262;
 iniciar_cps1:=false;
-//8x8
-screen_init(1,448,248,true,false);
-screen_mod_scroll(1,448,448,511,248,248,255);
-//16x16
-screen_init(2,464,256,true,false);
-screen_mod_scroll(2,464,464,511,256,256,255);
-for f:=3 to 4 do begin
-  screen_init(f,480,320,true,false);
-  screen_mod_scroll(f,480,448,511,320,288,511);
-end;
+screen_init(1,448,248,true,false); //8x8
+screen_init(2,1024,1024,true,false); //16x16
+screen_init(3,480,320,true,false); //32x32
+screen_init(4,1024,1024,true,false);
 screen_init(5,512,512,false,true);
+if (main_vars.tipo_maquina=423) then main_screen.rot270_screen:=true;
 iniciar_video(384,224);
+stars_enabled:=false;
 getmem(memoria_temp,$600000);
 case main_vars.tipo_maquina of
-  103..111:begin
+  103..111,422..424:begin
              iniciar_audio(false);
-             if (main_vars.tipo_maquina=111) then m68000_0:=cpu_m68000.create(12000000,262)
-                else m68000_0:=cpu_m68000.create(10000000,262);
+             if (main_vars.tipo_maquina=111) then m68000_0:=cpu_m68000.create(12000000)
+                else m68000_0:=cpu_m68000.create(10000000);
              m68000_0.change_ram16_calls(cps1_getword,cps1_putword);
              //Sound CPU
-             z80_0:=cpu_z80.create(3579545,262);
+             z80_0:=cpu_z80.create(3579545);
              z80_0.change_ram_calls(cps1_snd_getbyte,cps1_snd_putbyte);
              z80_0.init_sound(cps1_sound_update);
              //Sound chips
              ym2151_0:=ym2151_chip.create(3579545);
              ym2151_0.change_irq_func(cps1_ym2151_snd_irq);
-             oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.50);
+             oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.8);
            end;
   112,113:begin  //Qsound
            iniciar_audio(true);
-           m68000_0:=cpu_m68000.create(12000000,262);
+           m68000_0:=cpu_m68000.create(12000000);
            m68000_0.change_ram16_calls(cps1_qsnd_getword,cps1_qsnd_putword);
            //Sound CPU
-           z80_0:=cpu_z80.create(8000000,262);
+           z80_0:=cpu_z80.create(8000000);
            z80_0.change_ram_calls(cps1_qz80_getbyte,cps1_qz80_putbyte);
            z80_0.init_sound(qsound_sound_update);
            //Sound Chip
@@ -1030,10 +1261,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,ghouls_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //convertir gfx (salen todos de los mismos datos)
         if not(roms_load64b(memoria_temp,ghouls_gfx1)) then exit;
         if not(roms_load64b_b(memoria_temp,ghouls_gfx2)) then exit;
@@ -1044,9 +1274,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($6000);
         //Tiles 32x32
         convert_tiles32($1800);
-        dswa:=$ff;
-        dswb:=$ff;
-        dswc:=$ff;
+        init_dips(1,strider_dip_a,$ff);
+        init_dips(2,ghouls_dip_b,$fd);
+        init_dips(3,ghouls_dip_c,$ff);
   end;
   104:begin
         nbank:=1;
@@ -1057,10 +1287,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,ffight_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,ffight_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1072,9 +1301,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($4000);
         //Tiles 32x32
         convert_tiles32($1000);
-        dswa:=$ff;
-        dswb:=$f4;
-        dswc:=$9f;
+        init_dips(1,sf2_dip_a,$ff);
+        init_dips(2,ffight_dip_b,$f4);
+        init_dips(3,knights_dip_c,$9f);
   end;
   105:begin
         nbank:=2;
@@ -1084,10 +1313,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,kod_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,kod_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1099,9 +1327,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$fc;
-        dswc:=$9f;
+        init_dips(1,kod_dip_a,$ff);
+        init_dips(2,kod_dip_b,$fc);
+        init_dips(3,sf2_dip_c,$9f);
   end;
   106:begin
         nbank:=3;
@@ -1111,10 +1339,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,sf2_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,sf2_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1126,9 +1353,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($c000);
         //Tiles 32x32
         convert_tiles32($3000);
-        dswa:=$ff;
-        dswb:=$fc;
-        dswc:=$9f;
+        init_dips(1,sf2_dip_a,$ff);
+        init_dips(2,sf2_dip_b,$fc);
+        init_dips(3,sf2_dip_c,$9f);
   end;
   107:begin  //Strider
         nbank:=4;
@@ -1139,14 +1366,15 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,strider_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,strider_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
         if not(roms_load64b(memoria_temp,strider_gfx1)) then exit;
+        copymemory(@stars[0],@memoria_temp[0],$8000);
+        stars_enabled:=true;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars($10000);
@@ -1154,9 +1382,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$bf;
-        dswc:=$ff;
+        init_dips(1,strider_dip_a,$ff);
+        init_dips(2,strider_dip_b,$8d);
+        init_dips(3,strider_dip_c,$ff);
   end;
   108:begin  //3 Wonders
         nbank:=5;
@@ -1166,10 +1394,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,wonder3_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,wonder3_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1181,9 +1408,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$9a;
-        dswc:=$99;
+        init_dips(1,wonder3_dip_a,$ff);
+        init_dips(2,wonder3_dip_b,$9a);
+        init_dips(3,wonder3_dip_c,$99);
   end;
   109:begin  //Captain Commando
         nbank:=6;
@@ -1194,10 +1421,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,ccommando_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,ccommando_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1209,9 +1435,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$f4;
-        dswc:=$9f;
+        init_dips(1,knights_dip_a,$ff);
+        init_dips(2,captcomm_dip_b,$f4);
+        init_dips(3,knights_dip_c,$9f);
   end;
   110:begin  //Knights of the Round
         nbank:=7;
@@ -1221,10 +1447,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,knights_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,knights_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1236,9 +1461,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$fc;
-        dswc:=$9f;
+        init_dips(1,knights_dip_a,$ff);
+        init_dips(2,knights_dip_b,$7c);
+        init_dips(3,knights_dip_c,$9f);
   end;
   111:begin  //SF II' CE
         nbank:=8;
@@ -1248,10 +1473,9 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,sf2ce_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
-        copymemory(@snd_rom[1,0],ptemp,$4000);
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
         //Cargar ADPCM ROMS
         if not(roms_load(oki_6295_0.get_rom_addr,sf2ce_oki)) then exit;
         //convertir gfx (salen todos de los mismos datos)
@@ -1263,9 +1487,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($c000);
         //Tiles 32x32
         convert_tiles32($3000);
-        dswa:=$ff;
-        dswb:=$fc;
-        dswc:=$9f;
+        init_dips(1,sf2_dip_a,$ff);
+        init_dips(2,sf2_dip_b,$fc);
+        init_dips(3,sf2_dip_c,$9f);
   end;
   112:begin  //Cadillacs and Dinosaurs
         nbank:=9;
@@ -1278,12 +1502,13 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,dino_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        for f:=0 to 5 do begin
-          copymemory(@snd_rom[f,0],ptemp,$4000);
-          inc(ptemp,$4000);
-        end;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
+        copymemory(@snd_rom[2,0],@memoria_temp[$10000],$4000);
+        copymemory(@snd_rom[3,0],@memoria_temp[$14000],$4000);
+        copymemory(@snd_rom[4,0],@memoria_temp[$18000],$4000);
+        copymemory(@snd_rom[5,0],@memoria_temp[$1c000],$4000);
         kabuki_cps1_decode(@mem_snd,@qsnd_opcode,@qsnd_data,$76543210,$24601357,$4343,$43);
         //Cargar ROMS Qsound
         if not(roms_load(qsound_state.sample_rom,dino_qsound1)) then exit;
@@ -1296,9 +1521,9 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$ff;
-        dswc:=$ff;
+        marcade.dswa:=$ff;
+        marcade.dswb:=$ff;
+        init_dips(3,punisher_dip_c,$ff);
   end;
   113:begin  //The Punisher
         nbank:=10;
@@ -1312,12 +1537,13 @@ case main_vars.tipo_maquina of
         poner_roms_word;
         //roms sonido y poner en su banco
         if not(roms_load(memoria_temp,punisher_sound)) then exit;
-        ptemp:=memoria_temp;
-        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
-        for f:=0 to 5 do begin
-          copymemory(@snd_rom[f,0],ptemp,$4000);
-          inc(ptemp,$4000);
-        end;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
+        copymemory(@snd_rom[2,0],@memoria_temp[$10000],$4000);
+        copymemory(@snd_rom[3,0],@memoria_temp[$14000],$4000);
+        copymemory(@snd_rom[4,0],@memoria_temp[$18000],$4000);
+        copymemory(@snd_rom[5,0],@memoria_temp[$1c000],$4000);
         kabuki_cps1_decode(@mem_snd,@qsnd_opcode,@qsnd_data,$67452103,$75316024,$2222,$22);
         //Cargar ROMS Qsound
         if not(roms_load(qsound_state.sample_rom,punisher_qsound1)) then exit;
@@ -1330,9 +1556,88 @@ case main_vars.tipo_maquina of
         convert_tiles16($8000);
         //Tiles 32x32
         convert_tiles32($2000);
-        dswa:=$ff;
-        dswb:=$ff;
-        dswc:=$ff;
+        marcade.dswa:=$ff;
+        marcade.dswb:=$ff;
+        init_dips(3,punisher_dip_c,$ff);
+  end;
+  422:begin //Willow
+        nbank:=11;
+        cps_b:=10;
+        //cargar roms
+        if not(roms_load16b(memoria_temp,willow_rom1)) then exit;
+        if not(roms_load_swap_word(memoria_temp,willow_rom2)) then exit;
+        poner_roms_word;
+        //roms sonido y poner en su banco
+        if not(roms_load(memoria_temp,willow_sound)) then exit;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
+        if not(roms_load(oki_6295_0.get_rom_addr,willow_oki)) then exit;
+        //convertir gfx (salen todos de los mismos datos)
+        if not(roms_load64b(memoria_temp,willow_gfx1)) then exit;
+        if not(roms_load64b_b(memoria_temp,willow_gfx2)) then exit;
+        cps1_gfx_decode(memoria_temp,$300000);
+        //Chars
+        convert_chars($10000);
+        //Tiles 16x16
+        convert_tiles16($8000);
+        //Tiles 32x32
+        convert_tiles32($2000);
+        init_dips(1,willow_dip_a,$ff);
+        init_dips(2,willow_dip_b,$ff);
+        init_dips(3,willow_dip_c,$fa);
+  end;
+  423:begin //1941
+        nbank:=12;
+        cps_b:=11;
+        //cargar roms
+        if not(roms_load16b(memoria_temp,ca1941_rom1)) then exit;
+        if not(roms_load_swap_word(memoria_temp,ca1941_rom2)) then exit;
+        poner_roms_word;
+        //roms sonido y poner en su banco
+        if not(roms_load(memoria_temp,ca1941_sound)) then exit;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
+        if not(roms_load(oki_6295_0.get_rom_addr,ca1941_oki)) then exit;
+        //convertir gfx (salen todos de los mismos datos)
+        if not(roms_load64b(memoria_temp,ca1941_gfx1)) then exit;
+        cps1_gfx_decode(memoria_temp,$200000);
+        //Chars
+        convert_chars($8000);
+        //Tiles 16x16
+        convert_tiles16($4000);
+        //Tiles 32x32
+        convert_tiles32($1000);
+        init_dips(1,sf2_dip_a,$ff);
+        init_dips(2,ca1941_dip_b,$fc);
+        init_dips(3,ca1941_dip_c,$9f);
+  end;
+  424:begin //Nemo
+        nbank:=13;
+        cps_b:=12;
+        //cargar roms
+        if not(roms_load16b(memoria_temp,nemo_rom1)) then exit;
+        if not(roms_load_swap_word(memoria_temp,nemo_rom2)) then exit;
+        poner_roms_word;
+        //roms sonido y poner en su banco
+        if not(roms_load(memoria_temp,nemo_sound)) then exit;
+        copymemory(@mem_snd,@memoria_temp[0],$8000);
+        copymemory(@snd_rom[0,0],@memoria_temp[$8000],$4000);
+        copymemory(@snd_rom[1,0],@memoria_temp[$c000],$4000);
+        if not(roms_load(oki_6295_0.get_rom_addr,nemo_oki)) then exit;
+        //convertir gfx (salen todos de los mismos datos)
+        if not(roms_load64b(memoria_temp,nemo_gfx1)) then exit;
+        cps1_gfx_decode(memoria_temp,$200000);
+        //Chars
+        convert_chars($8000);
+        //Tiles 16x16
+        convert_tiles16($4000);
+        //Tiles 32x32
+        convert_tiles32($1000);
+        init_dips(1,sf2_dip_a,$ff);
+        init_dips(2,nemo_dip_b,$fc);
+        init_dips(3,nemo_dip_c,$9f);
   end;
 end;
 //final

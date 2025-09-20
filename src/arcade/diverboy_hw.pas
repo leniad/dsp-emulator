@@ -20,12 +20,12 @@ const
         diverboy_oki:array[0..1] of tipo_roms=(
         (n:'db_03.bin';l:$80000;p:0;crc:$50457505),(n:'db_04.bin';l:$20000;p:$80000;crc:$01b81da0));
         //Dip
-        diverboy_dip:array [0..5] of def_dip2=(
+        diverboy_dip:array [0..4] of def_dip2=(
         (mask:7;name:'Coinage';number:8;val8:(7,6,5,0,1,2,3,4);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 6C')),
         (mask:8;name:'Lives';number:2;val2:(0,8);name2:('2','3')),
         (mask:$10;name:'Display Copyright';number:2;val2:(0,$10);name2:('No','Yes')),
         (mask:$60;name:'Difficulty';number:4;val4:(0,$20,$40,$60);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Free Play';number:2;val2:($80,0);name2:('No','Yes')),());
+        (mask:$80;name:'Free Play';number:2;val2:($80,0);name2:('No','Yes')));
 var
  rom:array[0..$1ffff] of word;
  ram:array[0..$7fff] of word;
@@ -197,6 +197,7 @@ var
 begin
 llamadas_maquina.bucle_general:=diverboy_principal;
 llamadas_maquina.reset:=reset_diverboy;
+llamadas_maquina.scanlines:=256;
 iniciar_diverboy:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -204,11 +205,11 @@ iniciar_video(318,240);
 main_screen.flip_main_x:=true;
 getmem(memoria_temp,$100000);
 //Main CPU
-m68000_0:=cpu_m68000.create(12000000,$100);
+m68000_0:=cpu_m68000.create(12000000);
 m68000_0.change_ram16_calls(diverboy_getword,diverboy_putword);
 if not(roms_load16w(@rom,diverboy_rom)) then exit;
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,$100);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(diverboy_snd_getbyte,diverboy_snd_putbyte);
 z80_0.init_sound(diverboy_sound_update);
 if not(roms_load(@mem_snd,diverboy_sound)) then exit;
@@ -235,8 +236,7 @@ init_gfx(1,16,16,$3000);
 gfx_set_desc_data(4,0,16*16*4,0,1,2,3);
 convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$b8;
-marcade.dswa_val2:=@diverboy_dip;
+init_dips(1,diverboy_dip,$b8);
 //final
 freemem(memoria_temp);
 iniciar_diverboy:=true;

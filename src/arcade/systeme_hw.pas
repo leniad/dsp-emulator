@@ -350,6 +350,7 @@ begin
 llamadas_maquina.bucle_general:=systeme_principal;
 llamadas_maquina.reset:=reset_systeme;
 llamadas_maquina.fps_max:=59.922738;
+llamadas_maquina.scanlines:=LINES_NTSC;
 iniciar_systeme:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=257 then main_screen.rot90_screen:=true;
@@ -358,7 +359,7 @@ screen_init(2,284,243,true);
 screen_init(3,284,243);
 iniciar_video(284,243);
 //Main CPU
-z80_0:=cpu_z80.create(10738635 div 2,LINES_NTSC);
+z80_0:=cpu_z80.create(10738635 div 2);
 z80_0.change_ram_calls(systeme_getbyte,systeme_putbyte);
 z80_0.change_io_calls(systeme_inbyte,systeme_outbyte);
 z80_0.init_sound(systeme_sound_update);

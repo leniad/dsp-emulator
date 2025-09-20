@@ -178,14 +178,15 @@ var
 begin
 iniciar_genesis:=false;
 if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+llamadas_maquina.scanlines:=262;
 iniciar_audio(true);
 screen_init(1,284,243);
 iniciar_video(284,243);
 //Main CPU
-m68000_0:=cpu_m68000.create(53693175 div 7,262,TCPU_68000);
+m68000_0:=cpu_m68000.create(53693175 div 7);
 m68000_0.change_ram16_calls(genesis_getword,genesis_putword);
 //sound cpu
-z80_0:=cpu_z80.create(53693175 div 15,262);
+z80_0:=cpu_z80.create(53693175 div 15);
 z80_0.change_ram_calls(genesis_snd_getbyte,genesis_snd_putbyte);
 //Video
 vdp_5313_0:=vdp_5313_chip.create(false);

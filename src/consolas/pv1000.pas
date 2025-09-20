@@ -336,12 +336,13 @@ llamadas_maquina.reset:=reset_pv1000;
 llamadas_maquina.cartuchos:=abrir_pv1000;
 llamadas_maquina.grabar_snapshot:=pv1000_grabar_snapshot;
 llamadas_maquina.fps_max:=59.92274;
+llamadas_maquina.scanlines:=256;
 iniciar_pv1000:=false;
 iniciar_audio(false);
 screen_init(1,256,192,false,true);
 iniciar_video(224,244);
 //Main CPU
-z80_0:=cpu_z80.create(17897725 div 5,256);
+z80_0:=cpu_z80.create(17897725 div 5);
 z80_0.change_ram_calls(pv1000_getbyte,pv1000_putbyte);
 z80_0.change_io_calls(pv1000_in,pv1000_out);
 z80_0.init_sound(pv1000_sound_update);

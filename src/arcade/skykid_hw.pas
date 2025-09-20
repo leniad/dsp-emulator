@@ -296,7 +296,6 @@ begin
  m6809_0.reset;
  m6800_0.reset;
  namco_snd_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -328,17 +327,17 @@ iniciar_skykid:=false;
 llamadas_maquina.bucle_general:=skykid_principal;
 llamadas_maquina.reset:=reset_skykid;
 llamadas_maquina.fps_max:=60.60606060606060;
+llamadas_maquina.scanlines:=224;
 iniciar_audio(false);
 screen_init(1,288,224,true);
 screen_init(2,512,256);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,224,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1536000,TCPU_M6809);
 m6809_0.change_ram_calls(skykid_getbyte,skykid_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(6144000,224,TCPU_HD63701V);
+m6800_0:=cpu_m6800.create(6144000,TCPU_HD63701V);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
 m6800_0.init_sound(skykid_sound_update);

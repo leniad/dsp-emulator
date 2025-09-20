@@ -238,7 +238,7 @@ end else if event.keyboard then begin
     clear_disk(0);
     change_caption('');
   end;
-  if keyboard[KEYBOARD_N5] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $ef) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $10);
+  if (keyboard[KEYBOARD_5] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $ef) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $10);
   if keyboard[KEYBOARD_F1] then begin
       if cinta_tzx.cargada then begin
         if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
@@ -250,26 +250,26 @@ end else if event.keyboard then begin
   if keyboard[KEYBOARD_UP] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fe) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $1);
   if keyboard[KEYBOARD_RIGHT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fd) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $2);
   if keyboard[KEYBOARD_DOWN] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fb) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $4);
-  if keyboard[KEYBOARD_N9] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $f7) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $8);
-  if keyboard[KEYBOARD_N6] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $ef) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $10);
-  if keyboard[KEYBOARD_N3] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $df) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $20);
+  if (keyboard[KEYBOARD_9] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $f7) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $8);
+  if (keyboard[KEYBOARD_6] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $ef) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $10);
+  if (keyboard[KEYBOARD_3] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $df) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $20);
   if keyboard[KEYBOARD_HOME] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $bf) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $40);
   if keyboard[KEYBOARD_NDOT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $7f) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $80);
   //Line 1
   if keyboard[KEYBOARD_LEFT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fe) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 1);
   if keyboard[KEYBOARD_LALT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fd) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 2);
-  if keyboard[KEYBOARD_N7] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fb) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $4);
-  if keyboard[KEYBOARD_N8] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
-  if keyboard[KEYBOARD_N1] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $df) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $20);
-  if keyboard[KEYBOARD_N2] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
-  if keyboard[KEYBOARD_N0] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $7f) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $80);
+  if (keyboard[KEYBOARD_7] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fb) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $4);
+  if (keyboard[KEYBOARD_8] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
+  if (keyboard[KEYBOARD_1] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $df) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $20);
+  if (keyboard[KEYBOARD_2] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
+  if (keyboard[KEYBOARD_0] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $7f) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $80);
   //Line 2
   if keyboard[KEYBOARD_FILA0_T0] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fe) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 1);
   if keyboard[KEYBOARD_FILA1_T2] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fd) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 2);
   if (keyboard[KEYBOARD_RETURN] or keyboard[KEYBOARD_NRETURN]) then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fb) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 4);
   if keyboard[KEYBOARD_FILA2_T3] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $f7) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 8);
-  if keyboard[KEYBOARD_N4] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $ef) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $10);
-  if (keyboard[KEYBOARD_LSHIFT] or keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $df) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $20);
+  if (keyboard[KEYBOARD_4] and keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $ef) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $10);
+  if keyboard[KEYBOARD_LSHIFT] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $df) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $20);
   if keyboard[KEYBOARD_FILA3_T3] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $bf) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $40);
   if keyboard[KEYBOARD_LCTRL] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $7f) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $80);
   //Line 3
@@ -282,8 +282,8 @@ end else if event.keyboard then begin
   if keyboard[KEYBOARD_FILA3_T2] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $bf) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $40);
   if keyboard[KEYBOARD_FILA3_T1] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $7f) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $80);
   //Line 4
-  if keyboard[KEYBOARD_0] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fe) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 1);
-  if keyboard[KEYBOARD_9] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fd) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 2);
+  if (keyboard[KEYBOARD_0] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fe) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 1);
+  if (keyboard[KEYBOARD_9] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fd) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 2);
   if keyboard[KEYBOARD_o] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fb) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 4);
   if keyboard[KEYBOARD_i] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $f7) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 8);
   if keyboard[KEYBOARD_l] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $ef) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $10);
@@ -291,8 +291,8 @@ end else if event.keyboard then begin
   if keyboard[KEYBOARD_m] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $bf) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $40);
   if keyboard[KEYBOARD_FILA3_T0] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $7f) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $80);
   //Line 5
-  if keyboard[KEYBOARD_8] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fe) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 1);
-  if keyboard[KEYBOARD_7] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fd) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 2);
+  if (keyboard[KEYBOARD_8] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fe) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 1);
+  if (keyboard[KEYBOARD_7] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fd) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 2);
   if keyboard[KEYBOARD_u] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fb) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 4);
   if keyboard[KEYBOARD_y] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $f7) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 8);
   if keyboard[KEYBOARD_h] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $ef) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $10);
@@ -300,8 +300,8 @@ end else if event.keyboard then begin
   if keyboard[KEYBOARD_n] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $bf) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $40);
   if keyboard[KEYBOARD_space] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $7f) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $80);
   //Line 6
-  if keyboard[KEYBOARD_6] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fe) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 1);
-  if keyboard[KEYBOARD_5] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fd) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 2);
+  if (keyboard[KEYBOARD_6] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fe) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 1);
+  if (keyboard[KEYBOARD_5] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fd) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 2);
   if keyboard[KEYBOARD_r] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fb) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 4);
   if keyboard[KEYBOARD_t] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $f7) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 8);
   if keyboard[KEYBOARD_g] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $ef) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $10);
@@ -309,8 +309,8 @@ end else if event.keyboard then begin
   if keyboard[KEYBOARD_b] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $bf) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $40);
   if keyboard[KEYBOARD_v] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $7f) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $80);
   //Line 7
-  if keyboard[KEYBOARD_4] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fe) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 1);
-  if keyboard[KEYBOARD_3] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fd) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 2);
+  if (keyboard[KEYBOARD_4] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fe) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 1);
+  if (keyboard[KEYBOARD_3] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fd) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 2);
   if keyboard[KEYBOARD_e] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fb) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 4);
   if keyboard[KEYBOARD_w] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $f7) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 8);
   if keyboard[KEYBOARD_s] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $ef) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $10);
@@ -318,8 +318,8 @@ end else if event.keyboard then begin
   if keyboard[KEYBOARD_c] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $bf) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $40);
   if keyboard[KEYBOARD_x] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $7f) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $80);
   //Line 8
-  if keyboard[KEYBOARD_1] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fe) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 1);
-  if keyboard[KEYBOARD_2] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fd) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 2);
+  if (keyboard[KEYBOARD_1] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fe) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 1);
+  if (keyboard[KEYBOARD_2] and not(keyboard[KEYBOARD_RSHIFT])) then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fd) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 2);
   if keyboard[KEYBOARD_escape] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fb) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 4);
   if keyboard[KEYBOARD_q] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $f7) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 8);
   if keyboard[KEYBOARD_tab] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $ef) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $10);
@@ -579,7 +579,8 @@ end;
 //AY-8910
 function cpc_porta_read:byte;
 begin
-  cpc_porta_read:=cpc_ppi.keyb_val[cpc_ppi.keyb_line];
+  if cpc_ppi.keyb_line<10 then cpc_porta_read:=cpc_ppi.keyb_val[cpc_ppi.keyb_line]
+    else cpc_porta_read:=$ff;
 end;
 
 //Sound
@@ -871,7 +872,6 @@ begin
   frame_main:=z80_0.tframes;
   ay8910_0.reset;
   pia8255_0.reset;
-  reset_game_general;
   if cinta_tzx.cargada then cinta_tzx.play_once:=false;
   cinta_tzx.value:=0;
   ResetFDC;
@@ -1233,6 +1233,7 @@ begin
 llamadas_maquina.bucle_general:=cpc_main;
 llamadas_maquina.reset:=cpc_reset;
 llamadas_maquina.fps_max:=50.080128205;
+llamadas_maquina.scanlines:=1;
 llamadas_maquina.close:=cpc_close;
 llamadas_maquina.cintas:=amstrad_tapes;
 llamadas_maquina.cartuchos:=amstrad_loaddisk;
@@ -1263,7 +1264,7 @@ end else begin
   end;
 end;
 set_pal(colores,32);
-z80_0:=cpu_z80.create(4000000,1);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(cpc_getbyte,cpc_putbyte);
 z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
 z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80,amstrad_m1_detect);

@@ -4,18 +4,13 @@ interface
 {$IFDEF windows}uses windows;{$ENDIF}
 
 type
-  scroll_tipo=record
-          long_x,long_y:word;  //Longitud de la pantalla
-          max_x,max_y:word;    //Longitud que debe copiar
-          mask_x,mask_y:word;  //Mascara del scroll
-        end;
   tpantalla=record
                 x:word;  //ancho
                 y:word;  //alto
                 trans:boolean;  //¿es transparente?
                 final_mix,alpha:boolean;
                 sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word;
-                scroll:scroll_tipo;
+                mask_x,mask_y:word;
         end;
   tipo_sprites=record
     pos_planos:array[0..7] of dword;
@@ -48,6 +43,7 @@ const
 var
   p_final:array[0..MAX_PANTALLA] of tpantalla;
   des_gfx:tipo_sprites;
+  scroll_final_x,scroll_final_y:word;
 
 implementation
 

@@ -32,7 +32,7 @@ const
         (nombre:'ef01_1.wav'),(nombre:'ef01_2.wav'),(nombre:'ef02.wav'),
         (nombre:'ef03.wav';restart:true),(nombre:'ef04.wav'),(nombre:'ef05.wav'),(nombre:'ef06.wav'));
         dk_dip_a:array [0..4] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'7k'),(dip_val:$4;dip_name:'10k'),(dip_val:$8;dip_name:'15k'),(dip_val:$c;dip_name:'20k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$70;name:'Coinage';number:8;dip:((dip_val:$70;dip_name:'5C 1C'),(dip_val:$50;dip_name:'4C 1C'),(dip_val:$30;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C 2C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$40;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
@@ -124,41 +124,39 @@ procedure eventos_dkong;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   //SYS
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $80) else marcade.in2:=(marcade.in2 and $7f);
 end;
 end;
 
 procedure dkong_principal;
 var
-  frame:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=z80_0.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    z80_0.run(frame);
-    frame:=frame+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    eventos_dkong;
+    if f=240 then begin
       if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       update_video_dkong;
     end;
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   end;
-  eventos_dkong;
   video_sync;
 end;
 end;
@@ -166,7 +164,7 @@ end;
 function dkong_getbyte(direccion:word):byte;
 begin
 case direccion of
-     $0..$6bff,$7000..$77ff:dkong_getbyte:=memoria[direccion];
+     0..$6bff,$7000..$77ff:dkong_getbyte:=memoria[direccion];
      $7c00:dkong_getbyte:=marcade.in0;
      $7c80:dkong_getbyte:=marcade.in1;
      $7d00:dkong_getbyte:=marcade.in2;
@@ -233,16 +231,16 @@ end;
 procedure dkong_effects_sound(direccion,valor:byte);
 begin
 case direccion of
-  $0:begin
+  0:begin
         if ((effect0=0) and ((valor and 1)=1)) then start_sample(18);
         if ((effect0=1) and ((valor and 1)=0)) then start_sample(19);
         effect0:=valor and 1;
      end;
-  $1:if (valor<>0) then start_sample(20);
-  $2:if (valor<>0) then start_sample(21);
-  $3:if (valor<>0) then start_sample(22);
-  $4:if (valor<>0) then start_sample(23);
-  $5:if (valor<>0) then start_sample(24);
+  1:if (valor<>0) then start_sample(20);
+  2:if (valor<>0) then start_sample(21);
+  3:if (valor<>0) then start_sample(22);
+  4:if (valor<>0) then start_sample(23);
+  5:if (valor<>0) then start_sample(24);
 end;
 end;
 
@@ -282,22 +280,22 @@ end;
 procedure dkongjr_effects_sound(direccion,valor:byte);
 begin
 case direccion of
-  $0:begin
+  0:begin
        if ((effect0=1) and ((valor and 1)=0)) then start_sample(15);
        effect0:=valor and 1;
      end;
-  $1:begin
+  1:begin
        if ((effect1=1) and ((valor and 1)=0)) then start_sample(16);
        effect1:=valor and 1;
      end;
-  $2:begin
+  2:begin
        if ((effect2=1) and ((valor and 1)=0)) then start_sample(17);
        effect2:=valor and 1;
      end;
-  $3:if (valor<>0) then start_sample(18);
-  $4:if (valor<>0) then start_sample(19);
-  $5:if (valor<>0) then start_sample(20);
-  $6:if (valor<>0) then start_sample(21);
+  3:if (valor<>0) then start_sample(18);
+  4:if (valor<>0) then start_sample(19);
+  5:if (valor<>0) then start_sample(20);
+  6:if (valor<>0) then start_sample(21);
 end;
 
 end;
@@ -346,18 +344,18 @@ procedure eventos_dkong3;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $bf);
@@ -366,25 +364,13 @@ end;
 
 procedure dkong3_principal;
 var
-  frame_m,frame_s1,frame_s2:single;
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=z80_0.tframes;
-frame_s1:=n2a03_0.m6502.tframes;
-frame_s2:=n2a03_1.m6502.tframes;
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
-    //Main CPU
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //SND 1
-    n2a03_0.m6502.run(frame_s1);
-    frame_s1:=frame_s1+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
-    //SND 2
-    n2a03_1.m6502.run(frame_s2);
-    frame_s2:=frame_s2+n2a03_1.m6502.tframes-n2a03_1.m6502.contador;
-    if f=239 then begin
+    eventos_dkong3;
+    if f=240 then begin
       if haz_nmi then begin
         z80_0.change_nmi(PULSE_LINE);
         n2a03_0.m6502.change_nmi(PULSE_LINE);
@@ -392,8 +378,16 @@ while EmuStatus=EsRunning do begin
       end;
       update_video_dkong;
     end;
+    //Main CPU
+    z80_0.run(frame_main);
+    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+    //SND 1
+    n2a03_0.m6502.run(frame_snd);
+    frame_snd:=frame_snd+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+    //SND 2
+    n2a03_1.m6502.run(frame_snd2);
+    frame_snd2:=frame_snd2+n2a03_1.m6502.tframes-n2a03_1.m6502.contador;
   end;
-  eventos_dkong3;
   video_sync;
 end;
 end;
@@ -401,7 +395,7 @@ end;
 function dkong3_getbyte(direccion:word):byte;
 begin
 case direccion of
-     $0..$77ff,$8000..$9fff:dkong3_getbyte:=memoria[direccion];
+     0..$77ff,$8000..$9fff:dkong3_getbyte:=memoria[direccion];
      $7c00:dkong3_getbyte:=marcade.in0;
      $7c80:dkong3_getbyte:=marcade.in1;
      $7d00:dkong3_getbyte:=marcade.dswa;
@@ -421,7 +415,7 @@ case direccion of
   $7c00:latch1:=valor;
   $7c80:latch2:=valor;
   $7d00:latch3:=valor;
-  $7d80:if ((valor and $1)<>0) then begin
+  $7d80:if ((valor and 1)<>0) then begin
           n2a03_0.m6502.change_reset(CLEAR_LINE);
           n2a03_1.m6502.change_reset(CLEAR_LINE);
         end else begin
@@ -452,7 +446,7 @@ end;
 function dkong3_snd1_getbyte(direccion:word):byte;
 begin
   case direccion of
-    $0..$7ff,$e000..$ffff:dkong3_snd1_getbyte:=mem_snd[direccion];
+    0..$7ff,$e000..$ffff:dkong3_snd1_getbyte:=mem_snd[direccion];
     $4000..$4015:dkong3_snd1_getbyte:=n2a03_0.read(direccion);
     $4016:dkong3_snd1_getbyte:=latch1;
     $4017:dkong3_snd1_getbyte:=latch2;
@@ -471,7 +465,7 @@ end;
 function dkong3_snd2_getbyte(direccion:word):byte;
 begin
   case direccion of
-    $0..$7ff,$e000..$ffff:dkong3_snd2_getbyte:=mem_misc[direccion];
+    0..$7ff,$e000..$ffff:dkong3_snd2_getbyte:=mem_misc[direccion];
     $4000..$4015,$4017:dkong3_snd2_getbyte:=n2a03_1.read(direccion);
     $4016:dkong3_snd2_getbyte:=latch3;
   end;
@@ -490,17 +484,18 @@ end;
 procedure reset_dkong;
 begin
  z80_0.reset;
+ frame_main:=z80_0.tframes;
  case main_vars.tipo_maquina of
     15:marcade.in2:=0;
-
    168:marcade.in2:=$40;
    169:begin
         marcade.in2:=0;
         n2a03_0.reset;
         n2a03_1.reset;
+        frame_snd:=n2a03_0.m6502.tframes;
+        frame_snd2:=n2a03_1.m6502.tframes;
        end;
  end;
- reset_game_general;
  marcade.in0:=0;
  marcade.in1:=0;
  haz_nmi:=false;
@@ -568,9 +563,9 @@ begin
 for f:=0 to 255 do begin
   ctemp1:=memoria_temp[f];
   ctemp2:=memoria_temp[f+$200];
-  colores[f].r:=not($0e*((ctemp1 shr 4) and 1)+$1f*((ctemp1 shr 5) and 1)+$43*((ctemp1 shr 6) and 1)+$8f*((ctemp1 shr 7) and 1));
-  colores[f].g:=not($0e*((ctemp1 shr 0) and 1)+$1f*((ctemp1 shr 1) and 1)+$43*((ctemp1 shr 2) and 1)+$8f*((ctemp1 shr 3) and 1));
-  colores[f].b:=not($0e*((ctemp2 shr 0) and 1)+$1f*((ctemp2 shr 1) and 1)+$43*((ctemp2 shr 2) and 1)+$8f*((ctemp2 shr 3) and 1));
+  colores[f].r:=not($e*((ctemp1 shr 4) and 1)+$1f*((ctemp1 shr 5) and 1)+$43*((ctemp1 shr 6) and 1)+$8f*((ctemp1 shr 7) and 1));
+  colores[f].g:=not($e*((ctemp1 shr 0) and 1)+$1f*((ctemp1 shr 1) and 1)+$43*((ctemp1 shr 2) and 1)+$8f*((ctemp1 shr 3) and 1));
+  colores[f].b:=not($e*((ctemp2 shr 0) and 1)+$1f*((ctemp2 shr 1) and 1)+$43*((ctemp2 shr 2) and 1)+$8f*((ctemp2 shr 3) and 1));
 end;
 set_pal(colores,256);
 copymemory(@colores_char[0],@memoria_temp[$400],$100);
@@ -579,6 +574,7 @@ end;
 begin
 llamadas_maquina.reset:=reset_dkong;
 llamadas_maquina.fps_max:=60.6060606060606060;
+llamadas_maquina.scanlines:=264;
 iniciar_dkong:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -588,7 +584,7 @@ case main_vars.tipo_maquina of
   15:begin //Donkey Kong
         llamadas_maquina.bucle_general:=dkong_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(3072000,264);
+        z80_0:=cpu_z80.create(3072000);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
         if not(roms_load(@memoria,dkong_rom)) then exit;
@@ -612,7 +608,7 @@ case main_vars.tipo_maquina of
  168:begin //Donkey Kong Jr.
         llamadas_maquina.bucle_general:=dkong_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(3072000,264);
+        z80_0:=cpu_z80.create(3072000);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
         if not(roms_load(@memoria_temp,dkongjr_rom)) then exit;
@@ -646,17 +642,17 @@ case main_vars.tipo_maquina of
  169:begin //Donkey Kong 3
         llamadas_maquina.bucle_general:=dkong3_principal;
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,264);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
         //cargar roms
         if not(roms_load(@memoria,dkong3_rom)) then exit;
         //sound 1
         if not(roms_load(@mem_snd,dkong3_snd1)) then exit;
-        n2a03_0:=cpu_n2a03.Create(1789772,264);
+        n2a03_0:=cpu_n2a03.Create(1789772);
         n2a03_0.m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
         //sound 2
         if not(roms_load(@mem_misc,dkong3_snd2)) then exit;
-        n2a03_1:=cpu_n2a03.Create(1789772,264);
+        n2a03_1:=cpu_n2a03.Create(1789772);
         n2a03_1.m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
         //convertir chars
         if not(roms_load(@memoria_temp,dkong3_char)) then exit;
@@ -668,14 +664,13 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,dkong3_pal)) then exit;
         pal_dkong3;
         //DIP
-        marcade.dswa:=$0;
+        marcade.dswa:=0;
         marcade.dswa_val:=@dk3_dip_a;
-        marcade.dswb:=$0;
+        marcade.dswb:=0;
         marcade.dswb_val:=@dk3_dip_b;
      end;
 end;
 //final
-reset_dkong;
 iniciar_dkong:=true;
 end;
 

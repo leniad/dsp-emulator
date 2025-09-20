@@ -31,20 +31,20 @@ const
         (n:'b-4c-.bin';l:$2000;p:$10000;crc:$01298885),(n:'b-4e-.bin';l:$2000;p:$12000;crc:$c77b87d4),
         (n:'b-4d-.bin';l:$2000;p:$14000;crc:$6a70615f),(n:'b-4a-.bin';l:$2000;p:$16000;crc:$6189d626));
         //Dip
-        kungfum_dip_a:array [0..4] of def_dip2=(
+        kungfum_dip_a:array [0..3] of def_dip2=(
         (mask:1;name:'Difficulty';number:2;val2:(1,0);name2:('Easy','Hard')),
         (mask:2;name:'Energy Loss';number:2;val2:(2,0);name2:('Slow','Fast')),
         (mask:$c;name:'Lives';number:4;val4:(8,$c,4,0);name4:('2','3','4','5')),
-        (mask:$f0;name:'Coinage';number:16;val16:($90,$a0,$b0,$c0,$d0,$e0,$f0,$70,$60,$50,$40,$30,$20,$10,0,0);name16:('7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C','Free Play','')),());
-        kungfum_dip_b:array [0..8] of def_dip2=(
+        (mask:$f0;name:'Coinage';number:16;val16:($90,$a0,$b0,$c0,$d0,$e0,$f0,$70,$60,$50,$40,$30,$20,$10,0,0);name16:('7C 1C','6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','1C 8C','Free Play','')));
+        kungfum_dip_b:array [0..7] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
         (mask:2;name:'Cabinet';number:2;val2:(0,2);name2:('Upright','Cocktail')),
         (mask:4;name:'Coin Mode';number:2;val2:(4,0);name2:('Mode 1','Mode 2')),
-        (mask:8;name:'Slow Motion Mode (Cheat)';number:2;val2:(8,0);name2:('Off','On')),
-        (mask:$10;name:'Freeze (Cheat)';number:2;val2:($10,0);name2:('Off','On')),
-        (mask:$20;name:'Level Selection Mode (Cheat)';number:2;val2:($20,0);name2:('Off','On')),
-        (mask:$40;name:'Invulnerability (Cheat)';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Service';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:8;name:'Slow Motion Mode';number:2;val2:(8,0);name2:('Off','On')),
+        (mask:$10;name:'Freeze';number:2;val2:($10,0);name2:('Off','On')),
+        (mask:$20;name:'Level Selection Mode';number:2;val2:($20,0);name2:('Off','On')),
+        (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Service';number:2;val2:($80,0);name2:('Off','On')));
         //Spelunker
         spl_rom:array[0..3] of tipo_roms=(
         (n:'spra.4e';l:$4000;p:0;crc:$cf811201),(n:'spra.4d';l:$4000;p:$4000;crc:$bb4faa4f),
@@ -215,11 +215,9 @@ for f:=0 to $7ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-scroll__x_part2(1,2,464,@scroll_x,0,0,48);
-//Sprites
+scroll_x_cut(1,2,scroll_x,48,208);
 draw_sprites(1,1,$1f,0,0);
-//La parte de arriba tiene prioridad sobre los sprites?
-scroll__x_part2(3,2,464,@scroll_x,0,0,48);
+scroll_x_cut(3,2,scroll_x,48,208); //La parte de arriba tiene prioridad sobre los sprites?
 actualiza_trozo(128,0,256,48,1,128,0,256,48,2);
 actualiza_trozo_final(128,0,256,256,2);
 end;
@@ -593,7 +591,6 @@ begin
  msm5205_1.reset;
  frame_main:=z80_0.tframes;
  frame_snd:=m6800_0.tframes;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -708,6 +705,7 @@ begin
 llamadas_maquina.bucle_general:=irem_m62_principal;
 llamadas_maquina.reset:=reset_irem_m62;
 llamadas_maquina.fps_max:=56.338028;
+llamadas_maquina.scanlines:=284;
 iniciar_irem_m62:=false;
 fillchar(memoria_temp[0],$20000,0);
 iniciar_audio(false);
@@ -715,20 +713,12 @@ screen_init(1,512,512);
 screen_init(2,512,512,false,true);
 screen_init(3,512,512,true);
 case main_vars.tipo_maquina of
-  42:begin
-        x:=256;
-        screen_mod_scroll(1,512,256+128,511,512,512,511);
-        screen_mod_scroll(3,512,256+128,511,512,512,511);
-     end;
-  72,73:begin
-          x:=384;
-          screen_mod_scroll(1,512,384+128,511,512,256+128,511);
-        end;
-  74,75:x:=384;
+  42:x:=256;
+  72..75:x:=384;
 end;
 iniciar_video(x,256);
 //Sound CPU
-m6800_0:=cpu_m6800.create(3579545,284,TCPU_M6803);
+m6800_0:=cpu_m6800.create(3579545,TCPU_M6803);
 m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(irem_m62_play_sound);
@@ -740,12 +730,10 @@ msm5205_1.change_advance(nil);
 ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
 ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910);
-marcade.dswa:=$ff;
-marcade.dswb:=$fd;
 case main_vars.tipo_maquina of
   42:begin  //KungFu Master
         //Main CPU
-        z80_0:=cpu_z80.create(3072000,284);
+        z80_0:=cpu_z80.create(3072000);
         z80_0.change_ram_calls(kungfum_getbyte,kungfum_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -765,12 +753,12 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,kungfum_pal)) then exit;
         cargar_paleta;
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
-        marcade.dswa_val2:=@kungfum_dip_a;
-        marcade.dswb_val2:=@kungfum_dip_b;
+        init_dips(1,kungfum_dip_a,0);
+        init_dips(2,kungfum_dip_b,0);
      end;
      72:begin  //Spelunker
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(spl_getbyte,spl_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -799,7 +787,7 @@ case main_vars.tipo_maquina of
      end;
      73:begin  //Spelunker II
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(spl2_getbyte,spl2_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -829,7 +817,7 @@ case main_vars.tipo_maquina of
      end;
      74:begin  //Lode Runner
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(kungfum_getbyte,ldrun_putbyte);
         z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
@@ -853,7 +841,7 @@ case main_vars.tipo_maquina of
      end;
      75:begin  //Lode Runner II
         //Main CPU
-        z80_0:=cpu_z80.create(4000000,284);
+        z80_0:=cpu_z80.create(4000000);
         z80_0.change_ram_calls(ldrun2_getbyte,ldrun_putbyte);
         z80_0.change_io_calls(ldrun2_inbyte,ldrun2_outbyte);
         //video
@@ -878,6 +866,8 @@ case main_vars.tipo_maquina of
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
      end;
 end;
+marcade.dswa:=$ff;
+marcade.dswb:=$fd;
 //final
 iniciar_irem_m62:=true;
 end;

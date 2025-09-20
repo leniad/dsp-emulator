@@ -25,15 +25,15 @@ const
         (n:'380_j18.2a';l:$20;p:0;crc:$10dd4eaa),(n:'380_j17.7b';l:$100;p:$20;crc:$13989357),
         (n:'380_j16.10c';l:$100;p:$120;crc:$c244f2aa));
         //Dip
-        circusc_dip_a:array [0..2] of def_dip2=(
+        circusc_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-        circusc_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')));
+        circusc_dip_b:array [0..4] of def_dip2=(
         (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
         (mask:$4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$8;name:'Bonus Life';number:2;val2:(8,0);name2:('20K 90K 70K+','30K 110K 80K+')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Hard','Hardest')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  irq_ena:boolean;
@@ -64,7 +64,7 @@ for f:=0 to $3ff do begin
     end;
 end;
 actualiza_trozo(0,0,256,80,2,0,0,256,80,3);
-scroll__x_part(2,3,scroll_x,0,80,176);
+scroll_x_cut(2,3,scroll_x,80,176);
 //Sprites
 for f:=0 to $3f do begin
   atrib:=memoria[spritebank+1+(f*4)];
@@ -76,7 +76,7 @@ for f:=0 to $3f do begin
   actualiza_gfx_sprite(x,y,3,1);
 end;
 actualiza_trozo(0,0,256,80,1,0,0,256,80,3);
-scroll__x_part(1,3,scroll_x,0,80,176);
+scroll_x_cut(1,3,scroll_x,80,176);
 actualiza_trozo_final(16,0,224,256,3);
 end;
 
@@ -201,7 +201,6 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  dac_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -226,19 +225,18 @@ const
 begin
 llamadas_maquina.bucle_general:=circusc_principal;
 llamadas_maquina.reset:=reset_circusc;
+llamadas_maquina.scanlines:=256;
 iniciar_circusc:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(2048000,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(2048000,TCPU_M6809);
 m6809_0.change_ram_calls(circusc_getbyte,circusc_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,$100);
+z80_0:=cpu_z80.create(3579545);
 z80_0.change_ram_calls(circusc_snd_getbyte,circusc_snd_putbyte);
 z80_0.init_sound(circusc_sound);
 //Sound Chip
@@ -283,10 +281,8 @@ for f:=0 to $ff do begin
   gfx[1].colores[f]:=memoria_temp[$120+f] and $f;  //sprites
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$4b;
-marcade.dswa_val2:=@circusc_dip_a;
-marcade.dswb_val2:=@circusc_dip_b;
+init_dips(1,circusc_dip_a,$ff);
+init_dips(2,circusc_dip_b,$4b);
 //final
 reset_circusc;
 iniciar_circusc:=true;

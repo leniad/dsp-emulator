@@ -23,17 +23,17 @@ const
         (n:'gg13.bin';l:$4000;p:$10000;crc:$e80c3fca),(n:'gg12.bin';l:$4000;p:$14000;crc:$7780a925));
         gng_sound:tipo_roms=(n:'gg2.bin';l:$8000;p:0;crc:$615f5b6f);
         //Dip
-        gng_dip_a:array[0..5] of def_dip2=(
+        gng_dip_a:array[0..4] of def_dip2=(
         (mask:$f;name:'Coinage';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
         (mask:$10;name:'Coinage affects';number:2;val2:($10,0);name2:('Coin A','Coin B')),
         (mask:$20;name:'Demo Sounds';number:2;val2:($20,0);name2:('Off','On')),
         (mask:$40;name:'Service Mode';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')),());
-        gng_dip_b:array [0..4] of def_dip2=(
+        (mask:$80;name:'Flip Screen';number:2;val2:($80,0);name2:('Off','On')));
+        gng_dip_b:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 70K+','30K 80K+','20K 80K','30K 80K')),
-        (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),());
+        (mask:$60;name:'Difficulty';number:4;val4:($40,$60,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')));
 
 var
  memoria_rom:array[0..4,0..$1fff] of byte;
@@ -337,21 +337,18 @@ begin
 llamadas_maquina.bucle_general:=gng_principal;
 llamadas_maquina.reset:=reset_gng;
 llamadas_maquina.fps_max:=12000000/2/384/262;
+llamadas_maquina.scanlines:=262;
 llamadas_maquina.save_qsnap:=gng_qsave;
 llamadas_maquina.load_qsnap:=gng_qload;
 iniciar_gng:=false;
 iniciar_audio(false);
-//Background
-screen_init(1,512,512);
-screen_mod_scroll(1,512,256,511,512,256,511);
-//Foreground
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(1,512,512); //Background
+screen_init(2,512,512,true); //Foreground
 screen_init(3,256,256,true);
 screen_init(4,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(6000000,262,TCPU_MC6809);
+m6809_0:=cpu_m6809.Create(6000000,TCPU_MC6809);
 m6809_0.change_ram_calls(gng_getbyte,gng_putbyte);
 if not(roms_load(@memoria_temp,gng_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
@@ -359,7 +356,7 @@ for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2
 copymemory(@memoria[$6000],@memoria_temp[$6000],$2000);
 copymemory(@memoria_rom[4,0],@memoria_temp[$4000],$2000);
 //Sound CPU
-z80_0:=cpu_z80.create(3000000,262);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(gng_sound_update);
 if not(roms_load(@mem_snd,gng_sound)) then exit;
@@ -394,10 +391,8 @@ for f:=0 to 255 do begin
 end;
 set_pal(colores,256);
 //Dip
-marcade.dswa:=$df;
-marcade.dswb:=$7b;
-marcade.dswa_val2:=@gng_dip_a;
-marcade.dswb_val2:=@gng_dip_b;
+init_dips(1,gng_dip_a,$df);
+init_dips(2,gng_dip_b,$7b);
 //final
 iniciar_gng:=true;
 end;

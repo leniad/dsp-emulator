@@ -16,7 +16,7 @@ object load_dsk: Tload_dsk
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   KeyPreview = True
-  LCLVersion = '4.0.0.1'
+  LCLVersion = '4.0.0.3'
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   object GroupBox1: TGroupBox

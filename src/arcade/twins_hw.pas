@@ -297,6 +297,7 @@ begin
 iniciar_twins:=false;
 llamadas_maquina.reset:=reset_twins;
 llamadas_maquina.fps_max:=50.080128;
+llamadas_maquina.scanlines:=312;
 llamadas_maquina.bucle_general:=twins_principal;
 llamadas_maquina.close:=close_twins;
 iniciar_audio(false);
@@ -304,14 +305,14 @@ if main_vars.tipo_maquina<>343 then begin
   screen_init(1,320,204);
   iniciar_video(320,204);
   //Main CPU
-  nec_0:=cpu_nec.create(8000000,312,NEC_V30);
+  nec_0:=cpu_nec.create(8000000,NEC_V30);
   nec_0.change_ram_calls(twins_getbyte,twins_putbyte);
   ay_clock:=2;
 end else begin
   screen_init(1,320,200);
   iniciar_video(320,200);
   //Main CPU
-  nec_0:=cpu_nec.create(8000000,312,NEC_V20);
+  nec_0:=cpu_nec.create(8000000,NEC_V20);
   nec_0.change_ram_calls(hotblock_getbyte,hotblock_putbyte);
   ay_clock:=1;
 end;

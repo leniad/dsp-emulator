@@ -30,24 +30,24 @@ const
         mrgoemon_sprites:array[0..1] of tipo_roms=(
         (n:'621d03.4d';l:$8000;p:0;crc:$66f2b973),(n:'621d04.5d';l:$8000;p:$8000;crc:$47df6301));
         //Dip
-        gberet_dip_a:array [0..2] of def_dip2=(
+        gberet_dip_a:array [0..1] of def_dip2=(
         (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$99,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')),());
-        gberet_dip_b:array [0..5] of def_dip2=(
+        (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$99,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Invalid')));
+        gberet_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('30K 70K+','40K 80K+','50K 100K+','50K 200K+')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-        gberet_dip_c:array [0..2] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+        gberet_dip_c:array [0..1] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(1,0);name2:('Off','On')),
-        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')),());
-        mrgoemon_dip_b:array [0..5] of def_dip2=(
+        (mask:2;name:'Upright Controls';number:2;val2:(2,0);name2:('Single','Dual')));
+        mrgoemon_dip_b:array [0..4] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('2','3','5','7')),
         (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
         (mask:$18;name:'Bonus Life';number:4;val4:($18,$10,8,0);name4:('20K 60K+','30K 70K+','40K 80K+','50K 90K+')),
         (mask:$60;name:'Difficulty';number:4;val4:($60,$40,$20,0);name4:('Easy','Normal','Difficult','Very Difficult')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
 
 var
  scroll_lineas:array[0..$1f] of word;
@@ -271,7 +271,6 @@ begin
  z80_0.reset;
  frame_main:=z80_0.tframes;
  sn_76496_0.reset;
- reset_game_general;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  banco_sprites:=0;
@@ -315,18 +314,17 @@ llamadas_maquina.bucle_general:=gberet_principal;
 llamadas_maquina.close:=cerrar_gberet;
 llamadas_maquina.reset:=reset_gberet;
 llamadas_maquina.fps_max:=60.60606060;
+llamadas_maquina.scanlines:=256;
 llamadas_maquina.save_qsnap:=gberet_qsave;
 llamadas_maquina.load_qsnap:=gberet_qload;
 iniciar_gberet:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 screen_init(3,512,256,true,false);
-screen_mod_scroll(3,512,256,511,256,256,255);
 iniciar_video(240,224);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,256);
+z80_0:=cpu_z80.create(3072000);
 z80_0.change_ram_calls(gberet_getbyte,gberet_putbyte);
 z80_0.init_sound(gberet_sound_update);
 //Sound Chips
@@ -345,7 +343,7 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //poner la paleta
         if not(roms_load(@memoria_temp,gberet_pal)) then exit;
-        marcade.dswb_val2:=@gberet_dip_b;
+        init_dips(2,gberet_dip_b,$4a);
   end;
   203:begin //Mr. Goemon
         if not(roms_load(@memoria_temp,mrgoemon_rom)) then exit;
@@ -359,7 +357,7 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //poner la paleta
         if not(roms_load(@memoria_temp,mrgoemon_pal)) then exit;
-        marcade.dswb_val2:=@mrgoemon_dip_b;
+        init_dips(2,mrgoemon_dip_b,$4a);
   end;
 end;
 for f:=0 to 31 do begin
@@ -375,11 +373,8 @@ for f:=0 to $FF do begin
   gfx[1].colores[f]:=memoria_temp[$120+f] and $f;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$4a;
-marcade.dswc:=$ff;
-marcade.dswa_val2:=@gberet_dip_a;
-marcade.dswc_val2:=@gberet_dip_c;
+init_dips(1,gberet_dip_a,$ff);
+init_dips(3,gberet_dip_c,$ff);
 //final
 reset_gberet;
 iniciar_gberet:=true;

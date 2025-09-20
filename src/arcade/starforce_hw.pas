@@ -30,17 +30,16 @@ const
         (n:'6.10lm';l:$4000;p:0;crc:$5468a21d),(n:'5.9lm';l:$4000;p:$4000;crc:$f71717f8),
         (n:'4.8lm';l:$4000;p:$8000;crc:$dd9d68a4));
         //DIP
-        starforce_dip_a:array [0..5] of def_dip2=(
+        starforce_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(1,0,2,3);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('2C 1C','1C 1C','1C 2C','1C 3C')),
         (mask:$30;name:'Lives';number:4;val4:($30,0,$10,$20);name4:('2','3','4','5')),
         (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('On','Off')),());
-        starforce_dip_b:array [0..2] of def_dip2=(
+        (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('On','Off')));
+        starforce_dip_b:array [0..1] of def_dip2=(
         (mask:7;name:'Bonus Life';number:8;val8:(0,1,2,3,4,5,6,7);name8:('50K 200K 500K','100K 300K 800K','50K 200K','100K 300K','50K','100K','200K','None')),
-        (mask:$38;name:'Difficulty';number:8;val8:(0,$8,$10,$18,$20,$28,$30,$38);name8:('Easyest','Easy','Medium','Difficult','Hard','Hardest','Invalid','Invalid')),());
-        starforce_dip_c:array [0..1] of def_dip2=(
-        (mask:1;name:'Inmunnity';number:2;val2:(1,0);name2:('On','Off')),());
+        (mask:$38;name:'Difficulty';number:8;val8:(0,$8,$10,$18,$20,$28,$30,$38);name8:('Easyest','Easy','Medium','Difficult','Hard','Hardest','Invalid','Invalid')));
+        starforce_dip_c:def_dip2=(mask:1;name:'Inmunnity';number:2;val2:(1,0);name2:('On','Off'));
         //Senjyo
         senjyo_rom:array[0..3] of tipo_roms=(
         (n:'08m_05t.bin';l:$2000;p:0;crc:$b1f3544d),(n:'08k_04t.bin';l:$2000;p:$2000;crc:$e34468a8),
@@ -59,11 +58,10 @@ const
         (n:'08p_13b.bin';l:$2000;p:0;crc:$40127efd),(n:'08s_14b.bin';l:$2000;p:$2000;crc:$42648ffa),
         (n:'08m_11b.bin';l:$2000;p:$4000;crc:$ccc4680b),(n:'08n_12b.bin';l:$2000;p:$6000;crc:$742fafed),
         (n:'08j_09b.bin';l:$2000;p:$8000;crc:$1ee63b5c),(n:'08k_10b.bin';l:$2000;p:$a000;crc:$a9f41ec9));
-        senjyo_dip_b:array [0..2] of def_dip2=(
+        senjyo_dip_b:array [0..1] of def_dip2=(
         (mask:2;name:'Bonus Life';number:2;val2:(2,0);name2:('100K','None')),
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$40,0,$c0);name4:('Easy','Medium','Hard','Hardest')),());
-        senjyo_dip_c:array [0..1] of def_dip2=(
-        (mask:$f;name:'Disable Enemy Fire';number:2;val2:($f,0);name2:('On','Off')),());
+        (mask:$c0;name:'Difficulty';number:4;val4:($80,$40,0,$c0);name4:('Easy','Medium','Hard','Hardest')));
+        senjyo_dip_c:def_dip2=(mask:$f;name:'Disable Enemy Fire';number:2;val2:($f,0);name2:('On','Off'));
         //Baluba
         baluba_rom:array[0..1] of tipo_roms=(
         (n:'0';l:$4000;p:0;crc:$0e2ebe32),(n:'1';l:$4000;p:$4000;crc:$cde97076));
@@ -83,9 +81,9 @@ const
         baluba_sprites:array[0..2] of tipo_roms=(
         (n:'5';l:$4000;p:0;crc:$3b6b6e96),(n:'4';l:$4000;p:$4000;crc:$dd954124),
         (n:'3';l:$4000;p:$8000;crc:$7ac24983));
-        baluba_dip_b:array [0..2] of def_dip2=(
+        baluba_dip_b:array [0..1] of def_dip2=(
         (mask:7;name:'Bonus Life';number:8;val8:(0,1,2,3,4,5,6,7);name8:('50K 200K 500K','100K 300K 800K','50K 200K','100K 300K','50K','100K','200K','None')),
-        (mask:$38;name:'Difficulty';number:8;val8:(0,$8,$10,$18,$20,$28,$30,$38);name8:('Easyest','Easy','Medium','Difficult','Hard','Hardest','Invalid','Invalid')),());
+        (mask:$38;name:'Difficulty';number:8;val8:(0,$8,$10,$18,$20,$28,$30,$38);name8:('Easyest','Easy','Medium','Difficult','Hard','Hardest','Invalid','Invalid')));
 
 var
  scroll_x:array[0..2] of word;
@@ -507,7 +505,6 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
- reset_game_general;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -547,34 +544,28 @@ end;
 begin
 llamadas_maquina.bucle_general:=starforce_principal;
 llamadas_maquina.reset:=reset_starforce;
+llamadas_maquina.scanlines:=256;
 iniciar_starforce:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true); //bg1
-screen_mod_scroll(1,512,256,511,256,256,255);
 case main_vars.tipo_maquina of
   25,320:begin
         screen_init(2,512,256,true); //bg2
-        screen_mod_scroll(2,512,256,511,256,256,255);
         screen_init(3,512,256); //bg3
-        screen_mod_scroll(3,512,256,511,256,256,255);
-        screen_init(4,256,256,true); //chars
   end;
   319:begin
         screen_init(2,768,256,true); //bg2
-        screen_mod_scroll(2,768,256,1023,256,256,255);
         screen_init(3,896,256,true); //bg3
-        screen_mod_scroll(3,896,256,1023,256,256,255);
-        screen_init(4,256,256,true); //chars
-        screen_mod_scroll(4,256,256,255,256,256,255);
       end;
 end;
+screen_init(4,256,256,true); //chars
 screen_init(5,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000);
 z80_0.change_ram_calls(starforce_getbyte,starforce_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(2000000,256);
+z80_1:=cpu_z80.create(2000000);
 z80_1.enable_daisy;
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
@@ -612,12 +603,9 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,starforce_sprites)) then exit;
         decode_bg(4,$200);
         //DIP
-        marcade.dswa:=$c0;
-        marcade.dswa_val2:=@starforce_dip_a;
-        marcade.dswb:=0;
-        marcade.dswb_val2:=@starforce_dip_b;
-        marcade.dswc:=0;
-        marcade.dswc_val2:=@starforce_dip_c;
+        init_dips(1,starforce_dip_a,$c0);
+        init_dips(2,starforce_dip_b,0);
+        init_dips(3,starforce_dip_c,0);
   end;
   319:begin //Senjyo
         draw_video:=update_video_senjyo;
@@ -643,12 +631,9 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,senjyo_sprites)) then exit;
         decode_bg(4,$200);
         //DIP
-        marcade.dswa:=$c0;
-        marcade.dswa_val2:=@starforce_dip_a;
-        marcade.dswb:=$43;
-        marcade.dswb_val2:=@senjyo_dip_b;
-        marcade.dswc:=0;
-        marcade.dswc_val2:=@senjyo_dip_c;
+        init_dips(1,starforce_dip_a,$c0);
+        init_dips(2,senjyo_dip_b,$43);
+        init_dips(3,senjyo_dip_c,0);
       end;
   320:begin  //Baluba
         draw_video:=update_video_starforce;
@@ -672,10 +657,8 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,baluba_sprites)) then exit;
         decode_bg(4,$200);
         //DIP
-        marcade.dswa:=$c0;
-        marcade.dswa_val2:=@starforce_dip_a;
-        marcade.dswb:=0;
-        marcade.dswb_val2:=@baluba_dip_b;
+        init_dips(1,starforce_dip_a,$c0);
+        init_dips(2,baluba_dip_b,0);
   end;
 end;
 //Paleta radar

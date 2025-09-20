@@ -22,15 +22,15 @@ const
         (n:'bx-rom17';l:$80000;p:$200000;crc:$f169633f),(n:'bx-rom12';l:$80000;p:$200001;crc:$71eb160f),
         (n:'bx-rom13';l:$80000;p:$300000;crc:$da34bbb5),(n:'bx-rom16';l:$80000;p:$300001;crc:$55b28ef9));
         burglarx_oki:tipo_roms=(n:'bx-rom1.snd';l:$80000;p:0;crc:$8ae67138);
-        burglarx_dip_a:array [0..3] of def_dip=(
-        (mask:$200;name:'Free Play';number:2;dip:((dip_val:$200;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$800;name:'Demo Sounds';number:2;dip:((dip_val:$800;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$e000;name:'Coinage';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$2000;dip_name:'4C 1C'),(dip_val:$4000;dip_name:'3C 1C'),(dip_val:$6000;dip_name:'2C 1C'),(dip_val:$e000;dip_name:'1C 1C'),(dip_val:$c000;dip_name:'1C 2C'),(dip_val:$a000;dip_name:'1C 3C'),(dip_val:$8000;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),());
-        burglarx_dip_b:array [0..4] of def_dip=(
-        (mask:$300;name:'Bonus Life';number:4;dip:((dip_val:$200;dip_name:'None'),(dip_val:$300;dip_name:'A'),(dip_val:$100;dip_name:'B'),(dip_val:$0;dip_name:'C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$800;name:'Energy';number:2;dip:((dip_val:$0;dip_name:'2'),(dip_val:$800;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$2000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Normal'),(dip_val:$1000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c000;name:'Lives';number:4;dip:((dip_val:$8000;dip_name:'2'),(dip_val:$c000;dip_name:'3'),(dip_val:$4000;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        burglarx_dip_a:array [0..2] of def_dip2=(
+        (mask:$200;name:'Free Play';number:2;val2:($200,0);name2:('Off','On')),
+        (mask:$800;name:'Demo Sounds';number:2;val2:($800,0);name2:('Off','On')),
+        (mask:$e000;name:'Coinage';number:8;val8:(0,$2000,$4000,$6000,$e000,$c000,$a000,$8000);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C')));
+        burglarx_dip_b:array [0..3] of def_dip2=(
+        (mask:$300;name:'Bonus Life';number:4;val4:($200,$300,$100,0);name4:('None','A','B','C')),
+        (mask:$800;name:'Energy';number:2;val2:(0,$800);name2:('2','3')),
+        (mask:$3000;name:'Difficulty';number:4;val4:($2000,$3000,$1000,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$c000;name:'Lives';number:4;val4:($8000,$c000,$4000,0);name4:('2','3','4','5')));
         zeropnt_rom:array[0..1] of tipo_roms=(
         (n:'unico_2.rom2';l:$80000;p:0;crc:$1e599509),(n:'unico_3.rom3';l:$80000;p:$1;crc:$588aeef7));
         zeropnt_sprites:array[0..3] of tipo_roms=(
@@ -40,9 +40,9 @@ const
         (n:'unico_zpscr_z06.bin';l:$200000;p:0;crc:$e1e53cf0),(n:'unico_zpscr_z05.bin';l:$200000;p:$200000;crc:$0d7d4850),
         (n:'unico_zpscr_z07.bin';l:$200000;p:$400000;crc:$bb178f32),(n:'unico_zpscr_z08.bin';l:$200000;p:$600000;crc:$672f02e5));
         zeropnt_oki:tipo_roms=(n:'unico_1.rom1';l:$80000;p:0;crc:$fd2384fa);
-        zeropnt_dip_b:array [0..2] of def_dip=(
-        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$2000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Normal'),(dip_val:$1000;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c000;name:'Lives';number:4;dip:((dip_val:$8000;dip_name:'2'),(dip_val:$c000;dip_name:'3'),(dip_val:$4000;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        zeropnt_dip_b:array [0..1] of def_dip2=(
+        (mask:$3000;name:'Difficulty';number:4;val4:($2000,$3000,$1000,0);name4:('Easy','Normal','Hard','Hardest')),
+        (mask:$c000;name:'Lives';number:4;val4:($8000,$c000,$4000,0);name4:('2','3','4','5')));
 
 var
  rom:array[0..$7ffff] of word;
@@ -320,18 +320,16 @@ end;
 begin
 llamadas_maquina.bucle_general:=unico_principal;
 llamadas_maquina.reset:=reset_unico;
+llamadas_maquina.scanlines:=224;
 iniciar_unico:=false;
 iniciar_audio(true);
 screen_init(1,1024,1024,true);
-screen_mod_scroll(1,1024,512,1023,1024,256,1023);
 screen_init(2,1024,1024,true);
-screen_mod_scroll(2,1024,512,1023,1024,256,1023);
 screen_init(3,1024,1024,true);
-screen_mod_scroll(3,1024,512,1023,1024,256,1023);
-screen_init(4,1024,1024,false,true);
+screen_init(4,512,512,false,true);
 iniciar_video(384,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(16000000,224);
+m68000_0:=cpu_m68000.create(16000000);
 m68000_0.init_sound(unico_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,14318181 div 4,1);
@@ -354,10 +352,8 @@ case main_vars.tipo_maquina of
       gr_mask:=$3fff;
       eventos_unico:=eventos_burglarx;
       //DIP
-      marcade.dswa:=$f7ff;
-      marcade.dswa_val:=@burglarx_dip_a;
-      marcade.dswb:=$ffff;
-      marcade.dswb_val:=@burglarx_dip_b;
+      init_dips(1,burglarx_dip_a,$f7ff);
+      init_dips(2,burglarx_dip_b,$ffff);
   end;
   381:begin //Zero Point
       //cargar roms
@@ -377,10 +373,8 @@ case main_vars.tipo_maquina of
       eventos_unico:=eventos_zeropoint;
       show_mouse_cursor;
       //DIP
-      marcade.dswa:=$800;
-      marcade.dswa_val:=@burglarx_dip_a;
-      marcade.dswb:=0;
-      marcade.dswb_val:=@zeropnt_dip_b;
+      init_dips(1,burglarx_dip_a,$800);
+      init_dips(2,zeropnt_dip_b,0);
   end;
 end;
 //final

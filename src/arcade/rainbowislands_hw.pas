@@ -275,18 +275,17 @@ begin
 iniciar_rainbow:=false;
 llamadas_maquina.bucle_general:=rainbow_principal;
 llamadas_maquina.reset:=reset_rainbow;
+llamadas_maquina.scanlines:=256*CPU_SYNC;
 iniciar_audio(false);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256*CPU_SYNC);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(rainbow_getword,rainbow_putword);
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_SYNC,SOUND_RAINBOWI);
+tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_RAINBOWI);
 //cargar roms
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of

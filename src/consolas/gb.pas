@@ -1134,7 +1134,6 @@ begin
  lr35902_0.reset;
  gb_snd_0.reset;
  sound_engine_change_clock(GB_CLOCK);
- reset_game_general;
  gb_0.scroll_x:=0;
  gb_0.linea_actual:=0;
  fillchar(gb_0.scroll_y[0],$ff,0);
@@ -1418,13 +1417,14 @@ llamadas_maquina.close:=cerrar_gb;
 llamadas_maquina.reset:=reset_gb;
 llamadas_maquina.grabar_snapshot:=grabar_gb;
 llamadas_maquina.fps_max:=59.727500569605832763727500569606;
+llamadas_maquina.scanlines:=154;
 llamadas_maquina.cartuchos:=abrir_gb;
 //Pantallas:  principal+char y sprites
 screen_init(1,256,1,true);
 screen_init(2,256+166+7,154);  //256 pantalla normal + 166 window + 7 de desplazamiento
 iniciar_video(160,144);
 //Main CPU
-lr35902_0:=cpu_lr.create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
+lr35902_0:=cpu_lr.create(GB_CLOCK); //154 lineas, 456 estados t por linea
 lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
 lr35902_0.init_sound(gb_sound_update);
 lr35902_0.change_despues_instruccion(gb_despues_instruccion);

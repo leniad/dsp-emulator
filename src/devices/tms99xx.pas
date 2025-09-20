@@ -22,7 +22,8 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
         read_m:read_mem_type;
         write_m:write_mem_type;
         procedure reset;
-        procedure refresh(linea:word);
+        procedure refresh_ntsc(linea:word);
+        procedure refresh_pal(linea:word);
         function vram_r:byte;
         function register_r:byte;
         procedure register_w(valor:byte);
@@ -289,7 +290,7 @@ begin
     end; //del for de la s
    end; //del if dentro
   end; //del for
-	// Update sprite overflow bits */
+	// Update sprite overflow bits
   if (self.status_reg and $40)=0 then begin
     self.status_reg:=(self.status_reg and $e0) or self.FifthSprite;
     if (fifth_encountered and ((self.status_reg  and $80)=0)) then self.status_reg:=self.status_reg or $40;
@@ -320,13 +321,6 @@ begin //256x192 --> Caracteres de 8x8
         inc(ptemp);
         k:=k shl 1;
      end;
-     {if (k and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $10)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $08)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $04)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $02)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $01)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);}
  end;
  fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES,paleta[self.bgcolor]);
 end;
@@ -353,11 +347,6 @@ begin //240x192 --> Caracteres de 6x8
         inc(ptemp);
         k:=k shl 1;
      end;
-     {if (k and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and $10)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and 8)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (k and 4)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);}
  end;
  fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES_TEXT,paleta[self.bgcolor]);
 end;
@@ -385,12 +374,6 @@ begin //240x192 --> Caracteres de 6x8
         inc(ptemp);
         pattern:=pattern shl 1;
      end;
-     {if (pattern and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-     if (pattern and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-     if (pattern and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-     if (pattern and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-     if (pattern and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-     if (pattern and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);}
  end;
  fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES_TEXT,paleta[self.bgcolor]);
 end;
@@ -409,8 +392,8 @@ begin //256x192 --> Caracteres de 8x8
      charcode:=self.read_m(name_base)+(linea shr 6)*256;
      name_base:=name_base+1;
      patternptr:=self.pattern+((charcode and self.patternmask)*8)+(linea and 7);
-     colorptr:=self.color+((charcode and self.colormask)*8)+(linea and 7);
      pattern:=self.read_m(patternptr);
+     colorptr:=self.color+((charcode and self.colormask)*8)+(linea and 7);
      bc:=self.read_m(colorptr);
      fc:=bc shr 4;
      bc:=bc and $f;
@@ -420,14 +403,6 @@ begin //256x192 --> Caracteres de 8x8
         inc(ptemp);
         pattern:=pattern shl 1;
      end;
-     {if (pattern and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and $10)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and 8)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and 4)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and 2)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-     if (pattern and 1)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);}
  end;
  fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES,paleta[self.bgcolor]);
 end;
@@ -511,12 +486,12 @@ end;
 
 {Lineas de video fisicas NTSC
                             visible
+Top blanking          13      -
+Top border            27      *
 Active display       192      *
 Bottom border         24      *
 Bottom blanking        3      -
 Vertical sync          3      -
-Top blanking          13      -
-Top border            27      *
 Total                262     243
 
 Pixes fisicos dentro de la linea
@@ -530,45 +505,84 @@ Color burst     14 14     -
 Left blanking    8 8      -
 Left border     19 13     *
 Total          342 342   284}
-procedure tms99xx_chip.refresh(linea:word);
+procedure tms99xx_chip.refresh_ntsc(linea:word);
 begin
   //ESPERO UNA LINEA FISICA
   //Pantalla apagada, solo pinto el color de fondo
   if (self.regs[1] and $40)=0 then begin
     single_line(0,linea,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
-    if linea=192 then begin
-                self.status_reg:=self.status_reg or $80;
-                self.int:=(self.regs[1] and $20)<>0;
-                if @self.IRQ_Handler<>nil then self.IRQ_Handler(self.int);
+    if linea=232 then begin
+      self.status_reg:=self.status_reg or $80;
+      self.int:=(self.regs[1] and $20)<>0;
+      if @self.IRQ_Handler<>nil then self.IRQ_Handler(self.int);
     end;
     exit;
   end;
   case linea of
-     0..191:begin //Pantalla visible (192)
+     0..12:; //syncs
+     13..39:single_line(0,linea-13,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     40..231:begin //Pantalla visible (192)
                case self.modo_video of
-                    0:self.draw_mode0(linea);
-                    1:self.draw_mode1(linea);
-                    2:self.draw_mode2(linea);
-                    3:self.draw_mode12(linea);
-                    4:self.draw_mode3(linea);
-                    6:self.draw_mode23(linea);
+                    0:self.draw_mode0(linea-40);
+                    1:self.draw_mode1(linea-40);
+                    2:self.draw_mode2(linea-40);
+                    3:self.draw_mode12(linea-40);
+                    4:self.draw_mode3(linea-40);
+                    6:self.draw_mode23(linea-40);
                     5,7:self.draw_modebogus;
                end;
-               putpixel(0,linea+LINEAS_TOP_BORDE,PIXELS_VISIBLES_TOTAL,punbuf,self.pant);
-               if ((self.regs[1] and $50)=$40) then draw_sprites(linea)
+               putpixel(0,linea-40+27,PIXELS_VISIBLES_TOTAL,punbuf,self.pant);
+               if ((self.regs[1] and $50)=$40) then draw_sprites(linea-40)
                 else self.FifthSprite:=$1f;
                //if linea=191 then self.status_reg:=self.status_reg or $80;
             end;
-     192:begin
-            single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     232:begin
+            single_line(0,linea-13,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
             self.status_reg:=self.status_reg or $80;
             self.exec_interrupt;
          end;
-     193..215:single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
-     //Lineas no dibujadas sincronismos (3+3+13)
-     216..234:;
-     //Borde superior (27)
-     235..261:single_line(0,linea-235,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     233..255:single_line(0,linea-13,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     256..261:; //sincronismos (3+3)
+  end;
+end;
+
+procedure tms99xx_chip.refresh_pal(linea:word);
+begin
+  //ESPERO UNA LINEA FISICA
+  //Pantalla apagada, solo pinto el color de fondo
+  if (self.regs[1] and $40)=0 then begin
+    single_line(0,linea,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+    if linea=260 then begin
+      self.status_reg:=self.status_reg or $80;
+      self.int:=(self.regs[1] and $20)<>0;
+      if @self.IRQ_Handler<>nil then self.IRQ_Handler(self.int);
+    end;
+    exit;
+  end;
+  case linea of
+     0..40:; //sync + borde
+     41..67:single_line(0,linea-41,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     68..259:begin //Pantalla visible (192)
+               case self.modo_video of
+                    0:self.draw_mode0(linea-68);
+                    1:self.draw_mode1(linea-68);
+                    2:self.draw_mode2(linea-68);
+                    3:self.draw_mode12(linea-68);
+                    4:self.draw_mode3(linea-68);
+                    6:self.draw_mode23(linea-68);
+                    5,7:self.draw_modebogus;
+               end;
+               putpixel(0,linea-68+27,PIXELS_VISIBLES_TOTAL,punbuf,self.pant);
+               if ((self.regs[1] and $50)=$40) then draw_sprites(linea-68)
+                else self.FifthSprite:=$1f;
+            end;
+     260:begin
+            single_line(0,linea-41,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+            self.status_reg:=self.status_reg or $80;
+            self.exec_interrupt;
+         end;
+     261..283:single_line(0,linea-41,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     284..312:; //borde + sincronismos (3+3)
   end;
 end;
 
@@ -582,7 +596,7 @@ end;
 //change register
 procedure change_reg(tms:tms99xx_chip;addr,Val:byte);
 const
-  Mask:array[0..7] of byte=($ff,$fb,$0f,$ff,$07,$7f,$07,$ff);
+  Mask:array[0..7] of byte=(3,$fb,$0f,$ff,7,$7f,7,$ff);
 begin
   val:=val and mask[addr];
   tms.regs[addr]:=Val;

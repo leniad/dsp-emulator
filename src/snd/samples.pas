@@ -237,7 +237,7 @@ load_samples:=false;
 getmem(data_samples,sizeof(tipo_samples));
 //Inicializo un buffer
 getmem(ptemp,$100000);
-sample_size:=sizeof(nombre_samples) div sizeof(tipo_nombre_samples);
+sample_size:=length(nombre_samples);
 for f:=0 to (sample_size-1) do begin
     if not(load_file_from_zip(Directory.Arcade_samples+nombre_zip,nombre_samples[f].nombre,ptemp,longitud,crc,false)) then begin
         freemem(data_samples);

@@ -203,19 +203,18 @@ begin
 iniciar_opwolf:=false;
 llamadas_maquina.bucle_general:=opwolf_principal;
 llamadas_maquina.reset:=reset_opwolf;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(true);
 screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000);
 m68000_0.change_ram16_calls(opwolf_getword,opwolf_putword);
 if not(roms_load16w(@rom,opwolf_rom)) then exit;
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256,SOUND_OPWOLF);
+tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_OPWOLF);
 if not(roms_load(msm5205_0.rom_data,opwolf_adpcm)) then exit;
 if not(roms_load(msm5205_1.rom_data,opwolf_adpcm)) then exit;
 //cargar sonido+ponerlas en su banco+adpcm

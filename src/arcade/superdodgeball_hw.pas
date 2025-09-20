@@ -20,15 +20,13 @@ const
         (n:'22j6-0.83';l:$10000;p:0;crc:$744a26e3),(n:'22j7-0.82';l:$10000;p:$10000;crc:$2fa1de21));
         sdodgeball_proms:array[0..1] of tipo_roms=(
         (n:'mb7132e.158';l:$400;p:0;crc:$7e623722),(n:'mb7122e.159';l:$400;p:$400;crc:$69706e8d));
-        sdodgeball_dip_a:array [0..1] of def_dip2=(
-        (mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Very Hard')),());
-        sdodgeball_dip_b:array [0..4] of def_dip2=(
+        sdodgeball_dip_a:def_dip2=(mask:$c0;name:'Difficulty';number:4;val4:($80,$c0,$40,0);name4:('Easy','Normal','Hard','Very Hard'));
+        sdodgeball_dip_b:array [0..3] of def_dip2=(
         (mask:7;name:'Coin A';number:8;val8:(0,1,2,7,6,5,4,3);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$38;name:'Coin B';number:8;val8:(0,8,$10,$38,$30,$28,$20,$10);name8:('4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','1C 4C','1C 5C')),
         (mask:$40;name:'Flip Screen';number:2;val2:($40,0);name2:('Off','On')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
-        sdodgeball_dip_c:array [0..1] of def_dip2=(
-        (mask:4;name:'Allow Continue';number:2;val2:(0,4);name2:('No','Yes')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')));
+        sdodgeball_dip_c:def_dip2=(mask:4;name:'Allow Continue';number:2;val2:(0,4);name2:('No','Yes'));
 
 var
   rom_bank:array[0..1,0..$3fff] of byte;
@@ -56,7 +54,7 @@ for f:=0 to $7ff do begin
       gfx[0].buffer[pos]:=false;
     end;
 end;
-scroll__x_part2(1,2,8,@scroll_x[0]);
+scroll__x_part2(1,2,8,@scroll_x);
 for f:=0 to $3f do begin
   atrib:=memoria[$1001+(f*4)];
 	nchar:=memoria[$1002+(f*4)]+((atrib and 7) shl 8);
@@ -296,26 +294,26 @@ begin
 llamadas_maquina.bucle_general:=principal_sdodgeball;
 llamadas_maquina.reset:=reset_sdodgeball;
 llamadas_maquina.fps_max:=12000000/2/384/272;
+llamadas_maquina.scanlines:=272;
 iniciar_sdodgeball:=false;
 iniciar_audio(true); //Stereo!
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 iniciar_video(256,240);
 //Main CPU
-m6502_0:=cpu_m6502.create(12000000 div 6,272,TCPU_M6502);
+m6502_0:=cpu_m6502.create(12000000 div 6,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_sdodgeball,putbyte_sdodgeball);
 if not(roms_load(@memoria_temp,sdodgeball_rom)) then exit;
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 copymemory(@rom_bank[0,0],@memoria_temp[0],$4000);
 copymemory(@rom_bank[1,0],@memoria_temp[$4000],$4000);
 //Sound CPU
-m6809_0:=cpu_m6809.Create(12000000 div 2,272,TCPU_MC6809);
+m6809_0:=cpu_m6809.Create(12000000 div 2,TCPU_MC6809);
 m6809_0.change_ram_calls(getbyte_snd_sdodgeball,putbyte_snd_sdodgeball);
 m6809_0.init_sound(sdodgeball_sound_update);
 if not(roms_load(@mem_snd,sdodgeball_snd)) then exit;
 //MCU CPU
-m6800_0:=cpu_m6800.create(4000000,272,TCPU_HD63701Y);
+m6800_0:=cpu_m6800.create(4000000,TCPU_HD63701Y);
 m6800_0.change_ram_calls(sdodgeball_mcu_getbyte,sdodgeball_mcu_putbyte);
 m6800_0.change_io_calls(nil,sdodgeball_r2,nil,nil,nil,nil,nil,nil);
 m6800_0.change_iox_calls(sdodgeball_r5,sdodgeball_r6,sdodgeball_w5,nil);
@@ -361,12 +359,9 @@ for f:=0 to $3ff do begin
 end;
 set_pal(colores,$400);
 //DIP
-marcade.dswa:=$fc;
-marcade.dswa_val2:=@sdodgeball_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val2:=@sdodgeball_dip_b;
-marcade.dswc:=$ff;
-marcade.dswc_val2:=@sdodgeball_dip_c;
+init_dips(1,sdodgeball_dip_a,$fc);
+init_dips(2,sdodgeball_dip_b,$ff);
+init_dips(3,sdodgeball_dip_c,$ff);
 //final
 reset_sdodgeball;
 iniciar_sdodgeball:=true;

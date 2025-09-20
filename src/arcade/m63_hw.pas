@@ -28,17 +28,17 @@ const
         (n:'wt_a-3m.bin';l:$1000;p:$2000;crc:$e7e468ae),(n:'wt_a-3n.bin';l:$1000;p:$3000;crc:$0741d1a9),
         (n:'wt_a-3p.bin';l:$1000;p:$4000;crc:$7299f362),(n:'wt_a-3s.bin';l:$1000;p:$5000;crc:$9b37d50d));
         wilytower_misc:tipo_roms=(n:'wt_a-6d.bin';l:$1000;p:0;crc:$a5dde29b);
-        wilytower_dip_a:array [0..4] of def_dip2=(
+        wilytower_dip_a:array [0..3] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(0,1,2,3);name4:('2','3','4','5')),
         (mask:$c;name:'Bonus Points Rate';number:4;val4:(0,4,8,$c);name4:('Normal','x1.2','x1.4','x1.6')),
         (mask:$30;name:'Coin A';number:4;val4:($20,$10,0,$30);name4:('3C 1C','2C 1C','1C 1C','Free Play')),
-        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 5C','1C 6C')),());
-        wilytower_dip_b:array [0..5] of def_dip2=(
+        (mask:$c0;name:'Coin B';number:4;val4:(0,$40,$80,$c0);name4:('1C 2C','1C 3C','1C 5C','1C 6C')));
+        wilytower_dip_b:array [0..4] of def_dip2=(
         (mask:1;name:'Flip Screen';number:2;val2:(0,1);name2:('Off','On')),
         (mask:2;name:'Cabinet';number:2;val2:(2,0);name2:('Upright','Cocktail')),
         (mask:4;name:'Coin Mode';number:2;val2:(0,4);name2:('Mode 1','Mode 2')),
         (mask:$10;name:'Stop Mode';number:2;val2:(0,$10);name2:('Off','On')),
-        (mask:$40;name:'Invulnerability';number:2;val2:(0,$40);name2:('Off','On')),());
+        (mask:$40;name:'Invulnerability';number:2;val2:(0,$40);name2:('Off','On')));
         //Fighting Basketball
         fightbasket_rom:array[0..4] of tipo_roms=(
         (n:'fb14.0f';l:$2000;p:0;crc:$82032853),(n:'fb13.2f';l:$2000;p:$2000;crc:$5306df0f),
@@ -61,12 +61,12 @@ const
         (n:'fb01.42a';l:$2000;p:0;crc:$1200b220),(n:'fb02.41a';l:$2000;p:$2000;crc:$0b67aa82),
         (n:'fb03.40a';l:$2000;p:$4000;crc:$c71269ed),(n:'fb04.39a';l:$2000;p:$6000;crc:$02ddc42d),
         (n:'fb05.38a';l:$2000;p:$8000;crc:$72ea6b49));
-        fightbasket_dip_a:array [0..5] of def_dip2=(
+        fightbasket_dip_a:array [0..4] of def_dip2=(
         (mask:3;name:'Coin A';number:4;val4:(3,1,0,2);name4:('3C 1C','2C 1C','1C 1C','1C 2C')),
         (mask:$c;name:'Coin B';number:4;val4:(4,0,8,$c);name4:('1C 1C','1C 2C','1C 4C','99 Credits/Sound Test')),
         (mask:$20;name:'Time Count Down';number:2;val2:(0,$20);name2:('Slow','Too Fast')),
         (mask:$40;name:'Cabinet';number:2;val2:($40,0);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')),());
+        (mask:$80;name:'Demo Sounds';number:2;val2:(0,$80);name2:('Off','On')));
 
 var
  sound_latch,snd_status,pal_bank,p1_data,p2_data,sprite_y:byte;
@@ -393,17 +393,17 @@ end;
 begin
 llamadas_maquina.bucle_general:=irem_m63_principal;
 llamadas_maquina.reset:=reset_irem_m63;
+llamadas_maquina.scanlines:=256;
 iniciar_irem_m63:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(12000000 div 4,$100);
+z80_0:=cpu_z80.create(12000000 div 4);
 //Sound CPU
-mcs48_0:=cpu_mcs48.create(12000000 div 4,$100,I8039);
+mcs48_0:=cpu_mcs48.create(12000000 div 4,I8039);
 mcs48_0.change_ram_calls(m63_snd_getbyte,nil);
 //IRQ Sound CPU
 timers.init(mcs48_0.numero_cpu,12000000/4/15/60,m63_snd_irq,nil,true);
@@ -438,10 +438,8 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(3,0,16*8,$200*16*8*2,$200*16*8,0);
         convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //dip
-        marcade.dswa_val2:=@wilytower_dip_a;
-        marcade.dswb_val2:=@wilytower_dip_b;
-        marcade.dswa:=1;
-        marcade.dswb:=2;
+        init_dips(1,wilytower_dip_a,1);
+        init_dips(2,wilytower_dip_b,2);
         //poner la paleta
         if not(roms_load(@memoria_temp,wilytower_pal)) then exit;
         for f:=0 to $ff do begin
@@ -509,8 +507,7 @@ case main_vars.tipo_maquina of
         gfx_set_desc_data(3,0,16*8,$400*16*8*2,$400*16*8,0);
         convert_gfx(2,0,@memoria_temp,@ps_fb_x,@ps_y,false,false);
         //dip
-        marcade.dswa_val2:=@fightbasket_dip_a;
-        marcade.dswa:=$c4;
+        init_dips(1,fightbasket_dip_a,$c4);
         //poner la paleta
         if not(roms_load(@memoria_temp,fightbasket_pal)) then exit;
         for f:=0 to $ff do begin

@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}nz80,main_engine,ym_2151,
 
 type
   tc0140syt_chip=class
-    constructor create(clock:dword;frames_div:word;sound_type:byte);
+    constructor create(clock:dword;sound_type:byte);
     destructor free;
     public
       z80:cpu_z80;
@@ -254,9 +254,9 @@ case direccion of
 end;
 end;
 
-constructor tc0140syt_chip.create(clock:dword;frames_div:word;sound_type:byte);
+constructor tc0140syt_chip.create(clock:dword;sound_type:byte);
 begin
-  self.z80:=cpu_z80.create(clock,frames_div);
+  self.z80:=cpu_z80.create(clock);
   self.sound_type:=sound_type;
   case sound_type of
     SOUND_RASTAN:begin

@@ -13,9 +13,7 @@ uses lib_sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
      {$ifndef windows}LMessages,{$endif}
      //misc
      sound_engine,lenguaje,controls_engine,main_engine,loadrom,config_general,
-     init_games,tape_window,timer_engine,misc_functions,
-     //Devices
-     vars_hide;
+     init_games;
 
 type
 
@@ -27,9 +25,6 @@ type
     BitBtn12: TBitBtn;
     BitBtn13: TBitBtn;
     BitBtn14: TBitBtn;
-    BitBtn15: TBitBtn;
-    BitBtn16: TBitBtn;
-    BitBtn17: TBitBtn;
     BitBtn19: TBitBtn;
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
@@ -38,13 +33,8 @@ type
     BitBtn8: TBitBtn;
     BitBtn9: TBitBtn;
     btncfg: TBitBtn;
-    Edit1: TEdit;
-    GroupBox1: TGroupBox;
     Image1: TImage;
-    Image2: TImage;
     ImageList2: TImageList;
-    Label1: TLabel;
-    Label2: TLabel;
     leds20111: TMenuItem;
     MainMenu1: TMainMenu;
     Archivo1: TMenuItem;
@@ -74,7 +64,7 @@ type
     Commando1: TMenuItem;
     LadyBugHW: TMenuItem;
     Iremm621: TMenuItem;
-    BubbleBobble1: TMenuItem;
+    BubbleBobbleHW: TMenuItem;
     Jungler1: TMenuItem;
     AsteroidsHW1: TMenuItem;
     bt1: TMenuItem;
@@ -333,6 +323,16 @@ type
     cotton1: TMenuItem;
     dotron1: TMenuItem;
     Auto1: TMenuItem;
+    BayRoute1: TMenuItem;
+    BubbleBobble1: TMenuItem;
+    MSX1_1: TMenuItem;
+    Tokio1: TMenuItem;
+    SuperBobleBoble1: TMenuItem;
+    Willow1: TMenuItem;
+    N1941: TMenuItem;
+    Nemo1: TMenuItem;
+    SonicBoom1: TMenuItem;
+    timescanner1: TMenuItem;
     Pausa1: TMenuItem;
     tron1: TMenuItem;
     timber1: TMenuItem;
@@ -610,7 +610,6 @@ type
     Z801: TMenuItem;
     Ordenadores8bits1: TMenuItem;
     N3X1: TMenuItem;
-    Panel3: TPanel;
     ScanLines2X1: TMenuItem;
     ScanLines1: TMenuItem;
     N2X1: TMenuItem;
@@ -618,8 +617,6 @@ type
     SinSonido1: TMenuItem;
     consonido1: TMenuItem;
     Reset1: TMenuItem;
-    StringGrid1: TStringGrid;
-    StringGrid2: TStringGrid;
     Video1: TMenuItem;
     N1: TMenuItem;
     Salir1: TMenuItem;
@@ -642,6 +639,7 @@ type
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
+    procedure MenuItem61Click(Sender: TObject);
     procedure Pausa1Click(Sender: TObject);
     procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -668,15 +666,13 @@ type
 
 var
   principal1: Tprincipal1;
-
-implementation
-uses tap_tzx,spectrum_misc,acercade,lenslock,file_engine,arcade_config,
-     config,config_cpc,config_sms,config_gb;
-
-var
   //Misc Vars
   tipo_new:word;
   estado_actual:TEmuStatus;
+
+implementation
+uses tap_tzx,spectrum_misc,acercade,lenslock,arcade_config,
+     config,config_cpc,config_sms,config_gb,principal_misc;
 
 { Tprincipal1 }
 procedure sync_all;
@@ -703,81 +699,8 @@ end;
 end;
 
 procedure Tprincipal1.fSaveGIF(Sender: TObject);
-var
-  r:integer;
-  nombre:string;
-  indice:byte;
-  nombre2:ansistring;
-  rect2:libsdl_rect;
-  temp_s:libsdlp_Surface;
-  gif:tgifimage;
-  png:TPortableNetworkGraphic;
-  JPG:TJPEGImage;
-  imagen1:tbitmap;
 begin
-estado_actual:=EmuStatus;
-EmuStatus:=EsPause;
-if saverom(nombre,indice,SBITMAP) then begin
-  case indice of
-    1:nombre:=ChangeFileExt(nombre,'.png');
-    2:nombre:=ChangeFileExt(nombre,'.jpg');
-    3:nombre:=ChangeFileExt(nombre,'.gif');
-  end;
-  if FileExists(nombre) then begin
-    r:=application.messagebox(pansichar(leng.mensajes[3]),pansichar(leng.mensajes[6]), MB_YESNO or MB_ICONWARNING);
-    if r=IDNO then begin
-       restart_emu;
-       exit;
-    end;
-    deletefile(nombre);
-  end;
-  Directory.spectrum_image:=extractfiledir(nombre)+main_vars.cadena_dir;
-  rect2.x:=0;
-  rect2.y:=0;
-  case main_screen.video_mode of
-      1,3:begin
-            rect2.w:=p_final[0].x;
-            rect2.h:=p_final[0].y;
-          end;
-      2,4:begin
-            rect2.w:=p_final[0].x*2;
-            rect2.h:=p_final[0].y*2;
-          end;
-      5:begin
-            rect2.w:=p_final[0].x*3;
-            rect2.h:=p_final[0].y*3;
-          end;
-  end;
-  temp_s:=SDL_CreateRGBSurface(0,rect2.w,rect2.h,16,0,0,0,0);
-  SDL_UpperBlit(pantalla[0],@rect2,temp_s,@rect2);
-  nombre2:=directory.Base+'temp.bmp';
-  SDL_SaveBMP_RW(temp_s,SDL_RWFromFile(pointer(nombre2),'wb'), 1);
-  SDL_FreeSurface(temp_s);
-  imagen1:=tbitmap.Create;
-  imagen1.LoadFromFile(nombre2);
-  deletefile(nombre2);
-  case indice of
-    1:begin //png
-         PNG:=TPortableNetworkGraphic.Create;
-         PNG.Assign(imagen1);
-         PNG.SaveToFile(nombre);
-         PNG.free;
-      end;
-    2:begin //jpg
-         jpg:=TJPEGImage.Create;
-         jpg.Assign(imagen1);
-         jpg.SaveToFile(nombre);
-         jpg.free;
-      end;
-    3:begin
-        gif:=tgifimage.create;
-        gif.assign(imagen1);
-        gif.SaveToFile(nombre);
-        gif.free;
-    end;
-  end;
-  imagen1.Free;
-end;
+principal_fSaveGif;
 restart_emu;
 end;
 
@@ -785,10 +708,11 @@ procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
 begin
-tmp_idioma:=Tmenuitem(sender).Tag;
+tmp_idioma:=Tmenuitem(sender).tag;
 if main_vars.idioma<>tmp_idioma then begin
   main_vars.idioma:=tmp_idioma;
-  cambiar_idioma(tmp_idioma);
+  cambiar_idioma;
+  cambiar_idioma_ventanas;
 end;
 sync_all;
 end;
@@ -807,21 +731,9 @@ end;
 end;
 
 procedure Tprincipal1.CambiarMaquina(Sender:TObject);
-var
-  tipo:word;
 begin
 todos_false;
-tipo:=tipo_cambio_maquina(sender);
-if main_vars.tipo_maquina<>tipo then begin
-  menus_false(tipo);
-  if tipo>9 then begin
-    if tape_window1.Showing then tape_window1.close;
-    if lenslock1.Showing then lenslock1.close;
-  end;
-  if main_vars.driver_ok then EmuStatus:=EsPause;
-  tipo_new:=tipo;
-  timer3.Enabled:=true;
-end;
+tipo_new:=principal_cambiarmaquina(tipo_cambio_maquina(sender));
 end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
@@ -837,9 +749,6 @@ main_vars.cadena_dir:='\';
 {$else}
 main_vars.cadena_dir:='/';
 {$endif}
-Init_sdl_lib;
-timers:=timer_eng.create;
-EmuStatus:=EsStoped;
 directory.Base:=ExtractFilePath(application.ExeName);
 {$ifdef darwin}
 //OSX: Subir tres veces el directorio para saber el directorio real...
@@ -851,42 +760,16 @@ for f:=length(cadena) downto 1 do begin
 end;
 directory.Base:=copy(cadena,1,f);
 {$endif}
-file_ini_load;
-cambiar_idioma(main_vars.idioma);
-if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
-if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
-if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
-case main_screen.video_mode of
-  1,3,5:begin
-        principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
-        principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
-      end;
-  2,4:begin
-        principal1.Left:=(screen.Width div 2)-principal1.Width;
-        principal1.Top:=(screen.Height div 2)-principal1.Height;
-      end;
-end;
-//No puedo evitar este timer... Hasta que no está creada la ventana de la aplicacion no puedo crear la ventana interior
-principal1.timer2.Enabled:=true;
+principal_formcreate;
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-if cinta_tzx.cargada then vaciar_cintas;
-if ((addr(llamadas_maquina.close)<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
-sound_engine_close;
-reset_dsp;
-file_ini_save;
-close_joystick;
-sdl_videoquit;
-sdl_quit;
-close_sdl_lib;
+principal_formclose;
 halt(0);
 end;
 
-procedure Tprincipal1.CambiarVideo(Sender: TObject);
+procedure Tprincipal1.CambiarVideo(Sender:TObject);
 var
   nuevo:byte;
 begin
@@ -993,10 +876,8 @@ end;
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_vars.mensaje_principal:='';
-if addr(llamadas_maquina.reset)<>nil then begin
-   reset_game_general;
-   llamadas_maquina.reset;
-end;
+reset_game_general;
+if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
 sync_all;
 end;
 
@@ -1022,6 +903,11 @@ procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
 FLoadRom.Showmodal;
 sync_all;
+end;
+
+procedure Tprincipal1.MenuItem61Click(Sender: TObject);
+begin
+
 end;
 
 procedure Tprincipal1.Pausa1Click(Sender: TObject);
@@ -1069,44 +955,11 @@ end;
 
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
-timer3.enabled:=false;
-if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
-sound_engine_close;
-main_vars.tipo_maquina:=tipo_new;
-reset_dsp;
-cargar_maquina(main_vars.tipo_maquina);
-main_vars.driver_ok:=false;
-if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
-if not(main_vars.driver_ok) then begin
-  EmuStatus:=EsStoped;
-  principal1.timer1.Enabled:=false;
-  principal1.BitBtn1.Enabled:=false;
-  principal1.BitBtn2.Enabled:=false;
-  principal1.BitBtn3.Enabled:=false;
-  principal1.BitBtn5.Enabled:=false;
-  principal1.BitBtn6.Enabled:=false;
-  principal1.BitBtn8.Enabled:=false;
-  principal1.BitBtn9.Enabled:=false;
-  principal1.BitBtn10.Enabled:=false;
-  principal1.BitBtn11.Enabled:=false;
-  principal1.BitBtn12.Enabled:=false;
-  principal1.BitBtn14.Enabled:=false;
-  principal1.BitBtn19.Enabled:=false;
-end else begin
-  if ((marcade.dswa_val=nil) and (marcade.dswa_val2=nil)) then bitbtn8.Enabled:=false
-    else bitbtn8.Enabled:=true;
-  timers.autofire_init;
-  principal1.BitBtn3.Glyph:=nil;
-  principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
-  timer1.Enabled:=true;
-  EmuStatus:=EsRunning;
+  principal_timer3;
   sync_all;
-  if @llamadas_maquina.reset<>nil then begin
-     reset_game_general;
-     llamadas_maquina.reset;
-  end;
+  if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
+  reset_game_general;
   llamadas_maquina.bucle_general;
-end;
 end;
 
 {$IFDEF WINDOWS}

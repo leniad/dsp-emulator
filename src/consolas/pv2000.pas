@@ -134,7 +134,7 @@ while EmuStatus=EsRunning do begin
     eventos_pv2000;
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    tms_0.refresh(f);
+    tms_0.refresh_ntsc(f);
   end;
   actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
   video_sync;
@@ -255,12 +255,13 @@ llamadas_maquina.reset:=reset_pv2000;
 llamadas_maquina.cartuchos:=abrir_pv2000;
 llamadas_maquina.grabar_snapshot:=pv2000_grabar_snapshot;
 llamadas_maquina.fps_max:=59.922738;
+llamadas_maquina.scanlines:=262;
 iniciar_pv2000:=false;
 iniciar_audio(false);
 screen_init(1,284,243);
 iniciar_video(284,243);
 //Main CPU
-z80_0:=cpu_z80.create(7159090 div 2,262);
+z80_0:=cpu_z80.create(7159090 div 2);
 z80_0.change_ram_calls(pv2000_getbyte,pv2000_putbyte);
 z80_0.change_io_calls(pv2000_in,pv2000_out);
 z80_0.init_sound(pv2000_sound_update);

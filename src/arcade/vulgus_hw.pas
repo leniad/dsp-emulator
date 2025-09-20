@@ -27,15 +27,15 @@ const
         (n:'2-4a.bin';l:$2000;p:$4000;crc:$206a13f1),(n:'2-5a.bin';l:$2000;p:$6000;crc:$b6d81984),
         (n:'2-6a.bin';l:$2000;p:$8000;crc:$5a26b38f),(n:'2-7a.bin';l:$2000;p:$a000;crc:$1e1ca773));
         //Dip
-        vulgus_dip_a:array [0..3] of def_dip2=(
+        vulgus_dip_a:array [0..2] of def_dip2=(
         (mask:3;name:'Lives';number:4;val4:(1,2,3,0);name4:('1','2','3','5')),
         (mask:$1c;name:'Coin B';number:8;val8:($10,8,$18,4,$1c,$c,$14,0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','Invalid')),
-        (mask:$e0;name:'Coin A';number:8;val8:($80,$40,$c0,$20,$e0,$60,$a0,0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','Free Play')),());
-        vulgus_dip_b:array [0..4] of def_dip2=(
+        (mask:$e0;name:'Coin A';number:8;val8:($80,$40,$c0,$20,$e0,$60,$a0,0);name8:('5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','Free Play')));
+        vulgus_dip_b:array [0..3] of def_dip2=(
         (mask:4;name:'Demo Music';number:2;val2:(0,4);name2:('Off','On')),
         (mask:8;name:'Demo Sounds';number:2;val2:(0,8);name2:('Off','On')),
         (mask:$70;name:'Bonus Life';number:8;val8:($30,$50,$10,$70,$60,$20,$40,0);name8:('10K 50K','10K 60K','10K 70K','20K 60K','20K 70K','20K 80K','30K 70K','None')),
-        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')),());
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
 
 var
  scroll_x,scroll_y:word;
@@ -259,18 +259,18 @@ begin
 llamadas_maquina.bucle_general:=vulgus_principal;
 llamadas_maquina.reset:=reset_vulgus;
 llamadas_maquina.fps_max:=59.59;
+llamadas_maquina.scanlines:=256;
 iniciar_vulgus:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
 screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(3000000,256);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(vulgus_getbyte,vulgus_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,256);
+z80_1:=cpu_z80.create(3000000);
 z80_1.change_ram_calls(vulgus_snd_getbyte,vulgus_snd_putbyte);
 z80_1.init_sound(vulgus_sound_update);
 //IRQ Sound CPU
@@ -329,10 +329,8 @@ for f:=0 to $ff do begin
     gfx[2].colores[3*32*8+f]:=memoria_temp[$500+f]+192;
 end;
 //Dip
-marcade.dswa:=$ff;
-marcade.dswb:=$7f;
-marcade.dswa_val2:=@vulgus_dip_a;
-marcade.dswb_val2:=@vulgus_dip_b;
+init_dips(1,vulgus_dip_a,$ff);
+init_dips(2,vulgus_dip_b,$7f);
 //final
 iniciar_vulgus:=true;
 end;

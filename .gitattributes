@@ -1,0 +1,10 @@
+.gitattributes export-ignore
+"Preview Images.zip" export-ignore
+"Readme - Old.md" export-ignore
+"README.md" export-ignore
+"SDL2-2.32.4-windows.zip" export-ignore
+"Whats New 0.24WIP2.txt" export-ignore
+wiki export-ignore
+Samples export-ignore
+"DSP how to complile" export-ignore
+"DSP small guide" export-ignore

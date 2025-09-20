@@ -24,17 +24,16 @@ const
     (n:'gyrussk.pr3';l:$20;p:0;crc:$98782db3),(n:'gyrussk.pr1';l:$100;p:$20;crc:$7ed057de),
     (n:'gyrussk.pr2';l:$100;p:$120;crc:$de823a81));
     //Dip
-    gyruss_dip_a:array [0..2] of def_dip2=(
+    gyruss_dip_a:array [0..1] of def_dip2=(
     (mask:$f;name:'Coin A';number:16;val16:(2,5,8,4,1,$f,3,7,$e,6,$d,$c,$b,$a,9,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),
-    (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')),());
-    gyruss_dip_b:array [0..5] of def_dip2=(
+    (mask:$f0;name:'Coin B';number:16;val16:($20,$50,$80,$40,$10,$f0,$30,$70,$e0,$60,$d0,$c0,$b0,$a0,$90,0);name16:('4C 1C','3C 1C','2C 1C','3C 2C','4C 3C','1C 1C','3C 4C','2C 3C','1C 2C','2C 5C','1C 3C','1C 4C','1C 5C','1C 6C','1C 7C','Free Play')));
+    gyruss_dip_b:array [0..4] of def_dip2=(
     (mask:3;name:'Lives';number:4;val4:(3,2,1,0);name4:('3','4','5','255')),
     (mask:4;name:'Cabinet';number:2;val2:(0,4);name2:('Upright','Cocktail')),
     (mask:8;name:'Bonus Life';number:2;val2:(8,0);name2:('30K 90K 60K+','40K 110K 70K+')),
     (mask:$70;name:'Difficulty';number:8;val8:($70,$60,$50,$40,$30,$20,$10,0);name8:('1 (Easiest)','2','3','4','5 (Average)','6','7','8 (Hardest)')),
-    (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')),());
-    gyruss_dip_c:array [0..1] of def_dip2=(
-    (mask:1;name:'Demo Music';number:2;val2:(1,0);name2:('Off','On')),());
+    (mask:$80;name:'Demo Sounds';number:2;val2:($80,0);name2:('Off','On')));
+    gyruss_dip_c:def_dip2=(mask:1;name:'Demo Music';number:2;val2:(1,0);name2:('Off','On'));
 
 var
   scan_line,sound_latch,sound_latch2:byte;
@@ -318,28 +317,29 @@ gyruss_iniciar:=false;
 llamadas_maquina.bucle_general:=gyruss_principal;
 llamadas_maquina.reset:=gyruss_reset;
 llamadas_maquina.fps_max:=60.606060606060606060;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(true);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(18432000 div 6,256);
+z80_0:=cpu_z80.create(18432000 div 6);
 z80_0.change_ram_calls(gyruss_getbyte,gyruss_putbyte);
 if not(roms_load(@memoria,gyruss_rom)) then exit;
 //Sub CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,256,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(gyruss_sub_getbyte,gyruss_sub_putbyte);
 if not(roms_load(@mem_misc,gyruss_sub)) then exit;
 konami1_decode(@mem_misc[$e000],@mem_opcodes[0],$2000);
 //Sound CPU
-z80_1:=cpu_z80.create(14318180 div 4,256);
+z80_1:=cpu_z80.create(14318180 div 4);
 z80_1.change_ram_calls(gyruss_sound_getbyte,gyruss_sound_putbyte);
 z80_1.change_io_calls(gyruss_sound_inbyte,gyruss_sound_outbyte);
 z80_1.init_sound(gyruss_sound_update);
 if not(roms_load(@mem_snd,gyruss_sound)) then exit;
 //Sound CPU 2
-mcs48_0:=cpu_mcs48.create(8000000,256,I8039);
+mcs48_0:=cpu_mcs48.create(8000000,I8039);
 mcs48_0.change_ram_calls(gyruss_sound2_getbyte,nil);
 mcs48_0.change_io_calls(nil,gyruss_sound2_outport,gyruss_sound2_inport,nil);
 if not(roms_load(@mem_sound_sub,gyruss_sound_sub)) then exit;
@@ -392,12 +392,9 @@ for f:=0 to $ff do begin
   gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
 end;
 //DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$3b;
-marcade.dswc:=$fe;
-marcade.dswa_val2:=@gyruss_dip_a;
-marcade.dswb_val2:=@gyruss_dip_b;
-marcade.dswc_val2:=@gyruss_dip_c;
+init_dips(1,gyruss_dip_a,$ff);
+init_dips(2,gyruss_dip_b,$3b);
+init_dips(3,gyruss_dip_c,$fe);
 //Final
 gyruss_iniciar:=true;
 end;

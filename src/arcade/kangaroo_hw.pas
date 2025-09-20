@@ -18,15 +18,15 @@ const
         (n:'tvg_84.v1';l:$1000;p:$2000;crc:$e4cb26c2),(n:'tvg_86.v3';l:$1000;p:$3000;crc:$9e6a599f));
         kangaroo_sound:tipo_roms=(n:'tvg_81.8';l:$1000;p:0;crc:$fb449bfd);
         //DIP
-        kangaroo_dipa:array [0..3] of def_dip2=(
+        kangaroo_dipa:array [0..2] of def_dip2=(
         (mask:$20;name:'Music';number:2;val2:(0,$20);name2:('On','Off')),
         (mask:$40;name:'Cabinet';number:2;val2:(0,$40);name2:('Upright','Cocktail')),
-        (mask:$80;name:'Flip Screen';number:2;val2:(0,$80);name2:('Off','On')),());
-        kangaroo_dipb:array [0..4] of def_dip2=(
+        (mask:$80;name:'Flip Screen';number:2;val2:(0,$80);name2:('Off','On')));
+        kangaroo_dipb:array [0..3] of def_dip2=(
         (mask:1;name:'Lives';number:2;val2:(0,1);name2:('3','5')),
         (mask:2;name:'Difficulty';number:2;val2:(0,2);name2:('Easy','Hard')),
         (mask:$c;name:'Bonus Life';number:4;val4:(8,$c,4,0);name4:('10K 30K','20K 40K','10K','None')),
-        (mask:$f0;name:'Coinage';number:16;val16:($10,$20,0,$30,$40,$50,$60,$70,$80,$90,$a0,$e0,$b0,$c0,$d0,$f0);name16:('2C/1C','A 2C/1C B 1C/3C','1C/1C','A 1C/1C B 1C/2C','A 1C/1C B 1C/3C','A 1C/1C B 1C/4C','A 1C/1C B 1C/5C','A 1C/1C B 1C/6C','1C/2C','A 1C/2C B 1C/4C','A 1C/2C B 1C/5C','A 1C/2C B 1C/6C','A 1C/2C B 1C/10C','A 1C/2C B 1C/11C','A 1C/2C B 1C/12C','Free Play')),());
+        (mask:$f0;name:'Coinage';number:16;val16:($10,$20,0,$30,$40,$50,$60,$70,$80,$90,$a0,$e0,$b0,$c0,$d0,$f0);name16:('2C/1C','A 2C/1C B 1C/3C','1C/1C','A 1C/1C B 1C/2C','A 1C/1C B 1C/3C','A 1C/1C B 1C/4C','A 1C/1C B 1C/5C','A 1C/1C B 1C/6C','1C/2C','A 1C/2C B 1C/4C','A 1C/2C B 1C/5C','A 1C/2C B 1C/6C','A 1C/2C B 1C/10C','A 1C/2C B 1C/11C','A 1C/2C B 1C/12C','Free Play')));
 
 var
  video_control:array[0..$f] of byte;
@@ -332,6 +332,7 @@ begin
 llamadas_maquina.bucle_general:=kangaroo_principal;
 llamadas_maquina.reset:=reset_kangaroo;
 llamadas_maquina.fps_max:=60.096154;
+llamadas_maquina.scanlines:=260;
 llamadas_maquina.save_qsnap:=kangaroo_qsave;
 llamadas_maquina.load_qsnap:=kangaroo_qload;
 iniciar_kangaroo:=false;
@@ -339,11 +340,11 @@ iniciar_audio(false);
 screen_init(1,256,512);
 iniciar_video(240,512);
 //Main CPU
-z80_0:=cpu_z80.create(10000000 div 4,260);
+z80_0:=cpu_z80.create(10000000 div 4);
 z80_0.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
 if not(roms_load(@memoria,kangaroo_rom)) then exit;
 //Sound CPU
-z80_1:=cpu_z80.create(10000000 div 8,260);
+z80_1:=cpu_z80.create(10000000 div 8);
 z80_1.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.change_io_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.init_sound(kangaroo_sound_update);
@@ -360,10 +361,8 @@ for f:=0 to 7 do begin
   colores[f].b:=pal1bit(f shr 0);
 end;
 set_pal(colores,8);
-marcade.dswa:=0;
-marcade.dswa_val2:=@kangaroo_dipa;
-marcade.dswb:=0;
-marcade.dswb_val2:=@kangaroo_dipb;
+init_dips(1,kangaroo_dipa,0);
+init_dips(2,kangaroo_dipb,0);
 //final
 iniciar_kangaroo:=true;
 end;

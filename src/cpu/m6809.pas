@@ -18,7 +18,7 @@ type
         end;
         preg_m6809=^reg_m6809;
         cpu_m6809=class(cpu_class)
-            constructor create(clock:dword;frames_div:word;cpu_tipo:byte);
+            constructor create(clock:dword;cpu_tipo:byte);
             destructor free;
           public
             procedure reset;
@@ -141,7 +141,7 @@ const
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,4,  //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3); //f0
 
-constructor cpu_m6809.create(clock:dword;frames_div:word;cpu_tipo:byte);
+constructor cpu_m6809.create(clock:dword;cpu_tipo:byte);
 begin
 getmem(self.r,sizeof(reg_m6809));
 fillchar(self.r^,sizeof(reg_m6809),0);
@@ -151,7 +151,7 @@ case cpu_tipo of
 end;
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 end;
 
 destructor cpu_m6809.free;

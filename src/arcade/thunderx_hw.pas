@@ -447,21 +447,20 @@ llamadas_maquina.close:=cerrar_thunderx;
 llamadas_maquina.reset:=reset_thunderx;
 llamadas_maquina.bucle_general:=thunderx_principal;
 llamadas_maquina.fps_max:=59.17;
+llamadas_maquina.scanlines:=256;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 if main_vars.tipo_maquina<>224 then main_screen.rot90_screen:=true;
 iniciar_video(288,224,true);
 iniciar_audio(false);
 //Main CPU
-konami_0:=cpu_konami.create(12000000,256);
+konami_0:=cpu_konami.create(12000000);
 konami_0.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545);
 case main_vars.tipo_maquina of
      222:begin //Super contra
             call_function_1f98:=scontra_1f98_call;

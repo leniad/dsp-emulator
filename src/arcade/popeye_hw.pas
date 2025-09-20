@@ -32,23 +32,22 @@ const
         (n:'tnx1-t.1e';l:$1000;p:0;crc:$01c1120e),(n:'tnx1-t.2e';l:$1000;p:$1000;crc:$70292a71),
         (n:'tnx1-t.3e';l:$1000;p:$2000;crc:$92b6a0e8),(n:'tnx1-t.5e';l:$1000;p:$3000;crc:$cc5f0ac3));
         //Dip
-        popeye_dip_a:array [0..2] of def_dip=(
-        (mask:$f;name:'Coinage';number:9;dip:((dip_val:$8;dip_name:'6C 1C'),(dip_val:$5;dip_name:'5C 1C'),(dip_val:$9;dip_name:'4C 1C'),(dip_val:$a;dip_name:'3C 1C'),(dip_val:$d;dip_name:'2C 1C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 3C'),(dip_val:$0;dip_name:'Freeplay'),(),(),(),(),(),(),())),
-        (mask:$60;name:'Copyright';number:3;dip:((dip_val:$40;dip_name:'Nintendo'),(dip_val:$20;dip_name:'Nintendo Co.,Ltd'),(dip_val:$60;dip_name:'Nintendo of America'),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        popeye_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$c;dip_name:'Easy'),(dip_val:$8;dip_name:'Medium'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'40K'),(dip_val:$20;dip_name:'60K'),(dip_val:$10;dip_name:'80K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        skyskipper_dip_a:array [0..1] of def_dip=(
-        (mask:$f;name:'Coinage';number:9;dip:((dip_val:$3;dip_name:'A 3/1 B 1/2'),(dip_val:$e;dip_name:'2C 1C'),(dip_val:$1;dip_name:'A 2/1 B 2/5'),(dip_val:$4;dip_name:'A 2/1 B 1/3'),(dip_val:$7;dip_name:'A 1/1 B 2/1'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$c;dip_name:'A 1/1 B 1/2'),(dip_val:$d;dip_name:'1C 2C'),(dip_val:$6;dip_name:'A 1/2 B 1/4'),(dip_val:$b;dip_name:'A 1/2 B 1/5'),(dip_val:$2;dip_name:'A 2/5 B 1/1'),(dip_val:$a;dip_name:'A 1/3 B 1/1'),(dip_val:$9;dip_name:'A 1/4 B 1/1'),(dip_val:$5;dip_name:'A 1/5 B 1/1'),(dip_val:$8;dip_name:'A 1/6 B 1/1'),(dip_val:$0;dip_name:'Freeplay'))),());
-        skyskipper_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1c;name:'Difficulty';number:8;dip:((dip_val:$1c;dip_name:'Easiest'),(dip_val:$18;dip_name:'Very Easy'),(dip_val:$14;dip_name:'Easy'),(dip_val:$10;dip_name:'Medium Easy'),(dip_val:$c;dip_name:'Medium Hard'),(dip_val:$8;dip_name:'Hard'),(dip_val:$4;dip_name:'Very Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Bonus Life';number:2;dip:((dip_val:$20;dip_name:'15K'),(dip_val:$0;dip_name:'30K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Service';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        popeye_dip_a:array [0..1] of def_dip2=(
+        (mask:$f;name:'Coinage';number:16;val16:(8,5,9,$a,$d,$f,$e,3,0,1,2,4,6,7,$b,$c);name16:('6C 1C','5C 1C','4C 1C','3C 1C','2C 1C','1C 1C','1C 2C','1C 3C','Freeplay','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid','Invalid')),
+        (mask:$60;name:'Copyright';number:4;val4:($40,$20,$60,0);name4:('Nintendo','Nintendo Co.,Ltd','Nintendo of America','')));
+        popeye_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','4')),
+        (mask:$c;name:'Difficulty';number:4;val4:($c,8,4,0);name4:('Easy','Medium','Hard','Hardest')),
+        (mask:$30;name:'Bonus Life';number:4;val4:($30,$20,$10,0);name4:('40K','60K','80K','None')),
+        (mask:$40;name:'Demo Sounds';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
+        skyskipper_dip_a:def_dip2=(mask:$f;name:'Coinage';number:16;val16:(3,$e,1,4,7,$f,$c,$d,6,$b,2,$a,9,5,8,0);name16:('A 3/1 B 1/2','2C 1C','A 2/1 B 2/5','A 2/1 B 1/3','A 1/1 B 2/1','1C 1C','A 1/1 B 1/2','1C 2C','A 1/2 B 1/4','A 1/2 B 1/5','A 2/5 B 1/1','A 1/3 B 1/1','A 1/4 B 1/1','A 1/5 B 1/1','A 1/6 B 1/1','Freeplay'));
+        skyskipper_dip_b:array [0..4] of def_dip2=(
+        (mask:$3;name:'Lives';number:4;val4:(3,2,1,0);name4:('1','2','3','4')),
+        (mask:$1c;name:'Difficulty';number:8;val8:($1c,$18,$14,$10,$c,8,4,0);name8:('Easiest','Very Easy','Easy','Medium Easy','Medium Hard','Hard','Very Hard','Hardest')),
+        (mask:$20;name:'Bonus Life';number:2;val2:($20,0);name2:('15K','30K')),
+        (mask:$40;name:'Service';number:2;val2:($40,0);name2:('Off','On')),
+        (mask:$80;name:'Cabinet';number:2;val2:(0,$80);name2:('Upright','Cocktail')));
 
 var
   prot0,prot1,prot_shift,palette_bank,scroll_y,dswbit,field:byte;
@@ -56,6 +55,7 @@ var
   scroll_x:word;
   update_video_popeye_hw:procedure;
   back_ram:array[0..$fff] of byte;
+  mem_paleta:array[0..$1f] of byte;
 
 procedure update_video_popeye;
 var
@@ -84,15 +84,15 @@ actualiza_trozo(0,0,512,512,1,0,0,512,512,3);
 for f:=0 to $9e do begin
   atrib:=buffer_sprites[3+(f*4)];
   atrib2:=buffer_sprites[2+(f*4)];
-  nchar:=((atrib2 and $7f)+((atrib and $10) shl 3)+((atrib and $04) shl 6)) xor $1ff;
-  color:=((atrib and $7)+(palette_bank and $07) shl 3) shl 2;
-  put_gfx_sprite(nchar,color+48,(atrib2 and $80)<>0,(atrib and $08)<>0,1);
+  nchar:=((atrib2 and $7f)+((atrib and $10) shl 3)+((atrib and 4) shl 6)) xor $1ff;
+  color:=((atrib and 7)+(palette_bank and 7) shl 3) shl 2;
+  put_gfx_sprite(nchar,color+48,(atrib2 and $80)<>0,(atrib and 8)<>0,1);
   x:=(buffer_sprites[0+(f*4)] shl 1)-6;
   y:=(256-buffer_sprites[1+(f*4)]) shl 1;
   actualiza_gfx_sprite(x,y,3,1);
 end;
 //Chars
-for f:=$0 to $3ff do begin
+for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
@@ -110,22 +110,22 @@ procedure eventos_popeye;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or 2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or 4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or 8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or $80) else marcade.in1:=(marcade.in1 and $7f);
   //SYSTEM
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $80) else marcade.in2:=(marcade.in2 and $7f);
 end;
@@ -138,20 +138,20 @@ var
   colores:tcolor;
 begin
   for f:=0 to 15 do begin
-    ctemp4:=buffer_paleta[f+$10*valor];
+    ctemp4:=mem_paleta[f+$10*valor];
 		// red component
-		ctemp1:=(ctemp4 shr 0) and $1;
-		ctemp2:=(ctemp4 shr 1) and $1;
-		ctemp3:=(ctemp4 shr 2) and $1;
+		ctemp1:=(ctemp4 shr 0) and 1;
+		ctemp2:=(ctemp4 shr 1) and 1;
+		ctemp3:=(ctemp4 shr 2) and 1;
 		colores.r:=$1c*ctemp1+$31*ctemp2+$47*ctemp3;
 		// green component
-		ctemp1:=(ctemp4 shr 3) and $1;
-		ctemp2:=(ctemp4 shr 4) and $1;
-		ctemp3:=(ctemp4 shr 5) and $1;
+		ctemp1:=(ctemp4 shr 3) and 1;
+		ctemp2:=(ctemp4 shr 4) and 1;
+		ctemp3:=(ctemp4 shr 5) and 1;
 		colores.g:=$1c*ctemp1+$31*ctemp2+$47*ctemp3;
 		// blue component
-		ctemp1:=(ctemp4 shr 6) and $1;
-		ctemp2:=(ctemp4 shr 7) and $1;
+		ctemp1:=(ctemp4 shr 6) and 1;
+		ctemp2:=(ctemp4 shr 7) and 1;
 		colores.b:=$31*ctemp1+$47*ctemp2;
     set_pal_color(colores,f);
    end;
@@ -197,7 +197,7 @@ end;
 function popeye_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0000..$7fff,$8800..$8fff,$a000..$a7ff,$c000..$dfff:popeye_getbyte:=memoria[direccion];
+  0..$7fff,$8800..$8fff,$a000..$a7ff,$c000..$dfff:popeye_getbyte:=memoria[direccion];
   $e000:popeye_getbyte:=((prot1 shl prot_shift) or (prot0 shr (8-prot_shift))) and $ff;
   $e001:popeye_getbyte:=0;
 end;
@@ -219,9 +219,9 @@ case direccion of
                   memoria[direccion]:=valor;
                   offset:=((direccion and $1fff) and $3f) or (((direccion and $1fff) and not($7f)) shr 1);
                   if (direccion and $40)=0 then back_ram[offset]:=(back_ram[offset] and $f0) or (valor and $f)
-                    else back_ram[offset]:=(back_ram[offset] and $0f) or (valor shl 4);
+                    else back_ram[offset]:=(back_ram[offset] and $f) or (valor shl 4);
                end;
-  $e000:prot_shift:=valor and $7;
+  $e000:prot_shift:=valor and 7;
   $e001:begin
           prot0:=prot1;
           prot1:=valor;
@@ -304,15 +304,15 @@ actualiza_trozo(0,0,512,512,1,0,0,512,512,3);
 for f:=0 to $9e do begin
   atrib:=buffer_sprites[3+(f*4)];
   atrib2:=buffer_sprites[2+(f*4)];
-  nchar:=((atrib2 and $7f)+((atrib and $10) shl 3)+((atrib and $04) shl 6)) xor $1ff;
-  color:=((atrib and $7)+(palette_bank and $07) shl 3) shl 2;
-  put_gfx_sprite(nchar,color+48,(atrib2 and $80)<>0,(atrib and $08)<>0,1);
+  nchar:=((atrib2 and $7f)+((atrib and $10) shl 3)+((atrib and 4) shl 6)) xor $1ff;
+  color:=((atrib and 7)+(palette_bank and 7) shl 3) shl 2;
+  put_gfx_sprite(nchar,color+48,(atrib2 and $80)<>0,(atrib and 8)<>0,1);
   x:=(buffer_sprites[0+(f*4)] shl 1)-6;
   y:=(256-buffer_sprites[1+(f*4)]) shl 1;
   actualiza_gfx_sprite(x,y,3,1);
 end;
 //Chars
-for f:=$0 to $3ff do begin
+for f:=0 to $3ff do begin
   if gfx[0].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
@@ -329,7 +329,7 @@ end;
 function skyskipper_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0000..$7fff,$8000..$87ff,$8c00..$8fff,$a000..$a7ff,$c000..$cfff:skyskipper_getbyte:=memoria[direccion];
+  0..$7fff,$8000..$87ff,$8c00..$8fff,$a000..$a7ff,$c000..$cfff:skyskipper_getbyte:=memoria[direccion];
   $e000:skyskipper_getbyte:=((prot1 shl prot_shift) or (prot0 shr (8-prot_shift))) and $ff;
   $e001:skyskipper_getbyte:=0;
 end;
@@ -348,9 +348,9 @@ case direccion of
                   fondo_write:=true;
                   memoria[direccion]:=valor;
                   if (valor and $80)=0 then back_ram[direccion and $fff]:=(back_ram[direccion and $fff] and $f0) or (valor and $f)
-	                  else back_ram[direccion and $fff]:=(back_ram[direccion and $fff] and $0f) or (valor shl 4);
+	                  else back_ram[direccion and $fff]:=(back_ram[direccion and $fff] and $f) or (valor shl 4);
                end;
-  $e000:prot_shift:=valor and $7;
+  $e000:prot_shift:=valor and 7;
   $e001:begin
           prot0:=prot1;
           prot1:=valor;
@@ -429,7 +429,6 @@ procedure reset_popeye;
 begin
  z80_0.reset;
  ay8910_0.reset;
- reset_game_general;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
@@ -468,6 +467,7 @@ llamadas_maquina.reset:=reset_popeye;
 llamadas_maquina.save_qsnap:=popeye_qsave;
 llamadas_maquina.load_qsnap:=popeye_qload;
 llamadas_maquina.fps_max:=59.94;
+llamadas_maquina.scanlines:=512;
 iniciar_popeye:=false;
 iniciar_audio(false);
 screen_init(1,512,512);
@@ -475,7 +475,7 @@ screen_init(2,512,512,true);
 screen_init(3,512,512,false,true);
 iniciar_video(512,448);
 //Main CPU
-z80_0:=cpu_z80.create(8000000 div 2,512);
+z80_0:=cpu_z80.create(8000000 div 2);
 z80_0.change_misc_calls(nil,nil,popeye_nmi_clear);
 z80_0.change_io_calls(popeye_inbyte,popeye_outbyte);
 z80_0.init_sound(popeye_sound_update);
@@ -507,10 +507,8 @@ case main_vars.tipo_maquina of
           convert_gfx(1,256*f*16*16,@memoria_temp,@ps_x,@ps_y,false,false);
         end;
         //DIP
-        marcade.dswa:=$5f;
-        marcade.dswb:=$3d;
-        marcade.dswa_val:=@popeye_dip_a;
-        marcade.dswb_val:=@popeye_dip_b;
+        init_dips(1,popeye_dip_a,$5f);
+        init_dips(2,popeye_dip_b,$3d);
         if not(roms_load(@memoria_temp,popeye_pal)) then exit;
   end;
   376:begin //Sky Skipper
@@ -538,49 +536,47 @@ case main_vars.tipo_maquina of
           convert_gfx(1,$80*f*16*16,@memoria_temp,@pss_x,@ps_y,false,false);
         end;
         //DIP
-        marcade.dswa:=$7f;
-        marcade.dswb:=$6d;
-        marcade.dswa_val:=@skyskipper_dip_a;
-        marcade.dswb_val:=@skyskipper_dip_b;
+        init_dips(1,skyskipper_dip_a,$7f);
+        init_dips(2,skyskipper_dip_b,$6d);
         if not(roms_load(@memoria_temp,skyskipper_pal)) then exit;
   end;
 end;
 for f:=0 to $23f do memoria_temp[f]:=memoria_temp[f] xor $ff;
-for f:=0 to $1f do buffer_paleta[f]:=memoria_temp[f];
+for f:=0 to $1f do mem_paleta[f]:=memoria_temp[f];
 for f:=0 to 15 do begin
 		ctemp4:=f or ((f and 8) shl 1);
 		// red component
-		ctemp1:=(memoria_temp[ctemp4+$20] shr 0) and $1;
-		ctemp2:=(memoria_temp[ctemp4+$20] shr 1) and $1;
-		ctemp3:=(memoria_temp[ctemp4+$20] shr 2) and $1;
+		ctemp1:=(memoria_temp[ctemp4+$20] shr 0) and 1;
+		ctemp2:=(memoria_temp[ctemp4+$20] shr 1) and 1;
+		ctemp3:=(memoria_temp[ctemp4+$20] shr 2) and 1;
 		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
 		// green component
-		ctemp1:=(memoria_temp[ctemp4+$20] shr 3) and $1;
-		ctemp2:=(memoria_temp[ctemp4+$20] shr 4) and $1;
-		ctemp3:=(memoria_temp[ctemp4+$20] shr 5) and $1;
+		ctemp1:=(memoria_temp[ctemp4+$20] shr 3) and 1;
+		ctemp2:=(memoria_temp[ctemp4+$20] shr 4) and 1;
+		ctemp3:=(memoria_temp[ctemp4+$20] shr 5) and 1;
 		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
 		// blue component
 		ctemp1:=0;
-		ctemp2:=(memoria_temp[ctemp4+$20] shr 6) and $1;
-		ctemp3:=(memoria_temp[ctemp4+$20] shr 7) and $1;
+		ctemp2:=(memoria_temp[ctemp4+$20] shr 6) and 1;
+		ctemp3:=(memoria_temp[ctemp4+$20] shr 7) and 1;
 		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
     set_pal_color(colores,16+(2*f)+1);
 end;
 for f:=0 to $ff do begin
 		// red component
-		ctemp1:=(memoria_temp[$40+f] shr 0) and $1;
-		ctemp2:=(memoria_temp[$40+f] shr 1) and $1;
-		ctemp3:=(memoria_temp[$40+f] shr 2) and $1;
+		ctemp1:=(memoria_temp[$40+f] shr 0) and 1;
+		ctemp2:=(memoria_temp[$40+f] shr 1) and 1;
+		ctemp3:=(memoria_temp[$40+f] shr 2) and 1;
 		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
 		// green component
-		ctemp1:=(memoria_temp[$40+f] shr 3) and $1;
-		ctemp2:=(memoria_temp[$140+f] shr 0) and $1;
-		ctemp3:=(memoria_temp[$140+f] shr 1) and $1;
+		ctemp1:=(memoria_temp[$40+f] shr 3) and 1;
+		ctemp2:=(memoria_temp[$140+f] shr 0) and 1;
+		ctemp3:=(memoria_temp[$140+f] shr 1) and 1;
 		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
 		// blue component
 		ctemp1:=0;
-		ctemp2:=(memoria_temp[$140+f] shr 2) and $1;
-		ctemp3:=(memoria_temp[$140+f] shr 3) and $1;
+		ctemp2:=(memoria_temp[$140+f] shr 2) and 1;
+		ctemp3:=(memoria_temp[$140+f] shr 3) and 1;
 		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
     set_pal_color(colores,48+f);
 end;
