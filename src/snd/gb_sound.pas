@@ -1,4 +1,4 @@
-unit gb_sound;
+﻿unit gb_sound;
 
 interface
 uses main_engine,sound_engine;
@@ -62,544 +62,529 @@ type
     channel:array[1..4] of tipo_sound;
   	control:tipo_soundc;
     regs:array[0..$2f] of byte;
+    timer:array[1..4] of integer;
+    env_running:array[1..4] of boolean;
+    sweep_shadow:integer;
+    sweep_enabled,sweep_neg_used,cgb_mode:boolean;
+    frame_step:byte;
+    frame_remaining:integer;
+    sample_fraction:dword;
+    wave_sample,wave_window:byte;
+    capacitor_left,capacitor_right,hpf_factor:double;
     procedure w_internal(offset,valor:byte);
+    function dac_enabled(ch:integer):boolean;
+    function timer_period(ch:integer):integer;
+    procedure tick_length(ch:integer);
+    procedure tick_frame;
+    function sweep_calculate:integer;
+    procedure tick_sweep;
+    procedure trigger(ch:integer);
+    procedure channel_control(ch:integer;valor:byte);
+    procedure advance_cycles(cycles:integer;var area_left,area_right:int64);
+    procedure mix(var left,right:integer);
+    procedure power_off;
+  public
+    procedure set_cgb_mode(enabled:boolean);
+    procedure div_reset(apu_bit_was_high:boolean);
   end;
 
 var
   gb_snd_0:gb_sound_chip;
 
 implementation
+uses Math;
+
 const
-  NR10=$00;
-  NR11=$01;
-  NR12=$02;
-  NR13=$03;
-  NR14=$04;
-  NR21=$06;
-  NR22=$07;
-  NR23=$08;
-  NR24=$09;
-  NR30=$0A;
-  NR31=$0B;
-  NR32=$0C;
-  NR33=$0D;
-  NR34=$0E;
-  NR41=$10;
-  NR42=$11;
-  NR43=$12;
-  NR44=$13;
-  NR50=$14;
-  NR51=$15;
-  NR52=$16;
-  AUD3W0=$20;
-  AUD3W1=$21;
-  AUD3W2=$22;
-  AUD3W3=$23;
-  AUD3W4=$24;
-  AUD3W5=$25;
-  AUD3W6=$26;
-  AUD3W7=$27;
-  AUD3W8=$28;
-  AUD3W9=$29;
-  AUD3WA=$2A;
-  AUD3WB=$2B;
-  AUD3WC=$2C;
-  AUD3WD=$2D;
-  AUD3WE=$2E;
-  AUD3WF=$2F;
-  // Represents wave duties of 12.5%, 25%, 50% and 75%
-  wave_duty_table:array[0..3] of single=(8,4,2,1.33);
-
-var
-  env_length_table:array[0..7] of word;
-  swp_time_table:array[0..7] of word;
-  period_table:array[0..MAX_FREQUENCIES-1] of dword;
-  period_mode3_table:array[0..MAX_FREQUENCIES-1] of dword;
-  period_mode4_table:array[0..7,0..15] of dword;
-  length_table:array[0..63] of word;
-  length_mode3_table:array[0..$ff] of dword;
-
-destructor gb_sound_chip.free;
-begin
-end;
+  NR10=$00; NR11=$01; NR12=$02; NR13=$03; NR14=$04;
+  NR21=$06; NR22=$07; NR23=$08; NR24=$09;
+  NR30=$0a; NR31=$0b; NR32=$0c; NR33=$0d; NR34=$0e;
+  NR41=$10; NR42=$11; NR43=$12; NR44=$13;
+  NR50=$14; NR51=$15; NR52=$16; AUD3W0=$20;
+  APU_CLOCK=4194304;
+  DUTY_BITS:array[0..3] of byte=($80,$81,$e1,$7e);
+  NOISE_DIV:array[0..7] of integer=(8,16,32,48,64,80,96,112);
+  LENGTH_REG:array[1..4] of byte=(NR11,NR21,NR31,NR41);
+  ENV_REG:array[1..4] of byte=(NR12,NR22,NR32,NR42);
+  CTRL_REG:array[1..4] of byte=(NR14,NR24,NR34,NR44);
+  READ_MASK:array[0..$2f] of byte=(
+    $80,$3f,$00,$ff,$bf,$ff,$3f,$00,$ff,$bf,$7f,$ff,$9f,$ff,$bf,$ff,
+    $ff,$00,$00,$bf,$00,$00,$70,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,
+    $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00);
 
 constructor gb_sound_chip.create;
-const
-  FIXED_POINT=16;
-var
-  i,j:integer;
 begin
-	// Calculate the envelope and sweep tables
-	for i:=0 to 7 do begin
-		env_length_table[i]:=trunc((i*((1 shl FIXED_POINT)/64)*FREQ_BASE_AUDIO)) shr FIXED_POINT;
-		swp_time_table[i]:=trunc((((i shl FIXED_POINT)/128)*FREQ_BASE_AUDIO)) shr (FIXED_POINT-1);
-	end;
-	// Calculate the period tables
-	for i:=0 to (MAX_FREQUENCIES-1) do begin
-		period_table[i]:=trunc(((1 shl FIXED_POINT)/(131072/(2048-i)))*FREQ_BASE_AUDIO);
-		period_mode3_table[i]:=trunc(((1 shl FIXED_POINT)/(65536/(2048-i)))*FREQ_BASE_AUDIO);
-	end;
-	// Calculate the period table for mode 4
-	for i:=0 to 7 do begin
-		for j:=0 to 15 do begin
-			// I is the dividing ratio of frequencies
-      // J is the shift clock frequency
-      if i=0 then period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT)/(524288/0.5/(1 shl (j+1))))*FREQ_BASE_AUDIO)
-          else period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT)/(524288/i/(1 shl (j+1))))*FREQ_BASE_AUDIO);
-		end;
-	end;
-	// Calculate the length table
-	for i:=0 to 63 do begin
-		length_table[i]:=trunc((64-i)*((1 shl FIXED_POINT)/256)*FREQ_BASE_AUDIO) shr FIXED_POINT;
-	end;
-	// Calculate the length table for mode 3
-	for i:=0 to 255 do begin
-		length_mode3_table[i]:=trunc((256-i)*((1 shl FIXED_POINT)/256)*FREQ_BASE_AUDIO) shr FIXED_POINT;
-	end;
   self.tsample_num:=init_channel;
+  self.cgb_mode:=false;
   self.reset;
 end;
 
+destructor gb_sound_chip.free;
+begin
+
+end;
+
+procedure gb_sound_chip.set_cgb_mode(enabled:boolean);
+begin
+  self.cgb_mode:=enabled;
+  if enabled then self.hpf_factor:=Power(0.998943,APU_CLOCK/FREQ_BASE_AUDIO)
+    else self.hpf_factor:=Power(0.999958,APU_CLOCK/FREQ_BASE_AUDIO);
+  self.capacitor_left:=0;
+  self.capacitor_right:=0;
+end;
+
 procedure gb_sound_chip.reset;
-var
-  f:byte;
 begin
-  for f:=0 to $2f do self.regs[f]:=0;
-  self.w_internal(NR52,$00);
+  FillChar(self.channel,SizeOf(self.channel),0);
+  FillChar(self.control,SizeOf(self.control),0);
+  FillChar(self.regs,SizeOf(self.regs),0);
+  FillChar(self.timer,SizeOf(self.timer),0);
+  FillChar(self.env_running,SizeOf(self.env_running),0);
+  self.channel[1].swp_direction:=1;
+  self.sweep_shadow:=0;
+  self.sweep_enabled:=false;
+  self.sweep_neg_used:=false;
+  self.frame_step:=0;
+  self.frame_remaining:=8192;
+  self.sample_fraction:=0;
+  self.wave_sample:=0;
+  self.wave_window:=0;
+  self.set_cgb_mode(self.cgb_mode);
 end;
 
-function gb_sound_chip.save_snapshot(datos:pbyte):word;
-var
-  temp:pbyte;
-  f:byte;
-  size:dword;
+function gb_sound_chip.dac_enabled(ch:integer):boolean;
 begin
-  temp:=datos;
-  size:=0;
-  for f:=1 to 4 do begin
-    copymemory(temp,@self.channel[f],sizeof(tipo_sound));
-    size:=size+sizeof(tipo_sound);
-    inc(temp,sizeof(tipo_sound));
-  end;
-  copymemory(temp,@self.control,sizeof(tipo_soundc));
-  size:=size+sizeof(tipo_soundc);
-  inc(temp,sizeof(tipo_soundc));
-  copymemory(temp,@self.regs,sizeof(self.regs));
-  size:=size+sizeof(self.regs);
-  save_snapshot:=size;
+  if ch=3 then Result:=(self.regs[NR30] and $80)<>0
+    else Result:=(self.regs[ENV_REG[ch]] and $f8)<>0;
 end;
 
-procedure gb_sound_chip.load_snapshot(datos:pbyte);
-var
-  temp:pbyte;
-  f:byte;
+function gb_sound_chip.timer_period(ch:integer):integer;
+var f:integer;
 begin
-  temp:=datos;
-  for f:=1 to 4 do begin
-    copymemory(@self.channel[f],temp,sizeof(tipo_sound));
-    inc(temp,sizeof(tipo_sound));
+  if ch=4 then begin
+    Result:=NOISE_DIV[self.regs[NR43] and 7] shl (self.regs[NR43] shr 4);
+    exit;
   end;
-  copymemory(@self.control,temp,sizeof(tipo_soundc));
-  inc(temp,sizeof(tipo_soundc));
-  copymemory(@self.regs,temp,sizeof(self.regs));
-  inc(temp,sizeof(self.regs));
+  f:=((self.regs[CTRL_REG[ch]] and 7) shl 8) or self.regs[CTRL_REG[ch]-1];
+  if ch=3 then Result:=(2048-f)*2 else Result:=(2048-f)*4;
+end;
+
+procedure gb_sound_chip.tick_length(ch:integer);
+begin
+  if self.channel[ch].mode and (self.channel[ch].length>0) then begin
+    dec(self.channel[ch].length);
+    if self.channel[ch].length=0 then self.channel[ch].on_:=false;
+  end;
+end;
+
+function gb_sound_chip.sweep_calculate:integer;
+var
+  delta:integer;
+begin
+  delta:=self.sweep_shadow shr self.channel[1].swp_shift;
+  if self.channel[1].swp_direction<0 then begin
+    Result:=self.sweep_shadow-delta;
+    self.sweep_neg_used:=true;
+  end else Result:=self.sweep_shadow+delta;
+  if Result>2047 then self.channel[1].on_:=false;
+end;
+
+procedure gb_sound_chip.tick_sweep;
+var
+  f:integer;
+begin
+  Dec(self.channel[1].swp_count);
+  if self.channel[1].swp_count>0 then exit;
+  self.channel[1].swp_count:=self.channel[1].swp_time;
+  if self.channel[1].swp_count=0 then self.channel[1].swp_count:=8;
+  if (not self.sweep_enabled) or (self.channel[1].swp_time=0) then exit;
+  f:=self.sweep_calculate;
+  if (f<=2047) and (self.channel[1].swp_shift>0) then begin
+    self.sweep_shadow:=f;
+    self.channel[1].frequency:=f;
+    self.regs[NR13]:=byte(f and $ff);
+    self.regs[NR14]:=(self.regs[NR14] and $f8) or byte(f shr 8);
+    // Frequency changes affect the next timer reload, not the current countdown.
+    f:=self.sweep_calculate;
+  end;
+end;
+
+procedure gb_sound_chip.tick_frame;
+var
+  ch,v:integer;
+begin
+  if (self.frame_step and 1)=0 then for ch:=1 to 4 do self.tick_length(ch);
+  if (self.frame_step=2) or (self.frame_step=6) then self.tick_sweep;
+  if self.frame_step=7 then begin
+    for ch:=1 to 4 do begin
+      if (ch=3) or (not self.env_running[ch]) then continue;
+      Dec(self.channel[ch].env_count);
+      if self.channel[ch].env_count>0 then continue;
+      self.channel[ch].env_count:=self.channel[ch].env_length;
+      if self.channel[ch].env_count=0 then self.channel[ch].env_count:=8;
+      if self.channel[ch].env_length=0 then continue;
+      v:=self.channel[ch].env_value+self.channel[ch].env_direction;
+      if (v<0) or (v>15) then self.env_running[ch]:=false
+        else self.channel[ch].env_value:=v;
+    end;
+  end;
+  self.frame_step:=(self.frame_step+1) and 7;
+end;
+
+procedure gb_sound_chip.div_reset(apu_bit_was_high:boolean);
+begin
+  if self.control.on_ and apu_bit_was_high then self.tick_frame;
+  self.frame_remaining:=8192;
+end;
+
+procedure gb_sound_chip.trigger(ch:integer);
+var
+  v,f:integer;
+begin
+  self.channel[ch].on_:=self.dac_enabled(ch);
+  if self.channel[ch].length=0 then begin
+    if ch=3 then self.channel[ch].length:=256
+      else self.channel[ch].length:=64;
+    if self.channel[ch].mode and ((self.frame_step and 1)<>0) then dec(self.channel[ch].length);
+  end;
+  self.timer[ch]:=self.timer_period(ch);
+  if ch<>3 then begin
+    v:=self.regs[ENV_REG[ch]];
+    self.channel[ch].env_value:=v shr 4;
+    self.channel[ch].env_length:=v and 7;
+    self.channel[ch].env_count:=v and 7;
+    if self.channel[ch].env_count=0 then self.channel[ch].env_count:=8;
+    self.env_running[ch]:=true;
+  end;
+  if ch=1 then begin
+    self.sweep_shadow:=((self.regs[NR14] and 7) shl 8) or self.regs[NR13];
+    self.channel[1].frequency:=self.sweep_shadow;
+    self.channel[1].swp_count:=self.channel[1].swp_time;
+    if self.channel[1].swp_count=0 then self.channel[1].swp_count:=8;
+    self.sweep_enabled:=(self.channel[1].swp_time<>0) or (self.channel[1].swp_shift<>0);
+    self.sweep_neg_used:=false;
+    if self.channel[1].swp_shift<>0 then f:=self.sweep_calculate;
+  end;
+  if ch=3 then begin
+    self.channel[3].offset:=0;
+    self.wave_sample:=0;
+    self.wave_window:=0;
+    Inc(self.timer[3],6);
+  end;
+  if ch=4 then self.channel[4].ply_value:=$7fff;
+end;
+
+procedure gb_sound_chip.channel_control(ch:integer;valor:byte);
+var
+  old_mode:boolean;
+begin
+  old_mode:=self.channel[ch].mode;
+  self.channel[ch].mode:=(valor and $40)<>0;
+  if (not old_mode) and self.channel[ch].mode and ((self.frame_step and 1)<>0) then self.tick_length(ch);
+  if (valor and $80)<>0 then self.trigger(ch);
+end;
+
+procedure gb_sound_chip.power_off;
+var
+  ch:integer;
+  keep_length:array[1..4] of word;
+begin
+  for ch:=1 to 4 do keep_length[ch]:=self.channel[ch].length;
+  FillChar(self.channel,SizeOf(self.channel),0);
+  FillChar(self.control,SizeOf(self.control),0);
+  FillChar(self.timer,SizeOf(self.timer),0);
+  FillChar(self.env_running,SizeOf(self.env_running),0);
+  // Power off preserves Wave RAM. DMG also preserves length counters.
+  for ch:=0 to NR52 do self.regs[ch]:=0;
+  if not self.cgb_mode then for ch:=1 to 4 do self.channel[ch].length:=keep_length[ch];
+  self.sweep_enabled:=false;
+  self.sweep_neg_used:=false;
+  self.channel[1].swp_direction:=1;
+  self.sweep_shadow:=0;
+  self.wave_sample:=0;
+  self.wave_window:=0;
+  self.frame_step:=0;
 end;
 
 function gb_sound_chip.wave_r(offset:byte):byte;
 begin
-	// TODO: properly emulate scrambling of wave ram area when playback is active
-	wave_r:=self.regs[AUD3W0+offset] or byte(self.channel[3].on_);
+  if offset>15 then begin Result:=$ff; exit; end;
+  if self.channel[3].on_ then begin
+    if (not self.cgb_mode) and (self.wave_window=0) then begin
+      Result:=$ff; exit;
+    end;
+    offset:=self.channel[3].offset shr 1;
+  end;
+  Result:=self.regs[AUD3W0+offset];
 end;
 
 procedure gb_sound_chip.wave_w(offset,valor:byte);
 begin
-	self.regs[AUD3W0+offset]:=valor;
+  if offset>15 then exit;
+  if self.channel[3].on_ then begin
+    if (not self.cgb_mode) and (self.wave_window=0) then exit;
+    offset:=self.channel[3].offset shr 1;
+  end;
+  self.regs[AUD3W0+offset]:=valor;
 end;
 
 function gb_sound_chip.sound_r(offset:byte):byte;
+var
+  ch:integer;
 begin
-	case offset of
-  NR10:sound_r:=$80 or self.regs[offset];
-  NR11:sound_r:=$3f or self.regs[offset];
-  NR12:sound_r:=self.regs[offset];
-  NR13:sound_r:=$ff;
-  NR14:sound_r:=$bf or self.regs[offset];
-  NR21:sound_r:=$3f or self.regs[offset];
-  NR22:sound_r:=self.regs[offset];
-  NR23:sound_r:=$ff;
-  NR24:sound_r:=$bf or self.regs[offset];
-  NR41:sound_r:=$ff;
-  NR42:sound_r:=self.regs[offset];
-  NR43:sound_r:=self.regs[offset];
-  NR44:sound_r:=$bf or self.regs[offset];
-  NR50:sound_r:=self.regs[offset];
-  NR51:sound_r:=self.regs[offset];
-	$05,$0a:sound_r:=$ff;
-	NR52:sound_r:=$70 or self.regs[offset];
-	 else sound_r:=self.regs[offset];
-	end;
+  if offset>$2f then begin
+    result:=$ff;
+    exit;
+  end;
+  if offset>=AUD3W0 then begin
+    result:=self.wave_r(offset-AUD3W0);
+    exit;
+  end;
+  if offset=NR52 then begin
+    Result:=$70 or (byte(self.control.on_) shl 7);
+    for ch:=1 to 4 do if self.channel[ch].on_ then Result:=Result or (1 shl (ch-1));
+  end else Result:=self.regs[offset] or READ_MASK[offset];
 end;
 
 procedure gb_sound_chip.sound_w(offset,valor:byte);
+var
+  ch:integer;
 begin
-	// Only register NR52 is accessible if the sound controller is disabled
-	if (not(self.control.on_) and (offset<>NR52)) then exit;
-	self.w_internal(offset,valor);
+  if offset>$2f then exit;
+  if offset>=AUD3W0 then begin
+    self.wave_w(offset-AUD3W0,valor);
+    exit;
+  end;
+  if (offset>NR52) or (offset=$05) or (offset=$0f) then exit;
+  if (not self.control.on_) and (offset<>NR52) then begin
+    if not self.cgb_mode then
+      for ch:=1 to 4 do
+        if offset=LENGTH_REG[ch] then begin
+          if ch=3 then self.channel[ch].length:=256-valor
+            else self.channel[ch].length:=64-(valor and $3f);
+        end;
+    exit;
+  end;
+  self.w_internal(offset,valor);
 end;
 
 procedure gb_sound_chip.w_internal(offset,valor:byte);
+var
+  ch,old:integer;
 begin
-	// Store the value
-	self.regs[offset]:=valor;
-	case offset of
-	// MODE 1
-	NR10:begin // Sweep (R/W)
-		      self.channel[1].swp_shift:= valor and $7;
-		      self.channel[1].swp_direction:=(valor and $8) shr 3;
-		      self.channel[1].swp_direction:=self.channel[1].swp_direction or (self.channel[1].swp_direction-1);
-		      self.channel[1].swp_time:=swp_time_table[(valor and $70) shr 4];
-       end;
-	NR11:begin // Sound length/Wave pattern duty (R/W)
-      		self.channel[1].duty:=(valor and $C0) shr 6;
-      		self.channel[1].length:=length_table[valor and $3f];
-		   end;
-	NR12:begin // Envelope (R/W)
-      		self.channel[1].env_value:=valor shr 4;
-      		self.channel[1].env_direction:=(valor and $8) shr 3;
-      		self.channel[1].env_direction:=self.channel[1].env_direction or (self.channel[1].env_direction-1);
-      		self.channel[1].env_length:=env_length_table[valor and $7];
-		   end;
-	NR13:begin // Frequency lo (R/W)
-      		self.channel[1].frequency:=((self.regs[NR14] and $7) shl 8) or self.regs[NR13];
-      		self.channel[1].period:=period_table[self.channel[1].frequency];
-		   end;
-	NR14:begin // Frequency hi / Initialize (R/W)
-      		self.channel[1].mode:=(valor and $40)<>0;
-      		self.channel[1].frequency:=((self.regs[NR14] and $7) shl 8) or self.regs[NR13];
-      		self.channel[1].period:=period_table[self.channel[1].frequency];
-      		if (valor and $80)<>0 then begin
-      			if not(self.channel[1].on_) then	self.channel[1].pos:=0;
-			      self.channel[1].on_:=true;
-      			self.channel[1].count:=0;
-      			self.channel[1].env_value:=self.regs[NR12] shr 4;
-      			self.channel[1].env_count:=0;
-      			self.channel[1].swp_count:=0;
-      			self.channel[1].signal:=$1;
-      			self.regs[NR52]:=self.regs[NR52] or $1;
-      		end;
-		    end;
-	// MODE 2 */
-	NR21:begin // Sound length/Wave pattern duty (R/W) */
-		      self.channel[2].duty:=(valor and $C0) shr 6;
-		      self.channel[2].length:=length_table[valor and $3f];
-		   end;
-	NR22:begin // Envelope (R/W)
-      		self.channel[2].env_value:= valor shr 4;
-      		self.channel[2].env_direction:= (valor and $8 ) shr 3;
-      		self.channel[2].env_direction:=self.channel[2].env_direction or (self.channel[2].env_direction-1);
-      		self.channel[2].env_length:=env_length_table[valor and $7];
-		    end;
-	NR23:begin // Frequency lo (R/W)
-      		self.channel[2].period:=period_table[((self.regs[NR24] and $7) shl 8) or self.regs[NR23]];
-       end;
-	NR24:begin // Frequency hi / Initialize (R/W)
-      		self.channel[2].mode:=(valor and $40)<>0;
-      		self.channel[2].period:=period_table[((self.regs[NR24] and $7) shl 8) or self.regs[NR23]];
-      		if (valor and $80)<>0 then begin
-      			if not(self.channel[2].on_) then self.channel[2].pos:=0;
-      			self.channel[2].on_:=true;
-      			self.channel[2].count:=0;
-      			self.channel[2].env_value:=self.regs[NR22] shr 4;
-      			self.channel[2].env_count:=0;
-      			self.channel[2].signal:=$1;
-      			self.regs[NR52]:=self.regs[NR52] or $2;
-		      end;
-		   end;
-	// MODE 3
-	NR30:begin // Sound On/Off (R/W)
-		      self.channel[3].on_:=(valor and $80)<>0;
-		   end;
-	NR31:begin // Sound Length (R/W)
-		      self.channel[3].length:=length_mode3_table[valor];
-		   end;
-	NR32:begin // Select Output Level
-		      self.channel[3].level:=(valor and $60) shr 5;
-		   end;
-	NR33:begin // Frequency lo (W)
-		      self.channel[3].period:=period_mode3_table[((self.regs[NR34] and $7) shl 8) or self.regs[NR33]];
-		   end;
-	NR34:begin // Frequency hi / Initialize (W)
-		      self.channel[3].mode:=(valor and $40)<>0;
-		      self.channel[3].period:=period_mode3_table[((self.regs[NR34] and $7) shl 8) or self.regs[NR33]];
-		      if (valor and $80)<>0 then begin
-      			if not(self.channel[3].on_) then begin
-      				self.channel[3].pos:=0;
-      				self.channel[3].offset:=0;
-      				self.channel[3].duty:=0;
+  old:=self.regs[offset];
+  if offset=NR52 then begin
+    if (valor and $80)=0 then begin
+      self.power_off;
+      exit;
+    end;
+    if not self.control.on_ then self.frame_step:=0;
+    self.control.on_:=true;
+    self.regs[NR52]:=$80;
+    exit;
+  end;
+  self.regs[offset]:=valor;
+  case offset of
+    NR10:begin
+      self.channel[1].swp_shift:=valor and 7;
+      if (valor and 8)<>0 then self.channel[1].swp_direction:=-1
+        else self.channel[1].swp_direction:=1;
+      self.channel[1].swp_time:=(valor shr 4) and 7;
+      if ((old and 8)<>0) and ((valor and 8)=0) and self.sweep_neg_used then
+        self.channel[1].on_:=false;
+    end;
+    NR11,NR21,NR31,NR41:begin
+      if offset=NR11 then ch:=1 else if offset=NR21 then ch:=2
+        else if offset=NR31 then ch:=3 else ch:=4;
+      if ch=3 then self.channel[ch].length:=256-valor
+        else self.channel[ch].length:=64-(valor and $3f);
+      if ch<=2 then self.channel[ch].duty:=valor shr 6;
+    end;
+    NR12,NR22,NR42:begin
+      if offset=NR12 then ch:=1 else if offset=NR22 then ch:=2 else ch:=4;
+      if (valor and 8)<>0 then self.channel[ch].env_direction:=1
+        else self.channel[ch].env_direction:=-1;
+      self.channel[ch].env_length:=valor and 7;
+      if not self.dac_enabled(ch) then self.channel[ch].on_:=false;
+    end;
+    NR14:self.channel_control(1,valor);
+    NR24:self.channel_control(2,valor);
+    NR30:if not self.dac_enabled(3) then self.channel[3].on_:=false;
+    NR32:self.channel[3].level:=(valor shr 5) and 3;
+    NR34:self.channel_control(3,valor);
+    NR43:self.channel[4].ply_step:=(valor and 8)<>0;
+    NR44:self.channel_control(4,valor);
+    NR50:begin
+      self.control.vol_left:=(valor shr 4) and 7;
+      self.control.vol_right:=valor and 7;
+    end;
+    NR51:for ch:=1 to 4 do begin
+      self.control.mode_left[ch]:=(valor and (1 shl (ch+3)))<>0;
+      self.control.mode_right[ch]:=(valor and (1 shl (ch-1)))<>0;
+    end;
+  end;
+end;
+
+procedure gb_sound_chip.mix(var left,right:integer);
+var
+  ch,digital,s:integer;
+begin
+  left:=0; right:=0;
+  if not self.control.on_ then exit;
+  for ch:=1 to 4 do begin
+    if not self.dac_enabled(ch) then continue;
+    digital:=0;
+    if self.channel[ch].on_ then
+      case ch of
+        1,2:digital:=((DUTY_BITS[self.channel[ch].duty] shr
+                     (self.channel[ch].pos and 7)) and 1)*self.channel[ch].env_value;
+        3:if self.channel[3].level<>0 then
+            digital:=self.wave_sample shr (self.channel[3].level-1);
+        4:digital:=integer((not self.channel[4].ply_value) and 1)*
+                   self.channel[4].env_value;
+      end;
+    s:=15-2*digital;
+    if self.control.mode_left[ch] then Inc(left,s);
+    if self.control.mode_right[ch] then Inc(right,s);
+  end;
+  left:=left*(integer(self.control.vol_left)+1);
+  right:=right*(integer(self.control.vol_right)+1);
+end;
+
+procedure gb_sound_chip.advance_cycles(cycles:integer;var area_left,area_right:int64);
+var
+  step,ch,left,right,feedback,v:integer;
+begin
+  while cycles>0 do begin
+    step:=cycles;
+    if self.frame_remaining<step then step:=self.frame_remaining;
+    if self.control.on_ then
+      for ch:=1 to 4 do
+        if self.channel[ch].on_ and (self.timer[ch]<step) then step:=self.timer[ch];
+    self.mix(left,right);
+    area_left:=area_left+int64(left)*step;
+    area_right:=area_right+int64(right)*step;
+    Dec(cycles,step);
+    Dec(self.frame_remaining,step);
+    if self.wave_window>step then Dec(self.wave_window,step)
+      else self.wave_window:=0;
+    if self.control.on_ then begin
+      for ch:=1 to 4 do if self.channel[ch].on_ then begin
+        Dec(self.timer[ch],step);
+        if self.timer[ch]=0 then begin
+          self.timer[ch]:=self.timer_period(ch);
+          case ch of
+            1,2:self.channel[ch].pos:=(self.channel[ch].pos+1) and 7;
+            3:begin
+              self.channel[3].offset:=(self.channel[3].offset+1) and 31;
+              v:=self.regs[AUD3W0+(self.channel[3].offset shr 1)];
+              if (self.channel[3].offset and 1)=0 then v:=v shr 4;
+              self.wave_sample:=v and 15;
+              self.wave_window:=2;
             end;
-    			  self.channel[3].on_:=true;
-      			self.channel[3].count:=0;
-      			self.channel[3].duty:=1;
-      			self.channel[3].dutycount:=0;
-      			self.regs[NR52]:=self.regs[NR52] or $4;
+            4:begin
+              feedback:=((self.channel[4].ply_value shr 1) xor self.channel[4].ply_value) and 1;
+              self.channel[4].ply_value:=(self.channel[4].ply_value shr 1) or (dword(feedback) shl 14);
+              if self.channel[4].ply_step then
+                self.channel[4].ply_value:=(self.channel[4].ply_value and $7fbf) or (dword(feedback) shl 6);
+            end;
           end;
-		   end;
-	// MODE 4
-	NR41:begin // Sound Length (R/W)
-		      self.channel[4].length:=length_table[valor and $3f];
-		   end;
-	NR42:begin // Envelope (R/W)
-		      self.channel[4].env_value:=valor shr 4;
-      		self.channel[4].env_direction:=(valor and $8 ) shr 3;
-      		self.channel[4].env_direction:=self.channel[4].env_direction or (self.channel[4].env_direction-1);
-      		self.channel[4].env_length:=env_length_table[valor and $7];
-       end;
-	NR43:begin // Polynomial Counter/Frequency
-      		self.channel[4].period:=period_mode4_table[valor and $7][(valor and $F0) shr 4];
-      		self.channel[4].ply_step:=(valor and $8)<>0;
-		   end;
-	NR44:begin // Counter/Consecutive / Initialize (R/W)
-		      self.channel[4].mode:=(valor and $40)<>0;
-		      if (valor and $80)<>0 then begin
-      			if not(self.channel[4].on_) then self.channel[4].pos:=0;
-      			self.channel[4].on_:=true;
-      			self.channel[4].count:=0;
-      			self.channel[4].env_value:=self.regs[NR42] shr 4;
-      			self.channel[4].env_count:=0;
-      			self.channel[4].signal:=shortint(random(256));
-      			self.channel[4].ply_value:=$7fff;
-      			self.regs[NR52]:=self.regs[NR52] or $8;
-		      end;
-		   end;
-	// CONTROL
-	NR50:begin // Channel Control / On/Off / Volume (R/W)
-      		self.control.vol_left:= valor and $7;
-      		self.control.vol_right:= (valor and $70) shr 4;
-		   end;
-	NR51:begin // Selection of Sound Output Terminal
-      		self.control.mode_right[1]:=(valor and $1)<>0;
-      		self.control.mode_left[1]:=(valor and $10)<>0;
-      		self.control.mode_right[2]:=(valor and $2)<>0;
-      		self.control.mode_left[2]:=(valor and $20)<>0;
-      		self.control.mode_right[3]:=(valor and $4)<>0;
-      		self.control.mode_left[3]:=(valor and $40)<>0;
-      		self.control.mode_right[4]:=(valor and $8)<>0;
-      		self.control.mode_left[4]:=(valor and $80)<>0;
-       end;
-	NR52:begin // Sound On/Off (R/W)
-		      // Only bit 7 is writable, writing to bits 0-3 does NOT enable or
-          // disable sound.  They are read-only
-      		self.control.on_:=(valor and $80)<>0;
-      		if not(self.control.on_) then begin
-      			self.w_internal(NR10,$80);
-      			self.w_internal(NR11,$3f);
-      			self.w_internal(NR12,$00);
-      			self.w_internal(NR13,$fe);
-      			self.w_internal(NR14,$bf);
-      			self.w_internal(NR21,$3f);
-      			self.w_internal(NR22,$00);
-      			self.w_internal(NR23,$ff);
-      			self.w_internal(NR24,$bf);
-      			self.w_internal(NR30,$7f);
-      			self.w_internal(NR31,$ff);
-      			self.w_internal(NR32,$9f);
-      			self.w_internal(NR33,$ff);
-      			self.w_internal(NR34,$bf);
-      			self.w_internal(NR41,$ff);
-      			self.w_internal(NR42,$00);
-      			self.w_internal(NR43,$00);
-      			self.w_internal(NR44,$bf);
-      			self.w_internal(NR50,$00);
-      			self.w_internal(NR51,$00);
-      			self.channel[1].on_:=false;
-      			self.channel[2].on_:=false;
-      			self.channel[3].on_:=false;
-      			self.channel[4].on_:=false;
-      			self.regs[offset]:=0;
-          end;
-		   end;
+        end;
+      end;
+    end;
+    if self.frame_remaining=0 then begin
+      self.frame_remaining:=8192;
+      if self.control.on_ then self.tick_frame;
+    end;
   end;
 end;
 
 procedure gb_sound_chip.update;
 var
-  left,right,sample,mode4_mask:integer;
+  cycles,left,right:integer;
+  area_left,area_right:int64;
+  x,y:double;
 begin
-		left:=0;
-    right:=0;
-		// Mode 1 - Wave with Envelope and Sweep
-		if self.channel[1].on_ then begin
-			sample:=self.channel[1].signal*self.channel[1].env_value;
-			self.channel[1].pos:=self.channel[1].pos+1;
-			if (self.channel[1].pos=(trunc(self.channel[1].period/wave_duty_table[self.channel[1].duty]) shr 16)) then begin
-				self.channel[1].signal:=-self.channel[1].signal;
-			end else if (self.channel[1].pos>(self.channel[1].period shr 16)) then begin
-				self.channel[1].pos:=0;
-				self.channel[1].signal:=-self.channel[1].signal;
-			end;
-			if ((self.channel[1].length<>0) and self.channel[1].mode) then begin
-				self.channel[1].count:=self.channel[1].count+1;
-				if (self.channel[1].count>=self.channel[1].length) then begin
-					self.channel[1].on_:=false;
-					self.regs[NR52]:=self.regs[NR52] and $FE;
-				end;
-			end;
-			if (self.channel[1].env_length<>0) then begin
-				self.channel[1].env_count:=self.channel[1].env_count+1;
-				if (self.channel[1].env_count>=self.channel[1].env_length) then begin
-					self.channel[1].env_count:= 0;
-					self.channel[1].env_value:=self.channel[1].env_value+self.channel[1].env_direction;
-					if (self.channel[1].env_value<0) then self.channel[1].env_value:=0;
-					if (self.channel[1].env_value>15) then self.channel[1].env_value:=15;
-				end;
-			end;
-			if (self.channel[1].swp_time<>0) then begin
-				self.channel[1].swp_count:=self.channel[1].swp_count+1;
-				if (self.channel[1].swp_count>=self.channel[1].swp_time) then begin
-					self.channel[1].swp_count:=0;
-					if (self.channel[1].swp_direction>0) then begin
-						self.channel[1].frequency:=self.channel[1].frequency-(self.channel[1].frequency div (1 shl self.channel[1].swp_shift));
-						if (self.channel[1].frequency<=0) then begin
-							self.channel[1].on_:=false;
-							self.regs[NR52]:=self.regs[NR52] and $FE;
-						end;
-					end else begin
-						self.channel[1].frequency:=self.channel[1].frequency+(self.channel[1].frequency div (1 shl self.channel[1].swp_shift));
-						if (self.channel[1].frequency>=MAX_FREQUENCIES) then begin
-							self.channel[1].frequency:= MAX_FREQUENCIES-1;
-						end;
-					end;
-					self.channel[1].period:=period_table[self.channel[1].frequency];
-				end;
-			end;
+  self.sample_fraction:=self.sample_fraction+APU_CLOCK;
+  cycles:=self.sample_fraction div FREQ_BASE_AUDIO;
+  self.sample_fraction:=self.sample_fraction mod FREQ_BASE_AUDIO;
+  area_left:=0; area_right:=0;
+  self.advance_cycles(cycles,area_left,area_right);
+  left:=0; right:=0;
+  if cycles>0 then begin
+    x:=area_left/cycles;
+    y:=area_right/cycles;
+    if self.dac_enabled(1) or self.dac_enabled(2) or self.dac_enabled(3) or self.dac_enabled(4) then begin
+      x:=x-self.capacitor_left;
+      y:=y-self.capacitor_right;
+      self.capacitor_left:=area_left/cycles-x*self.hpf_factor;
+      self.capacitor_right:=area_right/cycles-y*self.hpf_factor;
+      left:=Round(x*48);
+      right:=Round(y*48);
+    end;
+  end;
+  if left>32767 then left:=32767
+    else if left<-32768 then left:=-32768;
+  if right>32767 then right:=32767
+    else if right< -32768 then right:=-32768;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=left;
+  tsample[self.tsample_num,sound_status.posicion_sonido+1]:=right;
+end;
 
-			if self.control.mode_left[1] then left:=left+sample;
-			if self.control.mode_right[1] then right:=right+sample;
-		end; // del on1
+function gb_sound_chip.save_snapshot(datos:pbyte):word;
+var
+  p:pbyte;
+procedure put(src:pointer; n:integer);
+begin
+  CopyMemory(p,src,n);
+  Inc(p,n);
+end;
+begin
+  p:=datos;
+  put(@self.channel,SizeOf(self.channel)); put(@self.control,SizeOf(self.control));
+  put(@self.regs,SizeOf(self.regs)); put(@self.timer,SizeOf(self.timer));
+  put(@self.env_running,SizeOf(self.env_running));
+  put(@self.sweep_shadow,SizeOf(self.sweep_shadow));
+  put(@self.sweep_enabled,SizeOf(self.sweep_enabled));
+  put(@self.sweep_neg_used,SizeOf(self.sweep_neg_used));
+  put(@self.cgb_mode,SizeOf(self.cgb_mode));
+  put(@self.frame_step,SizeOf(self.frame_step));
+  put(@self.frame_remaining,SizeOf(self.frame_remaining));
+  put(@self.sample_fraction,SizeOf(self.sample_fraction));
+  put(@self.wave_sample,SizeOf(self.wave_sample));
+  put(@self.wave_window,SizeOf(self.wave_window));
+  put(@self.capacitor_left,SizeOf(self.capacitor_left));
+  put(@self.capacitor_right,SizeOf(self.capacitor_right));
+  Result:=6+SizeOf(self.channel)+SizeOf(self.control)+SizeOf(self.regs)+
+    SizeOf(self.timer)+SizeOf(self.env_running)+SizeOf(self.sweep_shadow)+
+    3*SizeOf(boolean)+SizeOf(self.frame_step)+SizeOf(self.frame_remaining)+
+    SizeOf(self.sample_fraction)+2*SizeOf(byte)+2*SizeOf(double);
+end;
 
-		// Mode 2 - Wave with Envelope */
-		if self.channel[2].on_ then begin
-			sample:=self.channel[2].signal*self.channel[2].env_value;
-			self.channel[2].pos:=self.channel[2].pos+1;
-			if (self.channel[2].pos=(trunc(self.channel[2].period/wave_duty_table[self.channel[2].duty]) shr 16)) then begin
-				self.channel[2].signal:=-self.channel[2].signal;
-			end	else if( self.channel[2].pos>(self.channel[2].period shr 16)) then begin
-				self.channel[2].pos:=0;
-				self.channel[2].signal:=-self.channel[2].signal;
-			end;
-
-			if ((self.channel[2].length<>0) and self.channel[2].mode) then begin
-				self.channel[2].count:=self.channel[2].count+1;
-				if (self.channel[2].count>=self.channel[2].length) then begin
-					self.channel[2].on_:=false;
-					self.regs[NR52]:=self.regs[NR52] and $FD;
-				end;
-			end;
-
-			if (self.channel[2].env_length<>0) then begin
-				self.channel[2].env_count:=self.channel[2].env_count+1;
-				if (self.channel[2].env_count>=self.channel[2].env_length) then begin
-					self.channel[2].env_count:=0;
-					self.channel[2].env_value:=self.channel[2].env_value+self.channel[2].env_direction;
-					if (self.channel[2].env_value<0) then self.channel[2].env_value:=0;
-					if (self.channel[2].env_value>15) then self.channel[2].env_value:=15;
-				end;
-			end;
-			if self.control.mode_left[2] then left:=left+sample;
-			if self.control.mode_right[2] then right:=right+sample;
-		end;
-
-		// Mode 3 - Wave patterns from WaveRAM */
-		if self.channel[3].on_ then begin
-			// NOTE: This is extremely close, but not quite right.
-      //       The problem is for GB frequencies above 2000 the frequency gets
-      //       clipped. This is caused because self.channel[3].pos is never 0 at the test.
-			sample:=self.regs[AUD3W0+(self.channel[3].offset div 2)];
-			if ((self.channel[3].offset mod 2)=0) then sample:=sample shr 4;
-			sample:=(sample and $f)-8;
-			if (self.channel[3].level<>0) then sample:=sample shr (self.channel[3].level-1)
-  			else sample:=0;
-			self.channel[3].pos:=self.channel[3].pos+1;
-			if (self.channel[3].pos>=(dword(self.channel[3].period shr 21)+self.channel[3].duty)) then begin
-				self.channel[3].pos:=0;
-				if (self.channel[3].dutycount=(dword(self.channel[3].period shr 16) mod 32)) then begin
-					self.channel[3].duty:=self.channel[3].duty-1;
-				end;
-				self.channel[3].dutycount:=self.channel[3].dutycount+1;
-				self.channel[3].offset:=self.channel[3].offset+1;
-				if (self.channel[3].offset>31) then begin
-					self.channel[3].offset:=0;
-					self.channel[3].duty:=1;
-					self.channel[3].dutycount:=0;
-				end;
-			end;
-			if ((self.channel[3].length<>0) and self.channel[3].mode) then begin
-				self.channel[3].count:=self.channel[3].count+1;
-				if (self.channel[3].count>=self.channel[3].length ) then begin
-					self.channel[3].on_:=false;
-					self.regs[NR52]:=self.regs[NR52] and $fb;
-				end;
-			end;
-			if self.control.mode_left[3] then left:=left+sample;
-			if self.control.mode_right[3] then right:=right+sample;
-		end;
-
-		// Mode 4 - Noise with Envelope */
-		if self.channel[4].on_ then begin
-			// Similar problem to Mode 3, we seem to miss some notes */
-			sample:=self.channel[4].signal and self.channel[4].env_value;
-			self.channel[4].pos:=self.channel[4].pos+1;
-			if (self.channel[4].pos=(self.channel[4].period shr 17)) then begin
-				// Using a Polynomial Counter (aka Linear Feedback Shift Register)
-        //         Mode 4 has a 7 bit and 15 bit counter so we need to shift the
-        //         bits around accordingly
-        if self.channel[4].ply_step then mode4_mask:=(((self.channel[4].ply_value and $2) div 2) xor (self.channel[4].ply_value and $1)) shl 6
-          else mode4_mask:=(((self.channel[4].ply_value and $2) div 2) xor (self.channel[4].ply_value and $1)) shl 14;
-
-				self.channel[4].ply_value:=self.channel[4].ply_value div 2;
-				self.channel[4].ply_value:=self.channel[4].ply_value or mode4_mask;
-        if self.channel[4].ply_step then self.channel[4].ply_value:=self.channel[4].ply_value and $7f
-         else self.channel[4].ply_value:=self.channel[4].ply_value and $7fff;
-				self.channel[4].signal:=shortint(self.channel[4].ply_value);
-			end else if (self.channel[4].pos>(self.channel[4].period shr 16)) then begin
-				self.channel[4].pos:=0;
-        if self.channel[4].ply_step then mode4_mask:=(((self.channel[4].ply_value and $2) div 2) xor (self.channel[4].ply_value and $1)) shl 6
-          else mode4_mask:=(((self.channel[4].ply_value and $2) div 2) xor (self.channel[4].ply_value and $1)) shl 14;
-				self.channel[4].ply_value:=self.channel[4].ply_value div 2;
-				self.channel[4].ply_value:=self.channel[4].ply_value or mode4_mask;
-        if self.channel[4].ply_step then self.channel[4].ply_value:=self.channel[4].ply_value and $7f
-          else self.channel[4].ply_value:=self.channel[4].ply_value and $7fff;
-				self.channel[4].signal:=shortint(self.channel[4].ply_value);
-			end;
-			if ((self.channel[4].length<>0) and self.channel[4].mode) then begin
-				self.channel[4].count:=self.channel[4].count+1;
-				if (self.channel[4].count>=self.channel[4].length) then begin
-					self.channel[4].on_:=false;
-					self.regs[NR52]:=self.regs[NR52] and $f7;
-				end;
-			end;
-			if (self.channel[4].env_length<>0) then begin
-				self.channel[4].env_count:=self.channel[4].env_count+1;
-				if (self.channel[4].env_count>=self.channel[4].env_length) then begin
-					self.channel[4].env_count:=0;
-					self.channel[4].env_value:=self.channel[4].env_value+self.channel[4].env_direction;
-					if (self.channel[4].env_value<0) then self.channel[4].env_value:=0;
-					if (self.channel[4].env_value>15) then self.channel[4].env_value:=15;
-				end;
-			end;
-			if self.control.mode_left[4] then left:=left+sample;
-			if self.control.mode_right[4] then right:=right+sample;
-		end;
-		// Adjust for master volume
-		left:=left*self.control.vol_left;
-		right:=right*self.control.vol_right;
-		// pump up the volume
-		left:=left shl 6;
-		right:=right shl 6;
-		// Update the buffers
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=left;
-    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=right;
-	  self.regs[NR52]:=(self.regs[NR52] and $f0) or byte(self.channel[1].on_) or (byte(self.channel[2].on_) shl 1) or (byte(self.channel[3].on_) shl 2) or (byte(self.channel[4].on_) shl 3);
+procedure gb_sound_chip.load_snapshot(datos:pbyte);
+var p:pbyte;
+procedure get(dst:pointer; n:integer);
+begin
+  CopyMemory(dst,p,n);
+  Inc(p,n);
+end;
+begin
+  p:=datos;
+  get(@self.channel,SizeOf(self.channel)); get(@self.control,SizeOf(self.control));
+  get(@self.regs,SizeOf(self.regs)); get(@self.timer,SizeOf(self.timer));
+  get(@self.env_running,SizeOf(self.env_running));
+  get(@self.sweep_shadow,SizeOf(self.sweep_shadow));
+  get(@self.sweep_enabled,SizeOf(self.sweep_enabled));
+  get(@self.sweep_neg_used,SizeOf(self.sweep_neg_used));
+  get(@self.cgb_mode,SizeOf(self.cgb_mode));
+  get(@self.frame_step,SizeOf(self.frame_step));
+  get(@self.frame_remaining,SizeOf(self.frame_remaining));
+  get(@self.sample_fraction,SizeOf(self.sample_fraction));
+  get(@self.wave_sample,SizeOf(self.wave_sample));
+  get(@self.wave_window,SizeOf(self.wave_window));
+  get(@self.capacitor_left,SizeOf(self.capacitor_left));
+  get(@self.capacitor_right,SizeOf(self.capacitor_right));
+  if self.cgb_mode then self.hpf_factor:=Power(0.998943,APU_CLOCK/FREQ_BASE_AUDIO)
+    else self.hpf_factor:=Power(0.999958,APU_CLOCK/FREQ_BASE_AUDIO);
 end;
 
 end.

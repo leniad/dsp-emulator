@@ -1,4 +1,7 @@
-unit sid_sound;
+﻿unit sid_sound;
+{$IFDEF FPC}
+{$POINTERMATH ON}
+{$ENDIF}
 
 interface
 uses main_engine,sound_engine,sid_tables,math,dialogs;
@@ -50,27 +53,25 @@ type
 		stp:smallint;
 	end;
 
+  sid_chip=class;
   psidOperator=^sidOperator;
   sidOperator=class
     constructor create;
     destructor free;
     public
+      sid:sid_chip;
       reg:array[0..6] of byte;
       SIDfreq:dword;
       SIDpulseWidth:word;
       SIDctrl:byte;
       SIDAD,SIDSR:byte;
-
       carrier:psidOperator;
       modulator:psidOperator;
       sync:boolean;
-
       pulseIndex,newPulseIndex:word;
       curSIDfreq:word;
       curNoiseFreq:word;
-
       output:byte;//, outputMask;
-
       filtVoiceMask:byte;
       filtEnabled:boolean;
       filtLow, filtRef:single;
@@ -128,6 +129,7 @@ type
       procedure update;
     private
       zero16bit:word;
+      waveform30,waveform50,waveform60,waveform70:pbyte;
       filterTable:array[0..$7ff] of single;
       bandPassParam:array[0..$7ff] of single;
       filterResTable:array[0..15] of single;
@@ -204,10 +206,6 @@ var
   triangleTable:array[0..4095] of byte;
   sawtoothTable:array[0..4095] of byte;
   squareTable:array[0..(2*4096)-1] of byte;
-  waveform30:pbyte;
-  waveform50:pbyte;
-  waveform60:pbyte;
-  waveform70:pbyte;
   noiseTableMSB:array[0..(1 shl 8)-1] of byte;
   noiseTableLSB:array[0..(1 shl 16)-1] of byte;
 
@@ -223,7 +221,7 @@ begin
 	uk:=0;
 	for si:=0 to 255 do begin
 		for sj:=-128 to 127 do begin
-			ampMod1x8[uk]:=trunc(((si*sj)/255)*filterAmpl);
+			ampMod1x8[uk]:=trunc(((si*sj) div 255)*filterAmpl);
       uk:=uk+1;
 		end;
 	end;
@@ -231,7 +229,7 @@ end;
 
 function sshr(num:integer;fac:byte):integer;
 begin
-  if num<0 then sshr:=-(abs(num) shr fac)
+  if num<0 then sshr:=integer(-(((-Int64(num))+((Int64(1) shl fac)-1)) shr fac))
     else sshr:=num shr fac;
 end;
 
@@ -241,34 +239,34 @@ var
   tmpint:integer;
 begin
 	if pVoice.filtEnabled then begin
-		if (sid_0.filter.Type_<>0) then begin
-			if (sid_0.filter.Type_=$20) then begin
-				pVoice.filtLow:=pVoice.filtLow+(pVoice.filtRef*sid_0.filter.Dy);
+		if (pVoice.sid.filter.Type_<>0) then begin
+			if (pVoice.sid.filter.Type_=$20) then begin
+				pVoice.filtLow:=pVoice.filtLow+(pVoice.filtRef*pVoice.sid.filter.Dy);
 				tmp:=pVoice.filtIO-pVoice.filtLow;
-				tmp:=tmp-(pVoice.filtRef*sid_0.filter.ResDy);
-				pVoice.filtRef:=pVoice.filtRef+(tmp*sid_0.filter.Dy);
+				tmp:=tmp-(pVoice.filtRef*pVoice.sid.filter.ResDy);
+				pVoice.filtRef:=pVoice.filtRef+(tmp*pVoice.sid.filter.Dy);
 				pVoice.filtIO:=shortint(trunc(pVoice.filtRef-pVoice.filtLow/4));
-			end else if (sid_0.filter.Type_=$40) then begin
-				pVoice.filtLow:=pVoice.filtLow+(pVoice.filtRef*sid_0.filter.Dy*0.1);
+			end else if (pVoice.sid.filter.Type_=$40) then begin
+				pVoice.filtLow:=pVoice.filtLow+(pVoice.filtRef*pVoice.sid.filter.Dy*0.1);
 				tmp:=pVoice.filtIO-pVoice.filtLow;
-				tmp:=tmp-(pVoice.filtRef*sid_0.filter.ResDy);
-				pVoice.filtRef:=pVoice.filtRef+(tmp*(sid_0.filter.Dy));
+				tmp:=tmp-(pVoice.filtRef*pVoice.sid.filter.ResDy);
+				pVoice.filtRef:=pVoice.filtRef+(tmp*(pVoice.sid.filter.Dy));
 				tmp2:=pVoice.filtRef-pVoice.filtIO/8;
 				if (tmp2<-128) then tmp2:=-128;
 				if (tmp2>127) then tmp2:=127;
 				pVoice.filtIO:=shortint(trunc(tmp2));
 			end else begin
-				pVoice.filtLow:=pVoice.filtLow+(pVoice.filtRef*sid_0.filter.Dy);
+				pVoice.filtLow:=pVoice.filtLow+(pVoice.filtRef*pVoice.sid.filter.Dy);
 				sample:=pVoice.filtIO;
 				sample2:=sample-pVoice.filtLow;
 				tmpint:=trunc(sample2);
-				sample2:=sample2-(pVoice.filtRef*sid_0.filter.ResDy);
-				pVoice.filtRef:=pVoice.filtRef+(sample2*sid_0.filter.Dy);
-				if (sid_0.filter.Type_=$10) then pVoice.filtIO:=trunc(pVoice.filtLow)
-				  else if (sid_0.filter.Type_=$30) then pVoice.filtIO:=trunc(pVoice.filtLow)
-				    else if (sid_0.filter.Type_=$50) then pVoice.filtIO:=trunc(sample-sshr(tmpint,1))
-				      else if (sid_0.filter.Type_=$60) then pVoice.filtIO:=tmpint
-				        else if (sid_0.filter.Type_=$70) then pVoice.filtIO:=trunc(sample-sshr(tmpint,1));
+				sample2:=sample2-(pVoice.filtRef*pVoice.sid.filter.ResDy);
+				pVoice.filtRef:=pVoice.filtRef+(sample2*pVoice.sid.filter.Dy);
+				if (pVoice.sid.filter.Type_=$10) then pVoice.filtIO:=trunc(pVoice.filtLow)
+				  else if (pVoice.sid.filter.Type_=$30) then pVoice.filtIO:=trunc(pVoice.filtLow)
+				    else if (pVoice.sid.filter.Type_=$50) then pVoice.filtIO:=trunc(sample-sshr(tmpint,1))
+				      else if (pVoice.sid.filter.Type_=$60) then pVoice.filtIO:=tmpint
+				        else if (pVoice.sid.filter.Type_=$70) then pVoice.filtIO:=trunc(sample-sshr(tmpint,1));
 			end;
 		end else // pVoice->sid->filter.Type == 0x00 */
 			pVoice.filtIO:=0;
@@ -313,7 +311,7 @@ begin
 				if (tmpVol>255) then tmpVol:=255;
 			end;
 			// Want the modulated volume value in the high byte. */
-			masterAmplModTable[k]:=round((tmpVol*masterVolumeLevels[i])/255) shl 8;
+			masterAmplModTable[k]:=((tmpVol*masterVolumeLevels[i]) div 255) shl 8;
       k:=k+1;
 		end;
 	end;
@@ -359,28 +357,6 @@ begin
 		squareTable[k]:= 0; //255;
     k:=k+1;
   end;
-	if (type_=TYPE_8580) then begin
-		waveform30:=@waveform30_8580;
-		waveform50:=@waveform50_8580;
-		waveform60:=@waveform60_8580;
-		waveform70:=@waveform70_8580;
-	end else begin
-		waveform30:=@waveform30_6581;
-		waveform50:=@waveform50_6581;
-		waveform60:=@waveform60_6581;
-		waveform70:=@waveform70_6581;  // really audible? */
-	end;
-	if (type_=TYPE_8580) then begin
-		sidModeNormalTable[3]:=sidMode30;
-		sidModeNormalTable[6]:=sidMode60;
-		sidModeNormalTable[7]:=sidMode70;
-		sidModeRingTable[7]:=sidMode74;
-	end else begin
-		sidModeNormalTable[3]:=sidMode30;
-		sidModeNormalTable[6]:=sidMode60;
-		sidModeNormalTable[7]:=sidMode00;  // really audible? */
-		sidModeRingTable[7]:=sidMode00;    // */
-	end;
 	for ni:=0 to sizeof(noiseTableLSB)-1 do begin
 		noiseTableLSB[ni]:=
 			(((ni shr (13-4)) and $10) or
@@ -401,12 +377,27 @@ constructor sid_chip.create(clock:dword;type_:byte);
 var
   v,mod_voi:byte;
 const
-  rev:array[0..2] of byte=(2,1,0);
+  rev:array[0..2] of byte=(2,0,1);
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   self.tsample_num:=init_channel;
   self.clock:=clock;
-  for v:=0 to (max_voices-1) do self.optr[v]:=sidOperator.create;
+  self.type_:=type_;
+  for v:=0 to (max_voices-1) do begin
+    self.optr[v]:=sidOperator.create;
+    self.optr[v].sid:=self;
+  end;
+  if type_=TYPE_8580 then begin
+    self.waveform30:=@waveform30_8580[0];
+    self.waveform50:=@waveform50_8580[0];
+    self.waveform60:=@waveform60_8580[0];
+    self.waveform70:=@waveform70_8580[0];
+  end else begin
+    self.waveform30:=@waveform30_6581[0];
+    self.waveform50:=@waveform50_6581[0];
+    self.waveform60:=@waveform60_6581[0];
+    self.waveform70:=@waveform70_6581[0];
+  end;
   for v:=0 to (max_voices-1) do begin
 		mod_voi:=rev[v];
 		self.optr[v].modulator:=@self.optr[mod_voi];
@@ -422,7 +413,7 @@ begin
 	enveEmuInit(FREQ_BASE_AUDIO,true);
   self.zero16bit:=0;
 	self.MixerInit(0);
-	//self.reset;  Mejor no!! hasta que este creado
+	self.reset;
 end;
 
 destructor sid_chip.free;
@@ -448,6 +439,9 @@ procedure sid_chip.reset;
 var
   v:byte;
 begin
+  FillChar(self.reg,SizeOf(self.reg),0);
+  self.masterVolume:=0;
+  self.masterVolumeAmplIndex:=0;
   for v:=0 to (max_voices-1) do begin
 		self.optr[v].clear;
 		enveEmuResetOperator(@self.optr[v]);
@@ -657,6 +651,7 @@ end;
 
 procedure sidOperator.clear;
 begin
+  FillChar(self.reg,SizeOf(self.reg),0);
 	self.SIDfreq:=0;
 	self.SIDctrl:=0;
 	self.SIDAD:=0;
@@ -707,7 +702,7 @@ begin
 	else if (((self.waveStep+self.pulseIndex)<$1000) and ((self.waveStep+self.newPulseIndex)<$1000)) then
 		self.pulseIndex:=self.newPulseIndex;
   oldWave:=self.SIDctrl;
-  newWave:=self.reg[4] or (self.reg[5] shl 8); // FIXME: what's actually supposed to happen here?
+  newWave:=self.reg[4];
   enveTemp:=self.ADSRctrl;
 	self.SIDctrl:=newWave;
 
@@ -732,7 +727,7 @@ begin
 
 	self.ADSRproc:=enveModeTable[(enveTemp shr 1) and $1f];  // shifting out the KEY-bit
 	self.ADSRctrl:=enveTemp and (255-ENVE_ALTER-1);
-	self.filtEnabled:=sid_0.filter.Enabled and ((sid_0.reg[$17] and self.filtVoiceMask)<>0);
+	self.filtEnabled:=self.sid.filter.Enabled and ((self.sid.reg[$17] and self.filtVoiceMask)<>0);
 end;
 
 function waveCalcRangeCheck(pVoice:psidOperator):shortint;
@@ -778,8 +773,8 @@ begin
 			self.curSIDfreq:=self.SIDfreq;
 			// We keep the value cycleLen between 1 <= x <= 65535.
 			// This makes a range-check in wave_calc_cycle_len() unrequired.
-			self.cycleLen:=sid_0.PCMsid div self.SIDfreq;
-			self.cycleLenPnt:=((sid_0.PCMsid mod self.SIDfreq)*65536) div self.SIDfreq;
+			self.cycleLen:=self.sid.PCMsid div self.SIDfreq;
+			self.cycleLenPnt:=((self.sid.PCMsid mod self.SIDfreq)*65536) div self.SIDfreq;
 			if (self.cycleLenCount>0) then begin
 				self.wave_calc_cycle_len;
 				self.outProc:=@waveCalcRangeCheck;
@@ -787,9 +782,8 @@ begin
 		end;
 		if (((self.SIDctrl and $80)<>0) and (self.curNoiseFreq<>self.SIDfreq)) then begin
 			self.curNoiseFreq:=self.SIDfreq;
-			self.noiseStepAdd:=(sid_0.PCMsidNoise*self.SIDfreq) shr 8;
-			if (self.noiseStepAdd>=(1 shl 21)) then sidModeNormalTable[8]:=sidMode80hp
-			  else sidModeNormalTable[8]:=sidMode80;
+			self.noiseStepAdd:=(self.sid.PCMsidNoise*self.SIDfreq) shr 8;
+
 		end;
 		if (self.SIDctrl and 2)<>0 then begin
 			if ((self.modulator.SIDfreq=0) or ((self.modulator.SIDctrl and 8)<>0)) then begin
@@ -798,8 +792,10 @@ begin
 				          self.sync:=true;
                 end;
 		end;
-	  if (((self.SIDctrl and $14)=$14) and (self.modulator.SIDfreq<>0)) then self.waveProc:=sidModeRingTable[self.SIDctrl shr 4]
-	    else self.waveProc:=sidModeNormalTable[self.SIDctrl shr 4];
+      // Preserve the old 6581 mode-70 approximation without changing global tables.
+      if (self.sid.type_=TYPE_6581) and ((self.SIDctrl shr 4)=7) then self.waveProc:=sidMode00
+        else if (((self.SIDctrl and $14)=$14) and (self.modulator.SIDfreq<>0)) then self.waveProc:=sidModeRingTable[self.SIDctrl shr 4]
+              else self.waveProc:=sidModeNormalTable[self.SIDctrl shr 4];
   end;
 end;
 
@@ -837,7 +833,7 @@ begin
 	end else begin
 		pVoice.enveVol:=pVoice.enveStep;
 		enveEmuEnveAdvance(pVoice);
-		enveEmuAttack:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+		enveEmuAttack:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 	end;
 end;
 
@@ -855,14 +851,14 @@ begin
 			enveEmuDecay:=enveEmuAlterSustain(pVoice);  // start sustain */
 		end else begin
 			enveEmuEnveAdvance(pVoice);
-			enveEmuDecay:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+			enveEmuDecay:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 		end;
 	end;
 end;
 
 function enveEmuSustain(pVoice:psidOperator):word;
 begin
-  enveEmuSustain:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+  enveEmuSustain:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 end;
 
 function enveEmuRelease(pVoice:psidOperator):word;
@@ -870,11 +866,11 @@ begin
 	pVoice.enveStep:=trunc(pVoice.fenveStep) and $ffff;
 	if (pVoice.enveStep>=releaseTabLen) then begin
 		pVoice.enveVol:=releaseTab[releaseTabLen-1];
-		enveEmuRelease:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+		enveEmuRelease:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 	end else begin
 		pVoice.enveVol:=releaseTab[pVoice.enveStep];
 		enveEmuEnveAdvance(pVoice);
-		enveEmuRelease:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+		enveEmuRelease:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 	end;
 end;
 
@@ -892,7 +888,7 @@ begin
 			enveEmuSustainDecay:=enveEmuAlterSustain(pVoice);
 		end else begin
 			enveEmuEnveAdvance(pVoice);
-			enveEmuSustainDecay:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+			enveEmuSustainDecay:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 		end;
 	end;
 end;
@@ -912,7 +908,7 @@ begin
 	pVoice.enveVol:=pVoice.enveStep;
 	pVoice.enveShortAttackCount:=pVoice.enveShortAttackCount-1;
 	enveEmuEnveAdvance(pVoice);
-	enveEmuShortAttack:=masterAmplModTable[(sid_0.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
+	enveEmuShortAttack:=masterAmplModTable[(pVoice.sid.masterVolumeAmplIndex+pVoice.enveVol) and $fff];
 end;
 
 function enveEmuAlterShortAttack(pVoice:psidOperator):word;
@@ -998,7 +994,7 @@ end;
 procedure noiseAdvance(pVoice:psidOperator);
 begin
 	pVoice.noiseStep:=pVoice.noiseStep+pVoice.noiseStepAdd;
-	if (pVoice.noiseStep>=(1 shl 20)) then begin
+	while (pVoice.noiseStep>=(1 shl 20)) do begin
 		pVoice.noiseStep:=pVoice.noiseStep-(1 shl 20);
 		pVoice.noiseReg:=(pVoice.noiseReg shl 1) or
 			(((pVoice.noiseReg shr 22) xor (pVoice.noiseReg shr 17)) and 1);
@@ -1027,7 +1023,7 @@ end;
 
 procedure sidMode30(pVoice:psidOperator);
 begin
-  pVoice.output:=waveform30[pVoice.waveStep];
+  pVoice.output:=pVoice.sid.waveform30[pVoice.waveStep];
 	waveAdvance(pVoice);
 end;
 
@@ -1043,7 +1039,7 @@ var
 begin
   tword:=pVoice.waveStep+pVoice.SIDpulseWidth;
   if tword>4095 then pVoice.output:=0
-    else pVoice.output:=waveform50[tword];
+    else pVoice.output:=pVoice.sid.waveform50[tword];
 	waveAdvance(pVoice);
 end;
 
@@ -1053,7 +1049,7 @@ var
 begin
   tword:=pVoice.waveStep+pVoice.SIDpulseWidth;
   if tword>4095 then pVoice.output:=0
-    else pVoice.output:=waveform60[tword];
+    else pVoice.output:=pVoice.sid.waveform60[tword];
 	waveAdvance(pVoice);
 end;
 
@@ -1063,7 +1059,7 @@ var
 begin
   tword:=pVoice.waveStep+pVoice.SIDpulseWidth;
   if tword>4095 then pVoice.output:=0
-    else pVoice.output:=waveform70[tword];
+    else pVoice.output:=pVoice.sid.waveform70[tword];
 	waveAdvance(pVoice);
 end;
 
@@ -1090,8 +1086,8 @@ end;
 
 procedure sidMode34(pVoice:psidOperator);
 begin
-	if (pVoice.modulator.waveStep<2048) then pVoice.output:=waveform30[pVoice.waveStep and $fff]
-	  else pVoice.output:=$FF xor waveform30[pVoice.waveStep and $fff];
+	if (pVoice.modulator.waveStep<2048) then pVoice.output:=pVoice.sid.waveform30[pVoice.waveStep and $fff]
+	  else pVoice.output:=$FF xor pVoice.sid.waveform30[pVoice.waveStep and $fff];
 	waveAdvance(pVoice);
 end;
 
@@ -1101,7 +1097,7 @@ var
 begin
   tword:=pVoice.waveStep+pVoice.SIDpulseWidth;
   if tword>4095 then tword:=0
-    else tword:=waveform50[tword];
+    else tword:=pVoice.sid.waveform50[tword];
 	if (pVoice.modulator.waveStep<2048) then pVoice.output:=tword
 	  else pVoice.output:=$FF xor tword;
 	waveAdvance(pVoice);
@@ -1113,30 +1109,16 @@ var
 begin
   tword:=pVoice.waveStep+pVoice.SIDpulseWidth;
   if tword>4095 then tword:=0
-    else tword:=waveform70[tword];
+    else tword:=pVoice.sid.waveform70[tword];
 	if (pVoice.modulator.waveStep<2048) then pVoice.output:=tword
   	else pVoice.output:=$FF xor tword;
 	waveAdvance(pVoice);
 end;
 
 procedure noiseAdvanceHp(pVoice:psidOperator);
-var
-  tmp:dword;
 begin
-	tmp:=pVoice.noiseStepAdd;
-	while (tmp>=(1 shl 20)) do begin
-		tmp:=tmp-(1 shl 20);
-		pVoice.noiseReg:=(pVoice.noiseReg shl 1) or
-			(((pVoice.noiseReg shr 22) xor (pVoice.noiseReg shr 17)) and 1);
-	end;
-	pVoice.noiseStep:=pVoice.noiseStep+tmp;
-	if (pVoice.noiseStep>=(1 shl 20)) then begin
-		pVoice.noiseStep:=pVoice.noiseStep-(1 shl 20);
-		pVoice.noiseReg:=(pVoice.noiseReg shl 1) or
-			(((pVoice.noiseReg shr 22) xor (pVoice.noiseReg shr 17)) and 1);
-	end;
-	pVoice.noiseOutput:=noiseTableLSB[pVoice.noiseReg and $ffff]
-							or noiseTableMSB[(pVoice.noiseReg shr 16) and $ff];
+  // Same complete accumulator processing for all frequencies and voices.
+  noiseAdvance(pVoice);
 end;
 
 procedure sidMode80hp(pVoice:psidOperator);

@@ -374,7 +374,8 @@ begin
   slot[1,1].ena:=true;
   slot[1,2].ena:=true;
   freemem(datos);
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   directory.msx_tap:=ExtractFilePath(romfile);
 end;
 
@@ -409,7 +410,8 @@ begin
   end else MessageDlg('Error cargando cinta/WAV.'+chr(10)+chr(13)+'Error loading tape/WAV.', mtInformation,[mbOk], 0);
   freemem(datos);
   directory.msx_tap:=ExtractFilePath(romfile);
-  change_caption(cadena);
+  main_vars.nombre_caption:=cadena;
+  change_caption;
 end;
 
 function iniciar_msx1:boolean;

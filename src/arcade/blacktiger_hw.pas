@@ -43,7 +43,7 @@ const
 var
  scroll_ram:array[0..$3fff] of byte;
  memoria_rom:array[0..$f,0..$3fff] of byte;
- banco_rom,soundlatch,i8751_latch,z80_latch,timer_hs,mask_x,mask_y,shl_row:byte;
+ banco_rom,soundlatch,i8751_latch,z80_latch,timer_hs,mask_x,mask_y,shl_row,shl_rel:byte;
  mask_sx,mask_sy,scroll_x,scroll_y,scroll_bank:word;
  bg_on,ch_on,spr_on:boolean;
 
@@ -113,7 +113,7 @@ end;
 procedure eventos_blktiger;
 begin
 if event.arcade then begin
-  marcade.in0:=$ff;
+  marcade.in0:=$f7 or (marcade.in0 and 8);
   marcade.in1:=$ff;
   marcade.in2:=$ff;
   //SYS
@@ -149,10 +149,14 @@ while EmuStatus=EsRunning do begin
   {$endif}
   for f:=0 to 261 do begin
     eventos_blktiger;
-    if f=246 then begin
-      z80_0.change_irq(HOLD_LINE);
-      copymemory(@buffer_sprites,@memoria[$fe00],$200);
-      update_video_blktiger;
+    case f of
+      16: marcade.in0:=marcade.in0 and $f7;
+      112:z80_0.change_irq(HOLD_LINE);
+      240:begin
+            z80_0.change_irq(HOLD_LINE);
+            update_video_blktiger;
+            marcade.in0:=marcade.in0 or 8;
+          end;
     end;
     //Main CPU
     z80_0.run(frame_main);
@@ -236,6 +240,8 @@ end;
 end;
 
 procedure blktiger_outbyte(puerto:word;valor:byte);
+var
+  new_scroll:word;
 begin
 case (puerto and $ff) of
   0:soundlatch:=valor;
@@ -248,6 +254,7 @@ case (puerto and $ff) of
       main_screen.flip_main_screen:=(valor and $40)<>0;
       z80_1.change_reset((valor and $20) shr 5);
     end;
+  6:copymemory(@buffer_sprites,@memoria[$fe00],$200);
   7:begin
       z80_latch:=valor;
       mcs51_0.change_irq1(ASSERT_LINE);
@@ -257,16 +264,18 @@ case (puerto and $ff) of
       scroll_x:=(scroll_x and $ff00) or valor;
     end;
   9:if ((scroll_x shr 8)<>valor) then begin
-      if abs((scroll_x and mask_sx)-(valor and mask_sx))>15 then fillchar(gfx[2].buffer,$2000,1);
-      scroll_x:=(scroll_x and $ff) or (valor shl 8);
+      new_scroll:=(scroll_x and $ff) or (valor shl 8);
+      if abs((scroll_x and mask_sx)-(new_scroll and mask_sx))>15 then fillchar(gfx[2].buffer,$2000,1);
+      scroll_x:=new_scroll;
     end;
   $a:if ((scroll_y and $ff)<>valor) then begin
       if abs((scroll_y and mask_sy)-(valor and mask_sy))>15 then fillchar(gfx[2].buffer,$2000,1);
       scroll_y:=(scroll_y and $ff00) or valor;
     end;
   $b:if ((scroll_y shr 8)<>valor) then begin
-      if abs((scroll_y and mask_sy)-(valor and mask_sy))>15 then fillchar(gfx[2].buffer,$2000,1);
-      scroll_y:=(scroll_y and $ff) or (valor shl 8);
+      new_scroll:=(scroll_y and $ff) or (valor shl 8);
+      if abs((scroll_y and mask_sy)-(new_scroll and mask_sy))>15 then fillchar(gfx[2].buffer,$2000,1);
+      scroll_y:=new_scroll;
     end;
   $c:begin
       if bg_on<>((valor and 2)=0) then begin
@@ -276,19 +285,23 @@ case (puerto and $ff) of
       spr_on:=(valor and 4)=0;
      end;
   $d:scroll_bank:=(valor and 3) shl 12;
-  $e:if ((valor and 1)<>0) then begin
+  $e:if (shl_rel<>(valor and 1)) then begin
+      shl_rel:=valor and 1;
+      fillchar(gfx[2].buffer,$2000,1);
+      if ((valor and 1)<>0) then begin
         mask_x:=$70;
         mask_y:=$30;
         shl_row:=7;
         mask_sx:=$1ff0;
         mask_sy:=$ff0;
-     end else begin
+      end else begin
         mask_x:=$30;
         mask_y:=$70;
         shl_row:=6;
         mask_sx:=$ff0;
         mask_sy:=$1ff0;
-     end
+      end
+    end;
 end;
 end;
 
@@ -471,6 +484,7 @@ begin
  mask_x:=$70;
  mask_y:=$30;
  shl_row:=7;
+ shl_rel:=0;
  i8751_latch:=0;
  z80_latch:=0;
  bg_on:=true;
@@ -493,6 +507,7 @@ const
   ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
 begin
+iniciar_blktiger:=false;
 llamadas_maquina.bucle_general:=blktiger_principal;
 llamadas_maquina.close:=cerrar_blktiger;
 llamadas_maquina.reset:=reset_blktiger;
@@ -500,7 +515,6 @@ llamadas_maquina.save_qsnap:=blktiger_qsave;
 llamadas_maquina.load_qsnap:=blktiger_qload;
 llamadas_maquina.fps_max:=24000000/4/384/262;
 llamadas_maquina.scanlines:=262;
-iniciar_blktiger:=false;
 iniciar_audio(false);
 screen_init(1,272,272,true);
 screen_init(2,272,272,true);

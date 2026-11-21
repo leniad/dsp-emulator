@@ -1,4 +1,4 @@
-unit gauntlet_hw;
+﻿unit gauntlet_hw;
 
 interface
 uses rom_engine;
@@ -72,7 +72,7 @@ const
 	        special_entry:(0,0,0,0);  // mask for the special value
 	        specialvalue:0;           // resulting value to indicate "special"
         );
-        CPU_SYNC=4;
+        CPU_SYNC=2;
 
 var
  rom:array[0..$3ffff] of word;
@@ -174,7 +174,7 @@ while EmuStatus=EsRunning do begin
           vblank:=$40;
           m6502_0.change_irq(CLEAR_LINE);
         end;
-      64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
+      //64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
       32,96,160,224:m6502_0.change_irq(ASSERT_LINE);
       240:begin  //VBLANK
           update_video_gauntlet;
@@ -251,7 +251,7 @@ case direccion of
                         write_eeprom:=false;
                      end;
     $803100:; //watch dog
-    $803120..$80312e:begin //sound_reset_w
+    $80312e:begin //sound_reset_w
               old:=sound_reset_val;
               sound_reset_val:=valor;
               if ((old xor sound_reset_val) and 1)<>0 then begin

@@ -163,12 +163,12 @@ var
   addr,bank,y,pix,data_7,pixels,color:word;
   x,xpos,pitch:integer;
   spritedata:dword;
-procedure system16a_draw_pixel(x,y,pix:word);
+procedure system16a_draw_pixel(x:integer;y,pix:word);
 var
   punt,punt2,temp1,temp2,temp3:word;
 begin
   //only draw if onscreen, not 0 or 15
-	if ((x<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
+	if ((x>=0) and (x<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
       if (pix and $3f0)=$3f0 then begin //Shadow
           punt:=getpixel(x+ADD_SPRITE,y+ADD_SPRITE,7);
           punt2:=paleta[$1000];
@@ -182,8 +182,9 @@ begin
 end;
 begin
   for f:=0 to $7f do begin
-    bottom:=(sprite_ram[f*8] shr 8)+1;
+    bottom:=sprite_ram[f*8] shr 8;
     if bottom>$f0 then exit;
+    Inc(bottom); // Apply the existing Y offset only after testing the list marker.
     sprpri:=(sprite_ram[(f*8)+4] and $ff) and $3;
     if sprpri<>pri then continue;
     addr:=sprite_ram[(f*8)+3];
@@ -200,7 +201,7 @@ begin
 		// loop from top to bottom
 		for y:=top to (bottom-1) do begin
 			// advance a row
-			addr:=addr+pitch;
+			addr:=(Integer(addr)+pitch) and $ffff;
 			// skip drawing if not within the cliprect
 			if (y<256) then begin
 				// note that the System 16A sprites have a design flaw that allows the address
@@ -226,7 +227,7 @@ begin
 						if (pix=15) then begin
               sprite_ram[(f*8)+7]:=data_7;
               break;
-            end else data_7:=data_7+1;
+            end else data_7:=(Integer(data_7)+1) and $ffff;
 					end;
 				end else begin
 				// flipped case
@@ -248,7 +249,7 @@ begin
 						if (pix=15) then begin
               sprite_ram[(f*8)+7]:=data_7;
               break;
-            end else data_7:=data_7-1;
+            end else data_7:=(Integer(data_7)+$ffff) and $ffff;
 					end;
 				end;
 			end;

@@ -382,7 +382,8 @@ begin
   if extension='DSP' then snapshot_r(datos,longitud,SCHIP8)
     else copymemory(@memoria[$200],datos,longitud);
   freemem(datos);
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   directory.chip8:=ExtractFilePath(romfile);
 end;
 

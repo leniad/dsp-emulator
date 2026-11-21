@@ -1,10 +1,10 @@
-unit avg_dvg;
+﻿unit avg_dvg;
 
 interface
 uses main_engine,gfx_engine,timer_engine;
 
 const
-  MAXVECT=10000;
+  MAXVECT=5000;
 type
   	tvgvector=record
 		  x,y:integer;
@@ -35,7 +35,7 @@ type
         function dvg_state_addr:byte;
         function dvg_handler_0:byte;
         function dvg_handler_1:byte;
-        function dvg_handler_2:byte;
+        function dvg_handler_2:integer;
         function dvg_handler_3:byte;
         function dvg_handler_4:byte;
         function dvg_handler_5:byte;
@@ -53,15 +53,16 @@ var
   timer_hs,timer_run:byte;
 
 implementation
+uses SysUtils;
 const
   VGSLICE=10000;
   VGVECTOR=0;
   VGCLIP=1;
 
-procedure halt_sync_clear;
+procedure halt_sync_set;
 begin
-  avgdvg_0.sync_halt:=0;
   timers.enabled(timer_hs,false);
+  avgdvg_0.sync_halt:=1;
 end;
 
 procedure run_vector;
@@ -77,10 +78,11 @@ begin
   self.ycenter:=512;
   self.xmin:=0;
   self.ymin:=0;
-  timer_hs:=timers.init(cpu_n,1,halt_sync_clear,nil,false);
+  timer_hs:=timers.init(cpu_n,1,halt_sync_set,nil,false);
   timer_run:=timers.init(cpu_n,1,run_vector,nil,false);
   self.screen:=screen;
   self.x_desp:=x_desp;
+  self.reset;
 end;
 
 destructor avgdvg_chip.free;
@@ -91,7 +93,7 @@ procedure avgdvg_chip.reset;
 begin
   self.state_latch:=0;
   self.op:=0;
-  self.halt:=0;
+  self.halt:=1;
   self.pc:=0;
   self.data:=0;
   self.sp:=0;
@@ -106,7 +108,10 @@ begin
   self.ypos:=0;
   self.flip_x:=false;
   self.flip_y:=false;
-  self.sync_halt:=0;
+  self.sync_halt:=1;
+  self.nvect:=0;
+  timers.enabled(timer_hs,false);
+  timers.enabled(timer_run,false);
 end;
 
 function avgdvg_chip.get_prom_data:pbyte;
@@ -168,7 +173,7 @@ begin
 		vg_add_point_buf(self.xmin+x,self.ymin+y,7,intensity);
 end;
 
-function avgdvg_chip.dvg_handler_2:byte; //dvg_gostrobe
+function avgdvg_chip.dvg_handler_2:integer; //dvg_gostrobe
 var
   scale,fin,dx,dy:integer;
   cycles,c,mx,my:word;
@@ -295,7 +300,7 @@ end;
 
 procedure avgdvg_chip.run;
 var
-  cycles:word;
+  cycles:integer;
 begin
   cycles:=0;
 	while (cycles<VGSLICE) do begin
@@ -317,29 +322,25 @@ begin
       end;
 		end;
 		if ((self.halt<>0) and ((self.state_latch and $10)=0)) then begin
-        timers.timer[timer_hs].time_final:=cycles;
+        timers.timer[timer_hs].time_final:=cycles/8.0;
         timers.enabled(timer_hs,true);
-        self.sync_halt:=1;
     end;
 		self.state_latch:=(self.halt shl 4) or (self.state_latch and $f);
 		cycles:=cycles+8;
 	end;
   //Me espero a que ejecute este set de vectores y sigo...
-  timers.timer[timer_run].time_final:=cycles;
+  timers.timer[timer_run].time_final:=cycles/8.0;
   timers.enabled(timer_run,true);
 end;
 
 procedure avgdvg_chip.go_w;
 begin
+  if self.nvect<>0 then begin
+    fill_full_screen(self.screen,$400);
+    self.vg_flush;
+  end;
   self.dvy:=0;
   self.op:=0;
-	if ((self.sync_halt<>0) and (self.nvect>10)) then begin
-		 {* This is a good time to start a new frame. Major Havoc
-		 * sometimes sets VGGO after a very short vector list. That's
-		 * why we ignore frames with less than 10 vectors.}
-		  self.nvect:=0;
-  end;
-	self.vg_flush;
   self.halt:=0;
   self.sync_halt:=0;
   self.run;
@@ -354,7 +355,6 @@ procedure avgdvg_chip.vg_flush;
 var
   cx0,cy0,cx1,cy1,xs,ys,f,xe,ye,x0,y0,x1,y1:integer;
 begin
-  fill_full_screen(self.screen,$400);
 	cx0:=0;
   cy0:=0;
   cx1:=$500;
@@ -363,7 +363,7 @@ begin
 	while (self.vectbuf[f].status=VGCLIP) do f:=f+1;
 	xs:=self.vectbuf[f].x;
 	ys:=self.vectbuf[f].y;
-  for f:=0 to self.nvect do begin
+  for f:=0 to integer(self.nvect)-1 do begin
 		if (self.vectbuf[f].status=VGVECTOR) then begin
 			xe:=self.vectbuf[f].x;
 			ye:=self.vectbuf[f].y;
@@ -416,8 +416,6 @@ begin
         else if y1<0 then y1:=400
           else y1:=trunc((1024-y1)/2.56);
       if self.vectbuf[f].intensity<>0 then draw_line(x0+ADD_SPRITE,y0+ADD_SPRITE,x1+ADD_SPRITE,y1+ADD_SPRITE,self.vectbuf[f].intensity,self.screen);
-			//m_vector->add_point(x0, y0, m_vectbuf[i].color, 0);
-			//m_vector->add_point(x1, y1, m_vectbuf[i].color, m_vectbuf[i].intensity);
 		end;
     if (self.vectbuf[f].status=VGCLIP) then;
 		{

@@ -112,6 +112,10 @@ type
             function RORC_BYTE(dst:byte):byte;
             function RORC_WORD(dst:word):word;
             procedure ADD4S;
+            function ADCB(src:byte;dst:byte):byte;
+            function ADCW(src:word;dst:word):word;
+            function SBBB(src:byte;dst:byte):byte;
+            function SBBW(src:word;dst:word):word;
             procedure i_jmp(flag:boolean);
             procedure i_movsb;
             procedure i_movsw;
@@ -183,6 +187,7 @@ getmem(self.r,sizeof(reg_nec));
 fillchar(self.r^,sizeof(reg_nec),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
+self.tipo_cpu:=tipo;
 self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 case tipo of
     0:;
@@ -207,9 +212,9 @@ end;
 procedure cpu_nec.reset;
 begin
 r.ip:=0;
-r.f.T:=false;
+r.f.t:=false;
 r.f.i:=false;
-r.f.D:=false;
+r.f.d:=false;
 r.f.SignVal:=false;
 r.f.AuxVal:=false;
 r.f.OverVal:=false;
@@ -496,7 +501,7 @@ end;
 function cpu_nec.GetRMByte(ModRM:byte):byte;
 begin
 if (ModRM>=$c0) then begin
-    case (modRM and $7) of
+    case (modRM and 7) of
       0:GetRMByte:=r.aw.l;
       1:GetRMByte:=r.cw.l;
       2:GetRMByte:=r.dw.l;
@@ -870,45 +875,87 @@ begin
 end;
 
 function cpu_nec.SHR_BYTE(c,dst:byte):byte;
+var
+  i:integer;
+  original:byte;
 begin
-   self.contador:=self.contador+c;
-   dst:=dst shr (c-1);
-   r.f.CarryVal:=(dst and 1)<>0;
-   dst:=dst shr 1;
-   self.SetSZPF_Byte(dst);
-   SHR_BYTE:=dst;
+  if c=0 then begin
+    SHR_BYTE:=dst;
+    exit;
+  end;
+  self.contador:=self.contador+c;
+  for i:=1 to c do begin
+    original:=dst;
+    r.f.CarryVal:=(dst and 1)<>0;
+    dst:=dst shr 1;
+    if ((c=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=(original and $80)<>0;
+  end;
+  self.SetSZPF_Byte(dst);
+  if (self.tipo_cpu=NEC_V30) then r.f.AuxVal:=false;
+  SHR_BYTE:=dst;
 end;
 
 function cpu_nec.SHR_WORD(c:byte;dst:word):word;
+var
+  i:integer;
+  original:word;
 begin
+  if c=0 then begin
+    SHR_WORD:=dst;
+    exit;
+  end;
   self.contador:=self.contador+c;
-  dst:=dst shr (c-1);
-  r.f.CarryVal:=(dst and 1)<>0;
-  dst:=dst shr 1;
+  for i:=1 to c do begin
+    original:=dst;
+    r.f.CarryVal:=(dst and 1)<>0;
+    dst:=dst shr 1;
+    if ((c=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=(original and $8000)<>0;
+  end;
   self.SetSZPF_Word(dst);
+  if (self.tipo_cpu=NEC_V30) then r.f.AuxVal:=false;
   SHR_WORD:=dst;
 end;
 
 function cpu_nec.SHL_BYTE(c,dst:byte):byte;
 var
-   res:word;
+  i:integer;
+  original:byte;
 begin
-   self.contador:=self.contador+c;
-   res:=dst shl c;
-   r.f.CarryVal:=(res and $100)<>0;
-   self.SetSZPF_Byte(res);
-   SHL_BYTE:=res;
+  if c=0 then begin
+    SHL_BYTE:=dst;
+    exit;
+  end;
+  self.contador:=self.contador+c;
+  for i:=1 to c do begin
+    original:=dst;
+    r.f.CarryVal:=(dst and $80)<>0;
+    dst:=dst shl 1;
+    if ((c=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((original xor dst) and $80)<>0;
+  end;
+  self.SetSZPF_Byte(dst);
+  if (self.tipo_cpu=NEC_V30) then r.f.AuxVal:=false;
+  SHL_BYTE:=dst;
 end;
 
 function cpu_nec.SHL_WORD(c:byte;dst:word):word;
 var
-  res:dword;
+  i:integer;
+  original:word;
 begin
+  if c=0 then begin
+    SHL_WORD:=dst;
+    exit;
+  end;
   self.contador:=self.contador+c;
-  res:=dst shl c;
-  r.f.CarryVal:=(res and $10000)<>0;
-  self.SetSZPF_Word(res);
-  SHL_WORD:=res;
+  for i:=1 to c do begin
+    original:=dst;
+    r.f.CarryVal:=(dst and $8000)<>0;
+    dst:=dst shl 1;
+    if ((c=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((original xor dst) and $8000)<>0;
+  end;
+  self.SetSZPF_Word(dst);
+  if (self.tipo_cpu=NEC_V30) then r.f.AuxVal:=false;
+  SHL_WORD:=dst;
 end;
 
 function cpu_nec.ROL_BYTE(dst:byte):byte;
@@ -972,21 +1019,23 @@ begin
 end;
 
 procedure cpu_nec.SHRA_WORD(c:byte;dst:word;ModRM:byte);
-function sshr(num:integer;fac:byte):integer;
-begin
-  if num<0 then sshr:=-(abs(num) shr fac)
-    else sshr:=num shr fac;
-end;
 var
-  temp:smallint;
+  i:integer;
+  temp,original:word;
 begin
+  if c=0 then exit;
   self.contador:=self.contador+c;
-  temp:=smallint(dst);
-  temp:=sshr(temp,c-1);
-  r.f.CarryVal:=(temp and 1)<>0;
-  temp:=sshr(temp,1);
+  temp:=dst;
+  for i:=1 to c do begin
+    original:=temp;
+    r.f.CarryVal:=(temp and 1)<>0;
+    temp:=temp shr 1;
+    if (original and $8000)<>0 then temp:=temp or $8000;
+    if ((c=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=false;
+  end;
   dst:=temp;
   self.SetSZPF_Word(dst);
+  if (self.tipo_cpu=NEC_V30) then r.f.AuxVal:=false;
   PutbackRMWord(ModRM,dst);
 end;
 
@@ -996,12 +1045,13 @@ const
 var
   di,si,result:word;
   count,i,tmp,tmp2,v1,v2:byte;
+  nonzero:boolean;
 begin
 	count:=(r.cw.l+1) div 2;
 	di:=r.iy.w;
 	si:=r.ix.w;
 	if self.seg_prefix then MessageDlg('Warning: seg_prefix defined for add4s', mtInformation,[mbOk],0);
-  r.f.ZeroVal:=false;
+  nonzero:=false;
   r.f.CarryVal:=false;
 	for i:=0 to (count-1) do begin
     self.contador:=self.contador+table[self.tipo_cpu];
@@ -1014,10 +1064,75 @@ begin
 		result:=result mod 100;
 		v1:=((result div 10) shl 4) or (result mod 10);
 		self.PutMemB(DS1,di,v1);
-		if (v1<>0) then r.f.ZeroVal:=true;
+		if (v1<>0) then nonzero:=true;
 		si:=si+1;
 		di:=di+1;
 	end;
+  if (self.tipo_cpu=NEC_V30) then begin
+    r.f.ZeroVal:=not(nonzero or r.f.CarryVal);
+    r.f.ParityVal:=r.f.ZeroVal;
+    r.f.SignVal:=r.f.CarryVal;
+    r.f.AuxVal:=r.f.CarryVal;
+    r.f.OverVal:=false;
+  end else begin
+    r.f.ZeroVal:=not nonzero;
+  end;
+end;
+
+function cpu_nec.ADCB(src:byte;dst:byte):byte;
+var
+  res:word;
+  carry_in:byte;
+begin
+  carry_in:=byte(r.f.CarryVal);
+  res:=word(dst)+word(src)+carry_in;
+  r.f.CarryVal:=(res and $100)<>0;
+  r.f.OverVal:=((not (dst xor src)) and (dst xor byte(res)) and $80)<>0;
+  r.f.AuxVal:=((res xor (word(src) xor word(dst))) and $10)<>0;
+  SetSZPF_Byte(byte(res));
+  ADCB:=byte(res);
+end;
+
+function cpu_nec.ADCW(src:word;dst:word):word;
+var
+  res:dword;
+  carry_in:byte;
+begin
+  carry_in:=byte(r.f.CarryVal);
+  res:=dword(dst)+dword(src)+carry_in;
+  r.f.CarryVal:=(res and $10000)<>0;
+  r.f.OverVal:=((not (dst xor src)) and (dst xor word(res)) and $8000)<>0;
+  r.f.AuxVal:=((res xor (dword(src) xor dword(dst))) and $10)<>0;
+  SetSZPF_Word(word(res));
+  ADCW:=word(res);
+end;
+
+function cpu_nec.SBBB(src:byte;dst:byte):byte;
+var
+  res:longint;
+  carry_in:byte;
+begin
+  carry_in:=byte(r.f.CarryVal);
+  res:=longint(dst)-longint(src)-carry_in;
+  r.f.CarryVal:=res<0;
+  r.f.OverVal:=(((dst xor src) and (dst xor byte(res)) and $80)<>0);
+  r.f.AuxVal:=((res xor (longint(src) xor longint(dst))) and $10)<>0;
+  SetSZPF_Byte(byte(res));
+  SBBB:=byte(res);
+end;
+
+function cpu_nec.SBBW(src:word;dst:word):word;
+var
+  res:longint;
+  carry_in:byte;
+begin
+  carry_in:=byte(r.f.CarryVal);
+  res:=longint(dst)-longint(src)-carry_in;
+  r.f.CarryVal:=res<0;
+  r.f.OverVal:=(((dst xor src) and (dst xor word(res)) and $8000)<>0);
+  r.f.AuxVal:=((res xor (longint(src) xor longint(dst))) and $10)<>0;
+  SetSZPF_Word(word(res));
+  SBBW:=word(res);
 end;
 
 //MACROS INSTRUCCIONES
@@ -1110,7 +1225,25 @@ end;
 procedure cpu_nec.ADJ4(param1,param2:shortint);
 var
   tmp:word;
+  low_adjust,high_adjust,old_overflow:boolean;
 begin
+  if (self.tipo_cpu=NEC_V30) then begin
+    low_adjust:=r.f.AuxVal or ((r.aw.l and $f)>9);
+    if r.f.AuxVal then high_adjust:=r.f.CarryVal or (r.aw.l>$9f)
+      else high_adjust:=r.f.CarryVal or (r.aw.l>$99);
+    if low_adjust then tmp:=6 else tmp:=0;
+    if param1<0 then r.aw.l:=SUBB(tmp,r.aw.l)
+      else r.aw.l:=ADDB(tmp,r.aw.l);
+    old_overflow:=r.f.OverVal;
+    if high_adjust then begin
+      if param2<0 then r.aw.l:=SUBB($60,r.aw.l)
+        else r.aw.l:=ADDB($60,r.aw.l);
+      r.f.OverVal:=r.f.OverVal or old_overflow;
+    end;
+    r.f.AuxVal:=low_adjust;
+    r.f.CarryVal:=high_adjust;
+    exit;
+  end;
 	if (r.f.AuxVal or ((r.aw.l and $f)>9)) then begin
 		tmp:=r.aw.l+param1;
     r.aw.l:=tmp;
@@ -1135,7 +1268,7 @@ var
   temp:word;
 begin
   temp:=$7002;
-  if r.f.CarryVal then temp:=1;
+  if r.f.CarryVal then temp:=temp+1;
   if r.f.ParityVal then temp:=temp+4;
   if r.f.AuxVal then temp:=temp+$10;
   if r.f.ZeroVal then temp:=temp+$40;
@@ -1365,7 +1498,10 @@ case instruccion of
                   tmpb:=BITOP_BYTE(ModRM);
                   CLKS(4,4,4);
                   tmpb1:=fetch and 7;
-                  r.f.ZeroVal:=(tmpb and (1 shl tmpb1))=0;
+                  if (self.tipo_cpu=NEC_V30) then begin
+                    r.f.AuxVal:=false;
+                    SetSZPF_Byte(byte(tmpb and (1 shl tmpb1)));
+                  end else r.f.ZeroVal:=(tmpb and (1 shl tmpb1))=0;
                   r.f.CarryVal:=false;
                   r.f.OverVal:=false;
                 end;
@@ -1374,7 +1510,10 @@ case instruccion of
                   tmpw:=BITOP_WORD(ModRM);
                   CLKS(4,4,4);
                   tmpb:=fetch and $f;
-                  r.f.ZeroVal:=(tmpw and (1 shl tmpb))=0;
+                  if (self.tipo_cpu=NEC_V30) then begin
+                    r.f.AuxVal:=false;
+                    SetSZPF_Word(word(tmpw and (1 shl tmpb)));
+                  end else r.f.ZeroVal:=(tmpw and (1 shl tmpb))=0;
                   r.f.CarryVal:=false;
                   r.f.OverVal:=false;
                 end;
@@ -1429,36 +1568,31 @@ case instruccion of
         end;
     $10:begin  //i_adc_br8
           DEF_br8;
-          tmpw:=srcb+byte(r.f.CarryVal);
-          dstb:=ADDB(tmpw,dstb);
+          dstb:=ADCB(srcb,dstb);
           PutbackRMByte(ModRM,dstb);
           CLKM(2,2,2,16,16,7,ModRM);
         end;
     $11:begin //i_adc_wr16 29_04
           DEF_wr16;
-          tmpdw:=srcw+byte(r.f.CarryVal);
-          dstw:=ADDW(tmpdw,dstw);
+          dstw:=ADCW(srcw,dstw);
           PutbackRMWord(ModRM,dstw);
           CLKR(24,24,11,24,16,7,2,ModRM);
         end;
     $12:begin  //i_adc_r8b  01_05
           DEF_r8b;
-          tmpw:=srcb+byte(r.f.CarryVal);
-          dstb:=ADDB(tmpw,dstb);
+          dstb:=ADCB(srcb,dstb);
           PutBackRegByte(ModRM,dstb);
           CLKM(2,2,2,11,11,6,ModRM);
         end;
     $13:begin //i_adc_r16w 01_05
           DEF_r16w;
-          tmpdw:=srcw+byte(r.f.CarryVal);
-          dstw:=ADDW(tmpdw,dstw);
+          dstw:=ADCW(srcw,dstw);
           PutBackRegWord(ModRM,dstw);
           CLKR(15,15,8,15,11,6,2,ModRM);
         end;
     $1b:begin //i_sbb_r16w 01_05
           DEF_r16w;
-          tmpdw:=srcw+byte(r.f.CarryVal);
-          dstw:=SUBW(tmpdw,dstw);
+          dstw:=SBBW(srcw,dstw);
           PutBackRegWord(ModRM,dstw);
           CLKR(15,15,8,15,11,6,2,ModRM);
         end;
@@ -1803,7 +1937,9 @@ case instruccion of
             DEF_r16w;
             tmpi:=shortint(fetch);
             tmpi:=smallint(srcw)*tmpi;
-            r.f.CarryVal:=((tmpi div $8000)<>0) and ((tmpi div $8000)<>-1);
+            tmpw:=word(tmpi);
+            if (self.tipo_cpu=NEC_V30) then ADDW(tmpw,tmpw);
+            r.f.CarryVal:=(tmpi>$7fff) or (tmpi<-$8000);
             r.f.OverVal:=r.f.CarryVal;
             PutBackRegWord(ModRM,word(tmpi));
             if (ModRM>=$c0) then self.contador:=self.contador+31
@@ -2279,11 +2415,14 @@ case instruccion of
           srcb:=GetRMByte(ModRM);
           dstb:=srcb;
 	        c:=fetch;
+          tmpb1:=c;
 	        CLKM(7,7,2,19,19,6,ModRM);
 	        if (c<>0) then case (ModRM and $38) of
 		          $00:begin // 03_05
                      repeat
+                        tmpb:=dstb;
                         dstb:=ROL_BYTE(dstb);
+                        if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpb xor dstb) and $80)<>0;
                         c:=c-1;
                         self.contador:=self.contador+1;
                      until not(c>0);
@@ -2291,7 +2430,9 @@ case instruccion of
                   end;
 		          $08:begin
                     repeat
+                      tmpb:=dstb;
                       dstb:=ROR_BYTE(dstb);
+                      if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpb xor dstb) and $80)<>0;
                       c:=c-1;
                       self.contador:=self.contador+1;
                     until not(c>0);
@@ -2316,11 +2457,14 @@ case instruccion of
           srcw:=GetRMWord(ModRM);
           dstw:=srcw;
 	        c:=fetch;
+          tmpb1:=c;
 	        CLKM(7,7,2,27,19,6,ModRM);
           if (c<>0) then case (ModRM and $38) of
 		          $00:begin //03_05
                     repeat
+                       tmpw:=dstw;
                        dstw:=ROL_WORD(dstw);
+                       if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpw xor dstw) and $8000)<>0;
                        c:=c-1;
                        self.contador:=self.contador+1;
                     until not(c>0);
@@ -2328,7 +2472,9 @@ case instruccion of
                   end;
 		          $08:begin //03_05
                     repeat
+                       tmpw:=dstw;
                        dstw:=ROR_WORD(dstw);
+                       if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpw xor dstw) and $8000)<>0;
                        c:=c-1;
                        self.contador:=self.contador+1;
                     until not(c>0);
@@ -2420,32 +2566,32 @@ case instruccion of
         		$00:begin // 01_05
                   dstb:=ROL_BYTE(dstb);
                   PutbackRMByte(ModRM,dstb);
-                  r.f.OverVal:=((srcb xor dstb) and $80)<>0;
+                  r.f.OverVal:=((dstb and $80)<>0) xor r.f.CarryVal;
                 end;
         		$08:begin // 01_05
                   dstb:=ROR_BYTE(dstb);
                   PutbackRMByte(ModRM,dstb);
-                  r.f.OverVal:=((srcb xor dstb) and $80)<>0;
+                  r.f.OverVal:=((dstb xor (dstb shl 1)) and $80)<>0;
                 end;
         		$10:begin
                   dstb:=ROLC_BYTE(dstb);
                   PutbackRMByte(ModRM,dstb);
-                  r.f.OverVal:=((srcb xor dstb) and $80)<>0;
+                  r.f.OverVal:=((dstb and $80)<>0) xor r.f.CarryVal;
                 end;
         		$18:begin
                   dstb:=RORC_BYTE(dstb);
                   PutbackRMByte(ModRM,dstb);
-                  r.f.OverVal:=((srcb xor dstb) and $80)<>0;
+                  r.f.OverVal:=((dstb xor (dstb shl 1)) and $80)<>0;
                 end;
         		$20:begin  //SHL_BYTE
                   dstb:=SHL_BYTE(1,dstb);
                   self.PutbackRMByte(ModRM,dstb);
-                  r.f.OverVal:=((srcb xor dstb) and $80)<>0;
+                  r.f.OverVal:=((dstb xor (dstb shl 1)) and $80)<>0;
                 end;
         		$28:begin
                   dstb:=SHR_BYTE(1,dstb);
                   self.PutbackRMByte(ModRM,dstb);
-                  r.f.OverVal:=((srcb xor dstb) and $80)<>0;
+                  r.f.OverVal:=((dstb xor (dstb shl 1)) and $80)<>0;
                 end;
         		$30:MessageDlg('$d0 SHLA_BYTE Invalido!', mtInformation,[mbOk],0);
         		$38:MessageDlg('$d0 SHRA_BYTE', mtInformation,[mbOk],0);// SHRA_BYTE(1); nec_state->OverVal = 0; break;
@@ -2460,28 +2606,28 @@ case instruccion of
             $00:begin
                   dstw:=ROL_WORD(dstw);
                   PutbackRMWord(ModRM,dstw);
-                  r.f.OverVal:=((srcw xor dstw) and $8000)<>0;
+                  r.f.OverVal:=((dstw and $8000)<>0) xor r.f.CarryVal;
                 end;
 		        $08:begin
                   dstw:=ROR_WORD(dstw);
                   PutbackRMWord(ModRM,dstw);
-                  r.f.OverVal:=((srcw xor dstw) and $8000)<>0;
+                  r.f.OverVal:=((dstw xor (dstw shl 1)) and $8000)<>0;
                 end;
 		        $10:begin
                   dstw:=ROLC_WORD(dstw);
                   PutbackRMWord(ModRM,dstw);
-                  r.f.OverVal:=((srcw xor dstw) and $8000)<>0;
+                  r.f.OverVal:=((dstw and $8000)<>0) xor r.f.CarryVal;
                 end;
 		        $18:MessageDlg('$d1 RORC_WORD', mtInformation,[mbOk],0);//RORC_WORD; PutbackRMWord(ModRM,(WORD)dst); nec_state->OverVal = (src^dst)&0x8000; break;
 		        $20:begin //28_04
                   dstw:=SHL_WORD(1,dstw);
                   self.PutbackRMWord(ModRM,dstw);
-                  r.f.OverVal:=((srcw xor dstw) and $8000)<>0;
+                  r.f.OverVal:=((dstw xor (dstw shl 1)) and $8000)<>0;
                 end;
 		        $28:begin
                   dstw:=SHR_WORD(1,dstw);
                   self.PutbackRMWord(ModRM,dstw);
-                  r.f.OverVal:=((srcw xor dstw) and $8000)<>0;
+                  r.f.OverVal:=((dstw xor (dstw shl 1)) and $8000)<>0;
                 end;
 		        $30:MessageDlg('$d1 SHLA_WORD Invalido!', mtInformation,[mbOk],0);
 		        $38:begin
@@ -2495,11 +2641,14 @@ case instruccion of
           srcb:=GetRMByte(ModRM);
           dstb:=srcb;
           c:=r.cw.l;
+          tmpb1:=c;
 	        CLKM(7,7,2,19,19,6,ModRM);
 	        if (c<>0) then case (ModRM and $38) of
 		        $00:begin
                    repeat
+                      tmpb:=dstb;
                       dstb:=ROL_BYTE(dstb);
+                      if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpb xor dstb) and $80)<>0;
                       c:=c-1;
                       self.contador:=self.contador+1;
                    until not(c>0);
@@ -2508,7 +2657,9 @@ case instruccion of
 		        $08:MessageDlg('$d2 ROR_BYTE', mtInformation,[mbOk],0); // do { ROR_BYTE;  c--; CLK(1); }// while (c>0); PutbackRMByte(ModRM,(BYTE)dst); break;
             $10:begin
                    repeat
+                      tmpb:=dstb;
                       dstb:=ROLC_BYTE(dstb);
+                      if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpb xor dstb) and $80)<>0;
                       c:=c-1;
                       self.contador:=self.contador+1;
                    until not(c>0);
@@ -2516,7 +2667,9 @@ case instruccion of
                 end;
 		        $18:begin
                    repeat
+                      tmpb:=dstb;
                       dstb:=RORC_BYTE(dstb);
+                      if ((tmpb1=1) or (self.tipo_cpu=NEC_V30)) then r.f.OverVal:=((tmpb xor dstb) and $80)<>0;
                       c:=c-1;
                       self.contador:=self.contador+1;
                    until not(c>0);
@@ -2817,6 +2970,7 @@ case instruccion of
                     tmpb:=tmpb and fetch;
                     r.f.CarryVal:=false;
                     r.f.OverVal:=false;
+                    r.f.AuxVal:=false;
                     SetSZPF_Byte(tmpb);
                     if (ModRM>=$c0) then self.contador:=self.contador+4
                       else self.contador:=self.contador+11;
@@ -2828,10 +2982,8 @@ case instruccion of
                       else self.contador:=self.contador+16;
                   end;
 		          $18:begin
-                    r.f.CarryVal:=(tmpb<>0);
-                    tmpw:=not(tmpb)+1;
-                    SetSZPF_Byte(tmpw);
-                    PutbackRMByte(ModRM,tmpw);
+                    tmpb1:=SUBB(tmpb,0);
+                    PutbackRMByte(ModRM,tmpb1);
                     if (ModRM>=$c0) then self.contador:=self.contador+2
                       else self.contador:=self.contador+16;
                   end;
@@ -2846,16 +2998,29 @@ case instruccion of
 		          $28:MessageDlg('$f6 MUL', mtInformation,[mbOk], 0); // result = (INT16)((INT8)nec_state->regs.b[AL])*(INT16)((INT8)tmp); nec_state->regs.w[AW]=(WORD)result; nec_state->CarryVal=nec_state->OverVal=(nec_state->regs.b[AH]!=0); nec_state->icount-=(ModRM >=0xc0 )?30:36; break; /* MUL */
               $30:if (tmpb<>0) then begin
                      tmpw:=r.aw.w;
-	                   tmpb1:=tmpw mod tmpb;
+                     tmpb1:=tmpw mod tmpb;
                      tmpw:=tmpw div tmpb;
-	                   if (tmpw>$ff) then MessageDlg('$f6 DIVUB mod>$ff', mtInformation,[mbOk], 0)
-                      else begin
-		                      r.aw.l:=tmpw;
-		                      r.aw.h:=tmpb1;
-	                    end;
-                      if (ModRM>=$c0) then self.contador:=self.contador+43
-                      else self.contador:=self.contador+53;
-                  end else MessageDlg('$f6 DIVUB div por 0', mtInformation,[mbOk], 0);
+                     if (tmpw>$ff) then begin
+                       r.f.CarryVal:=false; r.f.OverVal:=false;
+                       MessageDlg('$f6 DIVUB mod>$ff', mtInformation,[mbOk], 0)
+                     end else begin
+                       r.aw.l:=tmpw;
+                       r.aw.h:=tmpb1;
+                       if (self.tipo_cpu=NEC_V30) then begin
+                         SUBB(tmpb,tmpb1);
+                         r.f.OverVal:=true;
+                       end else begin
+                         r.f.CarryVal:=true;
+                         r.f.OverVal:=true;
+                       end;
+                     end;
+                     if (ModRM>=$c0) then self.contador:=self.contador+43
+                       else self.contador:=self.contador+53;
+                   end else begin
+                     r.f.CarryVal:=false;
+                     r.f.OverVal:=false;
+                     MessageDlg('$f6 DIVUB div por 0', mtInformation,[mbOk], 0);
+                   end;
 		          $38:MessageDlg('$f6 DIVB', mtInformation,[mbOk], 0); // if (tmp) { DIVB;  } else nec_interrupt(nec_state, 0,0); nec_state->icount-=(ModRM >=0xc0 )?43:53; break;
            end;
         end;
@@ -2868,6 +3033,7 @@ case instruccion of
                     tmpw:=tmpw and tmpw1;
                     r.f.CarryVal:=false;
                     r.f.OverVal:=false;
+                    r.f.AuxVal:=false;
                     SetSZPF_Word(tmpw);
                     if (ModRM>=$c0) then self.contador:=self.contador+4
                       else self.contador:=self.contador+11;
@@ -2879,10 +3045,8 @@ case instruccion of
                       else self.contador:=self.contador+16;
                   end;
           		$18:begin  //NEG
-                    r.f.CarryVal:=(tmpw<>0);
-                    tmpdw:=not(tmpw)+1;
-                    SetSZPF_Word(tmpdw);
-                    PutbackRMWord(ModRM,tmpdw);
+                    tmpw1:=SUBW(tmpw,0);
+                    PutbackRMWord(ModRM,tmpw1);
                     if (ModRM>=$c0) then self.contador:=self.contador+2
                       else self.contador:=self.contador+16;
                   end;
@@ -2899,35 +3063,61 @@ case instruccion of
                     tmpi:=smallint(r.aw.w)*smallint(tmpw);
                     r.aw.w:=tmpi and $ffff;
                     r.dw.w:=tmpi div $10000;
-                    r.f.CarryVal:=(r.dw.w<>0);
+                    tmpw1:=word(tmpi);
+                    if (self.tipo_cpu=NEC_V30) then ADDW(tmpw1,tmpw1);
+                    r.f.CarryVal:=(tmpi > $7fff) or (tmpi < -$8000);
                     r.f.OverVal:=r.f.CarryVal;
                     if (ModRM>=$c0) then self.contador:=self.contador+30
                       else self.contador:=self.contador+36;
                    end;
           		$30: if (tmpw<>0) then begin
                     tmpdw:=(r.dw.w shl 16) or r.aw.w;
-	                  tmpw1:=tmpdw mod tmpw;
+                    tmpw1:=tmpdw mod tmpw;
                     tmpdw:=tmpdw div tmpw;
-                    if (tmpdw>$ffff) then MessageDlg('$f7 DIVUW mod>$ffff', mtInformation,[mbOk], 0)
-                      else begin
-                        r.aw.w:=tmpdw;
-                        r.dw.w:=tmpw1;
+                    if (tmpdw>$ffff) then begin
+                      r.f.CarryVal:=false; r.f.OverVal:=false;
+                      MessageDlg('$f7 DIVUW mod>$ffff', mtInformation,[mbOk], 0)
+                    end else begin
+                      r.aw.w:=tmpdw;
+                      r.dw.w:=tmpw1;
+                      if (self.tipo_cpu=NEC_V30) then begin
+                        SUBW(tmpw,tmpw1);
+                        r.f.OverVal:=true;
+                      end else begin
+                        r.f.CarryVal:=true;
+                        r.f.OverVal:=true;
                       end;
+                    end;
                     if (ModRM>=$c0) then self.contador:=self.contador+43
                       else self.contador:=self.contador+53;
-                  end else MessageDlg('$f7 DIVUW div por 0', mtInformation,[mbOk], 0);
+                  end else begin
+                    r.f.CarryVal:=false;
+                    r.f.OverVal:=false;
+                    MessageDlg('$f7 DIVUW div por 0', mtInformation,[mbOk], 0);
+                  end;
            		$38:if (tmpw<>0) then begin
                     tmpi:=(smallint(r.dw.w) shl 16) or smallint(r.aw.w);
-	                  tmpw1:=tmpi mod smallint(tmpw);
+                    tmpw1:=tmpi mod smallint(tmpw);
                     tmpi:=tmpi div smallint(tmpw);
-                    if (tmpi>$ffff) then MessageDlg('$f7 DIVU mod>$ffff', mtInformation,[mbOk], 0)
-                      else begin
-                        r.aw.w:=tmpi;
-                        r.dw.w:=tmpw1;
+                    if (tmpi > $7fff) or (tmpi < -$7fff) then begin
+                      r.f.CarryVal:=false; r.f.OverVal:=false;
+                      MessageDlg('$f7 DIVU mod>$ffff', mtInformation,[mbOk], 0)
+                    end else begin
+                      r.aw.w:=tmpi;
+                      r.dw.w:=tmpw1;
+                      if (self.tipo_cpu=NEC_V30) then begin
+                        SetSZPF_Word(word(abs(tmpi)));
+                        r.f.CarryVal:=false; r.f.AuxVal:=false; r.f.OverVal:=true;
+                      end else begin
+                        r.f.CarryVal:=true; r.f.OverVal:=true;
                       end;
+                    end;
                     if (ModRM>=$c0) then self.contador:=self.contador+43
                       else self.contador:=self.contador+53;
-                  end else MessageDlg('$f7 DIVU div por 0', mtInformation,[mbOk], 0);
+                  end else begin
+                    r.f.CarryVal:=false; r.f.OverVal:=false;
+                    MessageDlg('$f7 DIVU div por 0', mtInformation,[mbOk], 0);
+                  end;
            end;
         end;
     $f8:begin //i_clc
@@ -3077,10 +3267,10 @@ while self.contador<maximo do begin
              end;
   end;
   self.no_interrupt:=false;
-  {if ((((r.ps_r shl 4)+r.ip)=$eecf5) and (self.numero_cpu=0)) then begin
+  {if ((((r.ps_r shl 4)+r.ip)=$ef62f) and (self.numero_cpu=0)) then begin
       r.ip:=0;
-      r.ip:=$f5;
-  end;}
+      r.ip:=$a2f;
+  end; }
   self.r.old_pc:=self.r.ip;
   self.opcode:=true;
   instruccion:=self.fetch;

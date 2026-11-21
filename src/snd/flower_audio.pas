@@ -31,8 +31,9 @@ type
     private
         channel_list:array[0..(MAX_VOICES-1)] of flower_sound_channel;
         mixer_table:array[0..(256*MAX_VOICES)-1] of smallint;
-        buffer:array[0..1] of smallint;
-        buffer_pos:byte;
+        mix_sum:Int64;
+        mix_count:Int64;
+        last_sample:smallint;
         procedure make_mixer_table;
   end;
 
@@ -43,27 +44,26 @@ implementation
 uses timer_engine;
 
 const
-  DEFGAIN=48;
+  DEFGAIN=15;
   MIXER_LOOKUP=MAX_VOICES*128;
 
 procedure flower_chip.make_mixer_table;
 var
-  f:word;
+  f:integer;
   val:integer;
 begin
-	// fill in the table - 16 bit case
-	for f:=0 to (MAX_VOICES*128)-1 do begin
-		val:=(f*DEFGAIN*16) div MAX_VOICES;
-		if (val>32767) then val:=32767;
-		mixer_table[mixer_lookup+f]:=val;
-		mixer_table[mixer_lookup-f]:=-val;
+  for f:=-MIXER_LOOKUP to MIXER_LOOKUP-1 do begin
+    val:=(f*DEFGAIN*16) div MAX_VOICES;
+    if val>32767 then val:=32767
+      else if val<-32767 then val:=-32767;
+    mixer_table[MIXER_LOOKUP+f]:=val;
   end;
 end;
 
 procedure internal_update_flower;
 var
   voice,volume,raw_sample:byte;
-  frequency:word;
+  frequency,volume_index:word;
   res:integer;
 begin
 res:=0;
@@ -73,22 +73,28 @@ for voice:=0 to (MAX_VOICES-1) do begin
 		frequency:=flower_0.channel_list[voice].frequency;
     if flower_0.channel_list[voice].repeat_ then begin
 				raw_sample:=flower_0.sample_rom[((flower_0.channel_list[voice].start_address shr 7) and $7e00) or ((flower_0.channel_list[voice].position shr 7) and $1ff)];
-				// guess: cut off after a number of repetitions
-				if ((flower_0.channel_list[voice].position shr 7) and $20000)<>0 then flower_0.channel_list[voice].enable:=false;
+        if (flower_0.channel_list[voice].volume_bank and $10)=0 then begin
+          flower_0.channel_list[voice].enable:=false;
+          continue;
+        end;
     end else begin
 				raw_sample:=flower_0.sample_rom[((flower_0.channel_list[voice].start_address+flower_0.channel_list[voice].position) shr 7) and $7fff];
-				if (raw_sample=$ff) then flower_0.channel_list[voice].enable:=false;
+				if raw_sample=$ff then begin
+          flower_0.channel_list[voice].enable:=false;
+          continue; // Terminator is not PCM data.
+        end;
     end;
-    volume:=volume or flower_0.channel_list[voice].volume_bank;
-		res:=res+flower_0.sample_vol[((volume shl 8) or raw_sample) and $3fff]-$80;
+    volume_index:=((word(volume or flower_0.channel_list[voice].volume_bank) and $2f) shl 8) or (((flower_0.channel_list[voice].position shr 6) and 1) shl 12);
+    res:=res+integer(flower_0.sample_vol[(volume_index or raw_sample) and $3fff])-$80;
     flower_0.channel_list[voice].position:=flower_0.channel_list[voice].position+frequency;
 end;
-flower_0.buffer[flower_0.buffer_pos]:=flower_0.mixer_table[MIXER_LOOKUP+res];
-flower_0.buffer_pos:=flower_0.buffer_pos+1;
+flower_0.mix_sum:=flower_0.mix_sum+flower_0.mixer_table[MIXER_LOOKUP+res];
+flower_0.mix_count:=flower_0.mix_count+1;
 end;
 
 constructor flower_chip.create(clock:dword);
 begin
+  self.reset;
   self.make_mixer_table;
   self.tsample_num:=init_channel;
   timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/2),internal_update_flower,nil,true);
@@ -109,9 +115,9 @@ for f:=0 to (MAX_VOICES-1) do begin
     channel_list[f].enable:=false;
     channel_list[f].repeat_:=false;
 end;
-self.buffer_pos:=0;
-self.buffer[0]:=0;
-self.buffer[1]:=0;
+self.mix_sum:=0;
+self.mix_count:=0;
+self.last_sample:=0;
 end;
 
 procedure flower_chip.write(direccion,valor:byte);
@@ -145,22 +151,19 @@ begin
 end;
 
 procedure flower_chip.update;
-function sshr(num:int64;fac:byte):int64;
-begin
-  if num<0 then sshr:=-(abs(num) shr fac)
-    else sshr:=num shr fac;
-end;
 var
-  f:byte;
   res:integer;
 begin
-  res:=0;
-  for f:=0 to (self.buffer_pos-1) do res:=res+self.buffer[f];
-  res:=sshr(res,self.buffer_pos-1);
-  if res>32767 then res:=32767
-    else if res<-32767 then res:=-32767;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=res;
-  flower_0.buffer_pos:=0;
+  if self.mix_count>0 then begin
+    res:=self.mix_sum div self.mix_count;
+    if res>32767 then res:=32767
+      else if res<-32767 then res:=-32767;
+    self.last_sample:=res;
+  end;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=self.last_sample;
+  self.mix_sum:=0;
+  self.mix_count:=0;
 end;
 
 end.
+

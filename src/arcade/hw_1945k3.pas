@@ -314,7 +314,6 @@ end;
 begin
 iniciar_k31945:=false;
 llamadas_maquina.bucle_general:=k31945_principal;
-llamadas_maquina.iniciar:=iniciar_k31945;
 llamadas_maquina.reset:=reset_k31945;
 iniciar_audio(false);
 screen_init(1,512,512);

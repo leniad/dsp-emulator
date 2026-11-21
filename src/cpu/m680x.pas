@@ -64,7 +64,7 @@ type
               function popb:byte;
               procedure poner_band(valor:byte);
               function coger_band:byte;
-              function call_int(dir:word):byte;
+              procedure call_int(dir:word);
               procedure MODIFIED_counters;
               procedure check_timer_event;
               procedure write_port2;
@@ -783,14 +783,14 @@ end;
 //OCI -> fff4
 //NMI -> fffc
 //IRQ -> fff8
-function cpu_m6800.call_int(dir:word):byte;
+procedure cpu_m6800.call_int(dir:word);
 begin
   self.pushw(r.pc);
 	self.pushw(r.x);
 	self.pushb(r.d.a);
 	self.pushb(r.d.b);
 	self.pushb(self.coger_band);
-  call_int:=12;
+  estados_demas:=estados_demas+12;
   r.cc.i:=true;
   r.pc:=self.getword(dir);
 end;
@@ -849,18 +849,17 @@ self.estados_demas:=0;
 self.r.oldpc:=self.r.pc;
 //comprobar irq's
 if (self.pedir_nmi<>CLEAR_LINE) then begin
-  if self.nmi_state=CLEAR_LINE then self.estados_demas:=self.call_int($fffc);
+  if self.nmi_state=CLEAR_LINE then self.call_int($fffc);
   if self.pedir_nmi=PULSE_LINE then self.pedir_nmi:=CLEAR_LINE;
   if self.pedir_nmi=ASSERT_LINE then self.nmi_state:=ASSERT_LINE;
 end else begin
   if ((self.pedir_irq<>CLEAR_LINE) and not(r.cc.i)) then begin
       self.pedir_irq:=CLEAR_LINE;
-      self.estados_demas:=self.call_int($fff8);
+      self.call_int($fff8);
   end else begin
       if not(r.cc.i) then if ((self.tcsr and (TCSR_EOCI or TCSR_OCF))=(TCSR_EOCI or TCSR_OCF)) then self.call_int($fff4);
   end;
 end;
-// CLEANUP_COUNTERS()
 self.ocd.wh:=self.ocd.wh-self.ctd.wh;
 self.ctd.wh:=0;
 //timer_next = (OCD - r.cdt < TOD - CTD) ? OCD : TOD;

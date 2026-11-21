@@ -229,19 +229,19 @@ case direccion of
                       0:main_screen.flip_main_screen:=(valor and $100)<>0;
                       2:z80_0.change_nmi(PULSE_LINE);
                    end;
-    $e8010:if scroll_fg_x<>valor then begin
+    $e8010:if (scroll_fg_x and $3ff)<>(valor and $3ff) then begin
               if abs((scroll_fg_x and $3f0)-(valor and $3f0))>15 then fillchar(gfx[2].buffer,$1000,1);
               scroll_fg_x:=valor and $3ff;
             end;
-    $e8012:if scroll_fg_y<>valor then begin
+    $e8012:if (scroll_fg_y and $3ff)<>(valor and $3ff) then begin
               if abs((scroll_fg_y and $3f0)-(valor and $3f0))>15 then fillchar(gfx[2].buffer,$1000,1);
               scroll_fg_y:=valor and $3ff;
             end;
-    $e8014:if scroll_bg_x<>valor then begin
+    $e8014:if (scroll_bg_x and $1ff)<>(valor and $1ff) then begin
               if abs((scroll_bg_x and $1f8)-(valor and $1f8))>7 then fillchar(gfx[1].buffer,$1000,1);
               scroll_bg_x:=valor and $1ff;
             end;
-    $e8016:if scroll_bg_y<>valor then begin
+    $e8016:if (scroll_bg_y and $1ff)<>(valor and $1ff) then begin
               if abs((scroll_bg_y and $1f8)-(valor and $1f8))>7 then fillchar(gfx[1].buffer,$1000,1);
               scroll_bg_y:=valor and $1ff;
             end;

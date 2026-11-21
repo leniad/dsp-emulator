@@ -4,6 +4,7 @@ interface
 uses main_engine,dialogs,sysutils,cpu_misc;
 
 type
+        tm6502_bus_cycle=procedure(is_read:boolean);
         band_m6502=record
                 n,o_v,t,brk,dec,int,z,c:boolean;
         end;
@@ -21,8 +22,11 @@ type
             constructor create(clock:dword;cpu_type:byte);
             destructor free;
           public
+            // Optional NMOS bus timing; nil preserves the existing execution path.
+            bus_cycle_count:word;
             after_ei:boolean;
             tipo_cpu:byte;
+            procedure change_bus_cycle(callback:tm6502_bus_cycle);
             procedure reset;
             procedure run(maximo:single);
             procedure change_io_calls(in_port0,in_port1:cpu_inport_call);
@@ -35,9 +39,16 @@ type
             //RAM calls/IO Calls
             in_port0,in_port1:cpu_inport_call;
             read_dummy:boolean;
+            bus_callback:tm6502_bus_cycle;
+            bus_active:boolean;
+            irq_sampled,nmi_sampled:byte;
+            irq_sei_latched:boolean;
+            function bus_read(address:word):byte;
+            procedure bus_write(address:word;value:byte);
+            procedure bus_dummy(address:word);
             //IRQ
             function call_nmi:byte;
-            function call_irq:byte;
+            function call_irq(ignore_mask:boolean=false):byte;
         end;
 
 const
@@ -82,9 +93,9 @@ const
        $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //70
        $d,$a, 1,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //80
        $d,$b, 0,$b,8, 8,9,9,0, 6,0,6,2, 4,5,5,  //90
-        1,$a, 1, 0,7, 7,7,0,0, 1,0,0,2, 2,2,0,  //A0
-       $d,$b, 0,$b,8, 8,9,0,0, 6,0,0,5, 5,6,0,  //B0
-        1,$a, 1,$a,7, 7,7,0,0, 1,0,0,2, 2,2,2,  //C0
+        1,$a, 1,$a,7, 7,7,7,0, 1,0,0,2, 2,2,2,  //A0
+       $d,$b, 0,$b,8, 8,9,9,0, 6,0,0,5, 5,6,6,  //B0
+        1,$a, 1,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //C0
        $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //D0
         1,$a, 1,$a,7, 7,7,0,0, 1,0,1,2, 2,2,2,  //E0
        $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5); //F0
@@ -200,6 +211,8 @@ begin
   self.after_ei:=temp^<>0;inc(temp);
   self.tipo_cpu:=temp^;inc(temp);
   self.read_dummy:=temp^<>0;
+  self.irq_sei_latched:=false; // Keep the existing snapshot layout.
+  nmi_sampled:=CLEAR_LINE;
 end;
 
 procedure pon_pila(r:preg_m6502;valor:byte);
@@ -252,49 +265,76 @@ r.p.z:=false;
 r.p.c:=false;
 self.totalt:=0;
 self.after_ei:=false;
+self.irq_sei_latched:=false;
 self.change_nmi(CLEAR_LINE);
+nmi_sampled:=CLEAR_LINE;
 self.change_irq(CLEAR_LINE);
 self.change_reset(CLEAR_LINE);
 end;
 
 function cpu_m6502.call_nmi:byte;
+var
+  status:byte;
 begin
 call_nmi:=0;
 if self.nmi_state<>CLEAR_LINE then exit;
-self.putbyte($100+r.sp,r.pc shr 8);
+if bus_active then begin
+  self.bus_dummy(r.pc);
+  self.bus_dummy(r.pc);
+end;
+self.bus_write($100+r.sp,r.pc shr 8);
 r.sp:=r.sp-1;
-self.putbyte($100+r.sp,r.pc and $ff);
+self.bus_write($100+r.sp,r.pc and $ff);
 r.sp:=r.sp-1;
-self.putbyte($100+r.sp,(dame_pila(self.r) and $df));
+if bus_active and (tipo_cpu=TCPU_M6502) then status:=(dame_pila(self.r) or $20) and $ef
+  else status:=dame_pila(self.r) and $df;
+self.bus_write($100+r.sp,status);
 r.sp:=r.sp-1;
 r.p.int:=true;
 case self.tipo_cpu of
-  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFA)+(self.getbyte($FFFB) shl 8);
-  TCPU_DECO16:r.pc:=self.getbyte($FFF7)+(self.getbyte($FFF6) shl 8);
+  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.bus_read($FFFA)+(self.bus_read($FFFB) shl 8);
+  TCPU_DECO16:r.pc:=self.bus_read($FFF7)+(self.bus_read($FFF6) shl 8);
 end;
 call_nmi:=7;
+nmi_sampled:=CLEAR_LINE;
 if (self.pedir_nmi=PULSE_LINE) then self.pedir_nmi:=CLEAR_LINE;
 if (self.pedir_nmi=ASSERT_LINE) then self.nmi_state:=ASSERT_LINE;
 end;
 
-function cpu_m6502.call_irq:byte;
+function cpu_m6502.call_irq(ignore_mask:boolean):byte;
+var
+  status:byte;
+  hijack:boolean;
 begin
-if r.p.int then begin
+if r.p.int and not ignore_mask then begin
   call_irq:=0;
   exit;
 end;
-self.putbyte($100+r.sp,r.pc shr 8);
+if bus_active then begin
+  self.bus_dummy(r.pc);
+  self.bus_dummy(r.pc);
+end;
+self.bus_write($100+r.sp,r.pc shr 8);
 r.sp:=r.sp-1;
-self.putbyte($100+r.sp,r.pc and $ff);
+self.bus_write($100+r.sp,r.pc and $ff);
 r.sp:=r.sp-1;
-self.putbyte($100+r.sp,(dame_pila(self.r) and $df));
+hijack:=bus_active and (tipo_cpu=TCPU_M6502) and (pedir_nmi<>CLEAR_LINE) and (nmi_state=CLEAR_LINE);
+if bus_active and (tipo_cpu=TCPU_M6502) then status:=(dame_pila(self.r) or $20) and $ef
+  else status:=dame_pila(self.r) and $df;
+self.bus_write($100+r.sp,status);
 r.sp:=r.sp-1;
 r.p.int:=true;
-case self.tipo_cpu of
-  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
-  TCPU_DECO16:r.pc:=self.getbyte($FFF3)+(self.getbyte($FFF2) shl 8);
+if hijack then begin
+  r.pc:=self.bus_read($fffa)+(self.bus_read($fffb)shl 8);
+  nmi_sampled:=CLEAR_LINE;
+  if pedir_nmi=PULSE_LINE then pedir_nmi:=CLEAR_LINE;
+  if pedir_nmi=ASSERT_LINE then nmi_state:=ASSERT_LINE;
+end else case self.tipo_cpu of
+  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.bus_read($FFFE)+(self.bus_read($FFFF) shl 8);
+  TCPU_DECO16:r.pc:=self.bus_read($FFF3)+(self.bus_read($FFF2) shl 8);
 end;
 call_irq:=7;
+if bus_active and (tipo_cpu=TCPU_M6502) then nmi_sampled:=CLEAR_LINE;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
 end;
 
@@ -356,14 +396,54 @@ if (r.p.dec and (tipo_cpu<>TCPU_NES)) then begin
   end;
 end;
 
+procedure cpu_m6502.change_bus_cycle(callback:tm6502_bus_cycle);
+begin
+  bus_callback:=callback;
+  bus_active:=false;
+  bus_cycle_count:=0;
+  irq_sampled:=pedir_irq;
+  nmi_sampled:=CLEAR_LINE;
+  irq_sei_latched:=false;
+end;
+
+function cpu_m6502.bus_read(address:word):byte;
+begin
+  if bus_active then begin
+    if tipo_cpu=TCPU_M6502 then nmi_sampled:=pedir_nmi;
+    irq_sampled:=pedir_irq;
+    bus_callback(true);
+    inc(bus_cycle_count);
+  end;
+  result:=self.getbyte(address);
+end;
+
+procedure cpu_m6502.bus_write(address:word;value:byte);
+begin
+  if bus_active then begin
+    if tipo_cpu=TCPU_M6502 then nmi_sampled:=pedir_nmi;
+    irq_sampled:=pedir_irq;
+    bus_callback(false);
+    inc(bus_cycle_count);
+  end;
+  self.putbyte(address,value);
+end;
+
+procedure cpu_m6502.bus_dummy(address:word);
+begin
+  if bus_active then self.bus_read(address);
+end;
+
 procedure cpu_m6502.run(maximo:single);
 var
     instruccion,numero,tempb,carry:byte;
-    tempw,posicion:word;
+    tempw,posicion,base_address:word;
     old_contador:integer;
+    nmi_ready,nmi_hijack:boolean;
+    branch_nmi,branch_irq:byte;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
+bus_active:=false;
 old_contador:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   tempb:=self.pedir_reset;
@@ -375,17 +455,29 @@ if self.pedir_reset<>CLEAR_LINE then begin
   end;
 end;
 self.read_dummy:=false;
-if not(self.after_ei) then begin
-  if (self.pedir_nmi<>CLEAR_LINE) then
-  self.estados_demas:=self.call_nmi
-    else if (self.pedir_irq<>CLEAR_LINE) then
-    self.estados_demas:=self.call_irq
-      else self.estados_demas:=0;
-end;
+bus_cycle_count:=0;
+bus_active:=Assigned(bus_callback) and (tipo_cpu in [TCPU_M6502,TCPU_NES]);
+// Poll the NMI request before the final bus cycle. An edge arriving in
+// that cycle belongs to the next instruction boundary, not this one.
+if bus_active and (tipo_cpu=TCPU_M6502) then nmi_ready:=(nmi_sampled<>CLEAR_LINE) and (pedir_nmi<>CLEAR_LINE)
+  else nmi_ready:=pedir_nmi<>CLEAR_LINE;
+if bus_active and (tipo_cpu=TCPU_M6502) and irq_sei_latched then begin
+  // SEI cannot cancel an IRQ accepted before its I flag update. In particular,
+  // CLI / SEI must dispatch a pending IRQ with I=1 in the stacked status.
+  self.estados_demas:=0;
+  if nmi_ready then self.estados_demas:=self.call_nmi
+    else self.estados_demas:=self.call_irq(true);
+  irq_sei_latched:=false;
+end else if bus_active and (tipo_cpu=TCPU_M6502) and nmi_ready then self.estados_demas:=self.call_nmi
+          else if not(self.after_ei) then begin
+                  if nmi_ready then self.estados_demas:=self.call_nmi
+                      else if ((bus_active and (tipo_cpu in [TCPU_M6502,TCPU_NES]) and (irq_sampled<>CLEAR_LINE)) or ((not bus_active or not(tipo_cpu in [TCPU_M6502,TCPU_NES])) and (self.pedir_irq<>CLEAR_LINE))) then self.estados_demas:=self.call_irq
+                              else self.estados_demas:=0;
+               end else if bus_active and (tipo_cpu=TCPU_M6502) then self.estados_demas:=0;
 r.ppc:=r.pc;
 self.after_ei:=false;
 self.opcode:=true;
-instruccion:=self.getbyte(r.pc);
+instruccion:=self.bus_read(r.pc);
 self.opcode:=false;
 r.pc:=r.pc+1;
 case tipo_dir[instruccion] of
@@ -395,81 +487,96 @@ case tipo_dir[instruccion] of
                 r.pc:=r.pc+1;
           end;
         $02:begin //absoluto opcode+direccion 16bits (rev)
-                posicion:=self.getbyte(r.pc);
-                posicion:=posicion or (self.getbyte(r.pc+1) shl 8);
+                posicion:=self.bus_read(r.pc);
+                posicion:=posicion or (self.bus_read(r.pc+1) shl 8);
                 r.pc:=r.pc+2;
             end;
         $03:begin  //desconocido!!!! -> MAL
                 MessageDlg('Modo dir. mal, instruccion: '+inttohex(instruccion,2)+'. PC='+inttostr(r.pc), mtInformation,[mbOk], 0)
             end;
         $04:begin //absoluto indexado por X no page cross
-                posicion:=self.getbyte(r.pc);
-                posicion:=posicion+(self.getbyte(r.pc+1) shl 8)+r.x;
+                posicion:=self.bus_read(r.pc);
+                posicion:=posicion+(self.bus_read(r.pc+1) shl 8);
+                base_address:=posicion;
+                posicion:=word((posicion+r.x) and $ffff);
+                self.bus_dummy((base_address and $ff00) or (posicion and $ff));
                 r.pc:=r.pc+2;
             end;
         $05:begin //absoluto indexado por X (rev)
-                posicion:=self.getbyte(r.pc)+(self.getbyte(r.pc+1) shl 8);
+                posicion:=self.bus_read(r.pc);
+                posicion:=posicion or(self.bus_read(r.pc+1) shl 8);
                 case instruccion of
                   $1f,$3f,$5f,$7f:;
                   else if (((posicion+r.x) xor posicion) and $ff00)<>0 then self.estados_demas:=self.estados_demas+1;
                 end;
-                posicion:=posicion+r.x;
+                base_address:=posicion;
+                posicion:=word((posicion+r.x) and $ffff);
+                if bus_active and ((((base_address xor posicion) and $ff00)<>0) or (instruccion in [$13,$1b,$1f,$33,$3b,$3f,$53,$5b,$5f,$73,$7b,$7f,$91,$93,$99,$9b,$9f,$d3,$db,$df,$f3,$fb,$ff])) then self.bus_dummy((base_address and $ff00) or (posicion and $ff));
                 r.pc:=r.pc+2;
             end;
         $06:begin //absoluto indexado por Y (rev)
-                posicion:=self.getbyte(r.pc)+(self.getbyte(r.pc+1) shl 8);
+                posicion:=self.bus_read(r.pc);
+                posicion:=posicion or(self.bus_read(r.pc+1) shl 8);
                 case instruccion of
                   $1b,$3b,$5b,$7b,$99:;
                   else if (((posicion+r.y) xor posicion) and $ff00)<>0 then self.estados_demas:=self.estados_demas+1;
                 end;
-                posicion:=posicion+r.y;
+                base_address:=posicion;
+                posicion:=word((posicion+r.y) and $ffff);
+                if bus_active and ((((base_address xor posicion) and $ff00)<>0) or (instruccion in [$13,$1b,$1f,$33,$3b,$3f,$53,$5b,$5f,$73,$7b,$7f,$91,$93,$99,$9b,$9f,$d3,$db,$df,$f3,$fb,$ff])) then self.bus_dummy((base_address and $ff00) or (posicion and $ff));
                 r.pc:=r.pc+2;
             end;
         $07:begin //pagina 0  opcode+direccion 8bits (rev)
-                posicion:=self.getbyte(r.pc);
+                posicion:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
             end;
         $08:begin  //pagina cero indexado por X (rev)
-                tempb:=self.getbyte(r.pc);
+                tempb:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
+                self.bus_dummy(tempb);
                 posicion:=(tempb+r.x) and $ff;
             end;
         $09:begin  //pagina cero indexado por Y (rev)
-                tempb:=self.getbyte(r.pc);
+                tempb:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
+                self.bus_dummy(tempb);
                 posicion:=(tempb+r.y) and $ff;
             end;
         $0a:begin //indirecto indexado por X (rev)
-                tempb:=self.getbyte(r.pc);
+                tempb:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
+                self.bus_dummy(tempb);
                 tempb:=tempb+r.x;
-                posicion:=self.getbyte(tempb) or (self.getbyte((tempb+1) and $ff) shl 8);
+                posicion:=self.bus_read(tempb);
+                posicion:=posicion or(self.bus_read((tempb+1) and $ff) shl 8);
             end;
         $0b:begin  //indirecto indexado por Y (rev)
-                tempb:=self.getbyte(r.pc);
+                tempb:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=self.getbyte(tempb);
-                posicion:=posicion or (self.getbyte((tempb+1) and $ff) shl 8);
+                posicion:=self.bus_read(tempb);
+                posicion:=posicion or (self.bus_read((tempb+1) and $ff) shl 8);
                 case instruccion of
                   $13,$33,$53,$73,$93,$91:;
                   else if (((posicion+r.y) xor posicion) and $ff00)<>0 then self.estados_demas:=self.estados_demas+1;
                 end;
-                posicion:=posicion+r.y;
+                base_address:=posicion;
+                posicion:=word((posicion+r.y) and $ffff);
+                if bus_active and ((((base_address xor posicion) and $ff00)<>0) or (instruccion in [$13,$33,$53,$73,$91,$93,$d3,$f3])) then self.bus_dummy((base_address and $ff00) or (posicion and $ff));
             end;
         $0c:begin //indexado pagina 0 opcode+puntero 8bits (rev)
-                tempb:=self.getbyte(r.pc);
+                tempb:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=self.getbyte(tempb);
-                posicion:=posicion+(self.getbyte((tempb+1) and $ff) shl 8);
+                posicion:=self.bus_read(tempb);
+                posicion:=posicion+(self.bus_read((tempb+1) and $ff) shl 8);
             end;
         $0d:begin //relativo
-                numero:=self.getbyte(r.pc);
+                numero:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
             end;
         $0e:if self.tipo_cpu=TCPU_M65C02 then begin //Exclusivo del EC
-                tempb:=self.getbyte(r.pc);
+                tempb:=self.bus_read(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=self.getbyte(self.r.b+tempb) or (self.getbyte((self.r.b+tempb+1) and $ff) shl 8);
+                posicion:=self.bus_read(self.r.b+tempb) or (self.bus_read((self.r.b+tempb+1) and $ff) shl 8);
                 posicion:=posicion+self.r.z;
             end{$ifdef DEBUG}
               else
@@ -478,67 +585,85 @@ case tipo_dir[instruccion] of
 end;                // del tipo de direccionamiento
 case instruccion of
       $00:begin  //brk
+            self.bus_dummy(r.pc);
             r.pc:=r.pc+1;
-            self.putbyte($100+r.sp,r.pc shr 8);
+            self.bus_write($100+r.sp,r.pc shr 8);
             r.sp:=r.sp-1;
-            self.putbyte($100+r.sp,r.pc and $ff);
+            self.bus_write($100+r.sp,r.pc and $ff);
             r.sp:=r.sp-1;
             r.p.brk:=true;
-            self.putbyte($100+r.sp,dame_pila(self.r));
+            nmi_hijack:=bus_active and (tipo_cpu=TCPU_M6502) and (pedir_nmi<>CLEAR_LINE) and (nmi_state=CLEAR_LINE);
+            tempb:=dame_pila(self.r);
+            if bus_active and (tipo_cpu=TCPU_M6502) then tempb:=tempb or $30;
+            self.bus_write($100+r.sp,tempb);
             r.sp:=r.sp-1;
             r.p.int:=true;
-            case self.tipo_cpu of
-              TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
-              TCPU_DECO16:r.pc:=self.getbyte($FFF3)+(self.getbyte($FFF2) shl 8);
+            if nmi_hijack then begin
+              tempw:=self.bus_read($fffa);r.pc:=tempw or (self.bus_read($fffb) shl 8);
+              nmi_sampled:=CLEAR_LINE;
+              if pedir_nmi=PULSE_LINE then pedir_nmi:=CLEAR_LINE;
+              if pedir_nmi=ASSERT_LINE then nmi_state:=ASSERT_LINE;
+            end else case self.tipo_cpu of
+              TCPU_M6502,TCPU_NES,TCPU_M65C02:begin
+                tempw:=self.bus_read($fffe);
+                r.pc:=tempw or (self.bus_read($ffff) shl 8);
+                if bus_active and (tipo_cpu=TCPU_M6502) then nmi_sampled:=CLEAR_LINE;
+              end;
+              TCPU_DECO16:begin
+                tempw:=self.bus_read($fff3);
+                r.pc:=tempw or (self.bus_read($fff2) shl 8);
+              end;
             end;
           end;
       $01,$05,$09,$0d,$11,$15,$19,$1d:begin //ORA
-            r.a:=r.a or self.getbyte(posicion);
+            r.a:=r.a or self.bus_read(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
       $02,$42:self.r.pc:=self.r.pc-1; //kil
       $03,$07,$0f,$13,$17,$1b,$1f:begin //SLO
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo de la CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo de la CPU
             r.p.c:=(tempb and $80)<>0;
             tempb:=tempb shl 1;
             r.a:=r.a or tempb;
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
           end;
-      $04,$0c,$14,$1c,$3a,$3c,$44,$54,$5c,$7c,$82,$89,$c2,$d4,$dc,$e2,$f4,$fc://if self.tipo_cpu=TCPU_M65C02 then
-          {$ifdef DEBUG}  //nop dobles y triples
-            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
-            {$endif};
-          //else self.getbyte(r.pc);  // <-- Fallo CPU NOP
-      $ea:; //nop
+      $04,$0c,$14,$1c,$3c,$44,$54,$5c,$7c,$82,$89,$c2,$d4,$dc,$e2,$f4,$fc:if bus_active then self.bus_read(posicion);
+      $3a:if bus_active then self.bus_dummy(r.pc);
+      $ea:self.bus_dummy(r.pc); //nop
       $06,$0e,$16,$1e:begin //asl
-                tempb:=self.getbyte(posicion);
-                self.putbyte(posicion,tempb); // <-- Fallo de la CPU
+                tempb:=self.bus_read(posicion);
+                self.bus_write(posicion,tempb); // <-- Fallo de la CPU
                 r.p.c:=(tempb and $80)<>0;
                 tempb:=tempb shl 1;
                 r.p.z:=(tempb=0);
                 r.p.n:=(tempb and $80)<>0;
-                self.putbyte(posicion,tempb);
+                self.bus_write(posicion,tempb);
           end;
       $08:begin //PHP
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             tempb:=dame_pila(self.r);
             tempb:=tempb or $20 or $10;
-            self.putbyte($100+r.sp,tempb);
+            self.bus_write($100+r.sp,tempb);
             r.sp:=r.sp-1;
           end;
       $0a:begin //asl A
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.p.c:=(r.a and $80)<>0;
             r.a:=r.a shl 1;
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $0b,$2b:begin //anc
-            r.a:=r.a and self.getbyte(posicion);
+      $0b,$2b:if bus_active then begin // NMOS ANC
+            r.a:=r.a and self.bus_read(posicion);
+            r.p.c:=(r.a and $80)<>0;
+            r.p.z:=(r.a=0);
+            r.p.n:=(r.a and $80)<>0;
+          end else begin // legacy anc
+            r.a:=r.a and self.bus_read(posicion);
             if r.p.c then carry:=1 else carry:=0;
             r.p.c:=(r.a and $80)<>0;
             r.a:=(r.a shl 1) or carry;
@@ -548,6 +673,16 @@ case instruccion of
       $10:if not(r.p.n) then begin //BPL salta si n false
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
+              if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
               r.pc:=r.pc+shortint(numero);
           end;
       $1a:if self.tipo_cpu=TCPU_M65C02 then begin  //inc a
@@ -555,66 +690,68 @@ case instruccion of
              r.p.z:=(self.r.a=0);
              r.p.n:=(self.r.a and $80)<>0;
            end else begin
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif}
            end;
       $18:begin //CLC
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.p.c:=false;
           end;
       $20:begin // JSR absoluto
-            tempb:=self.getbyte(r.pc);
+            tempb:=self.bus_read(r.pc);
             r.pc:=r.pc+1;
-            self.putbyte($100+r.sp,r.pc shr 8);
+            self.bus_dummy($100+r.sp);
+            self.bus_write($100+r.sp,r.pc shr 8);
             r.sp:=r.sp-1;
-            self.putbyte($100+r.sp,r.pc and $ff);
+            self.bus_write($100+r.sp,r.pc and $ff);
             r.sp:=r.sp-1;
-            r.pc:=(self.getbyte(r.pc) shl 8) or tempb;
+            r.pc:=(self.bus_read(r.pc) shl 8) or tempb;
           end;
       $21,$25,$29,$2d,$31,$35,$39,$3d:begin  //AND
-            r.a:=r.a and self.getbyte(posicion);
+            r.a:=r.a and self.bus_read(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
         end;
       $23,$27,$2f,$33,$37,$3b,$3f:begin //RLA
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo de la CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo de la CPU
             if r.p.c then tempw:=(tempb shl 1)+1
               else tempw:=tempb shl 1;
             r.p.c:=(tempw and $100)<>0;
             r.a:=r.a and (tempw and $ff);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
-            self.putbyte(posicion,tempw and $ff);
+            self.bus_write(posicion,tempw and $ff);
           end;
       $24,$2c:begin  //BIT
-            numero:=self.getbyte(posicion);
+            numero:=self.bus_read(posicion);
             r.p.z:=(r.a and numero)=0;
             r.p.n:=(numero and $80)<>0;
             r.p.o_v:=(numero and $40)<>0;
         end;
       $26,$2e,$36,$3e:begin //ROL
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb);  // <-- Fallo CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb);  // <-- Fallo CPU
             if r.p.c then carry:=1 else carry:=0;
             r.p.c:=(tempb and $80)<>0;
             tempb:=(tempb shl 1) or carry;
             r.p.z:=(tempb=0);
             r.p.n:=(tempb and $80)<>0;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
          end;
       $28:begin  //PLP
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            self.bus_dummy($100+r.sp);
             r.sp:=r.sp+1;
             //Tengo que ingnorar el BRK!
-            tempb:=self.getbyte($100+r.sp) and IGNORE_FLAGS;
+            tempb:=self.bus_read($100+r.sp) and IGNORE_FLAGS;
             pon_pila(self.r,tempb);
             self.after_ei:=true;
           end;
       $2a:begin //ROL A
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             if r.p.c then carry:=1 else carry:=0;
             r.p.c:=(r.a and $80)<>0;
             r.a:=(r.a shl 1) or carry;
@@ -624,140 +761,166 @@ case instruccion of
       $30:if r.p.n then begin  //BMI salta si n false
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
+              if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                else if tipo_cpu=TCPU_M6502 then begin
+                  nmi_sampled:=branch_nmi;
+                  irq_sampled:=branch_irq;
+                end;
+              end;
               r.pc:=r.pc+shortint(numero);
           end;
       $34:if self.tipo_cpu=TCPU_M65C02 then begin  //BIT
-            numero:=self.getbyte(posicion);
+            numero:=self.bus_read(posicion);
             r.p.z:=(r.a and numero)=0;
             r.p.n:=(numero and $80)<>0;
             r.p.o_v:=(numero and $40)<>0;
           end else begin
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif}
           end;
       $38:begin  //SEC
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.p.c:=true;
           end;
       $40:begin //RTI
+                self.bus_dummy(r.pc);self.bus_dummy($100+r.sp);
                 r.sp:=r.sp+1;
-                //Tengo que ignorarel flag brk!!
-                pon_pila(self.r,self.getbyte($100+r.sp) and IGNORE_FLAGS);
+                //Tengo que ignorar el flag brk!!
+                pon_pila(self.r,self.bus_read($100+r.sp) and IGNORE_FLAGS);
                 r.sp:=r.sp+1;
-                r.pc:=self.getbyte($100+r.sp);
+                r.pc:=self.bus_read($100+r.sp);
                 r.sp:=r.sp+1;
-                r.pc:=r.pc or (self.getbyte($100+r.sp) shl 8);
+                r.pc:=r.pc or (self.bus_read($100+r.sp) shl 8);
                 self.after_ei:=false;
           end;
       $41,$45,$49,$4d,$51,$55,$59,$5d:begin //EOR
-            r.a:=r.a xor self.getbyte(posicion);
+            r.a:=r.a xor self.bus_read(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
       $43,$47,$4f,$53,$57,$5b,$5f:begin //SRE
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo de la CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo de la CPU
             r.p.c:=(tempb and $1)<>0;
             tempb:=tempb shr 1;
             r.a:=r.a xor tempb;
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
           end;
       $46,$4e,$56,$5e:begin  //LSR
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb);  // <-- Fallo CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb);  // <-- Fallo CPU
             r.p.c:=(tempb and $1)<>0;
             tempb:=tempb shr 1;
             r.p.z:=(tempb=0);
             r.p.n:=false;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
           end;
       $48:begin  //PHA
-            self.getbyte(r.pc);  // <-- Fallo CPU
-            self.putbyte($100+r.sp,r.a);
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            self.bus_write($100+r.sp,r.a);
             r.sp:=r.sp-1;
           end;
       $4a:begin  //LSR A
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.p.c:=(r.a and $1)<>0;
              r.a:=r.a shr 1;
              r.p.z:=(r.a=0);
              r.p.n:=false;
           end;
-      $4b:if self.tipo_cpu=TCPU_DECO16 then
-            if @self.in_port1<>nil then r.a:=self.in_port1
-          else begin //alr
-              r.p.c:=(r.a and $1)<>0;
-              r.a:=r.a and self.getbyte(posicion);
-              r.p.c:=(r.a and $1)<>0;
+      $4b:begin // ALR #imm / entrada especifica de DECO16
+            if self.tipo_cpu=TCPU_DECO16 then begin
+              if (@self.in_port1<>nil) then r.a:=self.in_port1;
+            end else if self.tipo_cpu in [TCPU_M6502,TCPU_NES] then begin
+              r.a:=r.a and self.bus_read(posicion);
+              r.p.c:=(r.a and 1)<>0;
               r.a:=r.a shr 1;
               r.p.z:=(r.a=0);
               r.p.n:=false;
+            end;
           end;
       $4c:r.pc:=posicion; //JMP absoluto
       $50:if not(r.p.o_v) then begin  //BVC salta si Overflow false
              if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
-             r.pc:=r.pc+shortint(numero);
+             if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                    else if tipo_cpu=TCPU_M6502 then begin
+                            nmi_sampled:=branch_nmi;
+                            irq_sampled:=branch_irq;
+                         end;
+              end;
+              r.pc:=r.pc+shortint(numero);
           end;
       $58:begin  //CLI
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            if bus_active and(tipo_cpu=TCPU_M6502) then self.after_ei:=r.p.int
+              else self.after_ei:=true;
             r.p.int:=false;
-            self.after_ei:=true;
           end;
       $5a:if self.tipo_cpu=TCPU_M65C02 then begin  //PHY
-            self.getbyte(r.pc);  // <-- Fallo CPU
-            self.putbyte($100+r.sp,r.y);
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            self.bus_write($100+r.sp,r.y);
             r.sp:=r.sp-1;
           end else begin
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif}
           end;
       $60:begin  //RTS
+             self.bus_dummy(r.pc);self.bus_dummy($100+r.sp);
              r.sp:=r.sp+1;
-             r.pc:=self.getbyte($100+r.sp);
+             r.pc:=self.bus_read($100+r.sp);
              r.sp:=r.sp+1;
-             r.pc:=r.pc or (self.getbyte($100+r.sp) shl 8);
+             r.pc:=r.pc or (self.bus_read($100+r.sp) shl 8);
+             self.bus_dummy(r.pc);
              r.pc:=r.pc+1;
            end;
       $61,$65,$69,$6d,$71,$75,$79,$7d:begin  //ADC
-             numero:=self.getbyte(posicion);
+             numero:=self.bus_read(posicion);
              adc(self.r,numero,self.tipo_cpu);
            end;
       $63,$67,$6f,$73,$77,$7b,$7f:begin //RRA
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo de la CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo de la CPU
             if r.p.c then tempw:=tempb or $100
               else tempw:=tempb;
             r.p.c:=(tempb and $1)<>0;
             tempw:=tempw shr 1;
             adc(self.r,tempw,self.tipo_cpu);
-            self.putbyte(posicion,tempw and $ff);
+            self.bus_write(posicion,tempw and $ff);
           end;
       $66,$6e,$76,$7e:begin //ROR
-              tempb:=self.getbyte(posicion);
-              self.putbyte(posicion,tempb); // <-- Fallo CPU
+              tempb:=self.bus_read(posicion);
+              self.bus_write(posicion,tempb); // <-- Fallo CPU
               if r.p.c then carry:=$80 else carry:=0;
               r.p.c:=(tempb and $1)<>0;
               tempb:=(tempb shr 1) or carry;
               r.p.z:=(tempb=0);
               r.p.n:=(tempb and $80)<>0;
-              self.putbyte(posicion,tempb);
+              self.bus_write(posicion,tempb);
          end;
       $68:begin //PLA
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            self.bus_dummy($100+r.sp);
             r.sp:=r.sp+1;
-            r.a:=self.getbyte($100+r.sp);
+            r.a:=self.bus_read($100+r.sp);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
       $6a:begin  //ROR A
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             if r.p.c then carry:=$80 else carry:=0;
             r.p.c:=(r.a and $1)<>0;
             r.a:=(r.a shr 1) or carry;
@@ -765,7 +928,7 @@ case instruccion of
             r.p.n:=(r.a and $80)<>0;
           end;
       $6b:begin  //arr
-            r.a:=r.a and self.getbyte(posicion);
+            r.a:=r.a and self.bus_read(posicion);
             if r.p.c then carry:=$80 else carry:=0;
             r.p.c:=(r.a and $1)<>0;
             r.a:=(r.a shr 1) or carry;
@@ -774,103 +937,141 @@ case instruccion of
           end;
       $6c:begin  //jmp rel
             //abs
-            posicion:=self.getbyte(r.pc);
-            posicion:=posicion+(self.getbyte(r.pc+1) shl 8);
-            r.pc:=self.getbyte(posicion);
-            r.pc:=r.pc or (self.getbyte((((posicion+1) and $00FF) or (posicion and $FF00))) shl 8);
+            posicion:=self.bus_read(r.pc);
+            posicion:=posicion+(self.bus_read(r.pc+1) shl 8);
+            r.pc:=self.bus_read(posicion);
+            r.pc:=r.pc or (self.bus_read((((posicion+1) and $00FF) or (posicion and $FF00))) shl 8);
           end;
       $70:if r.p.o_v then begin //BVS salta si Overflow true
             if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
-            r.pc:=r.pc+shortint(numero);
+            if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
+              r.pc:=r.pc+shortint(numero);
           end;
       $78:begin  //SEI
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            if bus_active and (tipo_cpu=TCPU_M6502) then irq_sei_latched:=(irq_sampled<>CLEAR_LINE) and not r.p.int;
             r.p.int:=true;
             self.after_ei:=true;
           end;
       $7a:if self.tipo_cpu=TCPU_M65C02 then begin //ply
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.sp:=r.sp+1;
-            r.y:=self.getbyte($100+r.sp);
+            r.y:=self.bus_read($100+r.sp);
             r.p.z:=(r.y=0);
             r.p.n:=(r.y and $80)<>0;
           end else begin
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif}
           end;
       $80:if self.tipo_cpu=TCPU_M65C02 then begin //bra
-            r.pc:=r.pc+shortint(numero);
+            if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
+              r.pc:=r.pc+shortint(numero);
           end else begin  //nop doble
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            if bus_active then self.bus_read(posicion)
+              else self.bus_read(r.pc);  // <-- Fallo CPU
           end;
-      $81,$85,$8d,$91,$92,$95,$99,$9d:self.putbyte(posicion,r.a); //STA
-      $83,$87,$8f,$97:self.putbyte(posicion,r.a and r.x); //sax
-      $84,$8c,$94:self.putbyte(posicion,r.y); //STY
-      $86,$8e,$96:self.putbyte(posicion,r.x); //STX
+      $81,$85,$8d,$91,$92,$95,$99,$9d:self.bus_write(posicion,r.a); //STA
+      $83,$87,$8f,$97:self.bus_write(posicion,r.a and r.x); //sax
+      $84,$8c,$94:self.bus_write(posicion,r.y); //STY
+      $86,$8e,$96:self.bus_write(posicion,r.x); //STX
       $88:begin  //DEY
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.y:=r.y-1;
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
       $8a:begin //TXA
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.a:=r.x;
              r.p.z:=(r.a=0);
              r.p.n:=(r.a and $80)<>0;
            end;
       $8b:begin //XAA
-             r.a:=r.x and self.getbyte(posicion);
+             r.a:=r.x and self.bus_read(posicion);
              r.p.z:=(r.a=0);
              r.p.n:=(r.a and $80)<>0;
            end;
       $90:if not(r.p.c) then begin  //BCC salta si c false
              if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
-             r.pc:=r.pc+shortint(numero);
+             if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
+              r.pc:=r.pc+shortint(numero);
           end;
-      $93,$9f:self.putbyte(posicion,r.a and r.x and tempb); //ahx
+      $93,$9f:self.bus_write(posicion,r.a and r.x and tempb); //ahx
       $98:begin  //TYA
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.a:=r.y;
              r.p.z:=(r.a=0);
              r.p.n:=(r.a and $80)<>0;
            end;
       $9a:begin  //TXS
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.sp:=r.x;
           end;
-      $64,$74,$9c,$9e:if self.tipo_cpu=TCPU_M65C02 then self.putbyte(posicion,0) //stz
+      $64,$74,$9c,$9e:if self.tipo_cpu=TCPU_M65C02 then self.bus_write(posicion,0) //stz
                 else
                 {$ifdef DEBUG}
                 MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
                 {$endif};
       $a0,$a4,$ac,$b4,$bc:begin //LDY
-             r.y:=self.getbyte(posicion);
+             r.y:=self.bus_read(posicion);
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
       $a1,$a5,$a9,$ad,$b1,$b5,$b9,$bd:begin //LDA
-            r.a:=self.getbyte(posicion);
+            r.a:=self.bus_read(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
       $a2,$a6,$ae,$b6,$be:begin //LDX
-             r.x:=self.getbyte(posicion);
+             r.x:=self.bus_read(posicion);
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
+       $a3,$a7,$af,$b7,$bf:if self.tipo_cpu in [TCPU_M6502,TCPU_NES] then begin
+            r.a:=self.bus_read(posicion);
+            r.x:=r.a;
+            r.p.z:=(r.a=0);
+            r.p.n:=(r.a and $80)<>0;
+          end;
       $a8:begin  //TAY
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.y:=r.a;
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
       $aa:begin  //TAX
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.x:=r.a;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
@@ -878,10 +1079,20 @@ case instruccion of
       $b0:if r.p.c then begin  //BCS salta si c true
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
+              if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
               r.pc:=r.pc+shortint(numero);
           end;
       $b2:if self.tipo_cpu=TCPU_M65C02 then begin //LDA
-            r.a:=self.getbyte(posicion);
+            r.a:=self.bus_read(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end else begin
@@ -890,119 +1101,147 @@ case instruccion of
             {$endif};
           end;
       $b3:begin //LAX
-            r.a:=self.getbyte(posicion);
+            r.a:=self.bus_read(posicion);
             r.x:=r.a;
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
       $b8:begin  //CLV
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.p.o_v:=false;
           end;
       $ba:begin  //TSX
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.x:=r.sp;
             r.p.z:=(r.x=0);
             r.p.n:=(r.x and $80)<>0;
           end;
       $c0,$c4,$cc:begin //CPY
-            tempw:=r.y-self.getbyte(posicion);
+            tempw:=r.y-self.bus_read(posicion);
             r.p.c:=(tempw and $100)=0;
             r.p.z:=(tempw and $ff)=0;
             r.p.n:=(tempw and $80)<>0;
            end;
       $c1,$c5,$c9,$cd,$d1,$d2,$d5,$d9,$dd:begin  //CMA
-             tempw:=r.a-self.getbyte(posicion);
+             tempw:=r.a-self.bus_read(posicion);
              r.p.c:=(tempw and $100)=0;
              r.p.z:=(tempw and $ff)=0;
              r.p.n:=(tempw and $80)<>0;
           end;
+       $c7:if self.tipo_cpu in [TCPU_M6502,TCPU_NES] then begin
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb);
+            tempb:=(word(tempb)+$ff) and $ff;
+            self.bus_write(posicion,tempb);
+            tempw:=word(r.a)-word(tempb);
+            r.p.c:=(r.a>=tempb);
+            r.p.z:=(tempw and $ff)=0;
+            r.p.n:=(tempw and $80)<>0;
+          end;
       $c3,$cf,$d3,$db,$df:begin //DCP
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo de la CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo de la CPU
             tempb:=tempb-1;
             if r.a>=tempb then r.p.c:=true
               else r.p.c:=false;
             r.p.z:=((r.a-tempb) and $ff)=0;
             r.p.n:=((r.a-tempb) and $80)<>0;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
           end;
-      $C6,$ce,$d6,$de:begin   //DEC
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo CPU
+      $c6,$ce,$d6,$de:begin   //DEC
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo CPU
             tempb:=tempb-1;
             r.p.z:=(tempb=0);
             r.p.n:=(tempb and $80)<>0;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
            end;
       $c8:begin  //INY
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.y:=r.y+1;
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
       $ca:begin  //DEX
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.x:=r.x-1;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
+      $cb:if self.tipo_cpu in [TCPU_M6502,TCPU_NES] then begin
+            tempb:=r.a and r.x;
+            tempw:=word(tempb)-word(self.bus_read(posicion));
+            r.p.c:=(tempw and $100)=0;
+            r.x:=tempw and $ff;
+            r.p.z:=(r.x=0);
+            r.p.n:=(r.x and $80)<>0;
+          end;
       $d0:if not(r.p.z) then begin   //BNE si z false
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
+              if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
               r.pc:=r.pc+shortint(numero);
           end;
       $d7:begin
-            tempb:=self.getbyte(posicion);
-            self.putbyte(posicion,tempb); // <-- Fallo CPU
+            tempb:=self.bus_read(posicion);
+            self.bus_write(posicion,tempb); // <-- Fallo CPU
             tempb:=tempb-1;
-            self.putbyte(posicion,tempb);
+            self.bus_write(posicion,tempb);
             tempw:=self.r.a-tempb;
             r.p.c:=(tempw and $100)=0;
             r.p.z:=(tempw and $ff)=0;
             r.p.n:=(tempw and $80)<>0;
           end;
       $d8:begin  //CLD
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.p.dec:=false;
           end;
       $da:if self.tipo_cpu=TCPU_M65C02 then begin  //PHX
-            self.getbyte(r.pc);  // <-- Fallo CPU
-            self.putbyte($100+r.sp,r.x);
+            self.bus_read(r.pc);  // <-- Fallo CPU
+            self.bus_write($100+r.sp,r.x);
             r.sp:=r.sp-1;
           end else begin
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif}
           end;
       $e0,$e4,$ec:begin  //CPX
-              tempw:=r.x-self.getbyte(posicion);
+              tempw:=r.x-self.bus_read(posicion);
               r.p.c:=(tempw and $100)=0;
               r.p.z:=(tempw and $ff)=0;
               r.p.n:=(tempw and $80)<>0;
           end;
       $e1,$e5,$e9,$eb,$ed,$f1,$f5,$f9,$fd:begin  //SBC
-              numero:=self.getbyte(posicion);
+              numero:=self.bus_read(posicion);
               sbc(self.r,numero,self.tipo_cpu);
           end;
       $e3,$ef,$f3,$f7,$fb,$ff:begin  //ISB
-             tempb:=self.getbyte(posicion);
-             self.putbyte(posicion,tempb);
+             tempb:=self.bus_read(posicion);
+             self.bus_write(posicion,tempb);
              tempb:=tempb+1;
              sbc(self.r,tempb,self.tipo_cpu);
-             self.putbyte(posicion,tempb);
+             self.bus_write(posicion,tempb);
           end;
       $e6,$ee,$f6,$fe:begin  //INC
-             tempb:=self.getbyte(posicion);
-             self.putbyte(posicion,tempb);  // <-- Fallo CPU
+             tempb:=self.bus_read(posicion);
+             self.bus_write(posicion,tempb);  // <-- Fallo CPU
              tempb:=tempb+1;
              r.p.z:=(tempb=0);
              r.p.n:=(tempb and $80)<>0;
-             self.putbyte(posicion,tempb);
+             self.bus_write(posicion,tempb);
            end;
       $e8:begin  //INX
-             self.getbyte(r.pc);  // <-- Fallo CPU
+             self.bus_read(r.pc);  // <-- Fallo CPU
              r.x:=r.x+1;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
@@ -1010,20 +1249,30 @@ case instruccion of
       $f0:if r.p.z then begin  //BEQ salta si z true
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
+              if bus_active then begin
+                branch_nmi:=nmi_sampled;
+                branch_irq:=irq_sampled;
+                self.bus_dummy(r.pc);
+                if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.bus_dummy((r.pc and $ff00) or ((r.pc+shortint(numero)) and $ff))
+                  else if tipo_cpu=TCPU_M6502 then begin
+                          nmi_sampled:=branch_nmi;
+                          irq_sampled:=branch_irq;
+                       end;
+              end;
               r.pc:=r.pc+shortint(numero);
           end;
       $f8:begin  //SED
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.p.dec:=true;
           end;
       $fa:if self.tipo_cpu=TCPU_M65C02 then begin //plx
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             r.sp:=r.sp+1;
-            r.x:=self.getbyte($100+r.sp);
+            r.x:=self.bus_read($100+r.sp);
             r.p.z:=(r.x=0);
             r.p.n:=(r.x and $80)<>0;
           end else begin
-            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.bus_read(r.pc);  // <-- Fallo CPU
             {$ifdef DEBUG}
             MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
             {$endif}
@@ -1034,6 +1283,13 @@ case instruccion of
       {$endif}
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
+// Remaining internal cycles: memory modes above place all official data accesses.
+// Never silently discard a real bus cycle if an inherited opcode table differs.
+if bus_active then begin
+  while bus_cycle_count<tempw do self.bus_dummy(r.pc);
+  if bus_cycle_count>tempw then tempw:=bus_cycle_count;
+end;
+bus_active:=false;
 self.contador:=self.contador+tempw;
 //Ojo!! el contador se puede incrementar en la funcion siguiente!!
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
@@ -1042,4 +1298,5 @@ timers.update(tempw,self.numero_cpu);
 self.totalt:=self.totalt+tempw;
 end; //del while!!
 end;
+
 end.

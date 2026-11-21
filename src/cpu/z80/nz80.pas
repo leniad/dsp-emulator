@@ -55,6 +55,7 @@ type
           constructor create(clock:dword);
           destructor free;
         public
+          irq_vector:byte;
           procedure change_irq_vector(estado:byte;irq_vector:byte);
           procedure reset;
           procedure run(maximo:single);
@@ -71,7 +72,6 @@ type
           r:npreg_z80;
           in_port:tgetbyte;
           out_port:tputbyte;
-          irq_vector:byte;
           //pila
           procedure push_sp(reg:word);
           function pop_sp:word;
@@ -2022,14 +2022,20 @@ var
  registro:pparejas;
  posicion:parejas;
 begin
+self.opcode:=true;
+repeat
+  instruccion:=self.getbyte(r.pc);
+  if @self.m1_raised<>nil then self.m1_raised(instruccion);
+  r.pc:=r.pc+1;
+  r.r:=((r.r+1) and $7f) or (r.r and $80);
+  if (instruccion=$dd) or (instruccion=$fd) then begin
+    tipo:=(instruccion=$dd);
+    self.estados_demas:=self.estados_demas+z80t[instruccion];
+  end;
+until (instruccion<>$dd) and (instruccion<>$fd);
+self.opcode:=false;
 if tipo then registro:=@r.ix else registro:=@r.iy;
 temp2:=registro.w;
-self.opcode:=true;
-instruccion:=self.getbyte(r.pc);
-if @self.m1_raised<>nil then self.m1_raised(instruccion);
-self.opcode:=false;
-r.pc:=r.pc+1;
-r.r:=((r.r+1) and $7f) or (r.r and $80);
 case instruccion of
         $09:registro.w:=add_16(registro.w,r.bc.w); //add IX,BC
         $19:registro.w:=add_16(registro.w,r.de.w); //add IX,DE
@@ -2296,7 +2302,12 @@ case instruccion of
                 temp:=self.getbyte(temp2);
                 cp_a(temp);
         end;
-        $cb,$dd,$fd:self.exec_dd_cb(tipo);
+        $cb:self.exec_dd_cb(tipo);
+        $ed:begin // DD/FD is ignored before ED, without an instruction boundary.
+          self.estados_demas:=self.estados_demas+z80t[$ed];
+          self.exec_ed;
+          exit;
+        end;
         $e1:registro.w:=self.pop_sp;  {pop IX}
         $e3:begin   {ex (SP),IX}
                 posicion.w:=self.pop_sp;
@@ -3310,20 +3321,20 @@ case instruccion of
         $56,$76:r.im:=1; {im 1}
         $57:begin  {ld A,I}
                 r.a:=r.i;
-                r.f.s:=false;
                 r.f.z:=(r.a=0);
-                r.f.bit5:=false;
                 r.f.h:=false;
-                r.f.bit3:=false;
                 r.f.p_v:=r.iff2;
                 r.f.n:=false;
+                r.f.s:=(r.a and $80)<>0;
+                r.f.bit3:=(r.a and 8)<>0;
+                r.f.bit5:=(r.a and $20)<>0;
             end;
         $58:begin  {in E,(C)}
                 r.de.l:=self.in_port(r.bc.w);
                 r.f.z:=(r.de.l=0);
-                r.f.s:=(r.de.l and $80) <> 0;
-                r.f.bit3:=(r.de.l and 8) <> 0;
-                r.f.bit5:=(r.de.l and $20) <> 0;
+                r.f.s:=(r.de.l and $80)<>0;
+                r.f.bit3:=(r.de.l and 8)<>0;
+                r.f.bit5:=(r.de.l and $20)<>0;
                 r.f.p_v:= paridad[r.de.l];
                 r.f.n:=false;
                 r.f.h:=false;
@@ -3346,9 +3357,9 @@ case instruccion of
                 r.f.h:=false;
                 r.f.n:=false;
                 r.f.p_v:=r.iff2;
-                r.f.bit5:=false;
-                r.f.bit3:=false;
-                r.f.s:=false;
+                r.f.s:=(r.a and $80)<>0;
+                r.f.bit3:=(r.a and 8)<>0;
+                r.f.bit5:=(r.a and $20)<>0;
                 r.f.z:=(r.a=0);
             end;
         $60:begin  {in H,(c)}

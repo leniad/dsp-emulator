@@ -261,7 +261,8 @@ begin
   end;
   if extension='DSP' then snapshot_r(datos,longitud,SGG)
     else abrir_cartucho_gg(datos,longitud);
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   Directory.gg:=ExtractFilePath(romfile);
   freemem(datos);
 end;

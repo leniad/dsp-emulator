@@ -62,13 +62,13 @@ var
   color:byte;
 begin
 for f:=0 to $1ff do begin
-  atrib:=memoria[$8002+(f shl 3)]+(memoria[$8003+(f shl 3)] shl 8);
+  atrib:=buffer_sprites[2+(f shl 3)]+(buffer_sprites[3+(f shl 3)] shl 8);
   if ((atrib and $c00)=priority) then begin
-    y:=(memoria[$8006+(f shl 3)]+(memoria[$8007+(f shl 3)] shl 8)) shr 7;
+    y:=(buffer_sprites[6+(f shl 3)]+(buffer_sprites[7+(f shl 3)] shl 8)) shr 7;
     if (y and $1ff)>$100 then continue;
-    nchar:=(memoria[$8000+(f shl 3)]+(memoria[$8001+(f shl 3)] shl 8)) and $7ff;
+    nchar:=(buffer_sprites[f shl 3]+(buffer_sprites[1+(f shl 3)] shl 8)) and $7ff;
     color:=atrib and $3f;
-    x:=(memoria[$8004+(f shl 3)]+(memoria[$8005+(f shl 3)] shl 8)) shr 7;
+    x:=(buffer_sprites[4+(f shl 3)]+(buffer_sprites[5+(f shl 3)] shl 8)) shr 7;
     flipx:=(atrib and $100)<>0;
     if flipx then x:=x-14;		// should really be 15
     flipy:=(atrib and $200)<>0;
@@ -120,11 +120,12 @@ if video_ena then begin
   draw_sprites($400);
   scroll_x_y(2,4,fg_scroll_x+55,fg_scroll_y+30);
   draw_sprites($800);
-  scroll_x_y(1,4,512-txt_scroll_x-55,256-txt_scroll_y-30);
+  scroll_x_y(1,4,txt_scroll_x+55,txt_scroll_y+30);
   draw_sprites($c00);
 end else fill_full_screen(4,$800);
 actualiza_trozo_final(0,0,320,240,4);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
+copymemory(@buffer_sprites[0],@memoria[$8000],$1000);
 end;
 
 procedure eventos_wardner;
@@ -166,7 +167,7 @@ while EmuStatus=EsRunning do begin
       240:begin
             marcade.in0:=marcade.in0 or $80;
             if int_enable then begin
-                z80_0.change_irq(HOLD_LINE);
+                z80_0.change_irq(ASSERT_LINE);
                 int_enable:=false;
             end;
             update_video_wardner;
@@ -185,33 +186,6 @@ while EmuStatus=EsRunning do begin
   eventos_wardner;
   video_sync;
 end;
-end;
-
-function wardner_dsp_r:word;
-begin
-	// DSP can read data from main CPU RAM via DSP IO port 1
-	case main_ram_seg of
-		$7000,$8000,$a000:wardner_dsp_r:=memoria[main_ram_seg+(dsp_addr_w+0)] or
-        								   (memoria[main_ram_seg+(dsp_addr_w+1)] shl 8);
-      else wardner_dsp_r:=0;
-	end;
-end;
-
-procedure wardner_dsp_w(valor:word);
-begin
-  // Data written to main CPU RAM via DSP IO port 1
-	dsp_execute:=false;
-	case main_ram_seg of
-		$7000:begin
-            if ((dsp_addr_w<3) and (valor=0)) then dsp_execute:=true;
-            memoria[main_ram_seg+dsp_addr_w]:=valor and $ff;
-						memoria[main_ram_seg+(dsp_addr_w+1)]:=(valor shr 8) and $ff;
-          end;
-		$8000,$a000:begin
-						memoria[main_ram_seg+dsp_addr_w]:=valor and $ff;
-						memoria[main_ram_seg+(dsp_addr_w+1)]:=(valor shr 8) and $ff;
-						end;
-	end;
 end;
 
 procedure wardner_dsp_addrsel_w(valor:word);
@@ -308,15 +282,13 @@ begin
 case direccion of
   0..$6fff:;
   $7000..$7fff:memoria[direccion]:=valor;
-  $8000..$ffff:if rom_bank=0 then begin
-                  case (direccion and $7fff) of
+  $8000..$ffff:case (direccion and $7fff) of
                     0..$fff,$4000..$47ff:memoria[direccion]:=valor;
                     $1000..$1fff,$3000..$3fff,$4800..$7fff:;
                     $2000..$2fff:if buffer_paleta[direccion and $fff]<>valor then begin
                                     buffer_paleta[direccion and $fff]:=valor;
                                     cambiar_color(direccion and $ffe);
                                  end;
-                  end;
                 end;
 end;
 end;
@@ -371,7 +343,10 @@ case (puerto and $ff) of
             end;
       end;
   $5c:case (valor and $f) of
-		    4:int_enable:=false;
+		    4:begin
+            int_enable:=false;
+            z80_0.change_irq(CLEAR_LINE);
+          end;
 		    5:int_enable:=true;
 		    6:main_screen.flip_main_screen:=false;
         7:main_screen.flip_main_screen:=true;
@@ -413,8 +388,39 @@ case (puerto and $ff) of
         fg_ram[fg_offs]:=(fg_ram[fg_offs] and $ff) or (valor shl 8);
         gfx[1].buffer[fg_offs]:=true;
       end;
-  $70:rom_bank:=valor;
+  $70:rom_bank:=valor and 7;
 end;
+end;
+
+function wardner_dsp_r:word;
+var
+  direccion:word;
+  dato_lo,dato_hi:byte;
+begin
+  wardner_dsp_r:=0;
+  case main_ram_seg of
+    $7000,$8000,$a000:begin
+                        direccion:=main_ram_seg+dsp_addr_w;
+                        dato_lo:=wardner_getbyte(direccion);
+                        dato_hi:=wardner_getbyte(direccion+1);
+                        wardner_dsp_r:=word(dato_lo) or (word(dato_hi) shl 8);
+    end;
+  end;
+end;
+
+procedure wardner_dsp_w(valor:word);
+var
+  direccion:word;
+begin
+  dsp_execute:=false;
+  case main_ram_seg of
+    $7000,$8000,$a000:begin
+                        direccion:=main_ram_seg+dsp_addr_w;
+                        if ((main_ram_seg=$7000) and (dsp_addr_w<3) and (valor=0)) then dsp_execute:=true;
+                        wardner_putbyte(direccion,byte(valor and $ff));
+                        wardner_putbyte(direccion+1,byte(valor shr 8));
+                      end;
+  end;
 end;
 
 procedure wardner_sound_update;

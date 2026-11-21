@@ -1,13 +1,35 @@
-unit nes_ppu;
+﻿unit nes_ppu;
 
 interface
 
 type
+  tnes_sprite_fetch=packed record
+    x,attr,number,lo,hi:byte;
+    pattern:word;
+  end;
+  tnes_ppu_pipe=packed record
+    dot:integer;
+    clock:int64;
+    frame_serial:cardinal;
+    odd,nmi_level,suppress_vblank:boolean;
+    bglo,bghi,atlo,athi:word;
+    tile,attr,lo,hi:byte;
+    sprite_count,next_count:integer;
+    sprites,next_sprites:array[0..7]of tnes_sprite_fetch;
+    pixels:array[0..255]of word;
+  end;
   nesppu_chip=class
       constructor create;
       destructor free;
     public
       linea,address,address_temp:word;
+      pipe:tnes_ppu_pipe;
+      procedure tick;
+      procedure update_nmi;
+      procedure cpu_address_changed;
+      function bus_read(a:word;kind:byte;tile_x:integer=-1;screen_y:integer=-1):byte;
+      function palette_read(a:word):byte;
+    public
       disable_chr,sprite_over_flow,sprite0_hit,dir_first,write_chr:boolean;
       mirror,tile_x_offset,pos_bg,pos_spt,sprite_size,control1,control2,status,open_bus,sprite_ram_pos:byte;
       pal_mask:byte;
@@ -29,6 +51,11 @@ type
       //Son 33 de la pantalla, uno del scroll y uno mas por si acaso!
       dot_line_trans:array[0..((34*8)-1)] of byte;  //012345-- --> sprites
                                                     //-------7 --> Background
+      procedure inc_x;
+      procedure inc_y;
+      procedure load_shifters;
+      procedure fetch_sprites;
+      procedure draw_pixel;
       function read_mem(address:word):byte;
       function set_emphasis(pal_tmp:word):word;
     end;
@@ -50,7 +77,7 @@ var
   ppu_nes_0:nesppu_chip;
 
 implementation
-uses nes,nes_mappers,gfx_engine,main_engine,pal_engine,math,n2a03;
+uses sysutils,nes,nes_mappers,gfx_engine,main_engine,pal_engine,math,n2a03;
 
 function nesppu_chip.save_snapshot(data:pbyte):word;
 var
@@ -152,7 +179,7 @@ var
 	hue,Kr,Kb,Ku,Kv:single;
   sat,y,u,v,rad:single;
   colores:tpaleta;
-  pos_col:byte;
+  pos_col:integer;
 begin
 	// This routine builds a palette using a transformation from
 	// the YUV (Y, B-Y, R-Y) to the RGB color space
@@ -231,7 +258,7 @@ self.status:=0;
 self.sprite_ram_pos:=0;
 self.address:=0;
 self.address_temp:=0;
-self.dir_first:=false;
+self.dir_first:=true;
 self.sprite0_hit:=false;
 self.sprite_over_flow:=false;
 self.sprite_size:=8;
@@ -242,64 +269,48 @@ self.disable_chr:=false;
 self.buffer_read:=random(256);
 self.tile_x_offset:=0;
 fillchar(self.dot_line_trans[0],sizeof(self.dot_line_trans),0);
+FillChar(pipe,SizeOf(pipe),0);linea:=261;
 end;
+
+{$I nes_ppu_cycles.inc}
 
 function nesppu_chip.read:byte;
-var
-  ret:byte;
+var a:word;
 begin
-//Proteccion del mapper 185!!!
-if self.disable_chr then ret:=self.address and $ff
-  else ret:=self.buffer_read;
-self.buffer_read:=self.read_mem(self.address);
-if ((self.linea>=240) or ((self.control2 and $18)=0)) then begin
-  if (self.control1 and $4)<>0 then self.address:=(self.address+32) and $7fff
-    else self.address:=(self.address+1) and $7fff;
-end else begin
-  //X fina
-  if (self.address and $1f)=$1f then self.address:=self.address xor $41f
-    else self.address:=self.address+1;
-  //Y fina
-  self.end_y_coarse;
+  a:=address and $3fff;
+  if a>=$3f00 then begin
+    Result:=(open_bus and $c0)or(palette_read(a)and pal_mask);
+    buffer_read:=bus_read(a-$1000,0);
+  end else begin
+    if disable_chr then Result:=a and $ff else Result:=buffer_read;
+    buffer_read:=bus_read(a,0);
+  end;
+  open_bus:=Result;
+  if(linea<240)and((control2 and $18)<>0)then begin inc_x;inc_y;end
+    else if(control1 and 4)<>0 then address:=(address+32)and $7fff
+      else address:=(address+1)and $7fff;
+  cpu_address_changed;
 end;
-read:=ret;
-end;
-
 procedure nesppu_chip.write(valor:byte);
+var a:word;
 begin
-case (self.address and $3fff) of
-  $0..$1fff:if (not(self.disable_chr) and self.write_chr) then self.chr[nes_mapper_0.chr_map[(self.address shr 12) and 1],self.address and $fff]:=valor;
-  $2000..$3eff:self.name_table[MIRROR_TYPES[self.mirror,(self.address shr 10) and 3],self.address and $3ff]:=valor;
-  $3f00..$3fff:case (self.address and $1f) of //Palete
-                    0,$10:begin
-                        self.pal_ram[0]:=valor;self.pal_ram[$04]:=valor;
-                        self.pal_ram[$8]:=valor;self.pal_ram[$0c]:=valor;
-                        self.pal_ram[$10]:=valor;self.pal_ram[$14]:=valor;
-                        self.pal_ram[$18]:=valor;self.pal_ram[$1c]:=valor;
-                    end;
-                    else self.pal_ram[self.address and $1f]:=valor;
-                  end;
+  a:=address and $3fff;
+  if a>=$3f00 then begin
+    a:=a and $1f;if(a and $13)=$10 then a:=a and $0f;
+    pal_ram[a]:=valor and $3f;
+  end else begin
+    nes_mapper_0.ppu_address(a,pipe.clock,false);
+    if not disable_chr then nes_mapper_0.ppu_store(a,valor);
+  end;
+  if(linea<240)and((control2 and $18)<>0)then begin inc_x;inc_y;end
+    else if(control1 and 4)<>0 then address:=(address+32)and $7fff
+      else address:=(address+1)and $7fff;
+  cpu_address_changed;
 end;
-if ((self.linea>=240) or ((self.control2 and $18)=0)) then begin
-  if (self.control1 and $4)<>0 then self.address:=(self.address+32) and $7fff
-    else self.address:=(self.address+1) and $7fff;
-end else begin
-  //X fina
-  if (self.address and $1f)=$1f then self.address:=self.address xor $41f
-    else self.address:=self.address+1;
-  //Y fina
-  self.end_y_coarse;
-end;
-end;
-
 function nesppu_chip.read_mem(address:word):byte;
 begin
-case (address and $3fff) of
-  $0..$1fff:if not(self.disable_chr) then read_mem:=self.chr[nes_mapper_0.chr_map[(address shr 12) and 1],address and $fff]
-            else read_mem:=address and $ff;
-  $2000..$3eff:read_mem:=self.name_table[MIRROR_TYPES[self.mirror,(address shr 10) and 3],address and $3ff];
-  $3f00..$3fff:read_mem:=self.pal_ram[address and $1f]; //Palete
-end;
+  if(address and $3fff)>=$3f00 then Result:=palette_read(address)
+    else Result:=nes_mapper_0.ppu_data(address,0,-1,-1);
 end;
 
 function nesppu_chip.set_emphasis(pal_tmp:word):word;

@@ -5,15 +5,15 @@ uses gfx_engine,ym_2203,ym_2151,oki6295,hu6280,cpu_misc,main_engine;
 
 type
   tdeco16_sprite=class
-    constructor create(gfx,pant:byte;global_x_size,color_add:word;invert:boolean=false);
+    constructor create(gfx,pant:byte;global_x_size,color_add:word;invert:boolean=false;mask:byte=$1f);
     destructor free;
     public
       ram:array[0..$3ff] of word;
-      procedure draw_sprites(pri:byte=0);
+      procedure draw_sprites(pri:byte=0;color_offset:word=0);
       procedure reset;
     private
       global_x_size,color_add:word;
-      gfx,pant:byte;
+      gfx,pant,mask:byte;
       invert:boolean;
   end;
 
@@ -38,13 +38,14 @@ procedure deco16_snd_irq(irqstate:byte);
 
 implementation
 
-constructor tdeco16_sprite.create(gfx,pant:byte;global_x_size,color_add:word;invert:boolean=false);
+constructor tdeco16_sprite.create(gfx,pant:byte;global_x_size,color_add:word;invert:boolean=false;mask:byte=$1f);
 begin
   self.global_x_size:=global_x_size;
   self.color_add:=color_add;
   self.gfx:=gfx;
   self.pant:=pant;
   self.invert:=invert;
+  self.mask:=mask;
 end;
 
 destructor tdeco16_sprite.free;
@@ -56,7 +57,7 @@ begin
   fillchar(self.ram,$400*2,0);
 end;
 
-procedure tdeco16_sprite.draw_sprites(pri:byte=0);
+procedure tdeco16_sprite.draw_sprites(pri:byte=0;color_offset:word=0);
 var
   f,color:byte;
   y,x,nchar:word;
@@ -68,7 +69,7 @@ for f:=0 to $ff do begin
       if pri<>((x shr 8) and $c0) then continue;
 			y:=self.ram[(f*4)+0];
       if (((y and $1000)<>0) and ((main_vars.frames_sec and 1)<>0)) then continue;
-      color:=(x shr 9) and $1f;
+      color:=(x shr 9) and self.mask;
       fx:=(y and $2000)<>0;
       fy:=(y and $4000)<>0;
       multi:=(1 shl ((y and $0600) shr 9))-1;	// 1x, 2x, 4x, 8x height
@@ -84,10 +85,10 @@ for f:=0 to $ff do begin
       while (multi>=0) do begin
         if nchar<>0 then begin
           if self.invert then begin
-            put_gfx_sprite(nchar-multi*inc,(color shl 4)+self.color_add,not fx,not fy,self.gfx);
+            put_gfx_sprite(nchar-multi*inc,(color shl 4)+self.color_add+color_offset,not fx,not fy,self.gfx);
             actualiza_gfx_sprite(self.global_x_size-x,(240-(y+mult*multi)) and $1ff,self.pant,self.gfx);
           end else begin
-            put_gfx_sprite(nchar-multi*inc,(color shl 4)+self.color_add,fx,fy,self.gfx);
+            put_gfx_sprite(nchar-multi*inc,(color shl 4)+self.color_add+color_offset,fx,fy,self.gfx);
             actualiza_gfx_sprite(x,y+mult*multi,self.pant,self.gfx);
           end;
         end;
@@ -130,7 +131,12 @@ case direccion of
   $110001:deco16_double_snd_getbyte:=ym2151_0.status;
   $120000..$120001:deco16_double_snd_getbyte:=oki_6295_0.read;
   $130000..$130001:deco16_double_snd_getbyte:=oki_6295_1.read;
-  $140000..$140001:deco16_double_snd_getbyte:=deco16_sound_latch;
+  $140000..$140001:begin
+                      deco16_double_snd_getbyte:=deco16_sound_latch;
+                      h6280_0.set_irq_line(0,CLEAR_LINE);
+                   end;
+  $1fec00..$1fec01:deco16_double_snd_getbyte:=h6280_0.timer_r;
+  $1ff400..$1ff403:deco16_double_snd_getbyte:=h6280_0.irq_status_r(direccion and 3);
   $1f0000..$1f1fff:deco16_double_snd_getbyte:=snd_ram[direccion and $1fff];
 end;
 end;
@@ -167,7 +173,7 @@ begin
   ym2151_0:=ym2151_chip.create(sound_clock div 9,0.7);
   ym2151_0.change_port_func(sound_bank);
   ym2151_0.change_irq_func(deco16_snd_irq);
-  oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH);
+  oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,2);
 end;
 
 procedure deco16_snd_simple_reset;
@@ -185,7 +191,12 @@ case direccion of
   0..$ffff:deco16_simple_snd_getbyte:=mem_snd[direccion];
   $110001:deco16_simple_snd_getbyte:=ym2151_0.status;
   $120000..$120001:deco16_simple_snd_getbyte:=oki_6295_0.read;
-  $140000..$140001:deco16_simple_snd_getbyte:=deco16_sound_latch;
+  $140000..$140001:begin
+                      deco16_simple_snd_getbyte:=deco16_sound_latch;
+                      h6280_0.set_irq_line(0,CLEAR_LINE);
+                   end;
+  $1fec00..$1fec01:deco16_simple_snd_getbyte:=h6280_0.timer_r;
+  $1ff400..$1ff403:deco16_simple_snd_getbyte:=h6280_0.irq_status_r(direccion and 3);
   $1f0000..$1f1fff:deco16_simple_snd_getbyte:=snd_ram[direccion and $1fff];
 end;
 end;

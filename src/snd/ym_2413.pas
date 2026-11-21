@@ -1,5 +1,4 @@
-unit ym_2413;
-
+﻿unit ym_2413;
 interface
 uses main_engine,fm_2151,sound_engine,
      cpu_misc,dialogs,math;
@@ -524,6 +523,7 @@ begin
 	self.noise_f:=1 shl FREQ_SH;
 	self.eg_timer_add:=1 shl EG_SH;
 	self.eg_timer_overflow:=1 shl EG_SH;
+  self.reset;
 end;
 
 destructor ym2413_chip.free;
@@ -534,6 +534,17 @@ procedure ym2413_chip.reset;
 var
   i,c,s:byte;
 begin
+  FillChar(self.ch,SizeOf(self.ch),0);
+  FillChar(self.instvol_r,SizeOf(self.instvol_r),0);
+  FillChar(self.output,SizeOf(self.output),0);
+  CopyMemory(@self.inst_tab,@table,SizeOf(table));
+  self.rhythm:=0;
+  self.addrs:=0;
+  self.LFO_AM:=0;
+  self.LFO_PM:=0;
+  self.lfo_am_cnt:=0;
+  self.lfo_pm_cnt:=0;
+  self.noise_p:=0;
 	self.eg_timer:=0;
 	self.eg_cnt:=0;
 	self.noise_rng:=1;    // noise shift register
@@ -542,6 +553,8 @@ begin
 	for i:=$3f downto $10 do self.write_int(i,0);
 	// reset operator parameters
 	for c:=0 to 8 do begin
+    // Force loading instrument zero even when instvol_r is already zero.
+    self.load_instrument(c,c*2,@self.inst_tab[0,0]);
 		for s:=0 to 1 do begin
 			// wave table
 			self.ch[c].slot[s].wavetable:=0;
@@ -1001,7 +1014,7 @@ begin
 	ch_m:=slot div 2;
 	slot_m:=slot and 1;
 	self.ch[ch_m].slot[slot_m].sl:=sl_tab[v shr 4];
-  if (v and $f)<>0 then self.ch[ch_m].slot[slot_m].rr:=16+((v and $f) shr 2)
+  if (v and $f)<>0 then self.ch[ch_m].slot[slot_m].rr:=16+((v and $f) shl 2)
     else self.ch[ch_m].slot[slot_m].rr:=0;
 	self.ch[ch_m].slot[slot_m].eg_sh_rr :=eg_rate_shift [self.ch[ch_m].slot[slot_m].rr+self.ch[ch_m].slot[slot_m].ksr];
 	self.ch[ch_m].slot[slot_m].eg_sel_rr:=eg_rate_select[self.ch[ch_m].slot[slot_m].rr+self.ch[ch_m].slot[slot_m].ksr];
@@ -1195,6 +1208,9 @@ case (reg and $f0) of
 				        key_off(SLOT2,chan,$fffffffe);
 			        end;                         
               self.ch[chan].sus:=valor and $20;
+              // SUS can change while FNUM and block remain unchanged.
+              calc_fcslot(chan,SLOT1);
+              calc_fcslot(chan,SLOT2);
 		        end;
 		        // update 
 		        if(self.ch[chan].block_fnum<>block_fnum) then begin
@@ -1240,6 +1256,8 @@ end;
 procedure ym2413_chip.update;
 var
   j:byte;
+  mixed:double;
+  sample:smallint;
 begin
   self.output[0]:=0;
 	self.output[1]:=0;
@@ -1251,14 +1269,15 @@ begin
   end else begin // Rhythm part 
 			self.rhythm_calc(0,noise_rng and 1);
   end;
-  if self.output[0]>32767 then self.output[0]:=32767
-    else if self.output[0]<-32768 then self.output[0]:=-32768;
-  if self.output[1]>32767 then self.output[1]:=32767
-    else if self.output[1]<-32768 then self.output[1]:=-32768;
-  if sound_status.stereo then begin
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.output[0]*self.amp);
-    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.output[1]*self.amp);
-  end else tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc((self.output[0]+self.output[1])*self.amp);
+  // MO and RO are melody/rhythm outputs, not left/right channels.
+  // Apply gain before clipping, including the final mono sum.
+  mixed:=(self.output[0]+self.output[1])*self.amp;
+  if mixed>32767 then sample:=32767
+    else if mixed< -32768 then sample:=-32768
+      else sample:=Trunc(mixed);
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=sample;
+  if sound_status.stereo then
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=sample;
   self.advance;
 end;
 

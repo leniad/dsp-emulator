@@ -170,7 +170,8 @@ end else begin
   MessageDlg('Error abriendo el disco: "'+end_file_name+'".', mtError,[mbOk], 0);
   cadena:='';
 end;
-change_caption(cadena);
+main_vars.nombre_caption:=cadena;
+change_caption;
 freemem(datos_dsk);
 datos_dsk:=nil;
 end;

@@ -7,12 +7,21 @@ interface
 uses main_engine,misc_functions;
 
 function gaelco_dec(offset,data:word;param1:byte;param2:word;thispc:dword):word;
+procedure reset_gaelco_decrypt;
 
 var
   lastpc:dword;
   lastoffset,lastencword,lastdecword:word;
 
 implementation
+
+procedure reset_gaelco_decrypt;
+begin
+  lastpc:=$ffffffff;
+  lastoffset:=$ffff;
+  lastencword:=$ffff;
+  lastdecword:=$ffff;
+end;
 
 function decrypt(param1:byte;param2:word;enc_prev_word,dec_prev_word,enc_word:word):word;
 var

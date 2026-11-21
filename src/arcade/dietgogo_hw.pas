@@ -16,8 +16,7 @@ const
 
 implementation
 uses m68000,main_engine,controls_engine,gfx_engine,pal_engine,oki6295,
-     sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,
-     misc_functions;
+     sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,misc_functions;
 
 const
         dietgo_dip_a:array [0..6] of def_dip2=(
@@ -176,11 +175,6 @@ begin
   	dietgo_bank_callback:=((bank shr 4) and 7)*$1000;
 end;
 
-procedure sound_bank_rom(valor:byte);
-begin
-  copymemory(oki_6295_0.get_rom_addr,@oki_rom[valor and 1],$40000);
-end;
-
 //Main
 procedure reset_dietgo;
 begin
@@ -223,7 +217,7 @@ iniciar_video(320,240);
 m68000_0:=cpu_m68000.create(14000000);
 m68000_0.change_ram16_calls(dietgo_getword,dietgo_putword);
 //Sound CPU
-deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
+deco16_snd_simple_init(32220000 div 12,32220000,nil);
 getmem(memoria_temp,$200000);
 getmem(memoria_temp_rom,$80000);
 //cargar roms

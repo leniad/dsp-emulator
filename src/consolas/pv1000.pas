@@ -316,7 +316,8 @@ begin
           reset_pv1000;
          end;
   fillchar(pv1000_0.buffer_video,$400,1);
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   freemem(datos);
   directory.pv1000:=ExtractFilePath(romfile);
 end;

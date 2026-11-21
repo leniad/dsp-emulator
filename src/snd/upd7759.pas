@@ -1,7 +1,7 @@
-unit upd7759;
+﻿unit upd7759;
 
 interface
-uses sound_engine,dialogs,main_engine;
+uses sound_engine,dialogs,main_engine,timer_engine;
 
 const
   CLOCK_UPD=640000;
@@ -54,6 +54,7 @@ type
        procedure port_w(data:byte);
        procedure reset_w(data:byte);
        function busy_r:byte;
+       procedure md_w(data:byte);
     private
    	   // internal clock to output sample rate mapping */
    	   pos:dword;						// current output sample position */
@@ -89,6 +90,14 @@ type
        resample_pos:single;
        resample_inc:single;
        drq_call:tcall_drq;
+       mode_standalone:boolean;
+       md_pin,slave_timer,instance_slot:byte;
+       clock_phase:dword;
+       procedure begin_playback;
+       procedure allocate_slave_timer;
+       procedure slave_tick;
+       procedure advance_with_drq;
+       function render_master:int64;
        procedure update_adpcm(data:integer);
        procedure advance_state;
   end;
@@ -98,52 +107,172 @@ var
 
 implementation
 
-constructor upd7759_chip.create(amp:single;slave:byte=1;call_drq:tcall_drq=nil);
+const
+  MAX_UPD7759_INSTANCES=16;
+  NO_TIMER=$ff;
+var
+  upd7759_instances:array[0..MAX_UPD7759_INSTANCES-1] of upd7759_chip;
+
+procedure upd7759_slave_callback(slot:byte);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
-	// compute the stepping rate based on the chip's clock speed
-	self.step:=4*FRAC_ONE;
-	// compute the ROM base or allocate a timer
-	if slave=1 then getmem(self.rom,$20000);
-	// set the DRQ callback */
-	self.drq_call:=call_drq;
-	// assume /RESET and /START are both high
-	self.reset_pin:=1;
-	self.start:=1;
+  if slot>=MAX_UPD7759_INSTANCES then exit;
+  if upd7759_instances[slot]<>nil then upd7759_instances[slot].slave_tick;
+end;
+
+constructor upd7759_chip.create(amp:single;slave:byte=1;call_drq:tcall_drq=nil);
+var
+  slot:integer;
+begin
+  self.slave_timer:=NO_TIMER;
+  self.instance_slot:=NO_TIMER;
+  if not Assigned(update_sound_proc) then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!',mtInformation,[mbOk],0);
+  self.step:=4*FRAC_ONE;
+  self.mode_standalone:=slave=1;
+  self.md_pin:=byte(self.mode_standalone);
+  if self.mode_standalone then begin
+    GetMem(self.rom,$20000);
+    FillChar(self.rom^,$20000,$ff);
+  end;
+  self.drq_call:=call_drq;
+  self.reset_pin:=1;
+  self.start:=1;
   self.resample_inc:=CLOCK_UPD/4/FREQ_BASE_AUDIO;
-	// toggle the reset line to finish the reset
   self.tsample_num:=init_channel;
   self.amp:=amp;
-	self.reset;
+  if not self.mode_standalone then begin
+    slot:=0;
+    while slot<MAX_UPD7759_INSTANCES do begin
+      if upd7759_instances[slot]=nil then break;
+      inc(slot);
+    end;
+    self.instance_slot:=slot;
+    upd7759_instances[slot]:=self;
+    self.allocate_slave_timer;
+  end;
+  self.reset;
 end;
 
 destructor upd7759_chip.free;
 begin
-if self.rom<>nil then freemem(self.rom);
-self.rom:=nil;
+  if (self.slave_timer<>NO_TIMER) and (timers<>nil) then timers.enabled(self.slave_timer,false);
+  if self.instance_slot<MAX_UPD7759_INSTANCES then
+    if upd7759_instances[self.instance_slot]=self then
+      upd7759_instances[self.instance_slot]:=nil;
+  if self.rom<>nil then FreeMem(self.rom);
+  self.rom:=nil;
+  if upd7759_0=self then upd7759_0:=nil;
+  if upd7759_1=self then upd7759_1:=nil;
+end;
+
+procedure upd7759_chip.allocate_slave_timer;
+var
+  slot:integer;
+begin
+  if self.slave_timer<>NO_TIMER then exit;
+  if self.instance_slot=NO_TIMER then begin
+    slot:=0;
+    while slot<MAX_UPD7759_INSTANCES do begin
+      if upd7759_instances[slot]=nil then break;
+      inc(slot);
+    end;
+    self.instance_slot:=slot;
+    upd7759_instances[slot]:=self;
+  end;
+  self.slave_timer:=timers.init(sound_status.cpu_num,1,nil,upd7759_slave_callback,false,self.instance_slot);
+end;
+
+procedure upd7759_chip.advance_with_drq;
+var
+  old_drq:byte;
+begin
+  old_drq:=self.drq;
+  self.advance_state;
+  if (old_drq<>self.drq) and (@self.drq_call<>nil) then self.drq_call(self.drq);
+end;
+
+procedure upd7759_chip.slave_tick;
+begin
+  if self.mode_standalone or (self.state=STATE_IDLE) then begin
+    timers.enabled(self.slave_timer,false);
+    exit;
+  end;
+  self.advance_with_drq;
+  if self.mode_standalone or (self.state=STATE_IDLE) then begin
+    timers.enabled(self.slave_timer,false);
+    exit;
+  end;
+  while self.clocks_left<=0 do begin
+    self.advance_with_drq;
+    if self.mode_standalone or (self.state=STATE_IDLE) then begin
+      timers.enabled(self.slave_timer,false);
+      exit;
+    end;
+  end;
+  timers.timer[self.slave_timer].time_final:=sound_status.cpu_clock*(self.clocks_left/CLOCK_UPD);
+end;
+
+procedure upd7759_chip.begin_playback;
+begin
+  self.state:=STATE_START;
+  self.clocks_left:=0;
+  self.pos:=0;
+  self.clock_phase:=0;
+  if not self.mode_standalone then begin
+    self.allocate_slave_timer;
+    timers.timer[self.slave_timer].actual_time:=0;
+    self.slave_tick;
+    if self.state<>STATE_IDLE then timers.enabled(self.slave_timer,true);
+  end;
+end;
+
+procedure upd7759_chip.md_w(data:byte);
+var
+  old_md:byte;
+begin
+  old_md:=self.md_pin;
+  self.md_pin:=byte(data<>0);
+  if (self.state<>STATE_IDLE) or (self.reset_pin=0) then exit;
+  if (old_md<>0) and (self.md_pin=0) then begin
+    self.mode_standalone:=false;
+    self.begin_playback;
+  end else if (old_md=0) and (self.md_pin<>0) then begin
+    if self.rom=nil then begin
+      getmem(self.rom,$20000);
+      fillchar(self.rom^,$20000,$ff);
+    end;
+    self.mode_standalone:=true;
+    if self.slave_timer<>NO_TIMER then timers.enabled(self.slave_timer,false);
+  end;
 end;
 
 procedure upd7759_chip.reset;
+var
+  old_drq:byte;
 begin
-	self.pos               := 0;
+  old_drq:=self.drq;
+  if (self.slave_timer<>NO_TIMER) and (timers<>nil) then timers.enabled(self.slave_timer,false);
+  self.resample_pos:=0;
+  self.clock_phase:=0;
+	self.pos:=0;
 	//self.fifo_in           := 0;
-	self.state             := STATE_IDLE;
-	self.clocks_left       := 0;
-	self.nibbles_left      := 0;
-	self.repeat_count      := 0;
-	self.post_drq_state    := STATE_IDLE;
-	self.post_drq_clocks   := 0;
-	self.req_sample        := 0;
-	self.last_sample       := 0;
-	self.block_header      := 0;
-	self.sample_rate       := 0;
-	self.first_valid_header:= 0;
-	self.offset            := 0;
-	self.repeat_offset     := 0;
-	self.adpcm_state       := 0;
-	self.adpcm_data        := 0;
-	self.sample            := 0;
+	self.state:=STATE_IDLE;
+	self.clocks_left:=0;
+	self.nibbles_left:=0;
+	self.repeat_count:=0;
+	self.post_drq_state:=STATE_IDLE;
+	self.post_drq_clocks:=0;
+	self.req_sample:=0;
+	self.last_sample:=0;
+	self.block_header:=0;
+	self.sample_rate:=0;
+	self.first_valid_header:=0;
+	self.offset:=0;
+	self.repeat_offset:=0;
+	self.adpcm_state:=0;
+	self.adpcm_data:=0;
+	self.sample:=0;
   self.drq:=0;
+  if (old_drq<>0) and (@self.drq_call<>nil) then self.drq_call(0);
 end;
 
 function upd7759_chip.get_rom_addr:pbyte;
@@ -176,15 +305,8 @@ begin
       end;
 		// Start state: we begin here as soon as a sample is triggered */
 		STATE_START:begin
-			  if self.rom<>nil then self.req_sample:=self.fifo_in
+			  if self.mode_standalone then self.req_sample:=self.fifo_in
           else self.req_sample:=$10;
-		  	{ 35+ cycles after we get here, the /DRQ goes low
-             *     (first byte (number of samples in ROM) should be sent in response)
-             *
-             * (35 is the minimum number of cycles I found during heavy tests.
-             * Depending on the state the self was in just before the /MD was set to 0 (reset, standby
-             * or just-finished-playing-previous-sample) this number can range from 35 up to ~24000).
-             * It also varies slightly from test to test, but not much - a few cycles at most.) }
 	  		self.clocks_left:=70+self.start_delay;	// 35 - breaks cotton */
   			self.state:=STATE_FIRST_REQ;
       end;
@@ -199,7 +321,7 @@ begin
 		// Last sample state: latch the last sample value and issue a request for the second byte */
 		// The second byte read will be just a dummy */
 		STATE_LAST_SAMPLE:begin
-  			if self.rom<>nil then self.last_sample:=self.rom^
+  			if self.mode_standalone then self.last_sample:=self.rom^
           else self.last_sample:=self.fifo_in;
   			self.drq:= 1;
   			// 28 cycles later, we will latch this value and request another byte */
@@ -218,7 +340,7 @@ begin
 		// Address MSB state: latch the MSB of the sample address and issue a request for the fourth byte */
 		// The expected response will be the LSB of the sample address */
 		STATE_ADDR_MSB:begin
-			if self.rom<>nil then begin
+			if self.mode_standalone then begin
         ptemp:=self.rom;
         inc(ptemp,self.req_sample*2+5);
         self.offset:=ptemp^ shl 9 //sample_offset_shift!!!!!
@@ -231,7 +353,7 @@ begin
 		// Address LSB state: latch the LSB of the sample address and issue a request for the fifth byte */
 		// The expected response will be just a dummy */
 		STATE_ADDR_LSB:begin
-			if self.rom<>nil then begin
+			if self.mode_standalone then begin
         ptemp:=self.rom;
         inc(ptemp,self.req_sample*2+6);
         self.offset:=self.offset or (ptemp^ shl 1)
@@ -258,7 +380,7 @@ begin
 				self.repeat_count:=self.repeat_count-1;
 				self.offset:=self.repeat_offset;
 			end;
-			if self.rom<>nil then begin
+			if self.mode_standalone then begin
         ptemp:=self.rom;
         inc(ptemp,self.offset and $1ffff);
         self.block_header:=ptemp^
@@ -295,11 +417,10 @@ begin
 			// set a flag when we get the first non-zero header */
 			if (self.block_header<>0) then self.first_valid_header:=1;
     end;
-
 		// Nibble count state: latch the number of nibbles to play and request another byte */
 		// The expected response will be the first data byte */
 		STATE_NIBBLE_COUNT:begin
-    			if (self.rom<>nil) then begin
+    			if self.mode_standalone then begin
             ptemp:=self.rom;
             inc(ptemp,self.offset and $1ffff);
             self.nibbles_left:=ptemp^+1
@@ -313,7 +434,7 @@ begin
 		// MSN state: latch the data for this pair of samples and request another byte */
 		// The expected response will be the next sample data or another header */
 		STATE_NIBBLE_MSN:begin
-			if self.rom<>nil then begin
+			if self.mode_standalone then begin
         ptemp:=self.rom;
         inc(ptemp,self.offset and $1ffff);
         self.adpcm_data:=ptemp^;
@@ -359,20 +480,16 @@ begin
 end;
 
 procedure upd7759_chip.start_w(data:byte);
-var
-  oldstart:byte;
+var oldstart:byte; trigger:boolean;
 begin
-	// update the start value */
-	oldstart:=self.start;
-	if (data<>0) then self.start:=1
-    else self.start:=0;
-	// on the rising edge, if we're idle, start going, but not if we're held in reset */
-	if ((self.state=STATE_IDLE) and ((not(oldstart) and 1)<>0) and ((self.start and 1)<>0) and ((self.reset_pin and 1)<>0)) then begin
-		self.state:=STATE_START;
-		// for slave mode, start the timer going */
- {		if (chip->timer)
-			timer_adjust_oneshot(chip->timer, attotime_zero, 0);}
-	end;
+  oldstart:=self.start;
+  self.start:=byte(data<>0);
+  if self.mode_standalone then begin
+    trigger:=(oldstart<>0) and (self.start=0);
+  end else
+    // Preserve entry for existing fixed-FIFO drivers; real mode entry is md_w.
+    trigger:=(oldstart=0) and (self.start<>0);
+  if (self.state=STATE_IDLE) and (self.reset_pin<>0) and trigger then self.begin_playback;
 end;
 
 procedure upd7759_chip.port_w(data:byte);
@@ -388,57 +505,40 @@ begin
     else busy_r:=0;
 end;
 
+function upd7759_chip.render_master:int64;
+var
+  remaining,chunk,until_event,total_phase:int64;
+begin
+  result:=0;
+  remaining:=CLOCK_UPD;
+  while (remaining>0) and (self.state<>STATE_IDLE) do begin
+    if self.clocks_left<=0 then begin
+      self.advance_with_drq;
+      continue;
+    end;
+    until_event:=int64(self.clocks_left)*FREQ_BASE_AUDIO-self.clock_phase;
+    if until_event<remaining then chunk:=until_event else chunk:=remaining;
+    result:=result+int64(self.sample)*128*chunk;
+    dec(remaining,chunk);
+    total_phase:=self.clock_phase+chunk;
+    self.clocks_left:=self.clocks_left-integer(total_phase div FREQ_BASE_AUDIO);
+    self.clock_phase:=dword(total_phase mod FREQ_BASE_AUDIO);
+    if self.clocks_left=0 then self.advance_with_drq;
+  end;
+end;
+
 procedure upd7759_chip.update;
 var
-  clocks_this_time,clocks_left:integer;
-  step,pos:dword;
-  out_:integer;
-  num_samples,old_drq:byte;
+  value,gain:double;out_:integer;
 begin
-	clocks_left:=self.clocks_left;
-  step:=self.step;
-  pos:=self.pos;
-  out_:=0;
-  self.resample_pos:=self.resample_pos+self.resample_inc;
-  num_samples:=trunc(self.resample_pos);
-  self.resample_pos:=self.resample_pos-num_samples;
-	// loop until done */
-	if (self.state<>STATE_IDLE) then begin
-    while (num_samples<>0) do begin
-			// store the current sample */
-			out_:=self.sample shl 7;
-			// advance by the number of clocks/output sample */
-			pos:=pos+step;
-			// handle clocks, but only in standalone mode */
-			while (pos>=FRAC_ONE) do begin
-				clocks_this_time:=pos shr FRAC_BITS;
-				if (clocks_this_time>clocks_left) then clocks_this_time:=clocks_left;
-				// clock once */
-				pos:=pos-(clocks_this_time*FRAC_ONE);
-				clocks_left:=clocks_left-clocks_this_time;
-				// if we're out of clocks, time to handle the next state */
-				if (clocks_left=0) then begin
-					// advance one state; if we hit idle, bail */
-          old_drq:=self.drq;
-					self.advance_state;
-          if old_drq<>self.drq then begin
-            if @self.drq_call<>nil then self.drq_call(self.drq);
-          end;
-					if (self.state=STATE_IDLE) then break;
-					// reimport the variables that we cached */
-					clocks_left:=self.clocks_left;
-          out_:=(out_+(self.sample*64)) div 2;
-				end;
-      end;
-      num_samples:=num_samples-1;
-	  end;
-  end;
-	// flush the state back */
-	self.clocks_left:= clocks_left;
-	self.pos:=pos;
-  out_:=trunc(out_*self.amp);
-  if out_>$7fff then out_:=$7fff
-    else if out_<-$7fff then out_:=-$7fff;
+  if self.mode_standalone then value:=self.render_master/CLOCK_UPD
+    else if self.state<>STATE_IDLE then value:=self.sample*128.0
+            else value:=0;
+  gain:=self.amp;
+  value:=value*gain;
+  if value>32767 then out_:=32767
+    else if value< -32768 then out_:=-32768
+            else out_:=trunc(value);
   tsample[self.tsample_num,sound_status.posicion_sonido]:=out_;
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=out_;
 end;

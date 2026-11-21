@@ -21,6 +21,7 @@ type
         data_val:integer;
         rom_data:pbyte;
         idle:boolean;
+        auto_clock_slave:boolean;
         procedure reset;
         procedure reset_w(reset_data:boolean);
         procedure data_w(data:byte);
@@ -38,6 +39,7 @@ type
         select:byte;
         timer_:byte;
         external_call:procedure;
+        procedure advance_rom;
         procedure playmode_w(select:byte);
         procedure stream_update;
   end;
@@ -104,50 +106,65 @@ begin
     0:begin
         msm5205_0.stream_update;
         //Slave!!
-        if msm5205_1<>nil then if msm5205_1.prescaler=0 then msm5205_1.stream_update;
+        if msm5205_0.auto_clock_slave then
+          if msm5205_1<>nil then
+            if msm5205_1.prescaler=0 then msm5205_1.stream_update;
     end;
     1:msm5205_1.stream_update;
   end;
 end;
 
 procedure MSM5205_chip.update;
+var
+  sample:double;
+  value:integer;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc((self.signal shl 4)*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round((self.signal shl 4)*self.amp);
+  // MSM5205: 12-bit predictor, 10-bit DAC. Keep existing driver gain.
+  sample:=(self.signal and not 3)*16.0*self.amp;
+  if sample>32767 then sample:=32767
+    else if sample<-32768 then sample:=-32768;
+  value:=trunc(sample);
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=value;
+  if sound_status.stereo then
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=value;
+end;
+
+procedure MSM5205_chip.advance_rom;
+begin
+  if self.idle then exit;
+  if self.rom_data=nil then begin
+    self.reset_w(true);
+    exit;
+  end;
+  if (self.pos>=self.rom_size) or (self.pos>=self.end_) then begin
+    self.reset_w(true);
+    exit;
+  end;
+  if self.data_val<>-1 then begin
+    self.data_w(self.data_val and $f);
+    self.data_val:=-1;
+    Inc(self.pos);
+  end else begin
+    self.data_val:=self.rom_data[self.pos];
+    self.data_w(self.data_val shr 4);
+  end;
 end;
 
 procedure advance_0;
 begin
-if msm5205_0.idle then exit;
-if (msm5205_0.data_val<>-1) then begin
-  msm5205_0.data_w(msm5205_0.data_val and $f);
-  msm5205_0.data_val:=-1;
-  msm5205_0.pos:=msm5205_0.pos+1;
-  if ((msm5205_0.pos>=msm5205_0.end_) or (msm5205_0.pos>msm5205_0.rom_size)) then msm5205_0.reset_w(true);
-end else begin
-  msm5205_0.data_val:=msm5205_0.rom_data[msm5205_0.pos];
-  msm5205_0.data_w(msm5205_0.data_val shr 4);
-end;
+  msm5205_0.advance_rom;
 end;
 
 procedure advance_1;
 begin
-if msm5205_1.idle then exit;
-if (msm5205_1.data_val<>-1) then begin
-  msm5205_1.data_w(msm5205_1.data_val and $f);
-  msm5205_1.data_val:=-1;
-  msm5205_1.pos:=msm5205_1.pos+1;
-  if ((msm5205_1.pos>=msm5205_1.end_) or (msm5205_1.pos=msm5205_1.rom_size)) then msm5205_1.reset_w(true);
-end else begin
-  msm5205_1.data_val:=msm5205_1.rom_data[msm5205_1.pos];
-  msm5205_1.data_w(msm5205_1.data_val shr 4);
-end;
+  msm5205_1.advance_rom;
 end;
 
 constructor MSM5205_chip.create(clock:dword;select:byte;amp:single;size:dword);
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
   chips_total:=chips_total+1;
+  self.auto_clock_slave:=true;
   self.prescaler:=$ff;
   self.amp:=amp;
 	self.clock:=clock;
@@ -168,8 +185,11 @@ end;
 
 destructor MSM5205_chip.free;
 begin
+timers.enabled(self.timer_,false);
+self.external_call:=nil;
 chips_total:=chips_total-1;
 if self.rom_size<>0 then freemem(self.rom_data);
+self.rom_data:=nil;
 end;
 
 procedure MSM5205_chip.reset;
@@ -179,9 +199,10 @@ begin
 	self.vclk:=false;
 	self.reset_data:=true;
 	self.signal:=0;
-	self.step:=-2;
+	self.step:=0;
 	// timer and bitwidth set
 	self.playmode_w(self.select);
+  timers.timer[self.timer_].actual_time:=0;
   self.pos:=0;
   self.end_:=0;
   self.data_val:=-1;
@@ -204,6 +225,7 @@ begin
     else bitwidth:=3;
 	if (self.prescaler<>prescaler) then begin
 		self.prescaler:=prescaler;
+    timers.timer[self.timer_].actual_time:=0;
 		// timer set
     if (prescaler<>0) then begin
   			timers.timer[self.timer_].time_final:=sound_status.cpu_clock/(self.clock/prescaler);
@@ -227,6 +249,7 @@ end;
 
 procedure MSM5205_chip.vclk_w(vclk:boolean);
 begin
+  if self.prescaler<>0 then exit;
   if (self.vclk<>vclk) then begin
 			self.vclk:=vclk;
 			if not(vclk) then self.stream_update;

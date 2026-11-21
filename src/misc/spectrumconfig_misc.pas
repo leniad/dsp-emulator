@@ -103,8 +103,7 @@ with ConfigSP do begin
     else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
       else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
         else if radiobutton20.Checked then mouse.tipo:=MAMX;
-  if (mouse.tipo<>0) then show_mouse_cursor
-    else hide_mouse_cursor;
+  init_mouse(mouse.tipo<>0);
   if mouse.tipo=3 then begin
     pio_0:=tz80pio.create;
     pio_0.change_calls(pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);

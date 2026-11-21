@@ -353,11 +353,11 @@ begin
 		// loop from top to bottom
 		for y:=top to (bottom-1) do begin
 			// advance a row
-			addr:=addr+pitch;
+			addr:=(Integer(addr)+pitch) and $ffff;
       // accumulate zoom factors; if we carry into the high bit, skip an extra row
       sprite_ram[(f*8)+5]:=sprite_ram[(f*8)+5]+(vzoom shl 10);
       if (sprite_ram[(f*8)+5] and $8000)<>0 then begin
-        addr:=addr+pitch;
+        addr:=(Integer(addr)+pitch) and $ffff;
         sprite_ram[(f*8)+5]:=sprite_ram[(f*8)+5] and $7fff;
       end;
 			// skip drawing if not within the cliprect
@@ -381,7 +381,7 @@ begin
 						if (((pixels shr 0) and $f)=15) then begin
               sprite_ram[(f*8)+7]:=data_7;
               break;
-            end else data_7:=data_7+1;
+            end else data_7:=(Integer(data_7)+1) and $ffff;
 					end;
 				end else begin
 				  // flipped case
@@ -402,7 +402,7 @@ begin
 						if (((pixels shr 12) and $f)=15) then begin
               sprite_ram[(f*8)+7]:=data_7;
               break;
-            end else data_7:=data_7-1;
+            end else data_7:=(Integer(data_7)+$ffff) and $ffff;
 					end;
 				end;
 			end;
@@ -534,7 +534,7 @@ if event.arcade then begin
   if arcade_input.start[0] then marcade.in0:=marcade.in0 and $ffef;
   if arcade_input.start[1] then marcade.in0:=marcade.in0 and $ffdf;
   //SDI solo!
-  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ffb7;
+  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ffbf;
   if arcade_input.but0[1] then marcade.in0:=marcade.in0 and $ff7f;
 end;
 end;
@@ -1448,7 +1448,7 @@ case main_vars.tipo_maquina of
         region1_rom_mask:=$ffff;
         region2_read:=region2_5358_read_fd;
         region2_rom_pos:=$20000 shr 1;
-        region2_rom_pos:=$1ffff;
+        region2_rom_mask:=$1ffff;
         region7_read:=sdi_s16_io_r;
         //Sound CPU
         if not(roms_load(@mem_snd,sdi_sound)) then exit;
@@ -1463,7 +1463,7 @@ case main_vars.tipo_maquina of
         init_dips(2,sdi_dip_b,$fd);
         //La placa 5358 usa un tipo diferente de banco de sprites!!
         s16_info.mb_type:=1;
-  end;
+      end;
   410:begin  //Cotton
         if not(roms_load16w(@rom,cotton_rom)) then exit;
         region1_read:=s16_region1_read;

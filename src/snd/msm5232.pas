@@ -51,8 +51,12 @@ type
           rate:integer;
           external_capacitance:array[0..7] of double;
 	        gate_handler_cb:procedure (valor:integer);
-          final_buffer:array[0..3] of smallint;
-          final_count:byte;
+          mixed_sample:double;
+          resample_phase:integer;
+          resample_pos:integer;
+          resample_history:array[0..127] of double;
+          resample_filter:array[0..127,0..127] of double;
+          procedure init_resampler;
           procedure init_tables;
           procedure init_voice(voice:byte);
           procedure gate_update;
@@ -65,6 +69,7 @@ var
   msm5232_0:msm5232_chip;
 
 implementation
+uses Math;
 const
   CLOCK_RATE_DIVIDER=16;
   STEP_SH=16;
@@ -111,19 +116,17 @@ var
   o2,o4,o8,o16,solo8,solo16:integer;
   msm5232_rom_def:array[0..87] of word;
 
-procedure msm5232_update_internal_0;
-begin
-  msm5232_0.internal_update;
-end;
-
 constructor msm5232_chip.create(clock:dword;amp:single=1);
 begin
-  clock:=clock;
   self.rate:=trunc(clock/CLOCK_RATE_DIVIDER);
   self.amp:=amp;
   self.clock:=clock;
   self.tsample_num:=init_channel;
-  timers.init(sound_status.cpu_num,sound_status.cpu_clock/self.rate,msm5232_update_internal_0,nil,true);
+  self.init_resampler;
+  self.resample_phase:=0;
+  self.resample_pos:=0;
+  self.mixed_sample:=0;
+  FillChar(self.resample_history,SizeOf(self.resample_history),0);
 end;
 
 destructor msm5232_chip.free;
@@ -152,8 +155,10 @@ begin
 	self.en_out4[1]:=0;
 	self.en_out2[1]:=0;
   self.gate_update;
-  final_count:=0;
-  for f:=0 to 3 do final_buffer[f]:=0;
+  self.resample_phase:=0;
+  self.resample_pos:=0;
+  self.mixed_sample:=0;
+  FillChar(self.resample_history,SizeOf(self.resample_history),0);
 end;
 
 procedure msm5232_chip.write(pos,valor:byte);
@@ -176,7 +181,7 @@ case pos of
 				      if (self.voice[ch].pitch<>(valor and $7f)) then begin
 					      self.voice[ch].pitch:=valor and $7f;
 					      pg:=msm5232_rom_def[valor and $7f];
-					      self.voice[ch].tg_count_period:=(pg and $1ff)*(self.updatestep div 2);
+					      self.voice[ch].tg_count_period:=((pg and $1ff)*self.updatestep) div 2;
 
 					      n:=(pg shr 9) and 7;  // n = bit number for 16' output
 					      self.voice[ch].tg_out16:=1 shl n;
@@ -215,12 +220,10 @@ case pos of
 				self.voice[f+4].dr_rate:=self.dr_tbl[valor and $f]*self.external_capacitance[f+4];
   $c:begin  // group1 control
 			  self.control1:=valor;
-
 			  for f:=0 to 3 do begin
 				  if (((valor and $10)<>0) and (self.voice[f].eg_sect=1)) then self.voice[f].eg_sect:=0;
 				  self.voice[f].eg_arm:=valor and $10;
         end;
-
         if (valor and 1)<>0 then self.en_out16[0]:=$ffffffff
           else self.en_out16[0]:=0;
         if (valor and 2)<>0 then self.en_out8[0]:=$ffffffff
@@ -233,13 +236,11 @@ case pos of
 		$d:begin  // group2 control
 			  self.control2:=valor;
 			  self.gate_update;
-
-			for f:=0 to 3 do begin
-				if (((valor and $10)<>0) and (self.voice[f+4].eg_sect=1)) then self.voice[f+4].eg_sect:=0;
-				self.voice[f+4].eg_arm:=valor and $10;
-			end;
-
-			if (valor and 1)<>0 then self.en_out16[1]:=$ffffffff
+			  for f:=0 to 3 do begin
+				  if (((valor and $10)<>0) and (self.voice[f+4].eg_sect=1)) then self.voice[f+4].eg_sect:=0;
+				  self.voice[f+4].eg_arm:=valor and $10;
+			  end;
+			  if (valor and 1)<>0 then self.en_out16[1]:=$ffffffff
           else self.en_out16[1]:=0;
         if (valor and 2)<>0 then self.en_out8[1]:=$ffffffff
           else self.en_out8[1]:=0;
@@ -265,23 +266,62 @@ begin
 	self.external_capacitance[7]:=cap8;
   self.init_tables;
   for f:=0 to 7 do begin
-		fillchar(self.voice[f],0,sizeof(msm5232_voice));
+		FillChar(self.voice[f],SizeOf(msm5232_voice),0);
 		self.init_voice(f);
+  end;
+end;
+
+procedure msm5232_chip.init_resampler;
+var
+  phase,tap:integer;
+  cutoff,frac,x,window,coefficient,total:double;
+begin
+  // 128-tap Blackman-windowed sinc, 128 fractional positions.
+  // Leave a transition band below the 44.1 kHz output Nyquist limit.
+  cutoff:=0.45*FREQ_BASE_AUDIO/self.rate;
+  if cutoff>0.45 then cutoff:=0.45;
+  for phase:=0 to 127 do begin
+    frac:=phase/128.0;
+    total:=0;
+    for tap:=0 to 127 do begin
+      x:=tap-63.5+frac;
+      window:=0.42-0.5*Cos(2*Pi*tap/127.0)+0.08*Cos(4*Pi*tap/127.0);
+      if Abs(x)<1.0e-12 then coefficient:=2*cutoff
+        else coefficient:=Sin(2*Pi*cutoff*x)/(Pi*x);
+      coefficient:=coefficient*window;
+      self.resample_filter[phase,tap]:=coefficient;
+      total:=total+coefficient;
+    end;
+    // Preserve DC gain for every fractional position.
+    for tap:=0 to 127 do self.resample_filter[phase,tap]:=self.resample_filter[phase,tap]/total;
   end;
 end;
 
 procedure msm5232_chip.update;
 var
-  final_out:smallint;
-  f:byte;
+  tap,index,phase:integer;
+  filtered,amplified:double;
 begin
-  final_out:=0;
-  if self.final_count<>0 then begin
-    for f:=0 to (self.final_count-1) do final_out:=final_out+self.final_buffer[f];
-    final_out:=final_out div self.final_count;
+  // Advance native chip samples from the output sample clock.
+  // Integer phase keeps the exact rate ratio without timer-order jitter.
+  self.resample_phase:=self.resample_phase+self.rate;
+  while self.resample_phase>=FREQ_BASE_AUDIO do begin
+    self.resample_phase:=self.resample_phase-FREQ_BASE_AUDIO;
+    self.internal_update;
+    self.resample_history[self.resample_pos]:=self.mixed_sample;
+    self.resample_pos:=(self.resample_pos+1) and 127;
   end;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(final_out*self.amp);
-  self.final_count:=0;
+  phase:=(self.resample_phase*128) div FREQ_BASE_AUDIO;
+  filtered:=0;
+  index:=(self.resample_pos-1) and 127;
+  for tap:=0 to 127 do begin
+    filtered:=filtered+self.resample_history[index]*self.resample_filter[phase,tap];
+    index:=(index-1) and 127;
+  end;
+  amplified:=filtered*self.amp;
+  if amplified>32767 then amplified:=32767
+    else if amplified<-32768 then amplified:=-32768;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=Round(amplified);
 end;
 
 procedure msm5232_chip.init_tables;
@@ -293,18 +333,15 @@ begin
 	// sample rate = chip clock !!!  But :
 	// highest possible frequency is chipclock/13/16 (pitch data=0x57)
 	// at 2MHz : 2000000/13/16 = 9615 Hz
-	self.updatestep:=round((1 shl STEP_SH)*(self.rate/self.clock));
-
+	self.updatestep:=trunc((1 shl STEP_SH)*(self.rate/self.clock));
 	scale:=self.clock/self.rate;
-	self.noise_step:=round(((1 shl STEP_SH)/128)*scale); // step of the rng reg in 16.16 format
-
+	self.noise_step:=trunc(((1 shl STEP_SH)/128)*scale); // step of the rng reg in 16.16 format
   clockscale:=self.clock/2119040;
 	for f:=0 to 7 do begin
     if (f and 4)<>0 then rcp_duty_cycle:=1 shl (f and $fd) // bit 1 is ignored if bit 2 is set
       else rcp_duty_cycle:=1 shl f;
 		self.ar_tbl[f]:=(rcp_duty_cycle/clockscale)*R51;
 	end;
-
 	for f:=0 to 7 do begin
 		if (f and 4)<>0 then
     rcp_duty_cycle:=1 shl (f and $fd) // bit 1 is ignored if bit 2 is set
@@ -350,9 +387,9 @@ begin
 		  0:begin // attack
 			  // capacitor charge
 			  if (self.voice[f].eg<VMAX) then begin
-				  self.voice[f].counter:=self.voice[f].counter-round((VMAX-self.voice[f].eg)/self.voice[f].ar_rate);
+				  self.voice[f].counter:=self.voice[f].counter-trunc((VMAX-self.voice[f].eg)/self.voice[f].ar_rate);
 				  if (self.voice[f].counter<=0) then begin
-					  n:=-self.voice[f].counter div (samplerate+1);
+					  n:=(-self.voice[f].counter div samplerate)+1;
 					  self.voice[f].counter:=self.voice[f].counter+(n*samplerate);
             self.voice[f].eg:=self.voice[f].eg+n;
 					  if (self.voice[f].eg>VMAX) then self.voice[f].eg:=VMAX;
@@ -360,16 +397,16 @@ begin
         end;
 			  // when ARM=0, EG switches to decay as soon as cap is charged to VT (EG inversion voltage; about 80% of MAX)
 			  if (self.voice[f].eg_arm=0) then begin
-			  	if (self.voice[f].eg>=(VMAX*(80/100))) then self.voice[f].eg_sect:=1;
+			  	if (self.voice[f].eg>=((VMAX*80) div 100)) then self.voice[f].eg_sect:=1;
 			  end; // when ARM=1, EG stays at maximum until key off
 			  self.voice[f].egvol:=self.voice[f].eg div 16; // 32768/16 = 2048 max
         end;
 		  1:begin // decay
 			  // capacitor discharge
 			  if (self.voice[f].eg>VMIN) then begin
-				  self.voice[f].counter:=self.voice[f].counter-round((self.voice[f].eg-VMIN)/self.voice[f].dr_rate);
+				  self.voice[f].counter:=self.voice[f].counter-trunc((self.voice[f].eg-VMIN)/self.voice[f].dr_rate);
 				  if (self.voice[f].counter<=0) then begin
-					  n:=-self.voice[f].counter div (samplerate+1);
+					  n:=(-self.voice[f].counter div samplerate)+1;
 					  self.voice[f].counter:=self.voice[f].counter+(n*samplerate);
             self.voice[f].eg:=self.voice[f].eg-n;
 					  if (self.voice[f].eg<VMIN) then self.voice[f].eg:=VMIN;
@@ -382,9 +419,9 @@ begin
 		  2:begin // release
 			  // capacitor discharge
 			  if (self.voice[f].eg>VMIN) then begin
-				  self.voice[f].counter:=self.voice[f].counter-round((self.voice[f].eg-VMIN)/self.voice[f].rr_rate);
+				  self.voice[f].counter:=self.voice[f].counter-trunc((self.voice[f].eg-VMIN)/self.voice[f].rr_rate);
 				  if (self.voice[f].counter<=0) then begin
-					  n:=-self.voice[f].counter div (samplerate+1);
+					  n:=(-self.voice[f].counter div samplerate)+1;
 					  self.voice[f].counter:=self.voice[f].counter+(n*samplerate);
             self.voice[f].eg:=self.voice[f].eg-n;
 					  if (self.voice[f].eg<VMIN) then self.voice[f].eg:=VMIN;
@@ -400,7 +437,7 @@ end;
 
 function sshr(num:integer;fac:byte):integer;
 begin
-  if num<0 then sshr:=-(abs(num) shr fac)
+  if num<0 then sshr:=integer(-(((-Int64(num))+((Int64(1) shl fac)-1)) shr fac))
     else sshr:=num shr fac;
 end;
 
@@ -472,7 +509,7 @@ begin
 		o4:=o4+sshr(((out4-(1 shl (STEP_SH-1)))*self.voice[f+groupidx*4].egvol),STEP_SH);
 		o2:=o2+sshr(((out2-(1 shl (STEP_SH-1)))*self.voice[f+groupidx*4].egvol),STEP_SH);
 
-		if ((f=1) and (groupidx=1)) then begin
+		if ((f=3) and (groupidx=1)) then begin
 			solo16:=solo16+sshr(((out16-(1 shl (STEP_SH-1))) shl 11),STEP_SH);
 			solo8:=solo8+sshr(((out8-(1 shl (STEP_SH-1))) shl 11),STEP_SH);
 		end;
@@ -482,14 +519,14 @@ begin
 	o16:=o16 and self.en_out16[groupidx];
 	o8:=o8 and self.en_out8[groupidx];
 	o4:=o4 and self.en_out4[groupidx];
-	o2:=o4 and self.en_out2[groupidx];
+	o2:=o2 and self.en_out2[groupidx];
 end;
 
 procedure msm5232_chip.internal_update;
 var
-  outputs:array[0..10] of smallint;
+  outputs:array[0..10] of integer;
   cnt,tmp,final_out:integer;
-  f,divt:byte;
+  f:byte;
 begin
 		// calculate all voices' envelopes
 		self.eg_voices_advance;
@@ -519,18 +556,8 @@ begin
     if (self.noise_rng and (1 shl 16))<>0 then outputs[10]:=1
       else outputs[10]:=0;
     final_out:=0;
-    divt:=0;
-    for f:=0 to 10 do begin
-      if outputs[f]<>0 then begin
-        final_out:=final_out+outputs[f];
-        divt:=divt+1;
-      end;
-    end;
-    if divt<>0 then final_out:=final_out div divt;
-    if final_out>32768 then final_out:=32768
-      else if final_out<-32767 then final_out:=-32767;
-    self.final_buffer[self.final_count]:=final_out;
-    self.final_count:=(self.final_count+1) mod 4;
+    for f:=0 to 7 do final_out:=final_out+outputs[f];
+    self.mixed_sample:=final_out/8.0;
 end;
 
 end.

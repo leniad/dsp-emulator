@@ -54,14 +54,12 @@ actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
 //sprites
 for f:=$17 downto 0 do begin
     nchar:=memoria[$d880+(f*16)];
-    if (nchar and $80)<>0 then begin
-      attr:=memoria[$d884+(f*16)];
-      color:=(attr and $f) shl 4;
-      x:=memoria[$d88c+(f*16)];
-      y:=memoria[$d888+(f*16)];
-      put_gfx_sprite(nchar,color,(attr and $10)<>0,(attr and $20)<>0,1);
-      actualiza_gfx_sprite(x,y,3,1);
-    end;
+    attr:=memoria[$d884+(f*16)];
+    color:=(attr and $f) shl 4;
+    x:=memoria[$d88c+(f*16)];
+    y:=memoria[$d888+(f*16)];
+    put_gfx_sprite(nchar,color,(attr and $10)<>0,(attr and $20)<>0,1);
+    actualiza_gfx_sprite(x,y,3,1);
 end;
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
 actualiza_trozo_final(0,16,256,224,3);
@@ -95,14 +93,14 @@ end;
 
 procedure higemaru_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 261 do begin
     case f of
-      0:z80_0.change_irq_vector(HOLD_LINE,$d7);
+      109:z80_0.change_irq_vector(HOLD_LINE,$cf);
       240:begin
-            z80_0.change_irq_vector(HOLD_LINE,$cf);
+            z80_0.change_irq_vector(HOLD_LINE,$d7);
             update_video_higemaru;
           end;
     end;
@@ -175,7 +173,8 @@ const
 begin
 llamadas_maquina.bucle_general:=higemaru_principal;
 llamadas_maquina.reset:=reset_higemaru;
-llamadas_maquina.scanlines:=256;
+llamadas_maquina.scanlines:=262;
+llamadas_maquina.fps_max:=6000000/(384*262);
 iniciar_higemaru:=false;
 iniciar_audio(false);
 screen_init(1,256,256);

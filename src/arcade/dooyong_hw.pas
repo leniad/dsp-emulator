@@ -871,7 +871,6 @@ end;
 begin
 llamadas_maquina.bucle_general:=dooyong_principal;
 llamadas_maquina.reset:=reset_dooyong;
-llamadas_maquina.fps_max:=60;
 llamadas_maquina.scanlines:=256;
 iniciar_dooyong:=false;
 iniciar_audio(false);

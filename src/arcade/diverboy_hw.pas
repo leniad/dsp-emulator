@@ -142,7 +142,7 @@ case direccion of
     $80000..$83fff:obj_ram[(direccion and $3fff) shr 1]:=valor;
     $100000:begin
               sound_latch:=valor;
-              z80_0.change_irq(HOLD_LINE);
+              z80_0.change_irq(ASSERT_LINE);
             end;
     $140000..$1407ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                         buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -156,7 +156,10 @@ begin
 case direccion of
   0..$87ff:diverboy_snd_getbyte:=mem_snd[direccion];
   $9800:diverboy_snd_getbyte:=oki_6295_0.read;
-  $a000:diverboy_snd_getbyte:=sound_latch;
+  $a000:begin
+          diverboy_snd_getbyte:=sound_latch;
+          z80_0.change_irq(CLEAR_LINE);
+        end;
 end;
 end;
 
@@ -206,7 +209,7 @@ iniciar_audio(false);
 screen_init(1,512,512,false,true);
 iniciar_video(318,240);
 main_screen.flip_main_x:=true;
-getmem(memoria_temp,$100000);
+getmem(memoria_temp,$200000);
 //Main CPU
 m68000_0:=cpu_m68000.create(12000000);
 m68000_0.change_ram16_calls(diverboy_getword,diverboy_putword);

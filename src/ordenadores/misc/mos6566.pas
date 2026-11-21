@@ -1,7 +1,5 @@
 unit mos6566;
 
-{$DEFINE CIA_OLD}
-
 interface
 uses dialogs,sysutils,pal_engine,cpu_misc,
      main_engine,gfx_engine;
@@ -36,6 +34,7 @@ type
       lpx, lpy:byte;
       me,mxe,mye,mdp,mmc:byte;
       sprite_on:byte;
+      sprite_y_repeat:array[0..7] of boolean;
       irq_flag, irq_mask:byte;
       clx_spr,clx_bgr:byte;
       ec,mm0,mm1:byte;
@@ -149,7 +148,7 @@ var
   matrix_line,color_line:array[0..39] of byte;
 
 implementation
-uses commodore64,{$IFNDEF CIA_OLD}mos6526{$ELSE}mos6526_old{$ENDIF};
+uses commodore64,mos6526;
 
 constructor mos6566_chip.create(clock:dword);
 var
@@ -193,9 +192,12 @@ begin
       sc[f]:=0;
       spr_color[f]:=0;
       mc[f]:=63;
+      sprite_y_repeat[f]:=true;
   end;
   for f:=0 to 3 do self.mc_color_lookup[f]:=0;
   for f:=0 to $2f do fore_mask_buf[f]:=0;
+  self.mx8:=0;
+  self.row25:=false;
   self.ctrl1:=0;
   self.ctrl2:=0;
   self.lpx:=0;
@@ -238,7 +240,7 @@ var
   va:word;
   ret:pbyte;
 begin
-	va:=direccion or self.cia_vabase;
+	va:=(direccion and $3fff) or self.cia_vabase;
 	if (((va and $f000)=$9000) or ((va and $f000)=$1000)) then ret:=@char_rom[va and $fff]
 	  else ret:=@memoria[va];
   get_physical:=ret;
@@ -333,7 +335,12 @@ case direccion of
 			    self.border_40_col:=(valor and 8)<>0;
 			    self.display_idx:=((self.ctrl1 and $60) or (self.ctrl2 and $10)) shr 4;
         end;
-		$17:self.mye:=valor;	// Sprite Y expansion
+		$17:begin
+          // Clearing expansion makes the next line advance normally.
+          for i:=0 to 7 do
+            if (valor and (1 shl i))=0 then self.sprite_y_repeat[i]:=true;
+          self.mye:=valor;
+        end;	// Sprite Y expansion
 		$18:begin	// Memory pointers
 			    self.vbase:=valor;
 			    self.matrix_base:=self.get_physical((valor and $f0) shl 6);
@@ -342,8 +349,10 @@ case direccion of
         end;
 		$19:begin // IRQ flags
 			    self.irq_flag:=self.irq_flag and (not(valor) and $0f);
-          self.irq_call(CLEAR_LINE);
-			    if (self.irq_flag and self.irq_mask)<>0 then self.irq_flag:=self.irq_flag or $80; // Set master bit if allowed interrupt still pending
+          if (self.irq_flag and self.irq_mask and $0f)<>0 then begin
+            self.irq_flag:=self.irq_flag or $80;
+            self.irq_call(ASSERT_LINE);
+          end else self.irq_call(CLEAR_LINE);
         end;
     $1a:begin	// IRQ mask
 			    self.irq_mask:=valor and $0f;
@@ -364,11 +373,11 @@ case direccion of
 		$23:self.mc_color_lookup[2]:=valor and $f;
 		$24:self.mc_color_lookup[3]:=valor and $f;
 		$25:begin
-          self.mm0:=valor;
+          self.mm0:=valor and $0f;
           self.mm0_color:=valor and $f;
         end;
 		$26:begin
-          self.mm1:=valor;
+          self.mm1:=valor and $0f;
           self.mm1_color:=valor and $f;
         end;
     $27,$28,$29,$2a,$2b,$2c,$2d,$2e:begin
@@ -382,289 +391,119 @@ procedure mos6566_chip.vblank;
 begin
   self.vc_base:=0;
 	self.lp_triggered:=false;
-  {$IFNDEF CIA_OLD}
-  mos6526_0.CountTOD1;
-  mos6526_0.CountTOD2;
-  {$ELSE}
   mos6526_0.clock_tod;
   mos6526_1.clock_tod;
-  {$ENDIF}
 end;
 
 procedure mos6566_chip.draw_sprites;
 var
-  snum,sbit:byte;
-  spr_coll,gfx_coll:byte;
+  snum,sbit,spr_coll,gfx_coll,col,pair,previous:byte;
+  x,dx,sx,width,scale,mask_x:integer;
   ptemp:pword;
-  color,coll_pos:byte;
   ptemp1:pbyte;
-  col,f,ptempb:byte;
-  plane0_r,plane1_r,plane0_l,plane1_l,sdata,fore_mask,sdata_l,sdata_r,fore_mask_r:dword;
-  sshift,spr_mask_pos:byte;
+  sdata:dword;
+  behind,foreground:boolean;
 begin
   spr_coll:=0;
   gfx_coll:=0;
-  sbit:=1;
   for snum:=0 to 7 do begin
-    if (((self.sprite_on and sbit)<>0) and (self.mx[snum]<(DISPLAY_X-32))) then begin
-      ptemp:=punbuf;
-      inc(ptemp,self.mx[snum]+8);
-			coll_pos:=self.mx[snum]+8;
-      //Datos
-			ptemp1:=self.get_physical(self.matrix_base[$3f8+snum] shl 6 or self.mc[snum]);
-			sdata:=(ptemp1^ shl 24);inc(ptemp1);
-      sdata:=sdata or (ptemp1^ shl 16);inc(ptemp1);
-      sdata:=sdata or (ptemp1^ shl 8);
-			color:=spr_color[snum] and $f;  //Color
-      //Back foreground
-			spr_mask_pos:=coll_pos-self.x_scroll;
-      ptempb:=spr_mask_pos div 8;
-      sshift:=spr_mask_pos and 7;
-			fore_mask:=(self.fore_mask_buf[ptempb] shl 24) or (self.fore_mask_buf[ptempb+1] shl 16)
-                  or (self.fore_mask_buf[ptempb+2] shl 8) or (self.fore_mask_buf[ptempb+3] shl sshift)
-                  or (self.fore_mask_buf[ptempb+4] shr (8-sshift));
-      if (self.mxe and sbit)<>0 then begin //X_expanded
-        if (self.mx[snum]>=(DISPLAY_X-56)) then continue;
-				fore_mask_r:=(self.fore_mask_buf[ptempb+4] shl 24) or (self.fore_mask_buf[ptempb+5] shl 16)
-                     or (self.fore_mask_buf[ptempb+6] shl 8) or (self.fore_mask_buf[ptempb+7] shl sshift)
-                     or (self.fore_mask_buf[ptempb+8] shr (8-sshift));
-        if (self.mmc and sbit)<>0 then begin	// Multicolor mode
-					// Expand sprite data
-					sdata_l:=MultiExpTable[(sdata shr 24) and $ff] shl 16 or MultiExpTable[(sdata shr 16) and $ff];
-					sdata_r:=0 or MultiExpTable[(sdata shr 8) and $ff] shl 16;
-          // Convert sprite chunky pixels to bitplanes
-					plane0_l:=(sdata_l and $55555555) or (sdata_l and $55555555) shl 1;
-					plane1_l:=(sdata_l and $aaaaaaaa) or (sdata_l and $aaaaaaaa) shr 1;
-					plane0_r:=(sdata_r and $55555555) or (sdata_r and $55555555) shl 1;
-					plane1_r:=(sdata_r and $aaaaaaaa) or (sdata_r and $aaaaaaaa) shr 1;
-          // Collision with graphics?
-					if (((fore_mask and (plane0_l or plane1_l))<>0) or ((fore_mask_r and (plane0_r or plane1_r))<>0)) then begin
-						gfx_coll:=gfx_coll or sbit;
-						if (self.mdp and sbit)<>0	then begin
-							plane0_l:=plane0_l and not(fore_mask);	// Mask sprite if in background
-							plane1_l:=plane1_l and not(fore_mask);
-							plane0_r:=plane0_r and not(fore_mask_r);
-							plane1_r:=plane1_r and not(fore_mask_r);
-						end;
-					end;
-          // Paint sprite
-					for f:=0 to 31 do begin
-						if (plane1_l and $80000000)<>0 then begin
-							if (plane0_l and $80000000)<>0 then col:=mm1
-							  else col:=color;
-						end else begin
-							if (plane0_l and $80000000)<>0 then col:=mm0
-							  else begin
-                  inc(ptemp);
-                  plane0_l:=plane0_l shl 1;
-                  plane1_l:=plane1_l shl 1;
-								  continue;
-                end;
-						end;
-						if self.spr_coll_buf[coll_pos+f]<>0 then spr_coll:=spr_coll or self.spr_coll_buf[coll_pos+f] or sbit
-						  else begin
-							  ptemp^:=paleta[col];
-							  self.spr_coll_buf[coll_pos+f]:=sbit;
-						  end;
-            inc(ptemp);
-            plane0_l:=plane0_l shl 1;
-            plane1_l:=plane1_l shl 1;
-					end;
-          for f:=32 to 47 do begin
-						if (plane1_r and $80000000)<>0 then begin
-							if (plane0_r and $80000000)<>0 then col:=mm1
-							  else col:=color;
-						end else begin
-							if (plane0_r and $80000000)<>0 then col:=mm0
-                else begin
-                  inc(ptemp);
-                  plane0_r:=plane0_r shl 1;
-                  plane1_r:=plane1_r shl 1;
-								  continue;
-                end;
-						end;
-            // Collision with sprite?
-            if self.spr_coll_buf[coll_pos+f]<>0 then begin
-              spr_coll:=spr_coll or self.spr_coll_buf[coll_pos+f] or sbit;
-            end else begin		// Draw pixel if no collision
-              ptemp^:=paleta[col];
-              self.spr_coll_buf[coll_pos+f]:=sbit;
-            end;
-            inc(ptemp);
-            plane0_r:=plane0_r shl 1;
-            plane1_r:=plane1_r shl 1;
-					end;
-        end else begin // Standard mode
-          // Expand sprite data
-					sdata_l:=(ExpTable[(sdata shr 24) and $ff] shl 16) or ExpTable[(sdata shr 16) and $ff];
-					sdata_r:=ExpTable[(sdata shr 8) and $ff] shl 16;
-					// Collision with graphics?
-					if (((fore_mask and sdata_l)<>0) or ((fore_mask_r and sdata_r)<>0)) then begin
-						gfx_coll:=gfx_coll or sbit;
-						if (self.mdp and sbit)<>0	then begin
-							sdata_l:=sdata_l and not(fore_mask);	// Mask sprite if in background
-							sdata_r:=sdata_r and not(fore_mask_r);
-						end;
-					end;
-					// Paint sprite
-					for f:=0 to 31 do begin
-						if (sdata_l and $80000000)<>0 then begin
-              // Collision with sprite?
-							if self.spr_coll_buf[coll_pos+f]<>0 then begin
-                spr_coll:=spr_coll or self.spr_coll_buf[coll_pos+f] or sbit
-              end else begin		// Draw pixel if no collision
-                  ptemp^:=paleta[color];
-								  self.spr_coll_buf[coll_pos+f]:=sbit;
-              end;
-            end;
-            inc(ptemp);
-            sdata_l:=sdata_l shl 1;
-          end;
-					for f:=32 to 47 do begin
-						if (sdata_r and $80000000)<>0 then begin
-              // Collision with sprite?
-							if self.spr_coll_buf[coll_pos+f]<>0 then begin
-                spr_coll:=spr_coll or self.spr_coll_buf[coll_pos+f] or sbit;
-							end else begin		// Draw pixel if no collision
-								ptemp^:=paleta[color];
-								self.spr_coll_buf[coll_pos+f]:=sbit;
-							end;
-						end;
-            inc(ptemp);
-            sdata_r:=sdata_r shl 1;
-          end;
+    sbit:=byte(1 shl snum);
+    if (self.sprite_on and sbit)=0 then continue;
+    // Three fetched bytes contain 24 monochrome pixels or 12 colour pairs.
+    ptemp1:=self.get_physical(((self.vbase and $f0) shl 6)+$3f8+snum);
+    sx:=integer(ptemp1^) shl 6;
+    ptemp1:=self.get_physical(sx+self.mc[snum]);
+    sdata:=dword(ptemp1^) shl 16;
+    ptemp1:=self.get_physical(sx+self.mc[snum]+1);
+    sdata:=sdata or (dword(ptemp1^) shl 8);
+    ptemp1:=self.get_physical(sx+self.mc[snum]+2);
+    sdata:=sdata or dword(ptemp1^);
+    scale:=1;
+    if (self.mxe and sbit)<>0 then scale:=2;
+    width:=24*scale;
+    behind:=(self.mdp and sbit)<>0;
+    for dx:=0 to width-1 do begin
+      x:=integer(self.mx[snum])+8+dx;
+      if (x<0) or (x>=384) then continue;
+      sx:=dx div scale;
+      if (self.mmc and sbit)<>0 then begin
+        pair:=byte((sdata shr (22-2*(sx div 2))) and 3);
+        case pair of
+          0:continue;
+          1:col:=self.mm0 and $0f;
+          2:col:=self.spr_color[snum] and $0f;
+          else col:=self.mm1 and $0f;
         end;
-      end else begin //No expanded
-        if (self.mmc and sbit)<>0 then begin 	// Multicolor mode
-					// Convert sprite chunky pixels to bitplanes
-          plane0_l:=(sdata and $55555555) or ((sdata and $55555555) shl 1);
-          plane1_l:=(sdata and $aaaaaaaa) or ((sdata and $aaaaaaaa) shr 1);
-					// Collision with graphics?
-					if (fore_mask and (plane0_l or plane1_l))<>0 then begin
-						gfx_coll:=gfx_coll or sbit;
-						if (self.mdp and sbit)<>0 then begin
-							plane0_l:=plane0_l and not(fore_mask);	// Mask sprite if in background
-							plane1_l:=plane1_l and not(fore_mask);
-						end;
-					end;
-					// Paint sprite
-					for f:=0 to 23 do begin
-						if (plane1_l and $80000000)<>0 then begin
-							if (plane0_l and $80000000)<>0 then col:=self.mm1
-							  else col:=color;
-						end else begin
-							if (plane0_l and $80000000)<>0 then col:=self.mm0
-							  else begin
-                  inc(ptemp);
-                  plane0_l:=plane0_l shl 1;
-                  plane1_l:=plane1_l shl 1;
-                  continue;
-                end;
-						end;
-						if self.spr_coll_buf[coll_pos+f]<>0 then spr_coll:=self.spr_coll_buf[coll_pos+f] or sbit
-						  else begin
-							  ptemp^:=paleta[col];
-							  self.spr_coll_buf[coll_pos+f]:=sbit;
-						end;
-            plane0_l:=plane0_l shl 1;
-            plane1_l:=plane1_l shl 1;
-            inc(ptemp);
-          end;
-        end else begin // Standard mode
-          // Collision with graphics?
-					{if (fore_mask and sdata)<>0 then begin
-						gfx_coll:=gfx_coll or sbit;
-						if (self.mdp and sbit)<>0 then sdata:=sdata and not(fore_mask);	// Mask sprite if in background
-					end;}
-					// Paint sprite
-					for f:=0 to 23 do begin
-						if (sdata and $80000000)<>0 then begin
-              // Collision with sprite?
-							if (self.spr_coll_buf[coll_pos+f]<>0) then begin
-								spr_coll:=spr_coll or self.spr_coll_buf[coll_pos+f] or sbit;
-							end else begin  // Draw pixel if no collision
-								ptemp^:=paleta[color];
-								self.spr_coll_buf[coll_pos+f]:=sbit;
-							end;
-						end;
-            inc(ptemp);
-            sdata:=sdata shl 1;
-          end;
-        end;
+      end else begin
+        if (sdata and (dword(1) shl (23-sx)))=0 then continue;
+        col:=self.spr_color[snum] and $0f;
+      end;
+      // Occupancy is independent of whether the background hides this pixel.
+      previous:=self.spr_coll_buf[x];
+      if previous<>0 then spr_coll:=spr_coll or previous or sbit;
+      self.spr_coll_buf[x]:=previous or sbit;
+      mask_x:=x-integer(self.x_scroll);
+      foreground:=false;
+      if (mask_x>=0) and (mask_x<384) then
+        foreground:=(self.fore_mask_buf[mask_x shr 3] and
+                     (byte($80) shr (mask_x and 7)))<>0;
+      if foreground then gfx_coll:=gfx_coll or sbit;
+      if (previous=0) and not(behind and foreground) then begin
+        ptemp:=punbuf;
+        inc(ptemp,x);
+        ptemp^:=paleta[col];
       end;
     end;
-    // Check sprite-sprite collisions
-		if (self.clx_spr<>0) then self.clx_spr:=self.clx_spr or spr_coll
-		else begin
-			self.clx_spr:=self.clx_spr or spr_coll;
-			self.irq_flag:=self.irq_flag or $04;
-			if (self.irq_mask and $04)<>0 then begin
-				self.irq_flag:=self.irq_flag or $80;
-				self.irq_call(ASSERT_LINE);
-			end;
-		end;
-		// Check sprite-background collisions
-		if (self.clx_bgr<>0) then self.clx_bgr:=self.clx_bgr or gfx_coll
-		else begin
-			self.clx_bgr:=self.clx_bgr or gfx_coll;
-			self.irq_flag:=self.irq_flag or $02;
-			if (self.irq_mask and $02)<>0 then begin
-				self.irq_flag:=self.irq_flag or $80;
-				self.irq_call(ASSERT_LINE);
-			end;
-    end;
-  sbit:=sbit shl 1;
-  end; //del for
+  end;
+  // A collision event is latched only when there really are colliding pixels.
+  if spr_coll<>0 then begin
+    if self.clx_spr=0 then self.irq_flag:=self.irq_flag or $04;
+    self.clx_spr:=self.clx_spr or spr_coll;
+  end;
+  if gfx_coll<>0 then begin
+    if self.clx_bgr=0 then self.irq_flag:=self.irq_flag or $02;
+    self.clx_bgr:=self.clx_bgr or gfx_coll;
+  end;
+  if (self.irq_flag and self.irq_mask and $0f)<>0 then begin
+    self.irq_flag:=self.irq_flag or $80;
+    if Assigned(self.irq_call) then self.irq_call(ASSERT_LINE);
+  end;
 end;
 
 function mos6566_chip.update_mc(linea:word):byte;
 var
-	i,j:byte;
-	cycles_used:byte;
-	spron,spren,sprye:byte;
+  i,j,cycles_used:byte;
+  advance_row:boolean;
 begin
-  spron:=self.sprite_on;
-	spren:=self.me;
-	sprye:=self.mye;
   cycles_used:=0;
-	// Increment sprite data counters
-  j:=1;
-	for i:=0 to 7 do begin
-		// Sprite enabled?
-		if (spren and j)<>0 then
-			// Yes, activate if Y position matches raster counter
-			if (my[i]=(linea and $ff)) then begin
-				self.mc[i]:=0;
-				spron:=spron or j;  // No, turn sprite off when data counter exceeds 60 and increment counter
-			end else if (self.mc[i]<>63) then begin
-				          if (sprye and j)<>0 then begin	// Y expansion
-					          if (((self.my[i] xor (linea and $ff)) and 1)=0) then begin
-						          self.mc[i]:=self.mc[i]+3;
-						          cycles_used:=cycles_used+2;
-						          if (self.mc[i]=63) then spron:=spron and not(j);
-                    end;
-				          end else begin
-					          self.mc[i]:=self.mc[i]+3;
-					          cycles_used:=cycles_used+2;
-					          if (self.mc[i]=63) then spron:=spron and not(j);
-				          end;
-			         end else if (self.mc[i]<>63) then begin
-				                  if (sprye and j)<>0 then begin	// Y expansion
-					                  if (((self.my[i] xor (linea and $ff)) and 1)=0) then begin
-                              self.mc[i]:=self.mc[i]+3;
-						                  cycles_used:=cycles_used+2;
-						                  if (self.mc[i]=63) then spron:=spron and not(j);
-					                  end;
-				                  end else begin
-					                  self.mc[i]:=self.mc[i]+3;
-					                  cycles_used:=cycles_used+2;
-					                  if (self.mc[i]=63) then spron:=spron and not(j);
-				                  end;
-			                  end;
-      j:=j shl 1;
-	end;
-	self.sprite_on:=spron;
-	update_mc:=cycles_used;
+  for i:=0 to 7 do begin
+    j:=byte(1 shl i);
+    // Finish an existing DMA even if the enable bit was subsequently cleared.
+    if (self.sprite_on and j)<>0 then begin
+      advance_row:=true;
+      if (self.mye and j)<>0 then begin
+        advance_row:=not self.sprite_y_repeat[i];
+        self.sprite_y_repeat[i]:=not self.sprite_y_repeat[i];
+      end else self.sprite_y_repeat[i]:=true;
+      if advance_row then begin
+        self.mc[i]:=self.mc[i]+3;
+        if self.mc[i]>=63 then begin
+          self.mc[i]:=63;
+          self.sprite_on:=self.sprite_on and not(j);
+        end;
+      end;
+    end;
+    // The data selected here is drawn on the following raster line.
+    if ((self.me and j)<>0) and (self.my[i]=(linea and $ff)) then begin
+      self.mc[i]:=0;
+      self.sprite_on:=self.sprite_on or j;
+      self.sprite_y_repeat[i]:=true;
+    end;
+    // Scanline approximation: every active sprite fetch steals two CPU clocks,
+    // also on repeated rows of a vertically expanded sprite.
+    if (self.sprite_on and j)<>0 then inc(cycles_used,2);
+  end;
+  update_mc:=cycles_used;
 end;
 
 function mos6566_chip.update(linea_:word):byte;
@@ -680,8 +519,12 @@ var
 begin
   ptemp:=punbuf;
   inc(ptemp,32);
+  fillchar(self.fore_mask_buf,SizeOf(self.fore_mask_buf),0);
   if self.display_state then begin
-    fillword(ptemp,self.x_scroll,paleta[self.mc_color_lookup[0]]);
+    for h:=1 to self.x_scroll do begin
+      ptemp^:=paleta[self.mc_color_lookup[0]];
+      inc(ptemp);
+    end;
     case self.display_idx of
       0:for f:=0 to 39 do begin  //Texto normal
           color:=color_line[f] and $f;
@@ -692,7 +535,7 @@ begin
           for h:=0 to 7 do begin
             if (data and $80)=0 then ptemp^:=paleta[self.mc_color_lookup[0]]
               else ptemp^:=paleta[color];
-            data:=data shl 1;
+            data:=byte(data shl 1);
             inc(ptemp);
           end;
         end;
@@ -702,18 +545,21 @@ begin
           inc(ptemp1,(matrix_line[f] shl 3));
           data:=ptemp1^;
           if (color_line[f] and 8)<>0 then begin
-            self.mc_color_lookup[3]:=color_line[f] and 7;
+            lookup[0]:=self.mc_color_lookup[0];
+            lookup[1]:=self.mc_color_lookup[1];
+            lookup[2]:=self.mc_color_lookup[2];
+            lookup[3]:=color_line[f] and 7;
             fore_mask_buf[f+4]:=(data and $aa) or (data and $aa) shr 1;
-            color:=self.mc_color_lookup[(data shr 6) and 3];
+            color:=lookup[(data shr 6) and 3];
             ptemp^:=paleta[color];inc(ptemp);
             ptemp^:=paleta[color];inc(ptemp);
-            color:=self.mc_color_lookup[(data shr 4) and 3];
+            color:=lookup[(data shr 4) and 3];
             ptemp^:=paleta[color];inc(ptemp);
             ptemp^:=paleta[color];inc(ptemp);
-            color:=self.mc_color_lookup[(data shr 2) and 3];
+            color:=lookup[(data shr 2) and 3];
             ptemp^:=paleta[color];inc(ptemp);
             ptemp^:=paleta[color];inc(ptemp);
-            color:=self.mc_color_lookup[(data shr 0) and 3];
+            color:=lookup[(data shr 0) and 3];
             ptemp^:=paleta[color];inc(ptemp);
             ptemp^:=paleta[color];inc(ptemp);
           end else begin // Standard mode in multicolor mode
@@ -727,37 +573,35 @@ begin
                 ptemp^:=paleta[color];
                 inc(ptemp);
               end;
-              data:=data shl 1;
+              data:=byte(data shl 1);
             end;
           end;
         end;
       2:begin //standar gfx
-          ptemp1:=bitmap_base;
-          inc(ptemp1,(vc shl 3)+rc);
           for f:=0 to 39 do begin
+            ptemp1:=self.get_physical(((self.vbase and $08) shl 10)+
+                      (((self.vc+f) and $3ff) shl 3)+self.rc);
             data:=ptemp1^;
-            inc(ptemp1,8);
             fore_mask_buf[f+4]:=data;
             color:=matrix_line[f] shr 4;
             bcolor:=matrix_line[f] and $f;
             for h:=0 to 7 do begin
               if (data and $80)=0 then ptemp^:=paleta[bcolor]
                 else ptemp^:=paleta[color];
-              data:=data shl 1;
+              data:=byte(data shl 1);
               inc(ptemp);
             end;
           end;
         end;
       3:begin //160x200 multi color
           lookup[0]:=self.mc_color_lookup[0];
-          ptemp1:=bitmap_base;
-          inc(ptemp1,(vc shl 3)+rc);
           for f:=0 to 39 do begin
             lookup[1]:=matrix_line[f] shr 4;
             lookup[2]:=matrix_line[f] and $f;
             lookup[3]:=color_line[f] and $f;
+            ptemp1:=self.get_physical(((self.vbase and $08) shl 10)+
+                      (((self.vc+f) and $3ff) shl 3)+self.rc);
             data:=ptemp1^;
-            inc(ptemp1,8);
             fore_mask_buf[f+4]:=(data and $aa) or (data and $aa) shr 1;
             color:=lookup[(data shr 6) and 3];
             ptemp^:=paleta[color];inc(ptemp);
@@ -775,35 +619,35 @@ begin
         end;
       4:for f:=0 to 39 do begin
           data:=matrix_line[f];
-          fore_mask_buf[f+4]:=data;
-          color:=color_line[f];
+          color:=color_line[f] and $0f;
           bcolor:=self.mc_color_lookup[(data shr 6) and 3];
           ptemp1:=char_base;
           inc(ptemp1,rc);
           inc(ptemp1,(data and $3f) shl 3);
           data:=ptemp1^;
+          fore_mask_buf[f+4]:=data;
           for h:=0 to 7 do begin
             if (data and $80)=0 then ptemp^:=paleta[bcolor]
               else ptemp^:=paleta[color];
-            data:=data shl 1;
+            data:=byte(data shl 1);
             inc(ptemp);
           end;
         end;
       5,6,7:fillword(ptemp,320,paleta[0]); //Invalid!
     end;
-    self.vc:=self.vc+40;
+    self.vc:=(self.vc+40) and $3ff;
   end else begin
     case self.display_idx of
       0,1,4:begin
               if (ctrl1 and $40)<>0 then ptemp1:=get_physical($39ff)
                 else ptemp1:=get_physical($3fff);
-              data:=ptemp1^;
               for f:=0 to 39 do begin
+                data:=ptemp1^;
                 fore_mask_buf[f+4]:=data;
                 for h:=0 to 7 do begin
                   if (data and $80)=0 then ptemp^:=paleta[self.mc_color_lookup[0]]
                     else ptemp^:=paleta[0];
-                  data:=data shl 1;
+                  data:=byte(data shl 1);
                   inc(ptemp);
                 end;
               end;
@@ -847,24 +691,25 @@ begin
     inc(ptemp,352);
     fillword(ptemp,32,paleta[self.ec]);
   end else begin
-    fillword(ptemp,32,paleta[self.ec]);
-    inc(ptemp,336);
-    fillword(ptemp,32+16,paleta[self.ec]);
+    fillword(ptemp,COL38_XSTART,paleta[self.ec]);
+    inc(ptemp,COL38_XSTOP);
+    fillword(ptemp,384-COL38_XSTOP,paleta[self.ec]);
   end;
 end;
 begin
   self.linea:=linea_;
+  fillword(punbuf,384,paleta[self.ec]);
   // Trigger raster IRQ if IRQ line reached
 	if (linea_=self.irq_raster) then self.raster_irq;
 	// Vblank?
   case linea_ of
     0..15,301..311:begin //estoy en Vblank
-      update:=63;
+      update:=63-self.update_mc(linea_);
       exit;
     end;
     300:begin //empiezo vblank
          self.vblank;
-         update:=63;
+         update:=63-self.update_mc(linea_);
 		     exit;
         end;
   end;

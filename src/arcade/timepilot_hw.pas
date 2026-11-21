@@ -3,7 +3,7 @@ unit timepilot_hw;
 interface
 uses rom_engine;
 
-function timepilot_iniciar:boolean;
+function iniciar_timepilot:boolean;
 
 const
     timepilot_rom:array[0..2] of tipo_roms=(
@@ -200,7 +200,7 @@ marcade.in1:=$ff;
 marcade.in2:=$ff;
 end;
 
-function timepilot_iniciar:boolean;
+function iniciar_timepilot:boolean;
 const
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3,
 			16*8+0,16*8+1,16*8+2,16*8+3,24*8+0,24*8+1,24*8+2,24*8+3);
@@ -214,7 +214,7 @@ begin
 llamadas_maquina.bucle_general:=timepilot_principal;
 llamadas_maquina.reset:=timepilot_reset;
 llamadas_maquina.scanlines:=256;
-timepilot_iniciar:=false;
+iniciar_timepilot:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
@@ -271,7 +271,7 @@ for f:=0 to $7f do gfx[0].colores[f]:=(memoria_temp[$140+f] and $f)+$10;
 //Final
 init_dips(1,timepilot_dip_a,$ff);
 init_dips(2,timepilot_dip_b,$4b);
-timepilot_iniciar:=true;
+iniciar_timepilot:=true;
 end;
 
 end.

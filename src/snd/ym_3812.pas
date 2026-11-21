@@ -28,6 +28,7 @@ const
 var
   ym3812_0,ym3812_1:ym3812_chip;
 
+procedure ym3812_set_timer(index,timer_num:byte;period:single);
 procedure ym3812_timer1(index:byte);
 procedure ym3812_timer2(index:byte);
 procedure ym3812_timer1_0;
@@ -37,7 +38,7 @@ procedure ym3812_timer2_1;
 
 implementation
 var
-  chips_total:integer=-1;
+  chip_instances:array[0..1] of ym3812_chip;
 
 function ym3812_chip.save_snapshot(data:pbyte):word;
 begin
@@ -54,26 +55,34 @@ var
   rate:integer;
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
-  chips_total:=chips_total+1;
-  self.num:=chips_total;
+  if chip_instances[0]=nil then self.num:=0
+    else if chip_instances[1]=nil then self.num:=1;
   rate:=round(clock/72);
   // emulator create
   self.OPL:=OPLCreate(sound_status.cpu_clock,clock,rate);
-  self.reset;
   case type_ of
     YM3812_FM:self.OPL.type_:=OPL_TYPE_WAVESEL;
     YM3526_FM:self.OPL.type_:=0;
   end;
   self.tsample_num:=init_channel;
   self.amp:=amp;
-  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym3812_timer1,false,chips_total);
-  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym3812_timer2,false,chips_total);
+  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym3812_timer1,false,self.num);
+  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym3812_timer2,false,self.num);
+  chip_instances[self.num]:=self;
+  self.reset;
 end;
 
 destructor ym3812_chip.free;
 begin
-  OPLClose(self.OPL);
-  chips_total:=chips_total-1;
+  if self.num<=1 then begin
+    if chip_instances[self.num]=self then begin
+      timers.enabled(self.timer1,false);
+      timers.enabled(self.timer2,false);
+      chip_instances[self.num]:=nil;
+    end;
+  end;
+  if self.OPL<>nil then OPLClose(self.OPL);
+  self.OPL:=nil;
 end;
 
 procedure ym3812_chip.change_irq_calls(irq_func:cpu_outport_call);
@@ -83,12 +92,15 @@ end;
 
 procedure ym3812_chip.reset;
 begin
-OPLResetChip(self.num,self.OPL);
+  timers.enabled(self.timer1,false);
+  timers.enabled(self.timer2,false);
+  OPLResetChip(self.num,self.OPL);
 end;
 
 procedure ym3812_chip.update;
 var
-  lt:integer;
+  lt:smallint;
+  mixed:double;
 begin
   self.OPL.output:=0;
   advance_lfo(self.OPL);
@@ -106,12 +118,13 @@ begin
   end else begin		// Rhythm part
       OPL_CALC_RH(self.OPL,self.OPL.noise_rng and 1);
   end;
-  lt:=self.OPL.output*2;
-  // limit check
-  if lt>$7fff then lt:=$7fff
-   else if lt<-$7fff then lt:=-$7fff;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(lt*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(lt*self.amp);
+  // Preserve the existing x2 mix level; clip after applying gain.
+  mixed:=self.OPL.output*2.0*self.amp;
+  if mixed>32767 then lt:=32767
+    else if mixed< -32768 then lt:=-32768
+      else lt:=Trunc(mixed);
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
   // store to sound buffer
   advance(self.OPL);
 end;
@@ -152,40 +165,47 @@ begin
   end;
 end;
 
-procedure ym3812_timer1(index:byte);
+procedure ym3812_set_timer(index,timer_num:byte;period:single);
 begin
-  case index of
-    0:OPLTimerOver(0,ym3812_0.OPL,0);
-    1:OPLTimerOver(0,ym3812_1.OPL,0);
-  end;
+  chip_instances[index].timer_handler(timer_num,period);
+end;
+
+procedure ym3812_timer1(index:byte);
+var
+  chip:ym3812_chip;
+begin
+  chip:=chip_instances[index];
+  if chip.OPL.st[0]=0 then Exit;
+  OPLTimerOver(index,chip.OPL,0);
 end;
 
 procedure ym3812_timer2(index:byte);
+var
+  chip:ym3812_chip;
 begin
-  case index of
-    0:OPLTimerOver(0,ym3812_0.OPL,1);
-    1:OPLTimerOver(0,ym3812_1.OPL,1);
-  end;
+  chip:=chip_instances[index];
+  if chip.OPL.st[1]=0 then Exit;
+  OPLTimerOver(index,chip.OPL,1);
 end;
 
 procedure ym3812_timer1_0;
 begin
-  OPLTimerOver(0,ym3812_0.OPL,0);
+  ym3812_timer1(0);
 end;
 
 procedure ym3812_timer2_0;
 begin
-  OPLTimerOver(0,ym3812_0.OPL,1);
+  ym3812_timer2(0);
 end;
 
 procedure ym3812_timer1_1;
 begin
-  OPLTimerOver(1,ym3812_1.OPL,0);
+  ym3812_timer1(1);
 end;
 
 procedure ym3812_timer2_1;
 begin
-  OPLTimerOver(1,ym3812_1.OPL,1);
+  ym3812_timer2(1);
 end;
 
 end.

@@ -20,6 +20,7 @@ type
              pos:dword;
              restart,loop:boolean;
              tsample:byte;
+             channel_slot:byte; //Indice local; tsample es el canal del mezclador
              amp:single;
         end;
   ptipo_audio=^tipo_audio;
@@ -76,6 +77,8 @@ var
   f,longitud:dword;
   salir,fmt,datos:boolean;
   temp,temp_w:word;
+  signed_left,signed_right:integer;
+  generated:dword;
   data2:pword;
   lsamples_m,lsamples_loop:single;
   header:^theader;
@@ -143,12 +146,15 @@ while not(salir) do begin
     long:=round(chunk.size*lsamples_m)+1;
     getmem(data,long*2);
     data2:=data;
+    generated:=0;
     for f:=0 to (chunk.size-1) do begin
       if fmt_info.bits_per_sample=8 then begin
         temp:=byte(ptemp^-128) shl 8;
         inc(ptemp);inc(longitud);
         if fmt_info.num_channles=2 then begin
-          temp:=(temp+(byte(ptemp^-128) shl 8)) shr 1;
+          signed_left:=smallint(temp);
+          signed_right:=(integer(ptemp^)-128)*256;
+          temp:=word(((signed_left+signed_right) div 2) and $ffff);
           inc(ptemp);
         end;
       end else begin
@@ -157,15 +163,20 @@ while not(salir) do begin
         if fmt_info.num_channles=2 then begin
           copymemory(@temp_w,ptemp,2);
           inc(ptemp,2);
-          temp:=(temp+temp_w) shr 1;
+          signed_left:=smallint(temp);
+          signed_right:=smallint(temp_w);
+          temp:=word(((signed_left+signed_right) div 2) and $ffff);
         end;
       end;
      for h:=0 to (trunc(lsamples_loop)-1) do begin
         data2^:=temp;
         inc(data2);
+        inc(generated);
      end;
      lsamples_loop:=(lsamples_loop-trunc(lsamples_loop))+lsamples_m;
     end;
+    //La reserva puede ser mayor, pero solo se reproducen datos escritos.
+    long:=generated;
     datos:=true;
   end;
   if ((chunk.name='fact') or (chunk.name='list') or (chunk.name='cue ') or (chunk.name='plst') or (chunk.name='labl') or (chunk.name='ltxt') or (chunk.name='smpl') or (chunk.name='note') or (chunk.name='inst')) then begin
@@ -186,11 +197,16 @@ end;
 function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean;amp:single=1):boolean;
 var
   sample_pos:byte;
+  channel:integer;
 begin
 load_samples_raw:=false;
 //Inicializo los samples
 if data_samples=nil then begin
   getmem(data_samples,sizeof(tipo_samples));
+  for channel:=0 to MAX_CHANNELS do begin
+    data_samples.tsample_reserved[channel]:=-1;
+    data_samples.tsample_use[channel]:=false;
+  end;
   data_samples.num_samples:=1;
   sample_pos:=0;
 end else begin
@@ -274,7 +290,7 @@ data_samples.num_samples:=sample_size;
 data_samples.amp:=amp;
 //Inicializar solor los necesarios...
 for f:=0 to MAX_CHANNELS do data_samples.tsample_reserved[f]:=-1;
-if (sample_size-1)>MAX_CHANNELS then sample_size:=MAX_CHANNELS;
+if sample_size>(MAX_CHANNELS+1) then sample_size:=MAX_CHANNELS+1;
 for f:=0 to (sample_size-1) do begin
   data_samples.tsample_reserved[f]:=init_channel;
   data_samples.tsample_use[f]:=false;
@@ -297,26 +313,34 @@ end;
 function first_sample_free:byte;
 var
   f:byte;
+  sample_index:integer;
 begin
   for f:=0 to MAX_CHANNELS do begin
       if (not(data_samples.tsample_use[f]) and (data_samples.tsample_reserved[f]<>-1)) then begin
         data_samples.tsample_use[f]:=true;
-        first_sample_free:=data_samples.tsample_reserved[f];
+        first_sample_free:=f;
         exit;
       end;
   end;
-  //Si no hay libres, que coja el primero...
-  first_sample_free:=data_samples.tsample_reserved[0];
+  //Sustituir la voz del primer slot, sin dejar dos muestras compartiendolo.
+  for sample_index:=0 to data_samples.num_samples-1 do
+    if data_samples.audio[sample_index].playing then
+      if data_samples.audio[sample_index].channel_slot=0 then
+        data_samples.audio[sample_index].playing:=false;
+  data_samples.tsample_use[0]:=true;
+  first_sample_free:=0;
 end;
 
 procedure start_sample(num:byte);
 begin
 if data_samples=nil then exit;
+if data_samples.audio[num].long=0 then exit;
 //Si no esta en marcha que comience
 if not(data_samples.audio[num].playing) then begin
-  data_samples.audio[num].playing:=true;
+  data_samples.audio[num].channel_slot:=first_sample_free;
+  data_samples.audio[num].tsample:=data_samples.tsample_reserved[data_samples.audio[num].channel_slot];
   data_samples.audio[num].pos:=0;
-  data_samples.audio[num].tsample:=first_sample_free;
+  data_samples.audio[num].playing:=true;
 end else begin //Si ya ha empezado, pero puede volver a comenzar lo hace
   if data_samples.audio[num].restart then data_samples.audio[num].pos:=0;
 end;
@@ -327,7 +351,7 @@ begin
 if data_samples=nil then exit;
 if data_samples.audio[num].playing then begin
   data_samples.audio[num].playing:=false;
-  data_samples.tsample_use[data_samples.audio[num].tsample]:=false;
+  data_samples.tsample_use[data_samples.audio[num].channel_slot]:=false;
 end;
 end;
 
@@ -344,7 +368,7 @@ if data_samples=nil then exit;
 for f:=0 to (data_samples.num_samples-1) do begin
   if data_samples.audio[f].playing then begin
     data_samples.audio[f].playing:=false;
-    data_samples.tsample_use[data_samples.audio[f].tsample]:=false;
+    data_samples.tsample_use[data_samples.audio[f].channel_slot]:=false;
   end;
 end;
 end;
@@ -366,7 +390,7 @@ for f:=0 to (data_samples.num_samples-1) do begin
         data_samples.audio[f].pos:=0;
       end else begin
         data_samples.audio[f].playing:=false;
-        data_samples.tsample_use[data_samples.audio[f].tsample]:=false;
+        data_samples.tsample_use[data_samples.audio[f].channel_slot]:=false;
       end;
     end;
  end;

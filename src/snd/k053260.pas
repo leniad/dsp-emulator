@@ -14,7 +14,7 @@ type
 	private
 		  // live state
 		  position:dword;
-		  pan_volume:array[0..1] of dword;
+		  pan_volume:array[0..1] of integer;
 		  counter:word;
 		  output:shortint;
       out1,out2:integer;
@@ -27,7 +27,7 @@ type
 		  // bit packed registers
 		  pan:byte;
 		  loop:boolean;
-		  kadpcm:boolean;
+		  kadpcm,reverse:boolean;
       rom:pbyte;
       rom_size:dword;
       procedure voice_reset;
@@ -49,70 +49,116 @@ type
 	    function read(direccion:byte):byte;
 	    procedure write(direccion,valor:byte);
       procedure change_calls(sh1,sh2:cpu_outport_call);
+      procedure change_clock(clock:dword);
    private
       // configuration
-	    rgnoverride:byte;
+	    instance_id:byte;
+      timers_ready:boolean;
 	    // live state
 	    portdata:array[0..3] of byte;
 	    keyon:byte;
 	    mode:byte;
       voice:array[0..3] of tKDSC_Voice;
       ntimer,ntimer2,state_output,tsample_num2:byte;
-      buffer:array[0..1,0..4] of integer;
-      posicion:byte;
+      mix_sum:array[0..1] of Int64;
+      last_mix:array[0..1] of integer;
+      sample_count:dword;
       sh1_call,sh2_call:cpu_outport_call;
       procedure internal_update;
   end;
 var
   k053260_0:tk053260_chip;
+
 implementation
 const
   CLOCKS_PER_SAMPLE=64;
-procedure internal_update_k053260;
+var
+  instances:array[0..3] of tk053260_chip;
+
+procedure internal_update_k053260(index:byte);
 begin
-  k053260_0.internal_update;
+  if instances[index]<>nil then instances[index].internal_update;
 end;
 
-procedure call_update_k053260;
+procedure call_update_k053260(index:byte);
+var
+  chip:tk053260_chip;
 begin
-k053260_0.state_output:=(k053260_0.state_output+1) and 3;
-case k053260_0.state_output of
-  0:if @k053260_0.sh1_call<>nil then k053260_0.sh1_call(ASSERT_LINE);
-  1:if @k053260_0.sh1_call<>nil then k053260_0.sh1_call(CLEAR_LINE);
-  2:if @k053260_0.sh2_call<>nil then k053260_0.sh2_call(ASSERT_LINE);
-  3:if @k053260_0.sh2_call<>nil then k053260_0.sh2_call(CLEAR_LINE);
-end;
+  chip:=instances[index];
+  if chip=nil then exit;
+  case chip.state_output of
+    0:if @chip.sh1_call<>nil then chip.sh1_call(ASSERT_LINE);
+    1:if @chip.sh1_call<>nil then chip.sh1_call(CLEAR_LINE);
+    2:if @chip.sh2_call<>nil then chip.sh2_call(ASSERT_LINE);
+    3:if @chip.sh2_call<>nil then chip.sh2_call(CLEAR_LINE);
+  end;
+  chip.state_output:=(chip.state_output+1) and 3;
 end;
 
 constructor tk053260_chip.create(clock:dword;rom:pbyte;size:dword;amp:single);
 var
-  f:byte;
+  f:integer;
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
+  self.instance_id:=$ff;
+  for f:=0 to 3 do
+    if instances[f]=nil then begin
+      self.instance_id:=f;
+      Break;
+    end;
+  if addr(update_sound_proc)=nil then
+    MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!',mtInformation,[mbOk],0);
+  self.clock:=clock;
+  self.amp:=amp;
   for f:=0 to 3 do self.voice[f]:=tKDSC_Voice.create(rom,size);
-  self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/CLOCKS_PER_SAMPLE),internal_update_k053260,nil,true);
-  //self.ntimer2:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock/16,call_update_k053260,nil,true);
   self.tsample_num:=init_channel;
   self.tsample_num2:=init_channel;
-  self.amp:=amp;
+  self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock*64.0/clock,nil,internal_update_k053260,false,self.instance_id);
+  self.ntimer2:=timers.init(sound_status.cpu_num,sound_status.cpu_clock*16.0/clock,nil,call_update_k053260,false,self.instance_id);
+  self.timers_ready:=true;
+  instances[self.instance_id]:=self;
+  self.reset;
+  timers.enabled(self.ntimer,true);
+  timers.enabled(self.ntimer2,true);
 end;
+
 destructor tk053260_chip.free;
 var
-  f:byte;
+  f:integer;
 begin
-  for f:=0 to 3 do self.voice[f].free;
+  if self.timers_ready then begin
+    timers.enabled(self.ntimer,false);
+    timers.enabled(self.ntimer2,false);
+  end;
+  if self.instance_id<=3 then
+    if instances[self.instance_id]=self then instances[self.instance_id]:=nil;
+  if k053260_0=self then k053260_0:=nil;
+  for f:=0 to 3 do if self.voice[f]<>nil then self.voice[f].free;
 end;
+
 procedure tk053260_chip.reset;
 var
-  f:byte;
+  f:integer;
 begin
-	for f:=0 to 3 do self.voice[f].voice_reset;
-  self.posicion:=0;
-  for f:=0 to 4 do begin
-    self.buffer[0,f]:=0;
-    self.buffer[1,f]:=0;
-  end;
+  for f:=0 to 3 do self.voice[f].voice_reset;
+  self.sample_count:=0;
+  self.mix_sum[0]:=0;
+  self.mix_sum[1]:=0;
+  self.last_mix[0]:=0;
+  self.last_mix[1]:=0;
+  // Preserve communication ports and control latches on reset, as before.
+  self.state_output:=0;
+  if @self.sh1_call<>nil then self.sh1_call(CLEAR_LINE);
+  if @self.sh2_call<>nil then self.sh2_call(CLEAR_LINE);
 end;
+
+procedure tk053260_chip.change_clock(clock:dword);
+begin
+  self.clock:=clock;
+  // timer_engine owns the current timer phase; only update its period here.
+  timers.timer[self.ntimer].time_final:=sound_status.cpu_clock*64.0/clock;
+  timers.timer[self.ntimer2].time_final:=sound_status.cpu_clock*16.0/clock;
+end;
+
 procedure tk053260_chip.change_calls(sh1,sh2:cpu_outport_call);
 begin
   self.sh1_call:=sh1;
@@ -157,6 +203,7 @@ begin
     $28:begin // key on/off
 			rising_edge:=valor and not(self.keyon);
 			for f:=0 to 3 do begin
+        self.voice[f].reverse:=(valor and (1 shl (f+4)))<>0;
 				if ((rising_edge and (1 shl f))<>0) then self.voice[f].key_on
 				  else if ((valor and (1 shl f))=0) then self.voice[f].key_off;
 			end;
@@ -191,76 +238,89 @@ begin
 			  end;
 end;
 end;
+function clip_sample(value:double):smallint;
+begin
+  if value>32767 then clip_sample:=32767
+    else if value< -32768 then clip_sample:=-32768
+      else clip_sample:=round(value);
+end;
+
 procedure tk053260_chip.update;
 var
-  out1,out2:integer;
-  f:byte;
+  out1,out2:smallint;
 begin
-out1:=0;
-out2:=0;
-if self.posicion<>0 then begin
-   for f:=0 to (self.posicion-1) do begin
-       out1:=out1+self.buffer[0,f];
-       out2:=out2+self.buffer[1,f];
-   end;
-   out1:=round(out1/self.posicion);
-   out2:=round(out2/self.posicion);
-   if out1<-32767 then out1:=-32767
-      else if out1>32767 then out1:=32767;
-   if out2<-32767 then out2:=-32767
-      else if out2>32767 then out2:=32767;
+  if self.sample_count<>0 then begin
+    self.last_mix[0]:=Round(self.mix_sum[0]/self.sample_count);
+    self.last_mix[1]:=Round(self.mix_sum[1]/self.sample_count);
+  end;
+  out1:=clip_sample(self.last_mix[0]*self.amp);
+  out2:=clip_sample(self.last_mix[1]*self.amp);
+  if sound_status.stereo then begin
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=out1;
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=out2;
+  end else begin
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=out1;
+    tsample[self.tsample_num2,sound_status.posicion_sonido]:=out2;
+  end;
+  self.sample_count:=0;
+  self.mix_sum[0]:=0;
+  self.mix_sum[1]:=0;
 end;
-if sound_status.stereo then begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=round(out1*self.amp);
-  tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(out2*self.amp);
-end else begin
-  //Channel 1
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=round(out1*self.amp);
-  //Channel 2
-  tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(out2*self.amp);
-end;
-self.posicion:=0;
-for f:=0 to 4 do begin
-  self.buffer[0,f]:=0;
-  self.buffer[1,f]:=0;
-end;
-end;
-function sshr(num:int64;fac:byte):int64;
+
+function sshr(num:integer;fac:byte):integer;
 begin
-  if num<0 then sshr:=-(abs(num) shr fac)
+  if num<0 then sshr:=integer(-(((-Int64(num))+((Int64(1) shl fac)-1)) shr fac))
     else sshr:=num shr fac;
 end;
+
 procedure tk053260_chip.internal_update;
 var
-  f:byte;
+  f:integer;
+  left,right:integer;
 begin
-if (self.mode and 2)<>0 then begin
-			for f:=0 to 3 do begin
-				if (self.voice[f].voice_playing) then self.voice[f].play;
-        self.buffer[0,self.posicion]:=self.buffer[0,self.posicion]+sshr(self.voice[f].out1,16);
-        self.buffer[1,self.posicion]:=self.buffer[1,self.posicion]+sshr(self.voice[f].out2,16);
-			end;
-end;
-self.posicion:=self.posicion+1;
+  left:=0;
+  right:=0;
+  if (self.mode and 2)<>0 then
+    for f:=0 to 3 do
+      if self.voice[f].voice_playing then begin
+        self.voice[f].play;
+        left:=left+sshr(self.voice[f].out1,16);
+        right:=right+sshr(self.voice[f].out2,16);
+      end;
+  // Bound the counter even if the host stops consuming audio indefinitely.
+  if self.sample_count=High(dword) then begin
+    self.mix_sum[0]:=Round(self.mix_sum[0]/self.sample_count);
+    self.mix_sum[1]:=Round(self.mix_sum[1]/self.sample_count);
+    self.sample_count:=1;
+  end;
+  self.mix_sum[0]:=self.mix_sum[0]+left;
+  self.mix_sum[1]:=self.mix_sum[1]+right;
+  Inc(self.sample_count);
 end;
 //KDSC Voice
 constructor tKDSC_Voice.create(adpcm_rom:pbyte;size:dword);
 begin
   self.rom:=adpcm_rom;
   self.rom_size:=size;
+  self.voice_reset;
 end;
+
 destructor tKDSC_Voice.free;
 begin
 end;
+
 function tKDSC_Voice.voice_playing:boolean;
 begin
  voice_playing:=self.is_playing;
 end;
+
 procedure tKDSC_Voice.voice_reset;
 begin
 	self.position:=0;
 	self.counter:=0;
 	self.output:=0;
+  self.out1:=0;
+  self.out2:=0;
 	self.is_playing:=false;
 	self.start:=0;
 	self.length:=0;
@@ -269,8 +329,10 @@ begin
 	self.pan:=0;
 	self.loop:=false;
 	self.kadpcm:=false;
+  self.reverse:=false;
 	self.update_pan_volume;
 end;
+
 procedure tKDSC_Voice.set_register(offset:word;data:byte);
 begin
 	case offset and $7 of
@@ -287,6 +349,7 @@ begin
       end;
 	end;
 end;
+
 procedure tKDSC_Voice.set_loop_kadpcm(data:byte);
 begin
 	self.loop:=BIT(data,0);
@@ -297,6 +360,7 @@ begin
 	self.pan:=data and $7;
 	self.update_pan_volume;
 end;
+
 procedure tKDSC_Voice.update_pan_volume;
 const pan_mul:array[0..7,0..1] of dword=(
 	(     0,     0 ), // No sound for pan 0
@@ -314,71 +378,84 @@ end;
 
 procedure tKDSC_Voice.key_on;
 begin
-{	if (self.start >= m_device->m_rom_size)
-		logerror("K053260: Attempting to start playing past the end of the ROM ( start = %06x, length = %06x )\n", m_start, m_length);
-	else if (m_start + m_length >= m_device->m_rom_size)
-		logerror("K053260: Attempting to play past the end of the ROM ( start = %06x, length = %06x )\n",
-					m_start, m_length);
-	else }
-		self.position:=byte(self.kadpcm); // for kadpcm low bit is nybble offset, so must start at 1 due to preincrement
-		self.counter:=$1000-CLOCKS_PER_SAMPLE; // force update on next sound_stream_update
-		self.output:=0;
-		self.is_playing:=true;
+  self.position:=byte(self.kadpcm); // for kadpcm low bit is nybble offset, so must start at 1 due to preincrement
+	self.counter:=$1000-CLOCKS_PER_SAMPLE; // force update on next sound_stream_update
+	self.output:=0;
+  self.out1:=0;
+  self.out2:=0;
+	self.is_playing:=true;
 end;
+
 procedure tKDSC_Voice.key_off;
 begin
 	self.position:=0;
 	self.output:=0;
+  self.out1:=0;
+  self.out2:=0;
 	self.is_playing:=false;
 end;
+
 procedure tKDSC_Voice.play;
 const
   kadpcm_table:array[0..15] of shortint=(0,1,2,4,8,16,32,64,-128,-64,-32,-16,-8,-4,-2,-1);
 var
   bytepos:dword;
   romdata:byte;
+  address:dword;
+  value:integer;
 begin
+  self.out1:=0;
+  self.out2:=0;
+  if not self.is_playing then Exit;
 	self.counter:=self.counter+CLOCKS_PER_SAMPLE;
 	while (self.counter>=$1000) do begin
 		self.counter:=self.counter-$1000+self.pitch;
     self.position:=self.position+1;
     bytepos:=self.position shr byte(self.kadpcm);
-		{Yes, _pre_increment. Playback must start 1 byte position after the
-		start address written to the register, or else ADPCM sounds will
-		have DC offsets (e.g. TMNT2 theme song) or will overflow and be
-		distorted (e.g. various Vendetta sound effects)
-		The "headers" in the Simpsons and Vendetta sound ROMs provide
-		further evidence of this quirk (the start addresses listed in the
-		ROM header are all 1 greater than the addresses the CPU writes
-		into the register) }
 		if (bytepos>self.length) then begin
 			if (self.loop) then begin
         self.position:=0;
         self.output:=0;
+        self.out1:=0;
+        self.out2:=0;
         bytepos:=0;
 			end else begin
 				self.is_playing:=false;
 				exit;
 			end;
 		end;
-		romdata:=self.rom[self.start+bytepos];
+    if self.reverse then address:=(self.start+$200000-bytepos) and $1fffff
+      else address:=(self.start+bytepos) and $1fffff;
+    if (self.rom=nil) or (address>=self.rom_size) then begin
+      self.is_playing:=false;
+      self.output:=0;
+      exit;
+    end;
+    romdata:=self.rom[address];
 		if self.kadpcm then begin
 			if (self.position and 1)<>0 then romdata:=romdata shr 4; // decode low nybble, then high nybble
-			self.output:=self.output+kadpcm_table[romdata and $f];
+			value:=(Integer(self.output)+kadpcm_table[romdata and $f]) and $ff;
+      if value>=128 then dec(value,256);
+      self.output:=value;
     end else begin
-			self.output:=romdata;
+			value:=romdata;
+      if value>=128 then Dec(value,256);
+      self.output:=value;
     end;
-    self.out1:=self.output*self.pan_volume[0];
-	  self.out2:=self.output*self.pan_volume[1];
+  end;
+  // Apply current volume/pan even when no ROM byte was decoded this tick.
+  self.out1:=Integer(self.output)*self.pan_volume[0];
+  self.out2:=Integer(self.output)*self.pan_volume[1];
 end;
-end;
+
 function tKDSC_Voice.read_rom:byte;
 var
   offs:dword;
 begin
-	offs:=self.start+self.position;
+	offs:=(self.start+self.position) and $1fffff;
 	self.position:=(self.position+1) and $ffff;
-	if (offs>=self.rom_size) then read_rom:=0
+	if (self.rom=nil) or (offs>=self.rom_size) then read_rom:=0
 	  else read_rom:=self.rom[offs];
 end;
+
 end.

@@ -6,671 +6,485 @@ uses main_engine;
 type
   tirq_handler=procedure(valor:byte);
   twd17xx=class
-            constructor create(clock:dword);
-            destructor free;
-          public
-            c_drive:byte;           // Currently active drive
-            c_side:byte;            // Currently active side
-            clock:dword;
-            procedure run(cycles:word);
-            procedure write(direccion,valor:byte);
-            function read(direccion:byte):byte;
-            procedure reset;
-          private
-            r_status:byte;          // Status register
-            r_track:byte;           // Track register
-            r_sector:byte;          // Sector register
-            r_data:byte;            // Data register
-            c_track:byte;           // Currently selected track
-            c_sector:byte;          // Currently selected sector ID
-            sectype:byte;           // When reading a sector, this is used to remember if it was marked as deleted
-            distatus:integer;          // The new contents for r_status when delayedint expires (or -1 to leave it untouched)
-            delayedint:integer;        // A cycle counter for simulating a delay before INTRQ is asserted
-            delayeddrq:integer;        // A cycle counter for simulating a delay before DRQ is asserted
-            currentop:byte;         // Current operation in progress
-            last_step_in:boolean;      // Set to TRUE if the last seek operation stepped the head inwards
-            curroffs:word;          // Current offset into the above sector
-            currsector:boolean;        // Pointers to the current sector in the disk image being used by an active read or write operation
-            currseclen:word;        // The length of the current sector
-            ddstatus:integer;          // The new contents for r_status when delayeddrq expires (or -1 to leave it untouched)
-            num:byte;
-            crc:word;
-            clrintrq:procedure(num:byte);
-            setintrq:procedure(num:byte);
-            clrdrq:procedure(num:byte);
-            setdrq:procedure(num:byte);
-            procedure seek_track(track:byte);
-            function find_sector(secid:byte):boolean;
-            function first_sector:boolean;
-            function next_sector:boolean;
-          end;
+    constructor create(clock:dword);
+    destructor free;
+  public
+    c_drive,c_side:byte;
+    clock:dword;
+    procedure run(cycles:word);
+    procedure write(direccion,valor:byte);
+    function read(direccion:byte):byte;
+    procedure reset;
+  private
+    r_status,r_track,r_sector,r_data:byte;
+    physical_track:array[0..3] of byte;
+    c_sector,currentop,sectype:byte;
+    last_step_in,update_track,verify_seek:boolean;
+    pending_track:byte;
+    delayedint,delayeddrq,distatus,drq_deadline:integer;
+    curroffs,currseclen:word;
+    crc:word;
+    address_data:array[0..5] of byte;
+    track_buffer:array[0..6399] of byte;
+    format_crc:word;
+    format_sync:byte;
+    format_crc_active:boolean;
+    force_mask:byte;
+    index_cycles:integer;
+    clrintrq,setintrq,clrdrq,setdrq:procedure(num:byte);
+    function media_ready:boolean;
+    function find_sector(secid:byte):boolean;
+    procedure complete(status:byte;delay:integer);
+    procedure begin_sector(writing,multiple:boolean);
+    procedure end_sector(writing:boolean);
+    procedure seek_track(track:byte;command:byte;update:boolean);
+    procedure update_raw_sector;
+    procedure format_byte(value:byte);
+  end;
   tmicrodisc=class
-               constructor create(clock:dword;set_irq:tirq_handler);
-               destructor free;
-             public
-                rom:array[0..$1fff] of byte;
-                port_314:byte;
-                irq_handle:tirq_handler;
-                wd:twd17xx;
-                procedure reset;
-                procedure write(direccion,valor:byte);
-                function read(direccion:byte):byte;
-             private
-                intrq,drq:byte;
-             end;
+    constructor create(clock:dword;set_irq:tirq_handler);
+    destructor free;
+  public
+    rom:array[0..$1fff] of byte;
+    port_314:byte;
+    irq_handle:tirq_handler;
+    wd:twd17xx;
+    procedure reset;
+    procedure write(direccion,valor:byte);
+    function read(direccion:byte):byte;
+  private
+    intrq,drq:byte; // $80=inactive, 0=active (ports are inverted)
+  end;
 
 const
-    P_ROMDIS    =$02;
-    P_EPROM     =$80;
-    MDSF_INTENA =  1;
-    MDSF_INTRQ  =$80;
-    WSF_BUSY=$1;
-    WSFI_HEADL=$20;
-    WSFI_SEEKERR=$10;
-    WSFI_PULSE=$2;
-    WSFI_TRK0=$4;
-    WSF_NOTREADY=$80;
-    WSF_RNF=$10;
-    WSF_DRQ=2;
-    MF_DRQ=$80;
-    WSFR_RECTYP=$20;
-    COP_NUFFINK=0;      // Not doing anything, guv
-    COP_READ_TRACK=1;     // Reading a track
-    COP_READ_SECTOR=2;    // Reading a sector
-    COP_READ_SECTORS=3;   // Reading multiple sectors
-    COP_WRITE_TRACK=4;    // Writing a track
-    COP_WRITE_SECTOR=5;   // Writing a sector
-    COP_WRITE_SECTORS=6;  // Writing multiple sectors
-    COP_READ_ADDRESS=7;  // Reading a sector header
+  P_ROMDIS=$02; P_EPROM=$80; MDSF_INTENA=1;
+  MDSF_INTRQ=$80; MF_DRQ=$80;
+  WSF_BUSY=1; WSF_DRQ=2; WSF_LOST=4; WSF_CRC=8;
+  WSF_RNF=$10; WSFI_SEEKERR=$10; WSFI_HEADL=$20;
+  WSFI_PULSE=2; WSFI_TRK0=4; WSFR_RECTYP=$20;
+  WSF_WPROT=$40; WSF_NOTREADY=$80;
+  COP_NUFFINK=0; COP_READ_TRACK=1; COP_READ_SECTOR=2;
+  COP_READ_SECTORS=3; COP_WRITE_TRACK=4; COP_WRITE_SECTOR=5;
+  COP_WRITE_SECTORS=6; COP_READ_ADDRESS=7;
 
 var
   microdisc_0:tmicrodisc;
-  disc_count:integer=-1;
+  disc_count:integer=-1; // retained for interface compatibility
 
 implementation
 uses disk_file_format;
 
-var
-  refreshdisks:boolean;
+procedure clear_drq_int(num:byte);
+begin
+  if microdisc_0<>nil then microdisc_0.drq:=MF_DRQ;
+end;
+procedure set_drq_int(num:byte);
+begin
+  if microdisc_0<>nil then microdisc_0.drq:=0;
+end;
+procedure clear_int_irq(num:byte);
+begin
+  if microdisc_0=nil then exit;
+  microdisc_0.intrq:=MDSF_INTRQ;
+  if Assigned(microdisc_0.irq_handle) then microdisc_0.irq_handle(CLEAR_LINE);
+end;
+procedure set_int_irq(num:byte);
+begin
+  if microdisc_0=nil then exit;
+  microdisc_0.intrq:=0;
+  if Assigned(microdisc_0.irq_handle) then begin
+    if (microdisc_0.port_314 and MDSF_INTENA)<>0 then
+      microdisc_0.irq_handle(ASSERT_LINE)
+    else microdisc_0.irq_handle(CLEAR_LINE);
+  end;
+end;
 
 constructor twd17xx.create(clock:dword);
 begin
   self.clock:=clock;
-  disc_count:=disc_count+1;
-  self.num:=disc_count;
+  clrintrq:=clear_int_irq; setintrq:=set_int_irq;
+  clrdrq:=clear_drq_int; setdrq:=set_drq_int;
+  reset;
 end;
-
 destructor twd17xx.free;
 begin
-  disc_count:=disc_count-1;
-end;
-
-function twd17xx.find_sector(secid:byte):boolean;
-var
-  revs:byte;
-begin
-  revs:=0;
-  find_sector:=false;
-  // No disk image? No sectors!
-  if not(dsk[self.c_drive].abierto) then exit;
-  // No sectors on this track? Someone needs to format their disk...
-  if (dsk[self.c_drive].Tracks[self.c_side,self.c_track].number_sector=0) then exit;
-  // We do this more realistically than we need to since this is not
-  // a super-accurate emulation (for now). Never mind. Lets go
-  // around the track up to two times.
-  while (revs<2) do begin
-    // Move on to the next sector
-    self.c_sector:=(self.c_sector+1) mod dsk[self.c_drive].Tracks[self.c_side,self.c_track].number_sector;
-    // If we passed through the start of the track, set the pulse bit in the status register
-    if (self.c_sector=0) then begin
-      revs:=revs+1;
-      self.r_status:=self.r_status or WSFI_PULSE;
-    end;
-    // Found the required sector?
-    if (dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].sector=secid) then begin
-      find_sector:=true;
-      exit;
-    end;
-  end;
-  // The search failed :-(
-end;
-
-procedure twd17xx.seek_track(track:byte);
-begin
-  // Is there a disk in the drive?
-  if dsk[self.c_drive].abierto then begin
-    // Yes. If we are trying to seek to a non-existant track, just seek as far as we can
-    if (track>=dsk[self.c_drive].DiskHeader.nbof_tracks) then begin
-      if dsk[self.c_drive].DiskHeader.nbof_tracks>0 then track:=dsk[self.c_drive].DiskHeader.nbof_tracks-1
-        else track:=0;
-      self.distatus:=WSFI_HEADL or WSFI_SEEKERR;
-    end else self.distatus:=WSFI_HEADL or WSFI_PULSE;
-    // Update our status
-    self.c_track:=track;
-    self.c_sector:=0;
-    self.r_track:=track;
-    // Assert INTRQ in 20 cycles time and update the status accordingly
-    // (note: 20 cycles is waaaaaay faster than any real drive could seek. The actual
-    // delay would depend how far the head had to seek, and what stepping speed was
-    // currently set).
-    self.delayedint:=20;
-    if (track=0) then self.distatus:=self.distatus or WSFI_TRK0;
-    exit;
-  end;
-  // No disk in drive
-  // Set INTRQ because the operation has finished.
-  self.setintrq(self.num);
-  self.r_track:=0;
-  // Set error state
-  self.r_status:=WSF_NOTREADY or WSFI_SEEKERR;
-end;
-function twd17xx.first_sector:boolean;
-begin
-  first_sector:=false;
-  // No disk? no sector...
-  if not(dsk[self.c_drive].abierto) then exit;
-  // No sectors?!
-  if (dsk[self.c_drive].Tracks[self.c_side,self.c_track].number_sector<1) then exit;
-  // We're at the first sector!
-  self.c_sector:=0;
-  self.r_status:=WSFI_PULSE;
-  // Return the sector pointers
-  first_sector:=false;
-end;
-function twd17xx.next_sector:boolean;
-begin
-  next_sector:=false;
-  // No disk? no sector...
-  if not(dsk[self.c_drive].abierto) then exit;
-  // No sectors?!
-  if (dsk[self.c_drive].Tracks[self.c_side,self.c_track].number_sector<1) then exit;
-  // Get the next sector number
-  self.c_sector:=(self.c_sector+1) mod dsk[self.c_drive].Tracks[self.c_side,self.c_track].number_sector;
-  // If we are at the start of the track, set the pulse bit
-  if (self.c_sector=0) then self.r_status:=self.r_status or WSFI_PULSE;
-  // Return the sector pointers
-  next_sector:=true;
-end;
-function calc_crc(crc:word;valor:byte):word;
-var
-  res:word;
-begin
-  res:=((crc and $ff00) shr 8) or ((crc and $ff) shl 8);
-  res:=res xor valor;
-  res:=res xor ((res and $ff) shr 4);
-  res:=res xor ((res shl 8) shl 4);
-  res:=res xor (((res and $ff) shl 4) shl 1);
-  calc_crc:=res;
-end;
-procedure twd17xx.write(direccion,valor:byte);
-var
-  ptemp:pbyte;
-begin
-  case direccion of
-    0:begin // Command register
-         self.clrintrq(self.num);
-         case (valor and $e0) of
-              $00:begin  // Restore or seek
-                    case (valor and $10) of
-                      $00:begin  // Restore (Type I)
-                            self.r_status:=WSF_BUSY;
-                            if (valor and 8)<>0 then self.r_status:=self.r_status or WSFI_HEADL;
-                            self.seek_track(0);
-                            self.currentop:=COP_NUFFINK;
-                            refreshdisks:=true;
-                          end;
-                      $10:begin  //Seek (Type I)
-                            self.r_status:=WSF_BUSY;
-                            if (valor and 8)<>0 then self.r_status:=self.r_status or WSFI_HEADL;
-                            self.seek_track(self.r_data);
-                            self.currentop:=COP_NUFFINK;
-                            refreshdisks:=true;
-                          end;
-                    end;
-              end;
-              $20:begin  // Step (Type I)
-                    self.r_status:=WSF_BUSY;
-                    if (valor and 8)<>0 then self.r_status:=self.r_status or WSFI_HEADL;
-                    if self.last_step_in then self.seek_track(self.c_track+1)
-                       else if (self.c_track>0) then self.seek_track(self.c_track-1)
-                              else self.seek_track(0);
-                    self.currentop:=COP_NUFFINK;
-                    refreshdisks:=true;
-              end;
-              $40:begin  // Step-in (Type I)
-                    self.r_status:=WSF_BUSY;
-                    if (valor and 8)<>0 then self.r_status:=self.r_status or WSFI_HEADL;
-                    self.seek_track(self.c_track+1);
-                    self.last_step_in:=true;
-                    self.currentop:=COP_NUFFINK;
-                    refreshdisks:=true;
-              end;
-              $60:begin  // Step-out (Type I)
-                    self.r_status:=WSF_BUSY;
-                    if (valor and 8)<>0 then self.r_status:=self.r_status or WSFI_HEADL;
-                    if (self.c_track>0) then self.seek_track(self.c_track-1);
-                    self.last_step_in:=false;
-                    self.currentop:=COP_NUFFINK;
-                    refreshdisks:=true;
-              end;
-              $80:begin  // Read sector (Type II)
-                    self.curroffs:=0;
-                    self.currsector:=self.find_sector(self.r_sector);
-                    if not(self.currsector) then begin
-                      self.r_status:=WSF_RNF;
-                      self.clrdrq(self.num);
-                      self.setintrq(self.num);
-                      self.currentop:=COP_NUFFINK;
-                      refreshdisks:=true;
-                      exit;
-                    end;
-                    self.currseclen:=1 shl (dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].sector_size+7);
-                    self.r_status:=WSF_BUSY or WSF_NOTREADY;
-                    self.delayeddrq:=60;
-                    if (valor and $10)<>0 then self.currentop:=COP_READ_SECTORS
-                      else self.currentop:=COP_READ_SECTOR;
-                    self.crc:=$e295;
-                    refreshdisks:=true;
-              end;
-              $a0:begin  // Write sector (Type II)
-                    self.curroffs:=0;
-                    self.currsector:=self.find_sector(self.r_sector);
-                    if not(self.currsector) then begin
-                      self.r_status:=WSF_RNF;
-                      self.clrdrq(self.num);
-                      self.setintrq(self.num);
-                      self.currentop:=COP_NUFFINK;
-                      refreshdisks:=true;
-                      exit;
-                    end;
-                    self.currseclen:=1 shl (dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].sector_size+7);
-                    self.r_status:=WSF_BUSY or WSF_NOTREADY;
-                    self.delayeddrq:=500;
-                    if (valor and $10)<>0 then self.currentop:=COP_WRITE_SECTORS
-                        else self.currentop:=COP_WRITE_SECTOR;
-                    self.crc:=$e295;
-                    refreshdisks:=true;
-              end;
-              $c0:begin  // Read address / Force IRQ
-                    case (valor and $10) of
-                      $00:begin // Read address (Type III)
-                            self.curroffs:=0;
-                            if not(self.currsector) then self.currsector:=self.first_sector
-                              else self.currsector:=self.next_sector;
-                            if not(self.currsector) then begin
-                              self.r_status:=WSF_RNF;
-                              self.clrdrq(self.num);
-                              self.currentop:=COP_NUFFINK;
-                              self.setintrq(self.num);
-                              refreshdisks:=false;
-                            end else begin
-                              self.r_status:=WSF_NOTREADY or WSF_BUSY or WSF_DRQ;
-                              self.setdrq(self.num);
-                              self.currentop:=COP_READ_ADDRESS;
-                              refreshdisks:=true;
-                            end;
-                          end;
-                      $10:begin // Force Interrupt (Type IV)
-                            self.r_status:=0;
-                            self.clrdrq(self.num);
-                            self.setintrq(self.num);
-                            self.delayedint:=0;
-                            self.delayeddrq:=0;
-                            self.currentop:=COP_NUFFINK;
-                            refreshdisks:=true;
-                      end;
-                    end;
-              end;
-              $e0:begin  // Read track / Write track
-                    case (valor and $10) of
-                      $00:begin // Read track (Type III)
-                            self.curroffs:=0;
-                            self.r_status:=WSF_BUSY or WSF_NOTREADY;
-                            self.delayeddrq:=60;
-                            self.currentop:=COP_READ_TRACK;
-                            refreshdisks:=true;
-                          end;
-                      $10:begin // Write track (Type III)
-                            self.curroffs:=0;
-                            self.r_status:=WSF_NOTREADY or WSF_BUSY;
-                            self.delayeddrq:=500;
-                            self.clrdrq(self.num);
-                            self.clrintrq(self.num);
-                            self.delayedint:=0;
-                            self.currentop:=COP_WRITE_TRACK;
-                            refreshdisks:=true;
-                          end;
-                    end;
-              end;
-            end;
-        end;
-    1:self.r_track:=valor;
-    2:self.r_sector:=valor;
-    3:begin
-        self.r_data:=valor;
-        case self.currentop of
-          COP_WRITE_SECTOR,COP_WRITE_SECTORS:begin
-              if not(self.currsector) then begin
-                self.r_status:=self.r_status and not(WSF_DRQ);
-                self.r_status:=self.r_status or WSF_RNF;
-                self.clrdrq(self.num);
-                self.currentop:=COP_NUFFINK;
-                refreshdisks:=true;
-                exit;
-              end;
-              ptemp:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].data;
-              inc(ptemp,dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].posicion_data);
-              if (self.curroffs=0) then dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].status1:=$fb;
-              ptemp[self.curroffs]:=self.r_data;
-              self.curroffs:=self.curroffs+1;
-              self.crc:=calc_crc(self.crc,self.r_data);
-              //if( !wd->disk[wd->c_drive]->modified ) refreshdisks = SDL_TRUE;
-              //wd->disk[wd->c_drive]->modified = SDL_TRUE;
-              //wd->disk[wd->c_drive]->modified_time = 0;
-              self.r_status:=self.r_status and not(WSF_DRQ);
-              self.clrdrq(self.num);
-              if (self.curroffs>(self.currseclen-1)) then begin
-                dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].data_length:=self.crc;
-                if (self.currentop=COP_WRITE_SECTORS) then begin
-                  // Get the next sector, and carry on!
-                  self.r_sector:=self.r_sector+1;
-                  self.curroffs:=0;
-                  self.currsector:=self.find_sector(self.r_sector);
-                  self.crc:=$e295;
-                  if not(self.currsector) then begin
-                    self.delayedint:=20;
-                    self.distatus:=self.sectype;
-                    self.currentop:=COP_NUFFINK;
-                    self.r_status:=self.r_status and not(WSF_DRQ);
-                    self.clrdrq(self.num);
-                    refreshdisks:=true;
-                    exit;
-                  end;
-                  self.delayeddrq:=180;
-                  exit;
-                end;
-                self.delayedint:=32;
-                self.distatus:=self.sectype;
-                self.currentop:=COP_NUFFINK;
-                self.r_status:=self.r_status and not(WSF_DRQ);
-                self.clrdrq(self.num);
-                refreshdisks:=true;
-              end else self.delayeddrq:=32;
-          end;
-        end;
-      end;
-      else halt(0);
-  end;
-end;
-
-function twd17xx.read(direccion:byte):byte;
-var
-  ret:byte;
-  ptemp:pbyte;
-begin
-  case direccion of
-    0:begin // Status register
-        self.clrintrq(self.num);   // Reading the status register clears INTRQ
-        ret:=self.r_status;
-      end;
-    1:ret:=self.r_track; // Track register
-    2:ret:=self.r_sector; // Sector register
-    3:case self.currentop of
-       COP_READ_SECTOR,COP_READ_SECTORS:begin
-          // We somehow started a sector read operation without a valid sector.
-          if not(self.currsector) then begin
-            // Abort.
-            self.r_status:=self.r_status and not(WSF_DRQ);
-            self.r_status:=self.r_status or WSF_RNF;
-            self.clrdrq(self.num);
-            self.currentop:=COP_NUFFINK;
-            refreshdisks:=true;
-            exit;
-          end;
-          // If this is the first read of a read operation, remember the record type for later
-          ptemp:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].data;
-          inc(ptemp,dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].posicion_data);
-          if (self.curroffs=0) then begin
-            if (dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].status1=$f8) then self.sectype:=WSFR_RECTYP
-              else self.sectype:=0;
-          end;
-          // Get the next byte from the sector
-          self.r_data:=ptemp[self.curroffs];
-          self.curroffs:=self.curroffs+1;
-          self.crc:=calc_crc(self.crc,self.r_data);
-          // Clear any previous DRQ
-          self.r_status:=self.r_status and not(WSF_DRQ);
-          self.clrdrq(self.num);
-          // Has the whole sector been read?
-          if (self.curroffs>(self.currseclen-1)) then begin
-            // If you want to do CRC checking, wd->crc should equal (wd->currsector->data_ptr[wd_curroffs]<<8)|wd->currsector->data_ptr[wd_curroffs+1] right here
-            // We've got to the end of the current sector. IF it is a multiple sector
-            // operation, we need to move on!
-            if (self.currentop=COP_READ_SECTORS) then begin
-              // Get the next sector, and carry on!
-              self.r_sector:=self.r_sector+1;
-              self.curroffs:=0;
-              self.currsector:=self.find_sector(self.r_sector);
-              self.crc:=$e295;
-              // If we hit the end of the track, thats fine, it just means the operation
-              // is finished.
-              if not(self.currsector) then begin
-                self.delayedint:=20;           // Assert INTRQ in 20 cycles time
-                self.distatus:=self.sectype;  // ...and when doing so, set the status to reflect the record type
-                self.currentop:=COP_NUFFINK;   // No longer in the middle of an operation
-                self.r_status:=self.r_status and not(WSF_DRQ);    // Clear DRQ (no data to read)
-                self.clrdrq(self.num);
-                refreshdisks:=true;       // Turn off the disk LED in the status bar
-                exit;
-              end;
-              // We've got the next sector lined up. Assert DRQ in 180 cycles time (simulate a bit of a delay
-              // between sectors. Note that most of these values have been pulled out of thin air and might need
-              // adjusting for some pickier loaders).
-              self.delayeddrq:=180;
-              exit;
-            end;
-            // Just reading one sector so..
-            self.delayedint:=32;           // INTRQ in a little while because we're finished
-            self.distatus:=self.sectype;  // Set the status accordingly
-            self.currentop:=COP_NUFFINK;   // Finished the op
-            self.r_status:=self.r_status and not(WSF_DRQ);    // Clear DRQ (no more data)
-            self.clrdrq(self.num);
-            refreshdisks:=true;       // Turn off disk LED
-          end else begin
-            self.delayeddrq:=32;           // More data ready. DRQ to let them know!
-          end;
-          ret:=self.r_data;
-       end;
-       COP_READ_ADDRESS:begin
-          if not(self.currsector) then begin
-            self.r_status:=self.r_status and not(WSF_DRQ);
-            self.clrdrq(self.num);
-            self.currentop:=COP_NUFFINK;
-            refreshdisks:=true;
-            exit;
-          end;
-          //Quiere leer los valores del track...
-          case self.curroffs of
-              0:begin
-                 self.r_sector:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].track;
-                 self.r_data:=self.r_sector;
-              end;
-              1:self.r_data:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].head;
-              2:self.r_data:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].sector;
-              3:self.r_data:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].sector_size;
-              4:self.r_data:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].data_length shr 8;
-              5:self.r_data:=dsk[self.c_drive].Tracks[self.c_side,self.c_track].sector[self.c_sector].data_length and $ff;
-          end;
-          self.curroffs:=self.curroffs+1;
-          self.r_status:=self.r_status and not(WSF_DRQ);
-          self.clrdrq(self.num);
-          ret:=self.r_data;
-          if (self.curroffs>=6) then begin
-            self.delayedint:=20;
-            self.distatus:=0;
-            self.currentop:=COP_NUFFINK;
-            refreshdisks:=true;
-          end else begin
-            self.delayeddrq:=32;
-          end;
-        end;
-       else halt(0);
-    end;
-  end;
-read:=ret;
 end;
 
 procedure twd17xx.reset;
 begin
-  self.r_status:=0;
-  self.r_track:=0;
-  self.r_sector:=0;
-  self.r_data:=0;
-  self.c_drive:=0;
-  self.c_side:=0;
-  self.c_track:=0;
-  self.sectype:=0;
-  self.c_sector:=0;
-  self.last_step_in:=false;
-  self.currentop:=COP_NUFFINK;
-  self.delayedint:=0;
-  self.delayeddrq:=0;
-  self.distatus:=-1;
-  self.ddstatus:=-1;
-  refreshdisks:=true;
-  self.curroffs:=0;          // Current offset into the above sector
-  self.currsector:=false;        // Pointers to the current sector in the disk image being used by an active read or write operation
-  self.currseclen:=0;        // The length of the current sector
-  self.crc:=0;
+  r_status:=WSFI_TRK0; r_track:=0; r_sector:=1; r_data:=0;
+  c_drive:=0; c_side:=0; c_sector:=0;
+  fillchar(physical_track,SizeOf(physical_track),0);
+  currentop:=COP_NUFFINK; last_step_in:=true;
+  update_track:=false; verify_seek:=false; pending_track:=0;
+  delayedint:=0; delayeddrq:=0; distatus:=-1; drq_deadline:=0;
+  curroffs:=0; currseclen:=0; sectype:=0; crc:=0;
+  force_mask:=0; index_cycles:=0;
+  format_sync:=0; format_crc:=$ffff; format_crc_active:=false;
+end;
+
+function twd17xx.media_ready:boolean;
+begin
+  media_ready:=false;
+  if c_drive>High(dsk) then exit;
+  if not dsk[c_drive].abierto then exit;
+  if c_side>=dsk[c_drive].DiskHeader.nbof_heads then exit;
+  if c_drive>3 then exit;
+  if physical_track[c_drive]>High(dsk[c_drive].Tracks[c_side]) then exit;
+  if physical_track[c_drive]>=dsk[c_drive].DiskHeader.nbof_tracks then exit;
+  media_ready:=true;
+end;
+
+function twd17xx.find_sector(secid:byte):boolean;
+var i,n:integer;
+begin
+  find_sector:=false;
+  if not media_ready then exit;
+  n:=dsk[c_drive].Tracks[c_side,physical_track[c_drive]].number_sector;
+  if n=0 then exit;
+  for i:=1 to n do begin
+    c_sector:=(c_sector+1) mod n;
+    with dsk[c_drive].Tracks[c_side,physical_track[c_drive]].sector[c_sector] do
+      if (sector=secid) and (track=r_track) then begin
+        find_sector:=true; exit;
+      end;
+  end;
+end;
+
+procedure twd17xx.complete(status:byte;delay:integer);
+begin
+  currentop:=COP_NUFFINK; delayeddrq:=0; drq_deadline:=0;
+  r_status:=r_status and not WSF_DRQ;
+  clrdrq(0);
+  distatus:=status; delayedint:=delay;
+  if delay<=0 then begin
+    r_status:=status; distatus:=-1; delayedint:=0; setintrq(0);
+  end;
+end;
+
+procedure twd17xx.seek_track(track:byte;command:byte;update:boolean);
+var distance,rate,i:integer; valid_id:boolean;
+begin
+  // Physical position and the track register are separate. 83 tracks supported.
+  if track>82 then track:=82;
+  distance:=abs(integer(track)-integer(physical_track[c_drive]));
+  physical_track[c_drive]:=track;
+  if update then begin
+    if (command and $e0)=0 then begin
+      if (command and $10)<>0 then r_track:=r_data else r_track:=0;
+    end
+    else if last_step_in then r_track:=r_track+1
+    else if r_track>0 then dec(r_track);
+  end;
+  pending_track:=track; update_track:=update;
+  verify_seek:=(command and 4)<>0;
+  r_status:=WSF_BUSY;
+  if (command and 8)<>0 then r_status:=r_status or WSFI_HEADL;
+  case command and 3 of
+    0:rate:=6000; 1:rate:=12000; 2:rate:=20000; else rate:=30000;
+  end;
+  if distance=0 then distance:=1;
+  distatus:=r_status and not WSF_BUSY;
+  if track=0 then distatus:=distatus or WSFI_TRK0;
+  if verify_seek then begin
+    if not media_ready then distatus:=distatus or WSFI_SEEKERR
+    else begin
+      // Verification must find a matching cylinder ID on this physical track.
+      valid_id:=false;
+      for i:=0 to integer(dsk[c_drive].Tracks[c_side,track].number_sector)-1 do
+        if (dsk[c_drive].Tracks[c_side,track].sector[i].track=r_track) and
+           ((dsk[c_drive].Tracks[c_side,track].sector[i].status2 and 1)=0) then valid_id:=true;
+      if not valid_id then distatus:=distatus or WSFI_SEEKERR;
+    end;
+  end;
+  // Timing is in FDC clocks; Oric CPU and FDC both use 1 MHz.
+  delayedint:=distance*rate;
+  currentop:=COP_NUFFINK;
+end;
+
+procedure twd17xx.begin_sector(writing,multiple:boolean);
+var flags:byte;
+begin
+  flags:=0;
+  if not find_sector(r_sector) then begin complete(WSF_RNF,20); exit; end;
+  with dsk[c_drive].Tracks[c_side,physical_track[c_drive]].sector[c_sector] do begin
+    if (sector_size>5) or (data_length<>(128 shl sector_size)) then begin
+      complete(WSF_RNF,20); exit;
+    end;
+    if (status2 and 1)<>0 then begin complete(WSF_RNF or WSF_CRC,20); exit; end;
+    currseclen:=data_length;
+    if status1=$f8 then flags:=WSFR_RECTYP;
+    if (status2 and 2)<>0 then flags:=flags or WSF_CRC;
+  end;
+  if writing and dsk[c_drive].protegido then begin complete(WSF_WPROT,20); exit; end;
+  curroffs:=0;
+  r_status:=WSF_BUSY;
+  if writing then begin
+    if multiple then currentop:=COP_WRITE_SECTORS else currentop:=COP_WRITE_SECTOR;
+  end else begin
+    sectype:=flags;
+    if multiple then currentop:=COP_READ_SECTORS else currentop:=COP_READ_SECTOR;
+  end;
+  delayeddrq:=60;
+end;
+
+procedure twd17xx.update_raw_sector;
+var t:^track_type; s:^sector_info_type; i,p:integer; c:word;
+begin
+  t:=@dsk[c_drive].Tracks[c_side,physical_track[c_drive]];
+  s:=@t^.sector[c_sector];
+  c:=$ffff;
+  c:=oric_crc_byte(c,$a1); c:=oric_crc_byte(c,$a1);
+  c:=oric_crc_byte(c,$a1); c:=oric_crc_byte(c,s^.status1);
+  for i:=0 to s^.data_length-1 do
+    c:=oric_crc_byte(c,t^.data[s^.posicion_data+i]);
+  s^.data_crc:=c; s^.status2:=s^.status2 and not 2;
+  if (t^.raw_data=nil) or (t^.raw_length=0) then exit;
+  p:=s^.raw_data_offset;
+  t^.raw_data[(p+t^.raw_length-1) mod t^.raw_length]:=s^.status1;
+  for i:=0 to s^.data_length-1 do
+    t^.raw_data[(p+i) mod t^.raw_length]:=t^.data[s^.posicion_data+i];
+  t^.raw_data[(p+s^.data_length) mod t^.raw_length]:=c shr 8;
+  t^.raw_data[(p+s^.data_length+1) mod t^.raw_length]:=c and $ff;
+end;
+
+procedure twd17xx.end_sector(writing:boolean);
+var multi:boolean;
+begin
+  multi:=(currentop=COP_WRITE_SECTORS) or (currentop=COP_READ_SECTORS);
+  if writing then update_raw_sector;
+  if (not writing) and ((sectype and WSF_CRC)<>0) then begin
+    complete(sectype,32); exit;
+  end;
+  if multi then begin
+    inc(r_sector); begin_sector(writing,true);
+    if currentop<>COP_NUFFINK then delayeddrq:=180;
+  end else if writing then complete(0,32)
+    else complete(sectype,32);
+end;
+
+procedure twd17xx.format_byte(value:byte);
+var v:byte;
+  procedure emit(b:byte);
+  begin
+    if curroffs<currseclen then begin
+      track_buffer[curroffs]:=b; inc(curroffs);
+    end;
+  end;
+begin
+  // Byte-level MFM approximation: F5=A1 missing clock, F6=C2, F7=CRC.
+  if value=$f7 then begin
+    emit(format_crc shr 8); emit(format_crc and $ff);
+    format_crc_active:=false; format_sync:=0;
+  end else begin
+    v:=value;
+    if value=$f5 then begin
+      v:=$a1;
+      if format_sync=0 then begin format_crc:=$ffff; format_crc_active:=true; end;
+      if format_sync<3 then inc(format_sync);
+    end else begin
+      if value=$f6 then v:=$c2;
+      format_sync:=0;
+    end;
+    emit(v);
+    if format_crc_active then format_crc:=oric_crc_byte(format_crc,v);
+  end;
+end;
+
+procedure twd17xx.write(direccion,valor:byte);
+var cmd,target,i:integer; multiple:boolean;
+begin
+  case direccion and 3 of
+    0:begin
+      // Force Interrupt is accepted while busy. Other commands are ignored.
+      if ((r_status and WSF_BUSY)<>0) and ((valor and $f0)<>$d0) then exit;
+      clrintrq(0); clrdrq(0);
+      delayedint:=0; delayeddrq:=0; distatus:=-1; drq_deadline:=0;
+      currentop:=COP_NUFFINK; force_mask:=0; r_status:=0;
+      cmd:=valor and $f0;
+      if cmd=$d0 then begin
+        force_mask:=valor and 7;
+        if physical_track[c_drive]=0 then r_status:=WSFI_TRK0;
+        if (valor and 8)<>0 then setintrq(0);
+        exit;
+      end;
+      if cmd<$80 then begin
+        target:=physical_track[c_drive];
+        case valor and $e0 of
+          $00:if (valor and $10)=0 then begin target:=0; r_track:=0; end
+              else target:=target+integer(r_data)-integer(r_track);
+          $20:if last_step_in then inc(target) else dec(target);
+          $40:begin last_step_in:=true; inc(target); end;
+          $60:begin last_step_in:=false; dec(target); end;
+        end;
+        if target<0 then target:=0;
+        if target>82 then target:=82;
+        seek_track(target,valor,((valor and $e0)=0) or ((valor and $10)<>0));
+        exit;
+      end;
+      multiple:=(valor and $10)<>0;
+      case valor and $e0 of
+        $80:begin_sector(false,multiple);
+        $a0:begin
+          sectype:=0; if (valor and 1)<>0 then sectype:=WSFR_RECTYP;
+          begin_sector(true,multiple);
+        end;
+        $c0:begin
+          if not media_ready then begin complete(WSF_RNF,20); exit; end;
+          i:=dsk[c_drive].Tracks[c_side,physical_track[c_drive]].number_sector;
+          if i=0 then begin complete(WSF_RNF,20); exit; end;
+          c_sector:=(c_sector+1) mod i;
+          with dsk[c_drive].Tracks[c_side,physical_track[c_drive]].sector[c_sector] do begin
+            address_data[0]:=track; address_data[1]:=head;
+            address_data[2]:=sector; address_data[3]:=sector_size;
+            address_data[4]:=id_crc shr 8; address_data[5]:=id_crc and $ff;
+            r_sector:=track;
+            sectype:=0; if (status2 and 1)<>0 then sectype:=WSF_CRC;
+          end;
+          curroffs:=0; currseclen:=6; r_status:=WSF_BUSY;
+          currentop:=COP_READ_ADDRESS; delayeddrq:=60;
+        end;
+        $e0:begin
+          if not media_ready then begin complete(WSF_RNF,20); exit; end;
+          if (valor and $10)=0 then begin
+            sectype:=0;
+            currseclen:=dsk[c_drive].Tracks[c_side,physical_track[c_drive]].raw_length;
+            if currseclen=0 then begin complete(WSF_RNF,20); exit; end;
+            copymemory(@track_buffer[0],dsk[c_drive].Tracks[c_side,physical_track[c_drive]].raw_data,currseclen);
+            currentop:=COP_READ_TRACK;
+          end else begin
+            if dsk[c_drive].protegido then begin complete(WSF_WPROT,20); exit; end;
+            currseclen:=6250; currentop:=COP_WRITE_TRACK;
+            fillchar(track_buffer,SizeOf(track_buffer),$4e);
+            format_sync:=0; format_crc:=$ffff; format_crc_active:=false;
+          end;
+          curroffs:=0; r_status:=WSF_BUSY; delayeddrq:=60;
+        end;
+      end;
+    end;
+    1:r_track:=valor;
+    2:r_sector:=valor;
+    3:begin
+      r_data:=valor;
+      if (r_status and WSF_DRQ)=0 then exit;
+      if not (currentop in [COP_WRITE_SECTOR,COP_WRITE_SECTORS,COP_WRITE_TRACK]) then exit;
+      r_status:=r_status and not WSF_DRQ; clrdrq(0); drq_deadline:=0;
+      if not media_ready then begin complete(WSF_RNF,20); exit; end;
+      if currentop=COP_WRITE_TRACK then begin
+        format_byte(valor);
+        if curroffs>=currseclen then begin
+          if not oric_decode_track(c_drive,c_side,physical_track[c_drive],@track_buffer[0],currseclen) then
+            complete(WSF_RNF,32)
+          else complete(0,32);
+        end else delayeddrq:=32;
+      end else begin
+        with dsk[c_drive].Tracks[c_side,physical_track[c_drive]] do begin
+          if sectype=WSFR_RECTYP then sector[c_sector].status1:=$f8
+            else sector[c_sector].status1:=$fb;
+          data[sector[c_sector].posicion_data+curroffs]:=valor;
+        end;
+        inc(curroffs);
+        if curroffs>=currseclen then end_sector(true) else delayeddrq:=32;
+      end;
+    end;
+  end;
+end;
+
+function twd17xx.read(direccion:byte):byte;
+begin
+  read:=r_data;
+  case direccion and 3 of
+    0:begin clrintrq(0); read:=r_status; end;
+    1:read:=r_track;
+    2:read:=r_sector;
+    3:begin
+      if (r_status and WSF_DRQ)=0 then exit;
+      if not (currentop in [COP_READ_SECTOR,COP_READ_SECTORS,COP_READ_ADDRESS,COP_READ_TRACK]) then exit;
+      if currentop=COP_READ_ADDRESS then r_data:=address_data[curroffs]
+      else if currentop=COP_READ_TRACK then r_data:=track_buffer[curroffs]
+      else begin
+        if not media_ready then begin complete(WSF_RNF,20); exit; end;
+        with dsk[c_drive].Tracks[c_side,physical_track[c_drive]] do
+          r_data:=data[sector[c_sector].posicion_data+curroffs];
+      end;
+      // Set the result BEFORE any completion/multi-sector transition.
+      read:=r_data;
+      inc(curroffs); r_status:=r_status and not WSF_DRQ; clrdrq(0); drq_deadline:=0;
+      if curroffs>=currseclen then begin
+        if currentop in [COP_READ_SECTOR,COP_READ_SECTORS] then end_sector(false)
+        else complete(sectype,32);
+      end else delayeddrq:=32;
+    end;
+  end;
 end;
 
 procedure twd17xx.run(cycles:word);
 begin
-  // Is there a pending INTRQ?
-  if (self.delayedint>0) then begin
-    // Count down the INTRQ timer!
-    self.delayedint:=self.delayedint-cycles;
-    // Time to assert INTRQ?
-    if (self.delayedint<=0) then begin
-      // Yep! Stop timing.
-      self.delayedint:=0;
-      // Need to update the status register?
-      if (self.distatus<>-1) then begin
-        // Yep. Do so.
-        self.r_status:=self.distatus;
-        self.distatus:=-1;
-      end;
-      // Assert INTRQ (this function pointer is set up by the microdisc/jasmin/whatever controller)
-      self.setintrq(self.num);
+  // A byte not serviced within its transfer window produces Lost Data.
+  if drq_deadline>0 then begin
+    dec(drq_deadline,cycles);
+    if drq_deadline<=0 then complete(WSF_LOST,0);
+  end;
+  // Approximate index pulse for Force Interrupt bit 2 (300 rpm).
+  inc(index_cycles,cycles);
+  if index_cycles>=200000 then begin
+    dec(index_cycles,200000);
+    if ((force_mask and 4)<>0) and media_ready then setintrq(0);
+  end;
+  if delayedint>0 then begin
+    dec(delayedint,cycles);
+    if delayedint<=0 then begin
+      delayedint:=0;
+      if distatus>=0 then r_status:=distatus;
+      distatus:=-1; setintrq(0);
     end;
   end;
-  // Is there a pending DRQ?
-  if (self.delayeddrq>0) then begin
-    // Count down the DRQ timer!
-    self.delayeddrq:=self.delayeddrq-cycles;
-    // Time to assert DRQ?
-    if (self.delayeddrq<=0) then begin
-      // Yep! Stop timing.
-      self.delayeddrq:=0;
-      // Need to update the status register?
-      if (self.ddstatus<>-1) then begin
-        // Yep. Do so.
-        self.r_status:=self.ddstatus;
-        self.ddstatus:=-1;
-      end;
-      // Assert DRQ
-      self.r_status:=self.r_status or WSF_DRQ;
-      self.setdrq(self.num);
+  if delayeddrq>0 then begin
+    dec(delayeddrq,cycles);
+    if delayeddrq<=0 then begin
+      delayeddrq:=0; r_status:=r_status or WSF_DRQ; drq_deadline:=32; setdrq(0);
     end;
   end;
-end;
-
-//microdisc
-procedure clear_drq_int(num:byte);
-var
-  md:tmicrodisc;
-begin
-  case num of
-    0:md:=microdisc_0;
-  end;
-  md.drq:=MF_DRQ;
-end;
-procedure set_drq_int(num:byte);
-var
-  md:tmicrodisc;
-begin
-  case num of
-    0:md:=microdisc_0;
-  end;
-  md.drq:=0;
-end;
-procedure clear_int_irq(num:byte);
-var
-  md:tmicrodisc;
-begin
-  case num of
-    0:md:=microdisc_0;
-  end;
-  md.intrq:=MDSF_INTRQ;
-  md.irq_handle(CLEAR_LINE);
-end;
-
-procedure set_int_irq(num:byte);
-var
-  md:tmicrodisc;
-begin
-  case num of
-    0:md:=microdisc_0;
-  end;
-  md.intrq:=0;
-  if (md.port_314 and MDSF_INTENA)<>0 then md.irq_handle(ASSERT_LINE);
 end;
 
 constructor tmicrodisc.create(clock:dword;set_irq:tirq_handler);
 begin
-  self.wd:=twd17xx.create(clock);
-  self.irq_handle:=set_irq;
-  self.wd.clrintrq:=clear_int_irq;
-  self.wd.setintrq:=set_int_irq;
-  self.wd.clrdrq:=clear_drq_int;
-  self.wd.setdrq:=set_drq_int;
+  irq_handle:=set_irq; wd:=twd17xx.create(clock);
+  port_314:=0; intrq:=MDSF_INTRQ; drq:=MF_DRQ;
 end;
-
 destructor tmicrodisc.free;
 begin
-  self.wd.free;
+  if Assigned(irq_handle) then irq_handle(CLEAR_LINE);
+  wd.free;
 end;
-
 procedure tmicrodisc.reset;
 begin
-  self.port_314:=0;
-  self.intrq:=0;
-  self.drq:=0;
-  self.wd.reset;
+  port_314:=0; intrq:=MDSF_INTRQ; drq:=MF_DRQ;
+  wd.reset;
+  if Assigned(irq_handle) then irq_handle(CLEAR_LINE);
 end;
-
 procedure tmicrodisc.write(direccion,valor:byte);
 begin
-case (direccion and $f) of
-  0..3:self.wd.write(direccion,valor);
-  $4:begin
-        self.port_314:=valor;
-        self.wd.c_drive:=(valor shr 5) and $3;
-        self.wd.c_side:=(valor and $10) shr 4;
-        if @self.irq_handle<>nil then if (((valor and MDSF_INTENA)<>0) and (self.intrq=0)) then self.irq_handle(ASSERT_LINE)
-          else self.irq_handle(CLEAR_LINE);
-       end;
-  $8:halt(0);
+  case direccion and $f of
+    0..3:wd.write(direccion and 3,valor);
+    4:begin
+      port_314:=valor;
+      wd.c_drive:=(valor shr 5) and 3; wd.c_side:=(valor shr 4) and 1;
+      if Assigned(irq_handle) then begin
+        if ((valor and MDSF_INTENA)<>0) and (intrq=0) then irq_handle(ASSERT_LINE)
+          else irq_handle(CLEAR_LINE);
+      end;
+    end;
+    // Other addresses have no Microdisc write register.
+  end;
 end;
-end;
-
 function tmicrodisc.read(direccion:byte):byte;
 begin
-case (direccion and $f) of
-  0..3:read:=self.wd.read(direccion);
-  4:read:=self.intrq or $7f;
-  8:read:=self.drq or $7f;
+  read:=$ff;
+  case direccion and $f of
+    0..3:read:=wd.read(direccion and 3);
+    4:if ((port_314 and MDSF_INTENA)<>0) and (intrq=0) then read:=$7f;
+    8:read:=drq or $7f;
+  end;
 end;
-end;
-
 end.

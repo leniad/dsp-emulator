@@ -61,7 +61,7 @@ type
 var
  rom,rom2:array[0..$2ffff] of word;
  ram,ram2:array[0..$3fff] of word;
- road_ram,char_ram,sprite_ram:array[0..$7ff] of word;
+ road_ram,char_ram,sprite_ram,sprite_ram_w:array[0..$7ff] of word;
  tile_ram:array[0..$7fff] of word;
  sprite_rom:array[0..$3ffff] of dword;
  s16_info:tsystem16_info;
@@ -75,8 +75,8 @@ procedure update_video_outrun;
 procedure draw_sprites(pri:byte);
 var
   f,sprpri,g:byte;
-  vzoom,hzoom,top,addr,bank,pix,data_7,color,height:word;
-  xpos,x,y,ydelta,ytarget,xacc,yacc,pitch,xdelta:integer;
+  vzoom,hzoom,addr,bank,pix,data_7,color,height,pitch_word:word;
+  top,xpos,x,y,ydelta,ytarget,xacc,yacc,pitch,xdelta:integer;
   pixels,spritedata:dword;
   hide,flip:boolean;
 procedure system16b_draw_pixel(x:integer;y,pix:word);
@@ -105,7 +105,7 @@ begin
     sprite_ram[(f*8)+7]:=addr;
     hide:=(sprite_ram[f*8] and $5000)<>0;
     if hide then continue;
-    top:=(sprite_ram[f*8] and $1ff)-$100;
+    top:=Integer(sprite_ram[f*8] and $1ff)-$100;
     bank:=((sprite_ram[f*8] shr 9) and $7) mod s16_info.banks;
 		xpos:=sprite_ram[(f*8)+2] and $1ff;
     if (sprite_ram[(f*8)+4] and $2000)<>0 then xdelta:=1
@@ -114,14 +114,14 @@ begin
       else xpos:=xpos-$b7; //-$bd+6
     vzoom:=sprite_ram[(f*8)+3] and $7ff;
     hzoom:=sprite_ram[(f*8)+4] and $7ff;
-    // clamp to a maximum of 8x (not 100% confirmed)
 		if (vzoom<$40) then vzoom:=$40;
 		if (hzoom<$40) then hzoom:=$40;
     color:=((sprite_ram[(f*8)+5] and $7f) shl 4) or (sprite_ram[(f*8)+3] and $4000);
-    // clamp to within the memory region size
 		spritedata:=$10000*bank;
     flip:=((not(sprite_ram[(f*8)+4]) shr 14) and 1)<>0;
-		pitch:=smallint((sprite_ram[(f*8)+2] shr 1) or ((sprite_ram[(f*8)+4] and $1000) shl 3)) div 256;
+    pitch_word:=(sprite_ram[(f*8)+2] shr 1) or ((sprite_ram[(f*8)+4] and $1000) shl 3);
+    pitch:=pitch_word shr 8;
+    if pitch>=128 then Dec(pitch,256);
     height:=(sprite_ram[(f*8)+5] shr 8)+1;
     if (sprite_ram[(f*8)+4] and $8000)<>0 then ydelta:=1
       else ydelta:=-1;
@@ -129,7 +129,6 @@ begin
     y:=top;
     ytarget:=top+ydelta*height;
 		while y<>ytarget do begin
-			// advance a row
 			if ((y<256) and (y>=0)) then begin
         xacc:=0;
 				if not(flip) then begin
@@ -149,7 +148,7 @@ begin
 						if (pixels and $f0)=$f0 then begin
               sprite_ram[(f*8)+7]:=data_7;
               break;
-            end else data_7:=data_7+1;
+            end else data_7:=(Integer(data_7)+1) and $ffff;
 					end;
 				end else begin
 				  // flipped case
@@ -169,13 +168,13 @@ begin
 						if (pixels and $0f000000)=$0f000000 then begin
               sprite_ram[(f*8)+7]:=data_7;
               break;
-            end else data_7:=data_7-1;
+            end else data_7:=(Integer(data_7)+$ffff) and $ffff;
 					end;
 			 	end; //del flip
-        yacc:=yacc+vzoom;
-			  addr:=addr+pitch*(yacc shr 9);
-			  yacc:=yacc and $1ff;
-			end; //De la Y
+      end; // visible row
+      yacc:=yacc+vzoom;
+      addr:=(Integer(addr)+pitch*(yacc shr 9)) and $ffff;
+      yacc:=yacc and $1ff;
       y:=y+ydelta;
 		end; //Del while
 	end;
@@ -494,7 +493,7 @@ if ((direccion>=s315_5195_0.dirs_start[2]) and (direccion<s315_5195_0.dirs_end[2
   zona:=true;
 end;
 if ((direccion>=s315_5195_0.dirs_start[3]) and (direccion<s315_5195_0.dirs_end[3])) then begin
-  outrun_getword:=sprite_ram[(direccion and $fff) shr 1]; //Object RAM
+  outrun_getword:=sprite_ram_w[(direccion and $fff) shr 1]; //Object RAM
   zona:=true;
 end;
 if ((direccion>=s315_5195_0.dirs_start[4]) and (direccion<s315_5195_0.dirs_end[4])) then begin
@@ -579,7 +578,7 @@ case (direccion and $38) of
     $10:;
     $18:;
     $30:; //watchdog
-    $38:;
+    $38:copymemory(@sprite_ram,@sprite_ram_w,$1000);
 end;
 end;
 
@@ -672,7 +671,7 @@ if ((direccion>=s315_5195_0.dirs_start[2]) and (direccion<s315_5195_0.dirs_end[2
   zona:=true;
 end;
 if ((direccion>=s315_5195_0.dirs_start[3]) and (direccion<s315_5195_0.dirs_end[3])) then begin
-  sprite_ram[(direccion and $fff) shr 1]:=valor; //Object RAM
+  sprite_ram_w[(direccion and $fff) shr 1]:=valor; //Object RAM
   zona:=true;
 end;
 if ((direccion>=s315_5195_0.dirs_start[4]) and (direccion<s315_5195_0.dirs_end[4])) then begin

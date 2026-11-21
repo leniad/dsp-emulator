@@ -174,7 +174,6 @@ var
  sprite_ram:array[0..1,0..$f] of byte;
  x_hack,y_hack:integer;
  alibaba_mystery:word;
- irq_vector:byte;
 
 procedure update_video_pacman;
 var
@@ -304,7 +303,7 @@ while EmuStatus=EsRunning do begin
     //Los timings del Z80 estan bien, supongo que es correcto (parece que no hay daños colaterales!)
     case f of
       96:update_video_pacman;
-      224:if irq_vblank then z80_0.change_irq_vector(ASSERT_LINE,irq_vector);
+      224:if irq_vblank then z80_0.change_irq(ASSERT_LINE);
     end;
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
@@ -366,7 +365,8 @@ end;
 
 procedure pacman_outbyte(puerto:word;valor:byte);
 begin
-if (puerto and $ff)=0 then irq_vector:=valor;
+//Ojo! La IRQ puede estar activa! No se puede cambiar el vector despues
+if (puerto and $ff)=0 then z80_0.irq_vector:=valor;
 end;
 
 procedure pacman_sound_update;
@@ -596,8 +596,8 @@ end;
 procedure piranha_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $ff)=0 then begin
-  if valor=$fa then irq_vector:=$78
-    else irq_vector:=valor;
+  if valor=$fa then z80_0.irq_vector:=$78
+    else z80_0.irq_vector:=valor;
 end;
 end;
 
@@ -690,7 +690,6 @@ begin
  frame_main:=z80_0.tframes;
  namco_snd_0.reset;
  irq_vblank:=false;
- irq_vector:=$ff;
  dec_enable:=false;
  marcade.in0:=$ef;
  marcade.in1:=$7f;

@@ -117,7 +117,7 @@ k052109_0.draw_layer(2,5); //B
 k051960_0.draw_sprites(0,-1);
 if prioridad then begin
   k051960_0.draw_sprites(3,-1);
-  k051316_0.draw(5);
+  k051316_0.draw(5,112,16,304,224,8,16);
   k051960_0.draw_sprites(2,-1);
   k051960_0.draw_sprites(5,-1);
   k052109_0.draw_layer(1,5); //A
@@ -125,7 +125,7 @@ if prioridad then begin
 end else begin
   k051960_0.draw_sprites(5,-1);
   k052109_0.draw_layer(1,5); //A
-  k051316_0.draw(5);
+  k051316_0.draw(5,112,16,304,224,8,16);
   k051960_0.draw_sprites(4,-1);
   k051960_0.draw_sprites(3,-1);
   k051960_0.draw_sprites(2,-1);
@@ -273,7 +273,7 @@ case direccion of
             if (valor and $40)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
               else k052109_0.set_rmrd_line(CLEAR_LINE);
 	          // bit 5 enables 051316 wraparound
-	          //m_k051316->wraparound_enable(data & 0x20);
+            k051316_0.wraparound_enable((valor and $20)<>0);
 	          // FIRQ control
 	          sub_firq_enable:=(valor and $10)<>0;
 	          // bank # (ROMS G16 and I16)

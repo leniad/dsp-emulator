@@ -1,9 +1,7 @@
-unit taito_b_hw;
+﻿unit taito_b_hw;
 
 interface
 uses rom_engine;
-
-function iniciar_taito_b:boolean;
 
 const
         nastar_rom:array[0..3] of tipo_roms=(
@@ -21,6 +19,8 @@ const
         masterw_gfx:array[0..2] of tipo_roms=(
         (n:'b72-02.6';l:$80000;p:0;crc:$843444eb),(n:'b72-01.5';l:$80000;p:$80000;crc:$a24ac26e),());
 
+function iniciar_taito_b:boolean;
+
 implementation
 uses m68000,main_engine,controls_engine,gfx_engine,taito_sound,pal_engine,
      sound_engine,taito_tc0180vcu;
@@ -28,56 +28,78 @@ uses m68000,main_engine,controls_engine,gfx_engine,taito_sound,pal_engine,
 var
  rom:array[0..$3ffff] of word;
  ram:array[0..$3fff] of word;
+ m68k_irq_a,m68k_irq_b:byte;
+ ioc_port:byte;
+ ioc_coin_control:word;
 
-procedure update_video_rastan;
+procedure eventos_taito_b;
 begin
-tc0180vcu_0.draw;
-actualiza_trozo(0,0,1024,1024,1,0,0,1024,1024,4);
-actualiza_trozo(0,0,1024,1024,2,0,0,1024,1024,4);
-tc0180vcu_0.draw_sprites;
-actualiza_trozo(0,0,512,256,3,0,0,512,256,4);
-actualiza_trozo_final(0,0,512,512,4);
-fillchar(buffer_color,MAX_COLOR_BUFFER,0);
+  marcade.in0:=$ffff;
+  marcade.in1:=$ffff;
+  marcade.in2:=$ffff;
+  //P1
+  if arcade_input.up[0] then marcade.in1:=marcade.in1 and $feff;
+  if arcade_input.down[0] then marcade.in1:=marcade.in1 and $fdff;
+  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fbff;
+  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $f7ff;
+  if arcade_input.but0[0] then marcade.in1:=marcade.in1 and $efff;
+  if arcade_input.but1[0] then marcade.in1:=marcade.in1 and $dfff;
+  //P2
+  if arcade_input.up[0] then marcade.in2:=marcade.in2 and $feff;
+  if arcade_input.down[0] then marcade.in2:=marcade.in2 and $fdff;
+  if arcade_input.left[0] then marcade.in2:=marcade.in2 and $fbff;
+  if arcade_input.right[0] then marcade.in2:=marcade.in2 and $f7ff;
+  if arcade_input.but0[0] then marcade.in2:=marcade.in2 and $efff;
+  if arcade_input.but1[0] then marcade.in2:=marcade.in2 and $dfff;
+  //System
+  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bfff;
+  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7fff;
+  if arcade_input.coin[0] then marcade.in0:=marcade.in0 and $fbff;
+  if arcade_input.coin[1] then marcade.in0:=marcade.in0 and $f7ff;
 end;
 
-procedure eventos_rastan;
+procedure update_video_taito_b;
 begin
-if event.arcade then begin
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-end;
+  tc0180vcu_0.draw;
+  actualiza_trozo_final(0,16,320,224,1);
 end;
 
-procedure rastan_principal;
+procedure taito_b_principal;
 var
-  frame_m:single;
   f:byte;
 begin
-frame_m:=m68000_0.tframes;
 while EmuStatus=EsRunning do begin
  for f:=0 to $ff do begin
-  if f=240 then begin
-    update_video_rastan;
-    m68000_0.irq[5]:=HOLD_LINE;
+  case f of
+    240:begin
+          update_video_taito_b;
+          tc0180vcu_0.vblank_update;
+          m68000_0.irq[m68k_irq_a]:=HOLD_LINE;
+        end;
+    248:m68000_0.irq[m68k_irq_b]:=HOLD_LINE;
   end;
-  if f=248 then m68000_0.irq[4]:=HOLD_LINE;
   //Main CPU
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+  m68000_0.run(frame_main);
+  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
   //Sound CPU
   tc0140syt_0.run;
  end;
- eventos_rastan;
+ eventos_taito_b;
  video_sync;
 end;
+end;
+
+function input_r(port:byte):word;
+begin
+  case port of
+    0:result:=marcade.dswa;
+    1:result:=marcade.dswb;
+    2:result:=marcade.in1;
+    3:result:=marcade.in2;
+    4:result:=ioc_coin_control;
+    7:result:=marcade.in0;
+    else result:=$ffff;
+  end;
 end;
 
 procedure cambiar_color(tmp_color,numero:word);
@@ -91,17 +113,30 @@ begin
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
 
+procedure vcu_putword(direccion:dword;valor:word);
+var mask:word;
+begin
+  mask:=$ffff;
+  if m68000_0.write_8bits_hi_dir then mask:=$ff
+    else if m68000_0.write_8bits_lo_dir then mask:=$ff00;
+  tc0180vcu_0.write(direccion,valor,mask);
+end;
+
 //Nastar
 function nastar_getword(direccion:dword):word;
 begin
+  nastar_getword:=$ffff;
 case direccion of
   0..$7ffff:nastar_getword:=rom[direccion shr 1];
   $200000..$201fff:nastar_getword:=buffer_paleta[(direccion and $1fff) shr 1];
   $400000..$47ffff:nastar_getword:=tc0180vcu_0.read(direccion and $7ffff);
   $600000..$607fff:nastar_getword:=ram[(direccion and $7fff) shr 1];
-  $800002:{if m68000_0.read_8bits_hi_dir then }nastar_getword:=tc0140syt_0.comm_r;
-  $a00000,$a00002,$a00004,$a00006,$a0000a,$a0000c,$a0000e:nastar_getword:=$ffff;
-  $a00008:nastar_getword:=$ffff;
+  $800002..$800003:begin
+                      nastar_getword:=$ffff;
+                      if not(m68000_0.read_8bits_hi_dir or m68000_0.write_8bits_hi_dir or m68000_0.write_8bits_lo_dir) then
+                        nastar_getword:=(tc0140syt_0.comm_r shl 8) or $ff;
+                    end;
+  $a00000..$a0000f:nastar_getword:=input_r((direccion and $e) shr 1);
 end;
 end;
 
@@ -113,24 +148,27 @@ case direccion of
                             buffer_paleta[(direccion and $1fff) shr 1]:=valor;
                             cambiar_color(valor,(direccion and $1fff) shr 1);
                        end;
-      $400000..$47ffff:tc0180vcu_0.write(direccion and $7ffff,valor);
+      $400000..$47ffff:vcu_putword(direccion and $7ffff,valor);
       $600000..$607fff:ram[(direccion and $7fff) shr 1]:=valor;
-      $800000:tc0140syt_0.port_w(valor and $ff);
-      $800002:tc0140syt_0.comm_w(valor and $ff);
+      $800000..$800001:if not m68000_0.write_8bits_hi_dir then tc0140syt_0.port_w(valor shr 8);
+      $800002..$800003:if not m68000_0.write_8bits_hi_dir then tc0140syt_0.comm_w(valor shr 8);
+      $a00008..$a00009:if not m68000_0.write_8bits_hi_dir then ioc_coin_control:=valor;
 end;
 end;
 
 //Master of weapon
 function masterw_getword(direccion:dword):word;
 begin
+  masterw_getword:=$ffff;
 case direccion of
   0..$7ffff:masterw_getword:=rom[direccion shr 1];
   $200000..$203fff:masterw_getword:=ram[(direccion and $3fff) shr 1];
   $400000..$47ffff:masterw_getword:=tc0180vcu_0.read(direccion and $7ffff);
   $600000..$601fff:masterw_getword:=buffer_paleta[(direccion and $1fff) shr 1];
-  $800000..$800001:masterw_getword:=$0f00;
-  $800002..$800003:masterw_getword:=$0;
-  $a00002:if m68000_0.read_8bits_hi_dir then masterw_getword:=tc0140syt_0.comm_r;
+  $800000..$800001:masterw_getword:=input_r(ioc_port);
+  $800002..$800003:masterw_getword:=$ff; // Watchdog read
+  $a00002..$a00003:if not(m68000_0.read_8bits_hi_dir or m68000_0.write_8bits_hi_dir or m68000_0.write_8bits_lo_dir) then
+                        masterw_getword:=(tc0140syt_0.comm_r shl 8) or $ff;
 end;
 end;
 
@@ -139,26 +177,30 @@ begin
 case direccion of
       0..$7ffff:; //ROM
       $200000..$203fff:ram[(direccion and $3fff) shr 1]:=valor;
-      $400000..$47ffff:tc0180vcu_0.write(direccion and $7ffff,valor);
+      $400000..$47ffff:vcu_putword(direccion and $7ffff,valor);
       $600000..$601fff:if buffer_paleta[(direccion and $1fff) shr 1]<>valor then begin
                             buffer_paleta[(direccion and $1fff) shr 1]:=valor;
                             cambiar_color(valor,(direccion and $1fff) shr 1);
                        end;
-      $800000..$800003:;
-      $a00000:tc0140syt_0.port_w(valor and $ff);
-      $a00002:tc0140syt_0.comm_w(valor and $ff);
+      $800000..$800001:if not m68000_0.write_8bits_hi_dir then if ioc_port=4 then ioc_coin_control:=valor;
+      $800002..$800003:if not m68000_0.write_8bits_hi_dir then ioc_port:=valor shr 8;
+      $a00000..$a00001:if not m68000_0.write_8bits_hi_dir then tc0140syt_0.port_w(valor shr 8);
+      $a00002..$a00003:if not m68000_0.write_8bits_hi_dir then tc0140syt_0.comm_w(valor shr 8);
 end;
 end;
-
 
 //Main
 procedure reset_taito_b;
 begin
  m68000_0.reset;
+ frame_main:=m68000_0.tframes;
  tc0140syt_0.reset;
- //tc0180vcu_0.reset;
- marcade.in0:=$1f;
- marcade.in1:=$ff;
+ tc0180vcu_0.reset;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
+ marcade.in2:=$ffff;
+ ioc_port:=0;
+ ioc_coin_control:=0;
 end;
 
 function iniciar_taito_b:boolean;
@@ -184,25 +226,23 @@ begin
   convert_gfx(1,0,ptemp,@ps_x,@ps_y,false,false);
 end;
 begin
-llamadas_maquina.bucle_general:=rastan_principal;
+iniciar_taito_b:=false;
+llamadas_maquina.bucle_general:=taito_b_principal;
 llamadas_maquina.reset:=reset_taito_b;
 llamadas_maquina.scanlines:=256;
-iniciar_taito_b:=false;
 iniciar_audio(false);
-if main_vars.tipo_maquina=418 then main_screen.rot270_screen:=true;
-screen_init(1,1024,1024);
-screen_init(2,1024,1024,true);
-screen_init(3,512,256,true);
-screen_init(4,1024,1024,false,true);
-//iniciar_video(320,224);
-iniciar_video(512,512);
+main_screen.rot270_screen:=(main_vars.tipo_maquina=418);
+screen_init(1,512,256,false,true);
+iniciar_video(320,224);
 //Main CPU
-getmem(ptemp,$100000);
 m68000_0:=cpu_m68000.create(12000000);
+getmem(ptemp,$100000);
 case main_vars.tipo_maquina of
   417:begin //Nastar
         m68000_0.change_ram16_calls(nastar_getword,nastar_putword);
         if not(roms_load16w(@rom,nastar_rom)) then exit;
+        m68k_irq_a:=4;
+        m68k_irq_b:=2;
         //Sound
         tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_TAITOB);
         //cargar sonido+ponerlas en su banco
@@ -212,8 +252,11 @@ case main_vars.tipo_maquina of
         copymemory(@tc0140syt_0.snd_bank_rom[1,0],@ptemp[$4000],$4000);
         copymemory(@tc0140syt_0.snd_bank_rom[2,0],@ptemp[$8000],$4000);
         copymemory(@tc0140syt_0.snd_bank_rom[3,0],@ptemp[$c000],$4000);
+        // YM2610 sample ROMs
+        if not(roms_load(@tc0140syt_0.ym2610.rom_a[0],nastar_adpcm_a)) then exit;
+        if not(roms_load(@tc0140syt_0.ym2610.rom_b[0],nastar_adpcm_b)) then exit;
         //Video
-        tc0180vcu_0:=tc0180vcu_chip.create(0,$c0,$80,$40);
+        tc0180vcu_0:=tc0180vcu_chip.create(1,0,$c0,$80,$40);
         //convertir chars
         if not(roms_load(ptemp,nastar_gfx)) then exit;
         convert_chars;
@@ -223,6 +266,8 @@ case main_vars.tipo_maquina of
   418:begin //Master of Weapon
         m68000_0.change_ram16_calls(masterw_getword,masterw_putword);
         if not(roms_load16w(@rom,masterw_rom)) then exit;
+        m68k_irq_a:=5;
+        m68k_irq_b:=4;
         //Sound
         tc0140syt_0:=tc0140syt_chip.create(6000000,SOUND_MASTERW);
         //cargar sonido+ponerlas en su banco
@@ -233,7 +278,7 @@ case main_vars.tipo_maquina of
         copymemory(@tc0140syt_0.snd_bank_rom[2,0],@ptemp[$8000],$4000);
         copymemory(@tc0140syt_0.snd_bank_rom[3,0],@ptemp[$c000],$4000);
         //Video
-        tc0180vcu_0:=tc0180vcu_chip.create(0,$30,$20,$10);
+        tc0180vcu_0:=tc0180vcu_chip.create(1,0,$30,$20,$10);
         //convertir chars
         if not(roms_load(ptemp,masterw_gfx)) then exit;
         convert_chars;
@@ -241,6 +286,9 @@ case main_vars.tipo_maquina of
         convert_sprites;
   end;
 end;
+//DIP
+marcade.dswa:=$ffff;
+marcade.dswb:=$ffff;
 freemem(ptemp);
 //final
 iniciar_taito_b:=true;

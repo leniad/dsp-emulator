@@ -1,4 +1,4 @@
-unit ay_8910;
+﻿unit ay_8910;
 
 interface
 uses main_engine,sound_engine,cpu_misc,dialogs;
@@ -33,9 +33,11 @@ type
         countenv:shortint;
         hold,alternate,attack,holding,rng,updatestep:integer;
         lastenable:smallint;
+        env_mask:integer;
         porta_read,portb_read:cpu_inport_call;
         porta_write,portb_write:cpu_outport_call;
         gain0,gain1,gain2:single;
+        function envelope_level:integer;
         procedure aywritereg(r,v:byte);
         function ayreadreg(r:byte):byte;
   end;
@@ -46,6 +48,8 @@ var
 const
   AY8910=0;
   AY8912=1;
+  YM2149=2;
+  AY8910_SNAPSHOT_SIZE=129;
 
 implementation
 
@@ -93,35 +97,69 @@ begin
   self.gain2:=gain2;
 end;
 
-procedure ay8910_chip.change_clock(clock:dword);
+function ay8910_chip.envelope_level:integer;
+var
+  level:integer;
 begin
+  level:=self.CountEnv xor self.Attack;
+  if self.env_mask=15 then begin
+    if level<>0 then level:=level*2+1;
+  end;
+  envelope_level:=Trunc(vol_table[level]);
+end;
+
+procedure ay8910_chip.change_clock(clock:dword);
+var
+  value,factor:integer;
+  procedure change_period(var period,count:integer;new_period:integer);
+  begin
+    if new_period<1 then new_period:=1;
+    if period>0 then count:=(Int64(count)*new_period) div period
+      else count:=new_period;
+    period:=new_period;
+    if count<1 then count:=1;
+  end;
+begin
+  value:=Round(((STEP*1.0)*FREQ_BASE_AUDIO*8)/clock);
   self.clock:=clock;
-  self.updatestep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
+  self.updatestep:=value;
+  value:=self.regs[AY_AFINE]+256*(self.regs[AY_ACOARSE] and $f);
+  if value=0 then value:=1;
+  change_period(self.perioda,self.counta,value*self.updatestep);
+  value:=self.regs[AY_BFINE]+256*(self.regs[AY_BCOARSE] and $f);
+  if value=0 then value:=1;
+  change_period(self.periodb,self.countb,value*self.updatestep);
+  value:=self.regs[AY_CFINE]+256*(self.regs[AY_CCOARSE] and $f);
+  if value=0 then value:=1;
+  change_period(self.periodc,self.countc,value*self.updatestep);
+  value:=self.regs[AY_NOISEPER] and $1f;
+  if value=0 then value:=1;
+  change_period(self.periodn,self.countn,value*self.updatestep);
+  if self.type_=YM2149 then factor:=1 else factor:=2;
+  value:=self.regs[AY_EFINE]+256*self.regs[AY_ECOARSE];
+  if value=0 then value:=(self.updatestep*factor) div 2
+    else value:=value*self.updatestep*factor;
+  change_period(self.periode,self.counte,value);
 end;
 
 constructor ay8910_chip.create(clock:integer;type_:byte;amp:single=1;internal:boolean=false);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
+  if addr(update_sound_proc)=nil then
+    MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!',mtInformation,[mbOk],0);
   init_table;
-  self.clock:=clock;
-  self.updateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
+  self.type_:=type_;
+  if type_=YM2149 then self.env_mask:=31 else self.env_mask:=15;
   self.porta_read:=nil;
   self.portb_read:=nil;
   self.porta_write:=nil;
   self.portb_write:=nil;
-  self.perioda:=self.updateStep;
-  self.periodb:=self.updateStep;
-  self.periodc:=self.updateStep;
-  self.periode:=self.updateStep;
-  self.periodn:=self.updateStep;
-  if not(internal) then self.tsample_num:=init_channel;
-  if amp<>1 then self.amp:=amp
-    else self.amp:=2;
-  self.reset;
-  self.type_:=type_;
   self.gain0:=1;
   self.gain1:=1;
   self.gain2:=1;
+  self.amp:=amp;
+  if not internal then self.tsample_num:=init_channel;
+  self.change_clock(clock);
+  self.reset;
 end;
 
 procedure ay8910_chip.reset;
@@ -135,7 +173,16 @@ begin
     self.outputn:=$ff;
     self.rng:=1;
     self.lastenable:=-1;
+    self.counta:=0;
+    self.countb:=0;
+    self.countc:=0;
+    self.countn:=0;
+    self.counte:=0;
   For i := 0 To 13 do self.aywritereg(i,0);
+  self.counta:=self.perioda;
+  self.countb:=self.periodb;
+  self.countc:=self.periodc;
+  self.countn:=self.periodn;
 end;
 
 destructor ay8910_chip.free;
@@ -225,16 +272,17 @@ end;
 procedure ay8910_chip.change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
 begin
   self.porta_read:=porta_read;
-  if self.type_=AY8912 then self.portb_read:=porta_read
+  if self.type_=AY8912 then self.portb_read:=nil
     else self.portb_read:=portb_read;
   self.porta_write:=porta_write;
-  if self.type_=AY8912 then self.portb_write:=porta_write
+  if self.type_=AY8912 then self.portb_write:=nil
     else self.portb_write:=portb_write;
 end;
 
 procedure ay8910_chip.aywritereg(r,v:byte);
 var
     old:integer;
+    new_period:Int64;
 begin
   self.Regs[r]:=v;
   case r of
@@ -313,14 +361,20 @@ begin
       end;
     AY_EFINE,AY_ECOARSE:begin
         old:=self.PeriodE;
-        self.PeriodE:=(self.Regs[AY_EFINE]+(256*self.Regs[AY_ECOARSE]))*self.UpdateStep;
-        if self.PeriodE=0 then self.PeriodE:=self.UpdateStep div 2;
+        if self.type_=YM2149 then new_period:=1 else new_period:=2;
+        new_period:=Int64(self.Regs[AY_EFINE]+256*self.Regs[AY_ECOARSE])*
+          self.UpdateStep*new_period;
+        self.PeriodE:=new_period;
+        if self.PeriodE=0 then begin
+          if self.type_=YM2149 then self.PeriodE:=self.UpdateStep div 2
+            else self.PeriodE:=self.UpdateStep;
+        end;
         self.CountE:=self.CountE+(self.PeriodE-old);
         if self.CountE<=0 then self.CountE:=1;
       end;
     AY_ESHAPE:begin
           self.Regs[AY_ESHAPE]:=self.Regs[AY_ESHAPE] and $f;
-          if ((self.Regs[AY_ESHAPE] and 4)<>0) then self.Attack:=$1f
+          if ((self.Regs[AY_ESHAPE] and 4)<>0) then self.Attack:=self.env_mask
               else self.Attack:=0;
           if ((self.Regs[AY_ESHAPE] and 8)=0) then begin
 			      self.Hold:=1;
@@ -330,17 +384,18 @@ begin
 			      self.Alternate:=self.Regs[AY_ESHAPE] and 2;
           end;
           self.CountE:=self.PeriodE;
-          self.CountEnv:=$1f;
+          self.CountEnv:=self.env_mask;
           self.Holding:=0;
-          self.VolE:=trunc(Vol_Table[self.CountEnv xor self.Attack]);
+          self.VolE:=self.envelope_level;
           if (self.EnvelopeA<>0) then self.VolA:=self.VolE;
           if (self.EnvelopeB<>0) then self.VolB:=self.VolE;
           if (self.EnvelopeC<>0) then self.VolC:=self.VolE;
       end;
-      AY_PORTA:if @self.porta_write<>nil then self.porta_write(v)
-                  else self.Regs[AY_PORTA]:=v;
-      AY_PORTB:if @self.portb_write<>nil then self.portb_write(v)
-                        else self.Regs[AY_PORTB]:=v;
+      AY_PORTA:if (self.regs[AY_ENABLE] and $40)<>0 then
+        if @self.porta_write<>nil then self.porta_write(v);
+      AY_PORTB:if self.type_<>AY8912 then
+        if (self.regs[AY_ENABLE] and $80)<>0 then
+          if @self.portb_write<>nil then self.portb_write(v);
   end; //case
 end;
 
@@ -348,7 +403,13 @@ function ay8910_chip.AYReadReg(r:byte):byte;
 begin
   case r of
       AY_PORTA:if (@self.porta_read<>nil) then self.Regs[AY_PORTA]:=self.porta_read;
-      AY_PORTB:if (@self.portb_read<>nil) then self.Regs[AY_PORTB]:=self.portb_read;
+      AY_PORTB:begin
+        if self.type_=AY8912 then begin
+          AYReadReg:=$ff;
+          Exit;
+        end;
+        if @self.portb_read<>nil then self.Regs[AY_PORTB]:=self.portb_read;
+      end;
   end;
   AYReadReg:=self.Regs[r];
 end;
@@ -360,12 +421,12 @@ end;
 
 function ay8910_chip.get_reg(reg:byte):byte;
 begin
-  get_reg:=self.Regs[reg];
+  if reg>15 then get_reg:=$ff else get_reg:=self.Regs[reg];
 end;
 
 procedure ay8910_chip.set_reg(reg,valor:byte);
 begin
-  self.Regs[reg]:=valor;
+  if reg<=15 then self.Regs[reg]:=valor;
 end;
 
 procedure ay8910_chip.write(v:byte);
@@ -499,7 +560,7 @@ begin
 					  self.OutputN:=not(self.OutputN);
 					  AY_Outnoise:=(self.OutputN or self.Regs[AY_ENABLE]);
           end;
-          if (self.RNG and 1)<>0 then self.RNG:=self.RNG xor $28000; //* This version is called the "Galois configuration". */
+          if (self.RNG and 1)<>0 then self.RNG:=self.RNG xor $24000; //* This version is called the "Galois configuration". */
 				  self.RNG:=self.RNG shr 1;
 				  self.CountN:=self.CountN+self.PeriodN;
         end;
@@ -514,15 +575,15 @@ begin
             until (self.CountE>0);
             if (self.CountEnv<0) then begin
                 if (self.Hold<>0) then begin
-                    if (self.Alternate<>0) then self.Attack:=self.Attack xor $1f;
+                    if (self.Alternate<>0) then self.Attack:=self.Attack xor self.env_mask;
                     self.Holding:=1;
                     self.CountEnv:=0;
                 end else begin
-                    If (self.Alternate<>0) and ((self.CountEnv and $20)<>0) then self.Attack:=self.Attack xor $1f;
-                    self.CountEnv:=self.CountEnv and $1f;
+                    If (self.Alternate<>0) and ((self.CountEnv and (self.env_mask+1))<>0) then self.Attack:=self.Attack xor self.env_mask;
+                    self.CountEnv:=self.CountEnv and self.env_mask;
                 end;
             end;
-            self.VolE :=trunc(Vol_Table[self.CountEnv xor self.Attack]);
+            self.VolE :=self.envelope_level;
             if (self.EnvelopeA<>0) then self.VolA:=self.VolE;
             if (self.EnvelopeB<>0) then self.VolB:=self.VolE;
             if (self.EnvelopeC<>0) then self.VolC:=self.VolE;
@@ -533,13 +594,13 @@ begin
     salida_ay[2]:=trunc(((VolB*self.VolB)/STEP)*self.gain1*self.amp);
     salida_ay[3]:=trunc(((VolC*self.VolC)/STEP)*self.gain2*self.amp);
     if salida_ay[1]>$7fff then salida_ay[1]:=$7fff
-      else if salida_ay[1]<-$7fff then salida_ay[1]:=-$7fff;
+      else if salida_ay[1]< -$8000 then salida_ay[1]:=-$8000;
     if salida_ay[2]>$7fff then salida_ay[2]:=$7fff
-      else if salida_ay[2]<-$7fff then salida_ay[2]:=-$7fff;
+      else if salida_ay[2]< -$8000 then salida_ay[2]:=-$8000;
     if salida_ay[3]>$7fff then salida_ay[3]:=$7fff
-      else if salida_ay[3]<-$7fff then salida_ay[3]:=-$7fff;
+      else if salida_ay[3]< -$8000 then salida_ay[3]:=-$8000;
     if salida_ay[0]>$7fff then salida_ay[0]:=$7fff
-      else if salida_ay[0]<-$7fff then salida_ay[0]:=-$7fff;
+      else if salida_ay[0]< -$8000 then salida_ay[0]:=-$8000;
     update_internal:=@salida_ay[0];
 end;
 

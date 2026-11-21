@@ -43,7 +43,8 @@ uses sysutils,main_engine,rom_engine,lenguaje,controls_engine,
   oric_hw,missilecommand_hw,gaplus_hw,pv1000,pv2000,m63_hw,diverboy_hw,
   mugsmashers_hw,steelforce_hw,bankpanic_hw,appoooh_hw,hw_88games,dooyong_hw,
   blueprint_hw,unico_hw,kikikaikai_hw,lasso_hw,finalstarforce_hw,wyvernf0_hw,
-  taito_b_hw,msx1,drmicro_hw;
+  taito_b_hw,msx1,drmicro_hw,qsound,atari2600,atari5200,atari7800,neogeo,
+  pcengine;
 
 type
   tgame_desc=record
@@ -71,7 +72,7 @@ const
   FIGHT=$100;
   DRIVE=$200;
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=448;
+  GAMES_CONT=457;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:[@spectrum_rom,nil];tipo:COMPUTER),
@@ -190,8 +191,8 @@ const
   (name:'Captain Commando';year:'1991';snd:1;hi:false;zip:'captcomm';grid:109;company:'Capcom';rom:[@ccommando_rom1,nil];tipo:ARCADE or RUN_GUN),
   (name:'Knights of the Round';year:'1991';snd:1;hi:false;zip:'knights';grid:110;company:'Capcom';rom:[@knights_rom1,nil];tipo:ARCADE or RUN_GUN),
   (name:'Street Fighter II'': Champion Edition';year:'1992';snd:1;hi:false;zip:'sf2ce';grid:111;company:'Capcom';rom:[@sf2ce_rom1,nil];tipo:ARCADE or FIGHT),
-  (name:'Cadillacs and Dinosaurs';year:'1992';snd:1;hi:false;zip:'dino';grid:112;company:'Capcom';rom:[@dino_rom1,nil];tipo:ARCADE or FIGHT),
-  (name:'The Punisher';year:'1993';snd:1;hi:false;zip:'punisher';grid:113;company:'Capcom';rom:[@punisher_rom1,nil];tipo:ARCADE or FIGHT),
+  (name:'Cadillacs and Dinosaurs';year:'1992';snd:1;hi:false;zip:'dino';grid:112;company:'Capcom';rom:[@dino_rom1,@qsound_rom,nil];tipo:ARCADE or FIGHT),
+  (name:'The Punisher';year:'1993';snd:1;hi:false;zip:'punisher';grid:113;company:'Capcom';rom:[@punisher_rom1,@qsound_rom,nil];tipo:ARCADE or FIGHT),
   (name:'Shinobi';year:'1987';snd:1;hi:false;zip:'shinobi';grid:114;company:'Sega';rom:[@shinobi_rom,@shinobi_n7751,nil];tipo:ARCADE or RUN_GUN),
   (name:'Alex Kidd';year:'1986';snd:1;hi:false;zip:'alexkidd';grid:115;company:'Sega';rom:[@alexkid_rom,@shinobi_n7751,nil];tipo:ARCADE or RUN_GUN),
   (name:'Fantasy Zone';year:'1986';snd:1;hi:false;zip:'fantzone';grid:116;company:'Sega';rom:[@fantzone_rom,nil];tipo:ARCADE or RUN_GUN),
@@ -508,6 +509,11 @@ const
   (name:'Mars';year:'1981';snd:1;hi:false;zip:'mars';grid:427;company:'Artic';rom:[@mars_rom,nil];tipo:ARCADE or SHOT),
   (name:'Devil Fish';year:'1982';snd:1;hi:false;zip:'devilfsh';grid:428;company:'Artic';rom:[@devilfish_rom,nil];tipo:ARCADE or MAZE),
   (name:'Dr. Micro';year:'1983';snd:1;hi:false;zip:'drmicro';grid:429;company:'Sanritsu';rom:[@drmicro_rom,nil];tipo:ARCADE or MAZE),
+  (name:'Metal Slug - Super Vehicle-001';year:'1996';snd:1;hi:false;zip:'mslug';grid:430;company:'SNK';rom:[@mslug_rom,@bios_program,nil];tipo:ARCADE),
+  (name:'Metal Slug 2 - Super Vehicle-001/II';year:'1998';snd:1;hi:false;zip:'mslug2';grid:431;company:'SNK';rom:[@mslug2_rom,@bios_program,nil];tipo:ARCADE),
+  (name:'King of Fighters 94';year:'1994';snd:1;hi:false;zip:'kof94';grid:432;company:'SNK';rom:[@kof94_rom,@bios_program,nil];tipo:ARCADE),
+  (name:'Viewpoint';year:'1992';snd:1;hi:false;zip:'viewpoin';grid:433;company:'Sammy';rom:[@viewpoint_rom,@bios_program,nil];tipo:ARCADE),
+  (name:'Metal Slug X - Super Vehicle-001';year:'1999';snd:1;hi:false;zip:'mslugx';grid:434;company:'SNK';rom:[@mslugx_rom,@bios_program,nil];tipo:ARCADE),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo';tipo:CONSOLE),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:[@coleco_bios,nil];tipo:CONSOLE),
@@ -521,6 +527,10 @@ const
   (name:'Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega';tipo:CONSOLE),
   (name:'PV-1000';year:'1983';snd:1;hi:false;zip:'';grid:1009;company:'Casio';tipo:CONSOLE),
   (name:'PV-2000';year:'1983';snd:1;hi:false;zip:'pv2000';grid:1010;company:'Casio';rom:[@pv2000_bios,nil];tipo:CONSOLE),
+  (name:'Atari 2600';year:'1977';snd:1;hi:false;zip:'';grid:1011;company:'Atari';tipo:CONSOLE),
+  (name:'Atari 5200';year:'1982';snd:1;hi:false;zip:'';grid:1012;company:'Atari';rom:[@a5200_rom,nil];tipo:CONSOLE),
+  (name:'Atari 7800';year:'1985';snd:1;hi:false;zip:'';grid:1013;company:'Atari';tipo:CONSOLE),
+  (name:'PCEngine';year:'1989';snd:1;hi:false;zip:'';grid:1014;company:'NEC';tipo:CONSOLE),
   //G&W
   (name:'Donkey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:[@gnw_dj101_rom,nil];tipo:GNW),
   (name:'Donkey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:[@gnw_jr55_rom,nil];tipo:GNW),
@@ -974,6 +984,11 @@ case numero of
   427:principal1.CambiarMaquina(principal1.Mars1);
   428:principal1.CambiarMaquina(principal1.devilfish1);
   429:principal1.CambiarMaquina(principal1.drmicro1);
+  430:principal1.CambiarMaquina(principal1.metalslug1);
+  431:principal1.CambiarMaquina(principal1.metalslug21);
+  432:principal1.CambiarMaquina(principal1.kof941);
+  433:principal1.CambiarMaquina(principal1.viewpoint1);
+  434:principal1.CambiarMaquina(principal1.metalslugx1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -985,6 +1000,10 @@ case numero of
   1008:principal1.CambiarMaquina(principal1.genesis1);
   1009:principal1.CambiarMaquina(principal1.pv1000);
   1010:principal1.CambiarMaquina(principal1.pv2000);
+  1011:principal1.CambiarMaquina(principal1.atari2600);
+  1012:principal1.CambiarMaquina(principal1.atari5200);
+  1013:principal1.CambiarMaquina(principal1.atari7800);
+  1014:principal1.CambiarMaquina(principal1.pcengine1);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
@@ -1428,6 +1447,11 @@ principal1.SuperBobleBoble1.Checked:=false;
 principal1.mars1.Checked:=false;
 principal1.devilfish1.Checked:=false;
 principal1.drmicro1.Checked:=false;
+principal1.metalslug1.Checked:=false;
+principal1.metalslug21.Checked:=false;
+principal1.kof941.Checked:=false;
+principal1.viewpoint1.Checked:=false;
+principal1.metalslugx1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1440,6 +1464,10 @@ principal1.scv1.checked:=false;
 principal1.genesis1.checked:=false;
 principal1.pv1000.checked:=false;
 principal1.pv2000.checked:=false;
+principal1.atari2600.checked:=false;
+principal1.atari5200.checked:=false;
+principal1.atari7800.checked:=false;
+principal1.pcengine1.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
@@ -1488,7 +1516,13 @@ case driver of
           principal1.Panel2.visible:=true;
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
-  3001,3002:begin //Oric
+  3001:begin //Oric
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn9.visible:=true; //Load Snapshot
+          principal1.BitBtn10.enabled:=true; //Disco
+          principal1.BitBtn10.visible:=true;  //Disco
+       end;
+  3002:begin //Oric
           principal1.Panel2.visible:=true;
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
@@ -1500,7 +1534,7 @@ case driver of
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
-  1008:begin
+  1008,1011,1012,1013,1014:begin
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn10.Hint:=leng.hints[3];
@@ -1615,7 +1649,7 @@ case tmaquina of
   135:llamadas_maquina.iniciar:=iniciar_hvyunit;
   136,137,149,150:llamadas_maquina.iniciar:=iniciar_snk68;
   138,139,140,337:llamadas_maquina.iniciar:=iniciar_megasys1;
-  141:llamadas_maquina.iniciar:=timepilot_iniciar;
+  141:llamadas_maquina.iniciar:=iniciar_timepilot;
   142:llamadas_maquina.iniciar:=iniciar_pengo;
   146,147:llamadas_maquina.iniciar:=iniciar_twincobra;
   148:llamadas_maquina.iniciar:=iniciar_jrpacman;
@@ -1636,7 +1670,7 @@ case tmaquina of
   181:llamadas_maquina.iniciar:=iniciar_volfied;
   182:llamadas_maquina.iniciar:=iniciar_opwolf;
   184:llamadas_maquina.iniciar:=iniciar_outrun;
-  185,189:llamadas_maquina.iniciar:=taitosj_iniciar;
+  185,189:llamadas_maquina.iniciar:=iniciar_taitosj;
   195:llamadas_maquina.iniciar:=iniciar_vulgus;
   196,232:llamadas_maquina.iniciar:=iniciar_ddragon3;
   197:llamadas_maquina.iniciar:=iniciar_blockout;
@@ -1644,7 +1678,7 @@ case tmaquina of
   204,205,260,261:llamadas_maquina.iniciar:=iniciar_nemesis;
   206,207:llamadas_maquina.iniciar:=iniciar_pirates;
   208:llamadas_maquina.iniciar:=iniciar_junofrst;
-  209:llamadas_maquina.iniciar:=gyruss_iniciar;
+  209:llamadas_maquina.iniciar:=iniciar_gyruss;
   210:llamadas_maquina.iniciar:=iniciar_boogwing;
   211,271,272,273,274:llamadas_maquina.iniciar:=iniciar_freekick;
   212:llamadas_maquina.iniciar:=iniciar_pinballaction;
@@ -1684,7 +1718,7 @@ case tmaquina of
   287,288:llamadas_maquina.iniciar:=iniciar_baraduke;
   292,293,294,295,296,297,408,409,410,419,420,421:llamadas_maquina.iniciar:=iniciar_system16b;
   298:llamadas_maquina.iniciar:=iniciar_toaplan1;
-  301:llamadas_maquina.iniciar:=karatechamp_iniciar;
+  301:llamadas_maquina.iniciar:=iniciar_karatechamp;
   302,303,304:llamadas_maquina.iniciar:=iniciar_seta;
   308,309,310,311,312,313:llamadas_maquina.iniciar:=iniciar_mrdocastle;
   314:llamadas_maquina.iniciar:=iniciar_ccastles;
@@ -1720,6 +1754,7 @@ case tmaquina of
   407:llamadas_maquina.iniciar:=iniciar_wyvernf0;
   417,418:llamadas_maquina.iniciar:=iniciar_taito_b;
   429:llamadas_maquina.iniciar:=iniciar_drmicro;
+  430,431,432,433,434:llamadas_maquina.iniciar:=iniciar_neogeo;
   //consolas
   1000:llamadas_maquina.iniciar:=iniciar_nes;
   1001:llamadas_maquina.iniciar:=iniciar_coleco;
@@ -1729,9 +1764,13 @@ case tmaquina of
   1005:llamadas_maquina.iniciar:=iniciar_sg;
   1006:llamadas_maquina.iniciar:=iniciar_gg;
   1007:llamadas_maquina.iniciar:=iniciar_scv;
-  1008:Cargar_genesis;
+  1008:llamadas_maquina.iniciar:=iniciar_genesis;
   1009:llamadas_maquina.iniciar:=iniciar_pv1000;
   1010:llamadas_maquina.iniciar:=iniciar_pv2000;
+  1011:llamadas_maquina.iniciar:=iniciar_atari2600;
+  1012:llamadas_maquina.iniciar:=iniciar_atari5200;
+  1013:llamadas_maquina.iniciar:=iniciar_atari7800;
+  1014:llamadas_maquina.iniciar:=iniciar_pcengine;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
@@ -3475,6 +3514,26 @@ if sender=principal1.drmicro1 then begin
   tipo:=429;
   principal1.drmicro1.Checked:=true;
 end;
+if sender=principal1.metalslug1 then begin
+  tipo:=430;
+  principal1.metalslug1.Checked:=true;
+end;
+if sender=principal1.metalslug21 then begin
+  tipo:=431;
+  principal1.metalslug21.Checked:=true;
+end;
+if sender=principal1.kof941 then begin
+  tipo:=432;
+  principal1.kof941.Checked:=true;
+end;
+if sender=principal1.viewpoint1 then begin
+  tipo:=433;
+  principal1.viewpoint1.Checked:=true;
+end;
+if sender=principal1.metalslugx1 then begin
+  tipo:=434;
+  principal1.metalslugx1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -3519,6 +3578,22 @@ end;
 if sender=principal1.pv2000 then begin
   tipo:=1010;
   principal1.pv2000.Checked:=true;
+end;
+if sender=principal1.atari2600 then begin
+  tipo:=1011;
+  principal1.atari2600.Checked:=true;
+end;
+if sender=principal1.atari5200 then begin
+  tipo:=1012;
+  principal1.atari5200.Checked:=true;
+end;
+if sender=principal1.atari7800 then begin
+  tipo:=1013;
+  principal1.atari7800.Checked:=true;
+end;
+if sender=principal1.pcengine1 then begin
+  tipo:=1014;
+  principal1.pcengine1.Checked:=true;
 end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin

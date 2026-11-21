@@ -82,7 +82,7 @@ const
          2,2,2,2,1,2,1,1,1,1,1,1,1,1,1,1,
 	       2,2,2,2,4,2,2,2,2,2,2,2,2,2,2,2,
 	       2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,
-	       2,2,1,2,4,1,2,2,2,2,2,2,2,2,2,2,
+	       2,2,2,2,4,1,2,2,2,2,2,2,2,2,2,2,
 	       2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,
 	       2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 	       2,2,1,1,1,2,1,1,2,2,2,2,2,2,2,2,
@@ -410,7 +410,7 @@ begin
 	result:=a-(data+c);
 	result1:=shortint(a)-shortint(data+c);
 	r.psw.c:=(result and $100)<>0;
-  result:=(a and $0f)-(data and $0f)+c;
+  result:=(a and $0f)-((data and $0f)+c);
   r.psw.a:=(result and $10)<>0;
   r.psw.o:=(result1<-128) or (result1>127);
   self.sfr[ADDR_PSW]:=self.dame_pila;
@@ -795,18 +795,6 @@ if self.pedir_halt<>CLEAR_LINE then begin
   end;
   if self.pedir_halt<>CLEAR_LINE then exit;
 end;
-//Calcular la paridad si cambia r.a
-if self.calc_parity then begin
-  tempb:=0;
-	tempb2:=self.sfr[ADDR_ACC];
-	for f:=0 to 7 do begin
-		tempb:=tempb xor (tempb2 and 1);
-		tempb2:=tempb2 shr 1;
-	end;
-  r.psw.p:=(tempb and 1)<>0;
-  self.sfr[ADDR_PSW]:=self.dame_pila;
-  self.calc_parity:=false;
-end;
 estados_demas:=self.evalue_irq;
 self.opcode:=true;
 instruccion:=self.rom[r.pc];
@@ -874,6 +862,7 @@ case instruccion of
         tempb:=self.sfr[ADDR_ACC];
 	      self.sfr[ADDR_ACC]:=(tempb shr 1) or (byte(r.psw.c) shl 7);
         r.psw.c:=(tempb and 1)<>0;
+        self.calc_parity:=true;
         self.sfr[ADDR_psw]:=self.dame_pila;
       end;
   $14:begin //dec_a
@@ -948,6 +937,7 @@ case instruccion of
          tempb:=self.sfr[ADDR_ACC];
          self.sfr[ADDR_ACC]:=(tempb shl 1) or byte(r.psw.c);
          r.psw.c:=(tempb and $80)<>0;
+         self.calc_parity:=true;
          self.sfr[ADDR_psw]:=self.dame_pila;
       end;
   $35:begin //addc_a_mem
@@ -1109,6 +1099,7 @@ case instruccion of
 		      //A gets quotient byte, B gets remainder byte
 		      self.sfr[ADDR_ACC]:=tempb;
 	  	    self.sfr[ADDR_B]:=tempb2;
+        self.calc_parity:=true;
 		      //Overflow flag is cleared
 		      r.psw.o:=false;
 	      end;
@@ -1190,6 +1181,7 @@ case instruccion of
 	      //A gets lo bits, B gets hi bits of result
 	      self.sfr[ADDR_B]:=(tempw and $ff00) shr 8;
 	      self.sfr[ADDR_ACC]:=tempw and $ff;
+        self.calc_parity:=true;
 	      //Set flags
 	      r.psw.o:=(tempw and $100)<>0;
 	      r.psw.c:=false;
@@ -1373,6 +1365,17 @@ case instruccion of
   $f6..$f7:self.iram_iw(self.r_reg(instruccion and $1),self.sfr[ADDR_ACC]);  //mov_ir_a
   $f8..$ff:self.set_reg(instruccion and $7,self.sfr[ADDR_ACC]); //mov_r_a
     else MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc-1,10), mtInformation,[mbOk], 0);
+end;
+if self.calc_parity then begin
+  tempb:=0;
+	tempb2:=self.sfr[ADDR_ACC];
+	for f:=0 to 7 do begin
+		tempb:=tempb xor (tempb2 and 1);
+		tempb2:=tempb2 shr 1;
+	end;
+  r.psw.p:=(tempb and 1)<>0;
+  self.sfr[ADDR_PSW]:=self.dame_pila;
+  self.calc_parity:=false;
 end;
 tempb:=ciclos_mcs51[instruccion]+estados_demas;
 self.contador:=self.contador+tempb;

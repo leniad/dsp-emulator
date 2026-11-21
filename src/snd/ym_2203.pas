@@ -1,4 +1,4 @@
-unit ym_2203;
+﻿unit ym_2203;
 
 interface
 uses main_engine,dialogs,cpu_misc,sound_engine,fmopn,ay_8910;
@@ -42,22 +42,23 @@ implementation
 uses timer_engine;
 
 var
-  chips_total:integer=-1;
+  chip_instances:array[0..1] of ym2203_chip;
 
 procedure change_ay_clock_0(clock:dword);
 begin
-  if ym2203_0<>nil then ym2203_0.ay8910_int.change_clock(clock);
+  if chip_instances[0]<>nil then chip_instances[0].ay8910_int.change_clock(clock);
 end;
 
 procedure change_ay_clock_1(clock:dword);
 begin
-  if ym2203_1<>nil then ym2203_1.ay8910_int.change_clock(clock);
+  if chip_instances[1]<>nil then chip_instances[1].ay8910_int.change_clock(clock);
 end;
 
 constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
-  chips_total:=chips_total+1;
+  if chip_instances[0]=nil then self.chip_number:=0
+    else if chip_instances[1]=nil then self.chip_number:=1;
   self.amp:=amp;
   self.ay8910_int:=ay8910_chip.create(clock,AY8910,ay_amp,true); //El PSG
   self.OPN:=opn_init(4); //Inicializo el OPN
@@ -68,10 +69,10 @@ begin
   self.tsample_num:=init_channel;
   self.opn.ST.IRQ_Handler:=nil;
   self.timer_adjust:=sound_status.cpu_clock/self.OPN.ST.clock;
-  self.chip_number:=chips_total;
-  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer1,false,chips_total);
-  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer2,false,chips_total);
-  case chips_total of
+  chip_instances[self.chip_number]:=self;
+  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer1,false,self.chip_number);
+  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer2,false,self.chip_number);
+  case self.chip_number of
     0:begin
         self.OPN.ST.TIMER_set_a:=ym2203_0_init_timer_a;
         self.OPN.ST.TIMER_set_b:=ym2203_0_init_timer_b;
@@ -98,19 +99,30 @@ end;
 
 destructor ym2203_chip.free;
 begin
+if (self.chip_number<=1) and (chip_instances[self.chip_number]=self) then begin
+  timers.enabled(self.timer1,false);
+  timers.enabled(self.timer2,false);
+  chip_instances[self.chip_number]:=nil;
+end;
 //Cierro el OPN
 opn_close(self.OPN);
 self.OPN:=nil;
 self.ay8910_int.free;
-chips_total:=chips_total-1;
+
 end;
 
-procedure ym2203_chip.Reset;
+procedure ym2203_chip.reset;
 var
   i:byte;
   OPN:pfm_opn;
 begin
 		OPN:=self.OPN;
+    timers.enabled(self.timer1,false);
+    timers.enabled(self.timer2,false);
+    FillChar(self.REGS,SizeOf(self.REGS),0);
+    FillChar(OPN.SL3^,SizeOf(fm_3slot),0);
+    OPN.ST.address:=0;
+    OPN.ST.fn_h:=0;
 		// Reset Prescaler
 	  OPNPrescaler_w(OPN,0,1);
 	  // reset SSG section */
@@ -205,7 +217,8 @@ begin
   self.ay8910_int.load_snapshot(temp);inc(temp,128);
   copymemory(@self.regs[0],temp,$100);inc(temp,$100);
   copymemory(@self.timer_adjust,temp,sizeof(single));inc(temp,sizeof(single));
-  self.chip_number:=temp^;inc(temp);
+  // Keep the live callback registration; consume the saved instance byte.
+  inc(temp);
   //ST:pFM_state;
   copymemory(@self.opn.st.clock,temp,4);inc(temp,4);
   copymemory(@self.opn.st.rate,temp,4);inc(temp,4);
@@ -240,7 +253,7 @@ begin
     copymemory(self.opn.P_CH[f].SLOT[1],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
     copymemory(self.opn.P_CH[f].SLOT[2],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
     copymemory(self.opn.P_CH[f].SLOT[3],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
-    setup_connection(self.OPN,self.OPN.P_CH[f],self.chip_number);
+    setup_connection(self.OPN,self.OPN.P_CH[f],f);
     self.opn.P_CH[f].SLOT[0].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[0].det_mul_val];
     self.opn.P_CH[f].SLOT[1].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[1].det_mul_val];
     self.opn.P_CH[f].SLOT[2].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[2].det_mul_val];
@@ -270,8 +283,21 @@ var
 begin
   opn:=self.opn;
 	for c:=0 to chan-1 do begin
-		opn.p_CH[c].fc:=0;
+    opn.p_CH[c].fc:=0;
+    opn.p_CH[c].kcode:=0;
+    opn.p_CH[c].block_fnum:=0;
+    opn.p_CH[c].ALGO:=0;
+    opn.p_CH[c].FB:=0;
+    opn.p_CH[c].pms:=0;
+    opn.p_CH[c].ams:=0;
+    opn.p_CH[c].op1_out[0]:=0;
+    opn.p_CH[c].op1_out[1]:=0;
+    opn.p_CH[c].mem_value:=0;
+    setup_connection(opn,opn.p_CH[c],c);
 		for s:=0 to 3 do begin
+      FillChar(opn.p_CH[c].SLOT[s]^,SizeOf(fm_slot),0);
+      opn.p_CH[c].SLOT[s].DT:=@opn.ST.dt_tab[0,0];
+      opn.p_CH[c].SLOT[s].mul:=1;
 			opn.p_CH[c].SLOT[s].ssg:=0;
 			opn.p_CH[c].SLOT[s].ssgn:=0;
 			opn.p_CH[c].SLOT[s].state:=EG_OFF;
@@ -327,11 +353,10 @@ begin
     chan_calc(OPN,cch[2]);
     lt:=self.ay8910_int.update_internal^+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
     if lt>$7fff then lt:=$7fff
-      else if lt<-$7fff then lt:=-$7fff;
+      else if lt< -$8000 then lt:=-$8000;
     tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
     if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
-    INTERNAL_TIMER_A(self.OPN.ST,self.OPN.p_ch[2]);
-    INTERNAL_TIMER_B(self.OPN.ST)
+    // timer_engine owns timer A/B; do not also advance sample timers.
 end;
 
 procedure ym2203_chip.write_int(port,data:byte);
@@ -395,10 +420,8 @@ procedure ym2203_timer1(index:byte);
 var
   chip:ym2203_chip;
 begin
-  case index of
-    0:chip:=ym2203_0;
-    1:chip:=ym2203_1;
-  end;
+  chip:=chip_instances[index];
+  if (chip.OPN.ST.mode and 1)=0 then Exit;
   TimerAOver(chip.OPN.ST);
   if (chip.OPN.ST.mode and $80)<>0 then begin
 			// CSM mode auto key on */
@@ -408,39 +431,37 @@ end;
 
 procedure ym2203_timer2(index:byte);
 begin
-  case index of
-    0:TimerBOver(ym2203_0.OPN.ST);
-    1:TimerBOver(ym2203_1.OPN.ST);
-  end;
+  if (chip_instances[index].OPN.ST.mode and 2)=0 then exit;
+  TimerBOver(chip_instances[index].OPN.ST);
 end;
 
 procedure change_timer_status(timer_num:byte;timer_adjust:single);
 begin
   if timer_adjust=0 then timers.enabled(timer_num,false)
     else begin
-      timers.enabled(timer_num,true);
       timers.timer[timer_num].time_final:=timer_adjust;
+      timers.enabled(timer_num,true);
     end;
 end;
 
 procedure ym2203_0_init_timer_a(count:single);
 begin
-  change_timer_status(ym2203_0.timer1,count*ym2203_0.timer_adjust);
+  change_timer_status(chip_instances[0].timer1,count*chip_instances[0].timer_adjust);
 end;
 
 procedure ym2203_0_init_timer_b(count:single);
 begin
-  change_timer_status(ym2203_0.timer2,count*ym2203_0.timer_adjust);
+  change_timer_status(chip_instances[0].timer2,count*chip_instances[0].timer_adjust);
 end;
 
 procedure ym2203_1_init_timer_a(count:single);
 begin
-  change_timer_status(ym2203_1.timer1,count*ym2203_1.timer_adjust);
+  change_timer_status(chip_instances[1].timer1,count*chip_instances[1].timer_adjust);
 end;
 
 procedure ym2203_1_init_timer_b(count:single);
 begin
-  change_timer_status(ym2203_1.timer2,count*ym2203_1.timer_adjust);
+  change_timer_status(chip_instances[1].timer2,count*chip_instances[1].timer_adjust);
 end;
 
 end.

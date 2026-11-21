@@ -24,7 +24,7 @@ uses nec_v20_v30,main_engine,controls_engine,gfx_engine,pal_engine,
      sound_engine,seibu_sound,misc_functions;
 
 const
-        CPU_SYNC=4;
+    CPU_SYNC=4;
 
 var
  main_rom:array[0..$5ffff] of byte;
@@ -120,22 +120,24 @@ end;
 procedure eventos_raiden;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $80);
-  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
-  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
-  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
-  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
-  if arcade_input.coin[0] then seibu_snd_0.input:=(seibu_snd_0.input or 1) else seibu_snd_0.input:=(seibu_snd_0.input and $fe);
-  if arcade_input.coin[1] then seibu_snd_0.input:=(seibu_snd_0.input or 2) else seibu_snd_0.input:=(seibu_snd_0.input and $fd);
+  marcade.in0:=$ffff;
+  seibu_snd_0.input:=0;
+  if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fffe;
+  if arcade_input.down[0] then marcade.in0:=marcade.in0 and $fffd;
+  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fffb;
+  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fff7;
+  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ffef;
+  if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $ffdf;
+  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $ff7f;
+  if arcade_input.up[1] then marcade.in0:=marcade.in0 and $feff;
+  if arcade_input.down[1] then marcade.in0:=marcade.in0 and $fdff;
+  if arcade_input.left[1] then marcade.in0:=marcade.in0 and $fbff;
+  if arcade_input.right[1] then marcade.in0:=marcade.in0 and $f7ff;
+  if arcade_input.but0[1] then marcade.in0:=marcade.in0 and $efff;
+  if arcade_input.but1[1] then marcade.in0:=marcade.in0 and $dfff;
+  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7fff;
+  if arcade_input.coin[0] then seibu_snd_0.input:=seibu_snd_0.input or 1;
+  if arcade_input.coin[1] then seibu_snd_0.input:=seibu_snd_0.input or 2;
 end;
 end;
 

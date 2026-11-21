@@ -1,4 +1,4 @@
-unit file_engine;
+﻿unit file_engine;
 
 interface
 uses {$ifdef fpc}
@@ -7,7 +7,7 @@ uses {$ifdef fpc}
      Zlib,zip,
      {$endif}
      sysutils,dialogs,lenguaje,sound_engine,inifiles,main_engine,
-     controls_engine,misc_functions,timer_engine;
+     controls_engine,misc_functions,timer_engine,configgeneral_misc;
 
 type
     tzip_find_files=record
@@ -164,6 +164,11 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.msx_tap:=fich_ini.readString('dir','msx_tap',directory.Base+'msx'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.pv1000:=fich_ini.readString('dir','pv1000',directory.Base+'pv1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.pv2000:=fich_ini.readString('dir','pv2000',directory.Base+'pv2000'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.atari2600:=fich_ini.readString('dir','atari2600',directory.Base+'atari2600'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.atari5200:=fich_ini.readString('dir','atari5200',directory.Base+'atari5200'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.atari7800:=fich_ini.readString('dir','atari7800',directory.Base+'atari7800'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.genesis:=fich_ini.readString('dir','genesis',directory.Base+'genesis'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.pcengine:=fich_ini.readString('dir','pcengine',directory.Base+'pcengine'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if ((main_vars.idioma>max_idiomas) and (main_vars.idioma<>200)) then main_vars.idioma:=1;
@@ -201,46 +206,48 @@ if fileexists(directory.Base+'dsp.ini') then begin
   //Configuracion GB
   gb_0.palette:=fich_ini.ReadInteger('gb','palette',0);
   //Teclas
-  arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
-  arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
-  arcade_input.nleft[0]:=fich_ini.ReadInteger('keyboard','left_0',KEYBOARD_LEFT) and $ff;
-  arcade_input.nright[0]:=fich_ini.ReadInteger('keyboard','right_0',KEYBOARD_RIGHT) and $ff;
-  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',KEYBOARD_LCTRL) and $ff;
-  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',KEYBOARD_LALT) and $ff;
-  arcade_input.nbut2[0]:=fich_ini.ReadInteger('keyboard','but2_0',KEYBOARD_LSHIFT) and $ff;
-  arcade_input.nbut3[0]:=fich_ini.ReadInteger('keyboard','but3_0',KEYBOARD_A) and $ff;
-  arcade_input.nbut4[0]:=fich_ini.ReadInteger('keyboard','but4_0',KEYBOARD_S) and $ff;
-  arcade_input.nbut5[0]:=fich_ini.ReadInteger('keyboard','but5_0',KEYBOARD_D) and $ff;
-  arcade_input.jbut0[0]:=fich_ini.ReadInteger('keyboard','jbut0_0',0) and $ff;
-  arcade_input.jbut1[0]:=fich_ini.ReadInteger('keyboard','jbut1_0',1) and $ff;
-  arcade_input.jbut2[0]:=fich_ini.ReadInteger('keyboard','jbut2_0',2) and $ff;
-  arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3) and $ff;
-  arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4) and $ff;
-  arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5) and $ff;
-  arcade_input.jcoin[0]:=fich_ini.ReadInteger('keyboard','jcoin_0',6) and $ff;
-  arcade_input.jcoin[1]:=fich_ini.ReadInteger('keyboard','jcoin_1',6) and $ff;
-  arcade_input.jstart[0]:=fich_ini.ReadInteger('keyboard','jstart_0',7) and $ff;
-  arcade_input.jstart[1]:=fich_ini.ReadInteger('keyboard','jstart_1',7) and $ff;
-  arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',KEYBOARD_5) and $ff;
-  arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',KEYBOARD_6) and $ff;
-  arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',KEYBOARD_1) and $ff;
-  arcade_input.nstart[1]:=fich_ini.ReadInteger('keyboard','start_1',KEYBOARD_2) and $ff;
-  arcade_input.nup[1]:=fich_ini.ReadInteger('keyboard','up_1',KEYBOARD_NONE) and $ff;
-  arcade_input.ndown[1]:=fich_ini.ReadInteger('keyboard','down_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nleft[1]:=fich_ini.ReadInteger('keyboard','left_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nright[1]:=fich_ini.ReadInteger('keyboard','right_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nbut0[1]:=fich_ini.ReadInteger('keyboard','but0_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nbut1[1]:=fich_ini.ReadInteger('keyboard','but1_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nbut2[1]:=fich_ini.ReadInteger('keyboard','but2_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nbut3[1]:=fich_ini.ReadInteger('keyboard','but3_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nbut4[1]:=fich_ini.ReadInteger('keyboard','but4_1',KEYBOARD_NONE) and $ff;
-  arcade_input.nbut5[1]:=fich_ini.ReadInteger('keyboard','but5_1',KEYBOARD_NONE) and $ff;
-  arcade_input.jbut0[1]:=fich_ini.ReadInteger('keyboard','jbut0_1',0) and $ff;
-  arcade_input.jbut1[1]:=fich_ini.ReadInteger('keyboard','jbut1_1',1) and $ff;
-  arcade_input.jbut2[1]:=fich_ini.ReadInteger('keyboard','jbut2_1',2) and $ff;
-  arcade_input.jbut3[1]:=fich_ini.ReadInteger('keyboard','jbut3_1',3) and $ff;
-  arcade_input.jbut4[1]:=fich_ini.ReadInteger('keyboard','jbut4_1',4) and $ff;
-  arcade_input.jbut5[1]:=fich_ini.ReadInteger('keyboard','jbut5_1',5) and $ff;
+  arcade_input.ndef[0]:=fich_ini.ReadInteger('keyboard','ndef_0',0);
+  arcade_input.ndef[1]:=fich_ini.ReadInteger('keyboard','ndef_1',1);
+  arcade_input.ndef[2]:=fich_ini.ReadInteger('keyboard','ndef_2',2);
+  //arcade_input.ndef[3]:=fich_ini.ReadInteger('keyboard','ndef_3',3);
+  defkeys[0].up:=fich_ini.ReadInteger('keyboard_def','up_0',KEYBOARD_UP);
+  defkeys[0].down:=fich_ini.ReadInteger('keyboard_def','down_0',KEYBOARD_DOWN);
+  defkeys[0].left:=fich_ini.ReadInteger('keyboard_def','left_0',KEYBOARD_LEFT);
+  defkeys[0].right:=fich_ini.ReadInteger('keyboard_def','right_0',KEYBOARD_RIGHT);
+  defkeys[0].but0:=fich_ini.ReadInteger('keyboard_def','but0_0',KEYBOARD_LALT);
+  defkeys[0].but1:=fich_ini.ReadInteger('keyboard_def','but1_0',KEYBOARD_LCTRL);
+  defkeys[0].but2:=fich_ini.ReadInteger('keyboard_def','but2_0',KEYBOARD_LSHIFT);
+  defkeys[0].but3:=fich_ini.ReadInteger('keyboard_def','but3_0',KEYBOARD_A);
+  defkeys[0].but4:=fich_ini.ReadInteger('keyboard_def','but4_0',KEYBOARD_S);
+  defkeys[0].but5:=fich_ini.ReadInteger('keyboard_def','but5_0',KEYBOARD_D);
+  defkeys[0].coin:=fich_ini.ReadInteger('keyboard_def','coin_0',KEYBOARD_5);
+  defkeys[0].start:=fich_ini.ReadInteger('keyboard_def','start_0',KEYBOARD_1);
+  defkeys[1].coin:=fich_ini.ReadInteger('keyboard_def','coin_1',KEYBOARD_6);
+  defkeys[1].start:=fich_ini.ReadInteger('keyboard_def','start_1',KEYBOARD_2);
+  defkeys[1].up:=fich_ini.ReadInteger('keyboard_def','up_1',KEYBOARD_Q);
+  defkeys[1].down:=fich_ini.ReadInteger('keyboard_def','down_1',KEYBOARD_A);
+  defkeys[1].left:=fich_ini.ReadInteger('keyboard_def','left_1',KEYBOARD_O);
+  defkeys[1].right:=fich_ini.ReadInteger('keyboard_def','right_1',KEYBOARD_P);
+  defkeys[1].but0:=fich_ini.ReadInteger('keyboard_def','but0_1',KEYBOARD_N);
+  defkeys[1].but1:=fich_ini.ReadInteger('keyboard_def','but1_1',KEYBOARD_M);
+  defkeys[1].but2:=fich_ini.ReadInteger('keyboard_def','but2_1',KEYBOARD_B);
+  defkeys[1].but3:=fich_ini.ReadInteger('keyboard_def','but3_1',KEYBOARD_V);
+  defkeys[1].but4:=fich_ini.ReadInteger('keyboard_def','but4_1',KEYBOARD_C);
+  defkeys[1].but5:=fich_ini.ReadInteger('keyboard_def','but5_1',KEYBOARD_X);
+  for f:=2 to NUM_CONTROLS do begin
+    defkeys[f].up:=fich_ini.ReadInteger('keyboard_def','up_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].down:=fich_ini.ReadInteger('keyboard_def','down_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].left:=fich_ini.ReadInteger('keyboard_def','left_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].right:=fich_ini.ReadInteger('keyboard_def','right_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].but0:=fich_ini.ReadInteger('keyboard_def','but0_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].but1:=fich_ini.ReadInteger('keyboard_def','but1_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].but2:=fich_ini.ReadInteger('keyboard_def','but2_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].but3:=fich_ini.ReadInteger('keyboard_def','but3_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].but4:=fich_ini.ReadInteger('keyboard_def','but4_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].but5:=fich_ini.ReadInteger('keyboard_def','but5_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].coin:=fich_ini.ReadInteger('keyboard_def','coin_'+inttostr(f),KEYBOARD_NONE);
+    defkeys[f].start:=fich_ini.ReadInteger('keyboard_def','start_'+inttostr(f),KEYBOARD_NONE);
+  end;
   //Autofire
   timers.autofire_enabled[0]:=fich_ini.ReadInteger('keyboard','autofire_p1_but0',0)<>0;
   timers.autofire_enabled[1]:=fich_ini.ReadInteger('keyboard','autofire_p1_but1',0)<>0;
@@ -256,10 +263,14 @@ if fileexists(directory.Base+'dsp.ini') then begin
   timers.autofire_enabled[11]:=fich_ini.ReadInteger('keyboard','autofire_p2_but5',0)<>0;
   timers.autofire_on:=fich_ini.ReadInteger('keyboard','autofire_general',0)<>0;
   //tipo y numero joystick
-  arcade_input.use_key[0]:=fich_ini.ReadInteger('keyboard','use_keyb_0',0)=0;
-  arcade_input.use_key[1]:=fich_ini.ReadInteger('keyboard','use_keyb_1',0)=0;
+  arcade_input.use_key[0]:=fich_ini.ReadInteger('keyboard','use_keyb_0',0)<>0;
+  arcade_input.use_key[1]:=fich_ini.ReadInteger('keyboard','use_keyb_1',0)<>0;
+  arcade_input.use_key[2]:=fich_ini.ReadInteger('keyboard','use_keyb_2',0)<>0;
+  //arcade_input.use_key[3]:=fich_ini.ReadInteger('keyboard','use_keyb_3',0)<>0;
   arcade_input.num_joystick[0]:=fich_ini.ReadInteger('keyboard','num_joy_0',0);
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
+  arcade_input.num_joystick[2]:=fich_ini.ReadInteger('keyboard','num_joy_2',0);
+  //arcade_input.num_joystick[3]:=fich_ini.ReadInteger('keyboard','num_joy_3',0);
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
     arcade_input.joy_x[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
@@ -298,6 +309,11 @@ end else begin
   Directory.msx_tap:=directory.base+'msx'+main_vars.cadena_dir;
   Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
   Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
+  Directory.atari2600:=directory.base+'atari2600'+main_vars.cadena_dir;
+  Directory.atari5200:=directory.base+'atari5200'+main_vars.cadena_dir;
+  Directory.atari7800:=directory.base+'atari7800'+main_vars.cadena_dir;
+  Directory.genesis:=directory.base+'genesis'+main_vars.cadena_dir;
+  Directory.pcengine:=directory.base+'pcengine'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
   sound_status.sonido_activo:=true;
@@ -328,50 +344,55 @@ end else begin
   //Config GB
   gb_0.palette:=0;
   //Teclas
-  arcade_input.nup[0]:=KEYBOARD_UP;
-  arcade_input.ndown[0]:=KEYBOARD_DOWN;
-  arcade_input.nleft[0]:=KEYBOARD_LEFT;
-  arcade_input.nright[0]:=KEYBOARD_RIGHT;
-  arcade_input.nbut0[0]:=KEYBOARD_LALT;
-  arcade_input.nbut1[0]:=KEYBOARD_LCTRL;
-  arcade_input.nbut2[0]:=KEYBOARD_LSHIFT;
-  arcade_input.nbut3[0]:=KEYBOARD_A;
-  arcade_input.nbut4[0]:=KEYBOARD_S;
-  arcade_input.nbut5[0]:=KEYBOARD_D;
-  arcade_input.jbut0[0]:=0;
-  arcade_input.jbut1[0]:=1;
-  arcade_input.jbut2[0]:=2;
-  arcade_input.jbut3[0]:=3;
-  arcade_input.jbut4[0]:=4;
-  arcade_input.jbut5[0]:=5;
-  arcade_input.jcoin[0]:=6;
-  arcade_input.jcoin[1]:=6;
-  arcade_input.jstart[0]:=7;
-  arcade_input.jstart[1]:=7;
-  arcade_input.ncoin[0]:=KEYBOARD_5;
-  arcade_input.ncoin[1]:=KEYBOARD_6;
-  arcade_input.nstart[0]:=KEYBOARD_1;
-  arcade_input.nstart[1]:=KEYBOARD_2;
-  arcade_input.nup[1]:=KEYBOARD_NONE;
-  arcade_input.ndown[1]:=KEYBOARD_NONE;
-  arcade_input.nleft[1]:=KEYBOARD_NONE;
-  arcade_input.nright[1]:=KEYBOARD_NONE;
-  arcade_input.nbut0[1]:=KEYBOARD_NONE;
-  arcade_input.nbut1[1]:=KEYBOARD_NONE;
-  arcade_input.nbut2[1]:=KEYBOARD_NONE;
-  arcade_input.nbut3[1]:=KEYBOARD_NONE;
-  arcade_input.nbut4[1]:=KEYBOARD_NONE;
-  arcade_input.nbut5[1]:=KEYBOARD_NONE;
-  arcade_input.jbut0[1]:=0;
-  arcade_input.jbut1[1]:=1;
-  arcade_input.jbut2[1]:=2;
-  arcade_input.jbut3[1]:=3;
-  arcade_input.jbut4[1]:=4;
-  arcade_input.jbut5[1]:=5;
+  arcade_input.ndef[0]:=0;
+  arcade_input.ndef[1]:=1;
+  arcade_input.ndef[2]:=2;
+  //arcade_input.ndef[3]:=3;
+  defkeys[0].up:=KEYBOARD_UP;
+  defkeys[0].down:=KEYBOARD_DOWN;
+  defkeys[0].left:=KEYBOARD_LEFT;
+  defkeys[0].right:=KEYBOARD_RIGHT;
+  defkeys[0].but0:=KEYBOARD_LALT;
+  defkeys[0].but1:=KEYBOARD_LCTRL;
+  defkeys[0].but2:=KEYBOARD_LSHIFT;
+  defkeys[0].but3:=KEYBOARD_A;
+  defkeys[0].but4:=KEYBOARD_S;
+  defkeys[0].but5:=KEYBOARD_D;
+  defkeys[0].coin:=KEYBOARD_5;
+  defkeys[0].start:=KEYBOARD_1;
+  defkeys[1].coin:=KEYBOARD_6;
+  defkeys[1].start:=KEYBOARD_2;
+  defkeys[1].up:=KEYBOARD_Q;
+  defkeys[1].down:=KEYBOARD_A;
+  defkeys[1].left:=KEYBOARD_O;
+  defkeys[1].right:=KEYBOARD_P;
+  defkeys[1].but0:=KEYBOARD_N;
+  defkeys[1].but1:=KEYBOARD_M;
+  defkeys[1].but2:=KEYBOARD_B;
+  defkeys[1].but3:=KEYBOARD_V;
+  defkeys[1].but4:=KEYBOARD_C;
+  defkeys[1].but5:=KEYBOARD_X;
+  for f:=2 to NUM_CONTROLS do begin
+    defkeys[f].start:=KEYBOARD_NONE;
+    defkeys[f].up:=KEYBOARD_NONE;
+    defkeys[f].down:=KEYBOARD_NONE;
+    defkeys[f].left:=KEYBOARD_NONE;
+    defkeys[f].right:=KEYBOARD_NONE;
+    defkeys[f].but0:=KEYBOARD_NONE;
+    defkeys[f].but1:=KEYBOARD_NONE;
+    defkeys[f].but2:=KEYBOARD_NONE;
+    defkeys[f].but3:=KEYBOARD_NONE;
+    defkeys[f].but4:=KEYBOARD_NONE;
+    defkeys[f].but5:=KEYBOARD_NONE;
+  end;
   arcade_input.use_key[0]:=true;
   arcade_input.use_key[1]:=true;
-  arcade_input.num_joystick[0]:=0;
-  arcade_input.num_joystick[1]:=0;
+  arcade_input.use_key[2]:=true;
+  //arcade_input.use_key[3]:=true;
+  arcade_input.num_joystick[0]:=255;
+  arcade_input.num_joystick[1]:=255;
+  arcade_input.num_joystick[2]:=255;
+  //arcade_input.num_joystick[3]:=255;
   timers.autofire_enabled[0]:=false;
   timers.autofire_enabled[1]:=false;
   timers.autofire_enabled[2]:=false;
@@ -421,6 +442,11 @@ if ((Directory.oric_tap='') or (directory.oric_tap=main_vars.cadena_dir)) then D
 if ((Directory.msx_tap='') or (directory.msx_tap=main_vars.cadena_dir)) then Directory.msx_tap:=directory.base+'msx'+main_vars.cadena_dir;
 if ((Directory.pv1000='') or (directory.pv1000=main_vars.cadena_dir)) then Directory.pv1000:=directory.base+'pv1000'+main_vars.cadena_dir;
 if ((Directory.pv2000='') or (directory.pv2000=main_vars.cadena_dir)) then Directory.pv2000:=directory.base+'pv2000'+main_vars.cadena_dir;
+if ((Directory.atari2600='') or (directory.atari2600=main_vars.cadena_dir)) then Directory.atari2600:=directory.base+'atari2600'+main_vars.cadena_dir;
+if ((Directory.atari5200='') or (directory.atari5200=main_vars.cadena_dir)) then Directory.atari5200:=directory.base+'atari5200'+main_vars.cadena_dir;
+if ((Directory.atari7800='') or (directory.atari7800=main_vars.cadena_dir)) then Directory.atari7800:=directory.base+'atari7800'+main_vars.cadena_dir;
+if ((Directory.genesis='') or (directory.genesis=main_vars.cadena_dir)) then Directory.genesis:=directory.base+'genesis'+main_vars.cadena_dir;
+if ((Directory.pcengine='') or (directory.pcengine=main_vars.cadena_dir)) then Directory.pcengine:=directory.base+'pcengine'+main_vars.cadena_dir;
 end;
 
 function test_dir(cadena:string):string;
@@ -474,6 +500,11 @@ fich_ini.Writestring('dir','oric_tap',test_dir(Directory.oric_tap));
 fich_ini.Writestring('dir','msx_tap',test_dir(Directory.msx_tap));
 fich_ini.Writestring('dir','pv1000',test_dir(Directory.pv1000));
 fich_ini.Writestring('dir','pv2000',test_dir(Directory.pv2000));
+fich_ini.Writestring('dir','atari2600',test_dir(Directory.atari2600));
+fich_ini.Writestring('dir','atari5200',test_dir(Directory.atari5200));
+fich_ini.Writestring('dir','atari7800',test_dir(Directory.atari7800));
+fich_ini.Writestring('dir','genesis',test_dir(Directory.genesis));
+fich_ini.Writestring('dir','pcengine',test_dir(Directory.pcengine));
 //Config general
 fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.sonido_activo));
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
@@ -505,48 +536,24 @@ fich_ini.WriteInteger('sms','model',sms_0.model);
 //Config GB
 fich_ini.WriteInteger('gb','palette',gb_0.palette);
 //Teclas P1
-fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
-fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);
-fich_ini.WriteInteger('keyboard','left_0',arcade_input.nleft[0]);
-fich_ini.WriteInteger('keyboard','right_0',arcade_input.nright[0]);
-fich_ini.WriteInteger('keyboard','but0_0',arcade_input.nbut0[0]);
-fich_ini.WriteInteger('keyboard','but1_0',arcade_input.nbut1[0]);
-fich_ini.WriteInteger('keyboard','but2_0',arcade_input.nbut2[0]);
-fich_ini.WriteInteger('keyboard','but3_0',arcade_input.nbut3[0]);
-fich_ini.WriteInteger('keyboard','but4_0',arcade_input.nbut4[0]);
-fich_ini.WriteInteger('keyboard','but5_0',arcade_input.nbut5[0]);
-fich_ini.WriteInteger('keyboard','jbut0_0',arcade_input.jbut0[0]);
-fich_ini.WriteInteger('keyboard','jbut1_0',arcade_input.jbut1[0]);
-fich_ini.WriteInteger('keyboard','jbut2_0',arcade_input.jbut2[0]);
-fich_ini.WriteInteger('keyboard','jbut3_0',arcade_input.jbut3[0]);
-fich_ini.WriteInteger('keyboard','jbut4_0',arcade_input.jbut4[0]);
-fich_ini.WriteInteger('keyboard','jbut5_0',arcade_input.jbut5[0]);
-//Teclas Misc
-fich_ini.WriteInteger('keyboard','coin_0',arcade_input.ncoin[0]);
-fich_ini.WriteInteger('keyboard','coin_1',arcade_input.ncoin[1]);
-fich_ini.WriteInteger('keyboard','start_0',arcade_input.nstart[0]);
-fich_ini.WriteInteger('keyboard','start_1',arcade_input.nstart[1]);
-fich_ini.WriteInteger('keyboard','jcoin_0',arcade_input.jcoin[0]);
-fich_ini.WriteInteger('keyboard','jcoin_1',arcade_input.jcoin[1]);
-fich_ini.WriteInteger('keyboard','jstart_0',arcade_input.jstart[0]);
-fich_ini.WriteInteger('keyboard','jstart_1',arcade_input.jstart[1]);
-//Teclas P2
-fich_ini.WriteInteger('keyboard','up_1',arcade_input.nup[1]);
-fich_ini.WriteInteger('keyboard','down_1',arcade_input.ndown[1]);
-fich_ini.WriteInteger('keyboard','left_1',arcade_input.nleft[1]);
-fich_ini.WriteInteger('keyboard','right_1',arcade_input.nright[1]);
-fich_ini.WriteInteger('keyboard','but0_1',arcade_input.nbut0[1]);
-fich_ini.WriteInteger('keyboard','but1_1',arcade_input.nbut1[1]);
-fich_ini.WriteInteger('keyboard','but2_1',arcade_input.nbut2[1]);
-fich_ini.WriteInteger('keyboard','but3_1',arcade_input.nbut3[1]);
-fich_ini.WriteInteger('keyboard','but4_1',arcade_input.nbut4[1]);
-fich_ini.WriteInteger('keyboard','but5_1',arcade_input.nbut5[1]);
-fich_ini.WriteInteger('keyboard','jbut0_1',arcade_input.jbut0[1]);
-fich_ini.WriteInteger('keyboard','jbut1_1',arcade_input.jbut1[1]);
-fich_ini.WriteInteger('keyboard','jbut2_1',arcade_input.jbut2[1]);
-fich_ini.WriteInteger('keyboard','jbut3_1',arcade_input.jbut3[1]);
-fich_ini.WriteInteger('keyboard','jbut4_1',arcade_input.jbut4[1]);
-fich_ini.WriteInteger('keyboard','jbut5_1',arcade_input.jbut5[1]);
+fich_ini.WriteInteger('keyboard','ndef_0',arcade_input.ndef[0]);
+fich_ini.WriteInteger('keyboard','ndef_1',arcade_input.ndef[1]);
+fich_ini.WriteInteger('keyboard','ndef_2',arcade_input.ndef[2]);
+//fich_ini.WriteInteger('keyboard','ndef_3',arcade_input.ndef[3]);
+for f:=0 to NUM_CONTROLS do begin
+  fich_ini.WriteInteger('keyboard_def','up_'+inttostr(f),defkeys[f].up);
+  fich_ini.WriteInteger('keyboard_def','down_'+inttostr(f),defkeys[f].down);
+  fich_ini.WriteInteger('keyboard_def','left_'+inttostr(f),defkeys[f].left);
+  fich_ini.WriteInteger('keyboard_def','right_'+inttostr(f),defkeys[f].right);
+  fich_ini.WriteInteger('keyboard_def','but0_'+inttostr(f),defkeys[f].but0);
+  fich_ini.WriteInteger('keyboard_def','but1_'+inttostr(f),defkeys[f].but1);
+  fich_ini.WriteInteger('keyboard_def','but2_'+inttostr(f),defkeys[f].but2);
+  fich_ini.WriteInteger('keyboard_def','but3_'+inttostr(f),defkeys[f].but3);
+  fich_ini.WriteInteger('keyboard_def','but4_'+inttostr(f),defkeys[f].but4);
+  fich_ini.WriteInteger('keyboard_def','but5_'+inttostr(f),defkeys[f].but5);
+  fich_ini.WriteInteger('keyboard_def','coin_'+inttostr(f),defkeys[f].coin);
+  fich_ini.WriteInteger('keyboard_def','start_'+inttostr(f),defkeys[f].start);
+end;
 //Autofire
 fich_ini.WriteInteger('keyboard','autofire_p1_but0',byte(timers.autofire_enabled[0]));
 fich_ini.WriteInteger('keyboard','autofire_p1_but1',byte(timers.autofire_enabled[1]));
@@ -562,10 +569,14 @@ fich_ini.WriteInteger('keyboard','autofire_p2_but4',byte(timers.autofire_enabled
 fich_ini.WriteInteger('keyboard','autofire_p2_but5',byte(timers.autofire_enabled[11]));
 fich_ini.WriteInteger('keyboard','autofire_general',byte(timers.autofire_on));
 //tipo y numero joystick
-fich_ini.WriteInteger('keyboard','use_keyb_0',byte(not(arcade_input.use_key[0])));
-fich_ini.WriteInteger('keyboard','use_keyb_1',byte(not(arcade_input.use_key[1])));
+fich_ini.WriteInteger('keyboard','use_keyb_0',byte(arcade_input.use_key[0]));
+fich_ini.WriteInteger('keyboard','use_keyb_1',byte(arcade_input.use_key[1]));
+fich_ini.WriteInteger('keyboard','use_keyb_2',byte(arcade_input.use_key[2]));
+//fich_ini.WriteInteger('keyboard','use_keyb_3',byte(not(arcade_input.use_key[3])));
 fich_ini.WriteInteger('keyboard','num_joy_0',arcade_input.num_joystick[0]);
 fich_ini.WriteInteger('keyboard','num_joy_1',arcade_input.num_joystick[1]);
+fich_ini.WriteInteger('keyboard','num_joy_2',arcade_input.num_joystick[2]);
+//fich_ini.WriteInteger('keyboard','num_joy_3',arcade_input.num_joystick[3]);
 //Joystick calibration
 for f:=0 to NUM_PLAYERS do begin
   fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_y[f]);

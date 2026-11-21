@@ -1,4 +1,4 @@
-unit tms32010;
+﻿unit tms32010;
 
 interface
 uses main_engine,dialogs,sysutils,cpu_misc;
@@ -113,6 +113,10 @@ r.sp[2]:=0;
 r.sp[3]:=0;
 self.change_irq(CLEAR_LINE);
 self.change_halt(CLEAR_LINE);
+r.str.ov:=true;
+r.str.ovm:=true;
+r.str.int:=true;
+r.str.dp_reg:=false;
 r.str.arp_reg:=0;
 end;
 
@@ -327,17 +331,13 @@ case instruccion.h of
               r.alu.l:=(r.acc.l shl (instruccion.h and $7));
               self.putdata(r.alu.wh,instruccion.l);
            end;
-  $60:begin  //addh
+  $60:begin //addh
+        // Sumar sobre los 32 bits para aplicar la saturacion OVM
+        // al ACC completo, igual que la rutina comun de MAME.
         r.oldacc.l:=r.acc.l;
-        self.getdata(instruccion.l,0,false);
-        r.acc.wh:=r.acc.wh+r.alu.wl;
-	      if (smallint((not(r.oldacc.wh xor r.ALU.wh)) and (r.oldacc.wh xor r.acc.wh)) < 0) then begin
-      		r.str.ov:=true;
-      		if r.str.ovm then begin
-            if (smallint(r.oldacc.wh)<0) then r.ACC.wh:=$8000
-              else r.ACC.wh:=$7fff;
-          end;
-	      end;
+        self.getdata(instruccion.l,16,false);
+        r.acc.l:=r.acc.l+r.alu.l;
+        self.calculate_add_overflow(r.alu.l);
       end;
   $61:begin //adds
         r.oldacc.l:=r.acc.l;

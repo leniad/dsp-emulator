@@ -1,5 +1,4 @@
 ﻿unit commodore64;
-{$DEFINE CIA_OLD}
 interface
 uses forms,sysutils,dialogs,rom_engine;
 
@@ -20,7 +19,7 @@ const
 implementation
 uses tap_tzx,snapshot,main_engine,controls_engine,misc_functions,
      sound_engine,file_engine,m6502,mos6566,gfx_engine,tape_window,sid_sound,
-     cargar_dsk,timer_engine,{$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
+     cargar_dsk,timer_engine,mos6526;
 
 var
   kernel_rom,basic_rom:array[0..$1fff] of byte;
@@ -140,18 +139,32 @@ if event.arcade then begin
 end;
 end;
 
+procedure c64_advance_hardware(cycles:word); forward;
+
 procedure c64_principal;
 var
   f:word;
+  available,stolen,i:integer;
 begin
 while EmuStatus=EsRunning do begin
  for f:=0 to 311 do begin
-    frame_main:=mos6566_0.update(f);
-    m6502_0.run(frame_main);
-    frame_main:=frame_main-m6502_0.contador;
+    available:=mos6566_0.update(f);
+    stolen:=63-available;
+    frame_main:=frame_main+available;
+    if frame_main>0 then begin
+      m6502_0.run(frame_main);
+      frame_main:=frame_main-m6502_0.contador;
+    end;
+    // Scanline approximation: contention is grouped after CPU execution.
+    // Do NOT call CPU.run here: these clocks belong to the peripherals.
+    for i:=1 to stolen do begin
+      c64_advance_hardware(1);
+      timers.update(1,m6502_0.numero_cpu);
+      m6502_0.totalt:=m6502_0.totalt+1;
+    end;
     if ((f>15) and (f<286)) then putpixel(0,f-16,384,punbuf,1);
  end;
- actualiza_trozo(0,0,384,284,1,0,0,384,284,PANT_TEMP);
+ actualiza_trozo(0,0,384,270,1,0,0,384,270,PANT_TEMP);
  eventos_c64;
  video_sync;
 end;
@@ -161,7 +174,8 @@ function c64_getbyte(direccion:word):byte;
 begin
 case direccion of
   0:c64_getbyte:=port_bits;
-  1:c64_getbyte:=tape_control or (byte(not(tape_motor))*$20) or (port_val and $7);
+  1:c64_getbyte:=(port_val and port_bits) or
+                 ((tape_control or $07) and not port_bits);
   2..$9fff,$c000..$cfff:c64_getbyte:=memoria[direccion];
   $a000..$bfff:if read_ram_a then c64_getbyte:=memoria[direccion]
                   else c64_getbyte:=basic_rom[direccion and $1fff];
@@ -172,13 +186,8 @@ case direccion of
                       0..3:c64_getbyte:=mos6566_0.read(direccion and $3f);   //VICII
                       4..7:c64_getbyte:=sid_0.read(direccion and $1f); //SID
                       8..$b:c64_getbyte:=color_ram[direccion and $3ff];
-                      {$IFDEF CIA_OLD}
                       $c:c64_getbyte:=mos6526_0.read(direccion and $f); //CIA1
                       $d:c64_getbyte:=mos6526_1.read(direccion and $f); //CIA2
-                      {$ELSE}
-                      $c:c64_getbyte:=mos6526_0.read1(direccion and $f); //CIA1
-                      $d:c64_getbyte:=mos6526_0.read2(direccion and $f); //CIA2
-                      {$ENDIF}
                       $e..$f:c64_getbyte:=$ff;//MessageDlg('Leyendo de la expansion...', mtInformation,[mbOk], 0);
                     end;
                end;
@@ -192,7 +201,7 @@ var
   res:byte;
 begin
 res:=port_val or not(port_bits);
-tape_motor:=(port_val and $20)=0;
+tape_motor:=(res and $20)=0;
 case (res and 7) of
   0:begin
       write_ram:=true;
@@ -261,25 +270,24 @@ case direccion of
                         0..3:mos6566_0.write(direccion and $3f,valor); //VICII
                         4..7:sid_0.write(direccion and $1f,valor); //SID
                         8..$b:color_ram[direccion and $3ff]:=valor and $f;
-                        {$IFDEF CIA_OLD}
                         $c:mos6526_0.write(direccion and $f,valor); //CIA1
                         $d:mos6526_1.write(direccion and $f,valor); //CIA2
-                        {$ELSE}
-                        $c:mos6526_0.write1(direccion and $f,valor); //CIA1
-                        $d:mos6526_0.write2(direccion and $f,valor); //CIA2
-                        {$ENDIF}
                         $e..$f:;//MessageDlg('Escribiendo en la expansion...', mtInformation,[mbOk], 0);
                        end;
     2..$cfff,$e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
-{$IFDEF CIA_OLD}
+function cia1_porta_r:byte;
+begin
+  cia1_porta_r:=mos6526_0.joystick2;
+end;
+
 function cia1_portb_r:byte;
 var
   ret:byte;
 begin
-  ret:=$ff;
+  ret:=mos6526_0.joystick1;
   //Filas
   if ((mos6526_0.pa and $01)=0) then ret:=ret and c64_keyboard[0];
   if ((mos6526_0.pa and $02)=0) then ret:=ret and c64_keyboard[1];
@@ -300,74 +308,82 @@ end;
 procedure cia2_portb_w(valor:byte);
 begin
 end;
-{$ENDIF}
+
+procedure c64_update_irq;
+begin
+  if cia_irq or vic_irq then m6502_0.change_irq(ASSERT_LINE)
+    else m6502_0.change_irq(CLEAR_LINE);
+end;
 
 procedure c64_cia_irq(state:byte);
 begin
-  cia_irq:=(state=ASSERT_LINE);
-  if not(cia_irq) then m6502_0.change_irq(CLEAR_LINE);
+  cia_irq:=state<>CLEAR_LINE;c64_update_irq;
 end;
 
 procedure c64_vic_irq(state:byte);
 begin
-  vic_irq:=(state=ASSERT_LINE);
-  if not(vic_irq) then m6502_0.change_irq(CLEAR_LINE);
+  vic_irq:=state<>CLEAR_LINE;c64_update_irq;
 end;
 
 procedure c64_nmi(state:byte);
+var
+  active:boolean;
 begin
-  cia_nmi:=(state=ASSERT_LINE);
-  if not(cia_nmi) then m6502_0.change_nmi(CLEAR_LINE);
+  active:=state<>CLEAR_LINE;
+  // Adapt the CIA level to the 6502's edge-sensitive NMI input. The supplied
+  // core leaves ASSERT_LINE pending after service, which otherwise blocks IRQ.
+  if active and not cia_nmi then m6502_0.change_nmi(PULSE_LINE);
+  cia_nmi:=active;
+end;
+
+procedure c64_advance_hardware(cycles:word);
+var
+  i:integer;
+  level:byte;
+begin
+  for i:=1 to cycles do begin
+    if cinta_tzx.cargada and cinta_tzx.play_tape and tape_motor then begin
+      // Present the initial level before time advances, then all transitions.
+      level:=cinta_tzx.value shr 6;mos6526_0.flag_w(level);
+      play_cinta_tzx(1);
+      level:=cinta_tzx.value shr 6;mos6526_0.flag_w(level);
+    end;
+    mos6526_0.sync(1);mos6526_1.sync(1);
+  end;
 end;
 
 procedure c64_despues_instruccion(tstates:word);
 begin
-  if (cia_irq or vic_irq) then m6502_0.change_irq(ASSERT_LINE);
-  if cia_nmi then m6502_0.change_nmi(ASSERT_LINE);
-  if cinta_tzx.cargada then begin
-    if cinta_tzx.play_tape then begin
-      if tape_motor then begin
-        mos6526_0.flag_w(cinta_tzx.value shr 6);
-        //3500/985 =3.5524
-        play_cinta_tzx(tstates);
-      end;
-    end;
-  end;
-  {$IFDEF CIA_OLD}
-  mos6526_0.sync(tstates);
-  mos6526_1.sync(tstates);
-  {$ELSE}
-  mos6526_0.EmulateLine1(tstates);
-  mos6526_0.EmulateLine2(tstates);
-  {$ENDIF}
+  c64_advance_hardware(tstates);
 end;
 
 procedure c64_reset;
 begin
 //SIEMPRE ESTO PRIMERO PARA PONER LOS VALORES DE RESET DE LA CPU!!!
-port_bits:=$ef;
-port_val:=$ef;
-actualiza_mem;
+main_screen.rapido:=false;
+if cinta_tzx.play_tape then tape_control:=0 else tape_control:=$10;
+cia_irq:=false;
+vic_irq:=false;
+cia_nmi:=false;
+port_bits:=0;
+port_val:=$3f;
 m6502_0.reset;
-frame_main:=m6502_0.tframes;
+frame_main:=0;
 mos6526_0.reset;
-{$IFDEF CIA_OLD}
 mos6526_1.reset;
-{$ENDIF}
 mos6566_0.reset;
 sid_0.reset;
 fillchar(c64_keyboard[0],8,$ff);
 fillchar(c64_keyboard_i[0],8,$ff);
-fillchar(memoria[0],$10000,0);
-tape_control:=$10;
 vic_irq:=false;
 cia_irq:=false;
 cia_nmi:=false;
 tape_motor:=false;
-write_ram:=false;
-read_ram_a:=false;
-read_ram_e:=false;
-read_ram_d:=2;
+actualiza_mem;
+fillchar(memoria[0],$10000,0);
+mos6566_0.ChangedVA(0);
+c64_update_irq;
+m6502_0.change_nmi(CLEAR_LINE);
 key_pos:=0;
 end;
 
@@ -421,6 +437,7 @@ begin
     freemem(datos);
     exit;
   end;
+  cadena:='';
   extension:=extension_fichero(nombre_file);
   resultado:=false;
   es_cinta:=true;
@@ -451,7 +468,8 @@ begin
   end;
   freemem(datos);
   directory.c64_tap:=ExtractFilePath(romfile);
-  change_caption(cadena);
+  main_vars.nombre_caption:=cadena;
+  change_caption;
 end;
 
 function iniciar_c64:boolean;
@@ -464,6 +482,8 @@ begin
   llamadas_maquina.cintas:=c64_tapes;
   llamadas_maquina.cartuchos:=c64_loaddisk;
   iniciar_c64:=false;
+  fillchar(memoria[0],$10000,0);
+  tape_control:=$10;
   iniciar_audio(true);
   //Total --> 504x312
   //Linea --> 76 HBLANK
@@ -493,15 +513,10 @@ begin
   if not(roms_load(@basic_rom,c64_basic)) then exit;
   if not(roms_load(@char_rom,c64_char)) then exit;
   //CIA
-  {$IFDEF CIA_OLD}
   mos6526_0:=mos6526_chip.create(985248);
-  mos6526_0.change_calls(nil,cia1_portb_r,nil,nil,c64_cia_irq);
+  mos6526_0.change_calls(cia1_porta_r,cia1_portb_r,nil,nil,c64_cia_irq);
   mos6526_1:=mos6526_chip.create(985248);
   mos6526_1.change_calls(nil,nil,cia2_porta_w,cia2_portb_w,c64_nmi);
-  {$ELSE}
-  mos6526_0:=mos6526_chip.create(985248);
-  mos6526_0.change_calls(nil,nil,nil,nil,c64_cia_irq,c64_nmi);
-  {$ENDIF}
   //VIDEO
   mos6566_0:=mos6566_chip.create(985248);
   mos6566_0.change_calls(c64_vic_irq);

@@ -90,7 +90,7 @@ const
 
 implementation
 uses nz80,main_engine,controls_engine,ym_2203,gfx_engine,msm5205,pal_engine,
-     sound_engine,timer_engine,mcs51,oki6295;
+     sound_engine,mcs51,oki6295,timer_engine;
 
 const
         lwings_dip_a:array [0..3] of def_dip2=(
@@ -150,8 +150,9 @@ var
  //avengers mcu
  mcu_data:array[0..1] of byte;
  mcu_latch:array[0..2] of byte;
- soundstate,avengers_linea,mcu_control,adpcm_command:byte;
+ soundstate,mcu_control,adpcm_command:byte;
  sprt_avenger:boolean;
+ avengers_linea:word;
  //Fire ball
  sprite_bank,oki_bank:byte;
  oki_roms:array[0..7,0..$1ffff] of byte;
@@ -209,12 +210,12 @@ for f:=$3ff downto 0 do begin
     x:=f mod 32;
     y:=f div 32;
     nchar:=memoria[f+$e000]+((attr and $c0) shl 2);
-    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+512,3,0,(attr and $20)<>0,(attr and $10)<>0);
+    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+512,3,0,(attr and $10)<>0,(attr and $20)<>0);
     gfx[0].buffer[f]:=false;
   end;
 end;
 scroll_x_y(2,1,scroll_y,scroll_x);
-for f:=$7f downto 0 do begin
+for f:=$5f downto 0 do begin
     x:=(buffer_sprites[3+(f*4)]+((buffer_sprites[1+(f*4)] and 1) shl 8));
     y:=buffer_sprites[2+(f*4)];
     if ((x or y)<>0) then begin
@@ -232,25 +233,26 @@ end;
 
 procedure lwings_principal;
 var
-  f:byte;
+  f:word;
 begin
-while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    if f=248 then begin
-      if irq_ena then z80_0.change_irq_vector(HOLD_LINE,$d7);
-      update_video_lw;
-      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
+  while EmuStatus=EsRunning do begin
+    for f:=0 to 281 do begin
+      case f of
+        32,96,160,224:z80_1.change_irq(HOLD_LINE);
+        128:z80_0.change_irq_vector(HOLD_LINE,$ff);
+        248:begin
+              if irq_ena then z80_0.change_nmi(PULSE_LINE);
+              update_video_lw;
+            end;
+      end;
+      z80_0.run(frame_main);
+      frame_main:=frame_main+z80_0.tframes-z80_0.contador;
+      z80_1.run(frame_snd);
+      frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     end;
-    //Main CPU
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
+    eventos_lwings;
+    video_sync;
   end;
-  eventos_lwings;
-  video_sync;
-end;
 end;
 
 //Main CPU
@@ -307,6 +309,7 @@ case direccion of
     $f80a:scroll_x:=(scroll_x and $100) or valor;
     $f80b:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
     $f80c:sound_command:=valor;
+    $f80d:copymemory(@buffer_sprites[0],@memoria[$de00],$180);
     $f80e:begin
             bank:=(valor and 6) shr 1;
             irq_ena:=(valor and 8)<>0;
@@ -325,7 +328,7 @@ case direccion of
   0..$7fff,$c000..$c7ff:lwings_snd_getbyte:=mem_snd[direccion];
   $c800:lwings_snd_getbyte:=sound_command;
   $e006:begin
-          lwings_snd_getbyte:=sound2_command or soundstate;
+          lwings_snd_getbyte:=sound_command or soundstate;
           soundstate:=0;
         end;
 end;
@@ -342,11 +345,6 @@ case direccion of
   $e003:ym2203_1.write(valor);
   $e006:sound2_command:=valor;
 end;
-end;
-
-procedure lwings_snd_irq;
-begin
-  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure lwings_sound_update;
@@ -372,11 +370,11 @@ if pintar_image then begin
   for y:=0 to $f do begin
     offsy:=offsy and $7fff;
     for x:=0 to $1f do begin
-      tile_index:=offsy+(2*x);
+      tile_index:=offsy+(2*x) and $7fff;
       attr:=trojan_map[tile_index+1];
       color:=(attr and 7) shl 4;
       nchar:=trojan_map[tile_index]+((attr and $80) shl 1);
-      put_gfx_flip(x*16,y*16,nchar,color,5,3,(attr and $30)<>0,false);
+      put_gfx_flip(x*16,y*16,nchar,color,5,3,(attr and $10)<>0,(attr and $20)<>0);
     end;
     offsy:=offsy+$800;
   end;
@@ -403,7 +401,7 @@ for f:=$3ff downto 0 do begin
     x:=f mod 32;
     y:=f div 32;
     nchar:=memoria[f+$e000]+((attr and $c0) shl 2);
-    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+768,3,0,(attr and $20)<>0,(attr and $10)<>0);
+    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+768,3,0,(attr and $10)<>0,(attr and $20)<>0);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -437,15 +435,18 @@ end;
 
 procedure trojan_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    if f=248 then begin
-      if irq_ena then z80_0.change_irq_vector(HOLD_LINE,$d7);
-      update_video_trojan;
-      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
-    end;
+  for f:=0 to 281 do begin
+    case f of
+        32,96,160,224:z80_1.change_irq(HOLD_LINE);
+        128:z80_0.change_irq_vector(HOLD_LINE,$ff);
+        248:begin
+              if irq_ena then z80_0.change_nmi(PULSE_LINE);
+              update_video_trojan;
+            end;
+      end;
     //Main Z80
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
@@ -505,6 +506,7 @@ case direccion of
             image:=valor;
             pintar_image:=true;
           end;
+    $f808:copymemory(@buffer_sprites[0],@memoria[$de00],$180);
     $f80c:sound_command:=valor;
     $f80d:sound2_command:=valor;
     $f80e:begin
@@ -560,12 +562,15 @@ var
   h:byte;
 begin
 while EmuStatus=EsRunning do begin
-  for avengers_linea:=0 to 255 do begin
-    if avengers_linea=248 then begin
-      if irq_ena then z80_0.change_nmi(PULSE_LINE);
-      update_video_trojan;
-      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
-    end;
+  for avengers_linea:=0 to 281 do begin
+    case avengers_linea of
+        32,96,160,224:z80_1.change_irq(HOLD_LINE);
+        128:z80_0.change_irq_vector(HOLD_LINE,$ff);
+        248:begin
+              if irq_ena then z80_0.change_nmi(PULSE_LINE);
+              update_video_trojan;
+            end;
+      end;
     for h:=1 to CPU_SYNC do begin
       //Main Z80
       z80_0.run(frame_main);
@@ -627,6 +632,7 @@ case direccion of
             image:=valor;
             pintar_image:=true;
           end;
+    $f808:copymemory(@buffer_sprites[0],@memoria[$de00],$180);
     $f809:begin
             mcu_latch[0]:=valor;
             mcs51_0.change_irq0(ASSERT_LINE);
@@ -693,29 +699,6 @@ begin
 end;
 
 //Fire Ball
-procedure fball_principal;
-var
-  f:byte;
-begin
-while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
-    if f=248 then begin
-      if irq_ena then z80_0.change_nmi(PULSE_LINE);
-      update_video_lw;
-      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
-    end;
-    //Main CPU
-    z80_0.run(frame_main);
-    frame_main:=frame_main+z80_0.tframes-z80_0.contador;
-    //Sound CPU
-    z80_1.run(frame_snd);
-    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
-  end;
-  eventos_lwings;
-  video_sync;
-end;
-end;
-
 function fball_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -836,7 +819,8 @@ begin
 if main_vars.tipo_maquina=368 then CPU_SYNC:=4
   else CPU_SYNC:=1;
 llamadas_maquina.reset:=reset_lwings;
-llamadas_maquina.scanlines:=256*CPU_SYNC;
+llamadas_maquina.scanlines:=282*CPU_SYNC;
+llamadas_maquina.fps_max:=12000000/2/384/282;
 iniciar_lwings:=false;
 iniciar_audio(false);
 //final 1  512x512 (por sprites)
@@ -848,7 +832,6 @@ screen_init(2,512,512);
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
   59:main_screen.rot90_screen:=true;
-  60:llamadas_maquina.fps_max:=55.37;
   61,368:begin
       //La pantallas 2 (la cambio) y 4 son transparentes
       screen_init(2,512,512,true);
@@ -880,7 +863,6 @@ case main_vars.tipo_maquina of
 end;
 if main_vars.tipo_maquina<>247 then begin
   z80_1.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
-  timers.init(z80_1.numero_cpu,3000000/222,lwings_snd_irq,nil,true);
   //Sound Chips
   ym2203_0:=ym2203_chip.create(1500000,0.50,1);
   ym2203_1:=ym2203_chip.create(1500000,0.50,1);
@@ -978,7 +960,7 @@ case main_vars.tipo_maquina of
         init_dips(2,trojan_dip_b,$ff);
       end;
   247:begin //Fire ball
-        llamadas_maquina.bucle_general:=fball_principal;
+        llamadas_maquina.bucle_general:=lwings_principal;
         //Main CPU
         z80_0:=cpu_z80.create(6000000);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);

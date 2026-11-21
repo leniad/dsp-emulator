@@ -1,4 +1,4 @@
-unit atari_system1;
+﻿unit atari_system1;
 
 interface
 uses rom_engine;
@@ -101,7 +101,6 @@ const
 	        special_entry:(0,$ffff,0,0);  // mask for the special value */
 	        specialvalue:$ffff;           // resulting value to indicate "special" */
         );
-        CPU_SYNC=1;
 
 var
  rom:array[0..$3ffff] of word;
@@ -111,17 +110,71 @@ var
  ram3:array[0..$1fff] of word;
  sound_latch,main_latch:byte;
  write_eeprom,main_pending,sound_pending:boolean;
+ controls_data:word;
  //Video
  playfield_lookup:array[0..$ff] of word;
  bank_color_shift:array[0..7] of byte;
  linea,scroll_x,scroll_y,scroll_y_latch,bankselect:word;
  rom_bank,vblank,playfield_tile_bank:byte;
  eeprom_ram:array[0..$7ff] of byte;
+ playfield_priority_pens:byte;
+ pf_indices:array[0..511,0..511] of word;
+ mo_indices:array[0..239,0..335] of word;
+
+procedure collect_system1_mo(x,y,palette_index,priority:word);
+begin
+  if (x<336) and (y<240) then begin
+    mo_indices[y,x]:=palette_index and $3ff;
+    if priority<>0 then mo_indices[y,x]:=mo_indices[y,x] or $8000;
+  end;
+end;
 
 procedure update_video_atari_sys1;
+procedure mix_system1;
+var
+  x,y,pf,mo,index,offset,pitch:integer;
+  dest:pword;
+begin
+  pitch:=pantalla[3].pitch shr 1;
+  for y:=0 to 239 do begin
+    offset:=y*pitch;
+    if p_final[3].final_mix then inc(offset,ADD_SPRITE*pitch+ADD_SPRITE);
+    dest:=pantalla[3].pixels;
+    inc(dest,offset);
+    for x:=0 to 335 do begin
+      pf:=pf_indices[(y+scroll_y) and $1ff,(x+scroll_x) and $1ff];
+      mo:=mo_indices[y,x];index:=pf;
+      if mo<>$ffff then begin
+        if (mo and $8000)<>0 then begin
+          if (mo and $0f)<>1 then index:=$300+((pf and $0f) shl 4)+(mo and $0f);
+        end else begin
+          if ((pf and $f8)<>0) or ((playfield_priority_pens and (1 shl (pf and 7)))=0) then index:=mo;
+        end;
+      end;
+      dest^:=paleta[index and $3ff];
+      inc(dest);
+    end;
+  end;
+end;
+
+procedure cache_pf_indices(tx,ty,nchar,base:word;ngfx:byte;hflip:boolean);
+var
+  px,py,srcx:integer;
+  pixel:pbyte;
+begin
+  for py:=0 to 7 do
+    for px:=0 to 7 do begin
+      if hflip then srcx:=7-px
+        else srcx:=px;
+      pixel:=gfx[ngfx].datos;
+      inc(pixel,(nchar mod gfx[ngfx].elements)*64+py*8+srcx);
+      pf_indices[ty*8+py,tx*8+px]:=base+pixel^;
+    end;
+end;
 var
   f,color,x,y,nchar,atrib,atrib2:word;
   gfx_index:byte;
+
 begin
 fill_full_screen(3,$2000);
 for f:=0 to $7ff do begin
@@ -142,15 +195,17 @@ for f:=0 to $fff do begin
   atrib:=ram3[f];
   atrib2:=playfield_lookup[((atrib shr 8) and $7f) or (playfield_tile_bank shl 7)];
   gfx_index:=(atrib2 shr 8) and $f;
-  color:=$20+(((atrib2 shr 12) and $f) shl bank_color_shift[gfx_index]);
+  color:=$20+(((atrib2 shr 12) and $f) shl (bank_color_shift[gfx_index]-1));
   if (gfx[1].buffer[f] or buffer_color[color]) then begin
     nchar:=((atrib2 and $ff) shl 8) or (atrib and $ff);
     put_gfx_flip(x*8,y*8,nchar,color shl 4,2,gfx_index,((atrib shr 15) and 1)<>0,false);
+    cache_pf_indices(x,y,nchar,color shl 4,gfx_index,(atrib and $8000)<>0);
     gfx[1].buffer[f]:=false;
   end;
 end;
-scroll_x_y(2,3,scroll_x,scroll_y);
+fillchar(mo_indices,sizeof(mo_indices),$ff);
 atari_mo_0.draw(0,256,-1);
+mix_system1;
 actualiza_trozo(0,0,512,256,1,0,0,512,256,3);
 actualiza_trozo_final(0,0,336,240,3);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
@@ -159,40 +214,41 @@ end;
 procedure eventos_atari_sys1;
 begin
 if event.arcade then begin
+  marcade.in1:=0;
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
   //SYSTEM
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
+  //JOYSTICK DIGITAL
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or 8);
 end;
 end;
 
 procedure atari_sys1_principal;
 var
-  frame_m,frame_s:single;
   h:byte;
 begin
-frame_m:=m68000_0.tframes;
-frame_s:=m6502_0.tframes;
 while EmuStatus=EsRunning do begin
  for linea:=0 to 261 do begin
-  //main
-  for h:=1 to CPU_SYNC do begin
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //sound
-    m6502_0.run(frame_s);
-    frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-  end;
   case linea of
-    239:begin
+    0:vblank:=$10;
+    240:begin
           update_video_atari_sys1;
           vblank:=$0;
           m68000_0.irq[4]:=ASSERT_LINE;
         end;
-    261:vblank:=$10;
   end;
+  //main
+  m68000_0.run(frame_main);
+  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+  //sound
+  m6502_0.run(frame_snd);
+  frame_snd:=frame_snd+m6502_0.tframes-m6502_0.contador;
  end;
  scroll_y:=scroll_y_latch;
  eventos_atari_sys1;
@@ -215,8 +271,27 @@ case direccion of
     $a00000..$a03fff:atari_sys1_getword:=ram3[(direccion and $3fff) shr 1];
     $b00000..$b007ff:atari_sys1_getword:=buffer_paleta[(direccion and $7ff) shr 1];
     $f00000..$f00fff:atari_sys1_getword:=eeprom_ram[(direccion and $fff) shr 1];
-    $f20000..$f20007:atari_sys1_getword:=$ff; //trakball_r
-	  $f40000..$f4001f:atari_sys1_getword:=0; //Controles
+    $f20000:atari_sys1_getword:=analog.c[0].x[0]; //trakball_x
+    $f20002:atari_sys1_getword:=analog.c[0].y[0]; //trakball_y
+	  $f40000..$f4001f:begin
+                      atari_sys1_getword:=controls_data;
+                      if not (m68000_0.write_8bits_hi_dir or m68000_0.write_8bits_lo_dir) then
+                        if not m68000_0.read_8bits_lo_dir then begin
+                          case ((direccion shr 1) and 7) of
+                              0:if (marcade.in1 and 1)<>0 then controls_data:=$f0
+                                  else controls_data:=0;
+                              1:if (marcade.in1 and 2)<>0 then controls_data:=$f0
+                                  else controls_data:=0;
+                              2:if (marcade.in1 and 4)<>0 then controls_data:=$f0
+                                  else controls_data:=0;
+                              3:if (marcade.in1 and 8)<>0 then controls_data:=$f0
+                                  else controls_data:=0;
+                              4..7:controls_data:=$ff;
+                          end;
+                          if (direccion and $10)=0 then m68000_0.irq[2]:=HOLD_LINE
+                            else m68000_0.irq[2]:=CLEAR_LINE;
+                        end;
+                     end;
 	  $f60000..$f60003:atari_sys1_getword:=marcade.in0 or vblank or ($80*(byte(sound_pending)));
 	  $fc0000:begin
                 main_pending:=false;
@@ -226,19 +301,23 @@ case direccion of
 end;
 end;
 
+procedure atari_sys1_putword(direccion:dword;valor:word);
 procedure cambiar_color(tmp_color,numero:word);
 var
   color:tcolor;
+  intensity:integer;
 begin
-  color.r:=pal4bit_i(tmp_color shr 8,tmp_color shr 12);
-  color.g:=pal4bit_i(tmp_color shr 4,tmp_color shr 12);
-  color.b:=pal4bit_i(tmp_color,tmp_color shr 12);
+  intensity:=((tmp_color shr 12) and $f)*17;
+  color.r:=(intensity*(((tmp_color shr 8) and $f)*17)) shr 8;
+  color.g:=(intensity*(((tmp_color shr 4) and $f)*17)) shr 8;
+  color.b:=(intensity*((tmp_color and $f)*17)) shr 8;
   set_pal_color(color,numero);
-  if numero<$20 then buffer_color[(numero shr 2) and 7]:=true
-    else buffer_color[$20+((numero shr 4) and $f)]:=true
+  if numero<$20 then begin
+    buffer_color[(numero shr 2) and 7]:=true;
+  end else if ((numero>=$200) and (numero<$300)) then begin
+    fillchar(gfx[1].buffer[0],$1000,1);
+  end;
 end;
-
-procedure atari_sys1_putword(direccion:dword;valor:word);
 var
   diff:word;
 begin
@@ -252,7 +331,7 @@ case direccion of
               if linea<240 then scroll_y:=valor-(linea+1)
                 else scroll_y:=valor;
             end;
-	  $840000:; //atarisy1_priority_w
+	  $840000..$840001:if not m68000_0.write_8bits_lo_dir then playfield_priority_pens:=valor and $ff;
 	  $860000:begin //atarisy1_bankselect_w
               diff:=bankselect xor valor;
               // playfield bank select
@@ -291,7 +370,23 @@ case direccion of
                         eeprom_ram[(direccion and $fff) shr 1]:=valor and $ff;
                         write_eeprom:=false;
                      end;
-	  $f40000..$f4001f:; //joystick_w
+	  $f40000..$f4001f:begin
+                      if not(m68000_0.write_8bits_lo_dir) then begin
+                        case ((direccion shr 1) and 7) of
+                            0:if (marcade.in1 and 1)<>0 then controls_data:=$f0
+                                else controls_data:=0;
+                            1:if (marcade.in1 and 2)<>0 then controls_data:=$f0
+                              else controls_data:=0;
+                            2:if (marcade.in1 and 4)<>0 then controls_data:=$f0
+                              else controls_data:=0;
+                            3:if (marcade.in1 and 8)<>0 then controls_data:=$f0
+                              else controls_data:=0;
+                            4..7:controls_data:=$ff;
+                        end;
+                        if (direccion and $10)=0 then m68000_0.irq[2]:=HOLD_LINE
+                          else m68000_0.irq[2]:=CLEAR_LINE;
+                      end;
+                     end;
 	  $f80000,$fe0000:begin
                         sound_latch:=valor;
 	                      sound_pending:=true;
@@ -311,7 +406,7 @@ case direccion of
               m6502_0.change_nmi(CLEAR_LINE);
 	            atari_sys1_snd_getbyte:=sound_latch;
            end;
-     $1820:atari_sys1_snd_getbyte:=marcade.in2 or ($8*byte(sound_pending)) or ($10*byte(main_pending));
+     $1820:atari_sys1_snd_getbyte:=marcade.in2 or (8*byte(sound_pending)) or ($10*byte(main_pending));
      $1870..$187f:pokey_0.read(direccion and $f);
 end;
 end;
@@ -355,19 +450,24 @@ begin
  m6502_0.reset;
  ym2151_0.reset;
  pokey_0.reset;
+ frame_main:=m68000_0.tframes;
+ frame_snd:=m6502_0.tframes;
  marcade.in0:=$ff6f;
- marcade.in1:=$ff;
+ marcade.in1:=0;
  marcade.in2:=$87;
  scroll_x:=0;
  scroll_y:=0;
  vblank:=$10;
  bankselect:=0;
  playfield_tile_bank:=0;
+ playfield_priority_pens:=0;
+ fillchar(gfx[1].buffer[0],$1000,1);
  write_eeprom:=false;
  sound_pending:=false;
  main_pending:=false;
  main_latch:=0;
  sound_latch:=0;
+
 end;
 
 function iniciar_atari_sys1:boolean;
@@ -496,7 +596,7 @@ iniciar_atari_sys1:=false;
 llamadas_maquina.bucle_general:=atari_sys1_principal;
 llamadas_maquina.reset:=reset_atari_sys1;
 llamadas_maquina.fps_max:=59.922743;
-llamadas_maquina.scanlines:=262*CPU_SYNC;
+llamadas_maquina.scanlines:=262;
 iniciar_audio(true);
 screen_init(1,512,256,true);
 screen_init(2,512,512);
@@ -579,10 +679,14 @@ case main_vars.tipo_maquina of
         if not(roms_load(mem_temp,marble_back)) then exit;
         convert_back($100000);
         freemem(mem_temp);
+        //controls
+        init_analog(m68000_0.numero_cpu,m68000_0.clock);
+        analog_0(30,30,0,$ff,0,false,true,false,false);
   end;
 end;
 //atari mo
-atari_mo_0:=tatari_mo.create(nil,@ram3[$2000 shr 1],atari_sys1_mo_config,3,336+8,240+8);
+atari_mo_0:=tatari_mo.create(nil,@ram3[$2000 shr 1],atari_sys1_mo_config,3,336+8,240+8,3);
+atari_mo_0.pixel_callback:=collect_system1_mo;
 ptempw:=atari_mo_0.get_codelookup;
 for f:=0 to $ffff do begin
   ptempw^:=(f and $ff) or ((motable[f shr 8] and $ff) shl 8);

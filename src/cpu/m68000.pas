@@ -1,33 +1,33 @@
-unit m68000;
+ï»¿unit m68000;
 {
 06/01/09 - Version 1.0 - Aqui empieza todo!!
 15/02/10 - Version 2.0 - Renovado el emulador
   analizados todos los bits de los opcodes.
 06/08/10 - Corregidos
            Opcode ABCD
-           EA indirecto indexado con desplazamiento tipo word y añadido long (corrige Rastan)
+           EA indirecto indexado con desplazamiento tipo word y aÃ±adido long (corrige Rastan)
            Opcodes tipo $e cantidad de repeticiones cuando es un registro (corrige demo F1 dream)
            Corregidas las condiciones de salto (corrige Snow Bros)
-           Añadidos dos opcodes de movep
-           Añadido un opcode bclr 32 bits
+           AÃ±adidos dos opcodes de movep
+           AÃ±adido un opcode bclr 32 bits
            Limpieza opcodes bclr, bset, bcmp, bchg
 05/09/10   Corregido movem
 20/09/10   Corregido sbcd
 23/09/10   Corregido asl.b
-25/12/10   Añadido TAS y algunos modos de direccionamiento
-20/04/11   Añadidos mas modos de dir en movem y corregido privilegio en 'move from sr'
+25/12/10   AÃ±adido TAS y algunos modos de direccionamiento
+20/04/11   AÃ±adidos mas modos de dir en movem y corregido privilegio en 'move from sr'
            corregido flag 'c' en cmpi.l
 14/12/12   Convertido a Clase
-27/01/13   Añadido STOP
-14/02/13   Añadido movem.l opcode $33 direccionamiento $30..$37
+27/01/13   AÃ±adido STOP
+14/02/13   AÃ±adido movem.l opcode $33 direccionamiento $30..$37
 04/06/14   Opcode $6Xff --> Illegal
-13/07/14   Añadido opcodes negx y dirs pea $28..$38
+13/07/14   AÃ±adido opcodes negx y dirs pea $28..$38
 02/08/14   Corregido STOP
-14/09/14   Añadida asl.w
+14/09/14   AÃ±adida asl.w
 12/10/14   Revisados los opcodes $Exxx
-07/11/17   Añadido roxl.w
-15/07/20   Añadido move.w opcode $32 direccionamiento $3b
-13/03/22   Añadido ror.w
+07/11/17   AÃ±adido roxl.w
+15/07/20   AÃ±adido move.w opcode $32 direccionamiento $3b
+13/03/22   AÃ±adido ror.w
 17/01/23   Mejorados los timings
 25/03/24   Corregido divs (corrige Space Harrier), mejorados timings, corregidos excepciones de privilegios en 'stop', 'move to sr' y 'move from sr'
 }
@@ -49,6 +49,7 @@ type
         end;
         preg_m68000=^reg_m68000;
         treset_call=procedure;
+        tm68000_irq_ack=procedure(level:byte);
         cpu_m68000=class(cpu_class)
             constructor create(clock:dword;tipo:byte=0);
             destructor free;
@@ -59,6 +60,8 @@ type
             irq:array[0..7] of byte;
             read_8bits_hi_dir,read_8bits_lo_dir,write_8bits_hi_dir,write_8bits_lo_dir:boolean;
             r:preg_m68000;
+            procedure change_irq_level(level,estado:byte);
+            procedure change_irq_ack_call(ack_call:tm68000_irq_ack);
             procedure reset;
             procedure run(maximo:single);
             function get_internal_r:preg_m68000;
@@ -70,10 +73,14 @@ type
             procedure putbyte(addr:dword;val:byte);
           private
             tipo:byte;
+            irq7_seen,irq7_pending:boolean;
             ea:dword;
             prefetch:boolean;
             temp:dparejas;
             reset_call:treset_call;
+            irq_ack_call:tm68000_irq_ack;
+            procedure movem_store(dir:byte;mask:word;long_size:boolean);
+            procedure movem_load(dir:byte;mask:word;long_size:boolean);
             procedure poner_band(pila:word);
             function getword(addr:dword):word;
             procedure putword(addr:dword;val:word);
@@ -141,6 +148,7 @@ self.clock:=clock;
 self.tframes:=(clock/llamadas_maquina.scanlines)/llamadas_maquina.fps_max;
 self.tipo:=tipo;
 self.reset_call:=nil;
+self.irq_ack_call:=nil;
 end;
 
 destructor cpu_m68000.free;
@@ -149,6 +157,11 @@ if self.r<>nil then begin
   freemem(self.r);
   self.r:=nil;
 end;
+end;
+
+procedure cpu_m68000.change_irq_ack_call(ack_call:tm68000_irq_ack);
+begin
+  self.irq_ack_call:=ack_call;
 end;
 
 procedure cpu_m68000.change_reset_call(reset_call:treset_call);
@@ -182,7 +195,10 @@ var
   f:byte;
 begin
 r.cc.s:=true;
+r.cc.t:=false;
 r.cc.z:=true;
+self.irq7_seen:=false;
+self.irq7_pending:=false;
 self.prefetch:=false;
 r.cc.im:=7;
 r.sp:=@r.a[7];
@@ -261,7 +277,8 @@ begin
   temp_w:=coger_band(self.r);
   copymemory(temp,@temp_w,2);inc(temp,2);size:=size+2;
   copymemory(temp,@self.ea,4);inc(temp,4);size:=size+4;
-  temp^:=byte(self.prefetch);inc(temp);size:=size+1;
+  temp^:=$80 or byte(self.prefetch) or (byte(self.halt) shl 1) or (byte(self.irq7_seen) shl 2) or (byte(self.irq7_pending) shl 3);
+  inc(temp);size:=size+1;
   copymemory(temp,@self.temp,sizeof(dparejas));size:=size+sizeof(dparejas);
   save_snapshot:=size;
 end;
@@ -278,10 +295,29 @@ begin
   copymemory(@self.r.d[0],temp,sizeof(dparejas)*8);inc(temp,sizeof(dparejas)*8);
   copymemory(@self.r.a[0],temp,sizeof(dparejas)*8);inc(temp,sizeof(dparejas)*8);
   copymemory(@temp_w,temp,2);inc(temp,2);
-  poner_band(temp_w);
+  self.r.cc.s:=(temp_w and $2000)<>0;
+  self.poner_band(temp_w);
   copymemory(@self.ea,temp,4);inc(temp,4);
-  self.prefetch:=(temp^<>0);inc(temp);
+  self.prefetch:=(temp^ and 1)<>0;
+  if (temp^ and $80)<>0 then begin
+    self.halt:=(temp^ and 2)<>0;
+    self.irq7_seen:=(temp^ and 4)<>0;
+    self.irq7_pending:=(temp^ and 8)<>0;
+  end else begin
+    self.halt:=false;
+    self.irq7_seen:=self.irq[7]<>CLEAR_LINE;
+    self.irq7_pending:=false;
+  end;
+  inc(temp);
   copymemory(@self.temp,temp,sizeof(dparejas));
+  self.r.sp:=@self.r.a[7];
+  if self.r.cc.s then begin
+    self.r.isp:=@self.r.a[7];
+    self.r.usp:=@self.temp;
+  end else begin
+    self.r.usp:=@self.r.a[7];
+    self.r.isp:=@self.temp;
+  end;
 end;
 
 function cpu_m68000.getbyte(addr:dword):byte;
@@ -830,6 +866,76 @@ end;
 leerdir_ea:=res;
 end;
 
+procedure cpu_m68000.change_irq_level(level,estado:byte);
+begin
+  if level=7 then begin
+    if (estado<>CLEAR_LINE) and not(self.irq7_seen) then self.irq7_pending:=true;
+    self.irq7_seen:=estado<>CLEAR_LINE;
+  end;
+  self.irq[level]:=estado;
+end;
+
+procedure cpu_m68000.movem_store(dir:byte;mask:word;long_size:boolean);
+var
+  cursor,value:dword;
+  i,regnum:integer;
+  step:byte;
+  predec,old_opcode:boolean;
+begin
+  if long_size then step:=4 else step:=2;
+  predec:=(dir shr 3)=4;
+  if predec then cursor:=r.a[dir and 7].l
+    else cursor:=self.leerdir_ea(dir);
+  old_opcode:=self.opcode;
+  self.opcode:=false;
+  for i:=0 to 15 do begin
+    if (mask and (word(1) shl i))<>0 then begin
+      if predec then regnum:=15-i else regnum:=i;
+      if regnum<8 then value:=r.d[regnum].l else value:=r.a[regnum-8].l;
+      if predec then cursor:=cursor-step;
+      if long_size then begin
+        if predec then begin
+          self.putword(cursor+2,value and $ffff);
+          self.putword(cursor,value shr 16);
+        end else begin
+          self.putword(cursor,value shr 16);
+          self.putword(cursor+2,value and $ffff);
+        end;
+      end else self.putword(cursor,value and $ffff);
+      if not predec then cursor:=cursor+step;
+    end;
+  end;
+  if predec then r.a[dir and 7].l:=cursor;
+  self.opcode:=old_opcode;
+end;
+
+procedure cpu_m68000.movem_load(dir:byte;mask:word;long_size:boolean);
+var
+  cursor,value:dword;
+  i:integer;
+  step:byte;
+  postinc,old_opcode:boolean;
+begin
+  if long_size then step:=4 else step:=2;
+  postinc:=(dir shr 3)=3;
+  if postinc then cursor:=r.a[dir and 7].l
+    else cursor:=self.leerdir_ea(dir);
+  old_opcode:=self.opcode;
+  self.opcode:=false;
+  for i:=0 to 15 do begin
+    if (mask and (word(1) shl i))<>0 then begin
+      if long_size then begin
+        value:=self.getword(cursor) shl 16;
+        value:=value or self.getword(cursor+2);
+      end else value:=dword(integer(smallint(self.getword(cursor))));
+      if i<8 then r.d[i].l:=value else r.a[i-8].l:=value;
+      cursor:=cursor+step;
+    end;
+  end;
+  if postinc then r.a[dir and 7].l:=cursor;
+  self.opcode:=old_opcode;
+end;
+
 function condicion(r:preg_m68000;tipo:byte):boolean;
 begin
   case tipo of
@@ -871,7 +977,7 @@ case dir of
   $30..$37,$3b:res:=caso_5[dest shr 3];    // d(An,ix)
   $39:res:=caso_6[dest shr 3];  // xxx.L
 end;
-if dest=39 then res:=res+4;
+if dest=$39 then res:=res+4;
 calc_move_t_bw:=res;
 end;
 
@@ -894,8 +1000,22 @@ case dir of
   $30..$37,$3b:res:=caso_5[dest shr 3];    // d(An,ix)
   $39:res:=caso_6[dest shr 3];  // xxx.L
 end;
-if dest=39 then res:=res+4;
+if dest=$39 then res:=res+4;
 calc_move_t_l:=res;
+end;
+
+function m68000_mulu_extra(value:word):integer;
+begin
+ result:=0;
+ while value<>0 do begin
+  value:=value and word(value-1);
+  inc(result,2);
+ end;
+end;
+
+function m68000_muls_extra(value:word):integer;
+begin
+ result:=m68000_mulu_extra(value xor word(value shl 1));
 end;
 
 function calc_ea_t_bw(dir:byte):byte;
@@ -930,13 +1050,20 @@ case dir of
 end;
 end;
 
+function calc_alu_t_l(dir,tipo:byte):byte;
+begin
+  result:=6+calc_ea_t_l(dir);
+  if (tipo=TCPU_68000) and (((dir shr 3)<2) or (dir=$3c)) then result:=result+2;
+end;
+
 procedure cpu_m68000.run(maximo:single);
 var
   instruccion,tempw,tempw2:word;
   dir,dest,orig,tempb,tempb2,tempb3,f:byte;
   templ,templ2,templ3:dword;
   pcontador:integer;
-  remainder,quotient,divisor:integer;
+  remainder,quotient,divisor,idle_cycles,irq_cycles:integer;
+  irq_taken:boolean;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
@@ -947,51 +1074,59 @@ if self.pedir_reset<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
+if ((self.irq[7]<>CLEAR_LINE) and not self.irq7_seen) then self.irq7_pending:=true;
+self.irq7_seen:=self.irq[7]<>CLEAR_LINE;
 if self.pedir_halt<>CLEAR_LINE then begin
-  tempw:=trunc(maximo) shr 2;
-  for tempw2:=1 to tempw do begin
-    self.contador:=self.contador+4;
-    //if @self.despues_instruccion<>nil then self.despues_instruccion(4);
-    timers.update(4,self.numero_cpu);
-    if self.pedir_halt=CLEAR_LINE then break;
+  idle_cycles:=trunc(maximo-self.contador);
+  if idle_cycles>4 then idle_cycles:=4;
+  if idle_cycles<1 then idle_cycles:=1;
+  self.contador:=self.contador+idle_cycles;
+  timers.update(idle_cycles,self.numero_cpu);
+  continue;
+end;
+irq_taken:=false;
+for f:=7 downto 1 do begin
+  if ((f=7) and self.irq7_pending) or ((r.cc.im<f) and (self.irq[f]<>CLEAR_LINE)) then begin
+    self.halt:=false;
+    self.prefetch:=false;
+    tempw:=coger_band(self.r);
+    self.poner_band((tempw or $2000) and $7fff);
+    if self.tipo=TCPU_68010 then begin
+      r.sp.l:=r.sp.l-2;
+      self.putword(r.sp.l,($18+f) shl 2);
+    end;
+    r.sp.l:=r.sp.l-6;
+    self.putword(r.sp.l,tempw);
+    self.putword(r.sp.l+2,r.pc.wh);
+    self.putword(r.sp.l+4,r.pc.wl);
+    self.opcode:=false;
+    r.pc.wh:=self.getword($64+((f-1)*4));
+    r.pc.wl:=self.getword($64+2+((f-1)*4));
+    self.opcode:=true;
+    if self.irq[f]=HOLD_LINE then self.irq[f]:=CLEAR_LINE;
+    if (@self.irq_ack_call<>nil)then self.irq_ack_call(f);
+    if f=7 then begin
+      self.irq7_pending:=false;
+      self.irq7_seen:=self.irq[7]<>CLEAR_LINE;
+    end;
+    r.cc.im:=f;
+    if self.tipo=TCPU_68010 then irq_cycles:=46 else irq_cycles:=44;
+    self.contador:=self.contador+irq_cycles;
+    timers.update(irq_cycles,self.numero_cpu);
+    irq_taken:=true;
+    break;
   end;
-  if self.pedir_halt<>CLEAR_LINE then exit;
+end;
+if irq_taken then continue;
+if self.halt then begin
+  idle_cycles:=trunc(maximo-self.contador);
+  if idle_cycles>4 then idle_cycles:=4;
+  if idle_cycles<1 then idle_cycles:=1;
+  self.contador:=self.contador+idle_cycles;
+  timers.update(idle_cycles,self.numero_cpu);
+  continue;
 end;
 pcontador:=self.contador;
-for f:=7 downto 1 do begin
-    if ((r.cc.im<f) and (self.irq[f]<>CLEAR_LINE)) then begin
-      self.halt:=false;
-      self.prefetch:=false;
-      self.contador:=self.contador+44;
-      tempw:=coger_band(self.r);
-      self.poner_band(tempw or $2000);
-      if self.tipo=TCPU_68010 then begin
-        r.sp.l:=r.sp.l-2;
-        self.putword(r.sp.l,f shl 2);
-      end;
-      r.sp.l:=r.sp.l-6;
-      self.putword(r.sp.l,tempw);
-      self.putword(r.sp.l+2,r.pc.wh);
-      self.putword(r.sp.l+4,r.pc.wl);
-      self.opcode:=false;
-      r.pc.wh:=self.getword($64+((f-1)*4));
-      r.pc.wl:=self.getword($64+2+((f-1)*4));
-      self.opcode:=true;
-      if self.irq[f]=HOLD_LINE then self.irq[f]:=CLEAR_LINE;
-      r.cc.im:=f;
-      break;
-    end;
-end;
-if self.halt then begin
-  tempw:=trunc(maximo) shr 2;
-  for tempw2:=1 to tempw do begin
-    self.contador:=self.contador+4;
-    //if @self.despues_instruccion<>nil then self.despues_instruccion(4);
-    timers.update(4,self.numero_cpu);
-    if not(self.halt) then break;
-  end;
-  if self.halt then exit;
-end;
 self.opcode:=true;
 r.ppc:=r.pc;
 {if r.pc.l=$10070 then begin
@@ -1018,7 +1153,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               r.cc.c:=false;
               r.cc.v:=false;
             end else begin   // # ori.b toc
-              self.contador:=self.contador+20;
+              if self.tipo=TCPU_68010 then self.contador:=self.contador+16
+                  else self.contador:=self.contador+20;
               tempb2:=(coger_band(self.r) and $ff) or tempb;
               r.cc.x:=(tempb2 and $10)<>0;
               r.cc.n:=(tempb2 and $8)<>0;
@@ -1041,7 +1177,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               r.cc.v:=false;
             end else begin
               if r.cc.s then begin // # ori.w tos
-                self.contador:=self.contador+20;
+                if self.tipo=TCPU_68010 then self.contador:=self.contador+16
+                  else self.contador:=self.contador+20;
                 tempw2:=coger_band(self.r) or tempw;
                 self.poner_band(tempw2);
               end else begin
@@ -1072,8 +1209,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 $01:begin // # movep.w er
                       self.contador:=self.contador+16;
                       tempw:=self.getword(r.pc.l);
-                      if (tempw and $8000)<>0 then MessageDlg('Mierda! movep btst>$8000', mtInformation,[mbOk], 0);
-                      templ:=r.a[orig].l+tempw;
+                      templ:=r.a[orig].l+smallint(tempw);
                       r.pc.l:=r.pc.l+2;
                       r.d[dest].h0:=self.getbyte(templ);
                       r.d[dest].l0:=self.getbyte(templ+2);
@@ -1097,8 +1233,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 1:begin  // # movep.l er
                     self.contador:=self.contador+24;
                     tempw:=self.getword(r.pc.l);
-                    if (tempw and $8000)<>0 then MessageDlg('Mierda! movep bchg>$8000', mtInformation,[mbOk], 0);
-                    templ:=r.a[orig].l+tempw;
+                    templ:=r.a[orig].l+smallint(tempw);
                     r.pc.l:=r.pc.l+2;
                     r.d[dest].h1:=self.getbyte(templ);
                     r.d[dest].l1:=self.getbyte(templ+2);
@@ -1128,7 +1263,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       tempw:=self.getword(r.pc.l);
                       //SDI usa esto, y todo OK
                       //if (tempw and $8000)<>0 then MessageDlg('Mierda! movep bclr>$8000 PC'+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
-                      templ:=r.a[orig].l+tempw;
+                      templ:=r.a[orig].l+smallint(tempw);
                       r.pc.l:=r.pc.l+2;
                       self.putbyte(templ,r.d[dest].h0);
                       self.putbyte(templ+2,r.d[dest].l0);
@@ -1220,7 +1355,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           end;
         $a:begin  // # andi.l
             if (dir shr 3)<>0 then self.contador:=self.contador+20+calc_ea_t_l(dir)
-              else self.contador:=self.contador+14;
+              else if self.tipo=TCPU_68010 then self.contador:=self.contador+14
+                   else self.contador:=self.contador+16;
             templ:=self.getword(r.pc.l) shl 16;
             templ:=templ or self.getword(r.pc.l+2);
             r.pc.l:=r.pc.l+4;
@@ -1350,7 +1486,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               tempw:=self.getword(r.pc.l);
               r.pc.l:=r.pc.l+2;
               if (dir shr 3)=0 then begin //32bits
-                self.contador:=self.contador+12;
+                self.contador:=self.contador+14;
                 r.cc.z:=((r.d[orig].l shr (tempw and $1f)) and 1)=0;
                 r.d[dir].l:=r.d[orig].l and not(1 shl (tempw and $1f));
               end else begin //8 bits
@@ -1389,7 +1525,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 r.cc.n:=(tempb2 and $80)<>0;
                 r.cc.z:=(tempb2=0);
               end else begin // # eori.b toc
-                self.contador:=self.contador+20;
+                if self.tipo=TCPU_68010 then self.contador:=self.contador+16
+                  else self.contador:=self.contador+20;
                 tempb2:=(coger_band(self.r) and $ff) xor tempb;
                 r.cc.x:=(tempb2 and $10)<>0;
                 r.cc.n:=(tempb2 and $8)<>0;
@@ -1411,8 +1548,14 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 r.cc.n:=(tempw2 and $8000)<>0;
                 r.cc.z:=(tempw2=0);
               end else begin // # eori.w tos
-                self.contador:=self.contador+20;
-                MessageDlg('Mierda eori.w tos', mtInformation,[mbOk], 0);
+                if self.tipo=TCPU_68010 then self.contador:=self.contador+16
+                  else self.contador:=self.contador+20;
+                tempw2:=(coger_band(self.r) and $ff) xor tempw;
+                r.cc.x:=(tempw2 and $10)<>0;
+                r.cc.n:=(tempw2 and $8)<>0;
+                r.cc.z:=(tempw2 and $4)<>0;
+                r.cc.v:=(tempw2 and $2)<>0;
+                r.cc.c:=(tempw2 and $1)<>0;
               end;
             end;
         $2a:begin  // # eori.l
@@ -1467,7 +1610,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
 	            r.cc.v:=((((templ xor templ2) and (templ3 xor templ2)) shr 24) and $80)<>0;
 	            r.cc.c:=((((templ and templ3) or (not(templ2) and (templ or templ3))) shr 23) and $100)<>0;
             end;
-        else MessageDlg('Instruccion $0: '+inttohex((instruccion shr 6) and $3f,10)+' - '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
+        else MessageDlg('Instruccion $0: '+inttohex((instruccion shr 6) and $3f,10)+' - '+inttohex(r.ppc.l,10)+' - '+inttohex(instruccion,10), mtInformation,[mbOk], 0);
       end;
    $1:begin  //+++++++++++++++ move.b
         tempb:=self.leerdir_b(dir);
@@ -1510,7 +1653,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
    $4:case (instruccion shr 6) and $3f of
           //00 neg.b
           //01 neg.w
-          $02:begin // # negx.l Añadido 13/07
+          $02:begin // # negx.l AÃ±adido 13/07
                 if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                   else self.contador:=self.contador+6;
                 templ:=self.leerdir_l(dir);
@@ -1518,7 +1661,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 r.cc.n:=((templ2 shr 24) and $80)<>0;
                 r.cc.c:=((((templ and templ2) or (not(0) and (templ or templ2))) shr 23) and $100)<>0;
                 r.cc.x:=r.cc.c;
-                r.cc.z:=(templ2=0);
+                r.cc.z:=r.cc.z and (templ2=0);
                 r.cc.v:=(((templ and templ2) shr 24) and $80)<>0;
                 self.ponerdir_l2(dir,templ2);
               end;
@@ -1551,9 +1694,12 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 if self.tipo=TCPU_68000 then begin
                   if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                     else self.contador:=self.contador+4;
-                  self.getbyte(self.ea);
+
                 end else self.contador:=self.contador+4+calc_ea_t_bw(dir);
-                self.ponerdir_b(dir,0);
+                if (self.tipo=TCPU_68000) and ((dir shr 3)<>0) then begin
+                  self.leerdir_b(dir);
+                  self.ponerdir_b2(dir,0);
+                end else self.ponerdir_b(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
                 r.cc.c:=false;
@@ -1563,9 +1709,12 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 if self.tipo=TCPU_68000 then begin
                   if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                     else self.contador:=self.contador+4;
-                  self.getword(self.ea);
+
                 end else self.contador:=self.contador+4+calc_ea_t_bw(dir);
-                self.ponerdir_w(dir,0);
+                if (self.tipo=TCPU_68000) and ((dir shr 3)<>0) then begin
+                  self.leerdir_w(dir);
+                  self.ponerdir_w2(dir,0);
+                end else self.ponerdir_w(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
                 r.cc.c:=false;
@@ -1575,17 +1724,18 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 if self.tipo=TCPU_68000 then begin
                   if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                     else self.contador:=self.contador+6;
-                  self.getword(self.ea);
-                  self.getword(self.ea+2);
+
                 end else if (dir shr 3)<>0 then self.contador:=self.contador+4+calc_ea_t_l(dir)
                           else self.contador:=self.contador+6;
-                self.ponerdir_l(dir,0);
+                if (self.tipo=TCPU_68000) and ((dir shr 3)<>0) then begin
+                  self.leerdir_l(dir);
+                  self.ponerdir_l2(dir,0);
+                end else self.ponerdir_l(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
                 r.cc.c:=false;
                 r.cc.z:=true;
               end;
-          //b, c, d ??
           $10:begin  // # neg.b
                 if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
@@ -1666,6 +1816,20 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 tempw:=self.leerdir_w(dir);
                 self.poner_band(tempw);
               end else MessageDlg('Mierda error de privilegio MOVE TO SR '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
+          $20:begin //nbcd b
+                if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
+                  else self.contador:=self.contador+6;
+                templ:=self.leerdir_b(dir);
+                templ2:=($100-templ-byte(r.cc.x)) and $ff;
+                if ((templ and $0f)+byte(r.cc.x))<>0 then templ2:=(templ2+$100-6) and $ff;
+                r.cc.c:=(templ<>0) or r.cc.x;
+                if r.cc.c then templ2:=(templ2+$100-$60) and $ff;
+                r.cc.x:=r.cc.c;
+                r.cc.z:=r.cc.z and (templ2=0);
+                r.cc.n:=(templ2 and $80)<>0;
+                r.cc.v:=false;
+                self.ponerdir_b2(dir,byte(templ2));
+              end;
           $21:begin // # pea
                 case dir of
                    $0..$7:begin  // # swap!!!
@@ -1684,7 +1848,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                         self.putword(r.sp.l,templ shr 16);
                         self.putword(r.sp.l+2,templ and $ffff);
                         end;
-                   $28..$2f:begin  //Añadido 13/07  d(An)
+                   $28..$2f:begin  //AÃ±adido 13/07  d(An)
                         self.contador:=self.contador+16;
                         tempw:=self.getword(r.pc.l);
                         r.pc.l:=r.pc.l+2;
@@ -1693,7 +1857,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                         self.putword(r.sp.l,templ shr 16);
                         self.putword(r.sp.l+2,templ and $ffff);
                         end;
-                   $30..$37:begin //Añadido 13/07  d(An+ix)
+                   $30..$37:begin //AÃ±adido 13/07  d(An+ix)
                         tempw:=self.getword(r.pc.l);
                         r.pc.l:=r.pc.l+2;
                         tempb:=tempw and $ff;
@@ -1709,7 +1873,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                         self.putword(r.sp.l,templ shr 16);
                         self.putword(r.sp.l+2,templ and $ffff);
                         end;
-                   $38:begin  //Añadido 13/07  xxx.W
+                   $38:begin  //AÃ±adido 13/07  xxx.W
                         self.contador:=self.contador+16;
                         tempw:=smallint(self.getword(r.pc.l));
                         r.pc.l:=r.pc.l+2;
@@ -1762,98 +1926,15 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                   end;
                   self.contador:=self.contador+(tempb2 shl 2);
                   case dir of
-                    $10..$17,$20..$27:self.contador:=self.contador+12;
-                    $28..$2f,$38:self.contador:=self.contador+16;
-                    $30..$37:self.contador:=self.contador+18;
-                    $39:self.contador:=self.contador+20;
+                    $10..$17,$20..$27:self.contador:=self.contador+8;
+                    $28..$2f,$38:self.contador:=self.contador+12;
+                    $30..$37:self.contador:=self.contador+14;
+                    $39:self.contador:=self.contador+16;
                   end;
                   case dir of
-                    $10..$17,$28..$2f,$39:begin
-                              templ:=self.leerdir_ea(dir);
-                              if (tempw and $0001)<>0 then begin
-                                self.putword(templ,r.d[0].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0002)<>0 then begin
-                                self.putword(templ,r.d[1].wl);
-                                templ:=templ+2
-                              end;
-                              if (tempw and $0004)<>0 then begin
-                                self.putword(templ,r.d[2].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0008)<>0 then begin
-                                self.putword(templ,r.d[3].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0010)<>0 then begin
-                                self.putword(templ,r.d[4].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0020)<>0 then begin
-                                self.putword(templ,r.d[5].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0040)<>0 then begin
-                                self.putword(templ,r.d[6].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0080)<>0 then begin
-                                self.putword(templ,r.d[7].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0100)<>0 then begin
-                                self.putword(templ,r.a[0].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0200)<>0 then begin
-                                self.putword(templ,r.a[1].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0400)<>0 then begin
-                                self.putword(templ,r.a[2].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $0800)<>0 then begin
-                                self.putword(templ,r.a[3].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $1000)<>0 then begin
-                                self.putword(templ,r.a[4].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $2000)<>0 then begin
-                                self.putword(templ,r.a[5].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $4000)<>0 then begin
-                                self.putword(templ,r.a[6].wl);
-                                templ:=templ+2;
-                              end;
-                              if (tempw and $8000)<>0 then begin
-                                self.putword(templ,r.a[7].wl);
-                              end;
-                             end;
-                    $20..$27:begin
-                            if (tempw and $0001)<>0 then self.ponerdir_w(dir,r.a[7].wl);
-                            if (tempw and $0002)<>0 then self.ponerdir_w(dir,r.a[6].wl);
-                            if (tempw and $0004)<>0 then self.ponerdir_w(dir,r.a[5].wl);
-                            if (tempw and $0008)<>0 then self.ponerdir_w(dir,r.a[4].wl);
-                            if (tempw and $0010)<>0 then self.ponerdir_w(dir,r.a[3].wl);
-                            if (tempw and $0020)<>0 then self.ponerdir_w(dir,r.a[2].wl);
-                            if (tempw and $0040)<>0 then self.ponerdir_w(dir,r.a[1].wl);
-                            if (tempw and $0080)<>0 then self.ponerdir_w(dir,r.a[0].wl);
-                            if (tempw and $0100)<>0 then self.ponerdir_w(dir,r.d[7].wl);
-                            if (tempw and $0200)<>0 then self.ponerdir_w(dir,r.d[6].wl);
-                            if (tempw and $0400)<>0 then self.ponerdir_w(dir,r.d[5].wl);
-                            if (tempw and $0800)<>0 then self.ponerdir_w(dir,r.d[4].wl);
-                            if (tempw and $1000)<>0 then self.ponerdir_w(dir,r.d[3].wl);
-                            if (tempw and $2000)<>0 then self.ponerdir_w(dir,r.d[2].wl);
-                            if (tempw and $4000)<>0 then self.ponerdir_w(dir,r.d[1].wl);
-                            if (tempw and $8000)<>0 then self.ponerdir_w(dir,r.d[0].wl);
-                          end;
+                  $10..$17,$28..$37,$38,$39,$20..$27:self.movem_store(dir,tempw,false);
                     else MessageDlg('Mierda movem.w $22 '+inttohex(dir,2)+' - '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
-                  end;
+                end;
                 end;
               end;
           $23:if (dir shr 3)=0 then begin // # ext.l
@@ -1883,108 +1964,9 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     $39:self.contador:=self.contador+16;
                   end;
                 case dir of
-                  $10..$17,$28..$37,$38,$39:begin  //$30..$37 Añadido 13/07
-                              templ:=self.leerdir_ea(dir);
-                              if (tempw and $0001)<>0 then begin
-                                self.putword(templ,r.d[0].wh);
-                                self.putword(templ+2,r.d[0].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0002)<>0 then begin
-                                self.putword(templ,r.d[1].wh);
-                                self.putword(templ+2,r.d[1].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0004)<>0 then begin
-                                self.putword(templ,r.d[2].wh);
-                                self.putword(templ+2,r.d[2].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0008)<>0 then begin
-                                self.putword(templ,r.d[3].wh);
-                                self.putword(templ+2,r.d[3].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0010)<>0 then begin
-                                self.putword(templ,r.d[4].wh);
-                                self.putword(templ+2,r.d[4].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0020)<>0 then begin
-                                self.putword(templ,r.d[5].wh);
-                                self.putword(templ+2,r.d[5].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0040)<>0 then begin
-                                self.putword(templ,r.d[6].wh);
-                                self.putword(templ+2,r.d[6].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0080)<>0 then begin
-                                self.putword(templ,r.d[7].wh);
-                                self.putword(templ+2,r.d[7].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0100)<>0 then begin
-                                self.putword(templ,r.a[0].wh);
-                                self.putword(templ+2,r.a[0].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0200)<>0 then begin
-                                self.putword(templ,r.a[1].wh);
-                                self.putword(templ+2,r.a[1].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0400)<>0 then begin
-                                self.putword(templ,r.a[2].wh);
-                                self.putword(templ+2,r.a[2].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $0800)<>0 then begin
-                                self.putword(templ,r.a[3].wh);
-                                self.putword(templ+2,r.a[3].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $1000)<>0 then begin
-                                self.putword(templ,r.a[4].wh);
-                                self.putword(templ+2,r.a[4].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $2000)<>0 then begin
-                                self.putword(templ,r.a[5].wh);
-                                self.putword(templ+2,r.a[5].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $4000)<>0 then begin
-                                self.putword(templ,r.a[6].wh);
-                                self.putword(templ+2,r.a[6].wl);
-                                templ:=templ+4;
-                              end;
-                              if (tempw and $8000)<>0 then begin
-                                self.putword(templ,r.a[7].wh);
-                                self.putword(templ+2,r.a[7].wl);
-                              end;
-                             end;
-                  $20..$27:begin
-                            if (tempw and $0001)<>0 then self.ponerdir_l(dir,r.a[7].l);
-                            if (tempw and $0002)<>0 then self.ponerdir_l(dir,r.a[6].l);
-                            if (tempw and $0004)<>0 then self.ponerdir_l(dir,r.a[5].l);
-                            if (tempw and $0008)<>0 then self.ponerdir_l(dir,r.a[4].l);
-                            if (tempw and $0010)<>0 then self.ponerdir_l(dir,r.a[3].l);
-                            if (tempw and $0020)<>0 then self.ponerdir_l(dir,r.a[2].l);
-                            if (tempw and $0040)<>0 then self.ponerdir_l(dir,r.a[1].l);
-                            if (tempw and $0080)<>0 then self.ponerdir_l(dir,r.a[0].l);
-                            if (tempw and $0100)<>0 then self.ponerdir_l(dir,r.d[7].l);
-                            if (tempw and $0200)<>0 then self.ponerdir_l(dir,r.d[6].l);
-                            if (tempw and $0400)<>0 then self.ponerdir_l(dir,r.d[5].l);
-                            if (tempw and $0800)<>0 then self.ponerdir_l(dir,r.d[4].l);
-                            if (tempw and $1000)<>0 then self.ponerdir_l(dir,r.d[3].l);
-                            if (tempw and $2000)<>0 then self.ponerdir_l(dir,r.d[2].l);
-                            if (tempw and $4000)<>0 then self.ponerdir_l(dir,r.d[1].l);
-                            if (tempw and $8000)<>0 then self.ponerdir_l(dir,r.d[0].l);
-                          end;
+                  $10..$17,$28..$37,$38,$39,$20..$27:self.movem_store(dir,tempw,true);
                     else MessageDlg('Mierda movem.l $23 '+inttohex(dir,2)+' - '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
-                  end;
+                end;
                 end;
           $28:begin // # tst.b
                 self.contador:=self.contador+4+calc_ea_t_bw(dir);
@@ -2037,90 +2019,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     $39:self.contador:=self.contador+20;
                 end;
                 case dir of
-                  $10..$17,$28..$37,$38,$39,$3b:begin  //3b añadido 15/07/20
-                            templ:=self.leerdir_ea(dir);
-                            if (tempw and $0001)<>0 then begin
-                              r.d[0].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0002)<>0 then begin
-                              r.d[1].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0004)<>0 then begin
-                              r.d[2].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0008)<>0 then begin
-                              r.d[3].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0010)<>0 then begin
-                              r.d[4].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0020)<>0 then begin
-                              r.d[5].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0040)<>0 then begin
-                              r.d[6].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0080)<>0 then begin
-                              r.d[7].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0100)<>0 then begin
-                              r.a[0].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0200)<>0 then begin
-                              r.a[1].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0400)<>0 then begin
-                              r.a[2].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $0800)<>0 then begin
-                              r.a[3].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $1000)<>0 then begin
-                              r.a[4].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $2000)<>0 then begin
-                              r.a[5].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $4000)<>0 then begin
-                              r.a[6].l:=smallint(self.getword(templ));
-                              templ:=templ+2;
-                            end;
-                            if (tempw and $8000)<>0 then begin
-                              r.a[7].l:=smallint(self.getword(templ));
-                            end;
-                           end;
-                  $18..$1f:begin
-                            if (tempw and $0001)<>0 then r.d[0].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0002)<>0 then r.d[1].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0004)<>0 then r.d[2].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0008)<>0 then r.d[3].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0010)<>0 then r.d[4].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0020)<>0 then r.d[5].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0040)<>0 then r.d[6].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0080)<>0 then r.d[7].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0100)<>0 then r.a[0].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0200)<>0 then r.a[1].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0400)<>0 then r.a[2].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $0800)<>0 then r.a[3].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $1000)<>0 then r.a[4].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $2000)<>0 then r.a[5].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $4000)<>0 then r.a[6].l:=smallint(self.leerdir_w(dir));
-                            if (tempw and $8000)<>0 then r.a[7].l:=smallint(self.leerdir_w(dir));
-                        end
+                  $10..$17,$28..$37,$38,$39,$3a,$3b,$18..$1f:self.movem_load(dir,tempw,false);
                   else MessageDlg('Mierda movem.w $32 '+inttohex(dir,2)+' - '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
                 end;
               end;
@@ -2141,115 +2040,21 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     $39:self.contador:=self.contador+20;
                   end;
                 case dir of
-                $10..$17,$28..$37,$38,$39,$3a:begin
-                      templ:=self.leerdir_ea(dir);
-                      if (tempw and $0001)<>0 then begin
-                         r.d[0].wh:=self.getword(templ);
-                         r.d[0].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0002)<>0 then begin
-                         r.d[1].wh:=self.getword(templ);
-                         r.d[1].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0004)<>0 then begin
-                         r.d[2].wh:=self.getword(templ);
-                         r.d[2].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0008)<>0 then begin
-                         r.d[3].wh:=self.getword(templ);
-                         r.d[3].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0010)<>0 then begin
-                         r.d[4].wh:=self.getword(templ);
-                         r.d[4].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0020)<>0 then begin
-                         r.d[5].wh:=self.getword(templ);
-                         r.d[5].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0040)<>0 then begin
-                         r.d[6].wh:=self.getword(templ);
-                         r.d[6].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0080)<>0 then begin
-                         r.d[7].wh:=self.getword(templ);
-                         r.d[7].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0100)<>0 then begin
-                         r.a[0].wh:=self.getword(templ);
-                         r.a[0].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0200)<>0 then begin
-                         r.a[1].wh:=self.getword(templ);
-                         r.a[1].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0400)<>0 then begin
-                         r.a[2].wh:=self.getword(templ);
-                         r.a[2].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $0800)<>0 then begin
-                         r.a[3].wh:=self.getword(templ);
-                         r.a[3].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $1000)<>0 then begin
-                         r.a[4].wh:=self.getword(templ);
-                         r.a[4].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $2000)<>0 then begin
-                         r.a[5].wh:=self.getword(templ);
-                         r.a[5].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $4000)<>0 then begin
-                         r.a[6].wh:=self.getword(templ);
-                         r.a[6].wl:=self.getword(templ+2);
-                         templ:=templ+4;
-                      end;
-                      if (tempw and $8000)<>0 then begin
-                         r.a[7].wh:=self.getword(templ);
-                         r.a[7].wl:=self.getword(templ+2);
-                      end;
-                end;
-                $18..$1f:begin
-                            if (tempw and $0001)<>0 then r.d[0].l:=self.leerdir_l(dir); //D0
-                            if (tempw and $0002)<>0 then r.d[1].l:=self.leerdir_l(dir);
-                            if (tempw and $0004)<>0 then r.d[2].l:=self.leerdir_l(dir);
-                            if (tempw and $0008)<>0 then r.d[3].l:=self.leerdir_l(dir);
-                            if (tempw and $0010)<>0 then r.d[4].l:=self.leerdir_l(dir);
-                            if (tempw and $0020)<>0 then r.d[5].l:=self.leerdir_l(dir);
-                            if (tempw and $0040)<>0 then r.d[6].l:=self.leerdir_l(dir);
-                            if (tempw and $0080)<>0 then r.d[7].l:=self.leerdir_l(dir);
-                            if (tempw and $0100)<>0 then r.a[0].l:=self.leerdir_l(dir);
-                            if (tempw and $0200)<>0 then r.a[1].l:=self.leerdir_l(dir);
-                            if (tempw and $0400)<>0 then r.a[2].l:=self.leerdir_l(dir);
-                            if (tempw and $0800)<>0 then r.a[3].l:=self.leerdir_l(dir);
-                            if (tempw and $1000)<>0 then r.a[4].l:=self.leerdir_l(dir);
-                            if (tempw and $2000)<>0 then r.a[5].l:=self.leerdir_l(dir);
-                            if (tempw and $4000)<>0 then r.a[6].l:=self.leerdir_l(dir);
-                            if (tempw and $8000)<>0 then r.a[7].l:=self.leerdir_l(dir);
-                        end;
+                  $10..$17,$28..$37,$38,$39,$3a,$3b,$18..$1f:self.movem_load(dir,tempw,true);
                  else MessageDlg('Mierda movem.l $33 '+inttohex(dir,2)+' - '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
                 end;
               end;
           $39:case dir of
            $0..$f:begin // # trap
                      self.prefetch:=false;
-                     self.contador:=self.contador+38;
+                     if self.tipo=TCPU_68010 then self.contador:=self.contador+38
+                       else self.contador:=self.contador+34;
                      tempw:=coger_band(self.r);
-                     self.poner_band(tempw or $2000);
+                     self.poner_band((tempw or $2000) and $7fff);
+                     if self.tipo=TCPU_68010 then begin
+                       r.sp.l:=r.sp.l-2;
+                       self.putword(r.sp.l,($20+(instruccion and $f)) shl 2);
+                     end;
                      r.sp.l:=r.sp.l-6;
                      self.putword(r.sp.l+4,r.pc.wl);
                      self.putword(r.sp.l+2,r.pc.wh);
@@ -2263,18 +2068,20 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     self.contador:=self.contador+16;
                     tempw:=self.getword(r.pc.l);
                     r.pc.l:=r.pc.l+2;
+                    templ:=r.a[orig].l;
                     r.sp.l:=r.sp.l-4;
-                    self.putword(r.sp.l,r.a[orig].wh);
-                    self.putword(r.sp.l+2,r.a[orig].wl);
+                    self.putword(r.sp.l,templ shr 16);
+                    self.putword(r.sp.l+2,templ and $ffff);
                     r.a[orig].l:=r.sp.l;
                     r.sp.l:=r.sp.l+smallint(tempw);
                   end;
           $18..$1f:begin  // # ulnk
                     self.contador:=self.contador+12;
-                    r.sp.l:=r.a[orig].l;
-                    r.a[orig].wh:=self.getword(r.sp.l);
-                    r.a[orig].wl:=self.getword(r.sp.l+2);
-                    r.sp.l:=r.sp.l+4;
+                    templ:=r.a[orig].l;
+                    templ2:=self.getword(templ) shl 16;
+                    templ2:=templ2 or self.getword(templ+2);
+                    r.sp.l:=templ+4;
+                    r.a[orig].l:=templ2;
                   end;
           $20..$2f:begin
                     self.contador:=self.contador+4;
@@ -2286,7 +2093,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               $30:begin  // # reset
                     if r.cc.s then begin
                       self.prefetch:=false;
-                      self.contador:=self.contador+40;
+                      if self.tipo=TCPU_68010 then self.contador:=self.contador+130
+                        else self.contador:=self.contador+132;
                       if @self.reset_call<>nil then self.reset_call;
                     end else MessageDlg('Mierda error de privilegio reset '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
                   end;
@@ -2311,14 +2119,14 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                         r.sp.l:=r.sp.l+6;
                         self.poner_band(tempw);
                       end else begin //M68010
-                        tempw:=self.getword(r.a[7].l+2) shr 12;
+                        tempw:=self.getword(r.a[7].l+6) shr 12;
                         if tempw=0 then begin
                           self.prefetch:=false;
                           self.contador:=self.contador+24;
                           tempw:=self.getword(r.sp.l);
                           r.pc.wh:=self.getword(r.sp.l+2);
                           r.pc.wl:=self.getword(r.sp.l+4);
-                          r.sp.l:=r.sp.l+8; //Añado una palabra mas por el formatword
+                          r.sp.l:=r.sp.l+8; //AÃ±ado una palabra mas por el formatword
                           self.poner_band(tempw);
                         end else MessageDlg('Mierda error de format word en rte'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
                       end;
@@ -2334,10 +2142,11 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               $37:begin // # rtr
                     self.prefetch:=false;
                     self.contador:=self.contador+20;
-                    self.poner_band(self.getword(r.sp.l));
+                    tempw:=self.getword(r.sp.l);
                     r.pc.wh:=self.getword(r.sp.l+2);
                     r.pc.wl:=self.getword(r.sp.l+4);
                     r.sp.l:=r.sp.l+6;
+                    self.poner_band((coger_band(self.r) and $ff00) or (tempw and $ff));
                   end
                 else MessageDlg('Instruccion $4b - $39 desconocida - '+inttohex(orig,2)+' - '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
               end;
@@ -2383,7 +2192,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
              end;
           $1:begin  // # addq.w
                 tempb:=((dest-1) and $7)+1;
-                if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
+                if (dir shr 3)>1 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
                 if (dir shr 3)<>1 then begin
                   tempw:=self.leerdir_w(dir);
@@ -2400,14 +2209,14 @@ case (instruccion shr 12) of //cojo solo el primer nibble
              end;
           $2:begin // # addq.l
                 tempb:=((dest-1) and $7)+1;
-                if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
+                if (dir shr 3)>1 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                   else self.contador:=self.contador+8;
                 if (dir shr 3)<>1 then begin
                   templ:=self.leerdir_l(dir);
                   templ2:=templ+tempb;
                   self.ponerdir_l2(dir,templ2);
-                  r.cc.n:=((templ shr 24) and $80)<>0;
-    	            r.cc.z:=(templ=0);
+                  r.cc.n:=((templ2 shr 24) and $80)<>0;
+    	            r.cc.z:=(templ2=0);
                   r.cc.c:=((((tempb and templ) or (not(templ2) and (tempb or templ))) shr 23) and $100)<>0;
                   r.cc.x:=r.cc.c;
                   r.cc.v:=((((tempb xor templ2) and (templ xor templ2)) shr 24) and $80)<>0;
@@ -2416,25 +2225,34 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 end;
              end;
           $3,$7:if ((dir shr 3) and $7)=1 then begin // # dbcc, dbt y dbf
-                      self.contador:=self.contador+12;
+                      if self.tipo=TCPU_68010 then self.contador:=self.contador+10
+                        else self.contador:=self.contador+12;
                       self.prefetch:=false;
                       if not(condicion(self.r,(instruccion shr 8) and $f)) then begin
                           r.d[orig].wl:=r.d[orig].wl-1;
                           if r.d[orig].wl<>$ffff then begin
-                              self.contador:=self.contador-2;
+                              if self.tipo=TCPU_68000 then self.contador:=self.contador-2;
                               tempw:=self.getword(r.pc.l);
                               r.pc.l:=r.pc.l+smallint(tempw);
-                          end else r.pc.l:=r.pc.l+2;
+                          end else begin
+                            if self.tipo=TCPU_68010 then self.contador:=self.contador+6
+                              else self.contador:=self.contador+2;
+                            r.pc.l:=r.pc.l+2;
+                          end;
                       end else r.pc.l:=r.pc.l+2;
                 end else begin // # scc, st y sf
                     if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                         else self.contador:=self.contador+4;
-                    if condicion(self.r,(instruccion shr 8) and $f) then self.ponerdir_b(dir,$ff)
+                    if condicion(self.r,(instruccion shr 8) and $f) then begin
+                      if ((dir shr 3)=0) and (self.tipo=TCPU_68000) then
+                        self.contador:=self.contador+2;
+                      self.ponerdir_b(dir,$ff);
+                    end
                         else self.ponerdir_b(dir,0);
              end;
           $4:begin  // # subq.b
                 tempb:=((dest-1) and $7)+1;
-                if (dir and $7)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
+                if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                     else self.contador:=self.contador+4;
                 if (dir shr 3)<>1 then begin
                   tempb2:=self.leerdir_b(dir);
@@ -2451,8 +2269,11 @@ case (instruccion shr 12) of //cojo solo el primer nibble
              end;
           $5:begin  // # subq.w
                 tempb:=((dest-1) and $7)+1;
-                if (dir and $7)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
-                    else self.contador:=self.contador+4;
+                if (dir shr 3)=1 then begin
+                  if self.tipo=TCPU_68010 then self.contador:=self.contador+4
+                    else self.contador:=self.contador+8;
+                end else if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
+                  else self.contador:=self.contador+4;
                 if (dir shr 3)<>1 then begin
                     tempw:=self.leerdir_w(dir);
                     templ:=tempw-tempb;
@@ -2468,7 +2289,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
              end;
           $6:begin  // # subq.l
                 tempb:=((dest-1) and $7)+1;
-                if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
+                if (dir shr 3)>1 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                   else self.contador:=self.contador+8;
                 if (dir shr 3)<>1 then begin
                   templ2:=self.leerdir_l(dir);
@@ -2542,7 +2363,11 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                          end;
                   end;
           end else begin //sino hace el salto comprobar si hay 16bits de desplazamiento
-              self.contador:=self.contador+8;
+              if (instruccion and $ff)=0 then begin
+                if self.tipo=TCPU_68010 then self.contador:=self.contador+10
+                  else self.contador:=self.contador+12;
+              end else if self.tipo=TCPU_68010 then self.contador:=self.contador+6
+                else self.contador:=self.contador+8;
               tempb:=(instruccion and $ff);
               case tempb of
                 $00:r.pc.l:=r.pc.l+2;
@@ -2580,8 +2405,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               r.cc.v:=false;
            end;
         $2:begin  // # or.l er
-              if (dir shr 3)<>0 then self.contador:=self.contador+6+calc_ea_t_l(dir)
-                  else self.contador:=self.contador+8;
+              self.contador:=self.contador+calc_alu_t_l(dir,self.tipo);
               templ:=self.leerdir_l(dir);
               templ2:=r.d[dest].l or templ;
               r.d[dest].l:=templ2;
@@ -2619,7 +2443,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                        if templ>$f then tempb3:=6
                         else tempb3:=0;
                        templ:=templ+(tempb and $f0)-(tempb2 and $f0);
-                       r.cc.v:=(templ<>0);
+                       r.cc.v:=(templ and $80)<>0;
                        if (templ>$ff) then begin
                          templ:=templ+$a0;
                          r.cc.x:=true;
@@ -2633,8 +2457,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                           r.cc.n:=false;
                                          end;
                        templ:=(templ-tempb3) and $ff;
-                       r.cc.z:=(templ=0);
-                       r.cc.v:=r.cc.v and ((templ and $80)<>0);
+                       r.cc.z:=r.cc.z and (templ=0);
+                       r.cc.v:=r.cc.v and ((templ and $80)=0);
                        r.cc.n:=(templ and $80)<>0;
                        r.d[dest].l0:=templ;
                     end;
@@ -2652,7 +2476,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                             if templ>$f then tempb3:=6
                               else tempb3:=0;
                             templ:=templ+(tempb and $f0)-(tempb2 and $f0);
-                            r.cc.v:=(templ<>0);
+                            r.cc.v:=(templ and $80)<>0;
                             if (templ>$ff) then begin
                               templ:=templ+$a0;
                               r.cc.x:=true;
@@ -2665,8 +2489,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                           r.cc.c:=false;
                                          end;
                             templ:=(templ-tempb3) and $ff;
-                            r.cc.z:=(templ=0);
-                            r.cc.v:=r.cc.v and ((templ and $80)<>0);
+                            r.cc.z:=r.cc.z and (templ=0);
+                            r.cc.v:=r.cc.v and ((templ and $80)=0);
                             r.cc.n:=(templ and $80)<>0;
                             self.putbyte(r.a[dest].l,templ);
                             self.opcode:=true;
@@ -2759,7 +2583,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               r.cc.z:=(templ and $ffff)=0;
            end;
         $2:begin  // # sub.l er
-              self.contador:=self.contador+6+calc_ea_t_l(dir);
+              self.contador:=self.contador+calc_alu_t_l(dir,self.tipo);
               templ:=self.leerdir_l(dir);
               templ2:=r.d[dest].l;
               templ3:=templ2-templ;
@@ -2768,6 +2592,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               r.cc.z:=(templ3=0);
               r.cc.v:=((((templ xor templ2) and (templ3 xor templ2)) shr 24) and $80)<>0;
               r.cc.c:=((((templ and templ3) or (not(templ2) and (templ or templ3))) shr 23) and $100)<>0;
+                      r.cc.x:=r.cc.c;
            end;
         $3:begin // # suba.w
               self.contador:=self.contador+8+calc_ea_t_bw(dir);
@@ -2785,7 +2610,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                      r.cc.c:=(tempw and $100)<>0;
                      r.cc.x:=r.cc.c;
                      r.cc.v:=(((tempb xor tempb2) and (tempw xor tempb2)) and $80)<>0;
-                     r.cc.z:=(tempw and $ff)=0;
+                     r.cc.z:=r.cc.z and ((tempw and $ff)=0);
                  end;
               $1:begin  // # subx.b mm
                      self.contador:=self.contador+18;
@@ -2813,7 +2638,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                      r.cc.c:=(templ and $10000)<>0;
                      r.cc.x:=r.cc.c;
                      r.cc.v:=((((tempw xor tempw2) and (templ xor tempw2)) shr 8) and $80)<>0;
-                     r.cc.z:=(templ and $ffff)=0;
+                     r.cc.z:=r.cc.z and ((templ and $ffff)=0);
                      r.d[dest].wl:=templ and $ffff;
                      self.contador:=self.contador+4;
                     end;
@@ -2842,7 +2667,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       templ3:=templ2-templ-byte(r.cc.x);
                       r.d[dest].l:=templ3;
                       r.cc.n:=((templ3 shr 24) and $80)<>0;
-                      r.cc.z:=(templ3=0);
+                      r.cc.z:=r.cc.z and (templ3=0);
                       r.cc.v:=((((templ xor templ2) and (templ3 xor templ2)) shr 24) and $80)<>0;
                       r.cc.c:=((((templ and templ3) or (not(templ2) and (templ or templ3))) shr 23) and $100)<>0;
                       r.cc.x:=r.cc.c;
@@ -2861,10 +2686,11 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       r.cc.z:=(templ3=0);
                       r.cc.v:=((((templ xor templ2) and (templ3 xor templ2)) shr 24) and $80)<>0;
                       r.cc.c:=((((templ and templ3) or (not(templ2) and (templ or templ3))) shr 23) and $100)<>0;
+                      r.cc.x:=r.cc.c;
                  end;
            end;
         $7:begin  // # suba.l
-              self.contador:=self.contador+6+calc_ea_t_l(dir);
+              self.contador:=self.contador+calc_alu_t_l(dir,self.tipo);
               r.a[dest].l:=r.a[dest].l-self.leerdir_l(dir);
            end;
        end;  //del case $9
@@ -3018,7 +2844,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  r.cc.v:=false;
                end;
             $2:begin  //and.l er
-                 self.contador:=self.contador+6+calc_ea_t_l(dir);
+                 self.contador:=self.contador+calc_alu_t_l(dir,self.tipo);
                  templ:=self.leerdir_l(dir);
                  templ2:=r.d[dest].l and templ;
                  r.d[dest].l:=templ2;
@@ -3029,9 +2855,10 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                end;
             $3:begin //mulu
                  if self.tipo=TCPU_68010 then self.contador:=self.contador+30
-                    else self.contador:=self.contador+54;
-                 if (dir shr 3)=0 then self.contador:=self.contador+calc_ea_t_bw(dir);
+                    else self.contador:=self.contador+38;
+                 self.contador:=self.contador+calc_ea_t_bw(dir);
                  tempw:=self.leerdir_w(dir);
+                 if self.tipo<>TCPU_68010 then inc(self.contador,m68000_mulu_extra(tempw));
                  tempw2:=r.d[dest].wl;
                  templ:=tempw*tempw2;
                  r.d[dest].l:=templ;
@@ -3056,7 +2883,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       if r.cc.c then templ:=templ-$a0;
                       r.cc.v:=r.cc.v and ((templ and $80)<>0);
                       r.cc.n:=(templ and $80)<>0;
-                      r.cc.z:=(templ and $ff)=0;
+                      r.cc.z:=r.cc.z and ((templ and $ff)=0);
                       r.d[dest].l0:=templ and $ff;
                     end;
                  $1:begin  //abcd mm
@@ -3080,7 +2907,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                if r.cc.c then templ:=templ-$a0;
                                r.cc.v:=r.cc.v and ((templ and $80)<>0);
                                r.cc.n:=(templ and $80)<>0;
-                               r.cc.z:=(templ and $ff)=0;
+                               r.cc.z:=r.cc.z and ((templ and $ff)=0);
                                self.putbyte(r.a[dest].l,templ and $ff);
                                self.opcode:=true;
                         end;
@@ -3137,9 +2964,10 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                end;
             $7:begin //muls
                  if self.tipo=TCPU_68010 then self.contador:=self.contador+32
-                    else self.contador:=self.contador+54;
-                 if (dir shr 3)=0 then self.contador:=self.contador+calc_ea_t_bw(dir);
+                    else self.contador:=self.contador+38;
+                 self.contador:=self.contador+calc_ea_t_bw(dir);
                  remainder:=smallint(self.leerdir_w(dir));
+                 if self.tipo<>TCPU_68010 then inc(self.contador,m68000_muls_extra(word(remainder)));
                  quotient:=smallint(r.d[dest].wl);
                  templ:=remainder*quotient;
                  r.d[dest].l:=templ;
@@ -3175,7 +3003,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  r.cc.z:=((templ and $ffff)=0);
                end;
             $2:begin  //add.l er
-                 self.contador:=self.contador+6+calc_ea_t_l(dir);
+                 self.contador:=self.contador+calc_alu_t_l(dir,self.tipo);
                  templ:=self.leerdir_l(dir);
                  templ2:=r.d[dest].l;
                  templ3:=templ+templ2;
@@ -3199,7 +3027,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       tempw:=tempb+tempb2+byte(r.cc.x);
                       r.d[dest].l0:=tempw and $ff;
                       r.cc.n:=(tempw and $80)<>0;
-                      r.cc.z:=((tempw and $ff)=0);
+                      r.cc.z:=r.cc.z and ((tempw and $ff)=0);
 	                    r.cc.v:=((((tempb xor tempw) and (tempb2 xor tempw))) and $80)<>0;
                       r.cc.c:=(tempw and $100)<>0;
 	                    r.cc.x:=r.cc.c;
@@ -3229,7 +3057,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       templ:=tempw+tempw2+byte(r.cc.x);
                       r.d[dest].wl:=templ and $ffff;
                       r.cc.n:=(templ and $8000)<>0;
-                      r.cc.z:=((templ and $ffff)=0);
+                      r.cc.z:=r.cc.z and ((templ and $ffff)=0);
       	              r.cc.v:=((((tempw xor templ) and (tempw2 xor templ))) and $8000)<>0;
                       r.cc.c:=(templ and $10000)<>0;
 	                    r.cc.x:=r.cc.c;
@@ -3259,7 +3087,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       templ3:=templ+templ2+byte(r.cc.x);
                       r.d[dest].l:=templ3;
                       r.cc.n:=((templ3 shr 24) and $80)<>0;
-                      r.cc.z:=(templ3=0);
+                      r.cc.z:=r.cc.z and (templ3=0);
     	                r.cc.v:=((((templ xor templ3) and (templ2 xor templ3)) shr 24) and $80)<>0;
                       r.cc.c:=((((templ and templ2) or (not(templ3) and (templ or templ2))) shr 23) and $100)<>0;
 	                    r.cc.x:=r.cc.c;
@@ -3282,7 +3110,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
                end;
             $7:begin //adda.l
-                 self.contador:=self.contador+6+calc_ea_t_l(dir);
+                 self.contador:=self.contador+calc_alu_t_l(dir,self.tipo);
                  r.a[dest].l:=r.a[dest].l+self.leerdir_l(dir);
                end;
       end;  //del case $d
@@ -3300,7 +3128,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.z:=(tempw=0);
                     r.cc.x:=r.cc.c;
                   end;
-               $1:begin  //asl.w añadida 14/09/2014
+               $1:begin  //asl.w aÃ±adida 14/09/2014
                     self.contador:=self.contador+8+calc_ea_t_bw(dir);
                     tempw:=self.leerdir_w(dir); //src
                     tempw2:=tempw shl 1;
@@ -3345,7 +3173,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.z:=(tempw=0);
                     r.cc.v:=false;
                  end;
-               $5:begin //roxl.w Añadido el 05/11/17
+               $5:begin //roxl.w AÃ±adido el 05/11/17
                     self.contador:=self.contador+8+calc_ea_t_bw(dir);
                     tempw:=self.leerdir_w(dir);
                     r.cc.c:=(tempw and $8000)<>0;
@@ -3356,7 +3184,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.z:=(tempw=0);
                     r.cc.v:=false;
                   end;
-               $6:begin //ror.w añadida 13/03/2022 E-swat
+               $6:begin //ror.w aÃ±adida 13/03/2022 E-swat
                     self.contador:=self.contador+8+calc_ea_t_bw(dir);
                     tempw:=self.leerdir_w(dir);
                     tempw2:=(tempw shr 1) or ((tempw and 1) shl 15);
@@ -3382,6 +3210,12 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           if ((instruccion shr 5) and 1)=1 then tempb:=r.d[dest].l and $3f
             else tempb:=(((instruccion shr 9)-1) and $7)+1;
           self.contador:=self.contador+(tempb*2);
+          if (((instruccion shr 5) and 1)=1) and (tempb=0) then begin
+            r.cc.c:=false;
+            case (instruccion shr $3) and $3f of
+              $02,$06,$0a,$0e,$12,$16,$22,$26,$2a,$2e,$32:r.cc.c:=r.cc.x;
+            end;
+          end;
           case (instruccion shr $3) and $3f of
            $00,$04:begin //asr.b
                     self.contador:=self.contador+6;
@@ -3406,7 +3240,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       tempb3:=tempb3 shr 1;
                     end;
                     r.d[orig].l0:=tempb3;
-                    r.cc.n:=false;
+                    r.cc.n:=(tempb3 and $80)<>0;
                     r.cc.v:=false;
                     r.cc.z:=(tempb3=0);
                  end;
@@ -3430,6 +3264,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       r.cc.c:=(tempb3 and 1)<>0;
                       tempb3:=(tempb3 shr 1) or ((tempb3 and 1) shl 7);
                   end;
+                  if (tempb<>0) and ((tempb and $7)=0) then r.cc.c:=(tempb3 and $80)<>0;
                   r.cc.n:=(tempb3 and $80)<>0;
                   r.cc.v:=false;
                   r.cc.z:=(tempb3=0);
@@ -3458,7 +3293,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       tempw:=tempw shr 1;
                     end;
                     r.d[orig].wl:=tempw;
-                    r.cc.n:=false;
+                    r.cc.n:=(tempw and $8000)<>0;
                     r.cc.z:=(tempw=0);
                     r.cc.v:=false;
                  end;
@@ -3510,7 +3345,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       templ:=templ shr 1;
                     end;
                     r.d[orig].l:=templ;
-                    r.cc.n:=false;
+                    r.cc.n:=(templ and $80000000)<>0;
                     r.cc.z:=(templ=0);
                     r.cc.v:=false;
                  end;
@@ -3550,7 +3385,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.n:=(tempb3 and $80)<>0;
                     r.cc.z:=(tempb3=0);
                     tempb2:=r.d[orig].l0 and m68ki_shift_8_table[tempb+1];
-                    r.cc.v:=not((tempb2=0) or (tempb2=(m68ki_shift_8_table[tempb+1] and (tempb shl 8))));
+                    r.cc.v:=not((tempb2=0) or ((tempb2=m68ki_shift_8_table[tempb+1]) and (tempb<8)));
                     r.d[orig].l0:=tempb3;
                   end;
            $21,$25:begin  //lsl.b
@@ -3602,7 +3437,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.n:=(tempw and $8000)<>0;
                     r.cc.z:=(tempw=0);
                     tempw2:=r.d[orig].wl and m68ki_shift_16_table[tempb+1];
-                    r.cc.v:=not((tempw2=0) or (tempw2=(m68ki_shift_16_table[tempb+1])));
+                    if tempb>=16 then r.cc.v:=r.d[orig].wl<>0
+                      else r.cc.v:=not((tempw2=0) or (tempw2=m68ki_shift_16_table[tempb+1]));
                     r.d[orig].wl:=tempw;
                  end;
            $29,$2d:begin  //lsl.w
@@ -3654,7 +3490,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.n:=((templ shr 24) and $80)<>0;
                     r.cc.z:=(templ=0);
                     templ2:=r.d[orig].l and m68ki_shift_32_table[tempb+1];
-                    r.cc.v:=not((templ2=0) or (templ2=m68ki_shift_32_table[tempb+1]));
+                    if tempb>=32 then r.cc.v:=r.d[orig].l<>0
+                      else r.cc.v:=not((templ2=0) or (templ2=m68ki_shift_32_table[tempb+1]));
                     r.d[orig].l:=templ;
                  end;
            $31,$35:begin  //++++ lsl.l
@@ -3670,7 +3507,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.v:=false;
                     r.d[orig].l:=templ;
                  end;
-           $32:begin  //roxl.l
+           $32,$36:begin  //roxl.l
                     self.contador:=self.contador+8;
                     templ:=r.d[orig].l;
                     for tempb2:=1 to tempb do begin
@@ -3682,7 +3519,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.z:=(templ=0);
                     r.cc.v:=false;
                     r.d[orig].l:=templ;
-             end;
+                 end;
            $33,$37:begin  //++++ rol.l
                     self.contador:=self.contador+8;
                     templ:=r.d[orig].l;
@@ -3702,11 +3539,15 @@ case (instruccion shr 12) of //cojo solo el primer nibble
         self.prefetch:=false;
         self.contador:=self.contador+4;
         tempw:=coger_band(self.r);
-        self.poner_band(tempw or $2000);
+        self.poner_band((tempw or $2000) and $7fff);
+        if self.tipo=TCPU_68010 then begin
+          r.sp.l:=r.sp.l-2;
+          self.putword(r.sp.l,$2c);
+        end;
         r.sp.l:=r.sp.l-6;
         self.putword(r.sp.l,tempw);
-        self.putword(r.sp.l+2,r.pc.wh);
-        self.putword(r.sp.l+4,r.pc.wl-2);
+        self.putword(r.sp.l+2,r.ppc.wh);
+        self.putword(r.sp.l+4,r.ppc.wl);
         r.pc.wh:=self.getword($b*4);
         r.pc.wl:=self.getword(($b*4)+2);
       end;
@@ -3717,4 +3558,5 @@ timers.update(self.contador-pcontador,self.numero_cpu);
 self.prefetch:=true;
 end;  //del while
 end;
+
 end.

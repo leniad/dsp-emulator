@@ -1,4 +1,4 @@
-unit atari_mo;
+﻿unit atari_mo;
 
 interface
 uses gfx_engine,main_engine;
@@ -6,6 +6,7 @@ uses gfx_engine,main_engine;
 const
   MAX_PER_BANK=1024;
 type
+  t_atari_mo_pixel=procedure(x,y,palette_index,priority:word);
   entry=array[0..3] of word;
   dual_entry=record
           data_lower:entry;
@@ -43,7 +44,7 @@ type
           specialvalue:word;         // resulting value to indicate "special"
   end;
   tatari_mo=class
-          constructor create(slip_ram:pword;sprite_ram:pword;config:atari_motion_objects_config;screen:byte;xmax,ymax:word);
+          constructor create(slip_ram:pword;sprite_ram:pword;config:atari_motion_objects_config;screen:byte;xmax,ymax:word;color_shift:byte=4);
           destructor free;
           type
               sprite_parameter=class
@@ -70,6 +71,8 @@ type
                     uppershift:word;       // upper shift
               end;
           public
+            // Opcional: conservar indices para mezcladores especificos de placa.
+            pixel_callback:t_atari_mo_pixel;
             procedure draw(xscroll,yscroll:word;prio:integer);
             procedure set_bank(bank:dword);
             function get_codelookup:pword;
@@ -77,7 +80,8 @@ type
             function get_gfxlookup:pbyte;
           private
             xmax,ymax:word;
-            screen:byte;
+            clip_top,clip_bottom:integer;
+            screen,color_shift:byte;
             sprite_ram:pword;
             config:atari_motion_objects_config;
             // parameter masks
@@ -137,6 +141,7 @@ var
   atari_mo_0:tatari_mo;
 
 implementation
+uses pal_engine;
 
 function compute_log(value:integer):integer;
 var
@@ -175,13 +180,15 @@ begin
 	round_to_powerof2:=1 shl (log+1);
 end;
 
-constructor tatari_mo.create(slip_ram:pword;sprite_ram:pword;config:atari_motion_objects_config;screen:byte;xmax,ymax:word);
+constructor tatari_mo.create(slip_ram:pword;sprite_ram:pword;config:atari_motion_objects_config;screen:byte;xmax,ymax:word;color_shift:byte=4);
 var
   colorsize,i,gfxsize:integer;
   temp:pword;
   tempb:pbyte;
 begin
   self.screen:=screen;
+  self.pixel_callback:=nil;
+  self.color_shift:=color_shift;
   self.xmax:=xmax;
   self.ymax:=ymax;
   self.config:=config;
@@ -214,6 +221,7 @@ begin
 	self.prioritymask.set_(self.config.priority_entry);
 	self.neighbormask.set_(self.config.neighbor_entry);
 	self.absolutemask.set_(self.config.absolute_entry);
+  self.specialmask.set_(self.config.special_entry);
  	// derive tile information
 	self.tilewidth:=gfx[self.config.gfxindex].x;
 	self.tileheight:=gfx[self.config.gfxindex].y;
@@ -233,8 +241,7 @@ begin
     else self.slipshift:=0;
 	self.slipramsize:=self.bitmapheight shr self.slipshift;
 	self.sliprammask:=self.slipramsize-1;
-	if (self.config.maxperline=0) then self.config.maxperline:=MAX_PER_BANK
-    else self.config.maxperline:=self.config.maxperline+1; //PQ?!?!?!?!?! Si no pongo esto Atari SYS1 no muestra algunos sprites...
+  if self.config.maxperline=0 then self.config.maxperline:=MAX_PER_BANK;
 	// allocate and initialize the code lookup
 	self.codesize:=round_to_powerof2(self.codemask.mask);
 	getmem(self.codelookup,self.codesize*2);
@@ -252,7 +259,7 @@ begin
     inc(temp);
   end;
 	// allocate and the gfx lookup
-	gfxsize:=self.codesize div 256;
+	gfxsize:=(self.codesize+255) div 256;
 	getmem(self.gfxlookup,gfxsize);
   tempb:=self.gfxlookup;
 	for i:=0 to (gfxsize-1) do begin
@@ -414,20 +421,13 @@ begin
 	for f:=0 to (self.config.maxperline-1) do begin
 		// copy the current entry into the list
 		modata:=current;
-		if (not(self.config.split)) then begin
-			srcdata:=bankbase;
+    if not self.config.split then begin
+      srcdata:=bankbase;
       inc(srcdata,link*4);
-      inc(current);
-			current^:=srcdata^;
-      inc(current);
-      inc(srcdata);
-			current^:=srcdata^;
-      inc(current);
-      inc(srcdata);
-			current^:=srcdata^;
-      inc(current);
-      inc(srcdata);
-			current^:=srcdata^;
+      current^:=srcdata^;inc(current);inc(srcdata);
+      current^:=srcdata^;inc(current);inc(srcdata);
+      current^:=srcdata^;inc(current);inc(srcdata);
+      current^:=srcdata^;inc(current);
 		end else begin
 			srcdata:=bankbase;
       inc(srcdata,link);
@@ -460,52 +460,62 @@ end;
 
 procedure tatari_mo.draw(xscroll,yscroll:word;prio:integer);
 var
-  step:integer;
+  step,band,startband,stopband,top,bandheight,first_source,last_source:integer;
   current,first,last,temp:pword;
-  band,stopband:byte;
   link:word;
 begin
-	if (self.slipshift=0) then stopband:=0
-    else stopband:=((512 div self.config.slipheight) shr 1)-1;
-  //Realmente solo necesito la mitad... La parte visible
-  //Funciona por "bandas", cada banda representa una parte de la pantalla, por ejemplo en Gauntlet
-  //cada banda tiene 8 pixles de alto, si la pantalla tiene 512 pixels --> 64 bandas
-  //Cada banda tiene un indice en la memoria de SLIP, este indice le dice el primer objeto dentro de la
-  //memoria de los sprites, despues el resto van encadenados
-	for band:=0 to stopband do begin
-		  // compute the starting link and clip for the current band
-		  link:=0;
-		  if (self.slipshift<>0) then begin
-			  // extract the link from the SLIP RAM
-        temp:=self.slipram;
-        inc(temp,band and self.sliprammask);
-			  link:=(temp^ shr self.linkmask.shift) and self.linkmask.mask;
-      end;
-		// if this matches the last link, we don't need to re-process the list
-		build_active_list(link);
-		// initialize the parameters
-		self.next_xpos:=123456;
-		// safety check
-		if (@self.activelist[0]=self.activelast) then continue;
-		// set the start and end points
-		if self.config.reverse then begin
-			first:=self.activelast;
+  if (self.xmax=0) or (self.ymax=0) then exit;
+  if self.config.slipheight=0 then begin
+    startband:=0;stopband:=0;
+  end else begin
+    if self.slipram=nil then exit;
+    bandheight:=1 shl self.slipshift;
+    first_source:=integer(yscroll)-self.config.slipoffset;
+    last_source:=integer(self.ymax)-1+first_source;
+    // Division hacia menos infinito; conservar bandas sin envolver para
+    // recortar ambas apariciones si una banda cruza el borde del bitmap.
+    if first_source<0 then startband:=-((-first_source+bandheight-1) div bandheight)
+      else startband:=first_source div bandheight;
+    if last_source<0 then stopband:=-((-last_source+bandheight-1) div bandheight)
+      else stopband:=last_source div bandheight;
+  end;
+  // Posicion inicial determinista para que las pasadas por prioridad
+  // no hereden la posicion del ultimo objeto de la pasada anterior.
+  self.last_xpos:=0;
+  for band:=startband to stopband do begin
+    link:=0;self.clip_top:=0;self.clip_bottom:=self.ymax-1;
+    if self.config.slipheight<>0 then begin
+      temp:=self.slipram;
+      inc(temp,band and self.sliprammask);
+      link:=(temp^ shr self.linkmask.shift) and self.linkmask.mask;
+      top:=band*(1 shl self.slipshift)-yscroll+self.config.slipoffset;
+      self.clip_top:=top;
+      self.clip_bottom:=top+(1 shl self.slipshift)-1;
+      if self.clip_top<0 then self.clip_top:=0;
+      if self.clip_bottom>=self.ymax then self.clip_bottom:=self.ymax-1;
+      if self.clip_top>self.clip_bottom then continue;
+    end;
+    build_active_list(link);
+    self.next_xpos:=123456;
+    if @self.activelist[0]=self.activelast then continue;
+    if self.config.reverse then begin
+      first:=self.activelast;
       dec(first,4);
-			last:=@self.activelist;
-			step:=-4;
-		end else begin
-			first:=@self.activelist;
-			last:=self.activelast;
+      last:=@self.activelist[0];
+      step:=-4;
+    end else begin
+      first:=@self.activelist[0];
+      last:=self.activelast;
       dec(last,4);
-			step:=4;
-		end;
-		// render the mos
+      step:=4;
+    end;
     current:=first;
-		while (current<>last) do begin
-			  render_object(current,xscroll,yscroll,prio);
-        inc(current,step);
-		end;
-	end;
+    repeat
+      render_object(current,xscroll,yscroll,prio);
+      if current=last then break;
+      inc(current,step);
+    until false;
+  end;
 end;
 
 procedure tatari_mo.render_object(entry:pword;xscroll,yscroll:word;prio:integer);
@@ -517,9 +527,50 @@ var
   x,y,width,height:byte;
   numero_gfx:byte;
   tempb:pbyte;
+procedure draw_tile;
+var
+  px,py,srcx,srcy,dx,dy,pitch,addx,addy:integer;
+  pen:byte;
+  pixel:pbyte;
+  dest:pword;
+begin
+  if numero_gfx>=MAX_GFX then exit;
+  if gfx[numero_gfx].elements=0 then exit;
+  // Banco MO ausente en las PROM de System 1 (salida indexada).
+  if (@self.pixel_callback<>nil) and (numero_gfx=0) then exit;
+  pitch:=0;addx:=0;addy:=0;
+  if (@self.pixel_callback=nil) then begin
+    pitch:=pantalla[self.screen].pitch shr 1;
+    if p_final[self.screen].final_mix then begin
+      addx:=ADD_SPRITE;addy:=ADD_SPRITE;
+    end;
+  end;
+  for py:=0 to self.tileheight-1 do begin
+    dy:=(sy+py) and self.bitmapymask;
+    if (dy<self.clip_top) or (dy>self.clip_bottom) then continue;
+    if vflip then srcy:=self.tileheight-1-py
+      else srcy:=py;
+    for px:=0 to self.tilewidth-1 do begin
+      dx:=(sx+px) and self.bitmapxmask;
+      if dx>=self.xmax then continue;
+      if hflip then srcx:=self.tilewidth-1-px else srcx:=px;
+      pixel:=gfx[numero_gfx].datos;
+      inc(pixel,(code mod gfx[numero_gfx].elements)*self.tilewidth*self.tileheight+srcy*self.tilewidth+srcx);
+      pen:=pixel^;
+      if pen=self.config.transpen then continue;
+      if Assigned(self.pixel_callback) then self.pixel_callback(dx,dy,color+pen,priority)
+      else begin
+        // No consultar trans[0..31]: el pen puede ser de 6 bpp.
+        if ((dx+addx>=pantalla[self.screen].w) or (dy+addy>=pantalla[self.screen].h)) then continue;
+        dest:=pantalla[self.screen].pixels;
+        inc(dest,(dy+addy)*pitch+dx+addx);
+        dest^:=paleta[gfx[numero_gfx].colores[color+pen]];
+      end;
+    end;
+  end;
+end;
 begin
   priority:=self.prioritymask.extract(entry);
-  if ((priority<>prio) and (prio<>-1)) then exit;
 	// select the gfx element and save off key information
  	rawcode:=self.codemask.extract(entry);
   tempb:=self.gfxlookup;
@@ -531,7 +582,7 @@ begin
 	code:=temp^;
   temp:=self.colorlookup;
   inc(temp,self.colormask.extract(entry));
-	color:=temp^ shl 4; //Aqui aumento el color!!!!!!
+	color:=temp^ shl self.color_shift;
 	xpos:=self.xposmask.extract(entry);
 	ypos:=-self.yposmask.extract(entry);
 	hflip:=self.hflipmask.extract(entry)<>0;
@@ -556,6 +607,8 @@ begin
 		  else self.next_xpos:=xpos+self.tilewidth;
 	end;
 	self.last_xpos:=xpos;
+  // Actualizar vecinos incluso si este objeto pertenece a otra pasada.
+  if (prio<>-1) and (priority<>prio) then exit;
 	// adjust the final coordinates
 	xpos:=xpos and self.bitmapxmask;
 	ypos:=ypos and self.bitmapymask;
@@ -581,10 +634,7 @@ begin
 				// loop over the width
         sx:=xpos;
 				for x:=0 to (width-1) do begin
-          if (((sx<self.xmax) or (sx>503)) and ((sy<self.ymax) or (sy>503))) then begin
-            put_gfx_sprite(code,color,hflip,vflip,numero_gfx);
-            actualiza_gfx_sprite(sx,sy,self.screen,numero_gfx);
-          end;
+          draw_tile;
           sx:=sx+xadv;
           code:=code+1;
 				end;
@@ -599,10 +649,7 @@ begin
         sy:=ypos;
 				for y:=0 to (height-1) do begin
 					// draw the sprite
-          if (((sx<self.xmax) or (sx>503)) and ((sy<self.ymax) or (sy>503))) then begin
-            put_gfx_sprite(code,color,hflip,vflip,numero_gfx);
-            actualiza_gfx_sprite(sx,sy,self.screen,numero_gfx);
-          end;
+          draw_tile;
           sy:=sy+yadv;
           code:=code+1;
 				end;
@@ -613,3 +660,4 @@ begin
 end;
 
 end.
+

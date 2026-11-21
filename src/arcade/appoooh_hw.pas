@@ -308,7 +308,6 @@ end;
 begin
 llamadas_maquina.bucle_general:=appoooh_principal;
 llamadas_maquina.reset:=appoooh_reset;
-llamadas_maquina.fps_max:=60;
 llamadas_maquina.scanlines:=256;
 iniciar_appoooh:=false;
 iniciar_audio(false);

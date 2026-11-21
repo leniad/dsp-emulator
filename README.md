@@ -1,4 +1,17 @@
 # DSP Emulator status #
+<b>21/11/26 - DSP Emulator 0.24WIP4. Updated Windows binary and source.<br>
+It's been a year since the last update!<br>
+DSP emulator is still alive, and this is the biggest update in a long time.<br>
+There have been many changes to the core engines, numerous CPU bugs have been fixed (Raiden finally works!), new sound chips have been added, and scrolling, joystick and keyboard controls, mouse support, and much more have been fixed.<br>
+As for consoles, support has been added for the Atari 2600, Atari 5200, Atari 7800, and PC Engine. The Genesis/Mega Drive driver has also been completed.<br>
+The audio systems for the Game Boy and NES have been rewritten, along with the mapper systems.<br>
+On the arcade side, Neo Geo has finally been added! The drivers for Atari System 1 and Taito System B have also been completed. There have been many other changes to the remaining arcade drivers as well.<br>
+On the computer side, video has been improved on the Amstrad CPC, audio, controls, and video have been improved on the Commodore 64, and disk support has been added for the Oric.<br>
+Please read "Whats New 0.24WIP4.txt" for full changes<br>
+<img src="https://i.ibb.co/j0fhPHZ/Metal-Slug-X-neogeo.png"><img src="https://i.ibb.co/hn73gNQ/nastar-taitob2.png"><br>
+<img src="https://i.ibb.co/hFvD43tY/indy-atari.png"><img src="https://i.ibb.co/rfbnrFr6/sonic3-genesis.png"><br>
+<img src="https://i.ibb.co/Zn15MBX/bonk3-pcengine.png"><img src="https://i.ibb.co/fLBjQfB/pitfall2-atari2600.png"><br>
+<img src="https://i.ibb.co/1t9X8YxF/hero-atari5200.png"><img src="https://i.ibb.co/8LvmM3w2/polepos2-atari7800.png"><br>
 <b>11/11/25 - DSP Emulator 0.24WIP3. Updated Windows/Linux binary and source.<br>
 <pre>
 -General

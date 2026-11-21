@@ -50,7 +50,7 @@ for f:=0 to $3ff do begin
     y:=f mod 32;
     atrib:=memoria[$8000+f];
     color:=(atrib and $f) shl 4;
-    nchar:=memoria[$8400+f]+8*(atrib and $20);
+    nchar:=memoria[$8400+f];
     put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
     gfx[0].buffer[f]:=false;
   end;
@@ -97,10 +97,10 @@ end;
 
 procedure pooyan_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 263 do begin
     if f=240 then begin
       if nmi_vblank then z80_0.change_nmi(ASSERT_LINE);
       update_video_pooyan;
@@ -124,7 +124,7 @@ case direccion of
                   0..$3ff:pooyan_getbyte:=memoria[$9000+(direccion and $ff)];
                   $400..$7ff:pooyan_getbyte:=memoria[$9400+(direccion and $ff)];
                end;
-  $a000..$bfff:case (direccion and $3ff) of
+  $a000..$ffff:case (direccion and $3ff) of
                     0..$7f,$200..$27f:pooyan_getbyte:=marcade.dswb;
                     $80..$9f,$280..$29f:pooyan_getbyte:=marcade.in0;
                     $a0..$bf,$2a0..$2bf:pooyan_getbyte:=marcade.in1;
@@ -147,18 +147,18 @@ case direccion of
                   0..$3ff:memoria[$9000+(direccion and $ff)]:=valor;
                   $400..$7ff:memoria[$9400+(direccion and $ff)]:=valor;
                end;
-    $a000..$bfff:case (direccion and $3ff) of
+    $a000..$ffff:case (direccion and $3ff) of
                   0..$7f,$200..$27f:; //WatchDog
                   $100..$17f,$300..$37f:konamisnd_0.sound_latch:=valor;
                   $180,$380:begin
-                              nmi_vblank:=valor<>0;
+                              nmi_vblank:=(valor and 1)<>0;
                               if not(nmi_vblank) then z80_0.change_nmi(CLEAR_LINE);
                             end;
                   $181,$381:begin
-                              if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
-                              last:=valor;
+                              if ((last=0) and ((valor and 1)<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
+                              last:=valor and 1;
                             end;
-                  $182,$382:konamisnd_0.enabled:=(valor=0);
+                  $182,$382:konamisnd_0.enabled:=(valor and 1)=0;
                   $187,$387:main_screen.flip_main_screen:=(valor and 1)=0;
                end;
 end;
@@ -193,7 +193,7 @@ const
 begin
 llamadas_maquina.bucle_general:=pooyan_principal;
 llamadas_maquina.reset:=reset_pooyan;
-llamadas_maquina.scanlines:=256;
+llamadas_maquina.scanlines:=264;
 iniciar_pooyan:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -221,9 +221,9 @@ convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //poner la paleta
 if not(roms_load(@memoria_temp,pooyan_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances,@rweights,0,0,
-			3,@resistances,@gweights,0,0,
-			2,@resistances[1],@bweights,0,0);
+			3,@resistances,@rweights,1000,0,
+			3,@resistances,@gweights,1000,0,
+			2,@resistances[1],@bweights,1000,0);
 for f:=0 to $1f do begin
 		// red component
 		bit0:=(memoria_temp[f] shr 0) and 1;

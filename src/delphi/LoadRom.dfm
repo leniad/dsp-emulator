@@ -14,6 +14,7 @@ object FLoadRom: TFLoadRom
   Font.Style = []
   KeyPreview = True
   Position = poDesigned
+  Scaled = False
   OnClose = FormClose
   OnKeyUp = FormKeyUp
   OnShow = FormShow

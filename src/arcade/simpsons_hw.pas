@@ -1,4 +1,4 @@
-unit simpsons_hw;
+﻿unit simpsons_hw;
 
 interface
 uses rom_engine;
@@ -163,7 +163,7 @@ begin
 while EmuStatus=EsRunning do begin
   for f:=0 to 263 do begin
       eventos_simpsons;
-      if f=224 then begin
+      if f=240 then begin
         if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
         if k053246_0.is_irq_enabled then begin
           simpsons_objdma;
@@ -258,6 +258,7 @@ case direccion of
                            bank0_bank:=valor and 1;
                            bank2000_bank:=(valor shr 1) and 1;
                            firq_enabled:=(valor and 4)<>0;
+                           if not(firq_enabled) then konami_0.change_firq(CLEAR_LINE);
                         end;
                   $1fc6..$1fc7:k053260_0.main_write(direccion and 1,valor);
                   else k052109_0.write(direccion,valor);
@@ -407,8 +408,8 @@ k052109_0:=k052109_chip.create(1,2,3,0,simpsons_cb,tiles_rom,$100000);
 getmem(sprite_rom,$400000);
 if not(roms_load64b(sprite_rom,simpsons_sprites)) then exit;
 k053246_0:=k053246_chip.create(4,simpsons_sprite_cb,sprite_rom,$400000);
-sprite_timer_dmaon:=timers.init(konami_0.numero_cpu,256,simpsons_sprites_dmaon,nil,false);
-sprite_timer_dmaoff:=timers.init(konami_0.numero_cpu,2048,simpsons_sprites_dmaoff,nil,false);
+sprite_timer_dmaon:=timers.init(konami_0.numero_cpu,128,simpsons_sprites_dmaon,nil,false);
+sprite_timer_dmaoff:=timers.init(konami_0.numero_cpu,1024,simpsons_sprites_dmaoff,nil,false);
 k053246_0.k053247_start(0,16);
 //final
 iniciar_simpsons:=true;

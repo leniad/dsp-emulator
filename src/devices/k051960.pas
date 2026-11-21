@@ -1,4 +1,4 @@
-unit k051960;
+﻿unit k051960;
 
 interface
 uses gfx_engine,main_engine,pal_engine;
@@ -22,7 +22,7 @@ type
       procedure change_irqs(irq_call,firq_call,nmi_call:t_irq_call);
       procedure update_line(line:word);
     private
-      ram:array[0..$3ff] of byte;
+      ram,sprite_buffer:array[0..$3ff] of byte;
       counter,pant,ngfx:byte;
       readroms,nmi_enabled,spriteflip:boolean;
       romoffset:word;
@@ -32,6 +32,8 @@ type
       k051960_cb:t_k051960_cb;
       sorted_list:array[0..(NUM_SPRITES)-1] of integer;
       irq_cb,firq_cb,nmi_cb:t_irq_call;
+      shadow_config:byte;
+      sprite_processing_disabled:boolean;
       function fetchromdata(direccion:word):byte;
     end;
 
@@ -40,6 +42,18 @@ var
 
 implementation
 
+const
+  zoomy_table:array[0..$3f] of byte=(
+  $00,$01,$03,$05,$07,$09,$0a,$0c,
+  $0e,$0f,$11,$12,$14,$15,$16,$18,
+  $19,$1a,$1c,$1d,$1e,$1f,$20,$21,
+  $22,$23,$24,$25,$26,$27,$28,$29,
+  $2a,$2b,$2c,$2d,$2e,$2e,$2f,$30,
+  $31,$31,$32,$33,$34,$34,$35,$36,
+  $36,$37,$38,$38,$39,$39,$3a,$3b,
+  $3b,$3c,$3c,$3d,$3d,$3e,$3e,$3f
+);
+
 procedure k051960_chip.reset;
 begin
   self.counter:=0;
@@ -47,6 +61,7 @@ begin
 	self.spriteflip:=false;
 	self.readroms:=false;
 	self.nmi_enabled:=false;
+  self.shadow_config:=0;
 	self.spriterombank[0]:=0;
 	self.spriterombank[1]:=0;
 	self.spriterombank[2]:=0;
@@ -152,26 +167,28 @@ end;
 
 procedure k051960_chip.k051937_write(direccion:word;valor:byte);
 begin
-	if (direccion=0) then begin
-		// bit 0 is IRQ enable
-		if (((valor and $01)<>0) and (addr(self.irq_cb)<>nil)) then self.irq_cb(CLEAR_LINE);
-		// bit 1: probably FIRQ enable
+  if direccion=0 then begin
+    // Conserva el tratamiento existente de las interrupciones.
+    if (((valor and $01)<>0) and (addr(self.irq_cb)<>nil)) then self.irq_cb(CLEAR_LINE);
     if (((valor and $02)<>0) and (addr(self.firq_cb)<>nil)) then self.firq_cb(CLEAR_LINE);
-		// bit 2 is NMI enable
     self.nmi_enabled:=(valor and $04)<>0;
     if ((addr(self.nmi_cb)<>nil) and self.nmi_enabled) then self.nmi_cb(CLEAR_LINE);
-		// bit 3 = flip screen
-		self.spriteflip:=(valor and $08)<>0;
-		// bit 4 used by Devastators and TMNT, unknown
-		// bit 5 = enable gfx ROM reading
-		self.readroms:=(valor and $20)<>0;
-	end else if ((direccion>=2) and (direccion<5)) then self.spriterombank[direccion-2]:=valor;
+    self.spriteflip:=(valor and $08)<>0;
+    self.sprite_processing_disabled:=(valor and $10)<>0;
+    self.readroms:=(valor and $20)<>0;
+  end else if direccion=1 then begin
+    // Bit 0: control adicional del modo de sombra.
+    // Bit 1: fuerza sombra para el pen $0f.
+    // Bit 2: desactiva sombra para el pen $0f; prevalece sobre bit 1.
+    self.shadow_config:=valor and 7;
+  end else if ((direccion>=2) and (direccion<5)) then self.spriterombank[direccion-2]:=valor;
 end;
 
 procedure k051960_chip.update_sprites;
 var
   f:byte;
 begin
+if not(self.sprite_processing_disabled) then copymemory(@self.sprite_buffer[0],@self.ram[0],$400);
 for f:=0 to (NUM_SPRITES)-1 do self.sorted_list[f]:=-1;
 for f:=0 to (NUM_SPRITES)-1 do
   if (self.ram[f*8] and $80)<>0 then self.sorted_list[self.ram[f*8] and $7f]:=f*8;
@@ -193,17 +210,20 @@ begin
 	for pri_code:=0 to (NUM_SPRITES-1) do begin
 		offs:=self.sorted_list[pri_code];
 		if (offs=-1) then continue;
-		nchar:=self.ram[offs+2]+((self.ram[offs+1] and $1f) shl 8);
-		color:=self.ram[offs+3];
+		nchar:=self.sprite_buffer[offs+2]+((self.sprite_buffer[offs+1] and $1f) shl 8);
+		color:=self.sprite_buffer[offs+3];
 		pri:=0;
-		shadow:=color and $80;
-		self.k051960_cb(nchar,color,pri,shadow);
+    shadow:=0;
+		if (self.shadow_config and 4)=0 then begin
+      if ((self.shadow_config and 2)<>0) or ((color and $80)<>0) then shadow:=1;
+    end;
+    self.k051960_cb(nchar,color,pri,shadow);
 		if (max_priority<>-1) then begin //Prioridad por llamada
 			if ((pri<min_priority) or (pri>max_priority)) then continue;
     end else begin //Prioridad por funcion
       if pri<>min_priority then continue;
     end;
-		size:=(self.ram[offs+1] and $e0) shr 5;
+		size:=(self.sprite_buffer[offs+1] and $e0) shr 5;
 		w:=width[size];
 		h:=height[size];
 		if (w>=2) then nchar:=nchar and $fffe;
@@ -212,14 +232,19 @@ begin
 		if (h>=4) then nchar:=nchar and $fff7;
 		if (w>=8) then nchar:=nchar and $ffef;
 		if (h>=8) then nchar:=nchar and $ffdf;
-		ox:=(256*self.ram[offs+6]+self.ram[offs+7]) and $1ff;
-		oy:=256-((256*self.ram[offs+4]+self.ram[offs+5]) and $1ff);
-		flipx:=(self.ram[offs+6] and $02)<>0;
-		flipy:=(self.ram[offs+4] and $02)<>0;
-		zoom_x:=(self.ram[offs+6] and $fc) shr 2;
-    zx:=($100-zoom_x)/$100;
-		zoom_y:=(self.ram[offs+4] and $fc) shr 2;
-    zy:=($100-zoom_y)/$100;
+		ox:=(256*self.sprite_buffer[offs+6]+self.sprite_buffer[offs+7]) and $1ff;
+		oy:=256-((256*self.sprite_buffer[offs+4]+self.sprite_buffer[offs+5]) and $1ff);
+		flipx:=(self.sprite_buffer[offs+6] and $02)<>0;
+		flipy:=(self.sprite_buffer[offs+4] and $02)<>0;
+		zoom_x:=(self.sprite_buffer[offs+6] and $fc) shr 2;
+    zx:=($80-zoom_x)/$80;
+		zoom_y:=(self.sprite_buffer[offs+4] and $fc) shr 2;
+    zoom_y:=128-zoomy_table[zoom_y];
+    if h<=1 then zoom_y:=(zoom_y+1) div 2;
+    if h<=2 then zoom_y:=(zoom_y+1) div 2;
+    if h<=4 then zoom_y:=(zoom_y+1) div 2;
+    zoom_y:=zoom_y*(8 div h);
+    zy:=zoom_y/128;
 		if self.spriteflip then begin
 			ox:=512-round(zx*w*16)-ox;
 			oy:=256-round(zy*h*16)-oy;

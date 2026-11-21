@@ -77,7 +77,7 @@ const
 
 var
     //lookup table for the precomputed difference
-    diff_lookup:array[0..(49*16)-1] of single;
+    diff_lookup:array[0..(49*16)-1] of integer;
     chips_total:integer=-1;
 
 procedure compute_tables;
@@ -99,9 +99,9 @@ begin
 		// loop over all nibbles and compute the difference
 		for nib:=0 to 15 do begin
 			diff_lookup[step*16+nib]:=nbl2bit[nib][0]*(stepval*nbl2bit[nib][1]+
-				 stepval/2*nbl2bit[nib][2]+
-				 stepval/4*nbl2bit[nib][3]+
-				 stepval/8);
+				 (stepval div 2)*nbl2bit[nib][2]+
+				 (stepval div 4)*nbl2bit[nib][3]+
+				 (stepval div 8));
 		end;
   end;
 end;
@@ -148,7 +148,11 @@ copymemory(@self.out_,temp,4);inc(temp,4);
 copymemory(@self.bank_installed,temp,sizeof(boolean));inc(temp,sizeof(boolean));
 copymemory(@self.ntimer,temp,1);inc(temp,1);
 copymemory(@self.amp,temp,sizeof(single));inc(temp,sizeof(single));
-for f :=0 to (OKIM6295_VOICES-1) do copymemory(@self.voice[f],temp,sizeof(ADPCMVoice));inc(temp,sizeof(ADPCMVoice));
+for f:=0 to (OKIM6295_VOICES-1) do begin
+  copymemory(@self.voice[f],temp,sizeof(ADPCMVoice));
+  inc(temp,sizeof(ADPCMVoice));
+end;
+load_snapshot:=12+sizeof(boolean)+1+sizeof(single)+OKIM6295_VOICES*sizeof(ADPCMVoice);
 end;
 
 function snd_okim6295.save_snapshot(data:pbyte):word;
@@ -164,7 +168,11 @@ copymemory(temp,@self.out_,4);inc(temp,4);size:=size+4;
 copymemory(temp,@self.bank_installed,sizeof(boolean));inc(temp,sizeof(boolean));size:=size+sizeof(boolean);
 copymemory(temp,@self.ntimer,1);inc(temp,1);size:=size+1;
 copymemory(temp,@self.amp,sizeof(single));inc(temp,sizeof(single));size:=size+sizeof(single);
-for f:=0 to (OKIM6295_VOICES-1) do copymemory(temp,@self.voice[f],sizeof(ADPCMVoice));inc(temp,sizeof(ADPCMVoice));size:=size+sizeof(ADPCMVoice);
+for f:=0 to (OKIM6295_VOICES-1) do begin
+  copymemory(temp,@self.voice[f],sizeof(ADPCMVoice));
+  inc(temp,sizeof(ADPCMVoice));
+  size:=size+sizeof(ADPCMVoice);
+end;
 save_snapshot:=size;
 end;
 
@@ -176,13 +184,13 @@ end;
 procedure snd_okim6295.reset_adpcm(num_voice:byte);
 begin
 	// reset the signal/step
-	self.voice[num_voice].adpcm.signal:=-2;
+	self.voice[num_voice].adpcm.signal:=0;
 	self.voice[num_voice].adpcm.step:=0;
 end;
 
 function snd_okim6295.clock_adpcm(num_voice,nibble:byte):integer;
 begin
-	self.voice[num_voice].adpcm.signal:=self.voice[num_voice].adpcm.signal+trunc(diff_lookup[self.voice[num_voice].adpcm.step*16+(nibble and 15)]);
+	self.voice[num_voice].adpcm.signal:=self.voice[num_voice].adpcm.signal+diff_lookup[self.voice[num_voice].adpcm.step*16+(nibble and 15)];
 	// clamp to the maximum
 	if (self.voice[num_voice].adpcm.signal>2047) then self.voice[num_voice].adpcm.signal:=2047
 	  else if (self.voice[num_voice].adpcm.signal<-2048) then self.voice[num_voice].adpcm.signal:=-2048;
@@ -216,7 +224,7 @@ begin
   self.voice[num_voice].sample:=sample;
   // output to the buffer, scaling by the volume
   //signal in range -2048..2047, volume in range 2..32 => signal * volume / 2 in range -32768..32767
-  generate_adpcm:=self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1);
+  generate_adpcm:=(self.clock_adpcm(num_voice,nibble)*self.voice[num_voice].volume) div 2;
 end;
 
 procedure snd_okim6295.reset;
@@ -319,14 +327,21 @@ begin
   self.out_:=0;
 	for f:=0 to (OKIM6295_VOICES-1) do
     if self.voice[f].playing then self.out_:=self.out_+self.generate_adpcm(f);
-  if self.out_<-32767 then self.out_:=-32767
-    else if self.out_>32767 then self.out_:=32767;
+  // Keep the full mix until gain has been applied in update.
 end;
 
 procedure snd_okim6295.update;
+var
+  mixed:double;
+  value:integer;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.out_*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.out_*self.amp);
+  mixed:=self.out_*self.amp;
+  if mixed>32767 then mixed:=32767
+    else if mixed<-32768 then mixed:=-32768;
+  value:=trunc(mixed);
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=value;
+  if sound_status.stereo then
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=value;
 end;
 
 end.

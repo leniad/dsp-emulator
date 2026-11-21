@@ -69,7 +69,7 @@ begin
     for y:=0 to 3 do begin
 			for x:=0 to 3 do begin
 				nchar_addr:=code*$20+(x+y*4)*2;
-        nchar:=(memoria_ram[0,nchar_addr+1] shl 8)+memoria_ram[0,nchar_addr];
+        nchar:=(memoria_ram[nchar_addr shr 12,(nchar_addr and $fff)+1] shl 8) or memoria_ram[nchar_addr shr 12,nchar_addr and $fff];
         put_gfx_sprite(nchar,color shl 4,flipx,flipy,1);
         if flipx then desp_x:=3-x
           else desp_x:=x;
@@ -104,7 +104,7 @@ for f:=0 to $3ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-scroll_x_y(1,3,scroll_bg_x-19,scroll_bg_y);
+scroll_x_y(1,3,scroll_bg_x-18,scroll_bg_y);
 draw_sprites(false);
 draw_sprites(true);
 scroll_x_y(2,3,scroll_fg_x-16,scroll_fg_y);
@@ -174,6 +174,10 @@ case direccion of
   0..$8fff,$c000..$cfff,$d500..$d5ff:wyvernf0_getbyte:=memoria[direccion];
   $9000..$9fff:wyvernf0_getbyte:=memoria_ram[banco_ram,direccion and $fff];
   $a000..$bfff:wyvernf0_getbyte:=memoria_rom[banco_rom,(direccion and $1fff)];
+  $d300:wyvernf0_getbyte:=scroll_fg_x;
+  $d301:wyvernf0_getbyte:=scroll_fg_y;
+  $d302:wyvernf0_getbyte:=scroll_bg_x;
+  $d303:wyvernf0_getbyte:=scroll_bg_y;
   $d400:wyvernf0_getbyte:=taito_68705_0.read;
   $d401:wyvernf0_getbyte:=byte(not(taito_68705_0.main_sent)) or (byte(taito_68705_0.mcu_sent) shl 1);
   $d600:wyvernf0_getbyte:=marcade.dswa;
@@ -258,8 +262,8 @@ case direccion of
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $c800:ay8910_0.control(valor);
   $c801:ay8910_0.write(valor);
-  $c802:ay8910_0.control(valor);
-  $c803:ay8910_0.write(valor);
+  $c802:ay8910_1.control(valor);
+  $c803:ay8910_1.write(valor);
   $c900..$c90d:msm5232_0.write(direccion and $f,valor);
   $d000:sound_latch:=valor;
   $d200:begin
@@ -325,7 +329,7 @@ const
 begin
 llamadas_maquina.bucle_general:=wyvernf0_principal;
 llamadas_maquina.reset:=reset_wyvernf0;
-llamadas_maquina.scanlines:=255;
+llamadas_maquina.scanlines:=256;
 iniciar_wyvernf0:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true,false);
@@ -345,16 +349,16 @@ z80_1.change_ram_calls(wyvernf0_snd_getbyte,wyvernf0_snd_putbyte);
 z80_1.init_sound(wyvernf0_sound_update);
 if not(roms_load(@mem_snd,wyvernf0_snd)) then exit;
 fillchar(mem_snd[$e000],$2000,$ff);
-timers.init(z80_1.numero_cpu,4000000/180,snd_irq,nil,true);
+timers.init(z80_1.numero_cpu,4000000/120,snd_irq,nil,true);
 //MCU
 taito_68705_0:=taito_68705p.create(3000000);
 if not(roms_load(taito_68705_0.get_rom_addr,wyvernf0_mcu)) then exit;
 //Sound chips
-msm5232_0:=msm5232_chip.create(2000000,4);
+msm5232_0:=msm5232_chip.create(2000000,2);
 msm5232_0.set_capacitors(1e-6,1e-6,1e-6,1e-6,1e-6,1e-6,1e-6,1e-6);
-ay8910_0:=ay8910_chip.create(2000000,AY8910);
-ay8910_1:=ay8910_chip.create(2000000,AY8910);
-dac_0:=dac_chip.create;
+ay8910_0:=ay8910_chip.create(2000000,YM2149,0.5);
+ay8910_1:=ay8910_chip.create(2000000,YM2149,0.5);
+dac_0:=dac_chip.create(0.5);
 //chars
 if not(roms_load(@memoria_temp,wyvernf0_chars)) then exit;
 init_gfx(0,8,8,$400);

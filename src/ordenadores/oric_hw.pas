@@ -27,6 +27,8 @@ var
   via_ca2,via_cb2,via_irq,ext_irq:boolean;
   key_row:array[0..7] of byte;
   key_timer,key_pos:byte;
+  key_physical,key_auto:array[0..7] of byte;
+  tape_motor,resetting_oric:boolean;
 
 procedure update_video_oric(linea:word);
 var
@@ -106,82 +108,99 @@ begin
 	pattr:=tpattr;
 end;
 
+procedure update_keyboard; forward;
+
+procedure combine_keyboard;
+var f:integer;
+begin
+  for f:=0 to 7 do key_row[f]:=key_physical[f] and key_auto[f];
+  update_keyboard;
+end;
+
+// Motor control must not change the user's transport selection.
+procedure sync_tape_timer;
+begin
+  timers.enabled(tape_timer,tape_motor and cinta_tzx.cargada and
+                 cinta_tzx.play_tape and not resetting_oric);
+end;
+
 procedure eventos_oric;
 begin
 if event.arcade then begin
-  fillchar(key_row,8,$ff);
-  if arcade_input.up[0] then key_row[4]:=key_row[4] and $f7;
-  if arcade_input.down[0] then key_row[4]:=key_row[4] and $bf;
-  if arcade_input.left[0] then key_row[4]:=key_row[4] and $df;
-  if arcade_input.right[0] then key_row[4]:=key_row[4] and $7f;
+  fillchar(key_physical,8,$ff);
+  if arcade_input.up[0] then key_physical[4]:=key_physical[4] and $f7;
+  if arcade_input.down[0] then key_physical[4]:=key_physical[4] and $bf;
+  if arcade_input.left[0] then key_physical[4]:=key_physical[4] and $df;
+  if arcade_input.right[0] then key_physical[4]:=key_physical[4] and $7f;
   //Row 0
-  if keyboard[KEYBOARD_7] then key_row[0]:=key_row[0] and $fe;
-  if keyboard[KEYBOARD_n] then key_row[0]:=key_row[0] and $fd;
-  if keyboard[KEYBOARD_5] then key_row[0]:=key_row[0] and $fb;
-  if keyboard[KEYBOARD_v] then key_row[0]:=key_row[0] and $f7;
-  if keyboard[KEYBOARD_1] then key_row[0]:=key_row[0] and $df;
-  if keyboard[KEYBOARD_x] then key_row[0]:=key_row[0] and $bf;
-  if keyboard[KEYBOARD_3] then key_row[0]:=key_row[0] and $7f;
+  if keyboard[KEYBOARD_7] then key_physical[0]:=key_physical[0] and $fe;
+  if keyboard[KEYBOARD_n] then key_physical[0]:=key_physical[0] and $fd;
+  if keyboard[KEYBOARD_5] then key_physical[0]:=key_physical[0] and $fb;
+  if keyboard[KEYBOARD_v] then key_physical[0]:=key_physical[0] and $f7;
+  if keyboard[KEYBOARD_1] then key_physical[0]:=key_physical[0] and $df;
+  if keyboard[KEYBOARD_x] then key_physical[0]:=key_physical[0] and $bf;
+  if keyboard[KEYBOARD_3] then key_physical[0]:=key_physical[0] and $7f;
   //Row 1
-  if keyboard[KEYBOARD_j] then key_row[1]:=key_row[1] and $fe;
-  if keyboard[KEYBOARD_t] then key_row[1]:=key_row[1] and $fd;
-  if keyboard[KEYBOARD_r] then key_row[1]:=key_row[1] and $fb;
-  if keyboard[KEYBOARD_f] then key_row[1]:=key_row[1] and $f7;
-  if keyboard[KEYBOARD_tab] then key_row[1]:=key_row[1] and $df;
-  if keyboard[KEYBOARD_q] then key_row[1]:=key_row[1] and $bf;
-  if keyboard[KEYBOARD_d] then key_row[1]:=key_row[1] and $7f;
+  if keyboard[KEYBOARD_j] then key_physical[1]:=key_physical[1] and $fe;
+  if keyboard[KEYBOARD_t] then key_physical[1]:=key_physical[1] and $fd;
+  if keyboard[KEYBOARD_r] then key_physical[1]:=key_physical[1] and $fb;
+  if keyboard[KEYBOARD_f] then key_physical[1]:=key_physical[1] and $f7;
+  if keyboard[KEYBOARD_tab] then key_physical[1]:=key_physical[1] and $df;
+  if keyboard[KEYBOARD_q] then key_physical[1]:=key_physical[1] and $bf;
+  if keyboard[KEYBOARD_d] then key_physical[1]:=key_physical[1] and $7f;
   //Row 2
-  if keyboard[KEYBOARD_m] then key_row[2]:=key_row[2] and $fe;
-  if keyboard[KEYBOARD_6] then key_row[2]:=key_row[2] and $fd;
-  if keyboard[KEYBOARD_b] then key_row[2]:=key_row[2] and $fb;
-  if keyboard[KEYBOARD_4] then key_row[2]:=key_row[2] and $f7;
-  if keyboard[KEYBOARD_LCTRL] then key_row[2]:=key_row[2] and $ef;
-  if keyboard[KEYBOARD_z] then key_row[2]:=key_row[2] and $df;
-  if keyboard[KEYBOARD_2] then key_row[2]:=key_row[2] and $bf;
-  if keyboard[KEYBOARD_c] then key_row[2]:=key_row[2] and $7f;
+  if keyboard[KEYBOARD_m] then key_physical[2]:=key_physical[2] and $fe;
+  if keyboard[KEYBOARD_6] then key_physical[2]:=key_physical[2] and $fd;
+  if keyboard[KEYBOARD_b] then key_physical[2]:=key_physical[2] and $fb;
+  if keyboard[KEYBOARD_4] then key_physical[2]:=key_physical[2] and $f7;
+  if keyboard[KEYBOARD_LCTRL] then key_physical[2]:=key_physical[2] and $ef;
+  if keyboard[KEYBOARD_z] then key_physical[2]:=key_physical[2] and $df;
+  if keyboard[KEYBOARD_2] then key_physical[2]:=key_physical[2] and $bf;
+  if keyboard[KEYBOARD_c] then key_physical[2]:=key_physical[2] and $7f;
   //Row 3
-  if keyboard[KEYBOARD_k] then key_row[3]:=key_row[3] and $fe;
-  if keyboard[KEYBOARD_9] then key_row[3]:=key_row[3] and $fd;
-  if keyboard[KEYBOARD_FILA1_T2] then key_row[3]:=key_row[3] and $fb;
-  if keyboard[KEYBOARD_FILA3_T3] then key_row[3]:=key_row[3] and $f7;
-  //if keyboard[KEYBOARD_LCTRL] then key_row[3]:=key_row[3] and $ef;
-  //if keyboard[KEYBOARD_z] then key_row[3]:=key_row[3] and $df;
-  if keyboard[KEYBOARD_FILA3_T0] then key_row[3]:=key_row[3] and $bf;
-  if keyboard[KEYBOARD_FILA1_T1] then key_row[3]:=key_row[3] and $7f;
+  if keyboard[KEYBOARD_k] then key_physical[3]:=key_physical[3] and $fe;
+  if keyboard[KEYBOARD_9] then key_physical[3]:=key_physical[3] and $fd;
+  if keyboard[KEYBOARD_FILA1_T2] then key_physical[3]:=key_physical[3] and $fb;
+  if keyboard[KEYBOARD_FILA3_T3] then key_physical[3]:=key_physical[3] and $f7;
+  //if keyboard[KEYBOARD_LCTRL] then key_physical[3]:=key_physical[3] and $ef;
+  //if keyboard[KEYBOARD_z] then key_physical[3]:=key_physical[3] and $df;
+  if keyboard[KEYBOARD_FILA3_T0] then key_physical[3]:=key_physical[3] and $bf;
+  if keyboard[KEYBOARD_FILA1_T1] then key_physical[3]:=key_physical[3] and $7f;
   //Row 4
-  if keyboard[KEYBOARD_space] then key_row[4]:=key_row[4] and $fe;
-  if keyboard[KEYBOARD_FILA3_T1] then key_row[4]:=key_row[4] and $fd;
-  if keyboard[KEYBOARD_FILA3_T2] then key_row[4]:=key_row[4] and $fb;
+  if keyboard[KEYBOARD_space] then key_physical[4]:=key_physical[4] and $fe;
+  if keyboard[KEYBOARD_FILA3_T1] then key_physical[4]:=key_physical[4] and $fd;
+  if keyboard[KEYBOARD_FILA3_T2] then key_physical[4]:=key_physical[4] and $fb;
   //Up --> arcade
-  if keyboard[KEYBOARD_LSHIFT] then key_row[4]:=key_row[4] and $ef;
+  if keyboard[KEYBOARD_LSHIFT] then key_physical[4]:=key_physical[4] and $ef;
   //Left --> Arcade
   //Down --> Arcade
   //Right --> Arcade
   //Row 5
-  if keyboard[KEYBOARD_u] then key_row[5]:=key_row[5] and $fe;
-  if keyboard[KEYBOARD_i] then key_row[5]:=key_row[5] and $fd;
-  if keyboard[KEYBOARD_o] then key_row[5]:=key_row[5] and $fb;
-  if keyboard[KEYBOARD_p] then key_row[5]:=key_row[5] and $f7;
-  if keyboard[KEYBOARD_backspace] then key_row[5]:=key_row[5] and $df;
-  if keyboard[KEYBOARD_FILA2_T1] then key_row[5]:=key_row[5] and $bf;
-  if keyboard[KEYBOARD_FILA2_T2] then key_row[5]:=key_row[5] and $7f;
+  if keyboard[KEYBOARD_u] then key_physical[5]:=key_physical[5] and $fe;
+  if keyboard[KEYBOARD_i] then key_physical[5]:=key_physical[5] and $fd;
+  if keyboard[KEYBOARD_o] then key_physical[5]:=key_physical[5] and $fb;
+  if keyboard[KEYBOARD_p] then key_physical[5]:=key_physical[5] and $f7;
+  if keyboard[KEYBOARD_backspace] then key_physical[5]:=key_physical[5] and $df;
+  if keyboard[KEYBOARD_FILA2_T1] then key_physical[5]:=key_physical[5] and $bf;
+  if keyboard[KEYBOARD_FILA2_T2] then key_physical[5]:=key_physical[5] and $7f;
   //Row 6
-  if keyboard[KEYBOARD_y] then key_row[6]:=key_row[6] and $fe;
-  if keyboard[KEYBOARD_h] then key_row[6]:=key_row[6] and $fd;
-  if keyboard[KEYBOARD_g] then key_row[6]:=key_row[6] and $fb;
-  if keyboard[KEYBOARD_e] then key_row[6]:=key_row[6] and $f7;
-  if keyboard[KEYBOARD_a] then key_row[6]:=key_row[6] and $df;
-  if keyboard[KEYBOARD_s] then key_row[6]:=key_row[6] and $bf;
-  if keyboard[KEYBOARD_w] then key_row[6]:=key_row[6] and $7f;
+  if keyboard[KEYBOARD_y] then key_physical[6]:=key_physical[6] and $fe;
+  if keyboard[KEYBOARD_h] then key_physical[6]:=key_physical[6] and $fd;
+  if keyboard[KEYBOARD_g] then key_physical[6]:=key_physical[6] and $fb;
+  if keyboard[KEYBOARD_e] then key_physical[6]:=key_physical[6] and $f7;
+  if keyboard[KEYBOARD_a] then key_physical[6]:=key_physical[6] and $df;
+  if keyboard[KEYBOARD_s] then key_physical[6]:=key_physical[6] and $bf;
+  if keyboard[KEYBOARD_w] then key_physical[6]:=key_physical[6] and $7f;
   //Row 7
-  if keyboard[KEYBOARD_8] then key_row[7]:=key_row[7] and $fe;
-  if keyboard[KEYBOARD_l] then key_row[7]:=key_row[7] and $fd;
-  if keyboard[KEYBOARD_0] then key_row[7]:=key_row[7] and $fb;
-  if keyboard[KEYBOARD_FILA0_T2] then key_row[7]:=key_row[7] and $f7;
-  if keyboard[KEYBOARD_RSHIFT] then key_row[7]:=key_row[7] and $ef;
-  if keyboard[KEYBOARD_return] then key_row[7]:=key_row[7] and $df;
-  if keyboard[KEYBOARD_FILA0_T1] then key_row[7]:=key_row[7] and $7f;
+  if keyboard[KEYBOARD_8] then key_physical[7]:=key_physical[7] and $fe;
+  if keyboard[KEYBOARD_l] then key_physical[7]:=key_physical[7] and $fd;
+  if keyboard[KEYBOARD_0] then key_physical[7]:=key_physical[7] and $fb;
+  if keyboard[KEYBOARD_FILA0_T2] then key_physical[7]:=key_physical[7] and $f7;
+  if keyboard[KEYBOARD_RSHIFT] then key_physical[7]:=key_physical[7] and $ef;
+  if keyboard[KEYBOARD_return] then key_physical[7]:=key_physical[7] and $df;
+  if keyboard[KEYBOARD_FILA0_T1] then key_physical[7]:=key_physical[7] and $7f;
 end;
+combine_keyboard;
 end;
 
 procedure oric_principal;
@@ -225,7 +244,7 @@ begin
 case direccion of
   0..$2ff,$400..$bfff:oric_getbyte_microdisc:=memoria[direccion];
   $300..$3ff:case direccion of
-                $310..$31f:oric_getbyte_microdisc:=microdisc_0.read(direccion and $f);
+                $310..$314,$318:oric_getbyte_microdisc:=microdisc_0.read(direccion and $f);
                 else oric_getbyte_microdisc:=via6522_0.read(direccion and $f);
              end;
   $c000..$dfff:if (microdisc_0.port_314 and P_ROMDIS)<>0 then oric_getbyte_microdisc:=bios_rom[direccion and $3fff]
@@ -241,7 +260,7 @@ begin
   case direccion of
     0..$2ff,$400..$bfff:memoria[direccion]:=valor;
     $300..$3ff:case direccion of
-                $310..$31f:microdisc_0.write(direccion and $f,valor);
+                $310..$314:microdisc_0.write(direccion and $f,valor);
                 else via6522_0.write(direccion and $f,valor);
              end;
     $c000..$dfff:if (microdisc_0.port_314 and P_ROMDIS)=0 then memoria[direccion]:=valor;
@@ -275,16 +294,10 @@ begin
   via_b:=valor;
 	update_keyboard;
 	//m_centronics->write_strobe(data & 0x10 ? 1 : 0);
-  //Tape Motor
-  if (valor and $40)<>0 then begin
-    if not(cinta_tzx.play_tape) then begin
-      tape_window1.fPlayCinta(nil);
-      timers.enabled(tape_timer,true);
-    end;
-  end else begin
-    if cinta_tzx.play_tape then tape_window1.fStopCinta(nil);
-    timers.enabled(tape_timer,false);
-  end;
+  // PB6 gates the motor; Play/Stop remains a transport/UI decision.
+  if resetting_oric then tape_motor:=false
+    else tape_motor:=(valor and $40)<>0;
+  sync_tape_timer;
 end;
 
 procedure via_ca2_w(valor:byte);
@@ -326,9 +339,10 @@ end;
 procedure oric_update_timers(estados_t:word);
 begin
   via6522_0.update_timers(estados_t);
-  //microdisc_0.wd.run(estados_t);
+  if microdisc_0<>nil then microdisc_0.wd.run(estados_t);
+  sync_tape_timer;
   if cinta_tzx.cargada then begin
-    if cinta_tzx.play_tape then begin
+    if cinta_tzx.play_tape and tape_motor then begin
       play_cinta_tzx(estados_t);
     end;
   end;
@@ -342,7 +356,8 @@ end;
 
 procedure oric_tape_play;
 begin
-  via6522_0.write_cb1(cinta_tzx.value<>0);
+  if tape_motor and cinta_tzx.cargada and cinta_tzx.play_tape then
+    via6522_0.write_cb1(cinta_tzx.value<>0);
 end;
 
 //Main
@@ -353,34 +368,51 @@ end;
 
 procedure reset_oric;
 begin
- //IMPORTANTE!! Hay que resetear primero esto para que ponga los valores pordefecto!
- //microdisc_0.reset;
+ resetting_oric:=true;
+ timers.enabled(key_timer,false);
+ timers.enabled(tape_timer,false);
+ key_pos:=0;
+ fillchar(key_physical,SizeOf(key_physical),$ff);
+ fillchar(key_auto,SizeOf(key_auto),$ff);
+ fillchar(key_row,SizeOf(key_row),$ff);
+ tape_motor:=false;
+ via_a:=$ff; via_b:=$ff; psg_a:=$ff;
+ via_ca2:=false; via_cb2:=false;
+ via_irq:=false; ext_irq:=false;
+ if microdisc_0<>nil then microdisc_0.reset;
  m6502_0.reset;
  frame_main:=m6502_0.tframes;
  ay8910_0.reset;
  via6522_0.reset;
- via_a:=$ff;
- via_b:=$ff;
- psg_a:=0;
- via_ca2:=false;
- via_cb2:=false;
- via_irq:=false;
- ext_irq:=false;
- fillchar(key_row,8,$ff);
+ // Keep cached pins consistent with the VIA reset callbacks.
+ combine_keyboard;
+ update_irq;
  blink_counter:=0;
  pattr:=0;
- key_pos:=0;
+ resetting_oric:=false;
 end;
 
 procedure key_press;
 const
   run_key:array[0..16] of word=($027f,$02ff,$07fd,$07ff,$05fb,$05ff,$06df,$06ff,$017f,$01ff,$04ef,$037f,$03ff,$04ff,$07df,$07ff,$ffff);
 begin
-key_row[run_key[key_pos] shr 8]:=run_key[key_pos] and $ff;
+if (key_pos>High(run_key)) then begin
+  timers.enabled(key_timer,false);
+  key_pos:=0;
+  fillchar(key_auto,SizeOf(key_auto),$ff);
+  combine_keyboard;
+  exit;
+end;
 if run_key[key_pos]=$ffff then begin
   timers.enabled(key_timer,false);
   key_pos:=0;
-end else key_pos:=key_pos+1;
+  fillchar(key_auto,SizeOf(key_auto),$ff);
+end else begin
+  // Preserve other rows: Shift must stay held while the quote key is pressed.
+  key_auto[run_key[key_pos] shr 8]:=run_key[key_pos] and $ff;
+  inc(key_pos);
+end;
+combine_keyboard;
 end;
 
 procedure oric_tapes;
@@ -397,21 +429,32 @@ begin
     exit;
   end;
   extension:=extension_fichero(nombre_file);
-  es_cinta:=true;
-  if extension='TAP' then abrir_oric_tap(datos,longitud);
-  if extension='WAV' then abrir_wav(datos,longitud,1000000);
+  timers.enabled(key_timer,false);
+  key_pos:=0;
+  fillchar(key_auto,SizeOf(key_auto),$ff);
+  combine_keyboard;
+  es_cinta:=false;
+  if extension='TAP' then es_cinta:=abrir_oric_tap(datos,longitud);
+  if extension='WAV' then es_cinta:=abrir_wav(datos,longitud,1000000);
+  cadena:='';
   if es_cinta then begin
      tape_window1.edit1.Text:=nombre_file;
      tape_window1.show;
-     tape_window1.BitBtn1.Enabled:=true;
-     tape_window1.BitBtn2.Enabled:=false;
-     cinta_tzx.play_tape:=false;
+     tape_window1.BitBtn1.Enabled:=false;
+     tape_window1.BitBtn2.Enabled:=true;
+     // Arm transport; PB6 still decides when the signal advances.
+     cinta_tzx.play_tape:=true;
+     sync_tape_timer;
      cadena:=extension+': '+nombre_file;
-     if main_vars.auto_type then timers.enabled(key_timer,true);
+     if main_vars.auto_type then begin
+       timers.reset(key_timer);
+       timers.enabled(key_timer,true);
+     end;
   end;
   freemem(datos);
   directory.oric_tap:=ExtractFilePath(romfile);
-  change_caption(cadena);
+  main_vars.nombre_caption:=cadena;
+  change_caption;
 end;
 
 function iniciar_oric:boolean;
@@ -426,6 +469,10 @@ llamadas_maquina.cartuchos:=oric_loaddisk;
 llamadas_maquina.fps_max:=50.080128;
 llamadas_maquina.scanlines:=312;
 iniciar_oric:=false;
+if microdisc_0<>nil then begin
+  microdisc_0.free;
+  microdisc_0:=nil;
+end;
 iniciar_audio(false);
 screen_init(1,240,224);
 iniciar_video(240,224);
@@ -447,13 +494,19 @@ tape_sound_channel:=init_channel;
 case main_vars.tipo_maquina of
   3001:begin
           if not(roms_load(@bios_rom,atmos_rom)) then exit;
-          //microdisc_0:=tmicrodisc.create(1000000,oric_ext_irq);
-          //if not(roms_load(@microdisc_0.rom,microdisc_rom)) then exit;
-          //m6502_0.change_ram_calls(oric_getbyte_microdisc,oric_putbyte_microdisc);
+          microdisc_0:=tmicrodisc.create(1000000,oric_ext_irq);
+          if not(roms_load(@microdisc_0.rom,microdisc_rom)) then begin
+            microdisc_0.free;
+            microdisc_0:=nil;
+            exit;
+          end;
+          // Set the overlay before the CPU fetches its reset vector.
+          microdisc_0.reset;
+          m6502_0.change_ram_calls(oric_getbyte_microdisc,oric_putbyte_microdisc);
        end;
   3002:if not(roms_load(@bios_rom,oric1_rom)) then exit;
 end;
-//bios_rom[$2000]:=$42;
+
 //paleta
 for f:=0 to 7 do begin
   colores[f].r:=pal1bit(f);
@@ -463,6 +516,7 @@ end;
 set_pal(colores,8);
 key_timer:=timers.init(m6502_0.numero_cpu,100000,key_press,nil,false);
 //final
+reset_oric;
 iniciar_oric:=true;
 end;
 

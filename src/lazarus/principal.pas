@@ -326,6 +326,14 @@ type
     mars1: TMenuItem;
     devilfish1: TMenuItem;
     drmicro1: TMenuItem;
+    Atari2600: TMenuItem;
+    Atari5200: TMenuItem;
+    Atari7800: TMenuItem;
+    MetalSlug1: TMenuItem;
+    MetalSlug21: TMenuItem;
+    kof941: TMenuItem;
+    Viewpoint1: TMenuItem;
+    NeoGeoHW: TMenuItem;
     MSX1_1: TMenuItem;
     Tokio1: TMenuItem;
     SuperBobleBoble1: TMenuItem;
@@ -674,7 +682,7 @@ var
 implementation
 uses tap_tzx,spectrum_misc,acercade,lenslock,arcade_config,config,config_cpc,
      config_sms,config_gb,principal_misc,sound_engine,lenguaje,controls_engine,
-     loadrom,config_general,init_games;
+     loadrom,config_general,init_games,configgeneral_misc;
 
 { Tprincipal1 }
 procedure sync_all;
@@ -937,6 +945,7 @@ if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
   SDL_SetHint(libSDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,'1');
   sdl_res:=SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO);
   controls_start;
+  actualiza_teclas;
 end;
 if sdl_res<0 then begin
    MessageDlg('SDL2 Mixer library not found.'+chr(10)+chr(13)+'Please read the documentation!', mtError,[mbOk], 0);

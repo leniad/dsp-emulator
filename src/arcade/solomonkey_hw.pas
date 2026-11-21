@@ -294,9 +294,9 @@ z80_1.init_sound(solomon_sound_update);
 timers.init(z80_1.numero_cpu,3072000/(60*2),solomon_snd_irq,nil,true);
 if not(roms_load(@mem_snd,solomon_snd_rom)) then exit;
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,AY8910);
-ay8910_1:=ay8910_chip.create(1500000,AY8910);
-ay8910_2:=ay8910_chip.create(1500000,AY8910);
+ay8910_0:=ay8910_chip.create(1500000,YM2149);
+ay8910_1:=ay8910_chip.create(1500000,YM2149);
+ay8910_2:=ay8910_chip.create(1500000,YM2149);
 //convertir chars
 if not(roms_load(@memoria_temp,solomon_chars)) then exit;
 init_gfx(0,8,8,$800);

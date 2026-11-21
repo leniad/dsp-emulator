@@ -39,41 +39,94 @@ var
   mem_dec:array[0..$7fff] of byte;
   banco,sound_latch:byte;
   bflicker:boolean;
+  prioridad:array[0..255,0..255] of boolean;
 
 procedure update_video_shootout;
 var
   f,nchar,color:word;
   x,y,atrib:byte;
 
-procedure sprites(prioridad:byte);
+procedure put_gfx_sprite_shot(nchar:word;flipx:boolean;y_diff,sx,sy:word;atrib:boolean);
+var
+  x,y,x_real:byte;
+  temp,temp2:pword;
+  pos:pbyte;
+  dir_x:integer;
+begin
+nchar:=nchar mod 2048;
+pos:=gfx[1].datos;
+inc(pos,nchar*16*16);
+temp2:=punbuf;
+if flipx then begin
+  inc(temp2,15);
+  dir_x:=-1;
+end else begin
+  dir_x:=1;
+end;
+for y:=0 to 15 do begin
+  temp:=temp2;
+  if flipx then x_real:=15
+    else x_real:=0;
+  for x:=0 to 15 do begin
+    if not(atrib) then begin
+      if (pos^<>0) then temp^:=paleta[gfx[1].colores[pos^+64]]
+        else temp^:=paleta[MAX_COLORES];
+    end else begin
+      if ((pos^<>0) and prioridad[x_real+sx,y+sy+y_diff]) then temp^:=paleta[gfx[1].colores[pos^+64]]
+        else temp^:=paleta[MAX_COLORES];
+    end;
+    inc(temp,dir_x);
+    inc(x_real,dir_x);
+    inc(pos);
+  end;
+  putpixel_gfx_int(0,y+y_diff,16,PANT_SPRITES);
+end;
+end;
+
+procedure sprites_update;
 var
   f,atrib,x,y:byte;
   nchar:word;
 begin
-{ 76543210
-  xxx-----    bank
-  ---x----    vertical size
-  ----x---    priority
-  -----x--    horizontal flip
-  ------x-    flicker
-  -------x    enable}
 for f:=$7f downto 0 do begin
   atrib:=memoria[$19fd-(f*4)];
-  if (((atrib and 1)=0) or ((atrib and 8)<>prioridad)) then continue;
+  if ((atrib and 1)=0) then continue;
   if (bflicker or ((atrib and 2)=0)) then begin
       nchar:=memoria[$19ff-(f*4)]+((atrib shl 3) and $700);
       x:=240-memoria[$19fe-(f*4)];
       y:=240-memoria[$19fc-(f*4)];
       if (atrib and $10)<>0 then begin //tamaño doble
          nchar:=nchar and $7fe;
-         put_gfx_sprite_diff(nchar,64,(atrib and 4)<>0,false,1,0,0);
-         put_gfx_sprite_diff(nchar+1,64,(atrib and 4)<>0,false,1,0,16);
+         put_gfx_sprite_shot(nchar,(atrib and 4)<>0,0,x,y-16,(atrib and 8)<>0);
+         put_gfx_sprite_shot(nchar+1,(atrib and 4)<>0,16,x,y-16,(atrib and 8)<>0);
          actualiza_gfx_sprite_size(x,y-16,3,16,32);
       end else begin
-         put_gfx_sprite(nchar,64,(atrib and 4)<>0,false,1);
+         put_gfx_sprite_shot(nchar,(atrib and 4)<>0,0,x,y,(atrib and 8)<>0);
          actualiza_gfx_sprite(x,y,3,1);
       end;
   end;
+end;
+end;
+
+procedure put_gfx_shoot(pos_x,pos_y,nchar,color:word);
+var
+  x,y:byte;
+  temp:pword;
+  pos:pbyte;
+begin
+nchar:=nchar mod 2048;
+pos:=gfx[0].datos;
+inc(pos,nchar*8*8);
+for y:=0 to 7 do begin
+  temp:=punbuf;
+  for x:=0 to 7 do begin
+    if pos^<>0 then temp^:=paleta[gfx[0].colores[pos^+color]]
+      else temp^:=paleta[MAX_COLORES];
+    prioridad[pos_x+x,pos_y+y]:=(pos^=0);
+    inc(pos);
+    inc(temp);
+  end;
+  putpixel_gfx_int(pos_x,pos_y+y,8,1);
 end;
 end;
 
@@ -96,14 +149,19 @@ for f:=0 to $3ff do begin
     atrib:=memoria[$2400+f];
     color:=(atrib and $f0) shr 2;
     nchar:=memoria[$2000+f]+((atrib and 3) shl 8);
-    put_gfx_trans(x*8,y*8,nchar,color+128,1,0);
+    put_gfx_shoot(x*8,y*8,nchar,color+128);
     gfx[0].buffer[f]:=false;
   end;
 end;
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
-sprites(8);
 actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
-sprites(0);
+//La prioridad de los sprites funciona asi:
+//Si tiene en el atributo 0 tiene prioridad sobre los chars, pero si tiene 8 se
+//pinta por debajo de los chars. Pero tambien se pintan con prioridad entre ellos,
+//por lo que no se puede hacer en dos pasadas, creo una matriz con los pixeles si
+//son diferentes a 0, y si cuando pinto un sprite tiene el atributo a 8 comparo con
+//la matrix del fondo, si no es transparente, pinto el sprite
+sprites_update;
 actualiza_trozo_final(0,8,256,240,3);
 bflicker:=not(bflicker);
 end;

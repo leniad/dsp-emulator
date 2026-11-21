@@ -563,7 +563,8 @@ if spec_rom.datos_rom<>nil then begin
   freemem(spec_rom.datos_rom);
   spec_rom.datos_rom:=nil;
 end;
-change_caption(cadena);
+main_vars.nombre_caption:=cadena;
+change_caption;
 end;
 
 procedure spectrum_load_close;

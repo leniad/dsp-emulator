@@ -1,4 +1,4 @@
-type
+﻿type
     {$IFNDEF WIN64}
     size_t=cardinal;
     {$ELSE}
@@ -12,8 +12,8 @@ type
                end;
     libsdl_Mem=record
                   base:pbyte;
-	          here:pbyte;
-	          stop:pbyte;
+	                here:pbyte;
+	                stop:pbyte;
                end;
     libsdl_Unknown=record
                   data1:Pointer;
@@ -31,8 +31,8 @@ type
                end;
     libsdl_WindowsIOBuffer = record
                   data:Pointer;
-	          size_:size_t;
-	          left:size_t;
+	                size_:size_t;
+	                left:size_t;
                end;
     libsdl_WindowsIO=record
                   append:libsdl_Bool;
@@ -109,7 +109,7 @@ type
                   userdata:Pointer;
                   locked:LongInt;
                   lock_data:Pointer;
-                  clip_rect:libsdlp_rect;
+                  clip_rect:libsdl_rect;
                   map:Pointer;
                   refcount:LongInt;
                 end;

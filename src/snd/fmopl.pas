@@ -1,4 +1,4 @@
-unit fmopl;
+﻿unit fmopl;
 
 interface
 uses math,main_engine;
@@ -452,7 +452,7 @@ uses ym_3812;
 
 function sshr(num:integer;fac:byte):integer;
 begin
-  if num<0 then sshr:=-(abs(num) shr fac)
+  if num<0 then sshr:=integer(-(((-Int64(num))+((Int64(1) shl fac)-1)) shr fac))
     else sshr:=num shr fac;
 end;
 
@@ -728,8 +728,12 @@ begin
 	CH:=OPL.P_CH[slot_v shr 1];
 	SLOT:=CH.SLOT[slot_v and 1];
 	ksl:=v shr 6; // 0 / 1.5 / 3.0 / 6.0 dB/OCT */
-  if ksl<>0 then SLOT.ksl:=3-ksl
-    else SLOT.ksl:=31;
+  case ksl of
+    0:SLOT.ksl:=31;
+    1:SLOT.ksl:=1;
+    2:SLOT.ksl:=2;
+    3:SLOT.ksl:=0;
+  end;
 	SLOT.TL:= (v and $3f) shl (ENV_BITS-1-7); // 7 bits TL (bit 6 = always 0) */
 
 	SLOT.TLL:= SLOT.TL + (CH.ksl_base shr SLOT.ksl);
@@ -825,8 +829,7 @@ begin
     end;
   end;
   // reload timer */
-  if num=0 then ym3812_0.timer_handler(c,OPL.TimerBase*OPL.T[c])
-     else ym3812_1.timer_handler(c,OPL.TimerBase*OPL.T[c]);
+  ym3812_set_timer(num,c,OPL.TimerBase*OPL.T[c]);
   //ym3812_timer_handler(num,c,OPL.TimerBase*OPL.T[c]);
 end;
 
@@ -864,8 +867,7 @@ begin
                   if st2<>0 then period:=(OPL.TimerBase*OPL.T[1])
                     else period:=0;
                   OPL.st[1]:=st2;
-                  if num=0 then ym3812_0.timer_handler(1,period)
-                     else ym3812_1.timer_handler(1,period);
+                  ym3812_set_timer(num,1,period);
                   //ym3812_timer_handler(num,1,period);
               end;
               // timer 1
@@ -873,8 +875,7 @@ begin
                   if st1<>0 then period:=(OPL.TimerBase*OPL.T[0])
                     else period:=0;
                   OPL.st[0]:=st1;
-                  if num=0 then ym3812_0.timer_handler(0,period)
-                     else ym3812_1.timer_handler(0,period);
+                  ym3812_set_timer(num,0,period);
                   //ym3812_timer_handler(num,0,period);
               end;
             end;
@@ -997,7 +998,7 @@ begin
         if ((v shr 1)and 7)<>0 then CH.SLOT[SLOT1].FB:=((v shr 1) and 7) + 7
           else CH.SLOT[SLOT1].FB:=0;
 		    CH.SLOT[SLOT1].CON:= v and 1;
-        if CH.SLOT[SLOT1].CON<>0 then CH.SLOT[SLOT1].connect1:=@output
+        if CH.SLOT[SLOT1].CON<>0 then CH.SLOT[SLOT1].connect1:=@OPL.output
           else CH.SLOT[SLOT1].connect1:=@OPL.phase_modulation;
         end;
    $e0:begin // waveform select */

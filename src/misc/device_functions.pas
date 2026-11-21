@@ -11,8 +11,10 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      mb88xx,hu6280,tms32010,hd6309,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
      deco_common,deco_16ic,sm510,slapstic,upd7810,upd1771,blitter_williams,
-     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526_old,z80ctc,seibu_sound,
-     namcoio_56xx_58xx,gb_sound,eepromser,z80pio,galaxian_stars,controls_engine;
+     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc,seibu_sound,
+     namcoio_56xx_58xx,gb_sound,eepromser,z80pio,galaxian_stars,ym_2610,ym_2612,
+     controls_engine,neogeo_video,sega_315_5313,atari_riot,pcengine_video,
+     huc6280_audio;
 
 procedure close_all_devices;
 begin
@@ -194,6 +196,14 @@ if ym2203_1<>nil then begin
   ym2203_1.free;
   ym2203_1:=nil;
 end;
+if ym2610_0<>nil then begin
+  ym2610_0.free;
+  ym2610_0:=nil;
+end;
+if ym2612_0<>nil then begin
+  ym2612_0.free;
+  ym2612_0:=nil;
+end;
 if vlm5030_0<>nil then begin
   vlm5030_0.free;
   vlm5030_0:=nil;
@@ -302,6 +312,26 @@ if k051316_0<>nil then begin
   k051316_0:=nil;
 end;
 //misc
+if pcevideo_0<>nil then begin
+  pcevideo_0.free;
+  pcevideo_0:=nil;
+end;
+if huc6280_psg_0<>nil then begin
+  huc6280_psg_0.free;
+  huc6280_psg_0:=nil;
+end;
+if vdp_5313_0<>nil then begin
+  vdp_5313_0.free;
+  vdp_5313_0:=nil;
+end;
+if riot_0<>nil then begin
+  riot_0.free;
+  riot_0:=nil;
+end;
+if nvideo_0<>nil then begin
+  nvideo_0.free;
+  nvideo_0:=nil;
+end;
 if slapstic_0<>nil then begin
   slapstic_0.free;
   slapstic_0:=nil;
@@ -413,6 +443,10 @@ end;
 if eepromser_0<>nil then begin
   eepromser_0.free;
   eepromser_0:=nil;
+end;
+if x24c01_0<>nil then begin
+  x24c01_0.free;
+  x24c01_0:=nil;
 end;
 end;
 

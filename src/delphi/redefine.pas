@@ -124,7 +124,7 @@ var
   redefine1: Tredefine1;
 
 implementation
-uses config_general,principal;
+uses redefine_main,principal;
 {$R *.dfm}
 
 procedure Tredefine1.Button10Click(Sender: TObject);

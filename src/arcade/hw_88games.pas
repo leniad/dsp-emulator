@@ -79,7 +79,8 @@ end;
 
 procedure update_video_hw88games;
 begin
-k052109_0.draw_tiles;
+if priority then k052109_0.draw_tiles(0)
+  else k052109_0.draw_tiles(2);
 k051960_0.update_sprites;
 if priority then begin
   k052109_0.draw_layer(0,4);
@@ -87,10 +88,10 @@ if priority then begin
   k052109_0.draw_layer(2,4);
   k052109_0.draw_layer(1,4);
   k051960_0.draw_sprites(0,-1);
-  //k051316_0.draw(4);
+  k051316_0.draw(4,96,16,320,224,0,16);
 end else begin
   k052109_0.draw_layer(2,4);
-  //k051316_0.draw(4);
+  k051316_0.draw(4,96,16,320,224,0,16);
   k051960_0.draw_sprites(0,-1);
   k052109_0.draw_layer(1,4);
   k051960_0.draw_sprites(1,-1);
@@ -186,7 +187,7 @@ end;
 begin
 case direccion of
     0..$fff,$8000..$ffff:; //ROM
-    $1000..$1fff:if pal_ram then if buffer_paleta[direccion and $fff]<>valor then begin
+    $1000..$1fff:if buffer_paleta[direccion and $fff]<>valor then begin
                                     buffer_paleta[direccion and $fff]:=valor;
                                     cambiar_color((direccion and $fff) shr 1);
                                  end;
@@ -282,7 +283,10 @@ begin
  marcade.in0:=$f;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
- rom_nbank:=0;
+ sound_latch:=0;
+ speech_chip:=0;
+ zoomreadroms:=false;
+ hw88games_bank(0);
 end;
 
 procedure cerrar_hw88games;
@@ -303,7 +307,6 @@ begin
 llamadas_maquina.close:=cerrar_hw88games;
 llamadas_maquina.reset:=reset_hw88games;
 llamadas_maquina.bucle_general:=hw88games_principal;
-llamadas_maquina.fps_max:=60;
 llamadas_maquina.scanlines:=256;
 iniciar_hw88games:=false;
 //Pantallas para el K052109

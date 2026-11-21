@@ -1,4 +1,4 @@
-unit k053246_k053247_k055673;
+﻿unit k053246_k053247_k055673;
 
 interface
 uses main_engine,gfx_engine;
@@ -24,8 +24,9 @@ type
           private
               kx46_regs:array[0..7] of byte;
 	            kx47_regs:array[0..31] of word;
-              objcha_line,sprite_count:byte;
+              objcha_line:byte;
               rom:pbyte;
+              sprite_count:word;
               rom_size,rom_mask,sprite_mask:dword;
               k053247_cb:t_k053247_cb;
               pant,dx,dy:byte;
@@ -117,6 +118,26 @@ var
   sx,sy:integer;
   fx,fy:boolean;
   tempcode,x,y:integer;
+procedure draw_piece(piece_flip_y:boolean);
+begin
+  if shadow<>0 then begin
+    if nozoom then begin
+      put_gfx_sprite_alpha(tempcode,color shl 4,fx,piece_flip_y,1);
+      actualiza_gfx_sprite_alpha(sx and $3ff,sy and $3ff,self.pant,1);
+    end else begin
+      put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,piece_flip_y,1,zoomx,zoomy);
+      actualiza_gfx_sprite_zoom_alpha(sx and $3ff,sy and $3ff,self.pant,1,zoomx,zoomy);
+    end;
+  end else begin
+    if nozoom then begin
+      put_gfx_sprite(tempcode,color shl 4,fx,piece_flip_y,1);
+      actualiza_gfx_sprite(sx and $3ff,sy and $3ff,self.pant,1);
+    end else begin
+      put_gfx_sprite_zoom(tempcode,color shl 4,fx,piece_flip_y,1,zoomx,zoomy);
+      actualiza_gfx_sprite_zoom(sx and $3ff,sy and $3ff,self.pant,1,zoomx,zoomy);
+    end;
+  end;
+end;
 begin
 		for y:=0 to (height-1) do begin
       sy:=oy+(round(zoomy*y*16));
@@ -153,39 +174,24 @@ begin
 					  else tempcode:=tempcode+(yoffset[(y+ya) and 7]);
 					fy:=flipy;
 				end;
-        if (shadow shr 10)<>0 then begin
-          if not(nozoom) then begin
-            put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);
-            actualiza_gfx_sprite_zoom_alpha(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
-          end else begin
-            put_gfx_sprite_alpha(tempcode,color shl 4,fx,fy,1);
-            actualiza_gfx_sprite_alpha(sx and $3ff,sy and $3ff,4,1);
-          end;
-        end else begin
-          if not(nozoom) then begin
-            put_gfx_sprite_zoom(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);
-            actualiza_gfx_sprite_zoom(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
-          end else begin
-            put_gfx_sprite(tempcode,color shl 4,fx,fy,1);
-            actualiza_gfx_sprite(sx and $3ff,sy and $3ff,4,1);
-          end;
-        end;
-        if (mirrory and (height=1)) then begin  // Simpsons shadows
-					 if not(nozoom) then begin
-              put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,not(fy),1,zoomx,zoomy);
-              actualiza_gfx_sprite_zoom_alpha(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
-           end else begin
-              put_gfx_sprite_alpha(tempcode,color shl 4,fx,not(fy),1);
-              actualiza_gfx_sprite_alpha(sx and $3ff,sy and $3ff,4,1);
-           end;
-        end;
+        draw_piece(fy);
+        if (mirrory and (height=1)) then draw_piece(not fy);
 			end; // end of X loop
 		end; // end of Y loop
 end;
+
+function k053247_zoom_fixed(valor:word):integer;
+var
+  escala:integer;
+begin
+  escala:=valor and $3ff;
+  if escala=0 then k053247_zoom_fixed:=$800000
+    else k053247_zoom_fixed:=($400000+(escala shr 1)) div escala;
+end;
+
 procedure k053246_chip.k053247_draw_single_sprite_gxcore(code:dword;offs:word;color,shadow:word);
 var
-		xa,ya,ox,oy:integer;
-    scalex,scaley:byte;
+		xa,ya,ox,oy,scalex,scaley,zoomx_fixed,zoomy_fixed:integer;
 		wrapsize,xwraplim,ywraplim,screenwidth,objset1,temp,temp4,flipscreenx,flipscreeny:integer;
     k053247_opset,offx,offy,width,height:integer;
     zoomx,zoomy:single;
@@ -206,17 +212,19 @@ begin
 		// mask off the upper 6 bits of coordinate and zoom registers
 		oy:=self.ram[offs+2] and $3ff;
 		ox:=self.ram[offs+3] and $3ff;
-    scaley:=self.ram[offs+4];
-    if (scaley<>0) then zoomy:=$40/scaley
-      else zoomy:=0;
-  	if ((temp4 and $4000)=0) then begin
-      scalex:=self.ram[offs+5];
-      if (scalex<>0) then zoomx:=$40/scalex
-        else zoomx:=0;
-		end else begin
-      zoomx:=zoomy;
+    scaley:=self.ram[offs+4] and $3ff;
+    zoomy_fixed:=k053247_zoom_fixed(scaley);
+    // Bit $4000: utilizar la escala vertical tambien para X.
+    if (temp4 and $4000)=0 then begin
+      scalex:=self.ram[offs+5] and $3ff;
+      zoomx_fixed:=k053247_zoom_fixed(scalex);
+    end else begin
       scalex:=scaley;
+      zoomx_fixed:=zoomy_fixed;
     end;
+    // Adaptacion a las funciones actuales, que reciben Single.
+    zoomx:=zoomx_fixed/65536;
+    zoomy:=zoomy_fixed/65536;
 		nozoom:=(scalex=$40) and (scaley=$40);
 		flipx:=(temp4 and $1000)<>0;
 		flipy:=(temp4 and $2000)<>0;
@@ -268,9 +276,11 @@ begin
   	//color:=color and $ffff; // strip attribute flags
 		self.k053247_draw_yxloop_gx(height,width,ox+53-self.dx,oy-6-self.dy,code,color,shadow,xa,ya,zoomx,zoomy,nozoom,mirrorx,mirrory,flipx,flipy);
 end;
+
 procedure k053246_chip.k053247_update_sprites;
 var
-  count,f:byte;
+  f:byte;
+  count:word;
 begin
 count:=0;
 if (self.z_rejection=-1) then begin
@@ -288,6 +298,7 @@ end else begin
 end;
 self.sprite_count:=count;
 end;
+
 procedure k053246_chip.k053247_draw_sprites(prio:byte);
 var
   zcode:integer;
@@ -300,7 +311,7 @@ begin
 		for y:=0 to (self.sprite_count-1) do begin
 			f:=sorted_list[y];
 			zcode:=self.ram[f] and $ff;
-			for x:=y+1 to self.sprite_count do begin
+			for x:=y+1 to (self.sprite_count-1) do begin
 				temp:=sorted_list[x];
 				code:=self.ram[temp] and $ff;
 				if (zcode<=code) then begin
@@ -316,7 +327,7 @@ begin
 		for y:=0 to (self.sprite_count-1) do begin
 			f:=sorted_list[y];
 			zcode:=self.ram[f] and $ff;
-			for x:=y+1 to self.sprite_count do begin
+			for x:=y+1 to (self.sprite_count-1) do begin
 				temp:=sorted_list[x];
 				code:=self.ram[temp] and $ff;
 				if (zcode>=code) then begin
@@ -332,7 +343,7 @@ begin
 		w:=sorted_list[f];
 		code:=self.ram[w+1] and self.sprite_mask;
     color:=self.ram[w+6];
-    shadow:=color;
+    shadow:=color and $0c00;
 		primask:=0;
     self.k053247_cb(code,color,primask);
     if primask<>prio then continue;

@@ -3,7 +3,7 @@ unit gyruss_hw;
 interface
 uses rom_engine;
 
-function gyruss_iniciar:boolean;
+function iniciar_gyruss:boolean;
 
 const
     gyruss_rom:array[0..2] of tipo_roms=(
@@ -298,7 +298,7 @@ marcade.in1:=$ff;
 marcade.in2:=$ff;
 end;
 
-function gyruss_iniciar:boolean;
+function iniciar_gyruss:boolean;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -314,7 +314,7 @@ const
   resistances_rg:array[0..2] of integer=(1000,470,220);
   resistances_b:array[0..1] of integer=(470,220);
 begin
-gyruss_iniciar:=false;
+iniciar_gyruss:=false;
 llamadas_maquina.bucle_general:=gyruss_principal;
 llamadas_maquina.reset:=gyruss_reset;
 llamadas_maquina.fps_max:=60.606060606060606060;
@@ -397,7 +397,7 @@ init_dips(1,gyruss_dip_a,$ff);
 init_dips(2,gyruss_dip_b,$3b);
 init_dips(3,gyruss_dip_c,$fe);
 //Final
-gyruss_iniciar:=true;
+iniciar_gyruss:=true;
 end;
 
 end.

@@ -1,4 +1,4 @@
-unit rom_engine;
+﻿unit rom_engine;
 
 interface
 uses main_engine,sysutils,dialogs;
@@ -21,7 +21,7 @@ function roms_load32b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load32b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load32dw(sitio:pdword;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load64b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
-function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms;warning:boolean=true;parent:boolean=false;nombre:string=''):boolean;
 function roms_load64b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 //Rom Export
 procedure export_roms;
@@ -299,14 +299,15 @@ end;
 roms_load64b:=true;
 end;
 
-function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms;warning:boolean=true;parent:boolean=false;nombre:string=''):boolean;
 var
   v1,v2:byte;
   ptemp,ptemp2:pbyte;
   roms_size,f,h:dword;
   nombre_zip,dir:string;
 begin
-nombre_zip:=rom_zip_name;
+if parent then nombre_zip:=nombre
+  else nombre_zip:=rom_zip_name;
 roms_load_swap_word:=false;
 roms_size:=length(ctipo_roms);
 for f:=0 to (roms_size-1) do begin
@@ -315,7 +316,7 @@ for f:=0 to (roms_size-1) do begin
     inc(ptemp,ctipo_roms[f].p);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
     if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
+        if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
     ptemp2:=ptemp;
     for h:=0 to (ctipo_roms[f].l div 2)-1 do begin
       v1:=ptemp2^;inc(ptemp2);

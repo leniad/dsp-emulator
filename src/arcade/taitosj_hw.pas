@@ -3,7 +3,7 @@ unit taitosj_hw;
 interface
 uses rom_engine;
 
-function taitosj_iniciar:boolean;
+function iniciar_taitosj:boolean;
 
 const
         //Elevator Action
@@ -597,14 +597,14 @@ mcu_zready:=false;
 mcu_busreq:=false;
 end;
 
-function taitosj_iniciar:boolean;
+function iniciar_taitosj:boolean;
 const
   resistances:array[0..2] of integer=(1000,470,270);
 var
   memoria_temp:array[0..$8fff] of byte;
   i,j,mask,data:byte;
 begin
-taitosj_iniciar:=false;
+iniciar_taitosj:=false;
 case main_vars.tipo_maquina of
   185:llamadas_maquina.bucle_general:=taitosj_mcu_principal;
   189:llamadas_maquina.bucle_general:=taitosj_nomcu_principal;
@@ -723,7 +723,7 @@ compute_resistor_weights(0,255,-1.0,
 			3,@resistances[0],@gweights[0],0,0,
 			3,@resistances[0],@bweights[0],0,0);
 //final
-taitosj_iniciar:=true;
+iniciar_taitosj:=true;
 end;
 
 end.

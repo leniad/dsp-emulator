@@ -196,6 +196,49 @@ var
    tape_sound_channel:byte;
    key_timer,key_pos:byte;
    mod_address:boolean;
+   cpc_video_touched:array[0..PANTALLA_ALTO-1] of boolean;
+   cpc_video_scanline:array[0..PANTALLA_LARGO_CPC-1] of word;
+   cpc_video_scanline_y:word;
+   cpc_video_scanline_valid:boolean;
+
+procedure cpc_video_start_line;
+var x:integer;
+begin
+  cpc_video_scanline_y:=cpc_line;
+  for x:=0 to PANTALLA_LARGO_CPC-1 do
+    cpc_video_scanline[x]:=paleta[cpc_ga.pal[$10]];
+  cpc_video_scanline_valid:=true;
+end;
+
+procedure cpc_video_commit_line;
+begin
+  if cpc_video_scanline_valid and (cpc_video_scanline_y<PANTALLA_ALTO) then begin
+    putpixel(0,cpc_video_scanline_y,PANTALLA_LARGO_CPC,@cpc_video_scanline[0],1);
+    cpc_video_touched[cpc_video_scanline_y]:=true;
+  end;
+end;
+
+procedure cpc_video_begin_update;
+begin
+  FillChar(cpc_video_touched,SizeOf(cpc_video_touched),0);
+end;
+
+procedure cpc_video_clear_unvisited;
+var y:integer;
+begin
+  // Presentation only: do not change CRTC clocks, syncs or frame boundaries.
+  for y:=0 to PANTALLA_ALTO-1 do
+    if not cpc_video_touched[y] and
+       not(cpc_video_scanline_valid and (y=cpc_video_scanline_y)) then
+      single_line(0,y,paleta[cpc_ga.pal[$10]],PANTALLA_LARGO_CPC,1);
+end;
+
+function cpc_video_address(ma:word;ra,half:byte):word;
+begin
+  cpc_video_address:=((ma and $3ff) shl 1) or
+                     ((word(ra) and 7) shl 11) or
+                     ((ma and $3000) shl 2) or (half and 1);
+end;
 
 procedure amstrad_cpc_paleta;
 const
@@ -247,7 +290,8 @@ begin
 if event.arcade then begin
   if keyboard[KEYBOARD_F5] then begin
     clear_disk(0);
-    change_caption('');
+    main_vars.nombre_caption:='';
+    change_caption;
   end;
   if keyboard[KEYBOARD_F1] then begin
       if cinta_tzx.cargada then begin
@@ -361,9 +405,11 @@ end;
 procedure cpc_main;
 begin
 while EmuStatus=EsRunning do begin
+  cpc_video_begin_update;
   z80_0.run(frame_main);
   frame_main:=frame_main+z80_0.tframes-z80_0.contador;
   eventos_cpc;
+  cpc_video_clear_unvisited;
   actualiza_trozo(0,0,PANTALLA_LARGO_CPC,PANTALLA_ALTO,1,0,0,PANTALLA_LARGO_CPC,PANTALLA_ALTO,PANT_TEMP);
   video_sync;
 end;
@@ -372,20 +418,38 @@ end;
 //Main CPU
 function cpc_getbyte(direccion:word):byte;
 begin
-case direccion of
-  0..$3fff:if (cpc_dandanator.enabled and cpc_dandanator.zone0_ena and (cpc_dandanator.zone0_seg=0)) then begin
-              if cpc_dandanator.enable_follow then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.follow_rom,direccion]
-                else cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom,direccion];
-           end else if cpc_ga.rom_low then cpc_getbyte:=cpc_rom[16].data[direccion]
-                        else cpc_getbyte:=cpc_mem[cpc_ga.marco[0],direccion];
-  $4000..$7fff:if (cpc_dandanator.enabled and cpc_dandanator.zone1_ena and (cpc_dandanator.zone1_seg=0)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone1_rom,direccion and $3fff]
-                  else cpc_getbyte:=cpc_mem[cpc_ga.marco[1],direccion and $3fff];
-  $8000..$bfff:if (cpc_dandanator.enabled and cpc_dandanator.zone0_ena and (cpc_dandanator.zone0_seg=1)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom,direccion and $3fff]
-                else cpc_getbyte:=cpc_mem[cpc_ga.marco[2],direccion and $3fff];
-  $c000..$ffff:if (cpc_dandanator.enabled and cpc_dandanator.zone1_ena and (cpc_dandanator.zone1_seg=1)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone1_rom,direccion and $3fff]
-                  else if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected].data[direccion and $3fff]
-                          else cpc_getbyte:=cpc_mem[cpc_ga.marco[3],direccion and $3fff];
-end;
+  if cpc_dandanator.enabled then begin
+    if cpc_dandanator.enable_follow then begin
+      // FollowROM substitutes the CPC ROM enables, not the normal zone map.
+      if (direccion<$4000) and cpc_ga.rom_low then begin
+        cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.follow_rom and $1f,direccion];
+        exit;
+      end;
+      if (direccion>=$c000) and cpc_ga.rom_high then begin
+        cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone1_rom and $1f,direccion and $3fff];
+        exit;
+      end;
+    end else begin
+      if cpc_dandanator.zone0_ena and
+         ((direccion shr 14)=word(cpc_dandanator.zone0_seg)*2) then begin
+        cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom and $1f,direccion and $3fff];
+        exit;
+      end;
+      if cpc_dandanator.zone1_ena and
+         ((direccion shr 14)=(word(cpc_dandanator.zone1_seg)*2+1)) then begin
+        cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone1_rom and $1f,direccion and $3fff];
+        exit;
+      end;
+    end;
+  end;
+  case direccion of
+    0..$3fff:if cpc_ga.rom_low then cpc_getbyte:=cpc_rom[16].data[direccion]
+      else cpc_getbyte:=cpc_mem[cpc_ga.marco[0],direccion];
+    $4000..$7fff:cpc_getbyte:=cpc_mem[cpc_ga.marco[1],direccion and $3fff];
+    $8000..$bfff:cpc_getbyte:=cpc_mem[cpc_ga.marco[2],direccion and $3fff];
+    $c000..$ffff:if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected].data[direccion and $3fff]
+      else cpc_getbyte:=cpc_mem[cpc_ga.marco[3],direccion and $3fff];
+  end;
 end;
 
 procedure cpc_putbyte(direccion:word;valor:byte);
@@ -459,22 +523,26 @@ const
 begin
   case (port and 3) of
     0:cpc_crt.reg:=val and $1f;
-    1:if (cpc_crt.regs[cpc_crt.reg]<>(val and masks[cpc_crt.reg])) then begin
+    1:begin
+        if cpc_crt.reg>15 then exit;
+        if (cpc_crt.regs[cpc_crt.reg]<>(val and masks[cpc_crt.reg])) then begin
           cpc_crt.regs[cpc_crt.reg]:=val and masks[cpc_crt.reg];
           case cpc_crt.reg of
             0:cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
             1:begin
-                if cpc_crt.regs[1]<50 then cpc_crt.pixel_visible:=cpc_crt.regs[1]*8
-                  else cpc_crt.pixel_visible:=49*8;
-                cpc_crt.borde:=(PANTALLA_LARGO_CPC-cpc_crt.pixel_visible) shr 1;
+                cpc_crt.pixel_visible:=word(cpc_crt.regs[1])*8;
+                if cpc_crt.pixel_visible<=PANTALLA_LARGO_CPC then
+                  cpc_crt.borde:=(PANTALLA_LARGO_CPC-cpc_crt.pixel_visible) shr 1
+                else cpc_crt.borde:=0;
               end;
             5:begin
                 cpc_crt.is_in_adjustment_period:=false;
                 cpc_crt.adj_count:=0;
               end;
-            9:mod_address:=true;
+            9:; // R9 does not schedule a memory reload on a GA mode change.
           end;
     end;
+      end;
     2,3:; //Sin uso
   end;
 end;
@@ -653,30 +721,15 @@ begin
   end else cpc_crt.adj_count:=(cpc_crt.adj_count+1) and $1f;
 end;
 begin
+  // Publish the completed line before preparing the next one.
+  cpc_video_commit_line;
   //Tengo que cambiar el video?
   if cpc_ga.change_video then begin
     cpc_ga.video_mode:=cpc_ga.nvideo;
     cpc_ga.change_video:=false;
-    //Si se ha cambiado la direccion de las lineas, hay que actualizarlo
-    if mod_address then begin
-      cpc_crt.line_address:=(cpc_crt.regs[12] shl 8) or cpc_crt.regs[13];
-      cpc_crt.state_refresh_address:=cpc_crt.line_address;
-      mod_address:=false;
-    end;
   end;
   cpc_line:=(cpc_line+1) mod PANTALLA_ALTO;
   cpc_crt.pant_x:=0;
-  cpc_crt.pant_addr:=((cpc_crt.line_address and $3ff) shl 1) or
-							((cpc_crt.state_row_address and 7) shl 11) or
-							((cpc_crt.line_address and $3000) shl 2);
-  if cpc_crt.next_line_is_visible then begin
-    cpc_crt.line_is_visible:=true;
-    cpc_crt.next_line_is_visible:=false;
-  end;
-  if cpc_crt.next_line_no_visible then begin
-    cpc_crt.line_is_visible:=false;
-    cpc_crt.next_line_no_visible:=false;
-  end;
   if cpc_crt.state_vsync then begin
       tempb:=cpc_crt.regs[3] shr 4;
       if tempb=0 then tempb:=16;
@@ -709,30 +762,42 @@ begin
       //cpc_crt.next_line_no_visible:=(cpc_crt.char_crt=cpc_crt.regs[6]);
       if cpc_crt.char_crt=cpc_crt.regs[6] then cpc_crt.next_line_no_visible:=true;
   end;
+  // Apply display-enable events to the row/raster just selected above.
+  // Delaying these events until the next EOL loses raster 0 at each restart.
+  if cpc_crt.next_line_is_visible then begin
+    cpc_crt.line_is_visible:=true;
+    cpc_crt.next_line_is_visible:=false;
+  end;
+  if cpc_crt.next_line_no_visible then begin
+    cpc_crt.line_is_visible:=false;
+    cpc_crt.next_line_no_visible:=false;
+  end;
   if (not(cpc_crt.was_vsync) and cpc_crt.state_vsync) then cpc_ga.lines_sync:=2;
   if (cpc_crt.was_vsync and not(cpc_crt.state_vsync)) then cpc_line:=0;
   cpc_crt.was_vsync:=cpc_crt.state_vsync;
-  single_line(0,cpc_line,paleta[cpc_ga.pal[$10]],PANTALLA_LARGO_CPC,1);
+  cpc_crt.pant_addr:=cpc_video_address(cpc_crt.line_address,cpc_crt.state_row_address,0);
+  cpc_video_start_line;
 end;
 procedure draw_pixels;
 var
  temp1,temp2,temp3,pal1,pal2:word;
  g,val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
+ x,k:integer;
  ptemp:pword;
 begin
 for g:=0 to 1 do begin //Ocho pixels por cada 4T
   ptemp:=punbuf;
-  if (cpc_crt.pant_x<cpc_crt.pixel_visible) then begin
-    //IMPORTANTE: La memoria de video SIEMPRE esta en los 64K mapeados... Por ejemplo Thunder Cats
+  if cpc_crt.character_counter<cpc_crt.regs[1] then begin
+    // Use the original CRTC MA counter, independently of visible pixel calls.
+    // CPU bank/ROM mapping does not change these physical video RAM reads.
+    cpc_crt.pant_addr:=cpc_video_address(cpc_crt.state_refresh_address,cpc_crt.state_row_address,g);
     val:=cpc_mem[cpc_crt.pant_addr shr 14,cpc_crt.pant_addr and $3fff];
-    //Con esto se hace el scroll por hardware...
-    if (cpc_crt.pant_addr and $7ff)=$7ff then cpc_crt.pant_addr:=cpc_crt.pant_addr and $f800
-      else cpc_crt.pant_addr:=cpc_crt.pant_addr+1;
     case cpc_ga.video_mode of
-      0:begin
+      0,3:begin
           // 1 5 3 7    0 4 2 6
           p1:=((val and 2) shl 2) or ((val and $20) shr 3) or ((val and 8) shr 2) or ((val and $80) shr 7);
           p2:=((val and 1) shl 3) or ((val and $10) shr 2) or ((val and 4) shr 1) or ((val and $40) shr 6);
+          if cpc_ga.video_mode=3 then begin p1:=p1 and 3;p2:=p2 and 3;end;
           ptemp^:=paleta[cpc_ga.pal[p1]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p1]];
@@ -769,35 +834,43 @@ for g:=0 to 1 do begin //Ocho pixels por cada 4T
           p8:=((val and 1) shr 0);
           pal1:=paleta[cpc_ga.pal[p1]];
           pal2:=paleta[cpc_ga.pal[p2]];
-          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp1:=((dword(pal1 and $f800)+dword(pal2 and $f800)) shr 1) and $f800;
           temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
           temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
           ptemp^:=temp1 or temp2 or temp3;
           inc(ptemp);
           pal1:=paleta[cpc_ga.pal[p3]];
           pal2:=paleta[cpc_ga.pal[p4]];
-          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp1:=((dword(pal1 and $f800)+dword(pal2 and $f800)) shr 1) and $f800;
           temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
           temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
           ptemp^:=temp1 or temp2 or temp3;
           inc(ptemp);
           pal1:=paleta[cpc_ga.pal[p5]];
           pal2:=paleta[cpc_ga.pal[p6]];
-          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp1:=((dword(pal1 and $f800)+dword(pal2 and $f800)) shr 1) and $f800;
           temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
           temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
           ptemp^:=temp1 or temp2 or temp3;
           inc(ptemp);
           pal1:=paleta[cpc_ga.pal[p7]];
           pal2:=paleta[cpc_ga.pal[p8]];
-          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp1:=((dword(pal1 and $f800)+dword(pal2 and $f800)) shr 1) and $f800;
           temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
           temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
           ptemp^:=temp1 or temp2 or temp3;
           //inc(ptemp);
       end;
     end;
-    putpixel(cpc_crt.borde+cpc_crt.pant_x,cpc_line,4,punbuf,1);
+    // Keep the original centred viewport; no new R2/R3 monitor phase model.
+    x:=(PANTALLA_LARGO_CPC-integer(cpc_crt.pixel_visible)) div 2+
+        integer(cpc_crt.character_counter)*8+integer(g)*4;
+    ptemp:=punbuf;
+    for k:=0 to 3 do begin
+      if (x+k>=0) and (x+k<PANTALLA_LARGO_CPC) then
+        cpc_video_scanline[x+k]:=ptemp^;
+      inc(ptemp);
+    end;
   end;
   cpc_crt.pant_x:=cpc_crt.pant_x+4;
 end;
@@ -826,6 +899,8 @@ begin
 //por lo que necesito compensar la diferencia de velocidad 3500/4000=0.875
 if (cinta_tzx.cargada and cinta_tzx.play_tape) then play_cinta_tzx(trunc(estados_t*0.875));
 //Clock a el video...
+if not cpc_video_scanline_valid or (cpc_video_scanline_y<>cpc_line) then
+  cpc_video_start_line;
 for f:=1 to (estados_t shr 2) do begin
   if ((cpc_crt.pant_x<cpc_crt.char_total) and cpc_crt.line_is_visible and not(cpc_crt.state_vsync) and not(cpc_crt.state_hsync)) then draw_pixels;
   if cpc_crt.state_hsync then begin
@@ -852,54 +927,58 @@ for f:=1 to (estados_t shr 2) do begin
 end;
 end;
 
+procedure cpc_dandanator_apply_config(value:byte;from_ret:boolean);
+begin
+  cpc_dandanator.zone0_seg:=(value shr 2) and 1;
+  cpc_dandanator.zone1_seg:=(value shr 3) and 1;
+  cpc_dandanator.zone0_ena:=(value and 1)=0;
+  cpc_dandanator.zone1_ena:=(value and 2)=0;
+  cpc_dandanator.halted:=(value and $20)<>0;
+  // Bit 4 only changes the FollowROM latch on a deferred action.
+  if from_ret then cpc_dandanator.enable_follow:=(value and $10)<>0;
+  cpc_dandanator.wait_ret:=false;
+end;
+
 procedure amstrad_m1_detect(opcode:byte);
 var
   z80:npreg_z80;
+  triggered:boolean;
 begin
-if (cpc_dandanator.halted or not(cpc_dandanator.enabled)) then exit;
-if (cpc_dandanator.wait_ret and (opcode=$c9)) then begin
-  cpc_dandanator.zone0_seg:=(cpc_dandanator.wait_data and 4) shr 2;
-  cpc_dandanator.zone1_seg:=(cpc_dandanator.wait_data and 8) shr 3;
-  cpc_dandanator.zone0_ena:=(cpc_dandanator.wait_data and 1)=0;
-  cpc_dandanator.zone1_ena:=(cpc_dandanator.wait_data and 2)=0;
-  cpc_dandanator.halted:=(cpc_dandanator.wait_data and $20)<>0;
-  cpc_dandanator.enable_follow:=(cpc_dandanator.wait_data and $10)<>0;
-  cpc_dandanator.wait_ret:=false;
-end;
-if cpc_dandanator.wait_ret then exit;
-if opcode=$fd then cpc_dandanator.fd_count:=cpc_dandanator.fd_count+1;
-if ((cpc_dandanator.fd_count=2) and (opcode<>$fd)) then begin
-      z80:=z80_0.get_internal_r;
-      case opcode of
-        $70:begin //reg B Zone0
-              cpc_dandanator.zone0_rom:=z80.bc.h and $1f;
-              cpc_dandanator.zone0_ena:=(z80.bc.h and $20)=0;
-            end;
-        $71:begin //reg C Zone1
-              cpc_dandanator.zone1_rom:=z80.bc.l and $1f;
-              cpc_dandanator.zone1_ena:=(z80.bc.l and $20)=0;
-            end;
-        $77:begin //reg A config
-                if (z80.a and $40)=0 then begin
-                    if (z80.a and $80)<>0 then begin
-                      cpc_dandanator.halted:=(z80.a and $20)<>0;
-                      cpc_dandanator.zone0_seg:=(z80.a and 4) shr 2;
-                      cpc_dandanator.zone1_seg:=(z80.a and 8) shr 3;
-                      cpc_dandanator.zone0_ena:=(z80.a and 1)=0;
-                      cpc_dandanator.zone1_ena:=(z80.a and 2)=0;
-                      cpc_dandanator.wait_ret:=false;
-                      cpc_dandanator.wait_data:=z80.a;
-                    end else begin
-                      cpc_dandanator.follow_rom:=28+((z80.a and $18) shr 3)
-                    end;
-                end else begin
-                    cpc_dandanator.wait_ret:=true;
-                    cpc_dandanator.wait_data:=(cpc_dandanator.wait_data and $c0) or z80.a;
-                end;
-            end;
+  if not cpc_dandanator.enabled or cpc_dandanator.halted then exit;
+  if opcode=$fd then begin
+    // Three or more consecutive FD fetches, with no byte-counter overflow.
+    if cpc_dandanator.fd_count<3 then inc(cpc_dandanator.fd_count);
+    exit;
+  end;
+  triggered:=cpc_dandanator.fd_count>=3;
+  cpc_dandanator.fd_count:=0;
+  if triggered and ((opcode=$70) or (opcode=$71) or (opcode=$77)) then begin
+    z80:=z80_0.get_internal_r;
+    // A new command supersedes the previous wait-for-RET transaction.
+    // This follows the v1.0 documentation's "no other command since" rule.
+    cpc_dandanator.wait_ret:=false;
+    case opcode of
+      $70:begin
+        cpc_dandanator.zone0_rom:=z80.bc.h and $1f;
+        cpc_dandanator.zone0_ena:=(z80.bc.h and $20)=0;
       end;
-end;
-if opcode<>$fd then cpc_dandanator.fd_count:=0;
+      $71:begin
+        cpc_dandanator.zone1_rom:=z80.bc.l and $1f;
+        cpc_dandanator.zone1_ena:=(z80.bc.l and $20)=0;
+      end;
+      $77:if (z80.a and $80)=0 then begin
+        cpc_dandanator.follow_rom:=28+((z80.a shr 3) and 3);
+        // USB and flash programming intentionally remain unimplemented.
+      end else begin
+        cpc_dandanator.wait_data:=z80.a;
+        if (z80.a and $40)<>0 then cpc_dandanator.wait_ret:=true
+        else cpc_dandanator_apply_config(z80.a,false);
+      end;
+    end;
+    exit;
+  end;
+  if cpc_dandanator.wait_ret and (opcode=$c9) then
+    cpc_dandanator_apply_config(cpc_dandanator.wait_data,true);
 end;
 
 procedure cpc_reset;
@@ -915,7 +994,7 @@ begin
   //Init GA
   cpc_ga.pen:=0;
   cpc_ga.video_mode:=0;
-  fillchar(cpc_ga.pal[0],16,0);
+  fillchar(cpc_ga.pal,SizeOf(cpc_ga.pal),0);
   cpc_ga.lines_count:=0;
   cpc_ga.lines_sync:=0;
   cpc_ga.rom_selected:=0;
@@ -934,7 +1013,7 @@ begin
   fillchar(cpc_ppi.keyb_val[0],$10,$ff);
   //Dandanator
   cpc_dandanator.fd_count:=0;
-  cpc_dandanator.zone0_ena:=false;
+  cpc_dandanator.zone0_ena:=cpc_dandanator.enabled;
   cpc_dandanator.zone0_seg:=0;
   cpc_dandanator.zone0_rom:=0;
   cpc_dandanator.zone1_ena:=false;
@@ -942,7 +1021,7 @@ begin
   cpc_dandanator.zone1_rom:=0;
   cpc_dandanator.halted:=false;
   cpc_dandanator.wait_ret:=false;
-  cpc_dandanator.follow_rom:=0;
+  cpc_dandanator.follow_rom:=28;
   cpc_dandanator.wait_data:=0;
   cpc_dandanator.enable_follow:=false;
   //CRT
@@ -964,25 +1043,28 @@ begin
   cpc_crt.state_refresh_address:=0;
   cpc_crt.line_address:=0;
   cpc_crt.pant_x:=0;
+  cpc_crt.pant_addr:=0;
+  cpc_crt.pixel_visible:=0;
+  cpc_crt.char_total:=8;
+  cpc_crt.borde:=0;
+  // Original sync/CRTC reset above is unchanged.
+  cpc_line:=0;
+  mod_address:=false;
+  cpc_video_scanline_valid:=false;
+  cpc_video_begin_update;
 end;
 
 function abrir_dandanator(datos:pbyte;file_size:integer):boolean;
-var
-  f:byte;
-  ptemp:pbyte;
 begin
   abrir_dandanator:=false;
-  if file_size>524288 then exit;
-  ptemp:=datos;
-  for f:=0 to ((file_size div 16384)-1) do begin
-    copymemory(@cpc_dandanator.rom[f,0],ptemp,$4000);
-    inc(ptemp,$4000);
-  end;
+  // Raw cartridge images contain complete 16 KB slots. Reject incomplete banks.
+  if (datos=nil) or (file_size<$4000) or
+     (file_size>SizeOf(cpc_dandanator.rom)) or ((file_size and $3fff)<>0) then exit;
+  FillChar(cpc_dandanator.rom,SizeOf(cpc_dandanator.rom),$ff);
+  CopyMemory(@cpc_dandanator.rom[0,0],datos,file_size);
   cpc_dandanator.enabled:=true;
-  abrir_dandanator:=true;
   cpc_reset;
-  //Importante el orden!
-  cpc_dandanator.zone0_ena:=true;
+  abrir_dandanator:=true;
 end;
 
 procedure key_press;
@@ -1001,7 +1083,7 @@ var
   datos:pbyte;
   longitud:integer;
   romfile,nombre_file,extension,cadena:string;
-  resultado,es_cinta:boolean;
+  resultado,es_cinta,dandanator_was_enabled:boolean;
 begin
   if not(OpenRom(romfile,SAMSTRADCPC)) then exit;
   getmem(datos,$3000000);
@@ -1013,6 +1095,7 @@ begin
   extension:=extension_fichero(nombre_file);
   resultado:=false;
   es_cinta:=true;
+  dandanator_was_enabled:=cpc_dandanator.enabled;
   cpc_dandanator.enabled:=false;
   if extension='CDT' then resultado:=abrir_cdt(datos,longitud);
   if extension='TZX' then resultado:=abrir_tzx(datos,longitud);
@@ -1020,6 +1103,7 @@ begin
   if extension='WAV' then resultado:=abrir_wav(datos,longitud,4000000);
   if extension='ROM' then begin
     resultado:=abrir_dandanator(datos,longitud);
+    if not resultado then cpc_dandanator.enabled:=dandanator_was_enabled;
     es_cinta:=false;
     if resultado then cadena:='ROM: '+nombre_file
       else MessageDlg('Error cargando ROM.'+chr(10)+chr(13)+'Error loading the ROM.', mtInformation,[mbOk], 0);
@@ -1028,6 +1112,7 @@ begin
       resultado:=abrir_sna_cpc(datos,longitud);
       es_cinta:=false;
       if resultado then begin
+        cpc_video_scanline_valid:=false;
         cadena:='Snap: '+nombre_file;
       end else MessageDlg('Error cargando snapshot.'+chr(10)+chr(13)+'Error loading the snapshot.', mtInformation,[mbOk], 0);
   end;
@@ -1045,7 +1130,8 @@ begin
   end;
   freemem(datos);
   directory.amstrad_tap:=ExtractFilePath(romfile);
-  change_caption(cadena);
+  main_vars.nombre_caption:=cadena;
+  change_caption;
 end;
 
 procedure amstrad_loaddisk;
@@ -1224,6 +1310,7 @@ loaddata_qsnapshot(@cpc_crt);
 loaddata_qsnapshot(@cpc_ga);
 loaddata_qsnapshot(@cpc_ppi);
 loaddata_qsnapshot(@cpc_dandanator);
+cpc_video_scanline_valid:=false;
 close_qsnapshot;
 end;
 
@@ -1300,3 +1387,4 @@ cinta_tzx.tape_stop:=cpc_stop_tape;
 end;
 
 end.
+

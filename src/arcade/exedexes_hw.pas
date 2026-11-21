@@ -89,7 +89,6 @@ if chon then begin //chars activos
   actualiza_trozo(0,0,256,256,3,0,0,256,256,4);
 end;
 actualiza_trozo_final(16,0,224,256,4);
-copymemory(@buffer_sprites,@memoria[$f000],$1000);
 end;
 
 procedure eventos_exedexes;
@@ -122,12 +121,12 @@ end;
 
 procedure exedexes_hw_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 261 do begin
     case f of
-      0:z80_0.change_irq_vector(HOLD_LINE,$cf);
+      109:z80_0.change_irq_vector(HOLD_LINE,$cf);
       240:begin
           z80_0.change_irq_vector(HOLD_LINE,$d7);
           update_video_exedexes;
@@ -166,6 +165,7 @@ case direccion of
             chon:=(valor and $80)<>0;
             if chon then fillchar(gfx[0].buffer,$400,1);
         end;
+  $c806:copymemory(@buffer_sprites,@memoria[$f000],$1000);
   $d000..$d7ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
@@ -232,9 +232,12 @@ begin
  marcade.in2:=$ff;
  scroll_x:=0;
  scroll_y:=0;
- sc2on:=true;
- sc1on:=true;
- objon:=true;
+ sc2on:=false;
+ sc1on:=false;
+ objon:=false;
+ chon:=false;
+ scroll_bg:=0;
+ sound_command:=0;
 end;
 
 function iniciar_exedexes_hw:boolean;
@@ -278,7 +281,7 @@ var
   f,pos:word;
   x,y,nchar:byte;
 begin
-for f:=0 to $1fff do begin
+for f:=0 to $3fff do begin
   x:=f div 128;
   y:=f mod 128;
   pos:=((y*16 and $f0) shr 4)+(x*16 and $f0)+(y*16 and $700)+((x*16 and $700) shl 3);
@@ -290,7 +293,8 @@ end;
 begin
 llamadas_maquina.bucle_general:=exedexes_hw_principal;
 llamadas_maquina.reset:=reset_exedexes_hw;
-llamadas_maquina.scanlines:=256;
+llamadas_maquina.scanlines:=262;
+llamadas_maquina.fps_max:=59.637404;
 iniciar_exedexes_hw:=false;
 iniciar_audio(false);
 screen_init(1,2048,2048);
@@ -299,7 +303,7 @@ screen_init(3,256,256,true);
 screen_init(4,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(exedexes_getbyte,exedexes_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(3000000);
@@ -309,7 +313,7 @@ z80_1.init_sound(exedexes_sound);
 AY8910_0:=ay8910_chip.create(1500000,AY8910);
 sn_76496_0:=sn76496_chip.Create(3000000);
 sn_76496_1:=sn76496_chip.Create(3000000);
-timers.init(z80_1.numero_cpu,3000000/(4*60),exedexes_snd_irq,nil,true);
+timers.init(z80_1.numero_cpu,3000000/238.55,exedexes_snd_irq,nil,true);
 //cargar roms
 if not(roms_load(@memoria,exedexes_rom)) then exit;
 //cargar ROMS sonido
@@ -322,7 +326,7 @@ convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //tiles 32x32
 if not(roms_load(@memoria_temp,exedexes_tiles1)) then exit;
 init_gfx(1,32,32,64);
-gfx_set_desc_data(2,0,256*8,0,4);
+gfx_set_desc_data(2,0,256*8,4,0);
 convert_gfx(1,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //tiles 16x16
 if not(roms_load(@memoria_temp,exedexes_tiles2)) then exit;

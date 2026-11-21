@@ -619,6 +619,16 @@ type
     Mars1: TMenuItem;
     DevilFish1: TMenuItem;
     DrMicro1: TMenuItem;
+    Atari2600: TMenuItem;
+    Atari5200: TMenuItem;
+    Atari7800: TMenuItem;
+    NeoGeo1: TMenuItem;
+    MetalSlug1: TMenuItem;
+    MetalSlug21: TMenuItem;
+    kof941: TMenuItem;
+    Viewpoint1: TMenuItem;
+    MetalSlugX1: TMenuItem;
+    PCEngine1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -654,6 +664,7 @@ var
   //Main Vars
   principal1:Tprincipal1;
   Child:TfrChild;
+  CursorDiana:HCURSOR;
   //Misc Vars
   tipo_new:word;
   estado_actual:TEmuStatus;
@@ -661,7 +672,7 @@ var
 implementation
 uses acercade,file_engine,lenslock,spectrum_misc,tap_tzx,arcade_config,config,
      config_cpc,config_sms,config_gb,principal_misc,sound_engine,lenguaje,
-     init_games,controls_engine,LoadRom,config_general,lib_sdl2;
+     init_games,controls_engine,LoadRom,config_general,lib_sdl2,configgeneral_misc;
 
 {$R *.dfm}
 
@@ -731,10 +742,13 @@ if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
     halt(0);
   end;
   controls_start;
+  actualiza_teclas;
 end;
 Child:=TfrChild.Create(application);
 child.Width:=1;
 child.Height:=1;
+CursorDiana:=CrearCursorDiana;
+Screen.Cursors[crDiana]:=CursorDiana;
 principal1.Caption:=principal1.Caption+DSP_VERSION;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;

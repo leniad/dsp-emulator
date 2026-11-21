@@ -59,7 +59,7 @@ procedure eventos_epos;
 begin
 if event.arcade then begin
   marcade.in0:=$ff;
-  marcade.in1:=$be;
+  marcade.in1:=$bc;
   //input
   if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe;
   if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd;
@@ -76,10 +76,10 @@ end;
 
 procedure epos_hw_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to 240 do begin
+  for f:=0 to 257 do begin
     if f=236 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_epos;
@@ -111,6 +111,7 @@ end;
 
 function epos_inbyte(puerto:word):byte;
 begin
+epos_inbyte:=$ff;
 case (puerto and $ff) of
   0:epos_inbyte:=marcade.dswa; //DSW
 	1:epos_inbyte:=marcade.in1; //SYSTEM
@@ -122,7 +123,10 @@ end;
 procedure epos_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
-	1:palette:=(valor shr 3) and 1;
+	1:if palette<>((valor shr 3) and 1) then begin
+      palette:=(valor shr 3) and 1;
+      fillchar(buffer,$8000,1);
+   end;
 	2:ay8910_0.write(valor);
 	6:ay8910_0.control(valor);
 end;
@@ -153,7 +157,8 @@ var
 begin
 llamadas_maquina.bucle_general:=epos_hw_principal;
 llamadas_maquina.reset:=reset_epos_hw;
-llamadas_maquina.scanlines:=241;
+llamadas_maquina.scanlines:=258;
+llamadas_maquina.fps_max:=60.5620155;
 iniciar_epos_hw:=false;
 iniciar_audio(false);
 screen_init(1,241,272);
@@ -164,7 +169,7 @@ z80_0.change_ram_calls(epos_getbyte,epos_putbyte);
 z80_0.change_io_calls(epos_inbyte,epos_outbyte);
 z80_0.init_sound(epos_sound_update);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(687500,AY8910);
+ay8910_0:=ay8910_chip.create(687500,AY8912);
 case main_vars.tipo_maquina of
   94:begin
       //cargar roms

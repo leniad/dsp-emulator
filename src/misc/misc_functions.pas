@@ -30,10 +30,14 @@ const
   SGANDW=21;
   SMSX_TAP=22;
   SMSX_ROM=23;
+  SATARI2600=24;
+  SATARI5200=25;
+  SATARI7800=26;
+  SPCENGINE=27;
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
-function calc_crc(p: pointer;byteCount:dword):dword;
+function calc_crc(p:pointer;byteCount:dword):dword;
 function mul_video:byte;
 //bit func
 function bit(data:dword;bitpos:byte):boolean;
@@ -46,7 +50,7 @@ function BITSWAP32(val:dword;B31,B30,B29,B28,B27,B26,B25,B24,B23,B22,B21,B20,B19
 function openrom(var name:string;system_type:byte):boolean;
 function saverom(var name:string;var index:byte;system_type:byte):boolean;
 //Load data
-function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte):boolean;
+function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte;max_lenght:integer=0):boolean;
 
 implementation
 uses principal,file_engine;
@@ -245,7 +249,7 @@ calc_crc:=crc;
 end;
 {$endif}
 
-function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte):boolean;
+function extract_data(romfile:string;data_des:pbyte;var longitud:integer;var file_name:string;system_type:byte;max_lenght:integer=0):boolean;
 var
   nombre_file,extension:string;
   datos:pbyte;
@@ -341,6 +345,34 @@ case system_type of
             ext[1]:='ROM';
             total_ext:=1;
         end;
+  SATARI2600:begin
+            ext[1]:='A26';
+            ext[2]:='BIN';
+            total_ext:=2;
+        end;
+  SATARI5200:begin
+            ext[1]:='A52';
+            ext[2]:='BIN';
+            ext[3]:='CAR';
+            total_ext:=3;
+        end;
+  SATARI7800:begin
+            ext[1]:='A78';
+            ext[2]:='BIN';
+            ext[3]:='CAR';
+            total_ext:=3;
+        end;
+  SGENESIS:begin
+            ext[1]:='BIN';
+            ext[2]:='MD';
+            ext[3]:='GEN';
+            total_ext:=3;
+        end;
+  SPCENGINE:begin
+            ext[1]:='PCE';
+            ext[2]:='BIN';
+            total_ext:=2;
+        end;
   else begin
           MessageDlg('Sistema sin definir!!!', mtInformation,[mbOk], 0);
           extract_data:=false;
@@ -385,10 +417,17 @@ if not(resultado) then begin
   nombre_file:='';
   exit;
 end;
+if max_lenght<>0 then
+  if longitud>max_lenght then begin
+      MessageDlg('Error cargando el fichero es más grande que el destino', mtInformation,[mbOk], 0);
+      extract_data:=false;
+      if datos<>nil then freemem(datos);
+      exit;
+  end;
 copymemory(data_des,datos,longitud);
+extract_data:=true;
 file_name:=nombre_file;
 if datos<>nil then freemem(datos);
-extract_data:=true;
 end;
 
 function openrom(var name:string;system_type:byte):boolean;
@@ -464,6 +503,26 @@ case system_type of
   SMSX_ROM:begin
          opendialog.InitialDir:=directory.msx_tap;
          Opendialog.Filter:='MSX ROM (*.rom;*.zip)|*.rom;*.zip';
+       end;
+  SATARI2600:begin
+         opendialog.InitialDir:=directory.atari2600;
+         Opendialog.Filter:='Atari 2600 Game (*.a26;*.bin;*.zip)|*.a26;*.bin;*.zip';
+       end;
+  SATARI5200:begin
+         opendialog.InitialDir:=directory.atari5200;
+         Opendialog.Filter:='Atari 5200 Game (*.a52;*.bin;*.car;*.zip)|*.a52;*.bin;*.car;*.zip';
+       end;
+  SATARI7800:begin
+         opendialog.InitialDir:=directory.atari7800;
+         Opendialog.Filter:='Atari 7800 Game (*.a78;*.bin;*.car;*.zip)|*.a78;*.bin;*.car;*.zip';
+       end;
+  SGENESIS:begin
+         opendialog.InitialDir:=directory.genesis;
+         Opendialog.Filter:='Genesis Games (*.bin;*.md;*.gen;*.zip)|*.bin;*.md;*.gen;*.zip';
+       end;
+  SPCENGINE:begin
+         opendialog.InitialDir:=directory.pcengine;
+         Opendialog.Filter:='PCE Games (*.pce;*.bin;*.zip)|*.pce;*.bin;*.zip';
        end;
 end;
 openrom:=opendialog.execute;

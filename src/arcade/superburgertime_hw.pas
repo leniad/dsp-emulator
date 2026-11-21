@@ -285,7 +285,7 @@ iniciar_video(320,240);
 //Main CPU
 m68000_0:=cpu_m68000.create(14000000);
 //Sound CPU
-deco16_snd_simple_init(32220000 div 8,32220000,nil);
+deco16_snd_simple_init(32220000 div 4,32220000,nil);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   161:begin //Superburger Time

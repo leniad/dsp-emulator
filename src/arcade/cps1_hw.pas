@@ -732,6 +732,7 @@ if event.arcade then begin
   marcade.in0:=$ffff;
   marcade.in1:=$ffff;
   marcade.in2:=$ffff;
+  marcade.in3:=$ffff;
   //P1
   if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fffe;
   if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fffd;
@@ -748,6 +749,15 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $efff;
   if arcade_input.but1[1] then marcade.in1:=marcade.in1 and $dfff;
   if arcade_input.but2[1] then marcade.in1:=marcade.in1 and $bfff;
+  //P3
+  if arcade_input.right[2] then marcade.in2:=marcade.in2 and $fffe;
+  if arcade_input.left[2] then marcade.in2:=marcade.in2 and $fffd;
+  if arcade_input.down[2] then marcade.in2:=marcade.in2 and $fffb;
+  if arcade_input.up[2] then marcade.in2:=marcade.in2 and $fff7;
+  if arcade_input.but0[2] then marcade.in2:=marcade.in2 and $ffef;
+  if arcade_input.but1[2] then marcade.in2:=marcade.in2 and $ffdf;
+  if arcade_input.coin[2] then marcade.in2:=marcade.in2 and $ffbf;
+  if arcade_input.start[2] then marcade.in2:=marcade.in2 and $ff7f;
   //Extra buttons
   if arcade_input.but3[0] then marcade.in2:=marcade.in2 and $fffe;
   if arcade_input.but4[0] then marcade.in2:=marcade.in2 and $fffd;
@@ -815,7 +825,8 @@ case dir of
   $1a:res:=(marcade.dswa shl 8)+$ff; //DSWA
   $1c:res:=(marcade.dswb shl 8)+$ff; //DSWB
   $1e:res:=(marcade.dswc shl 8)+$ff; //DSWC
-  $176:res:=marcade.in2; //Extra buttons
+  $30:; //Coin counter
+  $176:res:=marcade.in2; //Extra buttons / P3
 end;
 if (dir=cps1_cps_b[cps_b].testaddr) then res:=cps1_cps_b[cps_b].testval;
 if (dir=cps1_cps_b[cps_b].mull) then res:=(cps1_mula*cps1_mulb) and $ffff;
@@ -1253,7 +1264,7 @@ case main_vars.tipo_maquina of
            z80_0.change_ram_calls(cps1_qz80_getbyte,cps1_qz80_putbyte);
            z80_0.init_sound(qsound_sound_update);
            //Sound Chip
-           qsound_init($200000);
+           if not (qsound_init($200000)) then exit;
            timers.init(z80_0.numero_cpu,8000000/250,cps1_qsnd_int,nil,true);
       end;
 end;

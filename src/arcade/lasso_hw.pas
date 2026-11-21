@@ -440,10 +440,10 @@ gfx_set_desc_data(2,0,16*16,$1000*8,$3000*8);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+iniciar_lasso:=false;
 llamadas_maquina.reset:=reset_lasso;
 llamadas_maquina.fps_max:=57;
 llamadas_maquina.scanlines:=256;
-iniciar_lasso:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=390 then main_screen.rot90_screen:=true;
 screen_init(1,256,256);

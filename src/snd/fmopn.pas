@@ -1,4 +1,4 @@
-unit fmopn;
+﻿unit fmopn;
 
 interface
 uses math,main_engine;
@@ -80,6 +80,7 @@ end;
   pfm_slot=^fm_slot;
 //FMCHAN
   fm_chan=record
+    am_enable:byte; // Per-operator AM enable; unused on YM2203.
     SLOT:array[0..3] of pFM_Slot;
 	  ALGO:byte;		// algorithm
 	  FB:byte;			// feedback shift
@@ -135,6 +136,7 @@ const
   TYPE_ADPCM=$20;    // two ADPCM unit
 
   TYPE_YM2203=TYPE_SSG;
+  TYPE_YM2610=TYPE_SSG or TYPE_LFOPAN or TYPE_6CH or TYPE_ADPCM;
   // slot number
   SLOT1=0;
   SLOT2=2;
@@ -311,6 +313,65 @@ const
 {18 } 0,0, 0,0, 0,0, 0,0 // infinity rates for attack and decay(s)
 );
 
+const
+  opn_pm_bits:array[0..55,0..7]of byte=(
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,1,1,1,1),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,1,1,1,1),
+(0,0,1,1,2,2,2,3),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,1),
+(0,0,0,0,1,1,1,1),
+(0,0,1,1,2,2,2,3),
+(0,0,2,3,4,4,5,6),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,0,0,1,1),
+(0,0,0,0,1,1,1,1),
+(0,0,0,1,1,1,1,2),
+(0,0,1,1,2,2,2,3),
+(0,0,2,3,4,4,5,6),
+(0,0,4,6,8,8,10,12),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,1,1,1,1),
+(0,0,0,1,1,1,2,2),
+(0,0,1,1,2,2,3,3),
+(0,0,1,2,2,2,3,4),
+(0,0,2,3,4,4,5,6),
+(0,0,4,6,8,8,10,12),
+(0,0,8,12,16,16,20,24),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,2,2,2,2),
+(0,0,0,2,2,2,4,4),
+(0,0,2,2,4,4,6,6),
+(0,0,2,4,4,4,6,8),
+(0,0,4,6,8,8,10,12),
+(0,0,8,12,16,16,20,24),
+(0,0,16,24,32,32,40,48),
+(0,0,0,0,0,0,0,0),
+(0,0,0,0,4,4,4,4),
+(0,0,0,4,4,4,8,8),
+(0,0,4,4,8,8,12,12),
+(0,0,4,8,8,8,12,16),
+(0,0,8,12,16,16,20,24),
+(0,0,16,24,32,32,40,48),
+(0,0,32,48,64,64,80,96));
+
 var
   eg_rate_select:array[0..(32+64+32)-1] of byte;
   sl_table:array[0..15] of dword;
@@ -323,6 +384,7 @@ var
 procedure OPNWriteMode(OPN:pfm_opn;r,v:integer);
 procedure OPNWriteReg(OPN:pfm_opn;r,v:integer);
 procedure OPNPrescaler_w(OPN:pfm_opn;addr,pre_divider:integer);
+procedure OPNSetPres(OPN:pfm_opn;pres,Timer_prescaler,SSGpres:integer);
 procedure advance_eg_channel(OPN:pfm_opn;CH:pfm_chan);
 function opn_init(chan:byte):pfm_opn;
 procedure opn_close(OPN:pfm_opn);
@@ -404,6 +466,33 @@ begin
 end;
 
 procedure CHAN_Calc(OPN:pfm_opn;CH:pfm_chan);
+procedure opn_phase_pm(OPN:pfm_opn;slot:pfm_slot;pms:integer;block_fnum:dword);
+var
+  bitno,step,sign,offset,blk,fn,kc,fc:integer;
+  dt:pinteger;
+begin
+  step:=LFO_PM and 15;
+  sign:=1;
+  if (LFO_PM and 16)<>0 then sign:=-1;
+  if step>=8 then step:=15-step;
+  offset:=0;
+  for bitno:=0 to 6 do
+    if (block_fnum and (dword(1)shl(bitno+4)))<>0 then inc(offset,opn_pm_bits[bitno*8+(pms div 32),step]);
+  if offset=0 then begin
+    slot.phase:=slot.phase+slot.incr;
+    exit;
+  end;
+  fn:=integer(block_fnum)*2+offset*sign;
+  blk:=(fn shr 12)and 7;
+  fn:=fn and $fff;
+  kc:=(blk shl 2) or opn_fktable[fn shr 8];
+  dt:=slot.DT;
+  inc(dt,kc);
+  fc:=integer(OPN.fn_table[fn]shr(7-blk))+dt^;
+  if fc<0 then inc(fc,OPN.fn_max);
+  slot.phase:=slot.phase+dword((fc*slot.mul)shr 1);
+end;
+
 var
   eg_out:integer;
   out_:integer;
@@ -414,6 +503,7 @@ begin
     OPN.mem:=0;
 	  CH.mem_connect^:=CH.mem_value;	// restore delayed sample (MEM) value to m2 or c2
 	  eg_out:=CH.SLOT[SLOT1].vol_out;
+    if(CH.am_enable and(1 shl SLOT1))<>0 then Inc(eg_out,LFO_AM shr CH.ams);
     out_:=CH.op1_out[0] + CH.op1_out[1];
     CH.op1_out[0]:=CH.op1_out[1];
 		if (CH.connect1=nil) then begin
@@ -431,21 +521,34 @@ begin
 			CH.op1_out[1]:=op_calc1(CH.SLOT[SLOT1].phase, eg_out, (out_ shl CH.FB));
     end;
 	  eg_out:=CH.SLOT[SLOT3].vol_out;
+    if(CH.am_enable and(1 shl SLOT3))<>0 then Inc(eg_out,LFO_AM shr CH.ams);
 	  if (eg_out<ENV_QUIET)	then	// SLOT 3
 		  CH.connect3^:=CH.connect3^+op_calc(CH.SLOT[SLOT3].phase, eg_out, OPN.m2);
 
 	  eg_out:=CH.SLOT[SLOT2].vol_out;
+    if(CH.am_enable and(1 shl SLOT2))<>0 then Inc(eg_out,LFO_AM shr CH.ams);
 	  if( eg_out < ENV_QUIET ) then	// SLOT 2
 		  CH.connect2^:=CH.connect2^+op_calc(CH.SLOT[SLOT2].phase, eg_out, OPN.c1);
 
 	  eg_out:=CH.SLOT[SLOT4].vol_out;
+    if(CH.am_enable and(1 shl SLOT4))<>0 then Inc(eg_out,LFO_AM shr CH.ams);
 	  if (eg_out<ENV_QUIET)	then	// SLOT 4
 		  CH.connect4^:=CH.connect4^+ op_calc(CH.SLOT[SLOT4].phase, eg_out, OPN.c2);
 
 	  // store current MEM
 	  CH.mem_value:=OPN.mem;
     if (CH.pms<>0) then begin
-      halt(0);
+      if(CH=OPN.P_CH[2])and((OPN.ST.mode and $c0)<>0)then begin
+        opn_phase_pm(OPN,CH.SLOT[SLOT1],CH.pms,OPN.SL3.block_fnum[1]);
+        opn_phase_pm(OPN,CH.SLOT[SLOT2],CH.pms,OPN.SL3.block_fnum[2]);
+        opn_phase_pm(OPN,CH.SLOT[SLOT3],CH.pms,OPN.SL3.block_fnum[0]);
+        opn_phase_pm(OPN,CH.SLOT[SLOT4],CH.pms,CH.block_fnum);
+      end else begin
+        opn_phase_pm(OPN,CH.SLOT[0],CH.pms,CH.block_fnum);
+        opn_phase_pm(OPN,CH.SLOT[1],CH.pms,CH.block_fnum);
+        opn_phase_pm(OPN,CH.SLOT[2],CH.pms,CH.block_fnum);
+        opn_phase_pm(OPN,CH.SLOT[3],CH.pms,CH.block_fnum);
+      end;
     end else begin
 	  // update phase counters AFTER output calculations
 		  CH.SLOT[SLOT1].phase:=CH.SLOT[SLOT1].phase+CH.SLOT[SLOT1].Incr;
@@ -605,7 +708,7 @@ procedure FM_STATUS_SET(ST:pfm_state;flag:integer);
 begin
 		// set status flag
   ST.status:=ST.status or flag;
-  if (ST.irq=0) {and ((ST.status and ST.irqmask)<>0)} then begin
+  if (ST.irq=0) and ((ST.status and ST.irqmask)<>0) then begin
 			ST.irq:=1;
 			// callback user interrupt handler (IRQ is OFF to ON)
       if (addr(ST.IRQ_Handler)<>nil) then ST.IRQ_Handler(ASSERT_LINE);
@@ -617,7 +720,7 @@ procedure FM_STATUS_RESET(ST:pfm_state;flag:integer);
 begin
 		// reset status flag
 		ST.status:=ST.status and not(flag);
-	 	if (ST.irq<>0) {and ((ST.status and ST.irqmask)=0) }then begin
+	 	if (ST.irq<>0) and ((ST.status and ST.irqmask)=0) then begin
 			ST.irq:=0;
 			// callback user interrupt handler (IRQ is ON to OFF)
       if (addr(ST.IRQ_Handler)<>nil) then ST.IRQ_Handler(CLEAR_LINE);
@@ -724,7 +827,7 @@ end;
 procedure init_timetables(ST:pfm_state;dttable:pbyte);
 var
 	i,d:integer;
-	rate,divisor:single;
+	rate,divisor:double;
   tempb:byte;
 begin
 	// DeTune table
@@ -753,16 +856,23 @@ begin
   for f:=0 to 14 do sl_table[f]:=round(f*(4.0/ENV_STEP));
   sl_table[15]:=round(31*(4.0/ENV_STEP));
   getmem(opn,sizeof(fm_opn));
+  FillChar(opn^,SizeOf(fm_opn),0);
   //state
   getmem(opn.ST,sizeof(fm_state));
+  FillChar(opn.ST^,SizeOf(fm_state),0);
   opn.ST.TAC:=0;
   opn.ST.TBC:=0;
   opn.ST.SSG_Clock_change:=nil;
   getmem(opn.SL3,sizeof(fm_3slot));
+  FillChar(opn.SL3^,SizeOf(fm_3slot),0);
   for f:=0 to (chan-1) do begin
     getmem(OPN.P_CH[f],sizeof(fm_chan));
+  FillChar(OPN.P_CH[f]^,SizeOf(fm_chan),0);
     opn.P_CH[f].pms:=0;
-    for g:=0 to 3 do getmem(OPN.P_CH[f].SLOT[g],sizeof(fm_slot));
+    for g:=0 to 3 do begin
+      getmem(OPN.P_CH[f].SLOT[g],sizeof(fm_slot));
+      FillChar(OPN.P_CH[f].SLOT[g]^,SizeOf(fm_slot),0);
+    end;
   end;
   for f:=chan to 7 do OPN.P_CH[f]:=nil;
   opn_init:=opn;
@@ -798,18 +908,17 @@ var
 begin
 		case r of
 		  $21:;	// Test
-			  //#if FM_LFO_SUPPORT
-		  $22:;	// LFO FREQ (YM2608/YM2612)
-			  //if( (type & TYPE_LFOPAN) != 0 )
-			  //{
-			  //	LFOIncr = (v&0x08) ? LFO_FREQ[v&7] : 0;
-			  //	cur_chip = NULL;
-			  //}
-			//#endif
+      $22:if(OPN.type_ and TYPE_LFOPAN)<>0 then begin
+        if(v and 8)<>0 then OPN.lfo_inc:=OPN.lfo_freq[v and 7]
+          else begin OPN.lfo_inc:=0;OPN.lfo_cnt:=0;end;
+      end;
 		  $24:opn.ST.TA:=(opn.ST.TA and $03) or (v shl 2);	// timer A High 8
 		  $25:opn.ST.TA:=(opn.ST.TA and $3fc) or (v and 3);	// timer A Low 2
       $26:opn.ST.TB:= v;// timer B
-		  $27:set_timers(OPN.ST,v);	// mode , timer control
+		  $27:begin
+            if ((OPN.ST.mode xor v) and $c0)<>0 then OPN.P_CH[2].SLOT[SLOT1].Incr:=-1;
+            set_timers(OPN.ST,v);
+          end;	// mode , timer control
       $28:begin	// key on / off
 			      c:=v and $03;
 			      if (c=3) then exit;
@@ -901,7 +1010,7 @@ end;
 procedure OPNSetPres(OPN:pfm_opn;pres,Timer_prescaler,SSGpres:integer);
 var
 	i:integer;
-  tmp:single;
+  tmp:double;
 begin
 	// frequency base
   if OPN.ST.rate<>0 then OPN.ST.freqbase:=(OPN.ST.clock/OPN.ST.rate)/pres
@@ -975,13 +1084,10 @@ begin
 		  $60:begin	//     DR
 			      // bit7 = AMS_ON ENABLE(YM2612)
 			      set_dr(SLOT,v);
-			      //#if FM_LFO_SUPPORT
-			      //if( type & TYPE_LFOPAN)
-			      //{
-			      //	SLOT.amon = v>>7;
-			      //	SLOT.ams = CH.ams * SLOT.amon;
-			      //}
-			      //#endif
+          if(OPN.type_ and TYPE_LFOPAN)<>0 then begin
+            if(v and $80)<>0 then CH.am_enable:=CH.am_enable or(1 shl OPN_SLOT(r))
+              else CH.am_enable:=CH.am_enable and(byte(not(1 shl OPN_SLOT(r))));
+          end;
           end;
 		    $70:set_sr(SLOT,v);	// SR
 		    $80:set_sl_rr(SLOT,v);	// SL, RR
@@ -1011,7 +1117,7 @@ begin
 				              OPN.SL3.kcode[c]:=(blk shl 2) or opn_fktable[fn shr 7];
                       // phase increment counter
 				              OPN.SL3.fc[c]:=OPN.fn_table[fn*2] shr (7-blk);
-                      OPN.SL3.block_fnum[c]:= fn;
+                      OPN.SL3.block_fnum[c]:=(blk shl 11) or fn;
                       OPN.P_CH[2].SLOT[SLOT1].Incr:=-1;
                    end;
                   end;
@@ -1028,17 +1134,15 @@ begin
 				            setup_connection(OPN,CH,c);
 			            end;
 			          1:begin		// 0xb4-0xb6 : L , R , AMS , PMS (YM2612/YM2608)
-				            {if( OPN->type & TYPE_LFOPAN) then begin
-				              /* b0-2 PMS
-				              CH->pms = (v & 7) * 32; /* CH->pms = PM depth * 32 (index in lfo_pm_table)
-
-                      /* b4-5 AMS
-				              CH->ams = lfo_ams_depth_shift[(v>>4) & 0x03];
-
-				              /* PAN :  b7 = L, b6 = R
-				              OPN->pan[ c*2   ] = (v & 0x80) ? ~0 : 0;
-				              OPN->pan[ c*2+1 ] = (v & 0x40) ? ~0 : 0;
-                    end;}
+                    if(OPN.type_ and TYPE_LFOPAN)<>0 then begin
+                      CH.pms:=(v and 7)*32;
+                      case (v shr 4)and 3 of
+                        0:CH.ams:=8;1:CH.ams:=3;2:CH.ams:=1;3:CH.ams:=0;
+                      end;
+                      OPN.pan[c*2]:=0;OPN.pan[c*2+1]:=0;
+                      if(v and $80)<>0 then OPN.pan[c*2]:=$ffffffff;
+                      if(v and $40)<>0 then OPN.pan[c*2+1]:=$ffffffff;
+                    end;
 				          end;
               end;
         end;
@@ -1088,6 +1192,7 @@ begin
 				if ((OPN.eg_cnt and ((1 shl SLOT.eg_sh_d2r)-1))=0) then begin
 					SLOT.volume:=SLOT.volume+(4*eg_inc[SLOT.eg_sel_d2r + ((OPN.eg_cnt shr SLOT.eg_sh_d2r) and 7)]);
 					if ( SLOT.volume >= ENV_QUIET ) then begin
+              SLOT.volume:=MAX_ATT_INDEX;
 						if (SLOT.ssg and $01)<>0 then begin	// bit 0 = hold
 							if (SLOT.ssgn and 1)<>0	then begin// have we swapped once ???
 								// yes, so do nothing, just hold current level
@@ -1101,7 +1206,7 @@ begin
 							//SLOT->phase = 0;
 
 							// phase -> Attack
-							SLOT.phase:= EG_ATT;
+							SLOT.phase:=0;
               SLOT.volume:=511;
               SLOT.state:=EG_ATT;
 							swap_flag:=(SLOT.ssg and $02); // bit 1 = alternate
@@ -1142,7 +1247,7 @@ end;
 
 procedure FMInitTable;
 var
-		o,m:single;
+		o,m:double;
 		i,x,n:integer;
 begin
 	  for x:=0 to (TL_RES_LEN-1) do begin

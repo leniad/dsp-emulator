@@ -75,7 +75,7 @@ if event.arcade then begin
   if arcade_input.coin[1] then marcade.in0:=marcade.in0 or $20;
   //p2
   if arcade_input.but0[0] then marcade.in1:=marcade.in1 and $fe;
-  if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $fd;
+  if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $fb;
 end;
 end;
 
@@ -208,11 +208,11 @@ taito_68705_0:=taito_68705p.create(3000000,ARKANOID);
 taito_68705_0.arkanoid_call:=arkanoid_read_prot;
 if not(roms_load(taito_68705_0.get_rom_addr,arkanoid_mcu)) then exit;
 //Sound Chip
-ay8910_0:=ay8910_chip.create(3000000,AY8910);
+ay8910_0:=ay8910_chip.create(1500000,YM2149); //Pin 26 low divide el reloj por 2
 ay8910_0.change_io_calls(arkanoid_porta_r,arkanoid_portb_r,nil,nil);
 //analog
 init_analog(z80_0.numero_cpu,z80_0.clock);
-analog_0(30,15,$7f,$ff,0,false,true,true);
+analog_0(100,5,$7f,$ff,0,false,true,true);
 //Cargar tiles
 if not(roms_load(@memoria_temp,arkanoid_tiles)) then exit;
 init_gfx(0,8,8,$1000);

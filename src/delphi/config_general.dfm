@@ -43,7 +43,7 @@ object MConfig: TMConfig
     Top = 8
     Width = 495
     Height = 439
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     TabOrder = 2
     TabStop = False
     object TabSheet1: TTabSheet
@@ -557,473 +557,151 @@ object MConfig: TMConfig
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ImageIndex = 2
-      object GroupBox1: TGroupBox
-        Left = 5
-        Top = 13
-        Width = 225
-        Height = 395
+      object Label6: TLabel
+        Left = 24
+        Top = 24
+        Width = 38
+        Height = 13
         Caption = 'Player 1'
-        TabOrder = 0
-        object Label6: TLabel
-          Left = 3
-          Top = 251
-          Width = 25
-          Height = 13
-          Caption = 'But 0'
-        end
-        object Label7: TLabel
-          Left = 3
-          Top = 278
-          Width = 25
-          Height = 13
-          Caption = 'But 1'
-        end
-        object Label8: TLabel
-          Left = 3
-          Top = 305
-          Width = 25
-          Height = 13
-          Caption = 'But 2'
-        end
-        object Label15: TLabel
-          Left = 111
-          Top = 251
-          Width = 25
-          Height = 13
-          Caption = 'But 3'
-        end
-        object Label16: TLabel
-          Left = 111
-          Top = 278
-          Width = 25
-          Height = 13
-          Caption = 'But 4'
-        end
-        object Label17: TLabel
-          Left = 111
-          Top = 305
-          Width = 25
-          Height = 13
-          Caption = 'But 5'
-        end
-        object Label13: TLabel
-          Left = 35
-          Top = 337
-          Width = 75
-          Height = 13
-          Caption = ' COIN/SELECT'
-        end
-        object Label14: TLabel
-          Left = 149
-          Top = 337
-          Width = 54
-          Height = 13
-          Caption = 'P1/START'
-        end
-        object BitBtn10: TBitBtn
-          Left = 33
-          Top = 270
-          Width = 74
-          Height = 30
-          TabOrder = 7
-          TabStop = False
-          OnClick = BitBtn10Click
-        end
-        object RadioButton1: TRadioButton
-          Left = 11
-          Top = 15
-          Width = 70
-          Height = 17
-          Caption = 'Keyboard'
-          TabOrder = 0
-          OnClick = RadioButton1Click
-        end
-        object RadioButton2: TRadioButton
-          Left = 11
-          Top = 35
-          Width = 70
-          Height = 17
-          Caption = 'Joystick'
-          Enabled = False
-          TabOrder = 1
-          OnClick = RadioButton2Click
-        end
-        object BitBtn2: TBitBtn
-          Left = 138
-          Top = 170
-          Width = 41
-          Height = 33
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -8
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-          TabOrder = 2
-          TabStop = False
-          OnClick = BitBtn2Click
-        end
-        object BitBtn3: TBitBtn
-          Left = 91
-          Top = 204
-          Width = 41
-          Height = 33
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -8
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-          TabOrder = 3
-          TabStop = False
-          OnClick = BitBtn3Click
-        end
-        object BitBtn1: TBitBtn
-          Left = 46
-          Top = 170
-          Width = 41
-          Height = 33
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -8
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-          TabOrder = 4
-          TabStop = False
-          OnClick = BitBtn1Click
-        end
-        object BitBtn4: TBitBtn
-          Left = 91
-          Top = 134
-          Width = 41
-          Height = 33
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -8
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-          TabOrder = 5
-          TabStop = False
-          OnClick = BitBtn4Click
-        end
-        object GroupBox7: TGroupBox
-          Left = 26
-          Top = 55
-          Width = 177
-          Height = 66
-          Color = clBtnFace
-          ParentBackground = False
-          ParentColor = False
-          TabOrder = 12
-          object Button7: TButton
-            Left = 53
-            Top = 34
-            Width = 64
-            Height = 24
-            Caption = 'Get Center'
-            TabOrder = 0
-            TabStop = False
-            OnClick = Button7Click
-          end
-          object ComboBox1: TComboBox
-            Left = 8
-            Top = 7
-            Width = 159
-            Height = 21
-            Enabled = False
-            TabOrder = 1
-            TabStop = False
-            Text = 'ComboBox1'
-            OnChange = ComboBox1Change
-          end
-        end
-        object BitBtn16: TBitBtn
-          Left = 139
-          Top = 300
-          Width = 74
-          Height = 30
-          TabOrder = 10
-          TabStop = False
-          OnClick = BitBtn16Click
-        end
-        object BitBtn15: TBitBtn
-          Left = 139
-          Top = 270
-          Width = 74
-          Height = 30
-          TabOrder = 9
-          TabStop = False
-          OnClick = BitBtn15Click
-        end
-        object BitBtn17: TBitBtn
-          Left = 139
-          Top = 240
-          Width = 74
-          Height = 30
-          TabOrder = 11
-          TabStop = False
-          OnClick = BitBtn17Click
-        end
-        object BitBtn11: TBitBtn
-          Left = 33
-          Top = 300
-          Width = 74
-          Height = 30
-          TabOrder = 8
-          TabStop = False
-          OnClick = BitBtn11Click
-        end
-        object BitBtn9: TBitBtn
-          Left = 33
-          Top = 240
-          Width = 74
-          Height = 30
-          TabOrder = 6
-          TabStop = False
-          OnClick = BitBtn9Click
-        end
-        object BitBtn23: TBitBtn
-          Left = 33
-          Top = 356
-          Width = 75
-          Height = 30
-          TabOrder = 13
-          TabStop = False
-          OnClick = BitBtn23Click
-        end
-        object BitBtn24: TBitBtn
-          Left = 138
-          Top = 356
-          Width = 75
-          Height = 30
-          TabOrder = 14
-          TabStop = False
-          OnClick = BitBtn24Click
-        end
+        Color = clBtnFace
+        ParentColor = False
       end
-      object GroupBox2: TGroupBox
-        Left = 236
-        Top = 13
-        Width = 238
-        Height = 395
+      object Label7: TLabel
+        Left = 25
+        Top = 59
+        Width = 38
+        Height = 13
         Caption = 'Player 2'
+        Color = clBtnFace
+        ParentColor = False
+      end
+      object Label8: TLabel
+        Left = 25
+        Top = 98
+        Width = 38
+        Height = 13
+        Caption = 'Player 3'
+        Color = clBtnFace
+        ParentColor = False
+      end
+      object Label9: TLabel
+        Left = 26
+        Top = 138
+        Width = 38
+        Height = 13
+        Caption = 'Player 4'
+        Color = clBtnFace
+        Enabled = False
+        ParentColor = False
+      end
+      object ComboBox1: TComboBox
+        Left = 87
+        Top = 21
+        Width = 226
+        Height = 21
+        TabOrder = 0
+      end
+      object ComboBox2: TComboBox
+        Left = 89
+        Top = 56
+        Width = 225
+        Height = 21
         TabOrder = 1
-        object Label9: TLabel
-          Left = 7
-          Top = 251
-          Width = 25
-          Height = 13
-          Caption = 'But 0'
-        end
-        object Label10: TLabel
-          Left = 7
-          Top = 278
-          Width = 25
-          Height = 13
-          Caption = 'But 1'
-        end
-        object Label11: TLabel
-          Left = 7
-          Top = 305
-          Width = 25
-          Height = 13
-          Caption = 'But 2'
-        end
-        object Label18: TLabel
-          Left = 120
-          Top = 251
-          Width = 25
-          Height = 13
-          Caption = 'But 3'
-        end
-        object Label19: TLabel
-          Left = 120
-          Top = 278
-          Width = 25
-          Height = 13
-          Caption = 'But 4'
-        end
-        object Label20: TLabel
-          Left = 120
-          Top = 305
-          Width = 25
-          Height = 13
-          Caption = 'But 5'
-        end
-        object Label25: TLabel
-          Left = 38
-          Top = 337
-          Width = 72
-          Height = 13
-          Caption = 'COIN/SELECT'
-        end
-        object Label26: TLabel
-          Left = 159
-          Top = 337
-          Width = 54
-          Height = 13
-          Caption = 'P2/START'
-        end
-        object RadioButton3: TRadioButton
-          Left = 16
-          Top = 15
-          Width = 81
-          Height = 17
-          Caption = 'Keyboard'
-          TabOrder = 0
-          OnClick = RadioButton3Click
-        end
-        object RadioButton4: TRadioButton
-          Left = 16
-          Top = 35
-          Width = 89
-          Height = 17
-          Caption = 'Joystick'
-          Enabled = False
-          TabOrder = 1
-          OnClick = RadioButton4Click
-        end
-        object BitBtn5: TBitBtn
-          Left = 108
-          Top = 134
-          Width = 41
-          Height = 33
-          TabOrder = 2
-          TabStop = False
-          OnClick = BitBtn5Click
-        end
-        object BitBtn6: TBitBtn
-          Left = 61
-          Top = 170
-          Width = 41
-          Height = 33
-          TabOrder = 3
-          TabStop = False
-          OnClick = BitBtn6Click
-        end
-        object BitBtn7: TBitBtn
-          Left = 155
-          Top = 170
-          Width = 40
-          Height = 33
-          TabOrder = 4
-          TabStop = False
-          OnClick = BitBtn7Click
-        end
-        object BitBtn8: TBitBtn
-          Left = 108
-          Top = 204
-          Width = 41
-          Height = 33
-          TabOrder = 5
-          TabStop = False
-          OnClick = BitBtn8Click
-        end
-        object BitBtn12: TBitBtn
-          Left = 37
-          Top = 242
-          Width = 75
-          Height = 30
-          TabOrder = 6
-          TabStop = False
-          OnClick = BitBtn12Click
-        end
-        object BitBtn13: TBitBtn
-          Left = 37
-          Top = 270
-          Width = 75
-          Height = 30
-          TabOrder = 7
-          TabStop = False
-          OnClick = BitBtn13Click
-        end
-        object BitBtn14: TBitBtn
-          Left = 37
-          Top = 300
-          Width = 75
-          Height = 30
-          TabOrder = 8
-          TabStop = False
-          OnClick = BitBtn14Click
-        end
-        object BitBtn18: TBitBtn
-          Left = 148
-          Top = 240
-          Width = 75
-          Height = 30
-          TabOrder = 9
-          TabStop = False
-          OnClick = BitBtn18Click
-        end
-        object BitBtn19: TBitBtn
-          Left = 148
-          Top = 270
-          Width = 75
-          Height = 30
-          TabOrder = 10
-          TabStop = False
-          OnClick = BitBtn19Click
-        end
-        object BitBtn20: TBitBtn
-          Left = 148
-          Top = 300
-          Width = 75
-          Height = 30
-          TabOrder = 11
-          TabStop = False
-          OnClick = BitBtn20Click
-        end
-        object GroupBox10: TGroupBox
-          Left = 35
-          Top = 55
-          Width = 177
-          Height = 66
-          Color = clBtnFace
-          ParentBackground = False
-          ParentColor = False
-          TabOrder = 12
-          object ComboBox2: TComboBox
-            Left = 9
-            Top = 7
-            Width = 159
-            Height = 21
-            Enabled = False
-            TabOrder = 0
-            TabStop = False
-            Text = 'ComboBox2'
-            OnChange = ComboBox2Change
-          end
-          object Button8: TButton
-            Left = 53
-            Top = 34
-            Width = 64
-            Height = 24
-            Caption = 'Get Center'
-            TabOrder = 1
-            TabStop = False
-            OnClick = Button8Click
-          end
-        end
-        object BitBtn25: TBitBtn
-          Left = 37
-          Top = 356
-          Width = 75
-          Height = 30
-          TabOrder = 13
-          TabStop = False
-          OnClick = BitBtn25Click
-        end
-        object BitBtn26: TBitBtn
-          Left = 148
-          Top = 356
-          Width = 75
-          Height = 30
-          TabOrder = 14
-          TabStop = False
-          OnClick = BitBtn26Click
-        end
+      end
+      object ComboBox3: TComboBox
+        Left = 88
+        Top = 95
+        Width = 226
+        Height = 21
+        TabOrder = 2
+      end
+      object Button3: TButton
+        Left = 16
+        Top = 224
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Keyboard 1'
+        TabOrder = 3
+        WordWrap = True
+        OnClick = Button3Click
+      end
+      object Button4: TButton
+        Left = 128
+        Top = 224
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Keyboard 2'
+        TabOrder = 4
+        WordWrap = True
+        OnClick = Button4Click
+      end
+      object Button5: TButton
+        Left = 240
+        Top = 224
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Keyboard 3'
+        TabOrder = 5
+        WordWrap = True
+        OnClick = Button5Click
+      end
+      object Button6: TButton
+        Left = 352
+        Top = 224
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Keyboard 4'
+        TabOrder = 6
+        WordWrap = True
+        OnClick = Button6Click
+      end
+      object Button7: TButton
+        Left = 16
+        Top = 288
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Joystick 1'
+        TabOrder = 7
+        WordWrap = True
+        OnClick = Button7Click
+      end
+      object Button8: TButton
+        Left = 128
+        Top = 288
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Joystick 2'
+        TabOrder = 8
+        WordWrap = True
+        OnClick = Button8Click
+      end
+      object Button9: TButton
+        Left = 240
+        Top = 288
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Joystick 3'
+        TabOrder = 9
+        WordWrap = True
+        OnClick = Button9Click
+      end
+      object Button10: TButton
+        Left = 352
+        Top = 288
+        Width = 97
+        Height = 79
+        Caption = 'Redefine'#13#10'Joystick 4'
+        TabOrder = 10
+        WordWrap = True
+        OnClick = Button10Click
+      end
+      object ComboBox4: TComboBox
+        Left = 89
+        Top = 135
+        Width = 226
+        Height = 21
+        Enabled = False
+        TabOrder = 11
       end
     end
     object ROM: TTabSheet

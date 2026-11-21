@@ -1,4 +1,4 @@
-unit hw_1942;
+﻿unit hw_1942;
 
 interface
 uses rom_engine;
@@ -48,21 +48,58 @@ var
 procedure update_video_hw1942;
 procedure draw_sprites;
 var
-  f,color,nchar,x,y:word;
-  i,h,atrib:byte;
+  line,h,obj_index,code,color,sx,sy,mode,blocks,part,source_x:integer;
+  left_edge,right_edge,dest_y,source_y,height,v,v2c,lvbeta,vbeta:integer;
+  attr:byte;
+  objcnt4,objcnt3,vleq,vinlen:boolean;
 begin
-	for f:=$1f downto 0 do begin
-    atrib:=memoria[$cc01+(f*4)];
-		nchar:=(memoria[$cc00+(f*4)] and $7f)+(atrib and $20) shl 2+(memoria[$cc00+(f*4)] and $80) shl 1;
-		color:=(atrib and $0f) shl 4;
-		x:=240-(memoria[$cc03+(f*4)]-$10*(atrib and $10));
-		y:=memoria[$cc02+(f*4)];
-		// handle double or quadruple height
-		i:=(atrib and $c0) shr 6;
-		if (i=2) then i:=3;
-		for h:=i downto 0 do begin
-      put_gfx_sprite(nchar+h,color,false,false,1);
-      actualiza_gfx_sprite(y+16*h,x,1,1);
+  for line:=0 to 255 do begin
+    v:=(line-1) and $ff;
+    h:=496;
+    while h>=128 do begin
+      objcnt4:=((h shr 8) and 1)<>(((not h) shr 7) and 1);
+      objcnt3:=(((v and $80)<>0) and objcnt4)<>(((not h) and $80)<>0);
+      obj_index:=(h shr 4) and 7;
+      if objcnt3 then obj_index:=obj_index or 8;
+      if objcnt4 then obj_index:=obj_index or 16;
+      obj_index:=$cc00+obj_index*4;
+      attr:=memoria[obj_index+1];
+      code:=(memoria[obj_index] and $7f) or ((attr and $20) shl 2) or ((memoria[obj_index] and $80) shl 1);
+      color:=(attr and $0f) shl 4;
+      sx:=integer(memoria[obj_index+3])-((attr and $10) shl 4);
+      sy:=memoria[obj_index+2];
+      mode:=attr shr 6;
+      if mode=3 then blocks:=16
+        else blocks:=1 shl mode;
+      code:=code and (not(blocks-1));
+      v2c:=((not v)+$ff) and $ff;
+      lvbeta:=(v2c+sy) and $ff;
+      vbeta:=(not lvbeta) and $ff;
+      vleq:=vbeta<=((not sy) and $ff);
+      case mode of
+        0:vinlen:=(lvbeta and $f0)=$f0;
+        1:vinlen:=(lvbeta and $e0)=$e0;
+        2:vinlen:=(lvbeta and $c0)=$c0;
+        else vinlen:=true;
+      end;
+      if vleq and vinlen then begin
+        if (line>=sy) and (line<sy+16*blocks) then begin
+          part:=(line-sy) div 16;
+          source_x:=(line-sy) and 15;
+          left_edge:=sx;
+          if left_edge<0 then left_edge:=0;
+          right_edge:=sx+15;
+          if right_edge>255 then right_edge:=255;
+          if left_edge<=right_edge then begin
+            dest_y:=255-right_edge;
+            source_y:=15-(right_edge-sx);
+            height:=right_edge-left_edge+1;
+            put_gfx_sprite(code+part,color,false,false,1);
+            actualiza_gfx_sprite_size(line,dest_y,1,1,height,source_x,source_y);
+          end;
+        end;
+      end;
+      h:=h-16;
     end;
   end;
 end;
@@ -186,7 +223,10 @@ case direccion of
             else z80_1.change_reset(CLEAR_LINE);
           main_screen.flip_main_screen:=(valor and $80)<>0;
         end;
-  $c805:palette_bank:=valor;
+  $c805:if palette_bank<>(valor and 3) then begin
+          palette_bank:=valor and 3;
+          fillchar(gfx[2].buffer[0],$200,1);
+        end;
   $c806:rom_bank:=valor and $3;
   $cc00..$cc7f,$e000..$efff:memoria[direccion]:=valor;
   $d000..$d7ff:if memoria[direccion]<>valor then begin
@@ -331,7 +371,7 @@ screen_init(2,256,512);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000);
+z80_0:=cpu_z80.create(3000000);
 z80_0.change_ram_calls(hw1942_getbyte,hw1942_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(3000000);
@@ -366,9 +406,9 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //poner la paleta
 if not(roms_load(@memoria_temp,hw1942_pal)) then exit;
 for f:=0 to $ff do begin
-    colores[f].r:=pal4bit(memoria_temp[f]);
-    colores[f].g:=pal4bit(memoria_temp[f+$100]);
-    colores[f].b:=pal4bit(memoria_temp[f+$200]);
+    colores[f].r:=$e*(memoria_temp[f] and 1)+$1f*((memoria_temp[f] shr 1) and 1)+$43*((memoria_temp[f] shr 2) and 1)+$8f*((memoria_temp[f] shr 3) and 1);
+    colores[f].g:=$e*(memoria_temp[f+$100] and 1)+$1f*((memoria_temp[f+$100] shr 1) and 1)+$43*((memoria_temp[f+$100] shr 2) and 1)+$8f*((memoria_temp[f+$100] shr 3) and 1);
+    colores[f].b:=+$e*(memoria_temp[f+$200] and 1)+$1f*((memoria_temp[f+$200] shr 1) and 1)+$43*((memoria_temp[f+$200] shr 2) and 1)+$8f*((memoria_temp[f+$200] shr 3) and 1);
     gfx[0].colores[f]:=memoria_temp[$300+f]+$80;  //chars
     gfx[2].colores[f]:=memoria_temp[$400+f];  //tiles
     gfx[2].colores[f+$100]:=memoria_temp[$400+f]+$10;

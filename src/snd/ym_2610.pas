@@ -1,444 +1,493 @@
-unit ym_2610;
+﻿unit ym_2610;
 
 interface
-uses main_engine,fmopn,ay_8910,timer_engine,sound_engine,cpu_misc,dialogs;
+uses main_engine,fmopn,ay_8910,timer_engine,sound_engine,cpu_misc;
 
-{type
+type
+  tym2610_adpcma=record
+    playing:boolean;
+    address:dword; // nibble address
+    accumulator,step_index:integer;
+  end;
   ym2610_chip=class(snd_chip_class)
-       constructor create(clock:dword;amp:single=1;ay_amp:single=1);
-       destructor free;
+    constructor create(clock:dword;amp:single=1;ay_amp:single=1);
+    destructor free;
     public
-       procedure reset;
-       procedure update;
-       function status:byte;
-       function read:byte;
-       procedure control(data:byte);
-       procedure write(data:byte);
-       procedure change_irq_calls(irq_handler:type_irq_handler);
-       procedure change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
-       function save_snapshot(data:pbyte):word;
-       procedure load_snapshot(data:pbyte);
-     private
-       OPN:pfm_opn;
-       REGS:array[0..255] of byte;
-       timer_adjust:single;
-       timer1,timer2,chip_number:byte;
-       ay8910_int:ay8910_chip;
-       procedure reset_channels(chan:byte);
-       procedure write_int(port,data:byte);
+      rom_a,rom_b:array of byte;
+      procedure reset;
+      procedure update;
+      function read_port(port:byte):byte;
+      procedure write_port(port,data:byte);
+      function status:byte;
+      function read:byte;
+      procedure control(data:byte);
+      procedure write(data:byte);
+      procedure change_irq_calls(irq_handler:type_irq_handler);
+    private
+      OPN:pfm_opn;
+      regs:array[0..$1ff]of byte;
+      address_latch:word;
+      ay8910_int:ay8910_chip;
+      timer1,timer2,busy_timer:byte;
+      timer_adjust:single;
+      busy:boolean;
+      a:array[0..5] of tym2610_adpcma;
+      a_phase,b_phase:double;
+      eos,flag_mask:byte;
+      b_playing,b_latch:boolean;
+      b_address,b_buffer:dword;
+      b_nibbles,b_position,b_accumulator,b_step,b_output,b_previous:integer;
+      procedure clock_a;
+      procedure clock_b;
+      function fetch_b:boolean;
+      function consume_b(count:integer):integer;
+      procedure start_b;
+      procedure set_timer(number:byte;count:single);
+      procedure set_busy;
   end;
+var ym2610_0:ym2610_chip;
 
-var
-  ym2610_0:ym2610_chip;
-
-{procedure ym2203_timer1(index:byte);
-procedure ym2203_timer2(index:byte);
-procedure ym2203_0_init_timer_a(count:single);
-procedure ym2203_0_init_timer_b(count:single);
-procedure ym2203_1_init_timer_a(count:single);
-procedure ym2203_1_init_timer_b(count:single);
- }
 implementation
-{var
-  chips_total:integer=-1;
+uses sysutils;
+const
+  a_steps:array[0..48]of integer=(16,17,19,21,23,25,28,31,34,37,41,45,50,55,
+    60,66,73,80,88,97,107,118,130,143,157,173,190,209,230,253,279,307,337,
+    371,408,449,494,544,598,658,724,796,876,963,1060,1166,1282,1411,1552);
+  a_step_inc:array[0..7]of integer=(-1,-1,-1,-1,2,5,7,9);
+  b_scale:array[0..7]of integer=(57,57,57,57,77,102,128,153);
+  fm_channels:array[0..3]of byte=(1,2,4,5); // YM2610, not YM2610B
 
-procedure change_ay_clock_0(clock:dword);
+function clamp(v,lo,hi:integer):integer;
 begin
-  if ym2203_0<>nil then ym2203_0.ay8910_int.change_clock(clock);
+  if v<lo then result:=lo
+    else if v>hi then result:=hi
+      else Result:=v;
 end;
 
-procedure change_ay_clock_1(clock:dword);
+function sar(v:integer;shift:integer):integer;
 begin
-  if ym2203_1<>nil then ym2203_1.ay8910_int.change_clock(clock);
+  if v>=0 then Result:=v shr shift
+    else Result:=-integer((int64(-int64(v))+(int64(1)shl shift)-1)shr shift);
 end;
 
-constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
+procedure timer_a_set(count:single);
 begin
-  if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
-  chips_total:=chips_total+1;
+  ym2610_0.set_timer(ym2610_0.timer1,count);
+end;
+
+procedure timer_b_set(count:single);
+begin
+  ym2610_0.set_timer(ym2610_0.timer2,count);
+end;
+
+procedure timer_a_over(index:byte);
+begin
+  TimerAOver(ym2610_0.OPN.ST);
+  if (ym2610_0.OPN.ST.mode and $80)<>0 then CSMKeyControll(ym2610_0.OPN.P_CH[2]);
+end;
+
+procedure timer_b_over(index:byte);
+begin
+  TimerBOver(ym2610_0.OPN.ST);
+end;
+
+procedure busy_over(index:byte);
+begin
+  ym2610_0.busy:=false;timers.enabled(ym2610_0.busy_timer,false);
+end;
+
+constructor ym2610_chip.create(clock:dword;amp:single;ay_amp:single);
+begin
+  inherited Create;
+  ym2610_0:=self;
+  self.clock:=clock;
   self.amp:=amp;
-  self.ay8910_int:=ay8910_chip.create(clock,AY8910,ay_amp,true); //El PSG
-  self.OPN:=opn_init(4); //Inicializo el OPN
-  //Inicializo el state
-  self.OPN.type_:=TYPE_YM2203;
-  self.OPN.ST.clock:=clock;
-  self.OPN.ST.rate:=FREQ_BASE_AUDIO;
-  self.tsample_num:=init_channel;
-  self.opn.ST.IRQ_Handler:=nil;
-  self.timer_adjust:=sound_status.cpu_clock/self.OPN.ST.clock;
-  self.chip_number:=chips_total;
-  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer1,false,chips_total);
-  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer2,false,chips_total);
-  case chips_total of
+  OPN:=opn_init(6);
+  OPN.type_:=TYPE_YM2610;
+  OPN.ST.clock:=clock;
+  OPN.ST.rate:=FREQ_BASE_AUDIO;
+  OPN.ST.TIMER_set_a:=timer_a_set;
+  OPN.ST.TIMER_set_b:=timer_b_set;
+  timer_adjust:=sound_status.cpu_clock/clock;
+  timer1:=timers.init(sound_status.cpu_num,1,nil,timer_a_over,false);
+  timer2:=timers.init(sound_status.cpu_num,1,nil,timer_b_over,false);
+  busy_timer:=timers.init(sound_status.cpu_num,1,nil,busy_over,false);
+  ay8910_int:=ay8910_chip.create(clock div 4,AY8910,ay_amp,true);
+  tsample_num:=init_channel;
+  SetLength(rom_a,$80000);
+  SetLength(rom_b,$80000);
+  reset;
+end;
+
+destructor ym2610_chip.free;
+begin
+  opn_close(OPN);
+  OPN:=nil;
+  ay8910_int.free;
+  SetLength(rom_a,0);SetLength(rom_b,0);
+  inherited Destroy;
+end;
+
+procedure ym2610_chip.set_timer(number:byte;count:single);
+var
+  was_enabled:boolean;
+begin
+  was_enabled:=timers.timer[number].enabled;
+  if count=0 then begin
+    timers.enabled(number,false);
+    timers.timer[number].actual_time:=0;
+  end else begin
+    if not(was_enabled) then timers.timer[number].actual_time:=0;
+    timers.timer[number].time_final:=count*timer_adjust;
+    timers.enabled(number,true);
+  end;
+end;
+
+procedure ym2610_chip.set_busy;
+begin
+  busy:=true;
+  timers.timer[busy_timer].actual_time:=0;
+  timers.timer[busy_timer].time_final:=192*timer_adjust;
+  timers.enabled(busy_timer,true);
+end;
+
+procedure ym2610_chip.change_irq_calls(irq_handler:type_irq_handler);
+begin
+  OPN.ST.IRQ_Handler:=irq_handler;
+end;
+
+procedure ym2610_chip.reset;
+var
+  c,s,r:integer;
+begin
+  timers.enabled(timer1,false);
+  timers.enabled(timer2,false);
+  timers.enabled(busy_timer,false);
+  busy:=false;
+  address_latch:=0;
+  fillchar(regs,SizeOf(regs),0);
+  fillchar(a,SizeOf(a),0);
+  a_phase:=0;
+  b_phase:=0;
+  eos:=0;
+  flag_mask:=$bf;
+  b_playing:=false;
+  b_latch:=true;
+  b_address:=0;
+  b_buffer:=0;
+  b_nibbles:=0;
+  b_position:=0;
+  b_accumulator:=0;
+  b_step:=127;
+  b_output:=0;
+  b_previous:=0;
+  ay8910_int.reset;
+  OPNSetPres(OPN,144,144,0);
+  OPN.ST.mode:=0;
+  OPN.ST.TAC:=0;
+  OPN.ST.TBC:=0;
+  OPN.ST.TA:=0;
+  OPN.ST.TB:=0;
+  OPN.ST.fn_h:=0;
+  fillchar(OPN.SL3^,SizeOf(fm_3slot),0);
+  OPN.eg_timer:=0;
+  OPN.eg_cnt:=0;
+  OPN.lfo_cnt:=0;
+  OPN.lfo_inc:=0;
+  FM_IRQMASK_SET(OPN.ST,3);
+  FM_STATUS_RESET(OPN.ST,$ff);
+  for c:=0 to 5 do begin
+    OPN.P_CH[c].fc:=0;
+    OPN.P_CH[c].block_fnum:=0;
+    OPN.P_CH[c].kcode:=0;
+    OPN.P_CH[c].am_enable:=0;
+    OPN.P_CH[c].pms:=0;
+    OPN.P_CH[c].ams:=8;
+    OPN.P_CH[c].op1_out[0]:=0;
+    OPN.P_CH[c].op1_out[1]:=0;
+    OPN.P_CH[c].mem_value:=0;
+    for s:=0 to 3 do begin
+      fillchar(OPN.P_CH[c].SLOT[s]^,SizeOf(fm_slot),0);
+      OPN.P_CH[c].SLOT[s].state:=EG_OFF;
+      OPN.P_CH[c].SLOT[s].volume:=MAX_ATT_INDEX;
+      OPN.P_CH[c].SLOT[s].vol_out:=MAX_ATT_INDEX;
+    end;
+  end;
+  for r:=$b2 downto $30 do begin
+    OPNWriteReg(OPN,r,0);
+    OPNWriteReg(OPN,r or $100,0);
+  end;
+  for r:=$b4 to $b6 do begin
+    OPNWriteReg(OPN,r,$c0);
+    OPNWriteReg(OPN,r or $100,$c0);
+    regs[r]:=$c0;
+    regs[r or $100]:=$c0;
+  end;
+  for c:=0 to 5 do regs[$108+c]:=$df;
+end;
+
+procedure ym2610_chip.start_b;
+begin
+  b_playing:=true;
+  b_latch:=true;
+  b_buffer:=0;
+  b_nibbles:=0;
+  b_position:=0;
+  b_accumulator:=0;
+  b_step:=127;
+  b_output:=0;
+  b_previous:=0;
+  eos:=eos and $7f;
+end;
+
+procedure ym2610_chip.write_port(port,data:byte);
+var
+  r,c:integer;
+begin
+  port:=port and 3;
+  if(port and 1)=0 then begin
+    address_latch:=data+word(port shr 1)*$100;
+    if ((port=0) and (data<16)) then ay8910_int.control(data);
+    exit;
+  end;
+  // A1 must agree with the most recent address write (one shared latch).
+  if (port shr 1)<>(address_latch shr 8)then exit;
+  r:=address_latch;
+  if r=$10 then data:=(data or $20)and $bf; // ROM mode, recording disabled
+  regs[r]:=data;
+  set_busy;
+  if r<$0e then begin
+    ay8910_int.write(data);
+    exit;
+  end;
+  if r<$10 then exit; // No SSG I/O pins on YM2610
+  if(r>=$10)and(r<$20)then begin
+    case r of
+      $10:begin
+        if(data and 1)<>0 then begin
+          if b_playing then eos:=eos or $80;
+          b_playing:=false;
+          b_position:=0;
+          b_previous:=b_output;
+        end else if(data and $80)<>0 then start_b
+          else b_playing:=false;
+      end;
+      $1c:begin
+            flag_mask:=byte(not data) and $bf;
+            eos:=eos and flag_mask;
+          end;
+    end;
+    exit;
+  end;
+  if (r>=$100) and (r<$130) then begin
+    if r=$100 then for c:=0 to 5 do
+      if(data and(1 shl c))<>0 then begin
+        a[c].playing:=(data and $80)=0;
+        if not a[c].playing then a[c].accumulator:=0;
+        if a[c].playing then begin
+          a[c].address:=dword(regs[$110+c]+word(regs[$118+c])*256)*512;
+          a[c].accumulator:=0;a[c].step_index:=0;
+        end;
+      end;
+    exit;
+  end;
+  if (r>=$20) and (r<$30) then OPNWriteMode(OPN,r,data)
+    else OPNWriteReg(OPN,r,data);
+end;
+
+function ym2610_chip.read_port(port:byte):byte;
+begin
+  Result:=0;
+  case port and 3 of
     0:begin
-        self.OPN.ST.TIMER_set_a:=ym2203_0_init_timer_a;
-        self.OPN.ST.TIMER_set_b:=ym2203_0_init_timer_b;
-        self.OPN.ST.SSG_Clock_change:=change_ay_clock_0;
+        Result:=OPN.ST.status and 3;
+        if busy then Result:=Result or $80;
+      end;
+    1:if address_latch<$0e then Result:=ay8910_int.read
+        else if address_latch<$10 then Result:=$ff
+                else if address_latch=$ff then Result:=1;
+    2:Result:=eos and flag_mask;
+  end;
+end;
+
+function ym2610_chip.status:byte;
+begin
+  Result:=read_port(0);
+end;
+
+function ym2610_chip.read:byte;
+begin
+  Result:=read_port(1);
+end;
+
+procedure ym2610_chip.control(data:byte);
+begin
+  write_port(0,data);
+end;
+
+procedure ym2610_chip.write(data:byte);
+begin
+  write_port(1,data);
+end;
+
+procedure ym2610_chip.clock_a;
+var
+  c,n,delta,ending,addr:integer;
+  data:byte;
+begin
+  for c:=0 to 5 do if a[c].playing then begin
+    ending:=(regs[$120+c]+integer(regs[$128+c])*256+1)*256;
+    if(a[c].address and 1)=0 then
+      if(((a[c].address shr 1)xor dword(ending))and $fffff)=0 then begin
+        a[c].playing:=false;
+        a[c].accumulator:=0;
+        eos:=eos or(1 shl c);
+        continue;
+      end;
+    addr:=a[c].address shr 1;
+    data:=$ff;
+    if addr<Length(rom_a) then data:=rom_a[addr];
+    if (a[c].address and 1)=0 then n:=data shr 4
+      else n:=data and 15;
+    inc(a[c].address);
+    a[c].address:=a[c].address and $1ffffff;
+    delta:=((n and 7)*2+1)*a_steps[a[c].step_index]div 8;
+    if(n and 8)<>0 then delta:=-delta;
+    a[c].accumulator:=(a[c].accumulator+delta) and $fff;
+    a[c].step_index:=clamp(a[c].step_index+a_step_inc[n and 7],0,48);
+  end;
+end;
+
+function ym2610_chip.consume_b(count:integer):integer;
+begin
+  dec(b_nibbles,count);
+  Result:=(b_buffer shr (b_nibbles*4)) and ((1 shl (count*4))-1);
+end;
+
+function ym2610_chip.fetch_b:boolean;
+var
+  data:byte;ending:integer;
+begin
+  if b_latch then begin
+    b_address:=dword(regs[$12]+word(regs[$13])*256)*256;
+    b_latch:=false;
+  end;
+  data:=$ff;
+  if b_address<dword(Length(rom_b)) then data:=rom_b[b_address];
+  b_buffer:=(b_buffer shl 8)or data;
+  inc(b_nibbles,2);
+  ending:=regs[$14]+integer(regs[$15])*256;
+  Result:=((b_address and $ff)=$ff) and (integer(b_address shr 8)=ending);
+  if not Result then b_address:=(b_address+1)and $ffffff;
+end;
+
+procedure ym2610_chip.clock_b;
+var
+  position,n,delta,dummy:integer;
+begin
+  if not b_playing or((regs[$10]and $40)<>0)then begin
+    b_previous:=b_output;
+    b_position:=0;
+    exit;
+  end;
+  position:=b_position+regs[$19]+integer(regs[$1a])*256;
+  b_position:=position and $ffff;
+  if position<$10000 then exit;
+  if b_nibbles<>0 then begin
+    n:=consume_b(1);
+    delta:=((n and 7)*2+1)*b_step div 8;
+    if(n and 8)<>0 then delta:=-delta;
+    b_accumulator:=clamp(b_accumulator+delta,-32768,32767);
+    b_step:=clamp(b_step*b_scale[n and 7]div 64,127,24576);
+    b_previous:=b_output;
+    b_output:=b_accumulator;
+    if b_nibbles=0 then begin
+      b_accumulator:=0;
+      b_step:=127;
+      eos:=eos or $80;
+      if(regs[$10]and $10)=0 then b_playing:=false;
     end;
-    1:begin
-        self.OPN.ST.TIMER_set_a:=ym2203_1_init_timer_a;
-        self.OPN.ST.TIMER_set_b:=ym2203_1_init_timer_b;
-        self.OPN.ST.SSG_Clock_change:=change_ay_clock_1;
-    end;
   end;
-  self.Reset;
-end;
-
-procedure ym2203_chip.change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
-begin
-  self.ay8910_int.change_io_calls(porta_read,portb_read,porta_write,portb_write);
-end;
-
-procedure ym2203_chip.change_irq_calls(irq_handler:type_irq_handler);
-begin
-  self.opn.ST.IRQ_Handler:=irq_handler;
-end;
-
-destructor ym2203_chip.free;
-begin
-//Cierro el OPN
-opn_close(self.OPN);
-self.OPN:=nil;
-self.ay8910_int.free;
-chips_total:=chips_total-1;
-end;
-
-procedure ym2203_chip.Reset;
-var
-  i:byte;
-  OPN:pfm_opn;
-begin
-		OPN:=self.OPN;
-		// Reset Prescaler
-	  OPNPrescaler_w(OPN,0,1);
-	  // reset SSG section */
-    self.ay8910_int.reset;
-	  // status clear */
-	  FM_IRQMASK_SET(OPN.ST,$03);
-	  OPNWriteMode(OPN,$27,$30); //mode 0 , timer reset
-	  OPN.eg_timer:=0;
-	  OPN.eg_cnt:=0;
-	  FM_STATUS_RESET(OPN.ST,$ff);
-    opn.st.mode:=0;	//normal mode
-  	opn.st.TA:=0;
-  	opn.ST.TAC:=0;
-  	opn.ST.TB:=0;
-  	opn.ST.TBC:=0;
-	  self.reset_channels(4);
-		// reset OPerator paramater */
-		for i:=$b2 downto $30 do OPNWriteReg(OPN,i,0);
-		for i:=$26 downto $20 do OPNWriteReg(OPN,i,0);
-end;
-
-function ym2203_chip.save_snapshot(data:pbyte):word;
-var
-  temp:pbyte;
-  size:word;
-  f:byte;
-begin
-  temp:=data;
-  size:=self.ay8910_int.save_snapshot(temp);inc(temp,size);
-  copymemory(temp,@self.regs[0],$100);inc(temp,$100);size:=size+$100;
-  copymemory(temp,@self.timer_adjust,sizeof(single));inc(temp,sizeof(single));size:=size+sizeof(single);
-  temp^:=self.chip_number;inc(temp);size:=size+1;
-  //ST:pFM_state;
-  copymemory(temp,@self.opn.st.clock,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.st.rate,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.st.freqbase,sizeof(single));inc(temp,sizeof(single));size:=size+sizeof(single);
-  copymemory(temp,@self.opn.st.timer_prescaler,4);inc(temp,4);size:=size+4;
-  temp^:=self.opn.st.address;inc(temp);size:=size+1;
-  temp^:=self.opn.st.irq;inc(temp);size:=size+1;
-  temp^:=self.opn.st.irqmask;inc(temp);size:=size+1;
-  temp^:=self.opn.st.status;inc(temp);size:=size+1;
-  copymemory(temp,@self.opn.st.mode,4);inc(temp,4);size:=size+4;
-  temp^:=self.opn.st.prescaler_sel;inc(temp);size:=size+1;
-  temp^:=self.opn.st.fn_h;inc(temp);size:=size+1;
-  copymemory(temp,@self.opn.st.TA,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.st.TAC,sizeof(single));inc(temp,sizeof(single));size:=size+sizeof(single);
-  copymemory(temp,@self.opn.st.TB,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.st.TBC,sizeof(single));inc(temp,sizeof(single));size:=size+sizeof(single);
-  copymemory(temp,@self.opn.ST.dt_tab[0,0],8*32*4);inc(temp,8*32*4);size:=size+(8*32*4);
-  //resto
-  copymemory(temp,self.opn.SL3,sizeof(FM_3Slot));inc(temp,sizeof(FM_3Slot));size:=size+sizeof(FM_3Slot);
-  //channels 0..3
-  for f:=0 to 3 do begin
-    temp^:=self.opn.P_CH[f].ALGO;inc(temp);size:=size+1;
-    temp^:=self.opn.P_CH[f].FB;inc(temp);size:=size+1;
-    copymemory(temp,@self.opn.P_CH[f].op1_out[0],2*4);inc(temp,2*4);size:=size+(2*4);
-    copymemory(temp,@self.opn.P_CH[f].mem_value,4);inc(temp,4);size:=size+4;
-    copymemory(temp,@self.opn.P_CH[f].pms,4);inc(temp,4);size:=size+4;
-    temp^:=self.opn.P_CH[f].ams;inc(temp);size:=size+1;
-    copymemory(temp,@self.opn.P_CH[f].fc,4);inc(temp,4);size:=size+4;
-    temp^:=self.opn.P_CH[f].kcode;inc(temp);size:=size+1;
-    copymemory(temp,@self.opn.P_CH[f].block_fnum,4);inc(temp,4);size:=size+4;
-    copymemory(temp,self.opn.P_CH[f].SLOT[0],sizeof(fm_slot));inc(temp,sizeof(fm_slot));size:=size+sizeof(fm_slot);
-    copymemory(temp,self.opn.P_CH[f].SLOT[1],sizeof(fm_slot));inc(temp,sizeof(fm_slot));size:=size+sizeof(fm_slot);
-    copymemory(temp,self.opn.P_CH[f].SLOT[2],sizeof(fm_slot));inc(temp,sizeof(fm_slot));size:=size+sizeof(fm_slot);
-    copymemory(temp,self.opn.P_CH[f].SLOT[3],sizeof(fm_slot));inc(temp,sizeof(fm_slot));size:=size+sizeof(fm_slot);
-  end;
-  copymemory(temp,@self.opn.pan[0],12*4);inc(temp,12*4);size:=size+(12*4);
-  copymemory(temp,@self.opn.fn_table[0],4096*4);inc(temp,4096*4);size:=size+(4096*4);
-  copymemory(temp,@self.opn.lfo_freq[0],8*4);inc(temp,8*4);size:=size+(8*4);
-  temp^:=self.opn.type_;inc(temp);size:=size+1;
-  copymemory(temp,@self.opn.eg_cnt,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.eg_timer,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.eg_timer_add,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.eg_timer_overflow,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.fn_max,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.lfo_cnt,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.lfo_inc,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.m2,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.c1,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.c2,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.opn.mem,4);size:=size+4;
-  save_snapshot:=size;
-end;
-
-procedure ym2203_chip.load_snapshot(data:pbyte);
-var
-  temp:pbyte;
-  f:byte;
-begin
-  temp:=data;
-  self.ay8910_int.load_snapshot(temp);inc(temp,128);
-  copymemory(@self.regs[0],temp,$100);inc(temp,$100);
-  copymemory(@self.timer_adjust,temp,sizeof(single));inc(temp,sizeof(single));
-  self.chip_number:=temp^;inc(temp);
-  //ST:pFM_state;
-  copymemory(@self.opn.st.clock,temp,4);inc(temp,4);
-  copymemory(@self.opn.st.rate,temp,4);inc(temp,4);
-  copymemory(@self.opn.st.freqbase,temp,sizeof(single));inc(temp,sizeof(single));
-  copymemory(@self.opn.st.timer_prescaler,temp,4);inc(temp,4);
-  self.opn.st.address:=temp^;inc(temp);
-  self.opn.st.irq:=temp^;inc(temp);
-  self.opn.st.irqmask:=temp^;inc(temp);
-  self.opn.st.status:=temp^;inc(temp);
-  copymemory(@self.opn.st.mode,temp,4);inc(temp,4);
-  self.opn.st.prescaler_sel:=temp^;inc(temp);
-  self.opn.st.fn_h:=temp^;inc(temp);
-  copymemory(@self.opn.st.TA,temp,4);inc(temp,4);
-  copymemory(@self.opn.st.TAC,temp,sizeof(single));inc(temp,sizeof(single));
-  copymemory(@self.opn.st.TB,temp,4);inc(temp,4);
-  copymemory(@self.opn.st.TBC,temp,sizeof(single));inc(temp,sizeof(single));
-  copymemory(@self.opn.ST.dt_tab[0,0],temp,8*32*4);inc(temp,8*32*4);
-  //resto
-  copymemory(self.opn.SL3,temp,sizeof(FM_3Slot));inc(temp,sizeof(FM_3Slot));
-  //Channels 0..3
-  for f:=0 to 3 do begin
-    self.opn.P_CH[f].ALGO:=temp^;inc(temp);
-    self.opn.P_CH[f].FB:=temp^;inc(temp);
-    copymemory(@self.opn.P_CH[f].op1_out[0],temp,2*4);inc(temp,2*4);
-    copymemory(@self.opn.P_CH[f].mem_value,temp,4);inc(temp,4);
-    copymemory(@self.opn.P_CH[f].pms,temp,4);inc(temp,4);
-    self.opn.P_CH[f].ams:=temp^;inc(temp);
-    copymemory(@self.opn.P_CH[f].fc,temp,4);inc(temp,4);
-    self.opn.P_CH[f].kcode:=temp^;inc(temp);
-    copymemory(@self.opn.P_CH[f].block_fnum,temp,4);inc(temp,4);
-    copymemory(self.opn.P_CH[f].SLOT[0],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
-    copymemory(self.opn.P_CH[f].SLOT[1],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
-    copymemory(self.opn.P_CH[f].SLOT[2],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
-    copymemory(self.opn.P_CH[f].SLOT[3],temp,sizeof(fm_slot));inc(temp,sizeof(fm_slot));
-    setup_connection(self.OPN,self.OPN.P_CH[f],self.chip_number);
-    self.opn.P_CH[f].SLOT[0].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[0].det_mul_val];
-    self.opn.P_CH[f].SLOT[1].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[1].det_mul_val];
-    self.opn.P_CH[f].SLOT[2].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[2].det_mul_val];
-    self.opn.P_CH[f].SLOT[3].DT:=@self.OPN.ST.dt_tab[self.opn.P_CH[f].SLOT[3].det_mul_val];
-  end;
-  copymemory(@self.opn.pan[0],temp,12*4);inc(temp,12*4);
-  copymemory(@self.opn.fn_table[0],temp,4096*4);inc(temp,4096*4);
-  copymemory(@self.opn.lfo_freq[0],temp,8*4);inc(temp,8*4);
-  self.opn.type_:=temp^;inc(temp);
-  copymemory(@self.opn.eg_cnt,temp,4);inc(temp,4);
-  copymemory(@self.opn.eg_timer,temp,4);inc(temp,4);
-  copymemory(@self.opn.eg_timer_add,temp,4);inc(temp,4);
-  copymemory(@self.opn.eg_timer_overflow,temp,4);inc(temp,4);
-  copymemory(@self.opn.fn_max,temp,4);inc(temp,4);
-  copymemory(@self.opn.lfo_cnt,temp,4);inc(temp,4);
-  copymemory(@self.opn.lfo_inc,temp,4);inc(temp,4);
-  copymemory(@self.opn.m2,temp,4);inc(temp,4);
-  copymemory(@self.opn.c1,temp,4);inc(temp,4);
-  copymemory(@self.opn.c2,temp,4);inc(temp,4);
-  copymemory(@self.opn.mem,temp,4);
-end;
-
-procedure ym2203_chip.reset_channels(chan:byte);
-var
-  c,s:byte;
-  OPN:pfm_opn;
-begin
-  opn:=self.opn;
-	for c:=0 to chan-1 do begin
-		opn.p_CH[c].fc:=0;
-		for s:=0 to 3 do begin
-			opn.p_CH[c].SLOT[s].ssg:=0;
-			opn.p_CH[c].SLOT[s].ssgn:=0;
-			opn.p_CH[c].SLOT[s].state:=EG_OFF;
-			opn.p_CH[c].SLOT[s].volume:=MAX_ATT_INDEX;
-			opn.p_CH[c].SLOT[s].vol_out:=MAX_ATT_INDEX;
-		end;
-	end;
-end;
-
-procedure ym2203_chip.update;
-var
-  OPN:pfm_opn;
-  lt:integer;
-  cch:array[0..2] of pfm_chan;
-begin
-		OPN:=self.OPN;
-		cch[0]:=OPN.p_CH[0];
-		cch[1]:=OPN.p_CH[1];
-		cch[2]:=OPN.p_CH[2];
-    // refresh PG and EG */
-	  refresh_fc_eg_chan(OPN,cch[0]);
-	  refresh_fc_eg_chan(OPN,cch[1]);
-		if ((OPN.ST.mode and $c0)<>0) then begin
-		  // 3SLOT MODE */
-		  if (cch[2].SLOT[SLOT1].Incr=-1) then begin
-			  refresh_fc_eg_slot(OPN,cch[2].SLOT[SLOT1],OPN.SL3.fc[1],OPN.SL3.kcode[1] );
-			  refresh_fc_eg_slot(OPN,cch[2].SLOT[SLOT2],OPN.SL3.fc[2],OPN.SL3.kcode[2] );
-			  refresh_fc_eg_slot(OPN,cch[2].SLOT[SLOT3],OPN.SL3.fc[0],OPN.SL3.kcode[0] );
-			  refresh_fc_eg_slot(OPN,cch[2].SLOT[SLOT4],cch[2].fc,cch[2].kcode );
-		  end;
-    end else begin
-      refresh_fc_eg_chan(OPN,cch[2]);
-    end;
-	  // YM2203 doesn't have LFO so we must keep these globals at 0 level */
-	  LFO_AM:= 0;
-	  LFO_PM:= 0;
-	  // buffering */
-    out_fm[0]:= 0;
-    out_fm[1]:= 0;
-    out_fm[2]:= 0;
-		  // advance envelope generator */
-    OPN.eg_timer:=OPN.eg_timer+OPN.eg_timer_add;
-    while (OPN.eg_timer>=OPN.eg_timer_overflow) do begin
-			  OPN.eg_timer:=OPN.eg_timer-OPN.eg_timer_overflow;
-			  OPN.eg_cnt:=OPN.eg_cnt+1;
-			  advance_eg_channel(OPN,cch[0]);
-			  advance_eg_channel(OPN,cch[1]);
-			  advance_eg_channel(OPN,cch[2]);
-    end;
-    // calculate FM
-    chan_calc(OPN,cch[0]);
-    chan_calc(OPN,cch[1]);
-    chan_calc(OPN,cch[2]);
-    lt:=self.ay8910_int.update_internal^+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
-    if lt>$7fff then lt:=$7fff
-      else if lt<-$7fff then lt:=-$7fff;
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
-    if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
-    INTERNAL_TIMER_A(self.OPN.ST,self.OPN.p_ch[2]);
-    INTERNAL_TIMER_B(self.OPN.ST)
-end;
-
-procedure ym2203_chip.write_int(port,data:byte);
-var
-  OPN:pfm_opn;
-  addr:integer;
-begin
-OPN:=self.OPN;
-if ((port and 1)=0) then begin // address port */
-   OPN.ST.address:=data;
-   // Write register to SSG emulator */
-   if (data<$10) then self.ay8910_int.Control(data);
-   // prescaler select : 2d,2e,2f  */
-   if ((data>=$2d) and (data<=$2f)) then OPNPrescaler_w(OPN,data,1);
-end else begin // data port */
-   addr:=OPN.ST.address;
-   self.REGS[addr]:=data;
-   case (addr and $f0) of
-       $00:begin	// 0x00-0x0f : SSG section */
-              self.ay8910_int.Write(data); // Write data to SSG emulator */
-           end;
-       $20:begin	// 0x20-0x2f : Mode section */
-                //YM2203UpdateReq(n);
-		// write register */
-		OPNWriteMode(OPN,addr,data);
-           end;
-       else begin	// 0x30-0xff : OPN section */
-                //YM2203UpdateReq(n);
-		// write register */
-		OPNWriteReg(OPN,addr,data);
-            end;
-   end;
-end;
-end;
-
-function ym2203_chip.status:byte;
-begin
-  status:=self.OPN.ST.status;
-end;
-
-function ym2203_chip.read:byte;
-var
-   ret:byte;
-begin
-if (self.OPN.ST.address<16) then ret:=self.ay8910_int.Read
-   else ret:=0;
-read:=ret;
-end;
-
-procedure ym2203_chip.control(data:byte);
-begin
-  self.write_int(0,data);
-end;
-
-procedure ym2203_chip.write(data:byte);
-begin
-  self.write_int(1,data);
-end;
-
-procedure ym2203_timer1(index:byte);
-var
-  chip:ym2203_chip;
-begin
-  case index of
-    0:chip:=ym2203_0;
-    1:chip:=ym2203_1;
-  end;
-  TimerAOver(chip.OPN.ST);
-  if (chip.OPN.ST.mode and $80)<>0 then begin
-			// CSM mode auto key on */
-			CSMKeyControll(chip.OPN.p_ch[2]);
+  if b_playing and (b_nibbles<3)then if fetch_b then begin
+    // Hardware lookahead: the last three buffered nibbles are discarded.
+    dummy:=consume_b(3);
+    if(regs[$10]and $10)<>0 then b_latch:=true;
   end;
 end;
 
-procedure ym2203_timer2(index:byte);
+procedure ym2610_chip.update;
+var
+  j,c,s,pos,vol,mul,shift,sample,l,r,ssg:integer;
+  ch:pfm_chan;
+  mixb:int64;
 begin
-  case index of
-    0:TimerBOver(ym2203_0.OPN.ST);
-    1:TimerBOver(ym2203_1.OPN.ST);
+  for j:=0 to 3 do begin
+    c:=fm_channels[j];
+    ch:=OPN.P_CH[c];
+    if (c=2) and ((OPN.ST.mode and $c0)<>0) then begin
+      if ch.SLOT[SLOT1].Incr=-1 then begin
+        refresh_fc_eg_slot(OPN,ch.SLOT[SLOT1],OPN.SL3.fc[1],OPN.SL3.kcode[1]);
+        refresh_fc_eg_slot(OPN,ch.SLOT[SLOT2],OPN.SL3.fc[2],OPN.SL3.kcode[2]);
+        refresh_fc_eg_slot(OPN,ch.SLOT[SLOT3],OPN.SL3.fc[0],OPN.SL3.kcode[0]);
+        refresh_fc_eg_slot(OPN,ch.SLOT[SLOT4],ch.fc,ch.kcode);
+      end;
+    end else refresh_fc_eg_chan(OPN,ch);
   end;
+  LFO_AM:=0;
+  LFO_PM:=0;
+  if OPN.lfo_inc<>0 then begin
+    OPN.lfo_cnt:=dword((uint64(OPN.lfo_cnt)+OPN.lfo_inc)and $ffffffff);
+    pos:=(OPN.lfo_cnt shr LFO_SH)and 127;
+    if pos<64 then LFO_AM:=pos*2
+      else LFO_AM:=126-(pos and 63)*2;
+    LFO_PM:=pos shr 2;
+  end;
+  OPN.eg_timer:=OPN.eg_timer+OPN.eg_timer_add;
+  while OPN.eg_timer>=OPN.eg_timer_overflow do begin
+    OPN.eg_timer:=OPN.eg_timer-OPN.eg_timer_overflow;Inc(OPN.eg_cnt);
+    for j:=0 to 3 do advance_eg_channel(OPN,OPN.P_CH[fm_channels[j]]);
+  end;
+  l:=0;
+  r:=0;
+  for j:=0 to 3 do begin
+    c:=fm_channels[j];
+    out_fm[c]:=0;
+    CHAN_Calc(OPN,OPN.P_CH[c]);
+    if OPN.pan[c*2]<>0 then inc(l,sar(out_fm[c],1));
+    if OPN.pan[c*2+1]<>0 then inc(r,sar(out_fm[c],1));
+  end;
+  a_phase:=a_phase+clock/(432.0*FREQ_BASE_AUDIO);
+  while a_phase>=1 do begin
+    a_phase:=a_phase-1;
+    clock_a;
+  end;
+  b_phase:=b_phase+clock/(144.0*FREQ_BASE_AUDIO);
+  while b_phase>=1 do begin
+    b_phase:=b_phase-1;
+    clock_b;
+  end;
+  for c:=0 to 5 do begin
+    vol:=((regs[$108+c]and $1f)xor $1f)+((regs[$101]and $3f)xor $3f);
+    if vol>=63 then continue;
+    sample:=a[c].accumulator;
+    if sample>=$800 then dec(sample,$1000);
+    mul:=15-(vol and 7);
+    shift:=1+(vol shr 3);
+    sample:=sar(sample*mul,shift) and (integer(not 3));
+    if (regs[$108+c]and $80)<>0 then inc(l,sample);
+    if (regs[$108+c]and $40)<>0 then inc(r,sample);
+  end;
+  mixb:=(int64(b_previous)*($10000-b_position)+int64(b_output)*b_position)div $10000;
+  sample:=sar(integer(mixb)*regs[$1b],9);
+  if (regs[$11]and $80)<>0 then inc(l,sample);
+  if (regs[$11]and $40)<>0 then inc(r,sample);
+  // The AY engine supplies the existing emulator's SSG waveform/mix.
+  ssg:=ay8910_int.update_internal^;
+  if sound_status.stereo then begin
+    tsample[tsample_num,sound_status.posicion_sonido]:=clamp(ssg+Trunc(l*amp),-32768,32767);
+    tsample[tsample_num,sound_status.posicion_sonido+1]:=clamp(ssg+Trunc(r*amp),-32768,32767);
+  end else tsample[tsample_num,sound_status.posicion_sonido]:=clamp(ssg+Trunc((l+r)*amp),-32768,32767);
+  // Timers are advanced exclusively by timer_engine on the Z80 clock.
 end;
-
-procedure change_timer_status(timer_num:byte;timer_adjust:single);
-begin
-  if timer_adjust=0 then timers.enabled(timer_num,false)
-    else begin
-      timers.enabled(timer_num,true);
-      timers.timer[timer_num].time_final:=timer_adjust;
-    end;
-end;
-
-procedure ym2203_0_init_timer_a(count:single);
-begin
-  change_timer_status(ym2203_0.timer1,count*ym2203_0.timer_adjust);
-end;
-
-procedure ym2203_0_init_timer_b(count:single);
-begin
-  change_timer_status(ym2203_0.timer2,count*ym2203_0.timer_adjust);
-end;
-
-procedure ym2203_1_init_timer_a(count:single);
-begin
-  change_timer_status(ym2203_1.timer1,count*ym2203_1.timer_adjust);
-end;
-
-procedure ym2203_1_init_timer_b(count:single);
-begin
-  change_timer_status(ym2203_1.timer2,count*ym2203_1.timer_adjust);
-end;}
 
 end.

@@ -40,6 +40,26 @@ type
                 procedure e93cxx_parse_command_and_address;
              end;
 
+  // Xicor X24C01: 128 x 8, seven address bits plus R/W (not 24C02).
+  tx24c01_phase=(xpIdle,xpAddress,xpWrite,xpDeviceAck,xpRead,xpHostAck);
+  x24c01_chip=class
+  public
+    dirty:boolean;
+    constructor create;
+    procedure reset;
+    procedure lines_write(new_sda,new_scl:byte);
+    function do_read:byte;
+    function get_data:pbyte;
+    function load_data(name:string):boolean;
+    procedure write_data(name:string);
+ private
+    memory:array[0..$7f]of byte;
+    phase,after_ack:tx24c01_phase;
+    scl,sda,output,address:byte;
+    bits,shift,ack_phase:integer;
+    continue_read:boolean;
+  end;
+
 const
     E93C06=0;
     E93C46=1;
@@ -53,8 +73,10 @@ const
 
 var
   eepromser_0:eepromser_chip;
+  x24c01_0:x24c01_chip;
 
 implementation
+uses SysUtils;
 const
     COMMAND_INVALID=0;
 		COMMAND_READ=1;
@@ -463,6 +485,129 @@ begin
 		2:self.command:=COMMAND_READ;
 		3:self.command:=COMMAND_WRITE;  // WRITE instead of ERASE on ER5911
 	end;
+end;
+
+constructor x24c01_chip.create;
+begin
+ FillChar(memory,SizeOf(memory),$ff);
+ dirty:=false;
+ reset;
+end;
+
+procedure x24c01_chip.reset;
+begin
+ phase:=xpIdle;
+ scl:=1;
+ sda:=1;
+ output:=1;
+ bits:=0;
+ shift:=0;
+ address:=0;
+ ack_phase:=0;
+end;
+
+function x24c01_chip.do_read:byte;
+begin
+ Result:=sda and output; // Open-drain SDA: either participant can pull it low.
+end;
+
+procedure x24c01_chip.lines_write(new_sda,new_scl:byte);
+begin
+ new_sda:=new_sda and 1;
+ new_scl:=new_scl and 1;
+ if (scl=1) and (new_scl=1) and (sda<>new_sda) then begin
+  output:=1;
+  bits:=0;
+  shift:=0;
+  if new_sda=0 then phase:=xpAddress
+    else phase:=xpIdle;
+ end else if (scl=0) and (new_scl=1) then begin
+  case phase of
+   xpAddress,xpWrite:begin
+    shift:=((shift shl 1)or new_sda)and $ff;
+    inc(bits);
+    if bits=8 then begin
+     if phase=xpAddress then begin
+      address:=(shift shr 1)and $7f;
+      if(shift and 1)<>0 then after_ack:=xpRead
+        else after_ack:=xpWrite;
+     end else begin
+      if memory[address]<>shift then begin
+       memory[address]:=shift;
+       dirty:=true;
+      end;
+      // X24C01 has four-byte write pages; reads wrap over the whole device.
+      address:=(address and $7c) or ((address+1) and 3);
+      after_ack:=xpWrite;
+     end;
+     phase:=xpDeviceAck;
+     ack_phase:=0;
+    end;
+   end;
+   xpDeviceAck:if ack_phase=1 then ack_phase:=2;
+   xpRead:inc(bits);
+   xpHostAck:begin
+    continue_read:=new_sda=0;
+    ack_phase:=1;
+   end;
+  end;
+ end else if(scl=1)and(new_scl=0)then begin
+  case phase of
+   xpDeviceAck:begin
+    if ack_phase=0 then begin
+     output:=0;
+     ack_phase:=1;
+    end else if ack_phase=2 then begin
+     output:=1;
+     phase:=after_ack;
+     bits:=0;
+     shift:=0;
+     if phase=xpRead then output:=(memory[address] shr 7)and 1;
+    end;
+   end;
+   xpRead:begin
+    if bits=8 then begin
+     output:=1;
+     phase:=xpHostAck;
+     ack_phase:=0;
+    end else output:=(memory[address] shr (7-bits)) and 1;
+   end;
+   xpHostAck:if ack_phase=1 then begin
+    if continue_read then begin
+     address:=(address+1)and $7f;
+     bits:=0;
+     phase:=xpRead;
+     output:=(memory[address] shr 7) and 1;
+    end else begin
+     phase:=xpIdle;
+     output:=1;
+    end;
+   end;
+  end;
+ end;
+ sda:=new_sda;
+ scl:=new_scl;
+end;
+
+function x24c01_chip.get_data:pbyte;
+begin
+ Result:=@memory[0];
+end;
+
+function x24c01_chip.load_data(name:string):boolean;
+var n:integer;
+begin
+ Result:=false;
+ if not read_file_size(Directory.Arcade_nvram+name,n) then exit;
+ if n<>SizeOf(memory) then exit;
+ Result:=read_file(Directory.Arcade_nvram+name,@memory[0],n);
+ if Result then dirty:=false;
+end;
+
+procedure x24c01_chip.write_data(name:string);
+begin
+ write_file(Directory.Arcade_nvram+name,@memory[0],SizeOf(memory));
+ dirty:=false;
 end;
 
 end.

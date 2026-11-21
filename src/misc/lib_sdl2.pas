@@ -7,6 +7,8 @@ uses
 
 procedure Init_sdl_lib;
 procedure close_sdl_lib;
+procedure InstalarCursorDiana;
+procedure RestaurarCursor;
 
 const
   libSDL_DISABLE=0;
@@ -19,6 +21,8 @@ const
   libSDL_MOUSEBUTTONUP=$402;
   libSDL_BUTTON_LEFT=1;
   libSDL_BUTTON_RIGHT=3;
+  libSDL_SYSTEM_CURSOR_ARROW=0;
+  libSDL_SYSTEM_CURSOR_CROSSHAIR=3;
   libSDL_KEYUP=$301;
   libSDL_KEYDOWN=$300;
   libSDL_COMMONEVENT=1;
@@ -95,6 +99,7 @@ var
   SDL_SaveBMP_RW:function(surface:libsdlp_Surface;dst:libsdlp_RWops;freedst:LongInt):LongInt;cdecl;
   SDL_SetColorKey:function(surface:libsdlp_Surface;flag:LongInt;key:Cardinal):LongInt;cdecl;
   SDL_JoystickGetAxis:function(joystick:libsdlp_joystick;axis:LongInt):smallint;cdecl;
+  SDL_JoystickNumAxes:function(joystick:libsdlp_joystick):smallint;cdecl;
   SDL_NumJoysticks:function:LongInt;cdecl;
   SDL_JoystickName:function(joystick:libsdlp_joystick):PAnsiChar;cdecl;
   SDL_JoystickNumButtons:function(joystick:libsdlp_joystick):LongInt;cdecl;
@@ -103,7 +108,10 @@ var
   SDL_JoystickGetButton:function(joystick:libsdlp_joystick;button:LongInt):byte;cdecl;
   SDL_JoystickNumHats:function(joystick:libsdlp_joystick):LongInt;cdecl;
   SDL_PollEvent:function(event:libSDLp_Event):LongInt;cdecl;
-  SDL_CreateSystemCursor:function(id:word):libsdlP_cursor;cdecl;
+  SDL_CreateSystemCursor:function(id:LongInt):libsdlP_cursor;cdecl;
+  SDL_CreateColorCursor:function(surface:libsdlp_Surface;hot_x,hot_y:LongInt):libsdlP_cursor;cdecl;
+  SDL_GetCursor:function:libsdlP_cursor;cdecl;
+  SDL_FreeCursor:procedure(cursor:libsdlP_cursor);cdecl;
   SDL_SetCursor:procedure(cursor:libsdlP_cursor);cdecl;
   SDL_ShowCursor:function(toggle:LongInt):LongInt;cdecl;
   SDL_DestroyWindow:procedure(window:libsdlP_Window);cdecl;
@@ -140,7 +148,11 @@ var
   SDL_CloseAudioDevice:procedure (dev:libSDL_AudioDeviceID);cdecl;
   SDL_PauseAudioDevice:procedure (dev:libSDL_AudioDeviceID;pause_on:integer);cdecl;
   SDL_RaiseWindow:procedure(window:libsdlP_Window);cdecl;
+  SDL_GetQueuedAudioSize:function(dev:libSDL_AudioDeviceID):LongInt;cdecl;
   {$endif}
+  CursorDiana:libsdlP_cursor=nil;
+  CursorAnterior:libsdlP_cursor=nil;
+
 
 implementation
 
@@ -179,6 +191,7 @@ end;
 @SDL_UnlockSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UnlockSurface');
 //joystick
 @SDL_JoystickGetAxis:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickGetAxis');
+@SDL_JoystickNumAxes:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickNumAxes');
 @SDL_NumJoysticks:=GetProcAddress(sdl_dll_Handle,'SDL_NumJoysticks');
 @SDL_JoystickName:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickName');
 @SDL_JoystickNumButtons:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickNumButtons');
@@ -195,6 +208,9 @@ end;
 @SDL_SetCursor:=GetProcAddress(sdl_dll_Handle,'SDL_SetCursor');
 @SDL_ShowCursor:=GetProcAddress(sdl_dll_Handle,'SDL_ShowCursor');
 @SDL_CreateSystemCursor:=GetProcAddress(sdl_dll_Handle,'SDL_CreateSystemCursor');
+@SDL_CreateColorCursor:=GetProcAddress(sdl_dll_Handle,'SDL_CreateColorCursor');
+@SDL_GetCursor:=GetProcAddress(sdl_dll_Handle,'SDL_GetCursor');
+@SDL_FreeCursor:=GetProcAddress(sdl_dll_Handle,'SDL_FreeCursor');
 //video
 @SDL_DestroyWindow:=GetProcAddress(sdl_dll_Handle,'SDL_DestroyWindow');
 @SDL_VideoQuit:=GetProcAddress(sdl_dll_Handle,'SDL_VideoQuit');
@@ -233,6 +249,7 @@ end;
 @SDL_CloseAudioDevice:=GetProcAddress(sdl_dll_Handle,'SDL_CloseAudioDevice');
 @SDL_PauseAudioDevice:=GetProcAddress(sdl_dll_Handle,'SDL_PauseAudioDevice');
 @SDL_RaiseWindow:=GetProcAddress(sdl_dll_Handle,'SDL_RaiseWindow');
+@SDL_GetQueuedAudioSize:=GetProcAddress(sdl_dll_Handle,'SDL_GetQueuedAudioSize');
 {$endif}
 end;
 
@@ -242,6 +259,68 @@ if sdl_dll_handle<>0 then begin
    FreeLibrary(sdl_dll_handle);
    sdl_dll_handle:=0;
 end;
+end;
+
+function CrearCursorDiana:libsdlP_cursor;
+var
+  S:libsdlp_Surface;
+  X,Y,DX,DY,D2:LongInt;
+  Pixel,Transparente,Negro,Rojo:Cardinal;
+  P:PCardinal;
+begin
+  Result:=nil;
+  S:=SDL_CreateRGBSurface(0,32,32,32,$00FF0000,$0000FF00,$000000FF,$FF000000);
+  if S=nil then raise Exception.Create('SDL_CreateRGBSurface: '+string(SDL_GetError()));
+  try
+    if SDL_LockSurface(S) <> 0 then raise Exception.Create('SDL_LockSurface: '+string(SDL_GetError()));
+    try
+      Transparente := SDL_MapRGBA(S^.format, 0, 0, 0, 0);
+      Negro        := SDL_MapRGBA(S^.format, 0, 0, 0, 255);
+      Rojo         := SDL_MapRGBA(S^.format, 255, 0, 0, 255);
+      for Y := 0 to 31 do
+        for X := 0 to 31 do begin
+          DX := X - 16;
+          DY := Y - 16;
+          D2 := DX * DX + DY * DY;
+          Pixel := Transparente;
+          { Anillo exterior negro }
+          if (D2 >= 121) and (D2 <= 169) then Pixel := Negro
+          { Anillo interior rojo }
+          else if (D2 >= 49) and (D2 <= 100) then Pixel := Rojo
+          { Centro rojo }
+          else if D2 <= 9 then Pixel := Rojo
+          { Marcas de mira }
+          else if ((Y = 16) and ((X < 5) or (X > 27))) or ((X = 16) and ((Y < 5) or (Y > 27))) then Pixel := Negro;
+          P:=PCardinal(NativeUInt(S^.pixels)+NativeUInt(Y * S^.pitch + X * SizeOf(Cardinal)));
+          P^:=Pixel;
+        end;
+    finally
+      SDL_UnlockSurface(S);
+    end;
+    Result:=SDL_CreateColorCursor(S, 16, 16);
+    if Result=nil then raise Exception.Create('SDL_CreateColorCursor: '+string(SDL_GetError()));
+  finally
+    SDL_FreeSurface(S);
+  end;
+end;
+
+procedure InstalarCursorDiana;
+begin
+  CursorAnterior:=SDL_GetCursor;
+  CursorDiana:=CrearCursorDiana;
+  SDL_SetCursor(CursorDiana);
+  SDL_ShowCursor(1);
+end;
+
+procedure RestaurarCursor;
+begin
+  if CursorAnterior<>nil then SDL_SetCursor(CursorAnterior);
+  if CursorDiana<>nil then begin
+    SDL_FreeCursor(CursorDiana);
+    CursorDiana:=nil;
+  end;
+  CursorAnterior:=nil;
+  SDL_ShowCursor(0);
 end;
 
 end.

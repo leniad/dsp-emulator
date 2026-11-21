@@ -4,7 +4,7 @@ interface
 uses
   lib_sdl2,Variants,Classes,Controls,Forms,Dialogs,
   StdCtrls,ExtCtrls,lenguaje,main_engine,ComCtrls,Buttons,controls_engine,
-  SHLOBJ;
+  SHLOBJ,redefine_main;
 
 type
   TMConfig = class(TForm)
@@ -54,54 +54,6 @@ type
     d3: TEdit;
     D6: TEdit;
     TabSheet3: TTabSheet;
-    GroupBox1: TGroupBox;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    Label15: TLabel;
-    Label16: TLabel;
-    Label17: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
-    RadioButton1: TRadioButton;
-    RadioButton2: TRadioButton;
-    BitBtn2: TBitBtn;
-    BitBtn3: TBitBtn;
-    BitBtn1: TBitBtn;
-    BitBtn4: TBitBtn;
-    BitBtn9: TBitBtn;
-    BitBtn10: TBitBtn;
-    BitBtn11: TBitBtn;
-    BitBtn15: TBitBtn;
-    BitBtn16: TBitBtn;
-    BitBtn17: TBitBtn;
-    GroupBox7: TGroupBox;
-    Button7: TButton;
-    ComboBox1: TComboBox;
-    GroupBox2: TGroupBox;
-    Label9: TLabel;
-    Label10: TLabel;
-    Label11: TLabel;
-    Label18: TLabel;
-    Label19: TLabel;
-    Label20: TLabel;
-    Label25: TLabel;
-    Label26: TLabel;
-    RadioButton3: TRadioButton;
-    RadioButton4: TRadioButton;
-    BitBtn5: TBitBtn;
-    BitBtn6: TBitBtn;
-    BitBtn7: TBitBtn;
-    BitBtn8: TBitBtn;
-    BitBtn12: TBitBtn;
-    BitBtn13: TBitBtn;
-    BitBtn14: TBitBtn;
-    BitBtn18: TBitBtn;
-    BitBtn19: TBitBtn;
-    BitBtn20: TBitBtn;
-    GroupBox10: TGroupBox;
-    ComboBox2: TComboBox;
-    Button8: TButton;
     ROM: TTabSheet;
     BitBtn21: TBitBtn;
     Autofire: TTabSheet;
@@ -122,49 +74,33 @@ type
     CheckBox16: TCheckBox;
     BitBtn22: TBitBtn;
     RadioButton12: TRadioButton;
-    BitBtn23: TBitBtn;
-    BitBtn24: TBitBtn;
-    BitBtn25: TBitBtn;
-    BitBtn26: TBitBtn;
     GroupBox15: TGroupBox;
     RadioButton28: TRadioButton;
     RadioButton29: TRadioButton;
+    Label6: TLabel;
+    Label7: TLabel;
+    ComboBox1: TComboBox;
+    ComboBox2: TComboBox;
+    ComboBox3: TComboBox;
+    Label8: TLabel;
+    Button3: TButton;
+    Button4: TButton;
+    Button5: TButton;
+    Button6: TButton;
+    Button7: TButton;
+    Button8: TButton;
+    Button9: TButton;
+    Button10: TButton;
+    Label9: TLabel;
+    ComboBox4: TComboBox;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
-    procedure BitBtn1Click(Sender: TObject);
-    procedure BitBtn2Click(Sender: TObject);
-    procedure BitBtn3Click(Sender: TObject);
-    procedure BitBtn4Click(Sender: TObject);
-    procedure BitBtn9Click(Sender: TObject);
-    procedure BitBtn10Click(Sender: TObject);
-    procedure BitBtn11Click(Sender: TObject);
-    procedure BitBtn5Click(Sender: TObject);
-    procedure BitBtn6Click(Sender: TObject);
-    procedure BitBtn8Click(Sender: TObject);
-    procedure BitBtn7Click(Sender: TObject);
-    procedure BitBtn12Click(Sender: TObject);
-    procedure BitBtn13Click(Sender: TObject);
-    procedure BitBtn14Click(Sender: TObject);
-    procedure RadioButton1Click(Sender: TObject);
-    procedure RadioButton2Click(Sender: TObject);
-    procedure RadioButton3Click(Sender: TObject);
-    procedure RadioButton4Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SpeedButton4Click(Sender: TObject);
     procedure SpeedButton5Click(Sender: TObject);
-    procedure BitBtn17Click(Sender: TObject);
-    procedure BitBtn15Click(Sender: TObject);
-    procedure BitBtn16Click(Sender: TObject);
-    procedure BitBtn19Click(Sender: TObject);
-    procedure BitBtn18Click(Sender: TObject);
-    procedure BitBtn20Click(Sender: TObject);
-    procedure Button8Click(Sender: TObject);
     procedure BitBtn21Click(Sender: TObject);
-    procedure RadioButton22Click(Sender: TObject);
-    procedure RadioButton21Click(Sender: TObject);
-    procedure ComboBox1Change(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
     procedure SpeedButton6Click(Sender: TObject);
     procedure SpeedButton8Click(Sender: TObject);
@@ -176,15 +112,17 @@ type
     procedure RadioButton8Click(Sender: TObject);
     procedure RadioButton9Click(Sender: TObject);
     procedure RadioButton10Click(Sender: TObject);
-    procedure ComboBox2Change(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure BitBtn22Click(Sender: TObject);
     procedure RadioButton12Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure BitBtn23Click(Sender: TObject);
-    procedure BitBtn24Click(Sender: TObject);
-    procedure BitBtn25Click(Sender: TObject);
-    procedure BitBtn26Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -193,12 +131,10 @@ type
 
 var
   MConfig:TMConfig;
-  tecla_leida:word;
   idioma_antes:byte;
-  config_button:boolean;
 
 implementation
-uses principal,redefine,configgeneral_misc,rom_engine;
+uses principal,configgeneral_misc,rom_engine;
 {$R *.dfm}
 
 function BrowseForFolder(init_dir,title:string):string;
@@ -229,127 +165,6 @@ begin
   end else BrowseForFolder:=remove_last_char(init_dir);
 end;
 
-procedure TMConfig.BitBtn9Click(Sender: TObject);
-begin
-  read_button(9,0);
-end;
-
-procedure TMConfig.BitBtn10Click(Sender: TObject);
-begin
-  read_button(10,0);
-end;
-
-procedure TMConfig.BitBtn11Click(Sender: TObject);
-begin
-  read_button(11,0);
-end;
-
-procedure TMConfig.BitBtn12Click(Sender: TObject);
-begin
-  read_button(12,1);
-end;
-
-procedure TMConfig.BitBtn13Click(Sender: TObject);
-begin
-  read_button(13,1);
-end;
-
-procedure TMConfig.BitBtn14Click(Sender: TObject);
-begin
-  read_button(14,1);
-end;
-
-procedure TMConfig.BitBtn15Click(Sender: TObject);
-begin
-  read_button(15,0);
-end;
-
-procedure TMConfig.BitBtn16Click(Sender: TObject);
-begin
-  read_button(16,0);
-end;
-
-procedure TMConfig.BitBtn17Click(Sender: TObject);
-begin
-  read_button(17,0);
-end;
-
-procedure TMConfig.BitBtn18Click(Sender: TObject);
-begin
-  read_button(18,1);
-end;
-
-procedure TMConfig.BitBtn19Click(Sender: TObject);
-begin
- read_button(19,1);
-end;
-
-procedure TMConfig.BitBtn20Click(Sender: TObject);
-begin
-  read_button(20,1);
-end;
-
-procedure TMConfig.BitBtn23Click(Sender: TObject);
-begin
-  read_button(23,0);
-end;
-
-procedure TMConfig.BitBtn24Click(Sender: TObject);
-begin
-  read_button(24,0);
-end;
-
-procedure TMConfig.BitBtn25Click(Sender: TObject);
-begin
-  read_button(25,1);
-end;
-
-procedure TMConfig.BitBtn26Click(Sender: TObject);
-begin
-  read_button(26,1);
-end;
-
-procedure TMConfig.BitBtn1Click(Sender: TObject);
-begin
-  read_dir(1);
-end;
-
-procedure TMConfig.BitBtn2Click(Sender: TObject);
-begin
-  read_dir(2);
-end;
-
-procedure TMConfig.BitBtn3Click(Sender: TObject);
-begin
-  read_dir(3);
-end;
-
-procedure TMConfig.BitBtn4Click(Sender: TObject);
-begin
-  read_dir(4);
-end;
-
-procedure TMConfig.BitBtn5Click(Sender: TObject);
-begin
-  read_dir(5);
-end;
-
-procedure TMConfig.BitBtn6Click(Sender: TObject);
-begin
-  read_dir(6);
-end;
-
-procedure TMConfig.BitBtn7Click(Sender: TObject);
-begin
-  read_dir(7);
-end;
-
-procedure TMConfig.BitBtn8Click(Sender: TObject);
-begin
-  read_dir(8);
-end;
-
-
 procedure TMConfig.FormCreate(Sender: TObject);
 begin
   config_general_idioma;
@@ -366,36 +181,6 @@ end;
 procedure TMConfig.FormShow(Sender: TObject);
 begin
   configgeneral_formshow;
-end;
-
-procedure TMConfig.RadioButton1Click(Sender: TObject);
-begin
-select_keyboard_p1;
-end;
-
-procedure TMConfig.RadioButton2Click(Sender: TObject);
-begin
-select_joystick_p1;
-end;
-
-procedure TMConfig.RadioButton3Click(Sender: TObject);
-begin
-select_keyboard_p2;
-end;
-
-procedure TMConfig.RadioButton4Click(Sender: TObject);
-begin
-select_joystick_p2;
-end;
-
-procedure TMConfig.RadioButton21Click(Sender: TObject);
-begin
-  button7.Enabled:=false;
-end;
-
-procedure TMConfig.RadioButton22Click(Sender: TObject);
-begin
- button7.Enabled:=true;
 end;
 
 procedure TMConfig.SpeedButton1Click(Sender: TObject);
@@ -438,32 +223,52 @@ begin
   close;
 end;
 
+procedure TMConfig.Button3Click(Sender: TObject);
+begin
+  indice_redefinir:=0;
+  mredefine.showmodal;
+end;
+
+procedure TMConfig.Button4Click(Sender: TObject);
+begin
+  indice_redefinir:=1;
+  mredefine.showmodal;
+end;
+
+procedure TMConfig.Button5Click(Sender: TObject);
+begin
+  indice_redefinir:=2;
+  mredefine.showmodal;
+end;
+
+procedure TMConfig.Button6Click(Sender: TObject);
+begin
+  indice_redefinir:=3;
+  mredefine.showmodal;
+end;
+
 procedure TMConfig.Button7Click(Sender: TObject);
 begin
-SDL_JoystickUpdate;
-arcade_input.joy_x[0]:=SDL_JoystickGetAxis(joystick_def[0],0);
-arcade_input.joy_y[0]:=SDL_JoystickGetAxis(joystick_def[0],1);
-//SDL_JoystickGetAxisInitialState(joystick_def[0],0,@arcade_input.joy_x[0]);
-//SDL_JoystickGetAxisInitialState(joystick_def[0],1,@arcade_input.joy_y[0]);
+  indice_redefinir:=4;
+  mredefine.showmodal;
 end;
 
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
-SDL_JoystickUpdate;
-arcade_input.joy_x[1]:=SDL_JoystickGetAxis(joystick_def[1],0);
-arcade_input.joy_y[1]:=SDL_JoystickGetAxis(joystick_def[1],1);
-//SDL_JoystickGetAxisInitialState(joystick_def[1],0,@arcade_input.joy_x[1]);
-//SDL_JoystickGetAxisInitialState(joystick_def[1],1,@arcade_input.joy_y[1]);
+  indice_redefinir:=5;
+  mredefine.showmodal;
 end;
 
-procedure TMConfig.ComboBox1Change(Sender: TObject);
+procedure TMConfig.Button9Click(Sender: TObject);
 begin
-  arcade_input.num_joystick[0]:=combobox1.ItemIndex;
+  indice_redefinir:=6;
+  mredefine.showmodal;
 end;
 
-procedure TMConfig.ComboBox2Change(Sender: TObject);
+procedure TMConfig.Button10Click(Sender: TObject);
 begin
-  arcade_input.num_joystick[1]:=combobox2.ItemIndex;
+  indice_redefinir:=7;
+  mredefine.showmodal;
 end;
 
 procedure TMConfig.Button1Click(Sender: TObject);

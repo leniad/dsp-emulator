@@ -81,8 +81,85 @@ var
  mem_prom:array[0..$ff] of byte;
  banco_rom,sound_stat,sound_latch:byte;
  sound_nmi,video_enable:boolean;
+ sound_command_pending,sound_response_pending:boolean;
+ sound_reset_active,irq_ym2203,irq_ym3526:boolean;
  mcu_port3_in,mcu_port1_out,mcu_port2_out,mcu_port3_out,mcu_port4_out:byte;
  m_ic43_a,m_ic43_b:byte;
+
+ //Cualquiera de los dos chips de sonido puede provocar una NMI
+procedure update_sound_irq;
+begin
+  if (irq_ym2203 or irq_ym3526) then z80_2.change_irq(ASSERT_LINE)
+    else z80_2.change_irq(CLEAR_LINE);
+end;
+
+procedure snd_irq_ym2203(irqstate:byte);
+begin
+  irq_ym2203:=irqstate<>CLEAR_LINE;
+  update_sound_irq;
+end;
+
+procedure snd_irq_ym3526(irqstate:byte);
+begin
+  irq_ym3526:=irqstate<>CLEAR_LINE;
+  update_sound_irq;
+end;
+
+procedure update_sound_nmi;
+begin
+  if (sound_nmi and sound_command_pending) then z80_2.change_nmi(ASSERT_LINE)
+    else z80_2.change_nmi(CLEAR_LINE);
+end;
+
+procedure write_sound_command(valor:byte);
+begin
+  sound_latch:=valor;
+  sound_command_pending:=true;
+  update_sound_nmi;
+end;
+
+function read_sound_command:byte;
+begin
+  read_sound_command:=sound_latch;
+  sound_command_pending:=false;
+  update_sound_nmi;
+end;
+
+function read_sound_semaphores:byte;
+begin
+  read_sound_semaphores:=$fc or (byte(sound_command_pending) shl 1) or byte(sound_response_pending);
+end;
+
+procedure write_sound_response(valor:byte);
+begin
+  sound_stat:=valor;
+  sound_response_pending:=true;
+end;
+
+function read_sound_response:byte;
+begin
+  read_sound_response:=sound_stat;
+  sound_response_pending:=false;
+end;
+
+procedure sound_reset_w(valor:byte);
+var
+  active:boolean;
+begin
+  active:=valor<>0;
+  if (active and not sound_reset_active) then begin
+    // El Z80 principal ejecuta el reset segido, y se puede quedar el estado RESET
+    z80_2.reset;
+    ym2203_0.reset;
+    if main_vars.tipo_maquina<>425 then ym3812_0.reset;
+    sound_response_pending:=false;
+    sound_nmi:=false;
+    update_sound_nmi;
+  end;
+  if active then z80_2.change_reset(ASSERT_LINE)
+    else z80_2.change_reset(CLEAR_LINE);
+  sound_reset_active:=active;
+end;
 
 procedure update_video_bublbobl;
 var
@@ -90,7 +167,7 @@ var
     flipx,flipy:boolean;
     prom_line,atrib,atrib2,offs,xc,yc,sy,y,gfx_attr,gfx_num:byte;
 begin
-fill_full_screen(1,$100);
+fill_full_screen(1,$ff);
 if video_enable then begin
  sx:=0;
  for offs:=0 to $bf do begin
@@ -140,8 +217,8 @@ if event.arcade then begin
   //P2
   if arcade_input.left[1] then marcade.in2:=marcade.in2 and $fe;
   if arcade_input.right[1] then marcade.in2:=marcade.in2 and $fd;
-  if arcade_input.down[0] then marcade.in2:=marcade.in2 and $fb;
-  if arcade_input.up[0] then marcade.in2:=marcade.in2 and $f7;
+  if arcade_input.down[1] then marcade.in2:=marcade.in2 and $fb;
+  if arcade_input.up[1] then marcade.in2:=marcade.in2 and $f7;
   if arcade_input.but1[1] then marcade.in2:=marcade.in2 and $ef;
   if arcade_input.but0[1] then marcade.in2:=marcade.in2 and $df;
   if arcade_input.start[1] then marcade.in2:=marcade.in2 and $bf;
@@ -262,7 +339,11 @@ case direccion of
   0..$7fff,$c000..$f7ff,$fc00..$ffff:bublbobl_getbyte:=memoria[direccion];
   $8000..$bfff:bublbobl_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
   $f800..$f9ff:bublbobl_getbyte:=buffer_paleta[direccion and $1ff];
-  $fa00:bublbobl_getbyte:=sound_stat;
+  $fa00..$fa7f:case (direccion and 3) of
+    0:bublbobl_getbyte:=read_sound_response;
+    1:bublbobl_getbyte:=read_sound_semaphores;
+    else bublbobl_getbyte:=$ff;
+  end;
 end;
 end;
 
@@ -289,14 +370,9 @@ case direccion of
                         cambiar_color(direccion and $1fe);
                      end;
         $fa00..$fa7f:case (direccion and 3) of
-                      0:if not(sound_nmi) then begin
-                          z80_2.change_nmi(ASSERT_LINE);
-                          sound_latch:=valor;
-                          sound_nmi:=true;
-                        end;
+                      0:write_sound_command(valor);
                       1:; //Semaforos
-                      3:if valor<>0 then z80_2.change_reset(ASSERT_LINE)
-                          else z80_2.change_reset(CLEAR_LINE);
+                      3:sound_reset_w(valor);
                      end;
         $fb00..$fb3f:z80_1.change_nmi(PULSE_LINE);
         $fb40..$fb7f:begin
@@ -335,7 +411,8 @@ begin
     $9001:bbsnd_getbyte:=ym2203_0.read;
     $a000:bbsnd_getbyte:=ym3812_0.status;
     $a001:bbsnd_getbyte:=ym3812_0.read;
-    $b000:bbsnd_getbyte:=sound_latch;
+    $b000:bbsnd_getbyte:=read_sound_command;
+    $b001:bbsnd_getbyte:=read_sound_semaphores;
   end;
 end;
 
@@ -348,10 +425,14 @@ case direccion of
   $9001:ym2203_0.write(valor);
   $a000:ym3812_0.control(valor);
   $a001:ym3812_0.write(valor);
-  $b000:sound_stat:=valor;
+  $b000:write_sound_response(valor);
+  $b001:begin
+          sound_nmi:=true;
+          update_sound_nmi;
+        end;
   $b002:begin
           sound_nmi:=false;
-          z80_2.change_nmi(CLEAR_LINE);
+          update_sound_nmi;
         end;
 end;
 end;
@@ -360,11 +441,6 @@ procedure bb_sound_update;
 begin
   ym2203_0.update;
   ym3812_0.update;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  z80_2.change_irq(irqstate);
 end;
 
 function bublbobl_irq_vector:byte;
@@ -435,7 +511,7 @@ case direccion of
   $fa05:tokio_getbyte:=marcade.in0+($10*byte(not(taito_68705_0.main_sent)))+($20*byte(not(taito_68705_0.mcu_sent)));
   $fa06:tokio_getbyte:=marcade.in1;
   $fa07:tokio_getbyte:=marcade.in2;
-  $fc00:tokio_getbyte:=sound_stat;
+  $fc00:tokio_getbyte:=read_sound_response;
   $fe00:tokio_getbyte:=taito_68705_0.read;
 end;
 end;
@@ -456,11 +532,7 @@ case direccion of
               end;
         $fb00:main_screen.flip_main_screen:=(valor and $80)<>0;
         $fb80:z80_1.change_nmi(PULSE_LINE);
-        $fc00:if not(sound_nmi) then begin
-                z80_2.change_nmi(ASSERT_LINE);
-                sound_latch:=valor;
-                sound_nmi:=true;
-              end;
+        $fc00:write_sound_command(valor);
         $fe00:taito_68705_0.write(valor);
 end;
 end;
@@ -485,8 +557,8 @@ function tokio_snd_getbyte(direccion:word):byte;
 begin
   case direccion of
     0..$8fff:tokio_snd_getbyte:=mem_snd[direccion];
-    $9000:tokio_snd_getbyte:=sound_latch;
-    $9800:; //semaforos
+    $9000:tokio_snd_getbyte:=read_sound_command;
+    $9800:tokio_snd_getbyte:=read_sound_semaphores;
     $b000:tokio_snd_getbyte:=ym2203_0.status;
     $b001:tokio_snd_getbyte:=ym2203_0.read;
   end;
@@ -497,12 +569,15 @@ begin
 case direccion of
   0..$7fff:; //ROM
   $8000..$8fff:mem_snd[direccion]:=valor;
-  $9000:sound_stat:=valor;
+  $9000:write_sound_response(valor);
   $a000:begin
           sound_nmi:=false;
-          z80_2.change_nmi(CLEAR_LINE);
+          update_sound_nmi;
         end;
-  $a800:; //sound NMI set?
+  $a800:begin
+          sound_nmi:=true;
+          update_sound_nmi;
+        end;
   $b000:ym2203_0.control(valor);
   $b001:ym2203_0.write(valor);
 end;
@@ -520,7 +595,11 @@ case direccion of
   0..$7fff,$c000..$f7ff,$fc00..$fdff:sboblbobl_getbyte:=memoria[direccion];
   $8000..$bfff:sboblbobl_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
   $f800..$f9ff:sboblbobl_getbyte:=buffer_paleta[direccion and $1ff];
-  $fa00:sboblbobl_getbyte:=sound_stat;
+  $fa00..$fa7f:case (direccion and 3) of
+    0:sboblbobl_getbyte:=read_sound_response;
+    1:sboblbobl_getbyte:=read_sound_semaphores;
+    2,3:sboblbobl_getbyte:=$ff;
+  end;
   $fe00:sboblbobl_getbyte:=m_ic43_a shl 4;
   $fe01..$fe03:sboblbobl_getbyte:=random(256);
   $fe80:sboblbobl_getbyte:=m_ic43_b shl 4;
@@ -544,14 +623,9 @@ case direccion of
                         cambiar_color(direccion and $1fe);
                      end;
         $fa00..$fa7f:case (direccion and 3) of
-                      0:if not(sound_nmi) then begin
-                          z80_2.change_nmi(ASSERT_LINE);
-                          sound_latch:=valor;
-                          sound_nmi:=true;
-                        end;
+                      0:write_sound_command(valor);
                       1:; //Semaforos
-                      3:if valor<>0 then z80_2.change_reset(ASSERT_LINE)
-                          else z80_2.change_reset(CLEAR_LINE);
+                      3:sound_reset_w(valor);
                      end;
         $fb00..$fb3f:z80_1.change_nmi(PULSE_LINE);
         $fb40..$fb7f:begin
@@ -613,34 +687,37 @@ begin
  frame_main:=z80_0.tframes;
  frame_sub:=z80_1.tframes;
  frame_snd:=z80_2.tframes;
+ ym2203_0.reset;
  case main_vars.tipo_maquina of
   46:begin
       m6800_0.reset;
       frame_mcu:=m6800_0.tframes;
       marcade.in0:=$b3;
-      ym2203_0.reset;
       ym3812_0.reset;
-      mcu_port3_in:=0;
-      mcu_port1_out:=0;
-      mcu_port2_out:=0;
-      mcu_port3_out:=0;
-      mcu_port4_out:=0;
   end;
  425:begin
       marcade.in0:=$c3;
       taito_68705_0.reset;
-      ym2203_0.reset;
      end;
  426:begin
       marcade.in0:=$f3;
-      ym2203_0.reset;
       ym3812_0.reset;
-      m_ic43_a:=0;
-      m_ic43_b:=0;
      end;
  end;
+ mcu_port3_in:=0;
+ mcu_port1_out:=0;
+ mcu_port2_out:=0;
+ mcu_port3_out:=0;
+ mcu_port4_out:=0;
+ m_ic43_a:=0;
+ m_ic43_b:=0;
+ video_enable:=false;
  banco_rom:=0;
  sound_nmi:=false;
+ sound_command_pending:=false;
+ sound_response_pending:=false;
+ sound_reset_active:=false;
+ update_sound_nmi;
  sound_stat:=0;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -694,9 +771,9 @@ case main_vars.tipo_maquina of
         z80_2.init_sound(bb_sound_update);
         //Sound
         ym2203_0:=ym2203_chip.create(3000000);
-        ym2203_0.change_irq_calls(snd_irq);
+        ym2203_0.change_irq_calls(snd_irq_ym2203);
         ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-        ym3812_0.change_irq_calls(snd_irq);
+        ym3812_0.change_irq_calls(snd_irq_ym3526);
         //MCU
         m6800_0:=cpu_m6800.create(4000000,TCPU_M6801);
         m6800_0.change_io_calls(mcu_port1_r,nil,mcu_port3_r,nil,mcu_port1_w,mcu_port2_w,mcu_port3_w,mcu_port4_w);
@@ -725,7 +802,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@mem_snd,tokio_snd)) then exit;
         z80_2.init_sound(tokio_sound_update);
         ym2203_0:=ym2203_chip.create(3000000);
-        ym2203_0.change_irq_calls(snd_irq);
+        ym2203_0.change_irq_calls(snd_irq_ym2203);
         //MCU
         taito_68705_0:=taito_68705p.create(3000000);
         if not(roms_load(taito_68705_0.get_rom_addr,tokio_mcu)) then exit;
@@ -754,9 +831,9 @@ case main_vars.tipo_maquina of
         z80_2.init_sound(bb_sound_update);
         //Sound
         ym2203_0:=ym2203_chip.create(3000000);
-        ym2203_0.change_irq_calls(snd_irq);
+        ym2203_0.change_irq_calls(snd_irq_ym2203);
         ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-        ym3812_0.change_irq_calls(snd_irq);
+        ym3812_0.change_irq_calls(snd_irq_ym3526);
         //proms video
         if not(roms_load(@mem_prom,bublbobl_prom,true,true,'bublbobl.zip')) then exit;
         //convertir chars
@@ -772,3 +849,4 @@ iniciar_bublbobl:=true;
 end;
 
 end.
+

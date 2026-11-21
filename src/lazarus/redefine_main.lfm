@@ -1,0 +1,191 @@
+object mredefine: Tmredefine
+  Left = 316
+  Height = 295
+  Top = 32
+  Width = 279
+  ClientHeight = 295
+  ClientWidth = 279
+  DesignTimePPI = 120
+  LCLVersion = '5.0.1.0'
+  OnShow = FormShow
+  object Label13: TLabel
+    Left = 43
+    Height = 20
+    Top = 214
+    Width = 93
+    Caption = ' COIN/SELECT'
+  end
+  object Label14: TLabel
+    Left = 173
+    Height = 20
+    Top = 213
+    Width = 41
+    Caption = 'START'
+  end
+  object Label15: TLabel
+    Left = 140
+    Height = 20
+    Top = 128
+    Width = 34
+    Caption = 'But 3'
+  end
+  object Label16: TLabel
+    Left = 140
+    Height = 20
+    Top = 155
+    Width = 34
+    Caption = 'But 4'
+  end
+  object Label17: TLabel
+    Left = 140
+    Height = 20
+    Top = 182
+    Width = 34
+    Caption = 'But 5'
+  end
+  object Label6: TLabel
+    Left = 11
+    Height = 20
+    Top = 128
+    Width = 34
+    Caption = 'But 0'
+  end
+  object Label7: TLabel
+    Left = 11
+    Height = 20
+    Top = 155
+    Width = 34
+    Caption = 'But 1'
+  end
+  object Label8: TLabel
+    Left = 11
+    Height = 20
+    Top = 182
+    Width = 34
+    Caption = 'But 2'
+  end
+  object BitBtn1: TBitBtn
+    Left = 59
+    Height = 33
+    Top = 47
+    Width = 41
+    Font.Color = clWindowText
+    Font.Height = -8
+    Font.Name = 'MS Sans Serif'
+    ParentFont = False
+    TabOrder = 0
+    TabStop = False
+    OnClick = BitBtn1Click
+  end
+  object BitBtn10: TBitBtn
+    Left = 41
+    Height = 30
+    Top = 147
+    Width = 74
+    TabOrder = 1
+    TabStop = False
+    OnClick = BitBtn10Click
+  end
+  object BitBtn11: TBitBtn
+    Left = 41
+    Height = 30
+    Top = 177
+    Width = 74
+    TabOrder = 2
+    TabStop = False
+    OnClick = BitBtn11Click
+  end
+  object BitBtn15: TBitBtn
+    Left = 179
+    Height = 30
+    Top = 147
+    Width = 74
+    TabOrder = 3
+    TabStop = False
+    OnClick = BitBtn15Click
+  end
+  object BitBtn16: TBitBtn
+    Left = 179
+    Height = 30
+    Top = 177
+    Width = 74
+    TabOrder = 4
+    TabStop = False
+    OnClick = BitBtn16Click
+  end
+  object BitBtn17: TBitBtn
+    Left = 179
+    Height = 30
+    Top = 117
+    Width = 74
+    TabOrder = 5
+    TabStop = False
+    OnClick = BitBtn17Click
+  end
+  object BitBtn2: TBitBtn
+    Left = 153
+    Height = 33
+    Top = 47
+    Width = 41
+    Font.Color = clWindowText
+    Font.Height = -8
+    Font.Name = 'MS Sans Serif'
+    ParentFont = False
+    TabOrder = 6
+    TabStop = False
+    OnClick = BitBtn2Click
+  end
+  object BitBtn23: TBitBtn
+    Left = 41
+    Height = 30
+    Top = 233
+    Width = 75
+    TabOrder = 7
+    TabStop = False
+    OnClick = BitBtn23Click
+  end
+  object BitBtn24: TBitBtn
+    Left = 146
+    Height = 30
+    Top = 233
+    Width = 75
+    TabOrder = 8
+    TabStop = False
+    OnClick = BitBtn24Click
+  end
+  object BitBtn3: TBitBtn
+    Left = 106
+    Height = 33
+    Top = 78
+    Width = 41
+    Font.Color = clWindowText
+    Font.Height = -8
+    Font.Name = 'MS Sans Serif'
+    ParentFont = False
+    TabOrder = 9
+    TabStop = False
+    OnClick = BitBtn3Click
+  end
+  object BitBtn4: TBitBtn
+    Left = 106
+    Height = 33
+    Top = 8
+    Width = 41
+    Font.Color = clWindowText
+    Font.Height = -8
+    Font.Name = 'MS Sans Serif'
+    ParentFont = False
+    TabOrder = 10
+    TabStop = False
+    OnClick = BitBtn4Click
+  end
+  object BitBtn9: TBitBtn
+    Left = 41
+    Height = 30
+    Top = 117
+    Width = 74
+    TabOrder = 11
+    TabStop = False
+    OnClick = BitBtn9Click
+  end
+end

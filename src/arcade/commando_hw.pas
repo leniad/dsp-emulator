@@ -73,7 +73,7 @@ for f:=$3ff downto 0 do begin
 end;
 scroll_x_y(2,1,scroll_x,256-scroll_y);
 //sprites
-for f:=$7f downto 0 do begin
+for f:=$5f downto 0 do begin
     attr:=buffer_sprites[1+(f*4)];
     bank:=(attr and $c0) shr 6;
     if bank<3 then begin
@@ -87,7 +87,6 @@ for f:=$7f downto 0 do begin
 end;
 actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
 actualiza_trozo_final(16,0,224,256,1);
-copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
 end;
 
 procedure eventos_commando;
@@ -125,7 +124,7 @@ begin
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     eventos_commando;
-    if f=246 then begin
+    if f=240 then begin
       z80_0.change_irq_vector(HOLD_LINE,$d7);
       update_video_commando;
     end;
@@ -164,6 +163,7 @@ case direccion of
                     else z80_1.change_reset(CLEAR_LINE);
             main_screen.flip_main_screen:=(valor and $80)<>0;
          end;
+   $c806:copymemory(@buffer_sprites[0],@memoria[$fe00],$180);
    $c808:scroll_y:=(scroll_y and $100) or valor;
    $c809:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
    $c80a:scroll_x:=(scroll_x and $100) or valor;
@@ -288,9 +288,9 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //pal
 if not(roms_load(@memoria_temp,commando_pal)) then exit;
 for f:=0 to 255 do begin
-  colores[f].r:=pal4bit(memoria_temp[f]);
-  colores[f].g:=pal4bit(memoria_temp[f+$100]);
-  colores[f].b:=pal4bit(memoria_temp[f+$200]);
+  colores[f].r:=$e*(memoria_temp[f] and 1)+$1f*((memoria_temp[f] shr 1) and 1)+$43*((memoria_temp[f] shr 2) and 1)+$8f*((memoria_temp[f] shr 3) and 1);
+  colores[f].g:=$e*(memoria_temp[f+$100] and 1)+$1f*((memoria_temp[f+$100] shr 1) and 1)+$43*((memoria_temp[f+$100] shr 2) and 1)+$8f*((memoria_temp[f+$100] shr 3) and 1);
+  colores[f].b:=$e*(memoria_temp[f+$200] and 1)+$1f*((memoria_temp[f+$200] shr 1) and 1)+$43*((memoria_temp[f+$200] shr 2) and 1)+$8f*((memoria_temp[f+$200] shr 3) and 1);
 end;
 set_pal(colores,256);
 for f:=0 to 63 do begin

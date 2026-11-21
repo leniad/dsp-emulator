@@ -1390,7 +1390,8 @@ begin
       if gb_0.hay_nvram then nv_ram_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
       reset_gb;
   end;
-  change_caption(cadena);
+  main_vars.nombre_caption:=cadena;
+  change_caption;
   directory.GameBoy:=ExtractFilePath(romfile);
 end;
 

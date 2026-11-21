@@ -43,6 +43,7 @@ object principal1: Tprincipal1
     000FF800001FF800003FF800007FF80000FFF80001FFF80003FFFFFFFFFF}
   Menu = MainMenu1
   Position = poDesigned
+  Scaled = False
   ShowHint = True
   OnClose = FormClose
   OnCreate = FormCreate
@@ -1233,7 +1234,7 @@ object principal1: Tprincipal1
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 205
+    ExplicitHeight = 195
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1766,7 +1767,7 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 247
+    ExplicitTop = 237
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -4136,6 +4137,29 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object NeoGeo1: TMenuItem
+            Caption = 'NeoGeo'
+            object MetalSlug1: TMenuItem
+              Caption = 'Metal Slug'
+              OnClick = CambiarMaquina
+            end
+            object MetalSlug21: TMenuItem
+              Caption = 'Metal Slug 2'
+              OnClick = CambiarMaquina
+            end
+            object kof941: TMenuItem
+              Caption = 'King of Fighters 94'
+              OnClick = CambiarMaquina
+            end
+            object Viewpoint1: TMenuItem
+              Caption = 'Viewpoint'
+              OnClick = CambiarMaquina
+            end
+            object MetalSlugX1: TMenuItem
+              Caption = 'Metal Slug X'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -4228,6 +4252,22 @@ object principal1: Tprincipal1
         end
         object pv2000: TMenuItem
           Caption = 'Casio PV-2000'
+          OnClick = CambiarMaquina
+        end
+        object Atari2600: TMenuItem
+          Caption = 'Atari 2600'
+          OnClick = CambiarMaquina
+        end
+        object Atari5200: TMenuItem
+          Caption = 'Atari 5200'
+          OnClick = CambiarMaquina
+        end
+        object Atari7800: TMenuItem
+          Caption = 'Atari 7800'
+          OnClick = CambiarMaquina
+        end
+        object PCEngine1: TMenuItem
+          Caption = 'PCEngine'
           OnClick = CambiarMaquina
         end
       end

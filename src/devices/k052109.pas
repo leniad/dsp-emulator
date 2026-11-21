@@ -1,4 +1,4 @@
-unit k052109;
+﻿unit k052109;
 
 interface
 uses main_engine,gfx_engine;
@@ -21,7 +21,7 @@ type
         procedure write_lsb(direccion:word;valor:byte);
         function read(direccion:word):byte;
         procedure write(direccion:word;val:byte);
-        procedure draw_tiles;
+        procedure draw_tiles(opaque_layer:byte=$ff);
         procedure reset;
         function is_irq_enabled:boolean;
         procedure clean_video_buffer;
@@ -36,6 +36,7 @@ type
         charrombank,charrombank_2:array[0..3] of byte;
         pant:array[0..2] of byte;
         ngfx:byte;
+        opaque_layer:byte;
         irq_enabled,has_extra_video_ram:boolean;
         char_rom:pbyte;
         char_size,char_mask:dword;
@@ -62,6 +63,7 @@ begin
   self.pant[1]:=pant2;
   self.pant[2]:=pant3;
   self.ngfx:=ngfx;
+  self.opaque_layer:=$ff;
   self.k052109_cb:=call_back;
   self.char_rom:=rom;
   self.char_size:=rom_size;
@@ -102,6 +104,7 @@ begin
 		self.charrombank[f]:=0;
 		self.charrombank_2[f]:=0;
 	end;
+  self.opaque_layer:=$ff;
   clean_video_buffer;
 end;
 
@@ -151,7 +154,7 @@ end	else begin   // control registers
                 for i:=0 to $17ff do begin
 				        	  bank:=(self.ram[i] and $0c) shr 2;
 				          	if (((bank=0) and ((dirty and 1)<>0)) or ((bank=1) and ((dirty and 2)<>0))) then
-                      self.video_buffer[(direccion and $1800) shr 11,direccion and $7ff]:=true;
+                      self.video_buffer[(i and $1800) shr 11,i and $7ff]:=true;
 			          end;
               end;
             end;
@@ -173,7 +176,7 @@ end	else begin   // control registers
                   for i:=0 to $17ff do begin
 				        	  bank:=(self.ram[i] and $0c) shr 2;
 				          	if (((bank=2) and ((dirty and 1)<>0)) or ((bank=3) and ((dirty and 2)<>0))) then
-                      self.video_buffer[(direccion and $1800) shr 11,direccion and $7ff]:=true;
+                      self.video_buffer[(i and $1800) shr 11,i and $7ff]:=true;
 			            end;
 			          end;
             end;
@@ -263,7 +266,10 @@ for f:=0 to $7ff do begin
 	  // if flip Y is enabled and the attribute but is set, turn it on
 	  if (old_flip_y and ((self.tileflip_enable and 2)<>0)) then flip_y:=true
       else flip_y:=(flags and 2)<>0;
-    put_gfx_trans_flip(pos_x*8,pos_y*8,nchar and self.char_mask,color shl 4,self.pant[layer],self.ngfx,flip_x,flip_y);
+    if layer=self.opaque_layer then
+      put_gfx_flip(pos_x*8,pos_y*8,nchar and self.char_mask,color shl 4,self.pant[layer],self.ngfx,flip_x,flip_y)
+    else
+      put_gfx_trans_flip(pos_x*8,pos_y*8,nchar and self.char_mask,color shl 4,self.pant[layer],self.ngfx,flip_x,flip_y);
 	  //tileinfo.category = priority;
     video_buffer[layer,f]:=false;
   end;
@@ -323,8 +329,15 @@ begin
   self.clean_video_buffer;
 end;
 
-procedure k052109_chip.draw_tiles;
+procedure k052109_chip.draw_tiles(opaque_layer:byte);
 begin
+  // El modo por defecto mantiene las tres capas transparentes para otros drivers.
+  // Regenerar ambas capas al cambiar cual actua como fondo opaco.
+  if self.opaque_layer<>opaque_layer then begin
+    if self.opaque_layer<3 then self.clean_video_buffer_layer(self.opaque_layer);
+    if opaque_layer<3 then self.clean_video_buffer_layer(opaque_layer);
+    self.opaque_layer:=opaque_layer;
+  end;
   self.calc_scroll_1;
   self.calc_scroll_2;
   self.update_all_tile(0);

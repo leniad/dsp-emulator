@@ -13,7 +13,7 @@ type
     x,y:byte;
     datos:pbyte;
     colores:array[0..MAX_COLORES-1] of word;
-    trans:array[0..$1f] of boolean;
+    trans:array[0..$ff] of boolean;
     shadow:array[0..$1f] of boolean;
     alpha:array[0..$1f] of boolean;
     trans_alt:array[0..4,0..$1f] of boolean;
@@ -65,7 +65,7 @@ procedure scroll_x_cut(porigen,pdestino:byte;scroll_x,pos_y,size_y:word);
 procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0);
 procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
 procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
-procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
+procedure scroll_xy_part(porigen,pdestino:byte;posicion_x,posicion_y:pword;scroll_x,scroll_y:word;row_shift,col_shift:byte);
 //Basic draw functions
 procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);
 function getpixel(x,y:word;sitio:byte):word;
@@ -81,6 +81,44 @@ procedure reset_gfx;
 
 implementation
 uses spectrum_misc,lib_sdl2;
+
+function zoom_extent(size:byte;zoom:single):word;
+var
+  scaled:single;
+  rounded:integer;
+begin
+  scaled:=size*zoom;
+  rounded:=trunc(scaled);
+  if scaled>rounded then inc(rounded);
+  zoom_extent:=rounded;
+end;
+
+procedure blit_wrapped_block(porigen,pdestino:byte;sx,sy,block_w,block_h,dx,dy:word);
+var
+  source_w,source_h,w1,w2,h1,h2:word;
+begin
+  source_w:=p_final[porigen].x;
+  source_h:=p_final[porigen].y;
+  if (source_w=0) or (source_h=0) or (block_w=0) or (block_h=0) or (dx>=scroll_final_x) or (dy>=scroll_final_y) then exit;
+  if block_w>scroll_final_x-dx then block_w:=scroll_final_x-dx;
+  if block_h>scroll_final_y-dy then block_h:=scroll_final_y-dy;
+  sx:=sx mod source_w;
+  sy:=sy mod source_h;
+  w1:=block_w;
+  if w1>source_w-sx then w1:=source_w-sx;
+  w2:=block_w-w1;
+  h1:=block_h;
+  if h1>source_h-sy then h1:=source_h-sy;
+  h2:=block_h-h1;
+  if (w1>0) and (h1>0) then
+    actualiza_trozo(sx,sy,w1,h1,porigen,dx,dy,w1,h1,pdestino);
+  if (w2>0) and (h1>0) then
+    actualiza_trozo(0,sy,w2,h1,porigen,dx+w1,dy,w2,h1,pdestino);
+  if (w1>0) and (h2>0) then
+    actualiza_trozo(sx,0,w1,h2,porigen,dx,dy+h1,w1,h2,pdestino);
+  if (w2>0) and (h2>0) then
+    actualiza_trozo(0,0,w2,h2,porigen,dx+w1,dy+h1,w2,h2,pdestino);
+end;
 
 //GFX
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
@@ -312,23 +350,18 @@ end;
 
 procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0);
 var
-  pos_y,posicion_x_def,posicion_y_def,size_of_y,long_x,long_x2:word;
+  pos_y,posicion_x_def,posicion_y_def,size_of_y:word;
   temp_pos_x:pword;
 begin
+if (long_bloque_y=0) or (p_final[porigen].x=0) or (p_final[porigen].y=0) then exit;
 temp_pos_x:=posicion_x;
 pos_y:=0;
 while (pos_y<scroll_final_y) do begin
     posicion_x_def:=(temp_pos_x^+scroll_x) and p_final[porigen].mask_x;
     posicion_y_def:=(pos_y+scroll_y) and p_final[porigen].mask_y;
-    if ((posicion_y_def+long_bloque_y)>p_final[porigen].y) then size_of_y:=long_bloque_y-((posicion_y_def+long_bloque_y)-p_final[porigen].y)
-      else size_of_y:=long_bloque_y;
-    if ((posicion_x_def+scroll_final_x)>p_final[porigen].x) then begin
-      long_x:=p_final[porigen].x-posicion_x_def;
-      long_x2:=scroll_final_x-long_x;
-      actualiza_trozo(0,posicion_y_def,long_x2,size_of_y,porigen,long_x,pos_y,long_x2,size_of_y,pdestino);
-    end else long_x:=scroll_final_x;
-    if (size_of_y<long_bloque_y) then actualiza_trozo(0,posicion_y_def,long_x,size_of_y,porigen,long_x,pos_y+size_of_y,long_x2,size_of_y,pdestino);
-    actualiza_trozo(posicion_x_def,posicion_y_def,long_x,size_of_y,porigen,0,pos_y,long_x,size_of_y,pdestino);
+    size_of_y:=long_bloque_y;
+    if size_of_y>scroll_final_y-pos_y then size_of_y:=scroll_final_y-pos_y;
+    blit_wrapped_block(porigen,pdestino,posicion_x_def,posicion_y_def,scroll_final_x,size_of_y,0,pos_y);
     pos_y:=pos_y+long_bloque_y;
     inc(temp_pos_x);
 end;
@@ -336,52 +369,150 @@ end;
 
 procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
 var
-  pos_x,long_y,long_y2,posicion_x_def,posicion_y_def,size_of_x:word;
+  pos_x,posicion_x_def,posicion_y_def,size_of_x:word;
   temp_pos_y:pword;
 begin
+if (long_bloque_x=0) or (p_final[porigen].x=0) or (p_final[porigen].y=0) then exit;
 temp_pos_y:=posicion_y;
 pos_x:=0;
 while (pos_x<scroll_final_x) do begin
     posicion_y_def:=(temp_pos_y^+scroll_y) and p_final[porigen].mask_y;
     posicion_x_def:=(pos_x+scroll_x) and p_final[porigen].mask_x;
-    if ((posicion_x_def+long_bloque_x)>scroll_final_x) then size_of_x:=long_bloque_x-((posicion_x_def+long_bloque_x)-scroll_final_x)
-      else size_of_x:=long_bloque_x;
-    if ((posicion_y_def+scroll_final_y)>p_final[porigen].y) then begin
-      long_y:=p_final[porigen].y-posicion_y_def;
-      long_y2:=scroll_final_y-long_y;
-      actualiza_trozo(posicion_x_def,0,size_of_x,long_y2,porigen,pos_x,long_y,size_of_x,long_y2,pdestino);
-    end else long_y:=scroll_final_y;
-    if (size_of_x<long_bloque_x) then actualiza_trozo(0,posicion_y_def,size_of_x,long_y2,porigen,pos_x+size_of_x,long_y,size_of_x,long_y2,pdestino);
-    actualiza_trozo(posicion_x_def,posicion_y_def,size_of_x,long_y,porigen,pos_x,0,size_of_x,long_y,pdestino);
+    size_of_x:=long_bloque_x;
+    if size_of_x>scroll_final_x-pos_x then size_of_x:=scroll_final_x-pos_x;
+    blit_wrapped_block(porigen,pdestino,posicion_x_def,posicion_y_def,size_of_x,scroll_final_y,pos_x,0);
     pos_x:=pos_x+long_bloque_x;
     inc(temp_pos_y);
 end;
 end;
 
-procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
+procedure scroll_xy_part_inplace(porigen,pdestino:byte;posicion_x,posicion_y:pword;scroll_x,scroll_y:word;row_shift,col_shift:byte);
 var
-  pos_y,pos_x,posicion_x_def,posicion_y_def,long_def_x,long_def_y:word;
-  temp_pos_x:pword;
+  dst_x,dst_y,remaining,segment_w,row_index,col_index,col_group,col_phase:integer;
+  source_x,source_y,base_source_y:integer;
+  wrapped_x,wrapped_y:word;
+  row_values,col_values,row_ptr,col_ptr:pword;
+  col_offset:word;
 begin
-pos_y:=0;
-while (pos_y<scroll_final_y) do begin
-  temp_pos_x:=posicion_x;
-  pos_x:=0;
-  while (pos_x<scroll_final_x) do begin
-    posicion_x_def:=(temp_pos_x^+pos_y+scroll_x) and p_final[porigen].mask_x;
-    posicion_y_def:=(posicion_y^+pos_x+scroll_y) and p_final[porigen].mask_y;
-    if (posicion_y_def+long_bloque_x)>scroll_final_y then long_def_y:=long_bloque_x-((posicion_y_def+long_bloque_x)-scroll_final_y)
-      else long_def_y:=long_bloque_x;
-    if (posicion_x_def+long_bloque_y)>scroll_final_x then long_def_x:=long_bloque_y-((posicion_x_def+long_bloque_y)-scroll_final_x)
-      else long_def_x:=long_bloque_y;
-    actualiza_trozo(posicion_x_def,posicion_y_def,long_def_x,long_def_y,porigen,pos_y,pos_x,long_def_x,long_def_y,pdestino);
-    if long_def_x<long_bloque_y then actualiza_trozo(0,posicion_y_def,long_bloque_y-long_def_x,long_def_y,porigen,pos_y+long_def_x,pos_x,long_bloque_y-long_def_x,long_def_y,pdestino);
-    pos_x:=pos_x+long_bloque_x;
-    inc(temp_pos_x);
+  if ((p_final[porigen].x=0) or (p_final[porigen].y=0)) then exit;
+  row_values:=posicion_x;
+  col_values:=posicion_y;
+  col_group:=8 shl col_shift;
+  for dst_y:=0 to scroll_final_y-1 do begin
+    base_source_y:=scroll_y+dst_y;
+    row_index:=(base_source_y shr row_shift) and ($1ff shr row_shift);
+    row_ptr:=row_values;
+    inc(row_ptr,row_index);
+    source_x:=scroll_x+row_ptr^;
+    dst_x:=0;
+    while dst_x<scroll_final_x do begin
+      col_index:=(source_x shr (3+col_shift)) and ($3f shr col_shift);
+      col_ptr:=col_values;
+      inc(col_ptr,col_index);
+      col_offset:=col_ptr^;
+      col_phase:=source_x and (col_group-1);
+      segment_w:=col_group-col_phase;
+      remaining:=scroll_final_x-dst_x;
+      if segment_w>remaining then segment_w:=remaining;
+      source_y:=base_source_y+col_offset;
+      wrapped_x:=((source_x mod p_final[porigen].x)+p_final[porigen].x) mod p_final[porigen].x;
+      wrapped_y:=((source_y mod p_final[porigen].y)+p_final[porigen].y) mod p_final[porigen].y;
+      blit_wrapped_block(porigen,pdestino,wrapped_x,wrapped_y,segment_w,1,dst_x,dst_y);
+      source_x:=source_x+segment_w;
+      dst_x:=dst_x+segment_w;
+    end;
   end;
-  inc(posicion_y);
-  pos_y:=pos_y+long_bloque_y;
 end;
+
+procedure scroll_xy_part(porigen,pdestino:byte;posicion_x,posicion_y:pword;scroll_x,scroll_y:word;row_shift,col_shift:byte);
+var
+  source_w,source_h,visible_w,visible_h:integer;
+  dst_x,dst_y,band_h,next_y,row_index,row_mask:integer;
+  source_x,base_source_y,wrapped_x,wrapped_y:integer;
+  col_mask,col_count,col_group,col_index,col_phase:integer;
+  segment_w,remaining,i,j,run_groups:integer;
+  row_offset:word;
+  row_ptr,col_ptr:pword;
+  col_offsets:array[0..63] of integer;
+  col_runs:array[0..63] of integer;
+  constant_columns,power2_x,power2_y:boolean;
+begin
+  source_w:=p_final[porigen].x;
+  source_h:=p_final[porigen].y;
+  visible_w:=scroll_final_x;
+  visible_h:=scroll_final_y;
+  if (source_w=0) or (source_h=0) or (visible_w=0) or (visible_h=0) then exit;
+  if porigen=pdestino then begin
+    scroll_xy_part_inplace(porigen,pdestino,posicion_x,posicion_y,scroll_x,scroll_y,row_shift,col_shift);
+    exit;
+  end;
+  power2_x:=(source_w and (source_w-1))=0;
+  power2_y:=(source_h and (source_h-1))=0;
+  row_mask:=$1ff shr row_shift;
+  col_mask:=$3f shr col_shift;
+  col_count:=col_mask+1;
+  col_group:=8 shl col_shift;
+  col_ptr:=posicion_y;
+  constant_columns:=true;
+  for i:=0 to col_mask do begin
+    col_offsets[i]:=col_ptr^ mod source_h;
+    if col_offsets[i]<>col_offsets[0] then constant_columns:=false;
+    inc(col_ptr);
+  end;
+  if not constant_columns then
+    for i:=0 to col_mask do begin
+      run_groups:=1;
+      j:=(i+1) and col_mask;
+      while run_groups<col_count do begin
+        if col_offsets[j]<>col_offsets[i] then break;
+        inc(run_groups);
+        j:=(j+1) and col_mask;
+      end;
+      col_runs[i]:=run_groups;
+    end;
+  dst_y:=0;
+  while dst_y<visible_h do begin
+    base_source_y:=integer(scroll_y)+dst_y;
+    row_index:=(base_source_y shr row_shift) and row_mask;
+    row_ptr:=posicion_x;
+    inc(row_ptr,row_index);
+    row_offset:=row_ptr^;
+    band_h:=1;
+    while (band_h<visible_h-dst_y) and (band_h<source_h) do begin
+      next_y:=base_source_y+band_h;
+      row_index:=(next_y shr row_shift) and row_mask;
+      row_ptr:=posicion_x;
+      inc(row_ptr,row_index);
+      if row_ptr^<>row_offset then break;
+      inc(band_h);
+    end;
+    source_x:=integer(scroll_x)+row_offset;
+    dst_x:=0;
+    while dst_x<visible_w do begin
+      remaining:=visible_w-dst_x;
+      if constant_columns then begin
+        col_index:=0;
+        segment_w:=remaining;
+      end else begin
+        col_index:=(source_x shr (3+col_shift)) and col_mask;
+        col_phase:=source_x and (col_group-1);
+        segment_w:=col_runs[col_index]*col_group-col_phase;
+        if segment_w>remaining then segment_w:=remaining;
+      end;
+      // blit_wrapped_block supports one wrap per axis; split larger spans.
+      if segment_w>source_w then segment_w:=source_w;
+      if power2_x then wrapped_x:=source_x and (source_w-1)
+        else wrapped_x:=source_x mod source_w;
+      wrapped_y:=base_source_y+col_offsets[col_index];
+      if power2_y then wrapped_y:=wrapped_y and (source_h-1)
+        else wrapped_y:=wrapped_y mod source_h;
+      if (wrapped_x+segment_w<=source_w) and (wrapped_y+band_h<=source_h) then actualiza_trozo(wrapped_x,wrapped_y,segment_w,band_h,porigen,dst_x,dst_y,segment_w,band_h,pdestino)
+        else blit_wrapped_block(porigen,pdestino,wrapped_x,wrapped_y,segment_w,band_h,dst_x,dst_y);
+      source_x:=source_x+segment_w;
+      dst_x:=dst_x+segment_w;
+    end;
+    dst_y:=dst_y+band_h;
+  end;
 end;
 
 //put pixel especial interno solo para los gfx...
@@ -841,19 +972,19 @@ var
   temp,temp2:pword;
   zoom_x,zoom_y:single;
   dir_x,dir_y:integer;
-  pos_y,cant_x:word;
+  pos_y,cant_x,cant_y:word;
 begin
 if ((zx<=0) or (zy<=0)) then exit;
 nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
-cant_x:=round(gfx[ngfx].x*zx);
-if ((gfx[ngfx].x*zx)-cant_x)>0 then cant_x:=cant_x+1;
+cant_x:=zoom_extent(gfx[ngfx].x,zx);
+cant_y:=zoom_extent(gfx[ngfx].y,zy);
+if (cant_x=0) or (cant_y=0) then exit;
 if cant_x>pantalla[PANT_SPRITES].w then exit;
 temp2:=punbuf;
 if flipy then begin
-  pos_y:=round(gfx[ngfx].y*zy);
-  if ((gfx[ngfx].y*zy)-pos_y)>0 then pos_y:=pos_y+1;
+  pos_y:=cant_y-1;
   dir_y:=-1;
 end else begin
   pos_y:=0;
@@ -970,20 +1101,20 @@ var
   temp,temp2:pdword;
   zoom_x,zoom_y:single;
   dir_x,dir_y:integer;
-  pos_y,cant_x:word;
+  pos_y,cant_x,cant_y:word;
 begin
 if ((zx<=0) or (zy<=0)) then exit;
 nchar:=nchar mod gfx[ngfx].elements;
 pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 zoom_y:=0;
-cant_x:=round(gfx[ngfx].x*zx);
-if ((gfx[ngfx].x*zx)-cant_x)>0 then cant_x:=cant_x+1;
+cant_x:=zoom_extent(gfx[ngfx].x,zx);
+cant_y:=zoom_extent(gfx[ngfx].y,zy);
+if (cant_x=0) or (cant_y=0) then exit;
 if cant_x>pantalla[PANT_SPRITES_ALPHA].w then exit;
 temp2:=punbuf_alpha;
 if flipy then begin
-  pos_y:=round(gfx[ngfx].y*zy);
-  if ((gfx[ngfx].y*zy)-pos_y)>0 then pos_y:=pos_y+1;
+  pos_y:=cant_y-1;
   dir_y:=-1;
 end else begin
   pos_y:=0;
@@ -1090,10 +1221,9 @@ begin
 if ((zx<=0) or (zy<=0)) then exit;
 origen.x:=0;
 origen.y:=0;
-origen.w:=round(gfx[ngfx].x*zx);
-if ((gfx[ngfx].x*zx)-origen.w)>0 then origen.w:=origen.w+1;
-origen.h:=round(gfx[ngfx].y*zy);
-if ((gfx[ngfx].y*zy)-origen.h)>0 then origen.h:=origen.h+1;
+origen.w:=zoom_extent(gfx[ngfx].x,zx);
+origen.h:=zoom_extent(gfx[ngfx].y,zy);
+if (origen.w=0) or (origen.h=0) then exit;
 pos_x:=pos_x and p_final[dest].sprite_mask_x;
 pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.w:=origen.w;
@@ -1139,10 +1269,9 @@ begin
 if ((zx<=0) or (zy<=0)) then exit;
 origen.x:=0;
 origen.y:=0;
-origen.w:=round(gfx[ngfx].x*zx);
-if ((gfx[ngfx].x*zx)-origen.w)>0 then origen.w:=origen.w+1;
-origen.h:=round(gfx[ngfx].y*zy);
-if ((gfx[ngfx].y*zy)-origen.h)>0 then origen.h:=origen.h+1;
+origen.w:=zoom_extent(gfx[ngfx].x,zx);
+origen.h:=zoom_extent(gfx[ngfx].y,zy);
+if (origen.w=0) or (origen.h=0) then exit;
 pos_x:=pos_x and p_final[dest].sprite_mask_x;
 pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.w:=origen.w;

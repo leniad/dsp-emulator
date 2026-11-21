@@ -728,9 +728,9 @@ msm5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,0);
 msm5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,0);
 msm5205_0.change_advance(adpcm_int);
 msm5205_1.change_advance(nil);
-ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910);
+ay8910_0:=ay8910_chip.create(3579545 div 4,YM2149);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
-ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910);
+ay8910_1:=ay8910_chip.create(3579545 div 4,YM2149);
 case main_vars.tipo_maquina of
   42:begin  //KungFu Master
         //Main CPU

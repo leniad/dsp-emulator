@@ -777,7 +777,7 @@ end;
 fillchar(cinta_tzx.indice_saltos,MAX_TZX*2,0);
 fillchar(cinta_tzx.indice_select,MAX_TZX*2,0);
 cinta_tzx.indice_cinta:=0;
-change_caption('');
+main_vars.nombre_caption:='';
 tape_window1.stringgrid1.RowCount:=1;
 var_spectrum.sd_1:=false;
 cinta_tzx.en_pausa:=false;
@@ -952,6 +952,7 @@ var
 begin
 abrir_wav:=false;
 if not(convert_wav(data,ptemp_w,long,ltemp)) then exit;
+if ltemp=0 then begin freemem(ptemp_w); exit; end;
 vaciar_cintas;
 //Crear el tipo de datos de la cinta
 getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
@@ -962,6 +963,7 @@ cinta_tzx.datos_tzx[0].luno:=trunc(cpu_clock/FREQ_BASE_AUDIO);
 cinta_tzx.datos_tzx[0].lbloque:=ltemp div 8;
 if (ltemp mod 8)<>0 then cinta_tzx.datos_tzx[0].lbloque:=cinta_tzx.datos_tzx[0].lbloque+1;
 cinta_tzx.datos_tzx[0].lbyte:=ltemp mod 8;
+if cinta_tzx.datos_tzx[0].lbyte=0 then cinta_tzx.datos_tzx[0].lbyte:=8;
 getmem(cinta_tzx.datos_tzx[0].datos,cinta_tzx.datos_tzx[0].lbloque);
 ptemp_b:=cinta_tzx.datos_tzx[0].datos;
 //Descomprimir los datos
@@ -980,7 +982,7 @@ for f:=0 to (ltemp-1) do begin
     pos:=8;
   end;
 end;
-if pos<>0 then ptemp_b^:=vtemp;
+if pos<>8 then ptemp_b^:=vtemp;
 freemem(ptemp_w);
 //Pongo la info
 tape_window1.stringgrid1.RowCount:=1;
@@ -2138,83 +2140,79 @@ analizar_tzx;
 end;
 
 function abrir_c64_tap(data:pbyte;long:integer):boolean;
-type
-  ttap_c64=packed record
-    header:array[0..11] of ansichar;
-    version:byte;
-    expansion:dword;
-    size_:array[0..3] of byte;
-  end;
 var
-  tap_c64:^ttap_c64;
-  contador,longitud:integer;
-  tempb:byte;
-  tempw1,tempw2:pword;
-  temp_data:pbyte;
-  pulsos:dword;
-begin
-abrir_c64_tap:=false;
-if data=nil then exit;
-vaciar_cintas;
-temp_data:=data;
-cinta_tzx.grupo:=false;
-getmem(tap_c64,sizeof(ttap_c64));
-copymemory(tap_c64,temp_data,sizeof(ttap_c64));
-inc(temp_data,sizeof(ttap_c64));longitud:=sizeof(ttap_c64);
-if tap_c64.header<>'C64-TAPE-RAW' then begin
-  freemem(tap_c64);
-  exit;
-end;
-contador:=0;
-longitud:=0;
-getmem(tempw1,$1000000);
-tempw2:=tempw1;
-while longitud<long do begin
-  tempb:=temp_data^;
-  inc(temp_data);inc(longitud);
-  if tempb=0 then begin
-    case tap_c64.version of
-      0:pulsos:=256*8;
-      1:begin
-          pulsos:=temp_data^;
-          inc(temp_data);inc(longitud);
-          pulsos:=pulsos or (temp_data^ shl 8);
-          inc(temp_data);inc(longitud);
-          pulsos:=pulsos or (temp_data^ shl 16);
-          inc(temp_data);inc(longitud);
-        end;
+  posi,finish,count,i:integer;
+  size,pulse:dword;
+  outdata,pout:pdword;
+  version:byte;
+  function le24(p:integer):dword;
+  begin
+    le24:=dword(data[p]) or (dword(data[p+1]) shl 8) or
+          (dword(data[p+2]) shl 16);
+  end;
+  function getpulse(var value:dword):boolean;
+  begin
+    getpulse:=false;
+    if posi>=finish then exit;
+    value:=dword(data[posi])*8;inc(posi);
+    if value=0 then begin
+      if version=0 then value:=2048
+      else begin
+        if finish-posi<3 then exit;
+        value:=le24(posi);inc(posi,3);
+      end;
     end;
-  end else pulsos:=tempb*8;
-  tempw2^:=pulsos and $ffff;
-  inc(tempw2);
-  tempw2^:=pulsos shr 16;
-  inc(tempw2);
-  inc(contador);
-end;
-contador:=contador-1;
-getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
-zero_tape_data(0);
-cinta_tzx.datos_tzx[0].tipo_bloque:=$f3;
-cinta_tzx.datos_tzx[0].lbloque:=contador;
-getmem(cinta_tzx.datos_tzx[0].datos,contador*4);
-copymemory(cinta_tzx.datos_tzx[0].datos,tempw1,contador*4);
-freemem(tempw1);
-//Pongo la info
-tape_window1.stringgrid1.RowCount:=1;
-tape_window1.stringgrid1.Cells[0,0]:='C64 Tape';
-tape_window1.stringgrid1.Cells[1,0]:=inttostr(contador);
-//Creo el bloque final
-getmem(cinta_tzx.datos_tzx[1],sizeof(tipo_datos_tzx));
-zero_tape_data(1);
-cinta_tzx.datos_tzx[1].tipo_bloque:=$fe;
-cinta_tzx.datos_tzx[1].lbloque:=1;
-getmem(cinta_tzx.datos_tzx[1].datos,1);
-//Valores finales
-cinta_tzx.play_tape:=false;
-cinta_tzx.cargada:=true;
-cinta_tzx.value:=0;
-siguiente_bloque_tzx;
-abrir_c64_tap:=true;
+    if value<2 then exit;
+    getpulse:=true;
+  end;
+begin
+  abrir_c64_tap:=false;
+  if (data=nil) or (long<20) then exit;
+  if not CompareMem(data,PAnsiChar(AnsiString('C64-TAPE-RAW')),12) then exit;
+  version:=data[12];
+  // v0/v1 full pulses only. Reject other platforms/video systems explicitly.
+  if version>1 then exit;
+  if (data[13]<>0) or (data[14]<>0) then exit;
+  size:=le24(16) or (dword(data[19]) shl 24);
+  if (size=0) or (size>dword(long-20)) then exit;
+  finish:=20+integer(size);posi:=20;count:=0;
+  while posi<finish do begin
+    if not getpulse(pulse) then exit;
+    inc(count);
+  end;
+  if count>MaxInt div 8 then exit;
+  getmem(outdata,count*8);
+  pout:=outdata;
+  posi:=20;
+  for i:=0 to count-1 do begin
+    getpulse(pulse);
+    if i=0 then pout^:=pulse
+      else pout^:=pulse-1;
+    inc(pout);
+    pout^:=1;
+    inc(pout);
+  end;
+  vaciar_cintas;
+  cinta_tzx.grupo:=false;
+  getmem(cinta_tzx.datos_tzx[0],SizeOf(tipo_datos_tzx));
+  zero_tape_data(0);
+  cinta_tzx.datos_tzx[0].tipo_bloque:=$f3;
+  cinta_tzx.datos_tzx[0].initial_val:=3;
+  cinta_tzx.datos_tzx[0].lbloque:=count*2;
+  cinta_tzx.datos_tzx[0].datos:=pbyte(outdata);
+  getmem(cinta_tzx.datos_tzx[1],SizeOf(tipo_datos_tzx));
+  zero_tape_data(1);
+  cinta_tzx.datos_tzx[1].tipo_bloque:=$fe;
+  cinta_tzx.datos_tzx[1].lbloque:=1;
+  getmem(cinta_tzx.datos_tzx[1].datos,1);
+  cinta_tzx.indice_saltos[0]:=0;cinta_tzx.indice_select[0]:=0;
+  cinta_tzx.indice_saltos[1]:=1;cinta_tzx.indice_select[1]:=1;
+  cinta_tzx.play_tape:=false;cinta_tzx.cargada:=true;cinta_tzx.value:=0;
+  tape_window1.stringgrid1.RowCount:=1;
+  tape_window1.stringgrid1.Cells[0,0]:='C64 Tape';
+  tape_window1.stringgrid1.Cells[1,0]:=IntToStr(count);
+  siguiente_bloque_tzx;
+  abrir_c64_tap:=true;
 end;
 
 function abrir_oric_tap(data:pbyte;long:integer):boolean;
@@ -2356,6 +2354,8 @@ while longitud<long do begin
               cinta_tzx.datos_tzx[cont_tape].luno:=220;
               cinta_tzx.datos_tzx[cont_tape].lpausa:=0;
               cinta_tzx.datos_tzx[cont_tape].lbyte:=contador mod 8;
+              if cinta_tzx.datos_tzx[cont_tape].lbyte=0 then
+                cinta_tzx.datos_tzx[cont_tape].lbyte:=8;
               cinta_tzx.datos_tzx[cont_tape].tipo_bloque:=$15;
               if (contador mod 8)<>0 then begin
                 data_block_size:=(contador div 8)+1;
@@ -2379,7 +2379,7 @@ while longitud<long do begin
               nombre:='';
               contador:=0;
               valor_final:=0;
-              pos_bit:=0;
+              pos_bit:=8;
               estado:=SYNC;
               tempw2:=tempw1;
             end;
@@ -2397,6 +2397,8 @@ cinta_tzx.play_tape:=false;
 cinta_tzx.cargada:=true;
 cinta_tzx.value:=0;
 siguiente_bloque_tzx;
+freemem(header_oric);
+freemem(tempw1);
 abrir_oric_tap:=true;
 end;
 
@@ -2424,70 +2426,57 @@ t64_file_def=packed record
       file_name:array[0..15] of ansichar;
 end;
 function abrir_t64(data:pbyte;long:dword):boolean;
-var
-   t64_header:^t64_header_def;
-   t64_info:^t64_info_def;
-   t64_file:^t64_file_def;
-   pos_data:pbyte;
-   start_addr,file_size,f,cantidad,cont_tape:word;
+var maxentries,used,i,count,startaddr,endaddr,n,j:integer;
+    entry:pbyte;offset:dword;name:string;
+  function le16(p:pbyte):word;
+  begin le16:=p[0] or (word(p[1]) shl 8);end;
+  function le32(p:pbyte):dword;
+  begin le32:=dword(p[0]) or (dword(p[1]) shl 8) or
+    (dword(p[2]) shl 16) or (dword(p[3]) shl 24);end;
 begin
-	abrir_t64:=false;
-  if data=nil then exit;
-  vaciar_cintas;
-  cont_tape:=0;
-  cinta_tzx.grupo:=false;
-  getmem(t64_header,sizeof(t64_header_def));
-  copymemory(t64_header,data,32);
-  if t64_header.magic<>'C64' then exit;
-  freemem(t64_header);
-  inc(data,32);
-  getmem(t64_info,sizeof(t64_info_def));
-  copymemory(t64_info,data,32);
-  inc(data,32);
-  cantidad:=t64_info.used_l+(t64_info.used_h shl 8);
-  freemem(t64_info);
-  //Saco la posicion inicial de los datos
-  pos_data:=data;
-  inc(pos_data,cantidad*32);
-  getmem(t64_file,sizeof(t64_file_def));
-  for f:=0 to (cantidad-1) do begin
-    copymemory(t64_file,data,32);
-    inc(data,32);
-    if t64_file.c64_filetype<>0 then begin
-      start_addr:=t64_file.addr_l+(t64_file.addr_h shl 8);
-      file_size:=t64_file.end_addr_l+(t64_file.end_addr_h shl 8);
-      if file_size=$C3C6 then
-        halt(0);
-      file_size:=file_size-start_addr;
-      getmem(cinta_tzx.datos_tzx[cont_tape],sizeof(tipo_datos_tzx));
-      zero_tape_data(cont_tape);
-      cinta_tzx.datos_tzx[cont_tape].lbloque:=file_size;
-      cinta_tzx.datos_tzx[cont_tape].lcabecera:=start_addr;
-      cinta_tzx.datos_tzx[cont_tape].tipo_bloque:=$fd;
-      getmem(cinta_tzx.datos_tzx[cont_tape].datos,file_size);
-      copymemory(cinta_tzx.datos_tzx[cont_tape].datos,pos_data,file_size);
-      cinta_tzx.indice_saltos[cont_tape]:=cont_tape;
-      cinta_tzx.indice_select[cont_tape]:=cont_tape;
-      tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
-      tape_window1.stringgrid1.Cells[0,cont_tape]:=t64_file.file_name;
-      tape_window1.stringgrid1.Cells[1,cont_tape]:=inttostr(file_size);
-      cont_tape:=cont_tape+1;
-      inc(pos_data,file_size);
-    end;
-end;
-tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount-1;
-//Creo el bloque final
-getmem(cinta_tzx.datos_tzx[cont_tape],sizeof(tipo_datos_tzx));
-zero_tape_data(cont_tape);
-cinta_tzx.datos_tzx[cont_tape].tipo_bloque:=$fe;
-cinta_tzx.datos_tzx[cont_tape].lbloque:=1;
-getmem(cinta_tzx.datos_tzx[cont_tape].datos,1);
-//Valores finales
-cinta_tzx.play_tape:=false;
-cinta_tzx.cargada:=true;
-cinta_tzx.value:=0;
-siguiente_bloque_tzx;
-abrir_t64:=true;
+  abrir_t64:=false;
+  if (data=nil) or (long<64) then exit;
+  if (data[0]<>Ord('C')) or (data[1]<>Ord('6')) or (data[2]<>Ord('4')) then exit;
+  maxentries:=le16(@data[34]);used:=le16(@data[36]);
+  if (maxentries=0) or (used>maxentries) or
+     (int64(64)+int64(maxentries)*32>long) then exit;
+  // Validate all supported entries before replacing the mounted tape.
+  count:=0;
+  for i:=0 to maxentries-1 do begin
+    entry:=@data[64+i*32];
+    if entry[0]=0 then continue;
+    if (entry[0]<>1) or ((entry[1] and 7)<>2) then exit;
+    startaddr:=le16(@entry[2]);endaddr:=le16(@entry[4]);
+    offset:=le32(@entry[8]);
+    // Broken conv64 end address is rejected cleanly rather than halt(0).
+    if (endaddr=$c3c6) or (endaddr<=startaddr) then exit;
+    n:=endaddr-startaddr;
+    if (offset<dword(64+maxentries*32)) or (int64(offset)+n>long) then exit;
+    inc(count);
+  end;
+  if (count=0) or (count>=MAX_TZX) then exit;
+  vaciar_cintas;cinta_tzx.grupo:=false;count:=0;
+  for i:=0 to maxentries-1 do begin
+    entry:=@data[64+i*32];if entry[0]=0 then continue;
+    startaddr:=le16(@entry[2]);n:=le16(@entry[4])-startaddr;offset:=le32(@entry[8]);
+    getmem(cinta_tzx.datos_tzx[count],SizeOf(tipo_datos_tzx));zero_tape_data(count);
+    cinta_tzx.datos_tzx[count].tipo_bloque:=$fd;
+    cinta_tzx.datos_tzx[count].lcabecera:=startaddr;
+    cinta_tzx.datos_tzx[count].lbloque:=n;
+    getmem(cinta_tzx.datos_tzx[count].datos,n);
+    copymemory(cinta_tzx.datos_tzx[count].datos,@data[offset],n);
+    cinta_tzx.indice_saltos[count]:=count;cinta_tzx.indice_select[count]:=count;
+    name:='';for j:=16 to 31 do name:=name+chr(entry[j]);
+    tape_window1.stringgrid1.RowCount:=count+1;
+    tape_window1.stringgrid1.Cells[0,count]:=TrimRight(name);
+    tape_window1.stringgrid1.Cells[1,count]:=IntToStr(n);
+    inc(count);
+  end;
+  getmem(cinta_tzx.datos_tzx[count],SizeOf(tipo_datos_tzx));zero_tape_data(count);
+  cinta_tzx.datos_tzx[count].tipo_bloque:=$fe;cinta_tzx.datos_tzx[count].lbloque:=1;
+  getmem(cinta_tzx.datos_tzx[count].datos,1);
+  cinta_tzx.play_tape:=false;cinta_tzx.cargada:=true;cinta_tzx.value:=0;
+  siguiente_bloque_tzx;abrir_t64:=true;
 end;
 
 function abrir_cas(datos:pbyte;long:integer):boolean;

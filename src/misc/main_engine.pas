@@ -4,7 +4,7 @@ interface
 uses {$IFnDEF windows}LCLType,{$endif}lib_sdl2,forms,sysutils;
 
 const
-        DSP_VERSION='0.24WIP3';
+        DSP_VERSION='0.24WIP4';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -40,7 +40,7 @@ type
         pdword=^dword;
         {$endif}
         TMain_vars=record
-            mensaje_principal,cadena_dir,caption:string;
+            mensaje_principal,cadena_dir,caption,nombre_caption:string;
             frames_sec,tipo_maquina:word;
             idioma,idioma_sel:integer;
             vactual:byte;
@@ -87,6 +87,15 @@ type
             pv1000:string;
             //PV2000
             pv2000:string;
+            //Atari 2600
+            atari2600:string;
+            //Atari 5200
+            atari5200:string;
+            //Atari 7800
+            atari7800:string;
+            //Genesis
+            genesis:string;
+            pcengine:string;
             //Misc
             preview:string;
             qsnapshot:string;
@@ -158,7 +167,7 @@ procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 procedure flip_surface(pant:byte;flipx,flipy:boolean);
 procedure video_sync;
 //misc
-procedure change_caption(nombre:string);
+procedure change_caption;
 procedure reset_dsp;
 procedure reset_game_general;
 //Multidirs
@@ -334,7 +343,7 @@ if main_vars.center_screen then begin
 end;
 {$endif}
 //pongo el nombre de la maquina...
-change_caption('');
+change_caption;
 if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 //Calculo el rectangulo de destino para la pantalla completa
@@ -502,12 +511,7 @@ if not(main_screen.pantalla_completa) then begin
   window_render:=nil;
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,FULL_SCREEN_X,FULL_SCREEN_Y,libSDL_WINDOW_FULLSCREEN);
   main_screen.pantalla_completa:=true;
-  case main_vars.tipo_maquina of
-    0..5:if (mouse.tipo=0) then SDL_ShowCursor(0)
-          else SDL_ShowCursor(1);
-    182,381:SDL_ShowCursor(1);
-    else SDL_ShowCursor(0);
-  end;
+  InstalarCursorDiana;
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
   SDL_FreeSurface(pantalla[0]);
@@ -523,7 +527,7 @@ end else begin
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x*mul_video,p_final[0].y*mul_video,0);
   {$endif}
   main_screen.pantalla_completa:=false;
-  show_mouse_cursor;
+  RestaurarCursor;
 end;
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 end;
@@ -547,6 +551,7 @@ if punbuf<>nil then freemem(punbuf);
 if punbuf_alpha<>nil then freemem(punbuf_alpha);
 punbuf:=nil;
 punbuf_alpha:=nil;
+main_vars.nombre_caption:='';
 end;
 
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
@@ -854,12 +859,12 @@ if r<>0 then begin
 end;
 end;
 
-procedure change_caption(nombre:string);
+procedure change_caption;
 var
   cadena:ansistring;
 begin
-if nombre='' then cadena:=llamadas_maquina.caption
-  else cadena:=llamadas_maquina.caption+' - '+nombre;
+if main_vars.nombre_caption='' then cadena:=llamadas_maquina.caption
+  else cadena:=llamadas_maquina.caption+' - '+main_vars.nombre_caption;
 {$IFnDEF fpc}
 child.Caption:=cadena;
 {$Else}
@@ -897,6 +902,7 @@ valor_sync:=cont_micro-(res-valor_sync);
 cont_sincroniza:=sdl_getticks();
 {$endif}
 end;
+
 procedure copymemory(dest,source:pointer;size:integer);
 begin
 move(source^,dest^,size);
@@ -938,7 +944,6 @@ close_all_devices;
 cinta_tzx.tape_stop:=nil;
 cinta_tzx.tape_start:=nil;
 init_mouse(false);
-hide_mouse_cursor;
 timers.clear;
 marcade.dswa_val:=nil;
 marcade.dswb_val:=nil;

@@ -92,7 +92,7 @@ var
  sprite_ram:array[0..$7ff] of word;
  main_ram:array[0..$7fff] of word;
  sound_latch,gaelco_dec_val:byte;
- oki_rom:array[0..$c,0..$ffff] of byte;
+ oki_rom:array[0..$f,0..$ffff] of byte;
 
 procedure draw_sprites_bk(pri:byte);
 var
@@ -254,7 +254,7 @@ begin
 while EmuStatus=EsRunning do begin
   for f:=0 to 511 do begin
     if f=256 then begin
-      m68000_0.irq[6]:=HOLD_LINE;
+      m68000_0.irq[6]:=ASSERT_LINE;
       update_video_bigk;
     end;
     //main
@@ -314,7 +314,7 @@ case direccion of
               if abs((scroll_x1 and $1f0)-(valor and $1f0))>15 then fillchar(gfx[1].buffer[$400],$400,1);
               scroll_x1:=valor and $1ff;
             end;
-    $10800c:;
+    $10800c:m68000_0.irq[6]:=CLEAR_LINE;
     $200000..$2007ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                         cambiar_color(valor,(direccion and $7ff) shr 1);
                         buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -323,7 +323,7 @@ case direccion of
     //70000a..70003b:;
     $70000e:begin
             sound_latch:=valor and $ff;
-            m6809_0.change_firq(HOLD_LINE);
+            m6809_0.change_firq(ASSERT_LINE);
           end;
     $ff8000..$ffffff:main_ram[(direccion and $7fff) shr 1]:=valor;
   end;
@@ -335,7 +335,10 @@ case direccion of
   0..$7ff,$c00..$ffff:bigk_snd_getbyte:=mem_snd[direccion];
   $800,$801:bigk_snd_getbyte:=oki_6295_0.read;
   $a00:bigk_snd_getbyte:=ym3812_0.status;
-  $b00:bigk_snd_getbyte:=sound_latch;
+  $b00:begin
+          bigk_snd_getbyte:=sound_latch;
+          m6809_0.change_firq(CLEAR_LINE);
+       end;
 end;
 end;
 
@@ -461,7 +464,7 @@ begin
 while EmuStatus=EsRunning do begin
   for f:=0 to 511 do begin
      if f=256 then begin
-        m68000_0.irq[6]:=HOLD_LINE;
+        m68000_0.irq[6]:=ASSERT_LINE;
         update_video_thoop;
      end;
      m68000_0.run(frame_main);
@@ -496,21 +499,21 @@ begin
 case direccion of
     0..$fffff:; //ROM
     $100000..$100fff:begin
-                      dec:=gaelco_dec((direccion and $fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
+                      dec:=gaelco_dec((direccion and $fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.ppc.l);
                       if video_ram[(direccion and $fff) shr 1]<>dec then begin
                         video_ram[(direccion and $fff) shr 1]:=dec;
                         gfx[1].buffer[(direccion and $fff) shr 2]:=true;
                       end;
                    end;
     $101000..$101fff:begin
-                      dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
+                      dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.ppc.l);
                       if video_ram[(direccion and $1fff) shr 1]<>dec then begin
                         video_ram[(direccion and $1fff) shr 1]:=dec;
                         gfx[1].buffer[((direccion and $fff) shr 2)+$400]:=true;
                       end;
                    end;
     $102000..$103fff:begin
-                        dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
+                        dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.ppc.l);
                         video_ram[(direccion and $3fff) shr 1]:=dec;
                      end;
     $108000:if scroll_y0<>(valor and $1ff) then begin
@@ -529,7 +532,7 @@ case direccion of
               if abs((scroll_x1 and $1f0)-(valor and $1f0))>15 then fillchar(gfx[1].buffer[$400],$400,1);
               scroll_x1:=valor and $1ff;
             end;
-    $10800c:;
+    $10800c:m68000_0.irq[6]:=CLEAR_LINE;
     $200000..$2007ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                         cambiar_color(valor,(direccion and $7ff) shr 1);
                         buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -577,7 +580,7 @@ case direccion of
               if abs((scroll_x1 and $1f0)-(valor and $1f0))>15 then fillchar(gfx[1].buffer[$400],$400,1);
               scroll_x1:=valor and $1ff;
             end;
-    $10800c:;
+    $10800c:m68000_0.irq[6]:=CLEAR_LINE;
     $200000..$2007ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                         cambiar_color(valor,(direccion and $7ff) shr 1);
                         buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -601,6 +604,7 @@ end;
 //Main
 procedure reset_gaelco_hw;
 begin
+ reset_gaelco_decrypt;
  m68000_0.reset;
  frame_main:=m68000_0.tframes;
  if main_vars.tipo_maquina=78 then begin
@@ -647,7 +651,10 @@ begin
 end;
 begin
 case main_vars.tipo_maquina of
-  78:llamadas_maquina.bucle_general:=bigk_principal;
+  78:begin
+        llamadas_maquina.bucle_general:=bigk_principal;
+        llamadas_maquina.fps_max:=58.74;
+     end;
   101,173,174:begin
         llamadas_maquina.bucle_general:=thoop_principal;
         llamadas_maquina.fps_max:=57.42;
@@ -665,7 +672,8 @@ screen_init(17,512,512,false,true);
 iniciar_video(320,240);
 marcade.dswa:=$00ff;
 //Main CPU
-m68000_0:=cpu_m68000.create(12000000);
+if main_vars.tipo_maquina=173 then m68000_0:=cpu_m68000.create(10000000)
+  else m68000_0:=cpu_m68000.create(12000000);
 getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   78:begin  //Big Karnak
@@ -679,7 +687,7 @@ case main_vars.tipo_maquina of
       m6809_0.init_sound(bigk_sound_update);
       //Sound Chips
       ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
-      oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
+      oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,1);
       //Cargar ADPCM ROMS
       if not(roms_load(oki_6295_0.get_rom_addr,bigkarnak_adpcm)) then exit;
       //Sprites

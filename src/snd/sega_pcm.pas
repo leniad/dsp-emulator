@@ -1,4 +1,4 @@
-unit sega_pcm;
+﻿unit sega_pcm;
 
 interface
 uses main_engine,sound_engine,timer_engine,dialogs;
@@ -6,122 +6,166 @@ uses main_engine,sound_engine,timer_engine,dialogs;
 type
   tread_rom_call=function(dir:dword):byte;
   tsega_pcm=class(snd_chip_class)
-          constructor create(clock:dword;read_rom_call:tread_rom_call;amp:single);
-          destructor free;
-        public
-          read_rom:tread_rom_call;
-          procedure reset;
-          function read(dir:word):byte;
-          procedure write(dir:word;valor:byte);
-          procedure set_bank(bank:byte);
-          procedure update;
-        protected
-          ram:array[0..$7ff] of byte;
-          outl,outr:integer;
-          ntimer,bankshift,bankmask:byte;
-          clock:dword;
-          low:array[0..15] of byte;
+    constructor create(clock:dword;read_rom_call:tread_rom_call;amp:single);
+    destructor free;
+  public
+    read_rom:tread_rom_call;
+    procedure reset;
+    function read(dir:word):byte;
+    procedure write(dir:word;valor:byte);
+    procedure set_bank(bank:dword);
+    procedure update;
+  protected
+    ram:array[0..$7ff] of byte;
+    outl,outr:integer;
+    ntimer,bankshift,bankmask:byte;
+    clock:dword;
+    low:array[0..15] of byte;
+    instance_slot:byte;
+    procedure generate_sample;
   end;
-const
-  BANK_256    = 11;
-	BANK_512    = 12;
-	BANK_12M    = 13;
-	BANK_MASK7  = $70 shl 16;
-	BANK_MASKF  = $f0 shl 16;
-	BANK_MASKF8 = $f8 shl 16;
 
-procedure internal_update_segapcm;
+const
+  BANK_256=11;
+  BANK_512=12;
+  BANK_12M=13;
+  BANK_MASK7=$70 shl 16;
+  BANK_MASKF=$f0 shl 16;
+  BANK_MASKF8=$f8 shl 16;
 
 var
   sega_pcm_0:tsega_pcm;
 
 implementation
 
+const
+  MAX_SEGA_PCM_INSTANCES=16;
+  NO_TIMER=$ff;
+var
+  sega_pcm_instances:array[0..MAX_SEGA_PCM_INSTANCES-1] of tsega_pcm;
+
+procedure internal_update_segapcm_instance(slot:byte);
+begin
+  if sega_pcm_instances[slot]<>nil then
+    sega_pcm_instances[slot].generate_sample;
+end;
+
 constructor tsega_pcm.create(clock:dword;read_rom_call:tread_rom_call;amp:single);
+var
+  slot:integer;
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
+  self.ntimer:=NO_TIMER;
+  self.instance_slot:=NO_TIMER;
+  slot:=0;
+  while slot<MAX_SEGA_PCM_INSTANCES do begin
+    if sega_pcm_instances[slot]=nil then break;
+    inc(slot);
+  end;
   self.tsample_num:=init_channel;
   self.amp:=amp;
   self.clock:=clock;
   self.read_rom:=read_rom_call;
-  self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),internal_update_segapcm,nil,true);
+  self.set_bank(BANK_512);
+  self.reset;
+  self.instance_slot:=slot;
+  sega_pcm_instances[slot]:=self;
+  self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),nil,internal_update_segapcm_instance,true,self.instance_slot);
 end;
 
 destructor tsega_pcm.free;
 begin
+  if (self.ntimer<>NO_TIMER) and (timers<>nil) then timers.enabled(self.ntimer,false);
+  if self.instance_slot<MAX_SEGA_PCM_INSTANCES then
+    if sega_pcm_instances[self.instance_slot]=self then sega_pcm_instances[self.instance_slot]:=nil;
+  if sega_pcm_0=self then sega_pcm_0:=nil;
 end;
 
 procedure tsega_pcm.reset;
 begin
-  fillchar(self.ram[0],$800,$ff);
+  FillChar(self.ram,SizeOf(self.ram),$ff);
+  FillChar(self.low,SizeOf(self.low),0);
   self.outl:=0;
   self.outr:=0;
+  // Bank configuration and the free-running timer phase are preserved.
 end;
 
 function tsega_pcm.read(dir:word):byte;
 begin
-  read:=self.ram[dir and $7ff];
+  Result:=self.ram[dir and $7ff];
 end;
+
 procedure tsega_pcm.write(dir:word;valor:byte);
 begin
   self.ram[dir and $7ff]:=valor;
 end;
 
-procedure tsega_pcm.set_bank(bank:byte);
+procedure tsega_pcm.set_bank(bank:dword);
 begin
-  self.bankshift:=(bank and $f);
-  self.bankmask:=($70 or ((bank shr 16) and $fc));
+  self.bankshift:=bank and $f;
+  self.bankmask:=$70 or ((bank shr 16) and $fc);
 end;
 
 procedure tsega_pcm.update;
+function sega_pcm_clip(value:double):smallint;
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(self.outl*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(self.outr*self.amp);
+  if value>32767 then Result:=32767
+    else if value<-32768 then Result:=-32768
+            else Result:=Trunc(value);
+end;
+var
+  left,right,gain:double;
+begin
+  left:=self.outl;
+  right:=self.outr;
+  gain:=self.amp;
+  if sound_status.stereo then begin
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=sega_pcm_clip(left*gain);
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=sega_pcm_clip(right*gain);
+  end else begin
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=sega_pcm_clip((left+right)*0.5*gain);
+  end;
 end;
 
-procedure internal_update_segapcm;
+procedure tsega_pcm.generate_sample;
 var
-  f,end_,control:byte;
+  f,base:integer;
+  end_,control:byte;
   offset,addr,loop:dword;
-  v:shortint;
+  v:integer;
 begin
-  sega_pcm_0.outl:=0;
-  sega_pcm_0.outr:=0;
+  self.outl:=0;
+  self.outr:=0;
   for f:=0 to 15 do begin
-    control:=sega_pcm_0.ram[$86+(f*8)];
-		// only process active channels
-		if (control and 1)=0 then begin
-			offset:=(control and sega_pcm_0.bankmask) shl sega_pcm_0.bankshift;
-      addr:=(sega_pcm_0.ram[$85+(f*8)] shl 16) or (sega_pcm_0.ram[$84+(f*8)] shl 8) or sega_pcm_0.low[f];
-			loop:=(sega_pcm_0.ram[$05+(f*8)] shl 16) or (sega_pcm_0.ram[$04+(f*8)] shl 8);
-			end_:=sega_pcm_0.ram[6+(f*8)]+1;
-      // handle looping if we've hit the end
-      if ((addr shr 16)=end_) then begin
-					if (control and 2)<>0 then begin
-						sega_pcm_0.ram[$86+(f*8)]:=control or 1;
-            sega_pcm_0.ram[$84+(f*8)]:=addr shr 8;
-			      sega_pcm_0.ram[$85+(f*8)]:=addr shr 16;
-            sega_pcm_0.low[f]:=0;
-						continue;
-					end else addr:=loop;
+    base:=f*8;
+    control:=self.ram[$86+base];
+    if (control and 1)<>0 then begin
+      self.low[f]:=0;
+      continue;
+    end;
+    offset:=dword(control and self.bankmask) shl self.bankshift;
+    addr:=(dword(self.ram[$85+base]) shl 16) or
+          (dword(self.ram[$84+base]) shl 8) or self.low[f];
+    loop:=(dword(self.ram[5+base]) shl 16) or
+          (dword(self.ram[4+base]) shl 8);
+    end_:=byte((integer(self.ram[6+base])+1) and $ff);
+    // Exact page equality, including $ff -> $00 wrap, matches MAME.
+    if (addr shr 16)=end_ then begin
+      if (control and 2)<>0 then begin
+        self.ram[$86+base]:=control or 1;
+        self.low[f]:=0;
+        continue;
       end;
-			// fetch the sample
-      v:=sega_pcm_0.read_rom(offset+(addr shr 8))-$80;
-      // apply panning and advance
-      sega_pcm_0.outl:=sega_pcm_0.outl+(v*(sega_pcm_0.ram[2+(f*8)] and $7f));
-      sega_pcm_0.outr:=sega_pcm_0.outr+(v*(sega_pcm_0.ram[3+(f*8)] and $7f));
-      addr:=(addr+sega_pcm_0.ram[7+(f*8)]) and $ffffff;
-			// store back the updated address
-			sega_pcm_0.ram[$84+(f*8)]:=addr shr 8;
-			sega_pcm_0.ram[$85+(f*8)]:=addr shr 16;
-      if (control and 1)<>0 then sega_pcm_0.low[f]:=0
-        else sega_pcm_0.low[f]:=addr and $ff;
-		end;
-  end; //del chnnel
-  if sega_pcm_0.outl<-32767 then sega_pcm_0.outl:=-32767
-    else if sega_pcm_0.outl>32767 then sega_pcm_0.outl:=32767;
-  if sega_pcm_0.outr<-32767 then sega_pcm_0.outr:=-32767
-    else if sega_pcm_0.outr>32767 then sega_pcm_0.outr:=32767;
+      addr:=loop;
+    end;
+    v:=integer(self.read_rom(offset+(addr shr 8)))-$80;
+    Inc(self.outl,v*(self.ram[2+base] and $7f));
+    Inc(self.outr,v*(self.ram[3+base] and $7f));
+    addr:=(addr+self.ram[7+base]) and $ffffff;
+    self.ram[$84+base]:=byte((addr shr 8) and $ff);
+    self.ram[$85+base]:=byte((addr shr 16) and $ff);
+    self.low[f]:=byte(addr and $ff);
+  end;
 end;
 
 end.

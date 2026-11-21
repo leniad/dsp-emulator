@@ -7,6 +7,8 @@ function dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 procedure clear_disk(drvnum:byte);
 procedure check_protections(drvnum:byte;hay_multi:boolean);
 function oric_dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
+function oric_crc_byte(crc:word;value:byte):word;
+function oric_decode_track(DrvNum,side,track:byte;raw:pbyte;raw_length:word):boolean;
 
 type
 disc_header_type=record
@@ -14,6 +16,7 @@ disc_header_type=record
   nbof_heads:byte;
   track_size_table:array[0..1,0..$cb] of byte;
 end;
+
 sector_info_type=record
   track:byte;
   head:byte;
@@ -21,10 +24,13 @@ sector_info_type=record
   sector_size:byte;
   status1:byte;
   status2:byte;
-  data_length:word;
+  data_length:word; // Payload length, never a CRC
+  id_crc,data_crc:word; // Oric: CRCs in on-disk byte order
+  raw_data_offset:word; // Oric: payload offset in the raw MFM track
   posicion_data:word;
   multi:boolean;
 end;
+
 track_type=record
   track_number:byte;
   side_number:byte;
@@ -36,6 +42,8 @@ track_type=record
   filler:byte;
   track_lenght:word;
   data:pbyte;
+  raw_data:pbyte; // Oric MFM track; nil for CPC/other formats
+  raw_length:word;
   sector:array[0..63] of sector_info_type;
 end;
 
@@ -229,46 +237,26 @@ begin
 end;
 
 procedure clear_disk(drvnum:byte);
-var
-  f,h,g:byte;
+var s,t:integer;
 begin
-  if not(dsk[drvnum].abierto) then exit;
+  if drvnum>High(dsk) then exit;
+  // Fixed array bounds: safe for partial images, zero counts and 83 tracks.
+  for s:=0 to High(dsk[drvnum].Tracks) do
+    for t:=0 to High(dsk[drvnum].Tracks[s]) do begin
+      if dsk[drvnum].Tracks[s,t].data<>nil then
+        FreeMem(dsk[drvnum].Tracks[s,t].data);
+      FillChar(dsk[drvnum].Tracks[s,t],SizeOf(track_type),0);
+    end;
+  dsk[drvnum].abierto:=false;
   dsk[drvnum].cont_multi:=0;
   dsk[drvnum].max_multi:=0;
-  for g:=0 to 1 do begin
-   for f:=0 to dsk[drvnum].DiskHeader.nbof_tracks do begin
-    dsk[drvnum].Tracks[g,f].track_number:=0;
-    dsk[drvnum].Tracks[g,f].side_number:=0;
-    dsk[drvnum].Tracks[g,f].data_rate:=0;
-    dsk[drvnum].Tracks[g,f].sector_size:=0;
-    dsk[drvnum].Tracks[g,f].GAP3:=0;
-    dsk[drvnum].Tracks[g,f].track_lenght:=0;
-    if dsk[drvnum].Tracks[g,f].data<>nil then begin
-      freemem(dsk[drvnum].Tracks[g,f].data);
-      dsk[drvnum].Tracks[g,f].data:=nil;
-    end;
-    for h:=0 to dsk[drvnum].Tracks[g,f].number_sector do begin
-      dsk[drvnum].Tracks[g,f].sector[h].track:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].head:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].sector_size:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].status1:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].status2:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].data_length:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].posicion_data:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].sector:=0;
-      dsk[drvnum].Tracks[g,f].sector[h].multi:=false;
-      dsk[drvnum].Tracks[g,f].sector[h].posicion_data:=0;
-    end;
-    dsk[drvnum].Tracks[g,f].number_sector:=0;
-   end;
-  end;
-    dsk[drvnum].abierto:=false;
-    dsk[drvnum].DiskHeader.nbof_tracks:=0;
-    dsk[drvnum].DiskHeader.nbof_heads:=0;
-    dsk[drvnum].track_actual:=0;
-    dsk[drvnum].cara_actual:=0;
-    dsk[drvnum].sector_actual:=0;
-    fillchar(dsk[drvnum].DiskHeader.track_size_table,408,0);
+  dsk[drvnum].track_actual:=0;
+  dsk[drvnum].cara_actual:=0;
+  dsk[drvnum].sector_actual:=0;
+  dsk[drvnum].sector_read_track:=0;
+  dsk[drvnum].protegido:=false;
+  dsk[drvnum].extended:=false;
+  FillChar(dsk[drvnum].DiskHeader,SizeOf(disc_header_type),0);
 end;
 
 procedure check_protections(drvnum:byte;hay_multi:boolean);
@@ -366,144 +354,185 @@ begin
    end;
 end;
 
-type
-tmfm_header=record
-  firma:array[0..7] of ansichar;
-  side:dword;
-  track:dword;
-  sec_geo:dword;
-  trash:array[0..235] of byte;
+// CRC-CCITT used by the WD1793, including the three A1 sync bytes.
+function oric_crc_byte(crc:word;value:byte):word;
+var i:integer; c:cardinal;
+begin
+  c:=crc xor (word(value) shl 8);
+  for i:=0 to 7 do begin
+    if (c and $8000)<>0 then c:=(c shl 1) xor $1021
+      else c:=c shl 1;
+    c:=c and $ffff;
+  end;
+  oric_crc_byte:=word(c);
 end;
 
-tmfm_sector=record
-  sync:array[0..14] of byte;
-  info:byte;
-  ntrack:byte;
-  nside:byte;
-  nsector:byte;
-  nsector_size:byte;
-  crc:word;
-  sync2:array[0..21] of byte;
+function oric_decode_track(DrvNum,side,track:byte;raw:pbyte;raw_length:word):boolean;
+var
+  pos,j,k,n,count,total,data_pos,scan:integer;
+  id:array[0..3] of byte;
+  info:array[0..63] of sector_info_type;
+  payload:array[0..6399] of byte;
+  c:word;
+  new_data,new_raw:pbyte;
+  function rb(offset:integer):byte;
+  begin
+    rb:=raw[offset mod raw_length];
+  end;
+  function sync(offset:integer;mark:byte):boolean;
+  begin
+    sync:=(rb(offset)=$a1) and (rb(offset+1)=$a1) and
+          (rb(offset+2)=$a1) and (rb(offset+3)=mark);
+  end;
+begin
+  oric_decode_track:=false;
+  if (DrvNum>High(dsk)) or (side>1) or (track>82) or (raw=nil) or (raw_length<16) or (raw_length>6400) then exit;
+  fillchar(info,SizeOf(info),0);
+  count:=0;
+  total:=0;
+  pos:=0;
+  while pos<raw_length do begin
+    if not sync(pos,$fe) then begin
+      inc(pos);
+      continue;
+    end;
+    if count>=64 then exit;
+    for j:=0 to 3 do id[j]:=rb(pos+4+j);
+    if id[3]>5 then exit;
+    n:=128 shl id[3];
+    // Look for the following DAM. Stop at a new IDAM.
+    data_pos:=-1;
+    scan:=pos+10;
+    while scan<pos+raw_length do begin
+      if sync(scan,$fe) then break;
+      if sync(scan,$fb) or sync(scan,$f8) then begin
+        data_pos:=scan+4;
+        break;
+      end;
+      inc(scan);
+    end;
+    if data_pos<0 then begin
+      inc(pos,10);
+      continue;
+    end;
+    if (total+n>SizeOf(payload)) or (data_pos+n+2>pos+raw_length) then exit;
+    with info[count] do begin
+      track:=id[0];
+      head:=id[1];
+      sector:=id[2];
+      sector_size:=id[3];
+      status1:=rb(data_pos-1);
+      data_length:=n;
+      posicion_data:=total;
+      raw_data_offset:=data_pos mod raw_length;
+      id_crc:=(word(rb(pos+8)) shl 8) or rb(pos+9);
+      data_crc:=(word(rb(data_pos+n)) shl 8) or rb(data_pos+n+1);
+    end;
+    c:=$ffff;
+    for j:=0 to 7 do c:=oric_crc_byte(c,rb(pos+j));
+    if c<>info[count].id_crc then info[count].status2:=1;
+    c:=$ffff;
+    for j:=data_pos-4 to data_pos+n-1 do c:=oric_crc_byte(c,rb(j));
+    if c<>info[count].data_crc then info[count].status2:=info[count].status2 or 2;
+    for k:=0 to n-1 do payload[total+k]:=rb(data_pos+k);
+    inc(total,n);
+    inc(count);
+    pos:=data_pos+n+2;
+  end;
+  // Empty/unformatted tracks are valid and report RNF to sector commands.
+  new_data:=nil; new_raw:=nil;
+  if total>0 then begin
+    getmem(new_data,total); copymemory(new_data,@payload[0],total);
+  end;
+  getmem(new_raw,raw_length); copymemory(new_raw,raw,raw_length);
+  with dsk[DrvNum].Tracks[side,track] do begin
+    if data<>nil then freemem(data);
+    if raw_data<>nil then freemem(raw_data);
+    fillchar(sector,SizeOf(sector),0);
+    copymemory(@sector[0],@info[0],SizeOf(info));
+    data:=new_data; raw_data:=new_raw;
+    number_sector:=count; track_lenght:=total;
+    side_number:=side;
+    recording_mode:=2;
+  end;
+  dsk[DrvNum].Tracks[side,track].track_number:=track;
+  dsk[DrvNum].Tracks[side,track].raw_length:=raw_length;
+  oric_decode_track:=true;
 end;
 
 function oric_dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 var
-  mfm_header:^tmfm_header;
-  mfm_sector:^tmfm_sector;
-  puntero:pbyte;
-  longi,track_long:integer;
-  f,h,g:byte;
-  wtemp:word;
-  datos_track:array[0..6399] of byte;
-  ptemp,ptemp2:pbyte;
+  sides,tracks,geometry:cardinal;
+  side,track,sec,n:integer;
+  offset,required:int64;
+  is_mfm,is_raw:boolean;
+  c:word;
+  id:array[0..7] of byte;
+  function le32(offset:integer):cardinal;
+  begin
+    le32:=cardinal(datos[offset]) or (cardinal(datos[offset+1]) shl 8) or
+          (cardinal(datos[offset+2]) shl 16) or (cardinal(datos[offset+3]) shl 24);
+  end;
 begin
   oric_dsk_format:=false;
-  if datos=nil then exit;
-  getmem(mfm_header,sizeof(tmfm_header));
-  getmem(mfm_sector,sizeof(tmfm_sector));
-  clear_disk(drvnum);
-  puntero:=datos;
-  longi:=0;
-  copymemory(mfm_header,datos,$100);
-  inc(puntero,$100);inc(longi,$100);
-  dsk[DrvNum].protegido:=false;
-  if mfm_header.firma='MFM_DISK' then begin
-    if mfm_header.sec_geo<>1 then begin
-      MessageDlg('Geometria del disco<>1', mtInformation,[mbOk], 0);
-      exit;
-    end else begin
-      dsk[drvnum].DiskHeader.nbof_tracks:=mfm_header.track;
-      dsk[drvnum].DiskHeader.nbof_heads:=mfm_header.side;
-      getmem(ptemp,6400);
-      f:=0;
-      g:=0;
-      while (longi<longi_ini) do begin
-        //pillo los datos del track, con sus sectores...
-        wtemp:=0;
-        copymemory(@datos_track,puntero,6400);
-        inc(puntero,6400);
-        inc(longi,6400);
-        ptemp2:=ptemp;
-        track_long:=0;
-        h:=0;
-        //La informacion del track
-        if datos_track[40+wtemp]=0 then inc(wtemp,96) //formato Sedoric
-            else inc(wtemp,146); //formato IBM
-        //Leo los sectores
-        while (wtemp<6400) do begin
-          copymemory(mfm_sector,@datos_track[wtemp],44);
-          wtemp:=wtemp+44;
-          //Algunos checks...
-          if mfm_sector.nside>mfm_header.side then exit;
-          if mfm_sector.ntrack>mfm_header.track then exit;
-          //Status del sector (borrado, normal, etc)
-          dsk[drvnum].Tracks[f,g].sector[h].status1:=mfm_sector.info;
-          dsk[drvnum].Tracks[f,g].sector[h].track:=mfm_sector.ntrack;
-          dsk[drvnum].Tracks[f,g].sector[h].head:=mfm_sector.nside;
-          dsk[drvnum].Tracks[f,g].sector[h].sector:=mfm_sector.nsector;
-          dsk[drvnum].Tracks[f,g].sector[h].sector_size:=mfm_sector.nsector_size;
-          dsk[drvnum].Tracks[f,g].sector[h].data_length:=mfm_sector.crc;
-          //Le añado 16 bytes y ya estoy en los datos...
-          wtemp:=wtemp+16;
-          //Posicion de los datos...
-          dsk[drvnum].Tracks[f,g].sector[h].posicion_data:=track_long;
-          case mfm_sector.nsector_size of
-            1:begin //256b
-                copymemory(ptemp2,@datos_track[wtemp],256);
-                wtemp:=wtemp+256;
-                track_long:=track_long+256;
-              end;
-            2:begin //512b
-                copymemory(ptemp2,@datos_track[wtemp],512);
-                wtemp:=wtemp+512;
-                track_long:=track_long+512;
-              end;
+  if (DrvNum>High(dsk)) or (datos=nil) or (longi_ini<256) then exit;
+  is_mfm:=CompareMem(datos,PAnsiChar(AnsiString('MFM_DISK')),8);
+  is_raw:=CompareMem(datos,PAnsiChar(AnsiString('ORICDISK')),8);
+  if not (is_mfm or is_raw) then exit;
+  sides:=le32(8); tracks:=le32(12); geometry:=le32(16);
+  if (sides<1) or (sides>2) or (tracks<1) or (tracks>83) then exit;
+  if is_mfm then begin
+    if geometry<>1 then exit;
+    required:=256+int64(6400)*sides*tracks;
+  end else begin
+    if (geometry<1) or (geometry>64) then exit;
+    required:=256+int64(256)*geometry*sides*tracks;
+    if geometry*256>65535 then exit;
+  end;
+  if required<>longi_ini then exit;
+  clear_disk(DrvNum);
+  dsk[DrvNum].DiskHeader.nbof_tracks:=tracks;
+  dsk[DrvNum].DiskHeader.nbof_heads:=sides;
+  offset:=256;
+  for side:=0 to integer(sides)-1 do
+    for track:=0 to integer(tracks)-1 do begin
+      if is_mfm then begin
+        if not oric_decode_track(DrvNum,side,track,@datos[offset],6400) then begin
+          clear_disk(DrvNum); exit;
+        end;
+        inc(offset,6400);
+      end else begin
+        n:=geometry*256;
+        with dsk[DrvNum].Tracks[side,track] do begin
+          track_number:=track;
+          side_number:=side;
+          number_sector:=geometry;
+          track_lenght:=n;
+          recording_mode:=2;
+          getmem(data,n);
+          copymemory(data,@datos[offset],n);
+        end;
+        for sec:=0 to integer(geometry)-1 do begin
+          with dsk[DrvNum].Tracks[side,track].sector[sec] do begin
+            // Legacy ORICDISK has no IDs: synthesize conventional 1-based IDs.
+            head:=side; sector:=sec+1; sector_size:=1;
+            status1:=$fb; data_length:=256; posicion_data:=sec*256;
+            id[0]:=$a1; id[1]:=$a1; id[2]:=$a1; id[3]:=$fe;
+            id[4]:=dsk[DrvNum].Tracks[side,track].track_number;
+            id[5]:=side;
+            id[6]:=sec+1;
+            id[7]:=1;
+            c:=$ffff;
+            for n:=0 to 7 do c:=oric_crc_byte(c,id[n]);
+            id_crc:=c;
           end;
-          wtemp:=wtemp+2;
-          while datos_track[wtemp]=$4e do wtemp:=wtemp+1;
-          h:=h+1;
         end;
-        dsk[drvnum].Tracks[f,g].number_sector:=h;
-        dsk[drvnum].Tracks[f,g].track_lenght:=track_long;
-        getmem(dsk[drvnum].Tracks[f,g].data,track_long);
-        copymemory(dsk[drvnum].Tracks[f,g].data,ptemp,track_long);
-        g:=g+1;
-        if g=mfm_header.track then begin
-          g:=0;
-          f:=f+1;
-        end;
+        for sec:=0 to integer(geometry)-1 do dsk[DrvNum].Tracks[side,track].sector[sec].track:=track;
+        inc(offset,int64(geometry)*256);
       end;
-      freemem(ptemp);
     end;
-  end else if mfm_header.firma='ORICDISK' then begin
-      //Este es fijo... Todo va segido y se asume que cada sector es de 256bytes
-      dsk[drvnum].DiskHeader.nbof_tracks:=mfm_header.track;
-      dsk[drvnum].DiskHeader.nbof_heads:=mfm_header.side;
-      //caras
-      for f:=0 to mfm_header.side-1 do begin
-        //pistas
-        for g:=0 to mfm_header.track-1 do begin
-          track_long:=256*mfm_header.sec_geo;
-          dsk[drvnum].Tracks[f,g].track_lenght:=track_long;
-          getmem(dsk[drvnum].Tracks[f,g].data,track_long);
-          copymemory(dsk[drvnum].Tracks[f,g].data,puntero,track_long);
-          inc(puntero,track_long);
-          inc(longi,track_long);
-          dsk[drvnum].Tracks[f,g].number_sector:=mfm_header.sec_geo;
-          //sectores
-          for h:=0 to (mfm_header.sec_geo-1) do begin
-            dsk[drvnum].Tracks[f,g].sector[h].track:=g;
-            dsk[drvnum].Tracks[f,g].sector[h].head:=f;
-            dsk[drvnum].Tracks[f,g].sector[h].sector:=h;
-            dsk[drvnum].Tracks[f,g].sector[h].sector_size:=1;
-            dsk[drvnum].Tracks[f,g].sector[h].posicion_data:=256*h;
-          end;
-        end;
-      end;
-  end else exit;
-  freemem(mfm_header);
-  freemem(mfm_sector);
-  dsk[drvnum].abierto:=true;
+  dsk[DrvNum].abierto:=true;
+  dsk[DrvNum].protegido:=false;
   oric_dsk_format:=true;
 end;
 

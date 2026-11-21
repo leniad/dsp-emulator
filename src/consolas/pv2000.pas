@@ -237,7 +237,8 @@ begin
             copymemory(@memoria[$c000],datos,longitud);
             reset_pv2000;
          end;
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   freemem(datos);
   directory.pv2000:=ExtractFilePath(romfile);
 end;

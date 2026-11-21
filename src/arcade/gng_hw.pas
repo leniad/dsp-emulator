@@ -1,4 +1,4 @@
-unit gng_hw;
+﻿unit gng_hw;
 
 interface
 uses rom_engine;
@@ -17,8 +17,8 @@ const
         gng_sound:tipo_roms=(n:'gg2.bin';l:$8000;p:0;crc:$615f5b6f);
         gng_sprites:array[0..6] of tipo_roms=(
         (n:'gg17.bin';l:$4000;p:0;crc:$93e50a8f),(n:'gg16.bin';l:$4000;p:$4000;crc:$06d7e5ca),
-        (n:'gg15.bin';l:$4000;p:$8000;crc:$bc1fe02d),(n:'gg14.bin';l:$4000;p:$c000;crc:$6aaf12f9),
-        (n:'gg13.bin';l:$4000;p:$10000;crc:$e80c3fca),(n:'gg12.bin';l:$4000;p:$14000;crc:$7780a925),());
+        (n:'gg15.bin';l:$4000;p:$8000;crc:$bc1fe02d),(n:'gg14.bin';l:$4000;p:$10000;crc:$6aaf12f9),
+        (n:'gg13.bin';l:$4000;p:$14000;crc:$e80c3fca),(n:'gg12.bin';l:$4000;p:$18000;crc:$7780a925),());
 
 implementation
 uses m6809,nz80,ym_2203,main_engine,controls_engine,gfx_engine,pal_engine,
@@ -70,7 +70,7 @@ for f:=0 to $3ff do begin
       y:=(f shr 5) shl 3;
       x:=(f and $1f) shl 3;
       nchar:=memoria[$2000+f]+((atrib and $c0) shl 2);
-      put_gfx_trans(x,y,nchar,(color shl 2)+$80,3,0);
+      put_gfx_trans_flip(x,y,nchar,(color shl 2)+$80,3,0,(atrib and $10)<>0,(atrib and $20)<>0);
       gfx[0].buffer[f]:=false;
     end;
 end;
@@ -87,8 +87,6 @@ for f:=$7f downto 0 do begin
     actualiza_gfx_sprite(x,y,4,1);
 end;
 scroll_x_y(2,4,scroll_x,scroll_y);
-//Actualiza buffer sprites
-copymemory(@buffer_sprites,@memoria[$1e00],$200);
 //chars
 actualiza_trozo(0,0,256,256,3,0,0,256,256,4);
 actualiza_trozo_final(0,16,256,224,4);
@@ -131,7 +129,7 @@ begin
 while EmuStatus=EsRunning do begin
   for f:=0 to 261 do begin
     eventos_gng;
-    if f=246 then begin
+    if f=240 then begin
         update_video_gng;
         m6809_0.change_irq(HOLD_LINE);
     end;
@@ -198,8 +196,15 @@ case direccion of
   $3b09:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
   $3b0a:scroll_y:=(scroll_y and $100) or valor;
   $3b0b:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
+  $3c00:copymemory(@buffer_sprites,@memoria[$1e00],$200);
   $3d00:main_screen.flip_main_screen:=(valor and 1)=0;
-  $3e00:banco:=valor mod 5;
+  $3d01:if (valor and 1)=0 then begin
+          z80_0.change_reset(ASSERT_LINE);
+          ym2203_0.reset;
+          ym2203_1.reset;
+        end else z80_0.change_reset(CLEAR_LINE);
+  $3e00:if valor=4 then banco:=4
+          else banco:=valor and 3;
   $4000..$ffff:; //ROM
 end;
 end;
@@ -375,10 +380,11 @@ gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //sprites
+fillchar(memoria_temp,$20000,$ff);
 if not(roms_load(@memoria_temp,gng_sprites)) then exit;
 init_gfx(1,16,16,1024);
 gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
+gfx_set_desc_data(4,0,64*8,$10000*8+4,$10000*8,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
 if not(roms_load(@memoria_temp,gng_tiles)) then exit;

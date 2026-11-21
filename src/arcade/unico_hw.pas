@@ -164,6 +164,10 @@ end;
 
 procedure eventos_zeropoint;
 begin
+if event.mouse then begin
+  if raton.button1 then marcade.in1:=(marcade.in1 and $feff) else marcade.in1:=(marcade.in1 or $100);
+  if raton.button2 then marcade.in1:=(marcade.in1 and $fdff) else marcade.in1:=(marcade.in1 or $200);
+end;
 if event.arcade then begin
   //SYSTEM
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or 1) else marcade.in1:=(marcade.in1 and $fffe);
@@ -323,7 +327,6 @@ begin
 llamadas_maquina.bucle_general:=unico_principal;
 llamadas_maquina.reset:=reset_unico;
 llamadas_maquina.scanlines:=224;
-init_mouse(true);
 iniciar_unico:=false;
 iniciar_audio(true);
 screen_init(1,1024,1024,true);
@@ -359,6 +362,7 @@ case main_vars.tipo_maquina of
       init_dips(2,burglarx_dip_b,$ffff);
   end;
   381:begin //Zero Point
+      init_mouse(true);
       //cargar roms
       m68000_0.change_ram16_calls(zeropnt_getword,zeropnt_putword);
       if not(roms_load16w(@rom,zeropnt_rom)) then exit;
@@ -374,7 +378,6 @@ case main_vars.tipo_maquina of
       freemem(ptemp);
       gr_mask:=$7fff;
       eventos_unico:=eventos_zeropoint;
-      show_mouse_cursor;
       //DIP
       init_dips(1,burglarx_dip_a,$800);
       init_dips(2,zeropnt_dip_b,0);

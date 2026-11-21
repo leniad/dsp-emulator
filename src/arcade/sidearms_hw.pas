@@ -69,10 +69,10 @@ begin
   end;
 end;
 begin
-draw_sprites_def(8,$700);
-draw_sprites_def($10,$e00);
-draw_sprites_def($38,$800);
-draw_sprites_def($38,0);
+draw_sprites_def(7,$700);
+draw_sprites_def($f,$e00);
+draw_sprites_def($37,$800);
+draw_sprites_def($37,0);
 end;
 
 procedure draw_back;
@@ -99,10 +99,10 @@ var
 begin
 hadd_283:=0;
 for y:=0 to 255 do begin// 8-bit V-clock input
-    fillword(@punt,512,0);
+    fillword(@punt,512,paleta[0]);
 		for x:=0 to 511 do begin  // 9-bit H-clock input
 			i:=hadd_283; // store horizontal adder's previous state in i
-			hadd_283:=hcount_191+(x and $ff); // add lower 8 bits and preserve carry
+			hadd_283:=(hcount_191 and $ff)+(x and $ff); // add lower 8 bits and preserve carry
 			if ((x<64) or (x>447) or (y<16) or (y>239)) then continue; // clip rejection
 			vadd_283:=vcount_191+y; // add lower 8 bits and discard carry (later)
 			if ((vadd_283 xor (x shr 3)) and 4)=0 then continue;       // logic rejection 1
@@ -153,7 +153,7 @@ end;
 procedure eventos_sidearms;
 begin
 if event.arcade then begin
-  marcade.in0:=$ff;
+  marcade.in0:=$f7;
   marcade.in1:=$ff;
   marcade.in2:=$ff;
   //P1
@@ -188,12 +188,12 @@ while EmuStatus=EsRunning do begin
   for f:=0 to 255 do begin
     eventos_sidearms;
     case f of
-      0:vblank:=0;
+      16:vblank:=0;
+      112:z80_0.change_irq(HOLD_LINE);
       240:begin
             z80_0.change_irq(HOLD_LINE);
             update_video_sidearms;
-            vblank:=$80;
-            copymemory(@buffer_sprites,@memoria[$f000],$1000);
+            vblank:=8;
           end;
     end;
     //Main
@@ -212,12 +212,12 @@ begin
 case direccion of
   0..$7fff,$c000..$c7ff,$d000..$ffff:sidearms_getbyte:=memoria[direccion];
   $8000..$bfff:sidearms_getbyte:=memoria_rom[rom_bank,direccion and $3fff];
-  $c800:sidearms_getbyte:=marcade.in0;
+  $c800:sidearms_getbyte:=marcade.in0 or vblank;
   $c801:sidearms_getbyte:=marcade.in1;
   $c802:sidearms_getbyte:=marcade.in2;
   $c803:sidearms_getbyte:=marcade.dswa;
   $c804:sidearms_getbyte:=marcade.dswb;
-  $c805:sidearms_getbyte:=$7f or vblank;
+  $c805:sidearms_getbyte:=$ff;
 end;
 end;
 
@@ -249,10 +249,9 @@ case direccion of
                end;
   $c800:sound_command:=valor;
   $c801:rom_bank:=valor and 7;
-  $c802:; //WD
+  $c802:copymemory(@buffer_sprites,@memoria[$f000],$1000);
   $c804:begin
-          if (valor and $10)<>0 then z80_1.change_reset(ASSERT_LINE)
-            else z80_1.change_reset(CLEAR_LINE);
+          if (valor and $10)<>0 then z80_1.change_reset(HOLD_LINE);
           if (star_on<>((valor and $20)<>0)) then begin
             star_on:=(valor and $20)<>0;
 		        hflop_74a_n:=1;
@@ -274,8 +273,8 @@ case direccion of
   $c80a:scroll_y:=valor or (scroll_y and $f00);
   $c80b:scroll_y:=((valor and $f) shl 8) or (scroll_y and $ff);
   $c80c:begin
-          obj_on:=(valor and 1)<>0;
-          bg_on:=(valor and 2)<>0;
+          bg_on:=(valor and 1)<>0;
+          obj_on:=(valor and 2)<>0;
         end;
   $d000..$dfff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $7ff]:=true;
@@ -327,7 +326,7 @@ begin
  ym2203_1.reset;
  frame_main:=z80_0.tframes;
  frame_snd:=z80_1.tframes;
- marcade.in0:=$ff;
+ marcade.in0:=$f7;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
  scroll_x:=0;
@@ -335,7 +334,7 @@ begin
  rom_bank:=0;
  vblank:=0;
  sound_command:=0;
- back_redraw:=false;
+ back_redraw:=true;
  star_on:=false;
  bg_on:=false;
  obj_on:=false;
@@ -365,6 +364,7 @@ begin
 llamadas_maquina.bucle_general:=sidearms_principal;
 llamadas_maquina.reset:=reset_sidearms;
 llamadas_maquina.scanlines:=256;
+llamadas_maquina.fps_max:=8000000/(512*256);
 iniciar_sidearms:=false;
 iniciar_audio(false);
 screen_init(1,512,512,true);
@@ -372,7 +372,7 @@ screen_init(2,4096,4096,true);
 screen_init(3,512,512,false,true);
 iniciar_video(384,224);
 //Main CPU
-z80_0:=cpu_z80.create(4000000);
+z80_0:=cpu_z80.create(8000000);
 z80_0.change_ram_calls(sidearms_getbyte,sidearms_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000);

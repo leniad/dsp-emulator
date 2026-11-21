@@ -91,13 +91,13 @@ uses m6809,main_engine,controls_engine,gfx_engine,namco_snd,namcoio_56xx_58xx,
 
 const
         mappy_dip_a:array [0..5] of def_dip=(
-        (mask:$7;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'Rank A'),(dip_val:$6;dip_name:'Rank B'),(dip_val:$5;dip_name:'Rank C'),(dip_val:$4;dip_name:'Rank D'),(dip_val:$3;dip_name:'Rank E'),(dip_val:$2;dip_name:'Rank F'),(dip_val:$1;dip_name:'Rank G'),(dip_val:$0;dip_name:'Rank H'),(),(),(),(),(),(),(),())),
+        (mask:7;name:'Difficulty';number:8;dip:((dip_val:$7;dip_name:'Rank A'),(dip_val:$6;dip_name:'Rank B'),(dip_val:$5;dip_name:'Rank C'),(dip_val:$4;dip_name:'Rank D'),(dip_val:$3;dip_name:'Rank E'),(dip_val:$2;dip_name:'Rank F'),(dip_val:$1;dip_name:'Rank G'),(dip_val:0;dip_name:'Rank H'),(),(),(),(),(),(),(),())),
         (mask:$18;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$18;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 5C'),(dip_val:$8;dip_name:'1C 7C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Rack test';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Freeze';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         mappy_dip_b:array [0..3] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$1;dip_name:'3C 1C'),(dip_val:$3;dip_name:'2C 1C'),(dip_val:$0;dip_name:'3C 2C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 3C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:7;name:'Coin A';number:8;dip:((dip_val:$1;dip_name:'3C 1C'),(dip_val:$3;dip_name:'2C 1C'),(dip_val:$0;dip_name:'3C 2C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$2;dip_name:'2C 3C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
         (mask:$38;name:'Bonus Life';number:8;dip:((dip_val:$18;dip_name:'20K'),(dip_val:$30;dip_name:'20K 60K'),(dip_val:$38;dip_name:'20K 70K'),(dip_val:$10;dip_name:'20K 70K 70K+'),(dip_val:$28;dip_name:'20K 80K'),(dip_val:$8;dip_name:'20K 80K 80K+'),(dip_val:$20;dip_name:'30K 100K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$40;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
         mappy_dip_c:array [0..1] of def_dip=(
@@ -171,8 +171,8 @@ for f:=0 to $3f do begin
     color:=memoria[$1781+(f*2)] shl 4;
     x:=memoria[$1f80+(f*2)]-16;
     y:=memoria[$1f81+(f*2)]+$100*(memoria[$2781+(f*2)] and 1)-40;
-    flipx:=(atrib and $02)<>0;
-    flipy:=(atrib and $01)<>0;
+    flipx:=(atrib and 2)<>0;
+    flipy:=(atrib and 1)<>0;
     size:=((atrib and $c) shr 2);
     case size of
       0:begin  //16x16
@@ -219,7 +219,7 @@ end;
 begin
 for f:=$7ff downto 0 do begin
     if gfx[0].buffer[f] then begin
-      nchar:=memoria[$0+f];
+      nchar:=memoria[0+f];
       atrib:=memoria[$800+f];
       color:=(atrib and $3f) shl 2;
       case f of
@@ -283,8 +283,8 @@ for f:=0 to $3f do begin
     nchar:=memoria[$f80+(f*2)];
     color:=memoria[$f81+(f*2)] shl 2;
     x:=memoria[$1780+(f*2)]-17;
-    flipx:=(atrib and $02)<>0;
-    flipy:=(atrib and $01)<>0;
+    flipx:=(atrib and 2)<>0;
+    flipy:=(atrib and 1)<>0;
     size:=(atrib and $c) shr 2;
     case size of
       0:begin  //16x16
@@ -331,7 +331,7 @@ end;
 begin
 for f:=$3ff downto 0 do begin
     if gfx[0].buffer[f] then begin
-      nchar:=memoria[$0+f];
+      nchar:=memoria[0+f];
       atrib:=memoria[$400+f];
       color:=(atrib and $3f) shl 2;
       case f of
@@ -342,7 +342,7 @@ for f:=$3ff downto 0 do begin
                        if (atrib and $40)=0 then put_gfx_block_trans(x*8,(y*8)+16,2,8,8)
                           else put_gfx_mask(x*8,(y*8)+16,nchar,color,2,0,$1f,$1f);
                 end;
-        $0..$3f:begin
+        0..$3f:begin
                       //lineas de abajo
                       x:=31-(f and $1f);
                       y:=(f and $3f) shr 5;
@@ -434,17 +434,17 @@ end;
 procedure mappy_latch(direccion:byte);
 begin
 case (direccion and $e) of
-  $0:begin
+  0:begin
         snd_int:=(direccion and 1)<>0;
         if not(snd_int) then m6809_1.change_irq(CLEAR_LINE);
       end;
-  $2:begin
+  2:begin
         main_int:=(direccion and 1)<>0;
         if not(main_int) then m6809_0.change_irq(CLEAR_LINE);
       end;
-  $4:main_screen.flip_main_screen:=(direccion and 1)<>0;
-  $6:namco_snd_0.enabled:=(direccion and 1)<>0;
-  $8:begin
+  4:main_screen.flip_main_screen:=(direccion and 1)<>0;
+  6:namco_snd_0.enabled:=(direccion and 1)<>0;
+  8:begin
         namco_5x_0.reset_internal((direccion and 1)=0);
         namco_5x_1.reset_internal((direccion and 1)=0);
       end;
@@ -456,7 +456,7 @@ end;
 procedure mappy_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$fff:if memoria[direccion]<>valor then begin
+  0..$fff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion and $7ff]:=true;
               memoria[direccion]:=valor;
            end;
@@ -476,7 +476,7 @@ end;
 function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$3ff:sound_getbyte:=memoria[$4000+direccion];
+  0..$3ff:sound_getbyte:=memoria[$4000+direccion];
   $e000..$ffff:sound_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -484,7 +484,7 @@ end;
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-   $0..$3f:begin
+   0..$3f:begin
             memoria[$4000+direccion]:=valor;
             namco_snd_0.regs[direccion and $3f]:=valor;
            end;
@@ -503,7 +503,7 @@ end;
 procedure spacman_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$7ff:if memoria[direccion]<>valor then begin
+  0..$7ff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion and $3ff]:=true;
               memoria[direccion]:=valor;
            end;
@@ -562,7 +562,7 @@ end;
 
 procedure outport1_0(data:byte);
 begin
-mux:=(data and $1)*4;
+mux:=(data and 1)*4;
 end;
 
 //Main
@@ -628,10 +628,10 @@ begin
   end;
   set_pal(colores,32);
   case tipo of
-    0:for f:=0 to 255 do gfx[0].colores[f]:=(memoria_temp[f+$20] and $0f)+$10;
-    1:for f:=0 to 255 do gfx[0].colores[f]:=((memoria_temp[f+$20] and $0f) xor $f)+$10;
+    0:for f:=0 to 255 do gfx[0].colores[f]:=(memoria_temp[f+$20] and $f)+$10;
+    1:for f:=0 to 255 do gfx[0].colores[f]:=((memoria_temp[f+$20] and $f) xor $f)+$10;
   end;
-  for f:=0 to (long_sprites-1) do gfx[1].colores[f]:=(memoria_temp[f+$120] and $0f);
+  for f:=0 to (long_sprites-1) do gfx[1].colores[f]:=(memoria_temp[f+$120] and $f);
 end;
 begin
 llamadas_maquina.bucle_general:=mappy_principal;

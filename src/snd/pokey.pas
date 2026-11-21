@@ -1,7 +1,8 @@
-unit pokey;
+﻿unit pokey;
+{$INLINE ON}
 
 interface
-uses main_engine,sound_engine,timer_engine,dialogs;
+uses main_engine,sound_engine,timer_engine,dialogs,Math;
 
 const
   // POKEY WRITE LOGICALS */
@@ -57,9 +58,12 @@ const
   TIMER4=2;
 
   // values to add to the divisors for the different modes */
-  DIVADD_LOCLK=1;
+  // Borrow completes three chip clocks after underflow; the current
+  // clock consumes the first of these four propagation steps.
+  DIVADD_LOCLK=4;
   DIVADD_HICLK=4;
-  DIVADD_HICLK_JOINED=7;
+  // A joined pair propagates through each counter separately (4 + 3).
+  DIVADD_HICLK_JOINED=4;
   // AUDCx */
   NOTPOLY5=$80;    // selects POLY5 or direct CLOCK */
   POLY4_=$40;    // selects POLY4 or POLY17 */
@@ -121,6 +125,7 @@ type
       destructor free;
     private
       INTMask:byte;
+      AUDF_latched:byte; // AUDF at the physical reload, before the IRQ event
       AUDF:byte;           // AUDFx (D200, D202, D204, D206) */
       AUDC:byte;           // AUDCx (D201, D203, D205, D207) */
       borrow_cnt:integer;     // borrow counter */
@@ -128,16 +133,21 @@ type
       output_:byte;         // channel output signal (1 active, 0 inactive) */
       filter_sample:byte;  // high-pass filter sample */
       div2:byte;           // division by 2 */
-      procedure sample;
-      procedure reset_channel;
-      procedure inc_chan(chip_num,IRQEN:byte);
-      function check_borrow:boolean;
+      procedure sample; inline;
+      procedure reset_channel(latched:boolean=false); inline;
+      procedure inc_chan(chip_num,IRQEN:byte;cycles:integer);
+      function check_borrow:boolean; inline;
   end;
 
   pokey_chip=class(snd_chip_class)
         constructor create(clock:dword);
         destructor free;
         procedure update;
+        // Opt-in band-limited PCM output, without changing POKEY digital state.
+        procedure set_resampling(enabled:boolean);
+        // Opt-in bus clocking; the automatic timer remains the default.
+        procedure set_external_clock(enabled:boolean);
+        procedure clock;
         procedure reset;
       public
         function read(offset:word):byte;
@@ -149,6 +159,8 @@ type
       private
 	      // internal state
 	      number,buf_pos:byte;
+        clock_timer:byte;
+        external_clock:boolean;
 	      channel:array[0..POKEY_CHANNELS-1] of pokey_channel;
 
 	      output_:dword;        // raw output */
@@ -187,11 +199,20 @@ type
         poly5:array[0..$1f] of dword;
         poly9:array[0..$1ff] of dword;
         poly17:array[0..$1ffff] of dword;
-        voltab:array[0..$10000] of dword;
+        resample_enabled:boolean;
+        resample_clock,resample_phase:cardinal;
+        resample_history:array[0..1023]of smallint; // mirrored 512-sample ring
+        resample_delta_index:array[0..255]of word;
+        resample_delta:array[0..255]of integer;
+        resample_delta_count:integer;
+        resample_coeff:array[0..511]of smallint;
+        resample_queue:array[0..255]of smallint;
+        resample_pos,resample_read,resample_write,resample_count:integer;
+        resample_hold:smallint;
+        procedure resample_tick(value:integer);
         procedure step_one_clock;
 	      //procedure step_keyboard;
 
-        procedure vol_init;
         procedure write_internal(offset:word;data:byte);
         procedure update_internal;
         procedure process_channel(ch:integer);
@@ -230,14 +251,15 @@ end;
 
 procedure pokey_chip.update_internal;
 var
-  out_,i:integer;
+  out_:integer;
 begin
   //aqui me faltan el resto de salidas...para empezar va bien...
-  out_:=0;
-  for i:=0 to 3 do out_:=out_+(((self.output_ shr (4*i)) and $0f));
-  out_:=out_*POKEY_DEFAULT_GAIN;
+  // Sum the four packed 4-bit volumes without a per-clock loop.
+  out_:=(self.output_ and $0f0f)+((self.output_ shr 4) and $0f0f);
+  out_:=((out_ and $ff)+(out_ shr 8))*POKEY_DEFAULT_GAIN;
   if (out_>$7fff) then out_:=$7fff;
   self.output_:=out_;
+  if self.resample_enabled then self.resample_tick(out_);
 end;
 
 procedure synchronize(tipo:byte;valor:dword;chip_num:byte);
@@ -259,6 +281,7 @@ begin
 		end;
 	4:begin
 		  // serout_complete */
+      chip.SKSTAT:=chip.SKSTAT and not SK_SEROUT;
 		  if (chip.IRQEN and IRQ_SEROC)<>0 then begin
 			  chip.IRQST:=chip.IRQST or IRQ_SEROC;
 			  if (@chip.irq_f<>nil) then chip.irq_f(IRQ_SEROC);
@@ -297,20 +320,19 @@ begin
   self.filter_sample:=self.output_;
 end;
 
-procedure pokey_channel.reset_channel;
+procedure pokey_channel.reset_channel(latched:boolean);
 begin
-   self.counter:=self.AUDF xor $ff;
+   if latched then self.counter:=self.AUDF_latched xor $ff
+     else self.counter:=self.AUDF xor $ff;
+   self.borrow_cnt:=0;
 end;
 
-procedure pokey_channel.inc_chan(chip_num,IRQEN:byte);
+procedure pokey_channel.inc_chan(chip_num,IRQEN:byte;cycles:integer);
 begin
   self.counter:=(self.counter+1) and $ff;
   if ((self.counter=0) and (self.borrow_cnt=0)) then begin
-    self.borrow_cnt:=3;
-    if ((IRQEN and self.INTMask)<>0) then begin
-					// Exposed state has changed: This should only be updated after a resync ... */
-					synchronize(SYNC_SET_IRQST,self.INTMask,chip_num);
-    end;
+    self.borrow_cnt:=cycles;
+
   end;
 end;
 
@@ -329,6 +351,18 @@ var
   i:byte;
 begin
   self.output_:=0;
+  self.set_resampling(self.resample_enabled);
+  // Clear audio state on emulator reset.
+  for i:=0 to (POKEY_CHANNELS-1) do begin
+    self.channel[i].AUDF:=0;
+    self.channel[i].AUDF_latched:=0;
+    self.channel[i].AUDC:=0;
+    self.channel[i].counter:=0;
+    self.channel[i].borrow_cnt:=0;
+    self.channel[i].output_:=0;
+    self.channel[i].filter_sample:=0;
+    self.channel[i].div2:=0;
+  end;
   // Setup channels */
 	for i:=0 to (POKEY_CHANNELS-1) do self.channel[i].INTMask:=0;
 	self.channel[CHAN1].INTMask:=IRQ_TIMR1;
@@ -355,53 +389,21 @@ begin
 	for i:=0 to 7 do self.POTx[i]:=0;
 end;
 
-procedure pokey_chip.vol_init;
-const
-  resistors:array[0..3] of double=(90000, 26500, 8050, 3400);
+procedure poly_init_4_5(poly:pdword;size:integer);
 var
-	r_off:double;
-  r_chan:array[0..15] of double;
-	rTot:double;
-  j,i:integer;
-begin
-	// just a guess, there has to be a resistance since the doc specifies that
-	// Vout is at least 4.2V if all channels turned off.
-	r_off:=8e6;
-	for j:=0 to 15 do begin
-		rTot:= 1.0 / 1e12; // avoid div by 0 */;
-		for i:=0 to 4 do begin
-			if ((j and (1 shl i))<>0) then rTot:=rTot+(1.0/resistors[i])
-			  else rTot:=rTot+(1.0/r_off);
-		end;
-		r_chan[j]:=1.0/rTot;
-	end;
-	for j:=0 to $ffff do begin
-		rTot:=0;
-		for i:=0 to 3 do begin
-			rTot:=rTot +(1.0/r_chan[(j shr (i*4)) and $0f]);
-		end;
-		rTot:=1.0/rTot;
-		self.voltab[j]:=round(rTot);
-	end;
-end;
-
-procedure poly_init_4_5(poly:pdword;size,xorbit,invert:integer);
-var
-  mask,i,in_:integer;
-  lfsr:dword;
+  mask,i:integer;
+  feedback,lfsr:dword;
   ptemp:pdword;
 begin
   ptemp:=poly;
-	mask:=(1 shl size)-1;
-	lfsr:=0;
-	for i:=0 to (mask-1) do begin
-		// calculate next bit */
-		in_:=(not((lfsr shr 0) and 1)) xor ((lfsr shr xorbit) and 1);
-		lfsr:=lfsr shr 1;
-		lfsr:=(in_ shl (size-1)) or lfsr;
-		ptemp^:=lfsr xor invert;
-		inc(ptemp);
-	end;
+  mask:=(1 shl size)-1;
+  lfsr:=0;
+  for i:=0 to (mask-1) do begin
+    feedback:=(not ((lfsr shr 2) xor (lfsr shr (size-1)))) and 1;
+    lfsr:=((lfsr shl 1) or feedback) and mask;
+    ptemp^:=lfsr;
+    inc(ptemp);
+  end;
 end;
 
 procedure poly_init_9_17(poly:pdword;size:integer);
@@ -441,10 +443,13 @@ var
   i:integer;
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
+  self.resample_clock:=clock;
+  self.resample_enabled:=false;
   chips_total:=chips_total+1;
   self.number:=chips_total;
   self.buf_pos:=0;
-  timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock,nil,pokey_update_internal,true,self.number);
+  self.external_clock:=false;
+  self.clock_timer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock,nil,pokey_update_internal,true,self.number);
 	// Setup channels */
 	for i:=0 to (POKEY_CHANNELS-1) do begin
 		//self.channel[i].parent = this;
@@ -463,13 +468,12 @@ begin
 	// (takes two scanlines) but the result is not as accurate.
 
 	// initialize the poly counters */
-	poly_init_4_5(@self.poly4[0], 4, 1, 0);
-	poly_init_4_5(@self.poly5[0], 5, 2, 1);
+	poly_init_4_5(@self.poly4[0], 4);
+	poly_init_4_5(@self.poly5[0], 5);
 
 	// initialize 9 / 17 arrays */
 	poly_init_9_17(@self.poly9[0],   9);
 	poly_init_9_17(@self.poly17[0], 17);
-	self.vol_init;
 
 	// The pokey does not have a reset line. These should be initialized
 	// with random values.
@@ -751,76 +755,92 @@ begin
 
 	if ((self.SKCTL and SK_RESET)<>0) then begin
 		// Clocks only count if we are not in a reset */
-		for clk:=0 to 2 do begin
+    self.clock_cnt[CLK_1]:=0;
+    clock_triggered[CLK_1]:=1;
+		for clk:=1 to 2 do begin
 			self.clock_cnt[clk]:=self.clock_cnt[clk]+1;
 			if (self.clock_cnt[clk]>=clock_divisors[clk]) then begin
 				self.clock_cnt[clk]:=0;
 				clock_triggered[clk]:=1;
 			end;
     end;
-		self.p4:=(self.p4+1) mod $0000f;
-		self.p5:=(self.p5+1) mod $0001f;
-		self.p9:=(self.p9+1) mod $001ff;
-		self.p17:=(self.p17+1) mod $1ffff;
-
-		if (self.AUDCTL and CH1_HICLK)<>0 then clk:=CLK_1
-      else clk:=base_clock;
-		if (clock_triggered[clk]<>0) then self.channel[CHAN1].inc_chan(self.number,self.IRQEN);
-		if ((self.AUDCTL and CH3_HICLK)<>0) then clk:=CLK_1
-      else clk:=base_clock;
-		if (clock_triggered[clk]<>0) then self.channel[CHAN3].inc_chan(self.number,self.IRQEN);
-		if (clock_triggered[base_clock]<>0) then begin
-			if ((self.AUDCTL and CH12_JOINED)=0) then self.channel[CHAN2].inc_chan(self.number,self.IRQEN);
-			if ((self.AUDCTL and CH34_JOINED)=0) then self.channel[CHAN4].inc_chan(self.number,self.IRQEN);
-		end;
+		Inc(self.p4);if self.p4=$0000f then self.p4:=0;
+		Inc(self.p5);if self.p5=$0001f then self.p5:=0;
+		Inc(self.p9);if self.p9=$001ff then self.p9:=0;
+		Inc(self.p17);if self.p17=$1ffff then self.p17:=0;
+    if (self.AUDCTL and CH1_HICLK)<>0 then begin
+      if (clock_triggered[CLK_1]<>0) then begin
+        if (self.AUDCTL and CH12_JOINED)<>0 then self.channel[CHAN1].inc_chan(self.number,self.IRQEN,DIVADD_HICLK_JOINED)
+          else self.channel[CHAN1].inc_chan(self.number,self.IRQEN,DIVADD_HICLK);
+      end;
+    end else if (clock_triggered[base_clock]<>0) then self.channel[CHAN1].inc_chan(self.number,self.IRQEN,DIVADD_LOCLK);
+    if (self.AUDCTL and CH3_HICLK)<>0 then begin
+      if (clock_triggered[CLK_1]<>0) then begin
+        if (self.AUDCTL and CH34_JOINED)<>0 then self.channel[CHAN3].inc_chan(self.number,self.IRQEN,DIVADD_HICLK_JOINED)
+          else self.channel[CHAN3].inc_chan(self.number,self.IRQEN,DIVADD_HICLK);
+      end;
+    end else if (clock_triggered[base_clock]<>0) then self.channel[CHAN3].inc_chan(self.number,self.IRQEN,DIVADD_LOCLK);
+    if (clock_triggered[base_clock]<>0) then begin
+      if (self.AUDCTL and CH12_JOINED)=0 then self.channel[CHAN2].inc_chan(self.number,self.IRQEN,DIVADD_LOCLK);
+      if (self.AUDCTL and CH34_JOINED)=0 then self.channel[CHAN4].inc_chan(self.number,self.IRQEN,DIVADD_LOCLK);
+    end;
 		// Potentiometer handling */
 		if (((clock_triggered[CLK_114]<>0) or ((self.SKCTL and SK_PADDLE)<>0)) and (self.pot_counter<228)) then self.step_pot;
 		// Keyboard */
 		//if ((clock_triggered[CLK_114]<>0) and ((self.SKCTL and SK_KEYSCAN)<>0)) then self.step_keyboard;
 	end;
-	// do CHAN2 before CHAN1 because CHAN1 may set borrow! */
-	if (self.channel[CHAN2].check_borrow) then begin
-		isJoined:=(self.AUDCTL and CH12_JOINED)<>0;
-		if isJoined then self.channel[CHAN1].reset_channel;
-    self.channel[CHAN2].reset_channel;
-		self.process_channel(CHAN2);
-		// check if some of the requested timer interrupts are enabled */
-		if (((self.IRQST and IRQ_TIMR2)<>0) and (@self.irq_f<>nil)) then self.irq_f(IRQ_TIMR2);
-	end;
-	if (self.channel[CHAN1].check_borrow) then begin
-		isJoined:=(self.AUDCTL and CH12_JOINED)<>0;
-		if isJoined then self.channel[CHAN2].inc_chan(self.number,self.IRQEN)
-		  else self.channel[CHAN1].reset_channel;
-		self.process_channel(CHAN1);
-		// check if some of the requested timer interrupts are enabled */
-		if (((self.IRQST and IRQ_TIMR1)<>0) and (@self.irq_f<>nil)) then self.irq_f(IRQ_TIMR1);
-	end;
-	// do CHAN4 before CHAN3 because CHAN3 may set borrow! */
-	if (self.channel[CHAN4].check_borrow) then begin
+  // Match the borrow propagation and filter sampling order: 3, 4, 1, 2.
+	if (self.channel[CHAN3].check_borrow) then begin
 		isJoined:=(self.AUDCTL and CH34_JOINED)<>0;
-		if isJoined then self.channel[CHAN3].reset_channel;
-		self.channel[CHAN4].reset_channel;
+		if isJoined then self.channel[CHAN4].inc_chan(self.number,self.IRQEN,DIVADD_LOCLK)
+		  else self.channel[CHAN3].reset_channel(true);
+		self.process_channel(CHAN3);
+		// is this a filtering channel (3/4) and is the filter active? */
+		if (self.AUDCTL and CH1_FILTER)<>0 then self.channel[CHAN1].sample
+      else self.channel[CHAN1].filter_sample:=1;
+	end;
+	if (self.channel[CHAN4].check_borrow) then begin
+    // IRQ enable is sampled when the borrow arrives, not at underflow.
+    if (self.IRQEN and self.channel[CHAN4].INTMask)<>0 then
+      synchronize(SYNC_SET_IRQST,self.channel[CHAN4].INTMask,self.number);
+		isJoined:=(self.AUDCTL and CH34_JOINED)<>0;
+		if isJoined then self.channel[CHAN3].reset_channel(true);
+		self.channel[CHAN4].reset_channel(true);
 		self.process_channel(CHAN4);
 		// is this a filtering channel (3/4) and is the filter active? */
 		if ((self.AUDCTL and CH2_FILTER)<>0) then self.channel[CHAN2].sample
 		  else self.channel[CHAN2].filter_sample:=1;
 		if (((self.IRQST and IRQ_TIMR4)<>0) and (@self.irq_f<>nil)) then self.irq_f(IRQ_TIMR4);
 	end;
-
-	if (self.channel[CHAN3].check_borrow) then begin
-		isJoined:=(self.AUDCTL and CH34_JOINED)<>0;
-		if isJoined then self.channel[CHAN4].inc_chan(self.number,self.IRQEN)
-		  else self.channel[CHAN3].reset_channel;
-		self.process_channel(CHAN3);
-		// is this a filtering channel (3/4) and is the filter active? */
-		if (self.AUDCTL and CH1_FILTER)<>0 then self.channel[CHAN1].sample
-      else self.channel[CHAN1].filter_sample:=1;
+	if (self.channel[CHAN1].check_borrow) then begin
+    // IRQ enable is sampled when the borrow arrives, not at underflow.
+    if (self.IRQEN and self.channel[CHAN1].INTMask)<>0 then
+      synchronize(SYNC_SET_IRQST,self.channel[CHAN1].INTMask,self.number);
+		isJoined:=(self.AUDCTL and CH12_JOINED)<>0;
+		if isJoined then self.channel[CHAN2].inc_chan(self.number,self.IRQEN,DIVADD_LOCLK)
+		  else self.channel[CHAN1].reset_channel(true);
+		self.process_channel(CHAN1);
+		// check if some of the requested timer interrupts are enabled */
+		if (((self.IRQST and IRQ_TIMR1)<>0) and (@self.irq_f<>nil)) then self.irq_f(IRQ_TIMR1);
+	end;
+	if (self.channel[CHAN2].check_borrow) then begin
+    // IRQ enable is sampled when the borrow arrives, not at underflow.
+    if (self.IRQEN and self.channel[CHAN2].INTMask)<>0 then
+      synchronize(SYNC_SET_IRQST,self.channel[CHAN2].INTMask,self.number);
+		isJoined:=(self.AUDCTL and CH12_JOINED)<>0;
+		if isJoined then self.channel[CHAN1].reset_channel(true);
+    self.channel[CHAN2].reset_channel(true);
+		self.process_channel(CHAN2);
+		// check if some of the requested timer interrupts are enabled */
+		if (((self.IRQST and IRQ_TIMR2)<>0) and (@self.irq_f<>nil)) then self.irq_f(IRQ_TIMR2);
 	end;
 	for ch:=0 to 3 do
     if (((self.channel[ch].output_ xor self.channel[ch].filter_sample)<>0) or ((self.channel[ch].AUDC and VOLUME_ONLY)<>0)) then
       sum:=sum or ((self.channel[ch].AUDC and VOLUME_MASK) shl (ch*4));
       //else sum:= sum or (0 shl (ch*4))
   self.output_:=sum;
+  // The physical reload precedes the borrow/IRQ event by one chip cycle.
+  for ch:=0 to 3 do self.channel[ch].AUDF_latched:=self.channel[ch].AUDF;
 end;
 
 procedure pokey_update_internal(index:byte);
@@ -853,9 +873,112 @@ begin
   pokey_2.step_one_clock;
   pokey_2.update_internal;
 end;
-procedure pokey_chip.update;
+
+procedure pokey_chip.set_external_clock(enabled:boolean);
 begin
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=self.output_;
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.output_;
+  self.external_clock:=enabled;
+  // Disable the automatic source, avoiding two POKEY clocks per CPU cycle.
+  timers.enabled(self.clock_timer,not enabled);
 end;
+
+procedure pokey_chip.clock;
+begin
+  if not self.external_clock then exit;
+  self.step_one_clock;
+  self.update_internal;
+end;
+
+procedure pokey_chip.set_resampling(enabled:boolean);
+var
+  i,total:integer;
+  x,fc,h,coefficient_sum:double;
+  weights:array[0..511]of double;
+begin
+  self.resample_enabled:=enabled;
+  self.resample_phase:=0;
+  self.resample_pos:=0;
+  self.resample_read:=0;
+  self.resample_write:=0;
+  self.resample_count:=0;
+  self.resample_hold:=0;
+  FillChar(self.resample_history,SizeOf(self.resample_history),0);
+  FillChar(self.resample_queue,SizeOf(self.resample_queue),0);
+  if not enabled then exit;
+  // Hamming-windowed low pass at the chip clock, before decimation.
+  // 512 taps, 18 kHz cutoff at the 5200 clock. Coefficients sum to 32768.
+  fc:=Min(18000.0,FREQ_BASE_AUDIO*0.4081632653)/self.resample_clock;
+  coefficient_sum:=0;
+  for i:=0 to 511 do begin
+    x:=i-255.5;
+    h:=Sin(2*Pi*fc*x)/(Pi*x);
+    weights[i]:=h*(0.54-0.46*Cos(2*Pi*i/511));
+    coefficient_sum:=coefficient_sum+weights[i];
+  end;
+  total:=0;
+  for i:=0 to 511 do begin
+    self.resample_coeff[i]:=Round(weights[i]*32768/coefficient_sum);
+    Inc(total,self.resample_coeff[i]);
+  end;
+  Inc(self.resample_coeff[255],32768-total);
+  // Keep the original quantized coefficients exactly, including the DC fix.
+  // Symmetric pairs share one multiply; only unequal pairs need a correction.
+  self.resample_delta_count:=0;
+  for i:=0 to 255 do
+    if self.resample_coeff[511-i]<>self.resample_coeff[i] then begin
+      self.resample_delta_index[self.resample_delta_count]:=i;
+      self.resample_delta[self.resample_delta_count]:=integer(self.resample_coeff[511-i])-self.resample_coeff[i];
+      Inc(self.resample_delta_count);
+    end;
+end;
+
+procedure pokey_chip.resample_tick(value:integer);
+var
+  i,near_pos,far_pos,sample_value:integer;
+  sum:int64;
+begin
+  self.resample_history[self.resample_pos]:=value;
+  self.resample_history[self.resample_pos+512]:=value;
+  self.resample_phase:=self.resample_phase+FREQ_BASE_AUDIO;
+  if self.resample_phase>=self.resample_clock then begin
+    self.resample_phase:=self.resample_phase-self.resample_clock;
+    sum:=0;
+    near_pos:=self.resample_pos+512;
+    far_pos:=self.resample_pos+1;
+    for i:=0 to 255 do
+      sum:=sum+int64(integer(self.resample_history[near_pos-i])+self.resample_history[far_pos+i])*self.resample_coeff[i];
+    for i:=0 to self.resample_delta_count-1 do
+      sum:=sum+int64(self.resample_history[far_pos+self.resample_delta_index[i]])*self.resample_delta[i];
+    sample_value:=Round(sum/32768.0);
+    if sample_value>32767 then sample_value:=32767
+      else if sample_value< -32768 then sample_value:=-32768;
+    // Normal CPU/DMA batches produce only a few PCM samples at a time.
+    if self.resample_count=256 then begin
+      self.resample_read:=(self.resample_read+1) and 255;
+      Dec(self.resample_count);
+    end;
+    self.resample_queue[self.resample_write]:=sample_value;
+    self.resample_write:=(self.resample_write+1) and 255;
+    Inc(self.resample_count);
+  end;
+  self.resample_pos:=(self.resample_pos+1) and 511;
+end;
+
+procedure pokey_chip.update;
+var
+  value:integer;
+begin
+  value:=self.output_;
+  if self.resample_enabled then begin
+    if self.resample_count<>0 then begin
+      self.resample_hold:=self.resample_queue[self.resample_read];
+      self.resample_read:=(self.resample_read+1) and 255;
+      Dec(self.resample_count);
+    end;
+    value:=self.resample_hold;
+  end;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=value;
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=value;
+end;
+
 end.
+

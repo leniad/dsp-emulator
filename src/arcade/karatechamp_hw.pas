@@ -3,7 +3,7 @@ unit karatechamp_hw;
 interface
 uses rom_engine;
 
-function karatechamp_iniciar:boolean;
+function iniciar_karatechamp:boolean;
 
 const
     karatechamp_rom:array[0..5] of tipo_roms=(
@@ -238,7 +238,7 @@ marcade.in1:=$ff;
 marcade.in2:=$ff;
 end;
 
-function karatechamp_iniciar:boolean;
+function iniciar_karatechamp:boolean;
 const
   ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
 		$2000*8+0,$2000*8+1,$2000*8+2,$2000*8+3,$2000*8+4,$2000*8+5,$2000*8+6,$2000*8+7);
@@ -249,10 +249,10 @@ var
   f:word;
   memoria_temp:array[0..$17fff] of byte;
 begin
+iniciar_karatechamp:=false;
 llamadas_maquina.bucle_general:=karatechamp_principal;
 llamadas_maquina.reset:=karatechamp_reset;
 llamadas_maquina.scanlines:=256;
-karatechamp_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
@@ -302,7 +302,7 @@ set_pal(colores,$100);
 //DIP
 init_dips(1,karatechamp_dip,$3f);
 //Final
-karatechamp_iniciar:=true;
+iniciar_karatechamp:=true;
 end;
 
 end.

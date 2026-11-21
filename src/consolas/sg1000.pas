@@ -161,7 +161,8 @@ begin
     $92f29d6,$af4f14bc,$1d1a0ca3:sg1000_0.mid_8k_ram:=true;
     $49e9718b:copymemory(@memoria[$4000],@memoria[0],$4000); //Safari Hunting ¿proteccion?
   end;
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   Directory.sg1000:=ExtractFilePath(romfile);
 end;
 

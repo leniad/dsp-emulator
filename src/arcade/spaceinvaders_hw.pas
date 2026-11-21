@@ -133,7 +133,7 @@ case (puerto and 7) of
        if (((valor and 2)<>0) and ((sound1 and 2)=0)) then start_sample(0);
        if (((valor and 4)<>0) and ((sound1 and 4)=0)) then start_sample(1);
        if (((valor and 8)<>0) and ((sound1 and 8)=0)) then start_sample(2);
-       if (((valor and $10)<>0) and ((sound1 and $10)=0)) then start_sample(8); //????
+       if (((valor and $10)<>0) and ((sound1 and $10)=0)) then start_sample(8); //MAL! Vida extra
        sound1:=valor;
     end;
   4:shift_data:=(shift_data shr 8) or (valor shl 7);
@@ -211,6 +211,7 @@ begin
  sound2:=0;
  marcade.in0:=0;
  marcade.in1:=9;
+ reset_samples;
 end;
 
 function iniciar_spaceinv:boolean;

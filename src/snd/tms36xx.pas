@@ -1,4 +1,4 @@
-unit tms36xx;
+﻿unit tms36xx;
 interface
 uses sound_engine,timer_engine,dialogs;
 
@@ -38,10 +38,13 @@ procedure tms36xx_note_w(octave,note:integer);
 procedure tms36xx_close;
 
 implementation
+var
+  tms_timer:byte;
+  tms_timer_valid:boolean=false;
 const
    VMIN=$0000;
    VMAX=$7fff;
-   A_1=0;A_2=1;A_3=2;A_4=3;A_5=4;
+   A_1=61;A_2=1;A_3=2;A_4=3;A_5=4;
    Ax_1=5;Ax_2=6;Ax_3=7;Ax_4=8;Ax_5=9;
    B_1=10;B_2=11;B_3=12;B_4=13;B_5=14;B_0=60;
    C_1=15;C_2=16;C_3=17;C_4=18;C_5=19;
@@ -352,11 +355,12 @@ begin
 end;
 procedure RESTART(voice:integer);
 var
-  temp:single;
+  temp:Int64;
 begin
 	if (tunes[tms_chip.tune_num,tms_chip.tune_ofs*6+voice]<>0) then begin
-    temp:=tunes[tms_chip.tune_num,tms_chip.tune_ofs*6+voice]*(tms_chip.basefreq shl tms_chip.octave)/FSCALE;
-    tms_chip.frequency[tms_chip.shift+voice]:=round(temp);
+    temp:=Int64(tunes[tms_chip.tune_num,tms_chip.tune_ofs*6+voice])*
+      (Int64(tms_chip.basefreq) shl tms_chip.octave);
+    tms_chip.frequency[tms_chip.shift+voice]:=temp div FSCALE;
 		tms_chip.vol[tms_chip.shift+voice]:=VMAX;
 	end;
 end;
@@ -372,11 +376,13 @@ begin
 		if (tms_chip.output and tms_chip.enable and (1 shl voice))<>0 then tone:=tms_chip.vol[voice];
 	end;
 end;
+
 procedure tms36xx_internal_update;
 var
   n,sum:integer;
   f:byte;
 begin
+    if tms_chip=nil then Exit;
     // no tune played?
 	if ((tms_chip.tune_num=0) or (tms_chip.voices=0)) then begin
 		tms_chip.audio_out:=0;
@@ -387,7 +393,7 @@ begin
   // musical note timing
   tms_chip.tune_counter:=tms_chip.tune_counter-tms_chip.speed;
   if (tms_chip.tune_counter<=0) then begin
-    n:=trunc((-tms_chip.tune_counter/tms_chip.samplerate)+1);
+    n:=(-tms_chip.tune_counter div tms_chip.samplerate)+1;
     tms_chip.tune_counter:=tms_chip.tune_counter+(n*tms_chip.samplerate);
     tms_chip.note_counter:=tms_chip.note_counter-n;
     if (tms_chip.note_counter<=0) then begin
@@ -406,13 +412,19 @@ begin
   for f:=0 to 11 do sum:=sum+TONE(f);
   tms_chip.audio_out:=sum/tms_chip.voices;
 end;
+
 procedure tms36xx_sound_update;
+var
+  sample:smallint;
 begin
-  tsample[tms_chip.tsample,sound_status.posicion_sonido]:=trunc(tms_chip.audio_out);
+  sample:=trunc(tms_chip.audio_out);
+  tsample[tms_chip.tsample,sound_status.posicion_sonido]:=sample;
+  if sound_status.stereo then tsample[tms_chip.tsample,sound_status.posicion_sonido+1]:=sample;
 end;
 
 procedure mm6221aa_tune_w(tune:integer);
 begin
+    if tms_chip=nil then Exit;
     // which tune?
     tune:=tune and 3;
     if (tune=tms_chip.tune_num) then exit;
@@ -420,6 +432,8 @@ begin
     tms_chip.tune_ofs:=0;
     tms_chip.tune_max:=96; // fixed for now
 end;
+
+procedure tms36xx_note_w(octave,note:integer);
 procedure tms36xx_reset_counters;
 var
   f:byte;
@@ -431,44 +445,42 @@ begin
 	    tms_chip.counter[f]:=0;
     end;
 end;
-procedure tms36xx_note_w(octave,note:integer);
 begin
+  if tms_chip=nil then Exit;
 	octave:=octave and 3;
 	note:=note and 15;
-	if (note > 12) then exit;
-	// play a single note from 'tune 4', a list of the 13 tones
+	if (note>12) then exit;
 	tms36xx_reset_counters;
 	tms_chip.octave:= octave;
   tms_chip.tune_num:=4;
 	tms_chip.tune_ofs:=note;
 	tms_chip.tune_max:=note+1;
 end;
+
+procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 procedure tms3617_enable(enable:integer);
 var
   i,bits:integer;
 begin
   bits:= 0;
-	// duplicate the 6 voice enable bits
   enable:=(enable and $3f) or ((enable and $3f) shl 6);
 	if (enable=tms_chip.enable) then exit;
-  for i:=0 to 5 do begin
-    if (enable and (1 shl i))<>0 then bits:=bits+2;	// each voice has two instances
-  end;
-	// set the enable mask and number of active voices
+  for i:=0 to 5 do if (enable and (1 shl i))<>0 then bits:=bits+2;
 	tms_chip.enable:=enable;
   tms_chip.voices:=bits;
 end;
-procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 var
 	j,f:integer;
 	enable:integer;
   p:psingle;
-  temp:single;
+  temp:double;
+  saved_channel:byte;
 begin
   if addr(update_sound_proc)=nil then MessageDlg('ERROR: Chip de sonido inicializado sin CPU de sonido!', mtInformation,[mbOk], 0);
+  if tms_timer_valid then timers.enabled(tms_timer,false);
   //Primero las tablas
   for f:=1 to 4 do
-      for j:=0 to ((96*6)-1) do tunes[f,j]:=0;
+    for j:=0 to ((96*6)-1) do tunes[f,j]:=0;
   //tune 1
   for f:=0 to 191 do begin
    case tune1_d[f] of
@@ -525,6 +537,7 @@ begin
    case tune4_d[f] of
      A_1:tunes[4][f]:=A(1);A_2:tunes[4][f]:=A(2);A_3:tunes[4][f]:=A(3);A_4:tunes[4][f]:=A(4);A_5:tunes[4][f]:=A(5);
      Ax_1:tunes[4][f]:=Ax(1);Ax_2:tunes[4][f]:=Ax(2);Ax_3:tunes[4][f]:=Ax(3);Ax_4:tunes[4][f]:=Ax(4);Ax_5:tunes[4][f]:=Ax(5);
+     B_0:tunes[4][f]:=B(0);
      B_1:tunes[4][f]:=B(1);B_2:tunes[4][f]:=B(2);B_3:tunes[4][f]:=B(3);B_4:tunes[4][f]:=B(4);B_5:tunes[4][f]:=B(5);
      C_1:tunes[4][f]:=C(1);C_2:tunes[4][f]:=C(2);C_3:tunes[4][f]:=C(3);C_4:tunes[4][f]:=C(4);C_5:tunes[4][f]:=C(5);
      Cx_1:tunes[4][f]:=Cx(1);Cx_2:tunes[4][f]:=Cx(2);Cx_3:tunes[4][f]:=Cx(3);Cx_4:tunes[4][f]:=Cx(4);Cx_5:tunes[4][f]:=Cx(5);
@@ -540,11 +553,11 @@ begin
   p:=pdecay;
   if tms_chip=nil then begin
     getmem(tms_chip,sizeof(tms36xx_type));
-    fillchar(tms_chip^,sizeof(tms36xx_type),0);
-  end;
+    saved_channel:=init_channel;
+  end else saved_channel:=tms_chip.tsample;
+  fillchar(tms_chip^,SizeOf(tms36xx_type),0);
+  tms_chip.tsample:=saved_channel;
 	tms_chip.samplerate:=clock*64;
-  //Timer para rellenar sonido
-  timers.init(sound_status.cpu_num,sound_status.cpu_clock/tms_chip.samplerate,tms36xx_internal_update,nil,true);
 	tms_chip.basefreq:=clock;
 	enable:=0;
    for j:=0 to 5 do begin
@@ -559,13 +572,24 @@ begin
 	if (speed>0) then tms_chip.speed:=trunc(VMAX/speed)
     else tms_chip.speed:=VMAX;
 	tms3617_enable(enable);
-  tms_chip.tsample:=init_channel;
+  // Start the timer only after all chip state is initialized.
+  if not tms_timer_valid then begin
+    tms_timer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/tms_chip.samplerate,tms36xx_internal_update,nil,false);
+    tms_timer_valid:=true;
+  end else timers.timer[tms_timer].time_final:=sound_status.cpu_clock/tms_chip.samplerate;
+  timers.enabled(tms_timer,true);
 end;
+
 procedure tms36xx_close;
 begin
+  if tms_timer_valid then begin
+    timers.enabled(tms_timer,false);
+    tms_timer_valid:=false;
+  end;
 if tms_chip<>nil then begin
     freemem(tms_chip);
     tms_chip:=nil;
 end;
 end;
+
 end.

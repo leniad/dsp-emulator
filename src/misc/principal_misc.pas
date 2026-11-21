@@ -4,7 +4,7 @@ interface
 uses {$IFDEF windows}windows,{$else}LCLType,{$endif}principal,main_engine,
      file_engine,sound_engine,init_games,controls_engine,timer_engine,tap_tzx,
      lib_sdl2,tape_window,lenslock,sysutils,forms,lenguaje,misc_functions,
-     {$ifndef fpc}gifimg,jpeg,pngimage,{$endif}graphics;
+     {$ifndef fpc}gifimg,jpeg,pngimage,{$endif}graphics,device_functions;
 
 procedure principal_timer3;
 procedure principal_formclose;
@@ -87,6 +87,7 @@ end;
 
 procedure principal_formcreate;
 begin
+close_all_devices;
 Init_sdl_lib;
 timers:=timer_eng.create;
 EmuStatus:=EsStoped;

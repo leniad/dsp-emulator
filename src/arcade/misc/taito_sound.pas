@@ -1,7 +1,7 @@
-unit taito_sound;
+﻿unit taito_sound;
 
 interface
-uses nz80,main_engine,ym_2151,msm5205,ym_2203;
+uses nz80,main_engine,ym_2151,msm5205,ym_2203,ym_2610;
 
 type
   tc0140syt_chip=class
@@ -10,6 +10,7 @@ type
     public
       z80:cpu_z80;
       ym2151:ym2151_chip;
+      ym2610:ym2610_chip;
       snd_rom:array[0..$7fff] of byte;
       snd_bank_rom:array[0..3,0..$3fff] of byte;
       procedure port_w(valor:byte);
@@ -57,6 +58,7 @@ const
 //Rastan
 function rastan_snd_getbyte(direccion:word):byte;
 begin
+  rastan_snd_getbyte:=$ff;
 case direccion of
   0..$3fff:rastan_snd_getbyte:=tc0140syt_0.snd_rom[direccion];
   $4000..$7fff:rastan_snd_getbyte:=tc0140syt_0.snd_bank_rom[tc0140syt_0.sound_bank,direccion and $3fff];
@@ -151,6 +153,7 @@ end;
 //Volfied
 function volfied_snd_getbyte(direccion:word):byte;
 begin
+  volfied_snd_getbyte:=$ff;
 case direccion of
   0..$7fff:volfied_snd_getbyte:=tc0140syt_0.snd_rom[direccion];
   $8000..$87ff:volfied_snd_getbyte:=tc0140syt_0.ram[direccion and $7ff];
@@ -198,15 +201,14 @@ end;
 //TaitoB
 function taitob_snd_getbyte(direccion:word):byte;
 begin
-case direccion of
-  0..$3fff:taitob_snd_getbyte:=tc0140syt_0.snd_rom[direccion];
-  $4000..$7fff:taitob_snd_getbyte:=tc0140syt_0.snd_bank_rom[tc0140syt_0.sound_bank,direccion and $3fff];
-  $c000..$dfff:taitob_snd_getbyte:=tc0140syt_0.ram[direccion and $1fff];
-  $e000:taitob_snd_getbyte:=ym2203_0.status;
-  $e001:taitob_snd_getbyte:=ym2203_0.read;
-  $e002..$e003:taitob_snd_getbyte:=0; //ymadpcm
-  $e201:taitob_snd_getbyte:=tc0140syt_0.slave_comm_r;
-end;
+  taitob_snd_getbyte:=$ff;
+  case direccion of
+    0..$3fff:taitob_snd_getbyte:=tc0140syt_0.snd_rom[direccion];
+    $4000..$7fff:taitob_snd_getbyte:=tc0140syt_0.snd_bank_rom[tc0140syt_0.sound_bank,direccion and $3fff];
+    $c000..$dfff:taitob_snd_getbyte:=tc0140syt_0.ram[direccion and $1fff];
+    $e000..$e003:taitob_snd_getbyte:=tc0140syt_0.ym2610.read_port(direccion and 3);
+    $e201:taitob_snd_getbyte:=tc0140syt_0.slave_comm_r;
+  end;
 end;
 
 procedure taitob_snd_putbyte(direccion:word;valor:byte);
@@ -214,9 +216,7 @@ begin
 case direccion of
   0..$7fff:; //ROM
   $c000..$dfff:tc0140syt_0.ram[direccion and $1fff]:=valor;
-  $e000:ym2203_0.control(valor);
-  $e001:ym2203_0.write(valor);
-  $e002..$e003:; //ym
+  $e000..$e003:tc0140syt_0.ym2610.write_port(direccion and 3,valor);
   $e200:tc0140syt_0.slave_port_w(valor);
   $e201:tc0140syt_0.slave_comm_w(valor);
   $f200:tc0140syt_0.sound_bank:=valor and 3;
@@ -225,12 +225,13 @@ end;
 
 procedure taitob_sound_update;
 begin
-  //ym.update;
+  tc0140syt_0.ym2610.update;
 end;
 
 //Master of Weapon
 function masterw_snd_getbyte(direccion:word):byte;
 begin
+  masterw_snd_getbyte:=$ff;
 case direccion of
   0..$3fff:masterw_snd_getbyte:=tc0140syt_0.snd_rom[direccion];
   $4000..$7fff:masterw_snd_getbyte:=tc0140syt_0.snd_bank_rom[tc0140syt_0.sound_bank,direccion and $3fff];
@@ -269,7 +270,7 @@ begin
     end;
     SOUND_OPWOLF:begin
       self.z80.change_ram_calls(rastan_snd_getbyte,opwolf_snd_putbyte);
-      self.z80.init_sound(rastan_sound_update);
+      self.z80.init_sound(opwolf_sound_update);
       self.ym2151:=ym2151_chip.create(4000000);
       self.ym2151.change_port_func(rastan_sound_bank);
       self.ym2151.change_irq_func(tc0140syt_irq);
@@ -292,8 +293,8 @@ begin
     SOUND_TAITOB:begin
       self.z80.change_ram_calls(taitob_snd_getbyte,taitob_snd_putbyte);
       self.z80.init_sound(taitob_sound_update);
-      ym2203_0:=ym2203_chip.create(4000000);
-      ym2203_0.change_irq_calls(tc0140syt_irq);
+      self.ym2610:=ym2610_chip.create(8000000,1,0.75);
+      self.ym2610.change_irq_calls(tc0140syt_irq);
     end;
     SOUND_MASTERW:begin
       self.z80.change_ram_calls(masterw_snd_getbyte,masterw_snd_putbyte);
@@ -307,6 +308,7 @@ end;
 
 destructor tc0140syt_chip.free;
 begin
+  if self.sound_type=SOUND_TAITOB then self.ym2610.free;
   self.z80.free;
 end;
 
@@ -336,7 +338,7 @@ begin
                  end;
     SOUND_VOLFIED:ym2203_0.reset;
     SOUND_RAINBOWI:self.ym2151.reset;
-    SOUND_TAITOB:ym2203_0.reset;
+    SOUND_TAITOB:self.ym2610.reset;
     SOUND_MASTERW:ym2203_0.reset;
   end;
 end;
@@ -364,7 +366,7 @@ begin
     			self.slavedata[self.mainmode]:=valor;
           self.mainmode:=self.mainmode+1;
 		    	self.status:=self.status or TC0140SYT_PORT01_FULL;
-    			self.nmi_req:=true;
+
         end;
 		2:begin		// mode #2
 			    self.slavedata[self.mainmode]:=valor;
@@ -374,14 +376,16 @@ begin
     			self.slavedata[self.mainmode]:=valor;
           self.mainmode:=self.mainmode+1;
     			self.status:=self.status or TC0140SYT_PORT23_FULL;
-          self.nmi_req:=true;
+
         end;
 		4:begin		// port status
     			// this does a hi-lo transition to reset the sound cpu */
-    			if (valor<>0) then self.reset;
+    			if valor<>0 then self.z80.change_reset(ASSERT_LINE)
+              else self.z80.change_reset(CLEAR_LINE);
             //cpu_spin(space->cpu); /* otherwise no sound in driftout */
         end;
 	end;
+  self.interrupt_controller;
 end;
 
 function tc0140syt_chip.comm_r:byte;
@@ -412,11 +416,13 @@ end;
 
 //SLAVE
 procedure tc0140syt_chip.interrupt_controller;
+var level:boolean;
 begin
-	if (self.nmi_req and self.nmi_enabled) then begin
-    self.z80.change_nmi(PULSE_LINE);
-		self.nmi_req:=false;
-	end;
+  level:=self.nmi_enabled and
+    ((self.status and(TC0140SYT_PORT01_FULL or TC0140SYT_PORT23_FULL))<>0);
+  // Translate the chip's NMI level into one pending edge for this Z80 engine.
+  if level and not self.nmi_req then self.z80.change_nmi(PULSE_LINE);
+  self.nmi_req:=level;
 end;
 
 procedure tc0140syt_chip.slave_port_w(valor:byte);

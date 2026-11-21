@@ -27,16 +27,58 @@ type
            line_ack:procedure(force:boolean);
            ppu_read:procedure(address:word);
            end;
+  tnes_pulse=packed record
+    regs:array[0..3]of byte;
+    timer,divider,length_count,sequence,env_div,env_decay:integer;
+    env_start:boolean;
+  end;
+  tnes_mapper_state=packed record
+    cpu_clock,last_write,ppu_clock,a12_low,last_ppu_read:int64;
+    last_a12,irq_asserted,seen_write,mmc3_revision_a:boolean;
+    chr_pages:array[0..7]of word;
+    prg_pages:array[0..3]of word;
+    ram_bank:integer;
+    m5_chr:array[0..11]of word;
+    m5_last_chr,m5_nt_addr,m5_nt_repeat,m5_scanline,m5_ex_index:integer;
+    m5_inframe,m5_pending,m5_irq_enable,m5_split:boolean;
+    m5_pcm_mode,m5_pcm_irq_enable,m5_pcm_pending:boolean;
+    m5_pcm,m5_enable,m5_irq_target,m5_ex_attr:byte;
+    m5_split_y,m5_split_tile:integer;
+    pulses:array[0..1]of tnes_pulse;
+    audio_div,audio_half,audio_channel:integer;
+    audio_sum,audio_count:int64;
+    audio_hp,audio_prev:integer;
+    ffe_mode,ffe_latch,ffe_control,ffe_map,ffe_addr:byte;
+    ffe_prg:array[0..3]of byte;
+    ffe_chr:array[0..11]of byte;
+    ffe_irq:word;
+    ffe_irq_enable,ffe_fd0,ffe_fd1:boolean;
+    ffe_fds,ffe_fds_div:integer;
+    scratch:array[0..$fff]of byte;
+  end;
   tnes_mapper=class
               constructor create;
               destructor free;
               public
-                prg:array[0..31,0..$3fff] of byte;
-                chr,prg_ram:array[0..63,0..$1fff] of byte;
+                prg:array[0..63,0..$3fff] of byte;
+                chr:array[0..127,0..$1fff]of byte;
+                prg_ram:array[0..63,0..$1fff] of byte;
                 chr_map:array[0..1] of byte;
                 mapper:word;
                 submapper,last_prg,last_chr:byte;
                 prg_ram_enable:boolean;
+                ext:tnes_mapper_state;
+                irq_changed:procedure(active:boolean);
+                ram_bytes,nvram_bytes,chr_ram_bytes:integer;
+                battery,nes20,trainer_present:boolean;
+                trainer:array[0..511]of byte;
+                procedure cpu_tick;
+                procedure ppu_address(a:word;clock:int64;is_read:boolean);
+                function ppu_data(a:word;kind:byte;tile_x,screen_y:integer):byte;
+                procedure ppu_store(a:word;value:byte);
+                procedure save_battery(const filename:string);
+                procedure load_battery(const filename:string);
+              public
                 calls:tnes_mapper_calls;
                 procedure reset;
                 function save_snapshot(data:pbyte):dword;
@@ -69,10 +111,14 @@ var
   nes_mapper_0:tnes_mapper;
 
 implementation
-uses nes,nes_ppu,n2a03,dialogs,ay_8910;
+uses nes,nes_ppu,n2a03,dialogs,ay_8910,sound_engine,classes,file_engine;
 
 constructor tnes_mapper.create;
 begin
+  inherited Create;
+  ram_bytes:=$2000;
+  chr_ram_bytes:=$2000;
+  ext.audio_channel:=-1;
 end;
 
 destructor tnes_mapper.free;
@@ -196,63 +242,63 @@ end;
 
 procedure set_prg_16(pos:word;bank:word);
 var
-  tempb:byte;
+  n:integer;
 begin
-  tempb:=bank mod nes_mapper_0.last_prg;
-  copymemory(@memoria[pos],@nes_mapper_0.prg[tempb,0],$4000);
+  if nes_mapper_0.last_prg=0 then exit;
+  n:=bank mod nes_mapper_0.last_prg;
+  nes_mapper_0.ext.prg_pages[(pos-$8000)shr 13]:=n*2;
+  nes_mapper_0.ext.prg_pages[((pos-$8000)shr 13)+1]:=n*2+1;
+  copymemory(@memoria[pos],@nes_mapper_0.prg[n,0],$4000);
 end;
 
 procedure set_prg_32(bank:word);
-var
-  tempb:byte;
 begin
-  if nes_mapper_0.last_prg=1 then set_prg_16($8000,bank)
-  else begin
-    tempb:=(bank mod (nes_mapper_0.last_prg shr 1)) shl 1;
-    copymemory(@memoria[$8000],@nes_mapper_0.prg[tempb,0],$4000);
-    copymemory(@memoria[$c000],@nes_mapper_0.prg[tempb or 1,0],$4000);
+  if nes_mapper_0.last_prg<2 then begin
+    set_prg_16($8000,0);
+    set_prg_16($c000,0);
+  end else begin
+    set_prg_16($8000,(bank mod (nes_mapper_0.last_prg div 2))*2);
+    set_prg_16($c000,(bank mod (nes_mapper_0.last_prg div 2))*2+1);
   end;
 end;
 
 procedure set_prg_8(pos:word;bank:word);
 var
-  tempb:byte;
+  n:integer;
 begin
-  tempb:=bank mod (nes_mapper_0.last_prg shl 1);
-  copymemory(@memoria[pos],@nes_mapper_0.prg[tempb shr 1,$2000*(tempb and 1)],$2000);
-end;
-
-procedure set_chr_8(bank:word);
-var
-  tempb:byte;
-begin
-  tempb:=bank mod nes_mapper_0.last_chr;
-  copymemory(@ppu_nes_0.chr[nes_mapper_0.chr_map[0],0],@nes_mapper_0.chr[tempb,0],$1000);
-  copymemory(@ppu_nes_0.chr[nes_mapper_0.chr_map[1],0],@nes_mapper_0.chr[tempb,$1000],$1000);
-end;
-
-procedure set_chr_4(pos:word;bank:word);
-var
-  tempb:byte;
-begin
-  tempb:=bank mod (nes_mapper_0.last_chr shl 1);
-  copymemory(@ppu_nes_0.chr[nes_mapper_0.chr_map[(pos shr 12) and 1],0],@nes_mapper_0.chr[tempb shr 1,$1000*(tempb and 1)],$1000);
-end;
-
-procedure set_chr_2(pos:word;bank:word);
-var
-  tempb:byte;
-begin
-  tempb:=bank mod (nes_mapper_0.last_chr shl 2);
-  copymemory(@ppu_nes_0.chr[nes_mapper_0.chr_map[(pos shr 12) and 1],$800*((pos shr 11) and 1)],@nes_mapper_0.chr[tempb shr 2,$800*(tempb and 3)],$800);
+  if nes_mapper_0.last_prg=0 then exit;
+  n:=bank mod (integer(nes_mapper_0.last_prg)*2);
+  nes_mapper_0.ext.prg_pages[(pos-$8000)shr 13]:=n;
+  copymemory(@memoria[pos],@nes_mapper_0.prg[n div 2,(n and 1)*$2000],$2000);
 end;
 
 procedure set_chr_1(pos:word;bank:word);
 var
-  tempb:byte;
+  n,count:integer;
 begin
-  tempb:=bank mod (nes_mapper_0.last_chr shl 3);
-  copymemory(@ppu_nes_0.chr[nes_mapper_0.chr_map[(pos shr 12) and 1],$400*((pos shr 10) and 3)],@nes_mapper_0.chr[tempb shr 3,$400*(tempb and 7)],$400);
+  nes_mapper_0.ext.chr_pages[(pos shr 10)and 7]:=bank;
+  count:=integer(nes_mapper_0.last_chr)*8;
+  if count=0 then exit;
+  n:=bank mod count;
+  copymemory(@ppu_nes_0.chr[nes_mapper_0.chr_map[(pos shr 12)and 1],pos and $fff],@nes_mapper_0.chr[n div 8,(n and 7)*$400],$400);
+end;
+
+procedure set_chr_2(pos:word;bank:word);
+begin
+  set_chr_1(pos,bank*2);
+  set_chr_1(pos+$400,bank*2+1);
+end;
+
+procedure set_chr_4(pos:word;bank:word);
+begin
+  set_chr_2(pos,bank*2);
+  set_chr_2(pos+$800,bank*2+1);
+end;
+
+procedure set_chr_8(bank:word);
+begin
+  set_chr_4(0,bank*2);
+  set_chr_4($1000,bank*2+1);
 end;
 
 procedure mapper_1_delay(estados_t:word);
@@ -260,101 +306,41 @@ begin
   nes_mapper_0.counter:=nes_mapper_0.counter+estados_t;
 end;
 
+{$I nes_mapper_support.inc}
+
 //Mappers!
 procedure mapper_1_chr;
 begin
-  if (nes_mapper_0.regs[0] and $10)<>0 then begin  //4kb
-      if ppu_nes_0.write_chr then begin
-        nes_mapper_0.chr_map[0]:=nes_mapper_0.regs[1];
-        nes_mapper_0.chr_map[1]:=nes_mapper_0.regs[2];
-        if ((nes_mapper_0.regs[1]>3) or (nes_mapper_0.regs[2]>3)) then begin
-          MessageDlg('NES: Mapper 1 chr ram',mtInformation,[mbOk], 0);
-        end;
-      end else begin
-        set_chr_4($0,nes_mapper_0.regs[1]);
-        set_chr_4($1000,nes_mapper_0.regs[2]);
-      end;
-  end else begin //8Kb
-      if ppu_nes_0.write_chr then begin
-        nes_mapper_0.chr_map[0]:=0;
-        nes_mapper_0.chr_map[1]:=1;
-      end else begin
-        set_chr_8((nes_mapper_0.regs[1] and $1f) shr 1);
-      end;
-  end;
+  mmc1_sync;
 end;
 
 procedure mapper_1_prg;
-var
-  tempb,extra:byte;
 begin
-extra:=0;
-//Usado por SxROM
-if nes_mapper_0.last_prg>16 then extra:=nes_mapper_0.regs[1] and $10;
-tempb:=((nes_mapper_0.regs[3] and $f) or extra) mod nes_mapper_0.last_prg;
-case ((nes_mapper_0.regs[0] shr 2) and $3) of
-    $0,$1:begin  //32Kb
-        copymemory(@memoria[$8000],@nes_mapper_0.prg[tempb and $fe,0],$4000);
-        copymemory(@memoria[$c000],@nes_mapper_0.prg[tempb or 1,0],$4000);
-       end;
-    $2:begin  //16k+16k --> primero fijo al banco 0
-        copymemory(@memoria[$8000],@nes_mapper_0.prg[0 or extra,0],$4000);
-        copymemory(@memoria[$c000],@nes_mapper_0.prg[tempb,0],$4000);
-       end;
-    $3:begin  //16k + 16k --> segundo fijo al ultimo banco que siempre es 15 o menos!!
-        copymemory(@memoria[$8000],@nes_mapper_0.prg[tempb,0],$4000);
-        copymemory(@memoria[$c000],@nes_mapper_0.prg[($f or extra) mod nes_mapper_0.last_prg,0],$4000);
-       end;
-end;
-if nes_mapper_0.submapper=0 then nes_mapper_0.prg_ram_enable:=(nes_mapper_0.regs[3] and $10)=0;
+  mmc1_sync;
 end;
 
 procedure mapper_1_write_rom(direccion:word;valor:byte);
 begin
-if ((nes_mapper_0.counter<2) and (nes_mapper_0.serial_cnt=0)) then exit;
-if (valor and $80)<>0 then begin
-  //Reset!!
-  nes_mapper_0.serial_cnt:=0;
-  nes_mapper_0.valor_map:=0;
-  //ATENCION --> Necesario para 'Robocop 3'
-  nes_mapper_0.regs[0]:=nes_mapper_0.regs[0] or $c;
-  nes_mapper_0.counter:=0;
-  copymemory(@memoria[$c000],@nes_mapper_0.prg[$f mod nes_mapper_0.last_prg,0],$4000);
-end else begin
-  nes_mapper_0.valor_map:=nes_mapper_0.valor_map or ((valor and 1) shl nes_mapper_0.serial_cnt);
-  nes_mapper_0.serial_cnt:=nes_mapper_0.serial_cnt+1;
-  nes_mapper_0.counter:=0;
-  if nes_mapper_0.serial_cnt=5 then begin
-    nes_mapper_0.regs[(direccion shr 13) and 3]:=nes_mapper_0.valor_map;
-    case (nes_mapper_0.regs[0] and 3) of //Mirror
-      0:ppu_nes_0.mirror:=MIRROR_LOW;
-      1:ppu_nes_0.mirror:=MIRROR_HIGH;
-      2:ppu_nes_0.mirror:=MIRROR_VERTICAL;
-      3:ppu_nes_0.mirror:=MIRROR_HORIZONTAL;
-    end;
-    mapper_1_chr;
-    mapper_1_prg;
-    nes_mapper_0.valor_map:=0;
-    nes_mapper_0.serial_cnt:=0;
-  end;
-  end;
+  mmc1_write(direccion,valor);
 end;
 
 procedure mapper_2_write_rom(direccion:word;valor:byte);
 begin
+  if nes_mapper_0.submapper=2 then valor:=valor and memoria[direccion];
   set_prg_16($8000,valor);
 end;
 
 procedure mapper_3_write_rom(direccion:word;valor:byte);
 begin
-  set_chr_8(valor and $3);
+  if nes_mapper_0.submapper=2 then valor:=valor and memoria[direccion];
+  set_chr_8(valor);
 end;
 
 procedure mapper_4_update_chr(valor:byte);
 var
   base_chr:word;
 begin
-if not(ppu_nes_0.write_chr) then begin
+begin
   //Las paginas de CHR son de 1K siempre!! Cuando copia 2K copia 1K+1K
   base_chr:=(valor and $80) shl 5;
   set_chr_1($0 xor base_chr,nes_mapper_0.dregs[0] and $fe);
@@ -372,8 +358,8 @@ procedure mapper_4_update_prg(valor:byte);
 var
   temp1,temp2:byte;
 begin
-temp1:=nes_mapper_0.dregs[6] mod (nes_mapper_0.last_prg shl 1);
-temp2:=nes_mapper_0.dregs[7] mod (nes_mapper_0.last_prg shl 1);
+temp1:=(nes_mapper_0.dregs[6] and $3f)mod (nes_mapper_0.last_prg shl 1);
+temp2:=(nes_mapper_0.dregs[7] and $3f)mod (nes_mapper_0.last_prg shl 1);
 set_prg_8($a000,temp2);
 if (valor and $40)=0 then begin
   set_prg_8($8000,temp1);
@@ -408,10 +394,13 @@ case (direccion and $e001) of
           nes_mapper_0.regs[3]:=valor;
         end;
   $c000:nes_mapper_0.regs[2]:=valor;
-  $c001:nes_mapper_0.reload:=true;
+  $c001:begin
+          nes_mapper_0.counter:=0;
+          nes_mapper_0.reload:=true;
+        end;
   $e000:begin
-             nes_mapper_0.irq_ena:=false;
-             n2a03_0.m6502.change_irq(CLEAR_LINE);
+          nes_mapper_0.irq_ena:=false;
+          mapper_irq(false);
         end;
   $e001:nes_mapper_0.irq_ena:=true;
 end;
@@ -433,161 +422,24 @@ if (ppu_nes_0.control2 and $18)<>0 then begin //IMPORTANTE KingQuest V quiere es
 end;
 end;
 
-procedure mapper_5_update_prg;
-begin
-case (nes_mapper_0.regs[0] and 3) of
-  0:set_prg_32((nes_mapper_0.regs[$17] and $7f) shr 2); //32k
-  1:begin //16k+16k
-      set_prg_16($8000,(nes_mapper_0.regs[$15] and $7f) shr 1);
-      set_prg_16($c000,(nes_mapper_0.regs[$17] and $7f) shr 1);
-    end;
-  2:begin //16k+8k+8k
-      set_prg_16($8000,(nes_mapper_0.regs[$15] and $7f) shr 1);
-      set_prg_8($c000,nes_mapper_0.regs[$16] and $7f);
-      set_prg_8($e000,nes_mapper_0.regs[$17] and $7f);
-    end;
-  3:begin //8k+8k+8k+8k
-      set_prg_8($8000,nes_mapper_0.regs[$14] and $7f);
-      set_prg_8($a000,nes_mapper_0.regs[$15] and $7f);
-      set_prg_8($c000,nes_mapper_0.regs[$16] and $7f);
-      set_prg_8($e000,nes_mapper_0.regs[$17] and $7f);
-    end;
-end;
-end;
-
-procedure mapper_5_update_chr;
-begin
-case (nes_mapper_0.regs[1] and 3) of
-    0:set_chr_8(nes_mapper_0.regs[$27]);  //8k
-    1:begin //4k
-        set_chr_4(0,nes_mapper_0.regs[$23]);
-        set_chr_4($1000,nes_mapper_0.regs[$27]);
-      end;
-    2:begin //2k
-        set_chr_2(0,nes_mapper_0.regs[$21]);
-        set_chr_2($800,nes_mapper_0.regs[$23]);
-        set_chr_2($1000,nes_mapper_0.regs[$25]);
-        set_chr_2($1800,nes_mapper_0.regs[$27]);
-      end;
-    3:begin //1k
-        set_chr_1(0,nes_mapper_0.regs[$20]);
-        set_chr_1($400,nes_mapper_0.regs[$21]);
-        set_chr_1($800,nes_mapper_0.regs[$22]);
-        set_chr_1($c00,nes_mapper_0.regs[$23]);
-        set_chr_1($1000,nes_mapper_0.regs[$24]);
-        set_chr_1($1400,nes_mapper_0.regs[$25]);
-        set_chr_1($1800,nes_mapper_0.regs[$26]);
-        set_chr_1($1c00,nes_mapper_0.regs[$27]);
-      end;
-end;
-end;
-
-procedure mapper_5_update_chr_high;
-begin
-  case (nes_mapper_0.regs[1] and 3) of
-      0:set_chr_8(nes_mapper_0.regs[$2b]);  //8k
-      1:begin //4k
-          set_chr_4(0,nes_mapper_0.regs[$2b]);
-          set_chr_4($1000,nes_mapper_0.regs[$2b]);
-        end;
-      2:begin //2k
-         set_chr_2(0,nes_mapper_0.regs[$29]);
-         set_chr_2($800,nes_mapper_0.regs[$2b]);
-         set_chr_2($1000,nes_mapper_0.regs[$29]);
-         set_chr_2($1800,nes_mapper_0.regs[$2b]);
-        end;
-      3:begin //1k
-          set_chr_1(0,nes_mapper_0.regs[$28]);
-          set_chr_1($400,nes_mapper_0.regs[$29]);
-          set_chr_1($800,nes_mapper_0.regs[$2a]);
-          set_chr_1($c00,nes_mapper_0.regs[$2b]);
-          set_chr_1($1000,nes_mapper_0.regs[$28]);
-          set_chr_1($1400,nes_mapper_0.regs[$29]);
-          set_chr_1($1800,nes_mapper_0.regs[$2a]);
-          set_chr_1($1c00,nes_mapper_0.regs[$2b]);
-        end;
-  end;
-end;
-
-function mapper_5_read_extended(direccion:word):byte;
-begin
-case direccion of
-  5205:mapper_5_read_extended:=(nes_mapper_0.mul1*nes_mapper_0.mul2) and $ff;
-  5206:mapper_5_read_extended:=(nes_mapper_0.mul1*nes_mapper_0.mul2) shr 8;
-end;
-end;
-
-procedure mapper_5_write_extended(direccion:word;valor:byte);
-begin
-case direccion of
-  $5100..$5112,$5118..$511f,$512c..$5130:nes_mapper_0.regs[direccion and $3f]:=valor;
-  $5113..$5117:begin
-                  nes_mapper_0.regs[direccion and $3f]:=valor;
-                  mapper_5_update_prg;
-               end;
-  $5120..$512b:begin
-                  nes_mapper_0.regs[direccion and $3f]:=valor;
-                  mapper_5_update_chr;
-               end;
-  $5205:nes_mapper_0.mul1:=valor;
-  $5206:nes_mapper_0.mul2:=valor;
-end;
-end;
-
 procedure mapper_5_write_rom(direccion:word;valor:byte);
 begin
-case (nes_mapper_0.regs[0] and 3) of
-  0:; //32k todo ROM
-  1:case direccion of
-        $8000..$9fff:if (nes_mapper_0.regs[$15] and $80)=0 then nes_mapper_0.prg_ram[nes_mapper_0.regs[$15] and $e,direccion and $1fff]:=valor;
-        $a000..$bfff:if (nes_mapper_0.regs[$15] and $80)=0 then nes_mapper_0.prg_ram[(nes_mapper_0.regs[$15] and $e) or 1,direccion and $1fff]:=valor;
-        $c000..$ffff:;
-    end;
-  2:case direccion of
-        $8000..$9fff:if (nes_mapper_0.regs[$15] and $80)=0 then nes_mapper_0.prg_ram[nes_mapper_0.regs[$15] and $e,direccion and $1fff]:=valor;
-        $a000..$bfff:if (nes_mapper_0.regs[$15] and $80)=0 then nes_mapper_0.prg_ram[(nes_mapper_0.regs[$15] and $e) or 1,direccion and $1fff]:=valor;
-        $c000..$dfff:if (nes_mapper_0.regs[$16] and $80)=0 then nes_mapper_0.prg_ram[nes_mapper_0.regs[$16] and $f,direccion and $1fff]:=valor;
-        $e000..$ffff:;
-    end;
-  3:case direccion of
-        $8000..$9fff:if (nes_mapper_0.regs[$14] and $80)=0 then nes_mapper_0.prg_ram[nes_mapper_0.regs[$14] and $f,direccion and $1fff]:=valor;
-        $a000..$bfff:if (nes_mapper_0.regs[$15] and $80)=0 then nes_mapper_0.prg_ram[nes_mapper_0.regs[$15] and $f,direccion and $1fff]:=valor;
-        $c000..$dfff:if (nes_mapper_0.regs[$16] and $80)=0 then nes_mapper_0.prg_ram[nes_mapper_0.regs[$16] and $f,direccion and $1fff]:=valor;
-        $e000..$ffff:;
-    end;
-end;
+  mmc5_cpu_write(direccion,valor);
 end;
 
 function mapper_5_read_rom(direccion:word):byte;
 begin
-case (nes_mapper_0.regs[0] and 3) of
-  0:mapper_5_read_rom:=memoria[direccion];
-  1:case direccion of
-        $8000..$9fff:if (nes_mapper_0.regs[$15] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[nes_mapper_0.regs[$15] and $e,direccion and $1fff]
-                        else mapper_5_read_rom:=memoria[direccion];
-        $a000..$bfff:if (nes_mapper_0.regs[$15] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[(nes_mapper_0.regs[$15] and $e) or 1,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $c000..$ffff:mapper_5_read_rom:=memoria[direccion];
-    end;
-  2:case direccion of
-        $8000..$9fff:if (nes_mapper_0.regs[$15] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[nes_mapper_0.regs[$15] and $e,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $a000..$bfff:if (nes_mapper_0.regs[$15] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[(nes_mapper_0.regs[$15] and $e) or 1,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $c000..$dfff:if (nes_mapper_0.regs[$16] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[nes_mapper_0.regs[$16] and $f,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $e000..$ffff:mapper_5_read_rom:=memoria[direccion];
-    end;
-  3:case direccion of
-        $8000..$9fff:if (nes_mapper_0.regs[$14] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[nes_mapper_0.regs[$14] and $f,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $a000..$bfff:if (nes_mapper_0.regs[$15] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[nes_mapper_0.regs[$15] and $f,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $c000..$dfff:if (nes_mapper_0.regs[$16] and $80)=0 then mapper_5_read_rom:=nes_mapper_0.prg_ram[nes_mapper_0.regs[$16] and $f,direccion and $1fff]
-                      else mapper_5_read_rom:=memoria[direccion];
-        $e000..$ffff:mapper_5_read_rom:=memoria[direccion];
-    end;
+  Result:=mmc5_cpu_read(direccion);
 end;
+
+function mapper_5_read_extended(direccion:word):byte;
+begin
+  Result:=mmc5_cpu_read(direccion);
+end;
+
+procedure mapper_5_write_extended(direccion:word;valor:byte);
+begin
+  mmc5_cpu_write(direccion,valor);
 end;
 
 procedure mapper_mmc6_write_rom(direccion:word;valor:byte);
@@ -598,6 +450,7 @@ case direccion of
           if ((valor and $40)<>(nes_mapper_0.regs[0] and $40)) then mapper_4_update_prg(valor);
 		      if ((valor and $80)<>(nes_mapper_0.regs[0] and $80)) then mapper_4_update_chr(valor);
           nes_mapper_0.prg_ram_enable:=(valor and $20)<>0;
+          if not nes_mapper_0.prg_ram_enable then nes_mapper_0.regs[3]:=0;
           nes_mapper_0.regs[0]:=valor;
         end;
   $8001:begin
@@ -609,12 +462,12 @@ case direccion of
           if (valor and 1)=0 then ppu_nes_0.mirror:=MIRROR_VERTICAL
             else ppu_nes_0.mirror:=MIRROR_HORIZONTAL;
         end;
-  $a001:nes_mapper_0.regs[3]:=valor; //Especifico de MMC6
+  $a001:if nes_mapper_0.prg_ram_enable then nes_mapper_0.regs[3]:=valor; //MMC6
   $c000:nes_mapper_0.regs[2]:=valor;
-  $c001:nes_mapper_0.reload:=true;
+  $c001:begin nes_mapper_0.counter:=0;nes_mapper_0.reload:=true;end;
   $e000:begin
              nes_mapper_0.irq_ena:=false;
-             n2a03_0.m6502.change_irq(CLEAR_LINE);
+             mapper_irq(false);
         end;
   $e001:nes_mapper_0.irq_ena:=true;
 end;
@@ -640,8 +493,8 @@ begin
 if not(nes_mapper_0.prg_ram_enable) then exit; //Si esta disabled, no hago nada
 case direccion of
   $6000..$6fff:;
-  $7000..$71ff,$7400..$75ff,$7800..$79ff,$7c00..$7dff:if ((nes_mapper_0.regs[3] and $30)=$30) then memoria[$7000+(direccion and $1ff)]:=valor;
-  $7200..$73ff,$7600..$77ff,$7a00..$7bff,$7e00..$7fff:if ((nes_mapper_0.regs[3] and $c0)=$c0) then memoria[$7200+(direccion and $1ff)]:=valor;
+  $7000..$71ff,$7400..$75ff,$7800..$79ff,$7c00..$7dff:if ((nes_mapper_0.regs[3] and $10)<>0) then memoria[$7000+(direccion and $1ff)]:=valor;
+  $7200..$73ff,$7600..$77ff,$7a00..$7bff,$7e00..$7fff:if ((nes_mapper_0.regs[3] and $40)<>0) then memoria[$7200+(direccion and $1ff)]:=valor;
 end;
 end;
 
@@ -679,25 +532,9 @@ end;
 
 procedure mapper_9_ppu_read(direccion:word);
 begin
-case (direccion and $3ff0) of
-  $0fd0:begin
-          nes_mapper_0.latch0:=$fd;
-          set_chr_4($0,nes_mapper_0.regs[0]);
-       end;
-  $0fe0:begin
-          nes_mapper_0.latch0:=$fe;
-          set_chr_4($0,nes_mapper_0.regs[1]);
-       end;
-  $1fd0:begin
-          nes_mapper_0.latch1:=$fd;
-          set_chr_4($1000,nes_mapper_0.regs[2]);
-        end;
-  $1fe0:begin
-          nes_mapper_0.latch1:=$fe;
-          set_chr_4($1000,nes_mapper_0.regs[3]);
-        end;
+  mmc2_after_read(direccion);
 end;
-end;
+
 procedure mapper_10_write_rom(direccion:word;valor:byte);
 begin
 case ((direccion shr 12) and 7) of
@@ -722,11 +559,13 @@ case ((direccion shr 12) and 7) of
         else ppu_nes_0.mirror:=MIRROR_VERTICAL;
 end;
 end;
+
 procedure mapper_11_write_rom(direccion:word;valor:byte);
 begin
   set_prg_32(valor and $3);
   if nes_mapper_0.last_chr<>0 then set_chr_8(valor shr 4);
 end;
+
 procedure mapper_12_write_rom(direccion:word;valor:byte);
 begin
 case direccion of
@@ -734,6 +573,7 @@ case direccion of
   else mapper_4_write_rom(direccion,valor);
 end;
 end;
+
 procedure mapper_13_write_rom(direccion:word;valor:byte);
 begin
   nes_mapper_0.chr_map[1]:=valor and 3;
@@ -1003,6 +843,7 @@ begin
           end;
   end;
 end;
+
 procedure vrc_chr(direccion:word;valor:byte);
 begin
 case direccion of
@@ -1072,6 +913,7 @@ case direccion of
           end;
 end;
 end;
+
 procedure vrc4_prg;
 begin
 if nes_mapper_0.regs[1]=0 then begin
@@ -1889,7 +1731,7 @@ if (direccion<$8000) then begin
           set_prg_16($c000,nes_mapper_0.last_prg-1);
         end;
       2,3:begin
-            n2a03_0.m6502.change_despues_instruccion(mapper_1_delay); //mapper 1
+            // MMC1 timing is supplied by cpu_tick, once per CPU bus cycle. //mapper 1
             nes_mapper_0.serial_cnt:=0;
             nes_mapper_0.prg_ram_enable:=true;
             nes_mapper_0.regs[0]:=$c;
@@ -2309,6 +2151,8 @@ begin
   self.mapper:=mapper;
   self.submapper:=submapper;
   n2a03_0.m6502.change_despues_instruccion(nil);
+  n2a03_0.add_more_sound(nil);
+  self.calls.read_rom:=nil;
   self.calls.read_expansion:=nil;
   self.calls.write_expansion:=nil;
   self.calls.line_ack:=nil;
@@ -2320,6 +2164,8 @@ begin
       0:;
       1:begin
           self.calls.write_rom:=mapper_1_write_rom;
+          self.calls.read_prg_ram:=mmc1_ram_read;
+          self.calls.write_prg_ram:=mmc1_ram_write;
           n2a03_0.m6502.change_despues_instruccion(mapper_1_delay);
         end;
       2:self.calls.write_rom:=mapper_2_write_rom;
@@ -2332,22 +2178,30 @@ begin
             end else begin
               self.calls.write_rom:=mapper_4_write_rom;
             end;
-            self.calls.line_ack:=mapper_4_line;
         end;
       5:begin
           self.calls.read_expansion:=mapper_5_read_extended;
           self.calls.write_expansion:=mapper_5_write_extended;
           self.calls.write_rom:=mapper_5_write_rom;
           self.calls.read_rom:=mapper_5_read_rom;
+          self.calls.read_prg_ram:=mapper_5_read_rom;
+          self.calls.write_prg_ram:=mapper_5_write_rom;
+          n2a03_0.add_more_sound(mmc5_update_sound);
+        end;
+      6:begin
+          self.calls.read_rom:=ffe_read;
+          self.calls.write_rom:=ffe_write;
+          self.calls.read_expansion:=ffe_read;
+          self.calls.write_expansion:=ffe_write;
+          self.calls.read_prg_ram:=ffe_read;
+          self.calls.write_prg_ram:=ffe_write;
         end;
       7:self.calls.write_rom:=mapper_7_write_rom;
       9:begin
           self.calls.write_rom:=mapper_9_write_rom;
-          self.calls.ppu_read:=mapper_9_ppu_read;
         end;
       10:begin
           self.calls.write_rom:=mapper_10_write_rom;
-          self.calls.ppu_read:=mapper_9_ppu_read;
         end;
       11:self.calls.write_rom:=mapper_11_write_rom;
       12:begin
@@ -2494,6 +2348,8 @@ end;
 
 procedure tnes_mapper.reset;
 begin
+  if ext.irq_asserted then mapper_irq(false);
+  begin_mapper_reset;
   self.prg_ram_writeble:=false;
   self.prg_ram_enable:=false;
   self.latch0:=0;
@@ -2651,6 +2507,7 @@ begin
           set_prg_16($c000,0);
         end;
   end;
+  finish_mapper_reset;
 end;
 
 end.

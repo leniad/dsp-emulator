@@ -317,7 +317,8 @@ begin
           reset_coleco;
          end;
   freemem(datos);
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   directory.coleco:=ExtractFilePath(romfile);
 end;
 

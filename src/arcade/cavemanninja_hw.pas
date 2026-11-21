@@ -94,11 +94,10 @@ end;
 
 procedure update_video_robocop2;
 begin
-if (prioridad and 4)=0 then deco16ic_1.update_pf_2(5,false)
-  else begin
-    deco_sprites_0.draw_sprites($c0);
-    fill_full_screen(5,$200);
-  end;
+if (prioridad and 4)=0 then begin
+  deco16ic_1.update_pf_2(5,false);
+  deco_sprites_0.draw_sprites($c0);
+  end else fill_full_screen(5,$200);
 deco_sprites_0.draw_sprites($80);
 if (prioridad and 8)<>0 then begin
       deco16ic_0.update_pf_2(5,true);
@@ -135,7 +134,7 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in0:=marcade.in0 and $f7ff;
   if arcade_input.but0[1] then marcade.in0:=marcade.in0 and $efff;
   if arcade_input.but1[1] then marcade.in0:=marcade.in0 and $dfff;
-  if arcade_input.but1[1] then marcade.in0:=marcade.in0 and $bfff;
+  if arcade_input.but2[1] then marcade.in0:=marcade.in0 and $bfff;
   if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7fff;
   //SYSTEM
   if arcade_input.coin[0] then marcade.in1:=marcade.in1 and $fe;
@@ -346,7 +345,10 @@ procedure robocop2_putword(direccion:dword;valor:word);
 begin
 case direccion of
   0..$fffff:; //ROM
-  $140000..$14000f:deco16ic_0.control_w((direccion and $f) shr 1,valor);
+  $140000..$14000f:begin
+                      deco16ic_0.control_w((direccion and $f) shr 1,valor);
+                      if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $80)<>0;
+                   end;
   $144000..$144fff:if deco16ic_0.pf1.data[(direccion and $fff) shr 1]<>valor then begin
                       deco16ic_0.pf1.data[(direccion and $fff) shr 1]:=valor;
                       deco16ic_0.pf1.buffer[(direccion and $fff) shr 1]:=true
@@ -357,10 +359,7 @@ case direccion of
                    end;
   $14c000..$14c7ff:deco16ic_0.pf1.rowscroll[(direccion and $7ff) shr 1]:=valor;
   $14e000..$14e7ff:deco16ic_0.pf2.rowscroll[(direccion and $7ff) shr 1]:=valor;
-  $150000..$15000f:begin
-                      deco16ic_1.control_w((direccion and $f) shr 1,valor);
-                      if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $80)<>0
-                   end;
+  $150000..$15000f:deco16ic_1.control_w((direccion and $f) shr 1,valor);
 	$154000..$154fff:if deco16ic_1.pf1.data[(direccion and $fff) shr 1]<>valor then begin
                       deco16ic_1.pf1.data[(direccion and $fff) shr 1]:=valor;
                       deco16ic_1.pf1.buffer[(direccion and $fff) shr 1]:=true

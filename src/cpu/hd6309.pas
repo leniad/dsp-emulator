@@ -23,7 +23,7 @@ type
         end;
         reg_hd6309=record
                 q:parejas_hd6309;
-                pc,old_pc,u,s,x,y:word;
+                pc,old_pc,u,s,x,y,v:word;
                 dp:byte;
                 cc:band_m6809;
                 cc2:band_hd6309;
@@ -49,6 +49,8 @@ type
                 function call_firq:byte;
                 //Misc Func
                 function get_indexed:word;
+                function leer_registro(codigo:byte):word;
+                procedure escribir_registro(codigo:byte;dato:word);
                 procedure trf(valor:byte);
                 procedure trf_ex(valor:byte);
                 //Push & pop
@@ -219,6 +221,7 @@ self.contador:=0;
 r.u:=0;
 r.s:=0;
 r.dp:=0;
+r.v:=$ffff;
 self.pon_pila($50);
 self.r.cc2.md_em:=false;
 self.r.cc2.md_fm:=false;
@@ -427,11 +430,16 @@ if (iindexed and $80)<>0 then begin
           direccion:=origen^+smallint(r.q.d);
           self.estados_demas:=self.estados_demas+5+1;
          end;
-      $c:MessageDlg('Indexed $c desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
+      $c:begin  // PC + desplazamiento de 8 bits
+          temp:=self.getbyte(r.pc);
+          r.pc:=r.pc+1;
+          direccion:=word(integer(r.pc)+shortint(temp));
+          self.estados_demas:=self.estados_demas+2+1;
+      end;
       $d:begin  //pc + desplazamiento 16 bits
           temp2:=self.getword(r.pc);
           r.pc:=r.pc+2;
-          direccion:=r.pc+temp2;
+          direccion:=word(integer(r.pc)+smallint(temp2));
           self.estados_demas:=self.estados_demas+6+1;
       end;
       $f:begin  //pc
@@ -442,7 +450,7 @@ if (iindexed and $80)<>0 then begin
   end;
   if (iindexed and $10)<>0 then begin
      direccion:=self.getword(direccion);
-     self.estados_demas:=self.estados_demas+2;
+     self.estados_demas:=self.estados_demas+3;
   end;
 end else begin
   temp:=iindexed and $f;
@@ -453,101 +461,314 @@ end;
 get_indexed:=direccion;
 end;
 
+function cpu_hd6309.leer_registro(codigo:byte):word;
+begin
+    case codigo of
+      $0:leer_registro:=r.q.d;             // D
+      $1:leer_registro:=r.x;               // X
+      $2:leer_registro:=r.y;               // Y
+      $3:leer_registro:=r.u;               // U
+      $4:leer_registro:=r.s;               // S
+      $5:leer_registro:=r.pc;              // PC
+      $6:leer_registro:=r.q.w;             // W
+      $7:leer_registro:=r.v;               // V
+      $8:leer_registro:=word(r.q.a)*$0101; // A repetido
+      $9:leer_registro:=word(r.q.b)*$0101; // B repetido
+      $a:leer_registro:=word(self.dame_pila)*$0101; // CC repetido
+      $b:leer_registro:=word(r.dp)*$0101;  // DP repetido
+      $c,$d:leer_registro:=0;              // registro cero
+      $e:leer_registro:=word(r.q.e)*$0101; // E repetido
+      $f:leer_registro:=word(r.q.f)*$0101; // F repetido
+    else
+      leer_registro:=$ffff;
+    end;
+end;
+
+procedure cpu_hd6309.escribir_registro(codigo:byte;dato:word);
+begin
+    case codigo of
+      $0:r.q.d:=dato;                      // D
+      $1:r.x:=dato;                        // X
+      $2:r.y:=dato;                        // Y
+      $3:r.u:=dato;                        // U
+      $4:r.s:=dato;                        // S
+      $5:r.pc:=dato;                       // PC
+      $6:r.q.w:=dato;                      // W
+      $7:r.v:=dato;                        // V
+      $8:r.q.a:=byte(dato shr 8);          // A: byte alto
+      $9:r.q.b:=byte(dato);                // B: byte bajo
+      $a:self.pon_pila(byte(dato));        // CC: byte bajo
+      $b:r.dp:=byte(dato shr 8);           // DP: byte alto
+      $c,$d:;                              // registro cero: ignora escritura
+      $e:r.q.e:=byte(dato shr 8);          // E: byte alto
+      $f:r.q.f:=byte(dato);                // F: byte bajo
+    end;
+end;
+
 procedure cpu_hd6309.trf(valor:byte);
 var
+  origen,destino:byte;
   temp:word;
 begin
-if ((valor xor (valor shr 4)) and $08)<>0 then begin
-  temp:=$ff
-end else begin
-  case (valor shr 4) of
-    $0:temp:=r.q.d; //D
-    $1:temp:=r.x;  //X
-    $2:temp:=r.y; //Y
-    $3:temp:=r.u; //U
-    $4:temp:=r.s; //S
-    $5:temp:=r.pc; //pc
-    $8:temp:=r.q.a; //a
-    $9:temp:=r.q.b; //b
-    $a:temp:=self.dame_pila;  //cc
-    $b:temp:=r.dp; //dp
-  end;
-end;
-case (valor and 15) of
-    $0:r.q.d:=temp; //D
-    $1:r.x:=temp;  //X
-    $2:r.y:=temp; //Y
-    $3:r.u:=temp; //U
-    $4:r.s:=temp; //S
-    $5:r.pc:=temp; //pc
-    $8:r.q.a:=temp; //a
-    $9:r.q.b:=temp; //b
-    $a:self.pon_pila(temp);  //cc
-    $b:r.dp:=temp; //dp
-end;
+  origen:=valor shr 4;
+  destino:=valor and $0f;
+  temp:=leer_registro(origen);
+  escribir_registro(destino,temp);
 end;
 
 procedure cpu_hd6309.trf_ex(valor:byte);
 var
-  temp1,temp2:word;
+  origen,destino:byte;
+  temp_origen,temp_destino:word;
 begin
-if ((valor xor (valor shr 4)) and $08)<>0 then begin
-    temp1:=$ff;
-    temp2:=$ff;
-end else begin
-  case (valor shr 4) of
-    $0:temp1:=r.q.d; //D
-    $1:temp1:=r.x;  //X
-    $2:temp1:=r.y; //Y
-    $3:temp1:=r.u; //U
-    $4:temp1:=r.s; //S
-    $5:temp1:=r.pc; //pc
-    $8:temp1:=r.q.a; //a
-    $9:temp1:=r.q.b; //b
-    $a:temp1:=self.dame_pila;  //cc
-    $b:temp1:=r.dp; //dp
-  end;
-  case (valor and 15) of
-    $0:temp2:=r.q.d; //D
-    $1:temp2:=r.x;  //X
-    $2:temp2:=r.y; //Y
-    $3:temp2:=r.u; //U
-    $4:temp2:=r.s; //S
-    $5:temp2:=r.pc; //pc
-    $8:temp2:=r.q.a; //a
-    $9:temp2:=r.q.b; //b
-    $a:temp2:=self.dame_pila;  //cc
-    $b:temp2:=r.dp; //dp
-  end;
-end;
-case (valor shr 4) of
-    $0:r.q.d:=temp2; //D
-    $1:r.x:=temp2;  //X
-    $2:r.y:=temp2; //Y
-    $3:r.u:=temp2; //U
-    $4:r.s:=temp2; //S
-    $5:r.pc:=temp2; //pc
-    $8:r.q.a:=temp2; //a
-    $9:r.q.b:=temp2; //b
-    $a:self.pon_pila(temp2);  //cc
-    $b:r.dp:=temp2; //dp
-end;
-case (valor and 15) of
-    $0:r.q.d:=temp1; //D
-    $1:r.x:=temp1;  //X
-    $2:r.y:=temp1; //Y
-    $3:r.u:=temp1; //U
-    $4:r.s:=temp1; //S
-    $5:r.pc:=temp1; //pc
-    $8:r.q.a:=temp1; //a
-    $9:r.q.b:=temp1; //b
-    $a:self.pon_pila(temp1);  //cc
-    $b:r.dp:=temp1; //dp
-end;
+  origen:=valor shr 4;
+  destino:=valor and $f;
+  // Guarda ambos valores antes de modificar registros que pueden solaparse,
+  // como D con A/B o W con E/F.
+  temp_origen:=leer_registro(origen);
+  temp_destino:=leer_registro(destino);
+  escribir_registro(origen,temp_destino);
+  escribir_registro(destino,temp_origen);
 end;
 
 //Opcodes
-{$I m6809.inc}
+// Rutinas locales de flags y ALU para HD6309, independizadas del include compartido.
+function m680x_neg(valor:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=-valor;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+cc.c:=(tempw and $100)<>0;
+cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_neg:=tempw;
+end;
+
+function m680x_com(valor:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=not(valor);
+cc.v:=false;
+cc.c:=true;
+cc.n:=(temp and $80)<>0;
+cc.z:=(temp=0);
+m680x_com:=temp;
+end;
+
+function m680x_lsr(valor:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=valor shr 1;
+cc.z:=(temp=0);
+cc.n:=false;
+cc.c:=(valor and $1)<>0;
+cc.v:=cc.n xor cc.c;
+m680x_lsr:=temp;
+end;
+
+function m680x_ror(valor:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=(valor shr 1) or (byte(cc.c) shl 7);
+cc.c:=(valor and $1)<>0;
+cc.n:=(temp and $80)<>0;
+cc.z:=(temp=0);
+cc.v:=cc.n xor cc.c;
+m680x_ror:=temp;
+end;
+
+function m680x_asr(valor:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=(valor and $80) or (valor shr 1);
+cc.c:=(valor and $1)<>0;
+cc.n:=(temp and $80)<>0;
+cc.z:=(temp=0);
+cc.v:=cc.n xor cc.c;
+m680x_asr:=temp;
+end;
+
+function m680x_asl(valor:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=valor shl 1;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+cc.c:=(tempw and $100)<>0;
+cc.v:=((valor xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_asl:=tempw;
+end;
+
+function m680x_rol(valor:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=(valor shl 1) or byte(cc.c);
+cc.c:=(valor and $80)<>0;
+cc.v:=((valor xor tempw xor (tempw shr 1)) and $80)<>0;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+m680x_rol:=tempw;
+end;
+
+function m680x_dec(valor:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=valor-1;
+cc.z:=((tempw and $ff)=0);
+cc.n:=(tempw and $80)<>0;
+cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_dec:=tempw;
+end;
+
+function m680x_inc(valor:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=valor+1;
+cc.z:=((tempw and $ff)=0);
+cc.n:=(tempw and $80)<>0;
+cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_inc:=tempw;
+end;
+
+procedure m680x_tst(valor:byte;cc:pband_m6809);
+begin
+cc.v:=false;
+cc.c:=false; // MAME clears C for TST/TSTA/TSTB
+cc.n:=(valor and $80)<>0;
+cc.z:=(valor=0);
+end;
+
+function m680x_sub8(sub1,sub2:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=sub1-sub2;
+cc.c:=(tempw and $100)<>0;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+cc.v:=(((sub1 xor sub2 xor tempw xor (tempw shr 1)) and $80))<>0;
+m680x_sub8:=tempw;
+end;
+
+function m680x_sub16(sub1,sub2:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=sub1-sub2;
+cc.c:=(templ and $10000)<>0;
+cc.n:=(templ and $8000)<>0;
+cc.z:=(templ and $ffff)=0;
+cc.v:=((sub1 xor sub2 xor templ xor (templ shr 1)) and $8000)<>0;
+m680x_sub16:=templ;
+end;
+
+function m680x_sbc(sub1,sub2:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=sub1-sub2-byte(cc.c);
+cc.c:=(tempw and $100)<>0;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+cc.v:=(((sub1 xor sub2 xor tempw xor (tempw shr 1)) and $80))<>0;
+m680x_sbc:=tempw;
+end;
+
+function m680x_and(valor1,valor2:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=valor1 and valor2;
+cc.n:=(temp and $80)<>0;
+cc.z:=(temp=0);
+cc.v:=false;
+m680x_and:=temp;
+end;
+
+function m680x_eor(valor1,valor2:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=valor1 xor valor2;
+cc.n:=(temp and $80)<>0;
+cc.z:=(temp=0);
+cc.v:=false;
+m680x_eor:=temp;
+end;
+
+function m680x_adc(valor1,valor2:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=valor1+valor2+byte(cc.c);
+cc.c:=(tempw and $100)<>0;
+cc.h:=((valor1 xor valor2 xor tempw) and $10)<>0;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+cc.v:=((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_adc:=tempw;
+end;
+
+function m680x_or(valor1,valor2:byte;cc:pband_m6809):byte;
+var
+  temp:byte;
+begin
+temp:=valor1 or valor2;
+cc.n:=(temp and $80)<>0;
+cc.z:=(temp=0);
+cc.v:=false;
+m680x_or:=temp;
+end;
+
+function m680x_add8(valor1,valor2:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=valor1+valor2;
+cc.c:=(tempw and $100)<>0;
+cc.h:=((valor1 xor valor2 xor tempw) and $10)<>0;
+cc.n:=(tempw and $80)<>0;
+cc.z:=((tempw and $ff)=0);
+cc.v:=(((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80))<>0;
+m680x_add8:=tempw;
+end;
+
+function m680x_add16(add1,add2:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=add1+add2;
+cc.c:=(templ and $10000)<>0;
+cc.n:=(templ and $8000)<>0;
+cc.z:=((templ and $ffff)=0);
+cc.v:=((add1 xor add2 xor templ xor (templ shr 1)) and $8000)<>0;
+m680x_add16:=templ;
+end;
+
+function m680x_ld_st8(valor:byte;cc:pband_m6809):byte;
+begin
+cc.n:=(valor and $80)<>0;
+cc.z:=(valor=0);
+cc.v:=false;
+m680x_ld_st8:=valor;
+end;
+
+function m680x_ld_st16(valor:word;cc:pband_m6809):word;
+begin
+cc.n:=(valor and $8000)<>0;
+cc.z:=(valor=0);
+cc.v:=false;
+m680x_ld_st16:=valor;
+end;
 
 procedure cpu_hd6309.run(maximo:single);
 var

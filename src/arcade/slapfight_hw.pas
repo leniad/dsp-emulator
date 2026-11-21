@@ -361,9 +361,9 @@ z80_1:=cpu_z80.create(3000000);
 z80_1.change_ram_calls(snd_sf_hw_getbyte,snd_sf_hw_putbyte);
 z80_1.init_sound(sf_hw_sound_update);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,AY8910);
+ay8910_0:=ay8910_chip.create(1500000,YM2149);
 ay8910_0.change_io_calls(ay8910_porta_0,ay8910_portb_0,nil,nil);
-ay8910_1:=ay8910_chip.create(1500000,AY8910);
+ay8910_1:=ay8910_chip.create(1500000,YM2149);
 ay8910_1.change_io_calls(ay8910_porta_1,ay8910_portb_1,nil,nil);
 case main_vars.tipo_maquina of
   98:begin

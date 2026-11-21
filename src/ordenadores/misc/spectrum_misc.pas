@@ -242,7 +242,8 @@ if event.arcade then begin
   end;
   if ((keyboard[KEYBOARD_F5]) and (main_vars.tipo_maquina=2)) then begin
     clear_disk(0);
-    change_caption('');
+    main_vars.nombre_caption:='';
+    change_caption;
   end;
   fillchar(var_spectrum.keys[0],8,$ff);
   if keyboard[KEYBOARD_1] then var_spectrum.keys[3]:=var_spectrum.keys[3] and $fe;
@@ -552,7 +553,6 @@ llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.save_qsnap:=spec_qsave;
 llamadas_maquina.load_qsnap:=spec_qload;
-init_mouse(true);
 if ((main_vars.tipo_maquina<>0) and (main_vars.tipo_maquina<>5)) then llamadas_maquina.scanlines:=311
   else llamadas_maquina.scanlines:=312;
 if borde.tipo=2 then begin
@@ -598,8 +598,6 @@ for f:=16 to 79 do begin
 end;
 set_pal(colores,80);
 var_spectrum.haz_flash:=false;
-if mouse.tipo<>MNONE then show_mouse_cursor
-  else hide_mouse_cursor;
 //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;
@@ -613,9 +611,10 @@ spec_z80.contador:=0;
 var_spectrum.valor_beeper:=0;
 if cinta_tzx.cargada then begin
   cinta_tzx.play_once:=false;
-  change_caption(cinta_tzx.name);
-end else if dsk[0].abierto then change_caption(dsk[0].ImageName)
-          else change_caption('');
+  main_vars.nombre_caption:=cinta_tzx.name;
+end else if dsk[0].abierto then main_vars.nombre_caption:=dsk[0].ImageName
+          else main_vars.nombre_caption:='';
+change_caption;
 mouse.lg_val:=$20;
 var_spectrum.flash:=0;
 var_spectrum.irq_pos:=0;

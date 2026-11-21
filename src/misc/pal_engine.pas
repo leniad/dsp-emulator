@@ -319,3 +319,4 @@ paleta_alpha[pal_pos]:=SDL_MapRGBA(pantalla[PANT_SPRITES_ALPHA].format, pcolor.r
 end;
 
 end.
+

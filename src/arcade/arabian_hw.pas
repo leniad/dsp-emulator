@@ -55,13 +55,20 @@ if event.arcade then begin
   marcade.in1:=0;
   marcade.in2:=0;
   marcade.in3:=0;
-  //in1
+  marcade.in4:=0;
+  marcade.in5:=0;
+  //p1
   if arcade_input.right[0] then marcade.in1:=marcade.in1 or 1;
   if arcade_input.left[0] then marcade.in1:=marcade.in1 or 2;
   if arcade_input.up[0] then marcade.in1:=marcade.in1 or 4;
   if arcade_input.down[0] then marcade.in1:=marcade.in1 or 8;
-  //in2
   if arcade_input.but0[0] then marcade.in2:=marcade.in2 or 1;
+  //p2
+  if arcade_input.right[1] then marcade.in4:=marcade.in4 or 1;
+  if arcade_input.left[1] then marcade.in4:=marcade.in4 or 2;
+  if arcade_input.up[1] then marcade.in4:=marcade.in4 or 4;
+  if arcade_input.down[1] then marcade.in4:=marcade.in4 or 8;
+  if arcade_input.but0[1] then marcade.in5:=marcade.in5 or 1;
   //in3
   if arcade_input.coin[0] then marcade.in3:=marcade.in3 or 1;
   if arcade_input.coin[1] then marcade.in3:=marcade.in3 or 2;
@@ -260,8 +267,8 @@ if (not(mcu_port_r[0]) and 1)<>0 then begin
           0:val:=marcade.in0;
           1:val:=marcade.in1;
           2:val:=marcade.in2;
-          3:val:=0;  //Cocktail
-          4:val:=0;  //Cocktail
+          3:val:=marcade.in4;
+          4:val:=marcade.in5;
           5:val:=marcade.dswb;
         end;
 				break;
@@ -304,6 +311,8 @@ begin
  marcade.in1:=0;
  marcade.in2:=0;
  marcade.in3:=0;
+ marcade.in4:=0;
+ marcade.in5:=0;
 end;
 
 procedure create_palette;
@@ -316,7 +325,7 @@ var
 begin
 for i:=0 to $1fff do begin
 		ena:=(i shr 12 )and 1;
-		enb:=(i and $200)<>0;
+		enb:=(i and $800)<>0;
 		abhf:=((i shr 10) and 1) xor 1;
 		aghf:=((i shr 9) and 1) xor 1;
 		arhf:=((i shr 8) and 1) xor 1;
@@ -351,11 +360,11 @@ for i:=0 to $1fff do begin
     if ((abhf xor 1) and az)<>0 then bbase:=0
       else bbase:=ab;
     //Paleta
-    if (rhi or rlo)<>0 then colores[i].r:=round((rhi*115.7)+(rlo*77.3)+62)
-      else colores[i].r:=round((rhi*115.7)+(rlo*77.3));
-    if (ghi or glo)<>0 then colores[i].g:=round((ghi*117.9588)+(glo*75.0411)+62)
-      else colores[i].g:=round((ghi*117.9588)+(glo*75.0411));
-		colores[i].b:=(bhi*192)+(bbase*63);
+    colores[i].r:=rhi*115+rlo*77;
+    if (rhi or rlo)<>0 then colores[i].r:=colores[i].r+63;
+    colores[i].g:=ghi*117+glo*75;
+    if (ghi or glo)<>0 then colores[i].g:=colores[i].g+63;
+    colores[i].b:=bhi*192+bbase*63;
 end;
 set_pal(colores,$2000);
 end;

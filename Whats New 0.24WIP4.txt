@@ -1,0 +1,283 @@
+What's New!!! DSP Emulator
+
+DSP 0.24b4 21/11/26
+**********
+-General
+    +Improved the mouse cursor icon. It now displays a crosshair when enabled, even in fullscreen mode.
+    +CPU Engine
+        -HD6309
+            +Separated from the M6809.
+            +Fixed timings.
+            +Added 8-bit indexed addressing with displacement and fixed 16-bit displacement addressing.
+            +Fixed TRF and TRF_EX.
+        -HU6280
+            +Added functions to read the IRQ and timer status.
+            +Fixed timings.
+            +Fixed addressing modes.
+            +Added opcodes $3,$c,$e,$13,$14,$16,$1c,$1e,$23,$33,$24,$2c,$34,$3c,$89,$36,$2e,$3e,$2a,$42,$56,$4e,$5e,$54,$76,$6e,$7e,$70,$83,$a3,$96,$b6,$be,$b8,$ba,$c0,$c4,$cc,$c3,$d3,$e3,$d6,$e4,$ec,$f4.
+            +Fixed opcodes $4,$40,$50,$60.
+            +Fixed audio in Tumble Pop, FunkyJet, etc.
+        -Konami
+            +Separated from the M6809.
+            +Fixed timings.
+            +Fixed TRF and TRF_REG.
+            +Added addressing modes from $a2 to $f6.
+            +Fixed numerous opcodes!
+        -M6502
+            +Added bus cycle counting to the NMOS version.
+            +Added opcodes $a3,$a7,$af,$b7,$bf,$c7,$cb.
+            +Improved IRQ handling.
+        -M68000
+            +Fixed IRQ 7 handling.
+            +Added functions for external IRQ handling.
+            +Fixed timings.
+            +Fixed opcodes: mulu, muls, movep.w, movep.l, eori.w tos, negx.l, clr.X, trap, link, ulink, rtr, addq.l, sbcd rr, sbcd mm, suba.w, subx.b mm, subx.l rr, abcd mm, addx.X rr, lsr.X, ror.b, asl.X.
+            +Added opcodes nbcd b and roxl.l.
+        -M6805
+            +Fixed opcodes $38,$39,$40,$48,$49,$58,$59,$a0,$b0,$c0,$a1,$b1,$c1,$d1,$d2,$a3,$b9,$d9,$ab,$bb,$cb,$db,$fb.
+        -NEC V20/V30/V33
+            +Fixed opcodes: ADCB, ADCW, SBBB, SBBW, SHR_BYTE, SHR_WORD, SHL_BYTE, SHL_WORD, SHRA_WORD, pushf, imul_d8, rotshft_bd8, rotshft_wd8, rotshft_b, rotshft_w, rotshft_bcl, NEG and MUL. (Raiden finally works!)
+        -uPD7810
+            +Fixed IRQ clearing and jump handling.
+            +Fixed timings and opcode sizes.
+            +Fixed opcodes XRA_X_A, OFFI_X, ONI_X and LDEAX_Dp.
+            +Added opcodes SLR_B, SLR_C, SLL_A, STEAX_Hp, DSLL_EA, TABLE.
+        -Z80
+            +Fixed opcodes ld A,I, in E,(C) and ld A,R.
+            +Fixed DD/FD opcodes, removing all ED prefixes (fixes Dananator).
+    +Graphics Engine
+        -Fixed scroll and zoom functions.
+        -Atari MO
+            +Fixed tile rendering.
+            +Fixed object traversal and priority handling.
+            +Changed the supported number of plane colors.
+        -AVG/DVG Engine
+            +Fixed the base clock.
+            +Fixed the number of vectors.
+            +Fixed consumed cycles.
+            +Fixed reset handling.
+        -DECO BAC06: Fixed scrolling.
+        -Taito TC0180VCU: Rewrote the driver; fixed zoom, priorities, etc.
+        -Taito K051316: Added graphics rotation and scrolling.
+        -Taito K051960
+            +Fixed zoom.
+            +Added a sprite buffer.
+        -Taito K053246/K053247/K055673
+            +Fixed zoom.
+            +Fixed the number of sprites and color handling.
+    +Controls Engine
+        -Improved the control assignment system. Up to four different keyboards can now be configured and assigned independently to players. When joysticks are detected, buttons can also be remapped for up to four joysticks and assigned to individual players.
+        -Added support for three controllers.
+        -Improved joystick input handling by normalizing readings to prevent false movements.
+        -Improved keyboard input handling to prevent ghost key presses.
+    +Sound Engine
+        -Normalized audio output to prevent clipping.
+        -Improved the audio system, significantly reducing background noise.
+        -Taito Sound
+            +Fixed audio in Operation Wolf.
+            +Added sound support for Taito System B.
+        -N2A03: Rewrote the audio implementation.
+        -AY8910
+            +Added YM2149 support.
+            +Fixed AY8912 outputs.
+        -DAC: Normalized output to prevent audio clipping.
+        -Flower Audio: Improved output, gain and channel mixing.
+        -Game Boy: Rewrote the audio implementation.
+        -HuC6280: Added audio emulation.
+        -Pokey: Rewrote it to adapt it to Atari consoles.
+        -QSound: Updated; it now uses the sample ROM.
+        -Samples: Fixed free channel selection.
+        -SEGA PCM: Improved resampling and mixing.
+        -TMS36XX: Fixed melody playback; all notes now sound separately.
+        -uPD7759: Improved channel mixing.
+        -YM2610: Added sound chip
+        -YM2612: Added sound chip.
+    +Miscellaneous
+        -Taito C-Chip
+            +Separated M68000 access from the ASIC itself.
+            +Fixed the IRQ clearing timer.
+        -Added X24C01 EEPROM support.
+        -VIA6522
+            +Fixed timers.
+            +Added CA1 support.
+        -MOS6526: Rewritten.
+        -MOS6566: Rewritten.
+
+New Drivers
+***********
+-Neo Geo
+    +Metal Slug 2: added driver with sound
+    +Metal Slug X: added driver with sound
+    +King of Fighters '94: added driver with sound
+    +Viewpoint: added driver with sound
+-Atari System 1
+    +Fixed video, palette, and priority issues
+    +Added controls
+    +All three games are now playable
+-Taito System B
+    +Fixed issues and added controls, sound, and graphics
+    +Nastar: added driver with sound
+    +Master of Weapon: added driver with sound
+-Atari 2600
+    +Added console with audio
+    +Supports most mappers and cartridges
+-Atari 5200
+    +Added console with audio
+    +All known official games tested and working
+-Atari 7800
+    +Added console with audio
+    +All known official games tested and working
+    +Light gun support
+    +Automatic NTSC/PAL selection
+-Genesis/Mega Drive
+    +Completely rewritten driver; now working
+    +Light gun support
+    +Supports virtually all cartridges, including SSF2, Pier Solar, and Super Bubble Bobble
+    +Automatic region selection
+-PC Engine
+    +Added console with audio
+    +Supports virtually all cartridges, including Populous and those with inverted data
+    +Supports up to 3 controllers
+
+Computers
+*********
+-Amstrad CPC
+    +Video fixes ('Commando' now works properly)
+    +Fixed Dandanator support; ROMs now work
+-Commodore 64
+    +Improved video and audio, fixed sprites colors
+    +Fixed tape loading
+    +Fixed IRQs
+-Oric Atmos
+    +Improved disk drive
+    +Added support for Oric disk images
+
+Consoles
+********
+-Game Boy
+    +Rewritten audio engine; it now sounds much better!
+-NES
+    +Rewritten mapper system
+    +Rewritten video emulation; the PPU is now cycle-based rather than scanline-based
+    +Rewritten audio engine
+
+Arcade
+******
+-Ajax
+    +Added the K051316 chip with plane rotation support
+-Arabian
+    +Added P2 controls
+    +Fixed the color palette
+-Arkanoid
+    +Fixed button 2
+    +Replaced the sound chip with the YM2149
+    +Improved controls
+-Asteroids
+    +Fixed inverted video signals
+    +Lunar Lander: added controls
+-Black Tiger
+    +Added VBlank
+    +Added sprite DMA
+-Boogie Wings
+    +Fixed colors
+-Bubble Bobble
+    +Added audio timers and IRQs
+    +Fixed P2 controls
+-Commando
+    +Fixed the sprite count
+    +Added sprite DMA
+    +Fixed colors
+-CPS1
+    +Added P3 controls
+    +Diver Boy
+    +Fixed IRQ
+-Epos HW
+    +Replaced the sound chip with the AY8912
+    +Fixed the total number of screen scanlines
+-Exed Exes
+    +Fixed IRQs
+    +Added sprite DMA
+    +Fixed CPU clock
+    +Fixed background layer decoding
+-Ghosts'n Goblins
+    +Fixed VBlank
+    +Added sprite DMA
+    +Added audio reset
+    +Fixed sprite decoding
+-Gradius III
+    +Fixed priorities
+    +Fixed screen scanlines
+    +Fixed audio reset
+-Pirate Higemaru
+    +Fixed screen timing values
+-1942
+    +Fixed sprites
+    +Fixed CPU speed
+    +Fixed colors
+-88 Games
+    +Added the K051316 chip
+    +Fixed priorities
+-Legendary Wings HW
+    +Fixed the sprite count
+    +Adjusted screen timing values
+    +Added sprite DMA
+-M62 HW
+    +Replaced the sound chip with the YM2149
+-Operation Wolf
+    +Added the C-Chip, removing the simulation
+-Out Run
+    +Added sprite buffering, fixing related issues
+    +Fixed a sprite issue
+    +Added sprite DMA
+-Pac-Man
+    +Fixed IRQ
+-Pooyan
+    +Fixed screen timing values
+    +Fixed colors
+-Rainbow Islands HW
+    +Removed the simulated C-Chip
+-Shoot Out
+    +Fixed sprite priority (finally!)
+-Side Arms
+    +Fixed the sprite count
+    +Fixed background stars
+    +Added VBlank and fixed screen timing values
+    +Added sprite DMA
+    +Fixed CPU speed
+-The Simpsons
+    +Fixed VBlank
+    +Fixed timers, sprites no longer flicker
+-Slapfight HW
+    +Replaced the sound chips with YM2149 chips
+-Solomon's Key
+    +Replaced the sound chips with YM2149 chips
+-Sega System A
+    +Fixed sprites
+-Sega System B
+    +Fixed sprites
+    +Fixed button 0
+    +SDI: Fixed video
+-Tehkan World Cup
+    +Replaced the sound chips with YM2149 chips
+    +Rebalanced audio volume
+-Unico HW
+    +Zero Point: Buttons now work in addition to the mouse controls
+-Vigilante
+    +Fixed background redraw
+    +Adjusted screen timing values
+-Volfied
+    +Removed the simulated C-Chip
+-Wardner
+    +Adjusted screen timing values
+    +Fixed IRQ
+-Wyvern-F0
+    +Fixed scrolling
+    +Fixed character count
+    +Fixed audio from the second AY8910
+    +Fixed audio IRQ frequency
+    +Replaced the sound chips with YM2149 chips
+    +Balanced audio volume
+-Yie Ar Kung-Fu
+    +Fixed screen timing values
+    +Fixed audio IRQ frequency
+    +Fixed colors

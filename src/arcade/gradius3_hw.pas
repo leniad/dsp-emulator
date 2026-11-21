@@ -1,4 +1,4 @@
-unit gradius3_hw;
+﻿unit gradius3_hw;
 
 interface
 uses rom_engine;
@@ -60,20 +60,18 @@ end;
 
 procedure gradius3_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
 const
-  L0=1;
-	L1=2;
-	L2=3;
-	primask:array[0..1,0..3] of byte=(
-		( L0 or L2, L0, L0 or L2, L0 or L1 or L2 ),
-		( L1 or L2, L2,        0, L0 or L1 or L2 ));
+  sprite_pass:array[0..1,0..3] of byte=(
+    (3,1,3,6),  // priority=false: capas 1,2,0
+    (3,1,0,6)   // priority=true:  capas 0,1,2
+  );
 var
-  prio:byte;
+  sprite_priority:byte;
 begin
-	prio:=((color and $60) shr 5);
- 	if not(priority) then pri:=primask[0][prio]
-	  else pri:=primask[1][prio];
-	code:=code or ((color and $01) shl 13);
-	color:=sprite_colorbase+((color and $1e) shr 1);
+  sprite_priority:=(color and $60) shr 5;
+  if priority then pri:=sprite_pass[1,sprite_priority]
+    else pri:=sprite_pass[0,sprite_priority];
+  code:=code or ((color and $01) shl 13);
+  color:=sprite_colorbase+((color and $1e) shr 1);
 end;
 
 procedure gradius3_k007232_cb(valor:byte);
@@ -86,9 +84,9 @@ procedure update_video_gradius3;
 begin
 k052109_0.write($1d80,$10);
 k052109_0.write($1f00,$32);
-k052109_0.draw_tiles;
+if priority then k052109_0.draw_tiles(0)
+  else k052109_0.draw_tiles(1);
 k051960_0.update_sprites;
-fill_full_screen(4,0);
 if priority then begin
   k051960_0.draw_sprites(6,-1);
   k051960_0.draw_sprites(5,-1);
@@ -144,10 +142,10 @@ end;
 
 procedure gradius3_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
+ for f:=0 to 263 do begin
   eventos_gradius3;
   case f of
     16:if (irqB_mask and 2)<>0 then m68000_1.irq[2]:=HOLD_LINE;
@@ -211,16 +209,16 @@ case direccion of
                         buffer_paleta[(direccion and $fff) shr 1]:=valor;
                         cambiar_color_gradius3((direccion and $fff) shr 1,valor);
                    end;
-    $c0000:begin
-              valor:=valor shr 8;
-              priority:=(valor and 4)<>0;
-              if (valor and 8)<>0 then m68000_1.change_halt(CLEAR_LINE)
-                else m68000_1.change_halt(ASSERT_LINE);
-		          irqA_mask:=(valor and $20)<>0;
-            end;
+    $c0000..$c0001:if not m68000_0.write_8bits_hi_dir then begin
+                      valor:=valor shr 8;
+                      priority:=(valor and 4)<>0;
+                      if (valor and 8)<>0 then m68000_1.change_reset(CLEAR_LINE)
+                        else m68000_1.change_reset(ASSERT_LINE);
+		                  irqA_mask:=(valor and $20)<>0;
+                   end;
     $d8000:if (irqB_mask and 4)<>0 then m68000_1.irq[4]:=HOLD_LINE;
     $e0000:; //wd
-    $e8000:sound_latch:=valor shr 8;
+    $e8000..$e8001:if not m68000_0.write_8bits_hi_dir then sound_latch:=valor shr 8;
     $f0000:z80_0.change_irq(HOLD_LINE);
     $100000..$103fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $14c000..$153fff:begin
@@ -255,7 +253,7 @@ begin
 case direccion of
     0..$fffff:; //ROM
     $100000..$103fff:ram_sub[(direccion and $3fff) shr 1]:=valor;
-    $140000:irqB_mask:=(valor shr 8) and 7;
+    $140000..$140001:if not m68000_1.write_8bits_hi_dir then irqB_mask:=(valor shr 8) and 7;
     $200000..$203fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $24c000..$253fff:begin
                         direccion:=(direccion-$24c000) shr 1;
@@ -266,8 +264,8 @@ case direccion of
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
                         k052109_0.recalc_chars(((direccion and $1ffff) shr 1) div 16);
                      end;
-    $2c0000..$2c000f:k051960_0.k051937_write((direccion and $f) shr 1,valor and $ff);
-    $2c0800..$2c0fff:k051960_0.write((direccion and $7ff) shr 1,valor and $ff);
+    $2c0000..$2c000f:if not m68000_1.write_8bits_lo_dir then k051960_0.k051937_write((direccion and $f) shr 1,valor and $ff);
+    $2c0800..$2c0fff:if not m68000_1.write_8bits_lo_dir then k051960_0.write((direccion and $7ff) shr 1,valor and $ff);
   end;
 end;
 
@@ -305,7 +303,7 @@ procedure reset_gradius3;
 begin
  m68000_0.reset;
  m68000_1.reset;
- m68000_1.change_halt(ASSERT_LINE);
+ m68000_1.change_reset(ASSERT_LINE);
  z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
@@ -319,6 +317,7 @@ begin
  sound_latch:=0;
  irqA_mask:=false;
  irqB_mask:=0;
+ priority:=false;
 end;
 
 procedure cerrar_gradius3;
@@ -334,7 +333,8 @@ begin
 llamadas_maquina.close:=cerrar_gradius3;
 llamadas_maquina.reset:=reset_gradius3;
 llamadas_maquina.bucle_general:=gradius3_principal;
-llamadas_maquina.scanlines:=256;
+llamadas_maquina.scanlines:=264;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_gradius3:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);

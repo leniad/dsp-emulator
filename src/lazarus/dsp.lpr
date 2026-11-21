@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, principal, acercade, LoadRom, config_general, redefine, cargar_dsk,
   tape_window, cargar_spec, lenslock, config, arcade_config,
-  config_sms, config_cpc, misc_functions, principal_misc, config_gb;
+  config_sms, config_cpc, misc_functions, principal_misc, config_gb,redefine_main;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}
@@ -36,6 +36,7 @@ begin
   Application.CreateForm(Tredefine1, redefine1);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(Tconfiggb, configgb);
+  Application.CreateForm(Tmredefine, mredefine);
   Application.Run;
 end.
 

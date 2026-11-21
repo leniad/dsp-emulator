@@ -39,7 +39,7 @@ const
         (mask:$40;name:'Invulnerability';number:2;val2:($40,0);name2:('Off','On')));
 
 var
- rom_bank:array[0..3,0..$3fff] of byte;
+ rom_bank:array[0..7,0..$3fff] of byte;
  irq_vector,banco_rom,sound_latch,rear_color:byte;
  rear_scroll,scroll_x,sample_addr:word;
  rear_disable,rear_ch_color:boolean;
@@ -52,7 +52,7 @@ var
   flip_y:boolean;
   ccolor:tcolor;
 begin
-//fondo
+///fondo
 if not(rear_disable) then begin
  if rear_ch_color then begin
     for i:=0 to 15 do begin
@@ -86,7 +86,7 @@ for f:=0 to $7ff do begin
       x:=f mod 64;
       y:=f div 64;
       nchar:=memoria[$d000+(f*2)]+((memoria[$d001+(f*2)] and $f0) shl 4);
-      if (color>=4) then put_gfx(x*8,y*8,nchar,(color shl 4)+256,1,0)
+      if (rear_disable or (color>=4)) then put_gfx(x*8,y*8,nchar,(color shl 4)+256,1,0)
         else put_gfx_trans(x*8,y*8,nchar,(color shl 4)+256,1,0);
       if (color and $c)=$c then put_gfx_trans_alt(x*8,y*8,nchar,(color shl 4)+256,2,0,1)
         else put_gfx_block_trans(x*8,y*8,2,8,8);
@@ -147,10 +147,10 @@ end;
 
 procedure vigilante_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 283 do begin
     //Main CPU
     z80_0.run(frame_main);
     frame_main:=frame_main+z80_0.tframes-z80_0.contador;
@@ -182,6 +182,7 @@ var
   bank,pos:word;
 begin
   bank:=dir and $400;
+  if bank=$400 then rear_ch_color:=true;
   pos2:=(dir and $ff);
   pos:=bank+pos2;
 	color.r:=(buffer_paleta[pos+0]) shl 3;
@@ -245,27 +246,29 @@ case (puerto and $ff) of
   $83:rear_scroll:=(rear_scroll and $ff) or ((valor and 7) shl 8);
   $84:begin
         rear_disable:=(valor and $40)<>0;
-        rear_color:=valor and $d;
+        if rear_color<>(valor and $d) then begin
+          rear_color:=valor and $d;
+          rear_ch_color:=true;
+        end;
       end;
 end;
 end;
 
 function snd_getbyte(direccion:word):byte;
 begin
-snd_getbyte:=mem_snd[direccion];
+  snd_getbyte:=mem_snd[direccion];
 end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
-mem_snd[direccion]:=valor;
+  if direccion>=$f000 then mem_snd[direccion]:=valor;
 end;
 
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
   1:snd_inbyte:=ym2151_0.status;
-  $80:snd_inbyte:=sound_latch;
+  $80..$81:snd_inbyte:=sound_latch;
   $84:snd_inbyte:=mem_dac[sample_addr];
 end;
 end;
@@ -309,6 +312,7 @@ begin
  frame_main:=z80_0.tframes;
  frame_snd:=z80_1.tframes;
  ym2151_0.reset;
+ dac_0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -345,8 +349,8 @@ var
 begin
 llamadas_maquina.bucle_general:=vigilante_principal;
 llamadas_maquina.reset:=reset_vigilante;
-llamadas_maquina.fps_max:=55;
-llamadas_maquina.scanlines:=256;
+llamadas_maquina.fps_max:=56.3338208;
+llamadas_maquina.scanlines:=284;
 iniciar_vigilante:=false;
 iniciar_audio(true);
 screen_init(1,512,256,true);
@@ -363,7 +367,7 @@ z80_1:=cpu_z80.create(3579645);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(snd_despues_instruccion);
-timers.init(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_nmi,nil,true);
+timers.init(z80_1.numero_cpu,3579645/8000,vigilante_snd_nmi,nil,true);
 //sound chips
 dac_0:=dac_chip.create(0.6);
 ym2151_0:=ym2151_chip.create(3579645);

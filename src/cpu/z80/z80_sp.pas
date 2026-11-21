@@ -39,8 +39,8 @@ end;
 
 procedure cpu_z80_sp.spec_outbyte(posicion:word;valor:byte);
 begin
-self.out_port(posicion,valor);
 self.retraso_puerto(posicion);
+self.out_port(posicion,valor);
 end;
 
 function cpu_z80_sp.spec_inbyte(posicion:word):byte;
@@ -51,15 +51,15 @@ end;
 
 procedure cpu_z80_sp.spec_putbyte(posicion:word;valor:byte);
 begin
-self.putbyte(posicion,valor);
 self.retraso(posicion);
+self.putbyte(posicion,valor);
 self.contador:=self.contador+3;
 end;
 
 function cpu_z80_sp.spec_getbyte(posicion:word):byte;
 begin
-spec_getbyte:=self.getbyte(posicion);
 self.retraso(posicion);
+spec_getbyte:=self.getbyte(posicion);
 self.contador:=self.contador+3;
 end;
 
@@ -78,7 +78,7 @@ r.iff1:= False;
 Case r.im of
         0:begin //12t
               r.pc:= $38;
-              self.contador:=self.contador+6; //12 En total -6 de guardar SP
+              self.contador:=self.contador+7; //13 En total -6 de guardar SP
             end;
         1:begin //13t
               r.pc:= $38;

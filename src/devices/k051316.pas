@@ -13,8 +13,9 @@ type
               function read(direccion:word):byte;
               function rom_read(direccion:word):byte;
               procedure write(direccion:word;valor:byte);
-              procedure draw(screen:byte);
+              procedure draw(screen:byte;dest_x,dest_y,draw_w,draw_h:word;screen_x,screen_y:integer);
               procedure control_w(direccion,valor:byte);
+              procedure wraparound_enable(status:boolean);
               procedure clean_video_buffer;
           private
               ram:array[0..$7ff] of byte;
@@ -23,6 +24,7 @@ type
               rom_size,rom_mask:dword;
               k051316_cb:t_k051316_cb;
               color_type,pant,ngfx,pixels_per_byte:byte;
+              wraparound:boolean;
      end;
 
 const
@@ -33,6 +35,7 @@ var
    k051316_0:k051316_chip;
 
 implementation
+uses pal_engine;
 
 constructor k051316_chip.create(pant,ngfx:byte;call_back:t_k051316_cb;rom:pbyte;rom_size:dword;tipo:byte);
 const
@@ -77,6 +80,8 @@ end;
 procedure k051316_chip.reset;
 begin
   fillchar(self.control,$10,0);
+  self.wraparound:=false;
+  self.clean_video_buffer;
 end;
 
 procedure k051316_chip.clean_video_buffer;
@@ -96,8 +101,18 @@ begin
 end;
 
 procedure k051316_chip.control_w(direccion,valor:byte);
+var
+  offset:byte;
 begin
-  self.control[direccion and $f]:=valor;
+  offset:=direccion and $f;
+  if (offset=$e) and (((self.control[offset] xor valor) and $06)<>0) then
+    self.clean_video_buffer;
+  self.control[offset]:=valor;
+end;
+
+procedure k051316_chip.wraparound_enable(status:boolean);
+begin
+  self.wraparound:=status;
 end;
 
 function k051316_chip.read(direccion:word):byte;
@@ -111,36 +126,83 @@ begin
   gfx[self.ngfx].buffer[direccion and $3ff]:=true;
 end;
 
-procedure k051316_chip.draw(screen:byte);
+procedure k051316_chip.draw(screen:byte;dest_x,dest_y,draw_w,draw_h:word;screen_x,screen_y:integer);
 var
   f,color,nchar,pri:word;
   x,y:byte;
+  raw_color:byte;
+  flipx,flipy:boolean;
   startx,starty,incxx,incxy,incyx,incyy:integer;
+  dx,dy,sx,sy,src_pitch,dst_pitch,dst_offset:integer;
+  affine_x,affine_y:int64;
+  src_line,dst_line,p_src,p_dst:pword;
+  trans_color:word;
 begin
+// Regenerate modified tiles. Color bits 6/7 select flips only when control
+// register $0e enables them; preserve them before the board callback consumes
+// the board-specific color attribute.
 pri:=0;
-for f:=0 to $3ff do begin //Background
+for f:=0 to $3ff do begin
   if gfx[self.ngfx].buffer[f] then begin
     x:=f mod 32;
     y:=f div 32;
-    color:=self.ram[f+$400];
+    raw_color:=self.ram[f+$400];
+    color:=raw_color;
     nchar:=self.ram[f];
+    flipx:=((self.control[$e] and $02)<>0) and ((raw_color and $40)<>0);
+    flipy:=((self.control[$e] and $04)<>0) and ((raw_color and $80)<>0);
     self.k051316_cb(nchar,color,pri);
-    put_gfx_trans(x*16,y*16,nchar,color shl self.color_type,self.pant,self.ngfx);
+    put_gfx_trans_flip(x*16,y*16,nchar,color shl self.color_type,self.pant,self.ngfx,flipx,flipy);
     gfx[self.ngfx].buffer[f]:=false;
   end;
 end;
-startx:=smallint((self.control[0] shl 8)+self.control[1]) shl 8;
-starty:=smallint((self.control[6] shl 8)+self.control[7]) shl 8;
-incxx:=smallint(256*self.control[$02]+self.control[$03]);
-incyx:=smallint(256*self.control[$04]+self.control[$05]);
-incxy:=smallint(256*self.control[$08]+self.control[$09]);
-incyy:=smallint(256*self.control[$0a]+self.control[$0b]);
-startx:=startx-(16*incyx);
-starty:=starty-(16*incyy);
-startx:=startx-(89*incxx);
-starty:=starty-(89*incxy);
-//actualiza_trozo(0,0,512,512,self.pant,0,0,512,512,screen);
-scroll_x_y(self.pant,screen,startx,starty);
+// Registers are signed 16-bit values. The two counter registers have eight
+// fractional bits; the four increments are signed 8.8 values.
+startx:=smallint((self.control[0] shl 8) or self.control[1])*256;
+starty:=smallint((self.control[6] shl 8) or self.control[7])*256;
+incxx:=smallint((self.control[$02] shl 8) or self.control[$03]);
+incyx:=smallint((self.control[$04] shl 8) or self.control[$05]);
+incxy:=smallint((self.control[$08] shl 8) or self.control[$09]);
+incyy:=smallint((self.control[$0a] shl 8) or self.control[$0b]);
+// Match MAME's K051316 zoom_draw alignment for default offsets (dx=dy=0).
+startx:=startx-(16*incyx)+7*incxx;
+starty:=starty-(16*incyy)+7*incxy;
+if (draw_w=0) or (draw_h=0) or (pantalla[self.pant]=nil) or (pantalla[screen]=nil) then exit;
+src_pitch:=pantalla[self.pant].pitch shr 1;
+dst_pitch:=pantalla[screen].pitch shr 1;
+trans_color:=paleta[MAX_COLORES];
+for dy:=0 to draw_h-1 do begin
+  dst_offset:=(dest_y+dy)*dst_pitch+dest_x;
+  if p_final[screen].final_mix then inc(dst_offset,ADD_SPRITE*dst_pitch+ADD_SPRITE);
+  if (dest_y+dy>=pantalla[screen].h) then continue;
+  dst_line:=pantalla[screen].pixels;
+  inc(dst_line,dst_offset);
+  affine_y:=int64(starty)+int64(screen_y+dy)*incyy+int64(screen_x)*incxy;
+  affine_x:=int64(startx)+int64(screen_y+dy)*incyx+int64(screen_x)*incxx;
+  for dx:=0 to draw_w-1 do begin
+    // MAME passes all matrix values to tilemap::draw_roz shifted left by 5;
+    // the source coordinate is therefore fixed point with 11 fractional bits.
+    if affine_x>=0 then sx:=affine_x div 2048
+      else sx:=-(((-affine_x)+2047) div 2048);
+    if affine_y>=0 then sy:=affine_y div 2048
+      else sy:=-(((-affine_y)+2047) div 2048);
+    if self.wraparound then begin
+      sx:=sx and $1ff;
+      sy:=sy and $1ff;
+    end;
+    if (sx>=0) and (sx<512) and (sy>=0) and (sy<512) and (dest_x+dx<pantalla[screen].w) then begin
+      src_line:=pantalla[self.pant].pixels;
+      inc(src_line,sy*src_pitch);
+      p_src:=src_line;
+      inc(p_src,sx);
+      p_dst:=dst_line;
+      inc(p_dst,dx);
+      if p_src^<>trans_color then p_dst^:=p_src^;
+    end;
+    inc(affine_x,incxx);
+    inc(affine_y,incxy);
+  end;
+end;
 end;
 
 end.

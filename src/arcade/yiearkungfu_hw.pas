@@ -18,7 +18,7 @@ const
 
 implementation
 uses m6809,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
-     timer_engine,pal_engine,sound_engine,qsnapshot;
+     pal_engine,sound_engine,qsnapshot;
 
 const
         yiear_dip_a:array [0..1] of def_dip2=(
@@ -96,13 +96,17 @@ end;
 
 procedure yiear_principal;
 var
-  f:byte;
+  f:word;
 begin
 while EmuStatus=EsRunning do begin
-  for f:=0 to 255 do begin
-    if f=240 then begin
-      if irq_ena then m6809_0.change_irq(HOLD_LINE);
-      update_video_yiear;
+  for f:=0 to 263 do begin
+    case f of
+      16,48,80,112,144,176,208:if nmi_ena then m6809_0.change_nmi(ASSERT_LINE);
+      240:begin
+            if irq_ena then m6809_0.change_irq(ASSERT_LINE);
+            if nmi_ena then m6809_0.change_nmi(ASSERT_LINE);
+            update_video_yiear;
+          end;
     end;
     m6809_0.run(frame_main);
     frame_main:=frame_main+m6809_0.tframes-m6809_0.contador;
@@ -133,6 +137,8 @@ case direccion of
           irq_ena:=(valor and 4)<>0;
           nmi_ena:=(valor and 2)<>0;
           main_screen.flip_main_screen:=(valor and 1)<>0;
+          if (valor and 4)=0 then m6809_0.change_irq(CLEAR_LINE);
+          if (valor and 2)=0 then m6809_0.change_nmi(CLEAR_LINE);
         end;
   $4800:sound_latch:=valor;
   $4900:sn_76496_0.Write(sound_latch);
@@ -148,11 +154,6 @@ case direccion of
                end;
   $8000..$ffff:; //ROM
 end;
-end;
-
-procedure yiear_snd_nmi;
-begin
-  if nmi_ena then m6809_0.change_nmi(PULSE_LINE);
 end;
 
 procedure yiear_sound_update;
@@ -245,10 +246,10 @@ const
 begin
 llamadas_maquina.bucle_general:=yiear_principal;
 llamadas_maquina.reset:=reset_yiear;
-llamadas_maquina.fps_max:=60.58;
+llamadas_maquina.fps_max:=60.60606060606;
 llamadas_maquina.save_qsnap:=yiear_qsave;
 llamadas_maquina.load_qsnap:=yiear_qload;
-llamadas_maquina.scanlines:=256;
+llamadas_maquina.scanlines:=264;
 iniciar_yiear:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -258,7 +259,6 @@ iniciar_video(256,224);
 m6809_0:=cpu_m6809.Create(18432000 div 12,TCPU_M6809);
 m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
 m6809_0.init_sound(yiear_sound_update);
-timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
 if not(roms_load(@memoria,yiear_rom)) then exit;
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(18432000 div 12);
@@ -289,7 +289,7 @@ for f:=0 to 31 do begin
   ctemp1:=0;
   ctemp2:=(memoria_temp[f] shr 6) and 1;
   ctemp3:=(memoria_temp[f] shr 7) and 1;
-  colores[f].b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+  colores[f].b:=$52*ctemp2+$ad*ctemp3;
 end;
 set_pal(colores,32);
 //DIP

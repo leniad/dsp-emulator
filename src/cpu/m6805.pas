@@ -345,7 +345,7 @@ case instruccion of
       end;
   $38:begin //asl
         tempw:=numero shl 1;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         self.putbyte(posicion,tempw and $ff);
@@ -353,7 +353,7 @@ case instruccion of
   $39:begin //rol
         if r.cc.c then tempw:=$01 or (numero shl 1)
           else tempw:=numero shl 1;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         self.putbyte(posicion,tempw and $ff);
@@ -382,7 +382,7 @@ case instruccion of
       end;
   $40:begin //nega
         tempw:=-r.a;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         r.a:=tempw;
@@ -401,7 +401,7 @@ case instruccion of
       end;
   $48:begin //lsla
         tempw:=r.a shl 1;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         r.a:=tempw;
@@ -409,7 +409,7 @@ case instruccion of
   $49:begin //rola
         if r.cc.c then tempw:=$01 or (r.a shl 1)
           else tempw:=r.a shl 1;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         r.a:=tempw;
@@ -449,7 +449,7 @@ case instruccion of
   $58:begin //aslx
 	      tempw:=r.x shl 1;
         r.cc.n:=(tempw and $80)<>0;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.c:=(tempw and $100)<>0;
         r.x:=tempw;
       end;
@@ -457,7 +457,7 @@ case instruccion of
         if r.cc.c then tempw:=$01 or (r.x shl 1)
           else tempw:=r.x shl 1;
         r.cc.n:=(tempw and $80)<>0;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.c:=(tempw and $100)<>0;
         r.x:=tempw;
       end;
@@ -498,28 +498,28 @@ case instruccion of
   $9f:r.a:=r.x; //txa
   $a0,$b0,$c0:begin //suba
 	      tempw:=r.a-numero;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.c:=(tempw and $100)<>0;
         r.cc.n:=(tempw and $80)<>0;
         r.a:=tempw;
       end;
   $a1,$b1,$c1,$d1:begin //cmpa
         tempw:=r.a-numero;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.c:=(tempw and $100)<>0;
         r.cc.n:=(tempw and $80)<>0;
       end;
   $d2:begin //sbca
         if r.cc.c then tempw:=r.a-numero-1
           else tempw:=r.a-numero;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.c:=(tempw and $100)<>0;
         r.cc.n:=(tempw and $80)<>0;
 	      r.a:=tempw;
       end;
   $a3:begin //cmpx
         tempw:=r.x-numero;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.c:=(tempw and $100)<>0;
         r.cc.n:=(tempw and $80)<>0;
       end;
@@ -546,7 +546,7 @@ case instruccion of
   $b9,$d9:begin //adca
         if r.cc.c then tempw:=r.a+numero+$01
           else tempw:=r.a+numero;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         r.cc.h:=((r.a xor numero xor tempw) and $10)<>0;
@@ -559,7 +559,7 @@ case instruccion of
       end;
   $ab,$bb,$cb,$db,$fb:begin //adda
 	      tempw:=r.a+numero;
-        r.cc.z:=(tempw=0);
+        r.cc.z:=(byte(tempw)=0);
         r.cc.n:=(tempw and $80)<>0;
         r.cc.c:=(tempw and $100)<>0;
         r.cc.h:=((r.a xor numero xor tempw) and $10)<>0;

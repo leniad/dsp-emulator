@@ -1,15 +1,16 @@
 unit operationwolf_hw;
 
 interface
-uses rom_engine;
+uses rom_engine,principal;
 
 function iniciar_opwolf:boolean;
 
 const
         opwolf_rom:array[0..3] of tipo_roms=(
-        (n:'b20-05-02.40';l:$10000;p:0;crc:$3ffbfe3a),(n:'b20-03-02.30';l:$10000;p:$1;crc:$fdabd8a5),
+        (n:'b20-05-02.40';l:$10000;p:0;crc:$3ffbfe3a),(n:'b20-03-02.30';l:$10000;p:1;crc:$fdabd8a5),
         (n:'b20-04.39';l:$10000;p:$20000;crc:$216b4838),(n:'b20-20.29';l:$10000;p:$20001;crc:$d244431a));
         opwolf_sound:tipo_roms=(n:'b20-07.10';l:$10000;p:0;crc:$45c7ace3);
+        cchip_eeprom:tipo_roms=(n:'b20-18.73';l:$2000;p:0;crc:$5987b4e9);
         opwolf_char:tipo_roms=(n:'b20-13.13';l:$80000;p:0;crc:$f6acdab1);
         opwolf_sprites:tipo_roms=(n:'b20-14.72';l:$80000;p:0;crc:$89f889e5);
         opwolf_adpcm:array[0..1] of tipo_roms=((n:'b20-08.21';l:$80000;p:0;crc:$f3e19c64),());
@@ -19,7 +20,7 @@ var
 
 implementation
 uses m68000,main_engine,controls_engine,gfx_engine,taito_sound,pal_engine,
-     sound_engine,opwolf_cchip,msm5205;
+     sound_engine,msm5205,taito_cchip;
 
 const
         opwolf_dip_a:array [0..3] of def_dip2=(
@@ -52,7 +53,7 @@ for f:=$fff downto $0 do begin
     if (gfx[0].buffer[f] or buffer_color[color]) then begin
       x:=f mod 64;
       y:=f div 64;
-      nchar:=(ram2[$1+(f*2)]) and $3fff;
+      nchar:=(ram2[1+(f*2)]) and $3fff;
       flipx:=(atrib and $4000)<>0;
       flipy:=(atrib and $8000)<>0;
       put_gfx_flip(x*8,y*8,nchar,color shl 4,1,0,flipx,flipy);
@@ -74,13 +75,13 @@ end;
 scroll_x_y(1,3,scroll_x1,scroll_y1);
 //Sprites
 for f:=$ff downto 0 do begin
-  nchar:=(ram3[$2+(f*4)]) and $fff;
+  nchar:=(ram3[2+(f*4)]) and $fff;
   if nchar<>0 then begin
     atrib:=ram3[f*4];
     color:=((atrib and $f) or ((spritebank and $f) shl 4)) shl 4;
     put_gfx_sprite(nchar,color,(atrib and $4000)<>0,(atrib and $8000)<>0,1);
-    x:=ram3[$3+(f*4)]+16;
-    y:=ram3[$1+(f*4)];
+    x:=ram3[3+(f*4)]+16;
+    y:=ram3[1+(f*4)];
     actualiza_gfx_sprite(x,y,3,1);
   end;
 end;
@@ -96,12 +97,22 @@ if event.mouse then begin
   if raton.button2 then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
 end;
 if event.arcade then begin
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
 end;
+end;
+
+function opwolf_in0:byte;
+begin
+  opwolf_in0:=marcade.in0;
+end;
+
+function opwolf_in1:byte;
+begin
+  opwolf_in1:=marcade.in1;
 end;
 
 procedure opwolf_principal;
@@ -109,19 +120,23 @@ var
   f:byte;
 begin
 while EmuStatus=EsRunning do begin
- for f:=0 to $ff do begin
-  eventos_opwolf;
-  if f=248 then begin
-    update_video_opwolf;
-    m68000_0.irq[5]:=HOLD_LINE;
-  end;
-  //Main CPU
-  m68000_0.run(frame_main);
-  frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-  //Sound CPU
-  tc0140syt_0.run;
- end;
- video_sync;
+    for f:=0 to $ff do begin
+      eventos_opwolf;
+      if f=248 then begin
+        update_video_opwolf;
+        m68000_0.irq[5]:=HOLD_LINE;
+        cchip_0.set_int;
+      end;
+      //Main CPU
+      m68000_0.run(frame_main);
+      frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+      //Sound CPU
+      tc0140syt_0.run;
+      //MCU
+      cchip_0.upd7810.run(frame_mcu);
+      frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
+    end;
+    video_sync;
 end;
 end;
 
@@ -130,8 +145,8 @@ begin
 case direccion of
   0..$3ffff:opwolf_getword:=rom[direccion shr 1];
   $0f0000..$0fffff:case (direccion and $fff) of
-                      $0..$7ff:opwolf_getword:=opwolf_cchip_data_r(direccion and $7ff);
-                      $802:opwolf_getword:=opwolf_cchip_status_r;
+                      0..$7ff:opwolf_getword:=cchip_0.mem68_r((direccion and $7ff) shr 1);
+                      $800..$fff:opwolf_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
                    end;
   $100000..$107fff:opwolf_getword:=ram1[(direccion and $7fff) shr 1];
   $200000..$200fff:opwolf_getword:=buffer_paleta[(direccion and $fff) shr 1];
@@ -159,9 +174,10 @@ end;
 begin
 case direccion of
       0..$3ffff:;
-      $0ff000..$0ff7ff:opwolf_cchip_data_w(direccion and $7ff,valor);
-	    $0ff802:opwolf_cchip_status_w(valor);
-	    $0ffc00:opwolf_cchip_bank_w(valor);
+      $0f0000..$0fffff:case (direccion and $fff) of
+                          0..$7ff:cchip_0.mem68_w((direccion and $7ff) shr 1,valor and $ff);
+                          $800..$fff:cchip_0.asic68_w((direccion and $7ff) shr 1,valor and $ff);
+                       end;
       $100000..$107fff:ram1[(direccion and $7fff) shr 1]:=valor;
       $200000..$200fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                             buffer_paleta[(direccion and $fff) shr 1]:=valor;
@@ -194,10 +210,12 @@ procedure reset_opwolf;
 begin
  m68000_0.reset;
  tc0140syt_0.reset;
- opwolf_cchip_reset;
+ cchip_0.reset;
  frame_main:=m68000_0.tframes;
+ frame_mcu:=cchip_0.upd7810.tframes;
  marcade.in0:=$fc;
  marcade.in1:=$ff;
+ marcade.in3:=$ff;
  scroll_x1:=0;
  scroll_y1:=0;
  scroll_x2:=0;
@@ -238,7 +256,9 @@ copymemory(@tc0140syt_0.snd_bank_rom[1,0],@memoria_temp[$4000],$4000);
 copymemory(@tc0140syt_0.snd_bank_rom[2,0],@memoria_temp[$8000],$4000);
 copymemory(@tc0140syt_0.snd_bank_rom[3,0],@memoria_temp[$c000],$4000);
 //MCU
-opwolf_init_cchip(m68000_0.numero_cpu);
+cchip_0:=cchip_chip.create(12000000);
+cchip_0.change_in(nil,opwolf_in0,opwolf_in1,nil,nil);
+if not(roms_load(cchip_0.get_eeprom_dir,cchip_eeprom)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,opwolf_char)) then exit;
 init_gfx(0,8,8,$4000);
@@ -255,7 +275,6 @@ convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 init_dips(1,opwolf_dip_a,$ff);
 init_dips(2,opwolf_dip_b,$7f);
 //final
-show_mouse_cursor;
 iniciar_opwolf:=true;
 end;
 

@@ -196,6 +196,7 @@ begin
   self.mkh:=$ff;
   self.iff:=false;
   self.iff_pending:=false;
+  self.irr:=0;
   self.r.psw.zf:=false;
   self.r.psw.sk:=false;
   self.r.psw.hc:=false;
@@ -361,7 +362,7 @@ begin
 	case irqline of
 	  UPD7810_INTF0:begin // INT0 is level sensitive
 		                if (state=ASSERT_LINE) then self.irr:=self.irr or INTF0
-                      else self.irr:=self.irr and INTF0;
+                      else self.irr:=self.irr and not(INTF0);
                    end;
 	  UPD7810_INTF1:begin //INT1 is rising edge sensitive
 		                if ((self.int1=CLEAR_LINE) and (state=ASSERT_LINE)) then self.irr:=self.irr or INTF1;
@@ -419,7 +420,7 @@ begin
 		            if (self.mkl and $20)<>0 then self.irr:=self.irr and not(INTFE1);
 	            end else
 	              if (((self.irr and INTFEIN)<>0) and ((self.mkl and $80)=0)) then begin
-		              vector:=0020;
+		              vector:=$0020;
                   if (self.mkh and $1)<>0 then self.irr:=self.irr and not(INTFEIN);
 	              end else
 	                if (((self.irr and INTFAD)<>0) and ((self.mkh and $1)=0)) then begin
@@ -523,53 +524,54 @@ end;
 
 procedure cpu_upd7810.take_irq_7801;
 var
-   vector:word;
+   vector,irr_mask:word;
    irqline:integer;
 begin
   // global interrupt disable?
-	if not(self.iff) then exit;
+  if not(self.iff) then exit;
   vector:=0;
+  irr_mask:=0;
   irqline:=0;
-	if (((self.irr and INTF0)<>0) and ((self.mkl and $01)=0)) then begin
-	   vector:=$0004;
+  if (((self.irr and INTF0)<>0) and ((self.mkl and $01)=0)) then begin
+     vector:=$0004;
      irqline:=UPD7810_INTF0;
-	   self.irr:=self.irr and not(INTF0);
-	end;
+     irr_mask:=INTF0;
+  end;
   if (((self.irr and INTFT0)<>0) and ((self.mkl and $02)=0)) then begin
       vector:=$0008;
-      self.irr:=self.irr and not(INTFT0);
+      irr_mask:=INTFT0;
   end;
   if (((self.irr and INTF1)<>0) and ((self.mkl and $04)=0)) then begin
       irqline:=UPD7810_INTF1;
       vector:=$0010;
-      self.irr:=self.irr and not(INTF1);
+      irr_mask:=INTF1;
   end;
   if (((self.irr and INTF2)<>0) and ((self.mkl and $8)=0)) then begin
       irqline:=UPD7810_INTF2;
       vector:=$0020;
-      self.irr:=self.irr and not(INTF2);
+      irr_mask:=INTF2;
   end;
   if (((self.irr and INTFST)<>0) and ((self.mkl and $10)=0)) then begin
       vector:=$0040;
-      self.irr:=self.irr and not(INTFST);
+      irr_mask:=INTFST;
   end;
-	if (vector<>0) then begin
-		// acknowledge external IRQ
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//if (irqline<>0) then standard_irq_callback(irqline);
+  if (vector<>0) then begin
+    // acknowledge external IRQ
+    //if (irqline<>0) then standard_irq_callback(irqline);
     self.sp:=self.sp-1;
     self.putbyte(self.sp,self.dame_band);
     self.sp:=self.sp-1;
     self.putbyte(self.sp,self.pc shr 8);
-		self.sp:=self.sp-1;
+    self.sp:=self.sp-1;
     self.putbyte(self.sp,self.pc and $ff);
-		self.iff:=false;
+    self.iff:=false;
     self.iff_pending:=false;
+    self.irr:=self.irr and not(irr_mask);
     self.r.psw.sk:=false;
     self.r.psw.l0:=false;
     self.r.psw.l1:=false;
-		self.pc:=vector;
-	end;
+    self.pc:=vector;
+  end;
 end;
 
 procedure cpu_upd7810.handle_timers_7801(estados:byte);
@@ -982,7 +984,7 @@ end;
 procedure cpu_upd7810.XRA_X_A(reg:pbyte);
 begin
   self.r.va.l:=reg^ xor self.r.va.l;
-  self.r.psw.zf:=(reg^=0);
+  self.r.psw.zf:=(self.r.va.l=0);
 end;
 
 procedure cpu_upd7810.SUB_X_A(reg:pbyte);
@@ -1062,7 +1064,8 @@ var
 begin
   tempb:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
-  if ((reg^ and tempb)=0) then self.r.psw.sk:=true;
+  self.r.psw.zf:=((reg^ and tempb)=0);
+  if self.r.psw.zf then self.r.psw.sk:=true;
 end;
 
 procedure cpu_upd7810.ONI_X(reg:pbyte);
@@ -1071,7 +1074,8 @@ var
 begin
   tempb:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
-  if ((reg^ and tempb)<>0) then self.r.psw.sk:=true;
+  self.r.psw.zf:=((reg^ and tempb)=0);
+  if not(self.r.psw.zf) then self.r.psw.sk:=true;
 end;
 
 procedure cpu_upd7810.ORI_X(reg:pbyte);
@@ -1189,7 +1193,11 @@ while self.contador<maximo do begin
     $1:if self.cpu_type=CPU_7801 then begin //HALT
         self.contador:=trunc(maximo);
         self.pc:=self.pc-1;
-       end else MessageDlg('Instruccion: $1 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+       end else begin //LDAW_WA
+        tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+        self.pc:=self.pc+1;
+        self.r.va.l:=self.getbyte(tempw);
+       end;
     $2:self.sp:=self.sp+1; //INX_SP
     $4:begin //LXI_S
         self.sp:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
@@ -1271,7 +1279,9 @@ while self.contador<maximo do begin
           tempw:=self.pc+self.r.va.l+1;
 	        self.r.bc.l:=self.getbyte(tempw);
           self.r.bc.h:=self.getbyte(tempw+1);
-        end else MessageDlg('Instruccion: $21 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+        end else begin //JB
+          self.pc:=self.r.bc.w;
+        end;
     $22:self.r.de.w:=self.r.de.w+1; //INX_DE
     $23:self.r.de.w:=self.r.de.w-1; //DCX_DE
     $24:begin //LXI_D_w
@@ -1404,7 +1414,7 @@ while self.contador<maximo do begin
 	        ZHC_ADD(tempb,self.r.va.l,false);
           self.r.va.l:=tempb;
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+          self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $41 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $42:if ((self.cpu_type=CPU_7801) or (self.cpu_type=CPU_7810)) then begin //INR_B
           booltemp:=self.r.psw.cy;
@@ -1412,7 +1422,7 @@ while self.contador<maximo do begin
 	        ZHC_ADD(tempb,self.r.bc.h,false);
           self.r.bc.h:=tempb;
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+          self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $42 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $43:if ((self.cpu_type=CPU_7801) or (self.cpu_type=CPU_7810)) then begin //INR_C
           booltemp:=self.r.psw.cy;
@@ -1420,7 +1430,7 @@ while self.contador<maximo do begin
 	        ZHC_ADD(tempb,self.r.bc.l,false);
           self.r.bc.l:=tempb;
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+          self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $43 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $44:if self.cpu_type=CPU_7810 then begin //LXI_EA
           self.r.ea:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
@@ -1438,7 +1448,8 @@ while self.contador<maximo do begin
           tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
           tempb:=self.getbyte(self.pc+1);
           self.pc:=self.pc+2;
-	        self.r.psw.sk:=(self.getbyte(tempw) and tempb)<>0;
+	        self.r.psw.zf:=(self.getbyte(tempw) and tempb)=0;
+          if not(self.r.psw.zf) then self.r.psw.sk:=true;
         end;
     $46:self.ADI_X(@self.r.va.l); //ADI_A
     $47:self.ONI_X(@self.r.va.l); //ONI_A
@@ -1477,7 +1488,7 @@ while self.contador<maximo do begin
 	        ZHC_SUB(tempb,self.r.va.l,false);
 	        self.r.va.l:=tempb;
           if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+          self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $51 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $52:if ((self.cpu_type=CPU_7810) or (self.cpu_type=CPU_7801)) then begin //DCR_B
           booltemp:=self.r.psw.cy;
@@ -1485,7 +1496,7 @@ while self.contador<maximo do begin
 	        ZHC_SUB(tempb,self.r.bc.h,false);
 	        self.r.bc.h:=tempb;
           if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+          self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $52 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $53:if ((self.cpu_type=CPU_7810) or (self.cpu_type=CPU_7801)) then begin //DCR_C
           booltemp:=self.r.psw.cy;
@@ -1493,14 +1504,15 @@ while self.contador<maximo do begin
 	        ZHC_SUB(tempb,self.r.bc.l,false);
 	        self.r.bc.l:=tempb;
           if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+          self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $53 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $54:self.pc:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8); //jmp_w
     $55:begin //OFFIW_wa
           tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
           tempb:=self.getbyte(self.pc+1);
           self.pc:=self.pc+2;
-          self.r.psw.sk:=(self.getbyte(tempw) and tempb)=0;
+          self.r.psw.zf:=(self.getbyte(tempw) and tempb)=0;
+          if self.r.psw.zf then self.r.psw.sk:=true;
         end;
     $56:self.ACI_X(@self.r.va.l);  //ACI_A
     $57:self.OFFI_x(@self.r.va.l); //OFFI_A
@@ -1585,7 +1597,11 @@ while self.contador<maximo do begin
           self.sp:=self.sp-1;
 	        self.putbyte(self.sp,self.pc and $ff);
 	        self.pc:=self.r.bc.w;
-        end else MessageDlg('Instruccion: $63 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+        end else begin //STAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            self.putbyte(tempw,r.va.l);
+        end;
     $64:self.opcode_64;  //opc_64
     $65:begin //NEIW_wa
             tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
@@ -1700,7 +1716,9 @@ while self.contador<maximo do begin
                             self.r.ea:=self.getbyte(self.sp) or (self.getbyte(self.sp+1) shl 8);
                             self.sp:=self.sp+2;
                         end;
+                    $a5:self.r.ea:=self.r.bc.w; //DMOV_EA_BC
                     $a6:self.r.ea:=self.r.de.w; //DMOV_EA_DE
+                    $a7:self.r.ea:=self.r.hl.w; //DMOV_EA_HL
                     $aa:self.iff_pending:=true; //EI
                     $b0:begin //PUSH_VA
                             self.sp:=self.sp-1;
@@ -1835,9 +1853,21 @@ begin
             self.r.psw.cy:=(self.r.va.l and 1)<>0;
 	          self.r.va.l:=self.r.va.l shr 1;
           end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $22:if self.cpu_type=CPU_7810 then begin //SLR_B
+            self.r.psw.cy:=(self.r.bc.h and 1)<>0;
+	          self.r.bc.h:=self.r.bc.h shr 1;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $23:if self.cpu_type=CPU_7810 then begin //SLR_C
+            self.r.psw.cy:=(self.r.bc.l and 1)<>0;
+	          self.r.bc.l:=self.r.bc.l shr 1;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $24:if self.cpu_type=CPU_7801 then begin  //DI
             self.iff:=false;
             self.iff_pending:=false;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $25:if self.cpu_type=CPU_7810 then begin //SLL_A
+            self.r.psw.cy:=(self.r.va.l and $80)<>0;
+	          self.r.va.l:=self.r.va.l shl 1;
           end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $2a:self.r.psw.cy:=false; //CLC
       $2b:self.r.psw.cy:=true; //STC
@@ -1922,6 +1952,10 @@ begin
                   case instruccion of
                     $82:self.r.ea:=self.getbyte(self.r.de.w) or (self.getbyte(self.r.de.w+1) shl 8); //LDEAX_D
                     $83:self.r.ea:=self.getbyte(self.r.hl.w) or (self.getbyte(self.r.hl.w+1) shl 8); //LDEAX_H
+                    $84:begin  //LDEAX_Dp
+                          self.r.ea:=self.getbyte(self.r.de.w) or (self.getbyte(self.r.de.w+1) shl 8);
+                          self.r.de.w:=self.r.de.w+2;
+                        end;
                     $8c:begin //LDEAX_H_A
                           tempw:=self.r.hl.w+self.r.va.l;
                           self.r.ea:=self.getbyte(tempw) or (self.getbyte(tempw+1) shl 8);
@@ -1934,6 +1968,20 @@ begin
                           self.putbyte(self.r.de.w,self.r.ea and $ff);
                           self.putbyte(self.r.de.w+1,self.r.ea shr 8);
                           self.r.de.w:=self.r.de.w+2;
+                        end;
+                    $95:begin  //STEAX_Hp
+                          self.putbyte(self.r.hl.w,self.r.ea and $ff);
+                          self.putbyte(self.r.hl.w+1,self.r.ea shr 8);
+                          self.r.hl.w:=self.r.hl.w+2;
+                        end;
+                    $a4:begin //DSLL_EA
+                          self.r.psw.cy:=(self.r.ea and $8000)<>0;
+                          self.r.ea:=self.r.ea shl 1;
+                        end;
+                    $a8:begin //TABLE
+                          tempw:=self.pc+self.r.va.l+1;
+	                        self.r.bc.l:=self.getbyte(tempw);
+                          self.r.bc.h:=self.getbyte(tempw+1);
                         end;
                     else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
                   end
@@ -2505,18 +2553,21 @@ begin
                         portt:=self.read_port(UPD7810_PORTC);
                         tempb:=self.getbyte(self.pc);
                         self.pc:=self.pc+1;
-	                      if (portt and tempb)<>0 then self.r.psw.sk:=true;
+	                      self.r.psw.zf:=(portt and tempb)=0;
+                        if not(self.r.psw.zf) then self.r.psw.sk:=true;
                       end;
                   $cb:begin //ONI_MKL_xx
                         tempb:=self.getbyte(self.pc);
                         self.pc:=self.pc+1;
-                        if (self.mkl and tempb)<>0 then self.r.psw.sk:=true;
+                        self.r.psw.zf:=(self.mkl and tempb)=0;
+                        if not(self.r.psw.zf) then self.r.psw.sk:=true;
                       end;
                   $da:begin //OFFI_PC_xx
                         portt:=self.read_port(UPD7810_PORTC);
                         tempb:=self.getbyte(self.pc);
                         self.pc:=self.pc+1;
-                        if (portt and tempb)=0 then self.r.psw.sk:=true;
+                        self.r.psw.zf:=(portt and tempb)=0;
+                        if self.r.psw.zf then self.r.psw.sk:=true;
                       end;
                   $db:self.OFFI_X(@self.mkl); //OFFI_MKL_xx
                   else MessageDlg('Instruccion 64: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
@@ -3074,12 +3125,30 @@ begin
      $11:self.XRI_X(@self.r.va.l);
      $19:self.ORI_X(@self.r.va.l);
      $29:self.GTI_X(@self.r.va.l);
+     $3b:self.LTI_X(@self.r.bc.l);
      $41:self.ADI_X(@self.r.va.l);
      $49:self.ONI_X(@self.r.va.l);
      $59:self.OFFI_X(@self.r.va.l);
      $61:self.SUI_X(@self.r.va.l);
      $69:self.NEI_X(@self.r.va.l);
      $79:self.EQI_X(@self.r.va.l);
+     $88:begin //ANAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            self.r.va.l:=self.r.va.l and self.getbyte(tempw);
+            self.r.psw.zf:=(self.r.va.l=0);
+        end;
+     $98:begin //ORAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            self.r.va.l:=self.r.va.l or self.getbyte(tempw);
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+        end;
+     $af:begin //DGT_EA_HL
+            tempw:=self.r.ea-self.r.hl.w-1;
+	          ZHC_SUB(tempw,self.r.ea,false);
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true;
+         end;
      $c6:begin //DADD_EA_DE
            tempw:=self.r.ea+self.r.de.w;
 	         ZHC_ADD(tempw,self.r.ea,false);
@@ -3089,6 +3158,21 @@ begin
            tempw:=self.r.ea+self.r.hl.w;
            ZHC_ADD(tempw,self.r.ea,false);
            self.r.ea:=tempw;
+         end;
+     $bf:begin //DLT_EA_HL
+           tempw:=self.r.ea-self.r.hl.w;
+	         ZHC_SUB(tempw,self.r.ea,false);
+	         if self.r.psw.cy then self.r.psw.sk:=true;
+         end;
+     $df:if (self.r.ea and self.r.hl.w)<>0 then self.r.psw.zf:=false //DOFF_EA_HL
+            else begin
+                      self.r.psw.zf:=true;
+                      self.r.psw.sk:=true;
+                 end;
+     $ed:begin //DNE_EA_BC
+           tempw:=self.r.ea-self.r.bc.w;
+           ZHC_SUB(tempw,self.r.ea,false);
+           if not(self.r.psw.zf) then self.r.psw.sk:=true;
          end;
       else MessageDlg('Instruccion 74: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;

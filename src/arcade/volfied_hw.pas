@@ -1,6 +1,5 @@
 ﻿unit volfied_hw;
 
-//{$DEFINE MCU=1}
 interface
 uses rom_engine;
 
@@ -14,7 +13,7 @@ const
         (n:'c04-20.7';l:$20000;p:0;crc:$0aea651f),(n:'c04-22.9';l:$20000;p:1;crc:$f405d465),
         (n:'c04-19.6';l:$20000;p:$40000;crc:$231493ae),(n:'c04-21.8';l:$20000;p:$40001;crc:$8598d38e));
         volfied_sound:tipo_roms=(n:'c04-06.71';l:$8000;p:0;crc:$b70106b2);
-        {$IFDEF MCU}cchip_eeprom:tipo_roms=(n:'cchip_c04-23';l:$2000;p:0;crc:$46b0b479);{$ENDIF}
+        cchip_eeprom:tipo_roms=(n:'cchip_c04-23';l:$2000;p:0;crc:$46b0b479);
         volfied_sprites:array[0..8] of tipo_roms=(
         (n:'c04-16.2';l:$20000;p:0;crc:$8c2476ef),(n:'c04-18.4';l:$20000;p:1;crc:$7665212c),
         (n:'c04-15.1';l:$20000;p:$40000;crc:$7c50b978),(n:'c04-17.3';l:$20000;p:$40001;crc:$c62fdeb8),
@@ -23,7 +22,7 @@ const
 
 implementation
 uses m68000,main_engine,controls_engine,gfx_engine,taito_sound,pal_engine,
-     sound_engine,ym_2203{$IFDEF MCU},taito_cchip{$ELSE IF},volfied_cchip{$ENDIF};
+     sound_engine,ym_2203,taito_cchip;
 
 const
         volfied_dip1:array [0..4] of def_dip2=(
@@ -37,7 +36,6 @@ const
         (mask:$c;name:'Difficulty';number:4;val4:(8,$c,4,0);name4:('Easy','Medium','Hard','Hardest')),
         (mask:$70;name:'Lives';number:4;val4:($70,$60,$50,$40);name4:('3','4','5','6')),
         (mask:$80;name:'Languaje';number:2;val2:(0,$80);name2:('English','Japanese')));
-        CPU_SYNC=4;
 
 var
  video_mask,video_ctrl:word;
@@ -112,7 +110,7 @@ end;
 
 procedure volfied_principal;
 var
-  f,h:byte;
+  f:byte;
 begin
 while EmuStatus=EsRunning do begin
     for f:=0 to 255 do begin
@@ -120,22 +118,18 @@ while EmuStatus=EsRunning do begin
         if f=248 then begin
           update_video_volfied;
           m68000_0.irq[4]:=HOLD_LINE;
-          {$IFDEF MCU}cchip_0.set_int;{$ENDIF}
+          cchip_0.set_int;
         end;
-        for h:=1 to CPU_SYNC do begin
-          //Main CPU
-          m68000_0.run(frame_main);
-          frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
-          //Sound CPU
-          tc0140syt_0.run;
-          //MCU
-          {$IFDEF MCU}
-          cchip_0.upd7810.run(frame_mcu);
-          frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
-          {$ENDIF}
-        end;
+        //Main CPU
+        m68000_0.run(frame_main);
+        frame_main:=frame_main+m68000_0.tframes-m68000_0.contador;
+        //Sound CPU
+        tc0140syt_0.run;
+        //MCU
+        cchip_0.upd7810.run(frame_mcu);
+        frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
     end;
- video_sync;
+    video_sync;
 end;
 end;
 
@@ -150,13 +144,8 @@ case direccion of
   $500000..$503fff:volfied_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $d00000:volfied_getword:=$60;
   $e00002:if m68000_0.read_8bits_hi_dir then volfied_getword:=tc0140syt_0.comm_r;
-  {$IFDEF MCU}
-  $f00000..$f007ff:volfied_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
+  $f00000..$f007ff:volfied_getword:=cchip_0.mem68_r((direccion and $7ff) shr 1);
   $f00800..$f00fff:volfied_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
-  {$ELSE IF}
-  $f00000..$f007ff:volfied_getword:=volfied_cchip_ram_r(direccion and $7ff);
-  $f00802:volfied_getword:=volfied_cchip_ctrl_r;
-  {$ENDIF}
 end;
 end;
 
@@ -185,14 +174,8 @@ case direccion of
       $d00000:video_ctrl:=valor;
       $e00000:tc0140syt_0.port_w(valor and $ff);
       $e00002:tc0140syt_0.comm_w(valor and $ff);
-      {$IFDEF MCU}
-      $f00000..$f007ff:cchip_0.mem_w((direccion and $7ff) shr 1,valor and $ff);
-      $f00800..$f00fff:cchip_0.asic_w((direccion and $7ff) shr 1,valor and $ff);
-      {$ELSE IF}
-      $f00000..$f007ff:volfied_cchip_ram_w(direccion and $7ff,valor);
-      $f00802:volfied_cchip_ctrl_w(valor);
-      $f00c00:volfied_cchip_bank_w(valor);
-      {$ENDIF}
+      $f00000..$f007ff:cchip_0.mem68_w((direccion and $7ff) shr 1,valor and $ff);
+      $f00800..$f00fff:cchip_0.asic68_w((direccion and $7ff) shr 1,valor and $ff);
 end;
 end;
 
@@ -231,13 +214,9 @@ procedure reset_volfied;
 begin
  m68000_0.reset;
  tc0140syt_0.reset;
- {$IFDEF MCU}
  cchip_0.reset;
- {$ELSE IF}
- volfied_cchip_reset;
- {$ENDIF}
  frame_main:=m68000_0.tframes;
- {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
+ frame_mcu:=cchip_0.upd7810.tframes;
  marcade.in0:=$ff;
  marcade.in1:=$fc;
  marcade.in2:=$ff;
@@ -257,7 +236,7 @@ begin
 iniciar_volfied:=false;
 llamadas_maquina.bucle_general:=volfied_principal;
 llamadas_maquina.reset:=reset_volfied;
-llamadas_maquina.scanlines:=256*CPU_SYNC;
+llamadas_maquina.scanlines:=256;
 iniciar_audio(false);
 screen_init(1,248,512);
 screen_init(2,512,512,false,true);
@@ -272,15 +251,10 @@ tc0140syt_0:=tc0140syt_chip.create(4000000,SOUND_VOLFIED);
 ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
 if not(roms_load(@tc0140syt_0.snd_rom,volfied_sound)) then exit;
 //MCU
-{$IFDEF MCU}
-//?????????? Tengo que poner 4Mhz mas... En teoria son 10Mhz, pero si lo pongo hae cosas raras...
 cchip_0:=cchip_chip.create(10000000);
 cchip_0.change_ad(volfied_f0000d);
 cchip_0.change_in(volfied_f00007,volfied_f00009,volfied_f0000c,nil,nil);
 if not(roms_load(cchip_0.get_eeprom_dir,cchip_eeprom)) then exit;
-{$ELSE IF}
-volfied_init_cchip(m68000_0.numero_cpu);
-{$ENDIF}
 //convertir sprites
 getmem(memoria_temp,$100000);
 if not(roms_load16b(memoria_temp,volfied_sprites)) then exit;

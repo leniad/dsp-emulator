@@ -21,12 +21,13 @@ type
           is_8x8:boolean;
     end;
     chip_16ic=class
-          constructor create(pant1,pant2:byte;color_base1,color_base2,tmask1,tmask2:word;gfx_plane8,gfx_plane16,col_bank1,col_bank2:byte;call_bank1,call_bank2:tipo_deco16ic_bank);
+          constructor create(pant1,pant2:byte;color_base1,color_base2,tmask1,tmask2:word;gfx_plane8,gfx_plane16,col_bank1,col_bank2:byte;call_bank1,call_bank2:tipo_deco16ic_bank;color_plane:byte=4);
           destructor free;
        public
           pf1,pf2:type_pf;
           color_mask:array[1..2] of word;
           gfx_plane:array[1..2] of byte;
+          color_plane:byte;
           procedure reset;
           procedure control_w(pos,valor:word);
           function control_r(pos:word):word;
@@ -66,7 +67,7 @@ begin
  self.is_8x8:=true;
 end;
 
-constructor chip_16ic.create(pant1,pant2:byte;color_base1,color_base2,tmask1,tmask2:word;gfx_plane8,gfx_plane16,col_bank1,col_bank2:byte;call_bank1,call_bank2:tipo_deco16ic_bank);
+constructor chip_16ic.create(pant1,pant2:byte;color_base1,color_base2,tmask1,tmask2:word;gfx_plane8,gfx_plane16,col_bank1,col_bank2:byte;call_bank1,call_bank2:tipo_deco16ic_bank;color_plane:byte=4);
 begin
 self.pf1:=type_pf.create(pant1,col_bank1,call_bank1);
 self.pf2:=type_pf.create(pant2,col_bank2,call_bank2);
@@ -76,6 +77,7 @@ self.color_base[1]:=color_base1;
 self.color_base[2]:=color_base2;
 self.gfx_plane[1]:=gfx_plane8;
 self.gfx_plane[2]:=gfx_plane16;
+self.color_plane:=color_plane;
 end;
 
 destructor chip_16ic.free;
@@ -151,8 +153,8 @@ for f:=0 to $7ff do begin
       if trans then put_gfx_trans_flip(x*8,y*8,nchar,((color+self.pf1.color_bank) shl 4)+self.color_base[1],self.pf1.pant,self.gfx_plane[1],flipx,flipy)
         else put_gfx_flip(x*8,y*8,nchar,((color+self.pf1.color_bank) shl 4)+self.color_base[1],self.pf1.pant,self.gfx_plane[1],flipx,flipy);
     end else begin //16x16
-      if trans then put_gfx_trans_flip(x*16,y*16,nchar,((color+self.pf1.color_bank) shl 4)+self.color_base[2],self.pf1.pant,self.gfx_plane[2],flipx,flipy)
-        else put_gfx_flip(x*16,y*16,nchar,((color+self.pf1.color_bank) shl 4)+self.color_base[2],self.pf1.pant,self.gfx_plane[2],flipx,flipy);
+      if trans then put_gfx_trans_flip(x*16,y*16,nchar,((color+self.pf1.color_bank) shl self.color_plane)+self.color_base[2],self.pf1.pant,self.gfx_plane[2],flipx,flipy)
+        else put_gfx_flip(x*16,y*16,nchar,((color+self.pf1.color_bank) shl self.color_plane)+self.color_base[2],self.pf1.pant,self.gfx_plane[2],flipx,flipy);
     end;
     self.pf1.buffer[pos]:=false;
   end;
@@ -210,8 +212,8 @@ for f:=0 to $7ff do begin
       if trans then put_gfx_trans_flip(x*8,y*8,nchar,((color+self.pf2.color_bank) shl 4)+self.color_base[1],self.pf2.pant,self.gfx_plane[1],flipx,flipy)
         else put_gfx_flip(x*8,y*8,nchar,((color+self.pf2.color_bank) shl 4)+self.color_base[1],self.pf2.pant,self.gfx_plane[1],flipx,flipy);
     end else begin //16x16
-      if trans then put_gfx_trans_flip(x*16,y*16,nchar,((color+self.pf2.color_bank) shl 4)+self.color_base[2],self.pf2.pant,self.gfx_plane[2],flipx,flipy)
-        else put_gfx_flip(x*16,y*16,nchar,((color+self.pf2.color_bank) shl 4)+self.color_base[2],self.pf2.pant,self.gfx_plane[2],flipx,flipy);
+      if trans then put_gfx_trans_flip(x*16,y*16,nchar,((color+self.pf2.color_bank) shl self.color_plane)+self.color_base[2],self.pf2.pant,self.gfx_plane[2],flipx,flipy)
+        else put_gfx_flip(x*16,y*16,nchar,((color+self.pf2.color_bank) shl self.color_plane)+self.color_base[2],self.pf2.pant,self.gfx_plane[2],flipx,flipy);
     end;
     self.pf2.buffer[pos]:=false;
   end;

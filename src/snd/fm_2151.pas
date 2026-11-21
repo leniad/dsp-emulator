@@ -385,16 +385,16 @@ var
   d1l_tab:array[0..15] of dword;
   salida_fm:array[0..2] of integer;
 
-function sshr(num:int64;fac:byte):int64;
+function sshr(num:integer;fac:byte):integer;
 begin
-  if num<0 then sshr:=-(abs(num) shr fac)
+  if num<0 then sshr:=integer(-(((-Int64(num))+((Int64(1) shl fac)-1)) shr fac))
     else sshr:=num shr fac;
 end;
 
 procedure init_tables;
 var
 	i,x,n:integer;
-	o,m:single;
+	o,m:double;
 begin
 	for x:=0 to TL_RES_LEN-1 do begin
 		m:= (1 shl 16) / power(2,(x+1)*(ENV_STEP/4.0) / 8.0);
@@ -427,7 +427,7 @@ begin
 		  else o:= 8*ln(-1.0/m)/ln(2);	// convert to 'decibels' */
 		o:=o/(ENV_STEP/4);
 
-		n:=word(round(2.0*o));
+		n:=trunc(2.0*o);
 		if (n and 1)<>0 then n:=sshr(n,1)+1 // round to closest */
 		  else n:=sshr(n,1);
     if (m>=0)then sin_tab[i]:=n*2+0
@@ -444,8 +444,8 @@ end;
 procedure init_chip_tables(chip:pYM2151);
 var
 	i,j:integer;
-	mult,phaseinc,Hz,pom:single;
-	scaler:single;
+	mult,phaseinc,Hz,pom:double;
+	scaler:double;
 begin
 	scaler:=(chip.clock/64.0)/(chip.sampfreq);
 	{ this loop calculates Hertz values for notes from c-0 to b-7 */

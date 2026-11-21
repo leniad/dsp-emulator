@@ -48,52 +48,55 @@ var
  ace_ram:array[0..$27] of word;
 
 procedure update_video_boogwing;
+var
+  sprites_offset:word;
 begin
-//deco_sprites_0.draw_sprites($c0);
-//deco_sprites_1.draw_sprites($c0);
+sprites_offset:=(priority and 8)*$100;
+//deco_sprites_0.draw_sprites($c0,sprites_offset);
+//deco_sprites_1.draw_sprites($c0,sprites_offset);
 if (priority and 7)=5 then begin
   deco16ic_0.update_pf_2(5,false);
-  deco_sprites_0.draw_sprites($80);
-  deco_sprites_1.draw_sprites($80);
+  deco_sprites_0.draw_sprites($80,sprites_offset);
+  deco_sprites_1.draw_sprites($80,sprites_offset);
   deco16ic_1.update_pf_1(5,true);
-  deco_sprites_0.draw_sprites($40);
-  deco_sprites_1.draw_sprites($40);
+  deco_sprites_0.draw_sprites($40,sprites_offset);
+  deco_sprites_1.draw_sprites($40,sprites_offset);
   deco16ic_1.update_pf_2(5,true);
 end else if (priority and 7)=4 then begin
             deco16ic_1.update_pf_1(5,false);
-            deco_sprites_0.draw_sprites($80);
-            deco_sprites_1.draw_sprites($80);
+            deco_sprites_0.draw_sprites($80,sprites_offset);
+            deco_sprites_1.draw_sprites($80,sprites_offset);
             deco16ic_1.update_pf_2(5,true);
-            deco_sprites_0.draw_sprites($40);
-            deco_sprites_1.draw_sprites($40);
+            deco_sprites_0.draw_sprites($40,sprites_offset);
+            deco_sprites_1.draw_sprites($40,sprites_offset);
             deco16ic_0.update_pf_2(5,true);
          end else if (((priority and 7)=1) or ((priority and 7)=2)) then begin
             deco16ic_1.update_pf_2(5,false);
-            deco_sprites_0.draw_sprites($80);
-            deco_sprites_1.draw_sprites($80);
+            deco_sprites_0.draw_sprites($80,sprites_offset);
+            deco_sprites_1.draw_sprites($80,sprites_offset);
             deco16ic_0.update_pf_2(5,true);
-            deco_sprites_0.draw_sprites($40);
-            deco_sprites_1.draw_sprites($40);
+            deco_sprites_0.draw_sprites($40,sprites_offset);
+            deco_sprites_1.draw_sprites($40,sprites_offset);
             deco16ic_1.update_pf_1(5,true);
          end else if (priority and 7)=3 then begin
             deco16ic_1.update_pf_2(5,false);
-            deco_sprites_0.draw_sprites($80);
-            deco_sprites_1.draw_sprites($80);
+            deco_sprites_0.draw_sprites($80,sprites_offset);
+            deco_sprites_1.draw_sprites($80,sprites_offset);
             deco16ic_0.update_pf_2(5,true);
-            deco_sprites_0.draw_sprites($40);
-            deco_sprites_1.draw_sprites($40);
+            deco_sprites_0.draw_sprites($40,sprites_offset);
+            deco_sprites_1.draw_sprites($40,sprites_offset);
             deco16ic_1.update_pf_1(5,true);
          end else begin
             deco16ic_1.update_pf_2(5,false);
-            deco_sprites_0.draw_sprites($80);
-            deco_sprites_1.draw_sprites($80);
+            deco_sprites_0.draw_sprites($80,sprites_offset);
+            deco_sprites_1.draw_sprites($80,sprites_offset);
             deco16ic_1.update_pf_1(5,true);
-            deco_sprites_0.draw_sprites($40);
-            deco_sprites_1.draw_sprites($40);
+            deco_sprites_0.draw_sprites($40,sprites_offset);
+            deco_sprites_1.draw_sprites($40,sprites_offset);
             deco16ic_0.update_pf_2(5,true);
          end;
-deco_sprites_0.draw_sprites(0);
-deco_sprites_1.draw_sprites(0);
+deco_sprites_0.draw_sprites(0,sprites_offset);
+deco_sprites_1.draw_sprites(0,sprites_offset);
 deco16ic_0.update_pf_1(5,true);
 actualiza_trozo_final(0,8,320,240,5);
 end;
@@ -192,12 +195,12 @@ var
   color:tcolor;
   r,g,b:integer;
 begin
-fadeptr:=ace_ram[$20];
-fadeptg:=ace_ram[$21];
-fadeptb:=ace_ram[$22];
-fadepsr:=ace_ram[$23];
-fadepsg:=ace_ram[$24];
-fadepsb:=ace_ram[$25];
+fadeptr:=ace_ram[$20] and $ff;
+fadeptg:=ace_ram[$21] and $ff;
+fadeptb:=ace_ram[$22] and $ff;
+fadepsr:=ace_ram[$23] and $ff;
+fadepsg:=ace_ram[$24] and $ff;
+fadepsb:=ace_ram[$25] and $ff;
 mode:=ace_ram[$26];
 for f:=0 to 2047 do begin
 		// Lerp palette entry to 'fadept' according to 'fadeps'
@@ -218,19 +221,23 @@ for f:=0 to 2047 do begin
     end else begin
       b:=color.b+(((fadeptb-color.b)*fadepsb) div 255);
       if b>$ff then color.b:=$ff
-        else if b<0 then color.b:=0;
-          //else color.b:=b;
+        else if b<0 then color.b:=0
+          else color.b:=b;
       g:=color.g+(((fadeptg-color.g)*fadepsg) div 255);
       if g>$ff then color.g:=$ff
-        else if g<0 then color.g:=0;
-          //else color.g:=g;
+        else if g<0 then color.g:=0
+          else color.g:=g;
       r:=color.r+(((fadeptr-color.r)*fadepsr) div 255);
       if r>$ff then color.r:=$ff
-        else if r<0 then color.r:=0;
-          //else color.r:=r;
+        else if r<0 then color.r:=0
+          else color.r:=r;
     end;
     set_pal_color(color,f);
 end;
+fillchar(deco16ic_0.pf1.buffer,$1000,1);
+fillchar(deco16ic_0.pf2.buffer,$1000,1);
+fillchar(deco16ic_1.pf1.buffer,$1000,1);
+fillchar(deco16ic_1.pf2.buffer,$1000,1);
 end;
 
 procedure boogwing_putword(direccion:dword;valor:word);
@@ -286,8 +293,7 @@ case direccion of
                       tempw:=(direccion and $ff) shr 1;
                       if ace_ram[tempw]<>valor then begin
                         ace_ram[tempw]:=valor;
-                        if ((tempw>=$20) and (tempw<=$26)) then
-                          //update_palette;
+                        if ((tempw>=$20) and (tempw<=$26)) then update_palette;
                       end;
                    end;
 end;
@@ -322,6 +328,7 @@ begin
  m68000_0.reset;
  frame_main:=m68000_0.tframes;
  deco16ic_0.reset;
+ deco16ic_1.reset;
  deco104_0.reset;
  copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
  deco16_snd_simple_reset;
@@ -358,14 +365,15 @@ llamadas_maquina.fps_max:=57.79965;
 llamadas_maquina.scanlines:=274;
 iniciar_audio(true);
 //Pantallas
-deco16ic_0:=chip_16ic.create(1,2,$800,$100,$f,$f,0,1,0,0,nil,boogwing_bank_callback);
+deco16ic_0:=chip_16ic.create(1,2,$800,$100,$f,$f,0,1,0,0,nil,boogwing_bank_callback,5);
 deco16ic_1:=chip_16ic.create(3,4,$800,$300,$f,$f,0,2,0,16,boogwing_bank_callback2,boogwing_bank_callback2);
 deco_sprites_0:=tdeco16_sprite.create(3,5,304,$500,true);
-deco_sprites_1:=tdeco16_sprite.create(4,5,304,$700,true);
+deco_sprites_1:=tdeco16_sprite.create(4,5,304,$700,true,$f);
 screen_init(5,512,512,false,true);
 iniciar_video(320,240);
 getmem(memoria_temp,$400000);
 getmem(memoria_temp2,$100000);
+fillchar(memoria_temp2^,$100000,0);
 getmem(memoria_temp_rom,$100000);
 //Main CPU
 m68000_0:=cpu_m68000.create(14000000);

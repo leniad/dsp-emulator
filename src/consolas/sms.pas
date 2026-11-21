@@ -465,7 +465,8 @@ begin
   end;
   if extension='DSP' then snapshot_r(datos,longitud,SSMS);
   freemem(datos);
-  change_caption(nombre_file);
+  main_vars.nombre_caption:=nombre_file;
+  change_caption;
   Directory.sms:=ExtractFilePath(romfile);
 end;
 

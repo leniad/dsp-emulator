@@ -1197,6 +1197,17 @@ type
       name:array[0..3] of ansichar;
       size:dword;
     end;
+  // Private SNA v3 chunk DVST, version 1. Fixed byte/word layout, 26 bytes.
+  // The standard header has no fields for the live MA address latches.
+  tcpc_video_sna=packed record
+      version:byte;
+      screen_y,line_ma,end_ma,refresh_ma,pixel_x,pixel_address:word;
+      display_flags:word;
+      h_count,hs_count,vs_count,raster_count,adjust_count:byte;
+      char_line:word;
+      sync_flags:byte;
+      ga_mode,ga_next_mode,ga_mode_pending:byte;
+    end;
 
 function grabar_amstrad_sna(nombre:string):boolean;
 var
@@ -1207,6 +1218,7 @@ var
   cpc_sna:^tcpc_sna;
   cpc_chunk:^tcpc_chunk;
   buffer:array[0..9] of byte;
+  video_state:tcpc_video_sna;
 begin
 main_z80_reg:=z80_0.get_internal_r;
 getmem(pdatos,$50000);
@@ -1257,6 +1269,20 @@ cpc_sna.ram_config:=cpc_ga.marco_latch;
 //CRT
 cpc_sna.crt_index:=cpc_crt.reg;
 copymemory(@cpc_sna.crt_regs,@cpc_crt.regs[0],18);
+// Standard SNA v3 fields inside the existing reserved area ($75..$B1).
+// Preserve the 256-byte header and all legacy field offsets.
+cpc_sna.unused2[$a4-$75]:=0; // Existing driver has no selectable CRTC type; legacy type 0.
+cpc_sna.unused2[$a9-$75]:=cpc_crt.character_counter;
+cpc_sna.unused2[$ab-$75]:=byte(cpc_crt.char_crt and $7f);
+cpc_sna.unused2[$ac-$75]:=cpc_crt.state_row_address and $1f;
+cpc_sna.unused2[$ad-$75]:=cpc_crt.adj_count and $1f;
+if cpc_crt.hsync_counter<=16 then cpc_sna.unused2[$ae-$75]:=cpc_crt.hsync_counter
+  else cpc_sna.unused2[$ae-$75]:=16;
+if cpc_crt.vsync_counter<=16 then cpc_sna.unused2[$af-$75]:=cpc_crt.vsync_counter
+  else cpc_sna.unused2[$af-$75]:=16;
+cpc_sna.unused2[$b0-$75]:=byte(cpc_crt.state_vsync) or
+                           (byte(cpc_crt.state_hsync) shl 1) or
+                           (byte(cpc_crt.is_in_adjustment_period) shl 7);
 //ROM
 cpc_sna.rom_config:=cpc_ga.rom_selected;
 //PIA a,b,c,control
@@ -1289,6 +1315,35 @@ case main_vars.tipo_maquina of
           inc(long,$4000);
     end;
 end;
+// Save the live video state that does not fit in the standard SNA header.
+// A reader may skip this private chunk; it must explicitly support DVST to restore it.
+fillchar(video_state,SizeOf(video_state),0);
+video_state.version:=1;
+video_state.screen_y:=cpc_line;
+video_state.line_ma:=cpc_crt.line_address;
+video_state.end_ma:=cpc_crt.end_of_line_address;
+video_state.refresh_ma:=cpc_crt.state_refresh_address;
+video_state.pixel_x:=cpc_crt.pant_x;
+video_state.pixel_address:=cpc_crt.pant_addr;
+video_state.display_flags:=word(cpc_crt.line_is_visible) or (word(cpc_crt.next_line_is_visible) shl 1) or (word(cpc_crt.next_line_no_visible) shl 2) or (word(cpc_crt.was_hsync) shl 3) or (word(cpc_crt.was_vsync) shl 4);
+video_state.h_count:=cpc_crt.character_counter;
+video_state.hs_count:=cpc_crt.hsync_counter;
+video_state.vs_count:=cpc_crt.vsync_counter;
+video_state.raster_count:=cpc_crt.state_row_address;
+video_state.adjust_count:=cpc_crt.adj_count;
+video_state.char_line:=cpc_crt.char_crt;
+video_state.sync_flags:=byte(cpc_crt.state_vsync) or (byte(cpc_crt.state_hsync) shl 1) or (byte(cpc_crt.is_in_adjustment_period) shl 7);
+video_state.ga_mode:=cpc_ga.video_mode;
+video_state.ga_next_mode:=cpc_ga.nvideo;
+video_state.ga_mode_pending:=byte(cpc_ga.change_video);
+GetMem(cpc_chunk,SizeOf(tcpc_chunk));
+cpc_chunk.name:='DVST';
+cpc_chunk.size:=SizeOf(video_state);
+CopyMemory(ptemp,cpc_chunk,SizeOf(tcpc_chunk));
+Inc(ptemp,SizeOf(tcpc_chunk));Inc(long,SizeOf(tcpc_chunk));
+CopyMemory(ptemp,@video_state,SizeOf(video_state));
+Inc(ptemp,SizeOf(video_state));Inc(long,SizeOf(video_state));
+FreeMem(cpc_chunk);
 //Y ahora grabo chunks con las ROMs cambiadas (si las hay)
 case cpc_ga.cpc_model of
   1,2,3:begin
@@ -2534,3 +2589,4 @@ snapshot_main_write:=nombre;
 end;
 
 end.
+

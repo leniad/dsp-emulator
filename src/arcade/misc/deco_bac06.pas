@@ -28,10 +28,10 @@ type
             procedure write_tile_data_8b_swap(pos:word;valor:byte;mask:word);
             procedure write_rowscroll_8b(pos:word;valor:byte);
           private
-            pos_scroll_x:array[0..$ff] of word;
-            pos_scroll_y:array[0..$f] of word;
+            pos_scroll_x:array[0..$1ff] of word;
+            pos_scroll_y:array[0..$3f] of word;
             mult,screen,screen_pri,color_mask:byte;
-            color_add,scroll_x,scroll_y,control,long_bloque_x,long_bloque_y:word;
+            color_add,scroll_x,scroll_y,control:word;
             procedure update_16x16(gfx_num:byte;trans,pri:boolean);
             procedure update_8x8(gfx_num:byte;trans:boolean);
         end;
@@ -74,13 +74,11 @@ begin
  fillchar(self.control_1,4*2,$ee);
  self.scroll_x:=0;
  self.scroll_y:=0;
- self.long_bloque_x:=1;
- self.long_bloque_y:=1;
  self.control:=0;
  fillchar(self.colscroll,$40*2,0);
  fillchar(self.rowscroll,$200*2,0);
- fillchar(self.pos_scroll_x,$100*2,0);
- fillchar(self.pos_scroll_y,$10*2,0);
+ fillchar(self.pos_scroll_x,$200*2,0);
+ fillchar(self.pos_scroll_y,$40*2,0);
  fillchar(self.buffer_color,$10,1);
  fillchar(self.buffer,$1000,1);
 end;
@@ -274,22 +272,30 @@ if (self.control_0[0] and 1)=0 then self.update_16x16(gfx_num,trans,pri)
 end;
 
 procedure tyle_chip.show_pf;
+var
+  scroll_x_neg:word;
 begin
 if self.control=0 then begin
   scroll_x_y(self.screen,7,self.scroll_x,self.scroll_y);
 end else begin
-  if (self.control and $4)<>0 then copymemory(@self.pos_scroll_x,@self.rowscroll,$100*2)
-    else fillchar(self.pos_scroll_x,$100*2,0);
-  if (self.control and $8)<>0 then copymemory(@self.pos_scroll_y,@self.colscroll,$10*2)
-    else fillchar(self.pos_scroll_y,$10*2,0);
-  scroll_xy_part(self.screen,7,self.long_bloque_x,self.long_bloque_y,@self.pos_scroll_x[0],@self.pos_scroll_y[0],self.scroll_x,self.scroll_y);
+  if (self.control and $4)<>0 then copymemory(@self.pos_scroll_x,@self.rowscroll,$200*2)
+    else fillchar(self.pos_scroll_x,$200*2,0);
+  if (self.control and $8)<>0 then copymemory(@self.pos_scroll_y,@self.colscroll,$40*2)
+    else fillchar(self.pos_scroll_y,$40*2,0);
+  if ((self.control_0[0] and 2)=0) then scroll_x_neg:=-self.scroll_x-$100
+    else scroll_x_neg:=self.scroll_x;
+  scroll_xy_part(self.screen,7,@self.pos_scroll_x[0],@self.pos_scroll_y[0],scroll_x_neg,self.scroll_y,byte(self.control_1[3] and $f),byte(self.control_1[2] and $f));
 end;
 end;
 
 procedure tyle_chip.show_pf_pri;
+var
+  scroll_x_neg:word;
 begin
+if ((self.control_0[0] and 2)=0) then scroll_x_neg:=-self.scroll_x-$100
+    else scroll_x_neg:=self.scroll_x;
 if self.control=0 then scroll_x_y(self.screen_pri,7,self.scroll_x,self.scroll_y)
-  else scroll_xy_part(self.screen_pri,7,self.long_bloque_x,self.long_bloque_y,@self.pos_scroll_x[0],@self.pos_scroll_y[0],self.scroll_x,self.scroll_y);
+  else scroll_xy_part(self.screen_pri,7,@self.pos_scroll_x[0],@self.pos_scroll_y[0],self.scroll_x,self.scroll_y,byte(self.control_1[3] and $f),byte(self.control_1[2] and $f));
 end;
 
 procedure tyle_chip.change_control0_8b(pos:word;valor:byte);
@@ -367,9 +373,7 @@ self.control_1[pos]:=valor;
 case pos of
   0:self.scroll_x:=valor;
   1:self.scroll_y:=valor;
-  2:if dec1 then self.long_bloque_x:=16 shr (valor and $3)
-      else self.long_bloque_x:=1 shl (valor and $f);
-  3:self.long_bloque_y:=16 shl (valor and $f);
+  2,3:;
 end;
 end;
 
